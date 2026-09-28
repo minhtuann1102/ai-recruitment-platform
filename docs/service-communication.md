@@ -1,152 +1,248 @@
 # Service Communication
 
-How the three services talk to each other, which ports they use, and what to change if you swap the transport.
+Cách các service giao tiếp, port sử dụng, và cách thêm service mới.
+
+> **Lưu ý:** Tài liệu này đã được cập nhật theo [ADR-003](architecture/adr/adr-003-tcp-rest-transport.md) — chuyển từ gRPC sang **TCP transport** cho NestJS internal, và **REST** cho AI service.
 
 ---
 
 ## Overview
 
-External traffic reaches the services over **HTTP**, routed by Apache APISIX (or Kong). Internal service-to-service calls use **gRPC**.
+External traffic (client) đi qua **HTTP**, route bởi Apache APISIX. Internal service-to-service dùng **NestJS TCP transport**. AI service (FastAPI) giao tiếp qua **REST/HTTP**.
 
 ```
                  ┌──────────────┐
-   client ─────▶ │   APISIX     │  HTTP
+   client ─────▶ │   APISIX     │  HTTP (JWT auth)
                  └──────┬───────┘
-          ┌─────────────┼─────────────┐
-          ▼             ▼             ▼
-   ┌────────────┐ ┌────────────┐ ┌──────────────────┐
-   │auth-service│ │user-service│ │notification-svc  │
-   │  (client)  │ │  (server)  │ │(server + client) │
-   └─────┬──────┘ └─────▲──────┘ └────┬──────▲──────┘
-         │  gRPC        │             │      │
-         └──────────────┴─────────────┘      │
-         └───────────────── gRPC ────────────┘
+       ┌────────────────┼────────────────┐
+       ▼                ▼                ▼
+┌────────────┐  ┌────────────┐  ┌──────────────┐
+│auth-service│  │user-service│  │job-service   │
+│ (TCP client)│  │(TCP server)│  │(TCP client)  │
+└─────┬──────┘  └─────▲──────┘  └──────┬───────┘
+      │  TCP          │               │ TCP
+      └───────────────┘               │
+      └───────────────────────────────┘
+
+┌───────────────────┐         ┌──────────────────┐
+│interview-service  │  REST   │ai-service        │
+│(REST client)      │────────▶│(FastAPI mock)     │
+└───────────────────┘         └──────────────────┘
+
+┌──────────────────────┐
+│notification-service  │
+│(TCP server)          │◀── TCP ── auth-service
+└──────────────────────┘
 ```
 
-- **auth-service** — HTTP only. Never listens for RPC; it is purely a gRPC *client* of the other two.
-- **user-service** — HTTP + gRPC listener. Owns the `User` entity.
-- **notification-service** — HTTP + gRPC listener, and a gRPC client of user-service.
+- **auth-service** — HTTP + TCP *client* của user-service và notification-service. Không có TCP listener.
+- **user-service** — HTTP + TCP *server*. Sở hữu User entity.
+- **job-service** — HTTP + TCP *client* của user-service. Sở hữu Job, Application entities.
+- **interview-service** — HTTP + REST *client* của ai-service. Không dùng TCP.
+- **notification-service** — HTTP + TCP *server*. Nhận lệnh gửi email.
+- **ai-service** — HTTP only (FastAPI). Không nối TCP transport của NestJS.
 
 ---
 
 ## Ports
 
-| Service | HTTP | gRPC | Env vars |
+| Service | HTTP | TCP | Env vars |
 |---|---|---|---|
 | auth-service | 3300 | — (client only) | `AUTH_SERVICE_APP_PORT` |
-| user-service | 3301 | **3311** | `USER_SERVICE_APP_PORT`, `GRPC_USER_SERVICE_HOST/PORT` |
-| notification-service | 3303 | **3313** | `NOTIFICATION_SERVICE_APP_PORT`, `GRPC_NOTIFICATION_SERVICE_HOST/PORT` |
+| user-service | 3301 | **3411** | `USER_SERVICE_APP_PORT`, `TCP_USER_SERVICE_HOST/PORT` |
+| job-service | 3302 | — (client only) | `JOB_SERVICE_APP_PORT` |
+| interview-service | 3304 | — | `INTERVIEW_SERVICE_APP_PORT` |
+| notification-service | 3303 | **3413** | `NOTIFICATION_SERVICE_APP_PORT`, `TCP_NOTIFICATION_SERVICE_HOST/PORT` |
+| ai-service | 8000 | — | `AI_SERVICE_PORT` |
 
-> ⚠️ **Note:**
-> - Clients dial the same `0.0.0.0` the server binds to. That works locally because the OS resolves it to loopback. Once services run on separate hosts or containers, clients must point at a real hostname.
-> - Any new env var must also be added to `globalEnv` in `turbo.json`, or it will not reach the tasks.
+> **Lưu ý:** Mỗi env var mới phải thêm vào `globalEnv` trong `turbo.json`.
 
 ---
 
-## Using TCP instead of gRPC
+## TCP Transport
 
-`MicroserviceFactory` supports TCP; it is simply not the default.
+### Tổng quan
 
-> ⚠️ **If you switch a service to TCP, you must set its port explicitly.**
-> There are no defaults. `tcp.config.ts` reads `TCP_*_HOST` / `TCP_*_PORT` and leaves them `undefined` when unset, and **3311 / 3313 belong to gRPC** — reusing them collides with the running gRPC listener.
+NestJS TCP transport đơn giản hơn gRPC: không cần `.proto` files, không cần build step, dùng `@MessagePattern()` thay vì `@GrpcMethod()`.
 
-Pick free ports, e.g.:
+### Server (listener)
 
-```bash
-TCP_USER_SERVICE_HOST=0.0.0.0
-TCP_USER_SERVICE_PORT=3411
-TCP_NOTIFICATION_SERVICE_HOST=0.0.0.0
-TCP_NOTIFICATION_SERVICE_PORT=3413
-```
+Trong `main.ts` của service có TCP server:
 
-Then change the transport on the listener in the service's `main.ts`:
+```typescript
+// apps/user-service/src/main.ts
+const app = await NestFactory.create(AppModule);
 
-```ts
-const tcpListener = configService.get('tcp.userService');
-const tcpConfig = msFactory.createConfig({
-  serviceName: MicroserviceName.UserService,
+// TCP microservice listener
+app.connectMicroservice<MicroserviceOptions>({
   transport: Transport.TCP,
-  options: { ...tcpListener },
-} as unknown as MicroserviceConfigOptions);
-await app.connectMicroservice<MicroserviceOptions>(tcpConfig);
-```
-
-…and match it on every client in `app.module.ts`:
-
-```ts
-MicroserviceModule.registerAsync([
-  {
-    name: MicroserviceName.UserService,
-    transport: Transport.TCP,
-    inject: [ConfigService],
-    useFactory: (cs: ConfigService) => ({ ...cs.get('tcp.userService') }),
+  options: {
+    host: configService.get('TCP_USER_SERVICE_HOST', '0.0.0.0'),
+    port: configService.get('TCP_USER_SERVICE_PORT', 3411),
   },
-]);
+});
+
+await app.startAllMicroservices();
+await app.listen(configService.get('USER_SERVICE_APP_PORT', 3301));
 ```
 
-Two things change with the handlers as well: swap `@GrpcMethod(...)` for `@MessagePattern(...)`, and inject `ClientProxy` instead of the typed stub — `MS_INJECTION_TOKEN` builds a different token per transport, so `Transport.TCP` and `Transport.GRPC` are distinct providers.
+### Handler (server side)
 
-Kafka and RabbitMQ are wired into the same factory and can be enabled the same way; both have scaffolding in `main.ts` and `docker-compose.yml`, currently commented out.
+```typescript
+// apps/user-service/src/modules/user/user.consumer.ts
+@Controller()
+export class UserConsumer {
+  constructor(private readonly userService: UserService) {}
+
+  @MessagePattern('user.getById')
+  async getById(data: { id: string }): Promise<UserResponse> {
+    return this.userService.findById(data.id);
+  }
+
+  @MessagePattern('user.findByEmail')
+  async findByEmail(data: { email: string }): Promise<UserWithPasswordResponse> {
+    return this.userService.findByEmail(data.email);
+  }
+
+  @MessagePattern('user.create')
+  async create(data: CreateUserMessage): Promise<UserResponse> {
+    return this.userService.create(data);
+  }
+}
+```
+
+### Client (caller side)
+
+Đăng ký trong module:
+
+```typescript
+// apps/auth-service/src/modules/app.module.ts
+@Module({
+  imports: [
+    ClientsModule.register([
+      {
+        name: 'USER_SERVICE',
+        transport: Transport.TCP,
+        options: {
+          host: process.env.TCP_USER_SERVICE_HOST || '0.0.0.0',
+          port: parseInt(process.env.TCP_USER_SERVICE_PORT || '3411'),
+        },
+      },
+    ]),
+  ],
+})
+```
+
+Gọi trong service:
+
+```typescript
+// apps/auth-service/src/modules/auth/auth.service.ts
+@Injectable()
+export class AuthService {
+  constructor(
+    @Inject('USER_SERVICE') private readonly userClient: ClientProxy,
+  ) {}
+
+  async login(dto: LoginRequest) {
+    const user = await firstValueFrom(
+      this.userClient.send<UserWithPasswordResponse>('user.findByEmail', { email: dto.email }),
+    );
+    // verify password...
+  }
+}
+```
+
+### Tất cả message patterns
+
+Xem chi tiết request/response tại [api-contracts.md](architecture/api-contracts.md#2-tcp-message-patterns-inter-service).
+
+| Pattern | Server | Client(s) | Mô tả |
+|---|---|---|---|
+| `user.create` | user-service | auth-service | Tạo user khi sign-up |
+| `user.findByEmail` | user-service | auth-service | Tìm user khi login |
+| `user.getById` | user-service | job-service, auth-service | Lấy user theo ID |
+| `user.getByIds` | user-service | job-service | Batch get users |
+| `user.update` | user-service | auth-service | Cập nhật user |
+| `notification.sendEmail` | notification-service | auth-service | Gửi email (fire-and-forget) |
 
 ---
 
-## The service contract
+## REST — AI Service
 
-`.proto` files and the matching TypeScript interfaces live together in `libs/common/src/grpc/`. Both the provider and the consumers import from `@app/common`, so a change to the shape breaks compilation on every side instead of only at runtime.
+Interview-service gọi ai-service qua REST/HTTP (không dùng TCP vì FastAPI không nối NestJS TCP).
 
+```typescript
+// apps/interview-service/src/modules/ai-client/real-ai-interview-client.ts
+@Injectable()
+export class RealAiInterviewClient implements AiInterviewClient {
+  constructor(private readonly httpService: HttpService) {}
+
+  async evaluateAnswer(req: EvaluateAnswerRequest): Promise<EvaluateAnswerResponse> {
+    const { data } = await firstValueFrom(
+      this.httpService.post(`${this.aiServiceUrl}/api/evaluate`, req),
+    );
+    return data;
+  }
+}
 ```
-libs/common/src/grpc/
-├── proto/
-│   ├── user.proto
-│   └── notification.proto
-├── grpc.constant.ts                  # service names, proto paths, loader options
-├── user-grpc.interface.ts
-└── notification-grpc.interface.ts
-```
 
-### Adding an RPC
-
-1. Add the `rpc` and its messages to the relevant `.proto`.
-2. Add the matching request/response interfaces and the method signature to the `*-grpc.interface.ts` service interface.
-3. Implement it on the provider with `@GrpcMethod(SERVICE_NAME, 'MethodName')`.
-4. Call it from the consumer — the injected stub is typed, so a mismatch fails the build.
-
-### Conventions
-
-- **Dates cross the wire as ISO 8601 strings.** proto3 has no date type. Convert to `Date` on the provider side before handing values to MikroORM.
-- **Nullable fields are declared `optional`** so proto3 field presence applies and the loader does not substitute `""` / `false` for absent values (`defaults: false` in `GRPC_LOADER_OPTIONS`).
-- **Enums (`Role`, `Gender`) are plain `string`** in the proto — they are TypeScript string enums, so no mapping is needed.
-- **`UserResponse.password` carries the bcrypt hash.** auth-service verifies credentials locally, so `GetUser` and `FindUserByEmail` return it; `toUserResponse()` in `apps/user-service/src/modules/user/user.mapper.ts` withholds it from every other caller. A `VerifyCredentials` RPC on user-service would remove the need for it to travel at all.
-
-### Runtime proto resolution
-
-`@grpc/proto-loader` reads `.proto` files from disk at runtime, not at build time — and `tsc` does not copy non-TS files. So `@app/common`'s `build` script mirrors `src/grpc/proto/` into `dist/grpc/proto/` via a `copy:proto` step, and `grpc.constant.ts` resolves `./proto` relative to its own emitted location. That lands correctly for both `pnpm dev` and `pnpm prod`.
-
-Adding or renaming a `.proto` therefore needs a rebuild of `@app/common`, not just a restart. `start:dev` copies once before entering watch mode, so editing a `.proto` during a watch session also needs a restart.
+Chi tiết OpenAPI contract: [ai-integration.md](architecture/ai-integration.md#4-hop-dong-openapi--ai-service).
 
 ---
 
-## Error handling
+## Error Handling
 
-An error raised in one service reaches the HTTP client with its original status, code and message.
+Lỗi từ TCP call được xử lý qua `RpcException` và `ExceptionFilter`:
 
-1. A handler throws `ServerException` (an `HttpException`).
-2. `AllExceptionFilter` detects the RPC context and emits an error carrying the mapped gRPC status (`httpToGrpcStatus`) plus a JSON envelope `{ statusCode, message, errorCode, errorService }` in `details`.
-3. On the caller, `BaseService.msResponse()` parses that envelope and rebuilds the identical `HttpException`, including per-field `details` for validation failures.
-4. Without an envelope the call never reached the provider: an unreachable peer becomes 503 `service_unavailable`, a deadline 504 `gateway_timeout`, anything else maps via `grpcToHttpStatus(err.code)`.
+1. Handler throw `RpcException` với payload `{ statusCode, message, errorCode }`
+2. Client nhận error qua Observable, parse và throw lại `HttpException` tương ứng
+3. Client nên set timeout (default 30s qua `CALL_SERVICE_TIMEOUT`)
 
-Mapping table: `libs/common/src/utilities/grpc-status.util.ts`.
+```typescript
+// Server side — throw error
+throw new RpcException({
+  statusCode: 404,
+  message: 'User not found',
+  errorCode: 'NOT_FOUND',
+});
 
-`msResponse()` also applies the `CALL_SERVICE_TIMEOUT` deadline (default 30s).
+// Client side — handle error
+try {
+  const user = await firstValueFrom(
+    this.userClient.send('user.getById', { id }).pipe(
+      timeout(30000),
+    ),
+  );
+} catch (error) {
+  if (error instanceof RpcException) {
+    const detail = error.getError();
+    throw new HttpException(detail, detail.statusCode);
+  }
+  throw new HttpException('Service unavailable', 503);
+}
+```
 
 ---
 
-## Related files
+## Thêm service mới
+
+1. Tạo `apps/new-service/` (copy scaffold)
+2. Nếu cần TCP **server**: thêm `app.connectMicroservice()` trong `main.ts`, chọn port chưa dùng
+3. Nếu cần TCP **client**: thêm `ClientsModule.register()` trong `app.module.ts`
+4. Nếu cần gọi AI service: dùng `HttpModule` + REST
+5. Thêm env vars vào `.env.example` và `turbo.json` > `globalEnv`
+6. Thêm APISIX route trong `config/apisix/conf/apisix-dev.yaml`
+7. Thêm message patterns vào [api-contracts.md](architecture/api-contracts.md)
+
+---
+
+## Related Files
 
 | Concern | Path |
 |---|---|
-| Transport factory & DI tokens | `libs/core/src/microservice/` |
-| gRPC config | `libs/common/src/config/grpc.config.ts` |
-| TCP config (optional) | `libs/common/src/config/tcp.config.ts` |
-| Error envelope | `libs/common/src/exceptions/all-exception.filter.ts`, `libs/core/src/base/base.service.ts` |
-| Providers | `apps/user-service/src/modules/user/user.consumer.ts`, `apps/notification-service/src/modules/send-mail/send-mail.consumer.ts` |
+| TCP config | `libs/common/src/config/tcp.config.ts` |
+| Microservice factory | `libs/core/src/microservice/` |
+| Error handling | `libs/common/src/exceptions/`, `libs/core/src/base/base.service.ts` |
+| APISIX config | `config/apisix/conf/apisix-dev.yaml` |
+| API contracts | `docs/architecture/api-contracts.md` |
+| AI integration | `docs/architecture/ai-integration.md` |
