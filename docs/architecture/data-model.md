@@ -271,9 +271,11 @@ erDiagram
 ```
 
 **Ghi chú:**
-- DB này **chưa cần tạo** trong giai đoạn mock.
+- DB này **tạo từ Sprint 0** (DE init script tạo database, AIE setup pgvector extension + table).
+- LLM: **OpenAI GPT-4o-mini**. Embedding: **text-embedding-3-small** (1536 dims).
 - Image: `pgvector/pgvector:pg16` (thay vì postgres:16 thông thường).
 - `embedding` dùng cho RAG — truy vấn semantic similarity.
+- 3 nguồn: Interview Q&A (`interview_qa`), Job Descriptions crawled (`job_description`), Textbook/Tutorial (`textbook`).
 
 ---
 
@@ -285,7 +287,7 @@ erDiagram
 | job-service | 6 | job_postings, skills, job_skills, applications, application_events, saved_jobs |
 | interview-service | 4 | question_bank, interview_sessions, interview_turns, interview_results |
 | notification-service | 1 | notifications |
-| ai-service | 1 | knowledge_chunks (tương lai) |
+| ai-service | 1 | knowledge_chunks (active từ Sprint 0) |
 | **Tổng** | **15** | |
 
 > 15 bảng, gần với ERD 14 bảng của nhóm. Chênh lệch có thể do `application_events` (audit trail) hoặc `saved_jobs`. Cần đối chiếu khi nhóm cung cấp ERD gốc.

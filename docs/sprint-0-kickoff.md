@@ -1,31 +1,32 @@
 # Sprint 0 — Kickoff Guide
 
-> 28/09 → 12/10/2026. Mục tiêu: stack chạy local, architecture chốt, mock AI có trong Docker.
-> File này breakdown công việc **theo từng người**, có thứ tự và phụ thuộc.
+> 28/09 → 12/10/2026. Mục tiêu: stack chạy local, architecture chốt, mock AI có trong Docker, ai_db sẵn sàng.
+> File này breakdown công việc **theo role**, có thứ tự và phụ thuộc.
+> Roles: **FSD** (Fullstack Developer) | **AIE** (AI Engineer) | **DE** (Data Engineer + DevOps)
 
 ## Dependency Graph
 
 ```
-C: Rename project + Docker multi-DB + MinIO ──┐
-                                               ├──▶ Tất cả service boot
-A: TCP migration + Role enum ─────────────────┘        │
-                                                       ▼
-A: Skeleton interview-service ◀── cần TCP transport đã chạy
-B: Skeleton job-service ◀──────── cần Docker multi-DB đã chạy
-C: Mock ai-service + APISIX routes ◀── cần Docker đã chạy
-C: CI pipeline ◀── cần build thành công
+DE: Rename project + Docker multi-DB + ai_db + MinIO ──┐
+                                                        ├──▶ Tất cả service boot
+FSD: TCP migration + Role enum ────────────────────────┘        │
+                                                                ▼
+FSD: Skeleton interview-service ◀── cần TCP transport đã chạy
+FSD: Skeleton job-service ◀──────── cần Docker multi-DB đã chạy
+AIE: Mock ai-service + ai_db setup ◀── cần Docker đã chạy
+DE: APISIX routes + CI pipeline ◀── cần build thành công
 ```
 
 **Tuần 1 (28/09 → 05/10):** Infra + migration song song
-**Tuần 2 (05/10 → 12/10):** Scaffold services + CI + verify
+**Tuần 2 (05/10 → 12/10):** Scaffold services + CI + verify 
 
 ---
 
-## Người C: Infrastructure (___________) 
+## DE — Data Engineer + DevOps (___________) 
 
 ### Tuần 1 — Nền tảng
 
-#### C-1. Đổi tên project (ngày 1-2)
+#### DE-1. Đổi tên project (ngày 1-2)
 
 **Files thay đổi:**
 - `package.json` — `name: "@ai-recruit/root"`
@@ -43,7 +44,7 @@ pnpm build      # build thanh cong
 docker compose up -d   # containers boot voi ten moi
 ```
 
-#### C-2. Docker multi-DB + MinIO (ngày 2-4)
+#### DE-2. Docker multi-DB + MinIO (ngày 2-4)
 
 **Thay đổi `docker-compose.yml`:**
 
@@ -71,6 +72,7 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
     CREATE DATABASE job_db;
     CREATE DATABASE interview_db;
     CREATE DATABASE notification_db;
+    CREATE DATABASE ai_db;
 EOSQL
 ```
 
@@ -125,39 +127,10 @@ docker exec ai_recruit_db psql -U postgres -c "\l"
 
 ### Tuần 2
 
-#### C-3. Mock ai-service (ngày 5-7)
+> Mock ai-service được **AIE** own — xem section AIE bên dưới.
+> ai_db đã được tạo trong DE-2 init script.
 
-**Tạo files:**
-```
-apps/ai-service/
-├── main.py
-├── Dockerfile
-├── requirements.txt    # fastapi, uvicorn
-└── .env.example
-```
-
-Nội dung `main.py`: xem [ai-integration.md](architecture/ai-integration.md#5-mock-fastapi-service)
-
-`Dockerfile`:
-```dockerfile
-FROM python:3.12-slim
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-COPY . .
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
-```
-
-Thêm vào `docker-compose.yml` và APISIX route.
-
-**Verify:**
-```bash
-docker compose up -d ai-service
-curl http://localhost:8000/api/health
-curl http://localhost:9080/ai/api/health  # qua APISIX
-```
-
-#### C-4. APISIX routes cho service mới (ngày 7-8)
+#### DE-3. APISIX routes cho service mới (ngày 7-8)
 
 Cập nhật `config/apisix/conf/apisix-dev.yaml` — thêm route cho:
 - `/job/*` → job-service:3302
@@ -166,7 +139,7 @@ Cập nhật `config/apisix/conf/apisix-dev.yaml` — thêm route cho:
 
 Copy pattern từ auth-service route (JWT plugin, proxy-rewrite, serverless-post-function).
 
-#### C-5. CI pipeline (ngày 8-10)
+#### DE-4. CI pipeline (ngày 8-10)
 
 Tạo `.github/workflows/ci.yml`:
 ```yaml
@@ -185,18 +158,17 @@ jobs:
       - run: pnpm test
 ```
 
-#### C-6. Cập nhật .env.example + turbo.json (ngày 10)
+#### DE-5. Cập nhật .env.example + turbo.json (ngày 10)
 
 Thêm tất cả env vars mới vào `turbo.json` > `globalEnv`.
 
-**File ownership C:**
+**File ownership DE:**
 ```
 docker-compose.yml
 docker-compose-kong.yml (xoa)
 config/kong/ (xoa)
 config/apisix/conf/apisix-dev.yaml
 scripts/init-databases.sh (tao moi)
-apps/ai-service/ (tao moi)
 .env.example
 .github/workflows/ci.yml (tao moi)
 turbo.json (globalEnv)
@@ -205,11 +177,125 @@ package.json (root)
 
 ---
 
-## Người A: Auth + Interview (___________) 
+## AIE — AI Engineer (___________) 
 
 ### Tuần 1
 
-#### A-1. Mở rộng Role enum (ngày 1-2)
+#### AIE-1. Research RAG architecture (ngày 1-3)
+
+Chốt thiết kế RAG pipeline trước khi code:
+- Embedding model: `text-embedding-3-small` (1536 dims, match pgvector schema)
+- Chunking: chunk_size=512 tokens, overlap=50
+- Retrieval: cosine similarity top-5, filter theo source_type nếu cần
+- LLM: `gpt-4o-mini` (128k context, cost ~$0.15/1M input tokens)
+
+Document kết quả vào `docs/architecture/ai-integration.md`.
+
+#### AIE-2. Setup ai_db + pgvector (ngày 2-4)
+
+Sau khi DE hoàn thành DE-2 (multi-DB, đã tạo `ai_db`), thêm vào cuối `scripts/init-databases.sh`:
+
+```bash
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
+    \c ai_db
+    CREATE EXTENSION IF NOT EXISTS vector;
+    CREATE TABLE IF NOT EXISTS knowledge_chunks (
+        id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        content     TEXT NOT NULL,
+        embedding   vector(1536),
+        source_type VARCHAR(50),
+        metadata    JSONB,
+        created_at  TIMESTAMPTZ DEFAULT now()
+    );
+    CREATE INDEX IF NOT EXISTS knowledge_chunks_embedding_idx
+        ON knowledge_chunks USING ivfflat (embedding vector_cosine_ops);
+EOSQL
+```
+
+**Verify:**
+```bash
+docker exec ai_recruit_db psql -U postgres -d ai_db -c "\dx"
+# Phai thay: vector extension installed
+```
+
+### Tuần 2
+
+#### AIE-3. Mock ai-service (ngày 5-7)
+
+**Tạo files:**
+```
+apps/ai-service/
+├── main.py
+├── Dockerfile
+├── requirements.txt    # fastapi, uvicorn, openai, pgvector, sqlalchemy, python-dotenv
+└── .env.example        # OPENAI_API_KEY, AI_DB_URL
+```
+
+Nội dung `main.py`: xem [ai-integration.md](architecture/ai-integration.md#5-mock-fastapi-service)
+
+`Dockerfile`:
+```dockerfile
+FROM python:3.12-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+COPY . .
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+```
+
+Thêm vào `docker-compose.yml`:
+```yaml
+  ai-service:
+    build: ./apps/ai-service
+    container_name: ai_recruit_ai_service
+    ports: ["8000:8000"]
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - AI_SERVICE_MOCK=true
+    networks: [ai-recruit-network]
+```
+
+**Verify:**
+```bash
+docker compose up -d ai-service
+curl http://localhost:8000/api/health
+curl http://localhost:9080/ai/api/health  # qua APISIX
+```
+
+#### AIE-4. Setup OpenAI SDK + test connection (ngày 7-8)
+
+```python
+# test_openai_connection.py (chạy local, không commit key)
+from openai import OpenAI
+client = OpenAI()  # reads OPENAI_API_KEY from env
+
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "Say hello"}]
+)
+print(response.choices[0].message.content)
+
+embedding = client.embeddings.create(
+    model="text-embedding-3-small",
+    input="Test embedding"
+)
+print(f"Embedding dims: {len(embedding.data[0].embedding)}")  # should be 1536
+```
+
+**File ownership AIE:**
+```
+apps/ai-service/ (tao moi)
+scripts/init-databases.sh (them ai_db + vector extension, phoi hop voi DE)
+docs/architecture/ai-integration.md (cap nhat RAG design)
+```
+
+---
+
+## FSD — Fullstack Developer (___________) 
+
+### Tuần 1
+
+#### FSD-1. Mở rộng Role enum (ngày 1-2)
 
 **Files thay đổi:**
 - `libs/common/src/enums/app.enum.ts` — thêm `Candidate`, `Employer` vào `Role`
@@ -228,7 +314,7 @@ export enum Role {
 pnpm check-types  # khong loi
 ```
 
-#### A-2. Chuyển gRPC sang TCP (ngày 2-5)
+#### FSD-2. Chuyển gRPC sang TCP (ngày 2-5)
 
 > Đây là task phức tạp nhất Sprint 0. Làm trên branch riêng `chore/grpc-to-tcp`.
 
@@ -268,7 +354,7 @@ curl -X POST http://localhost:9080/auth/api/sign-up \
 
 ### Tuần 2
 
-#### A-3. Scaffold interview-service (ngày 6-8)
+#### FSD-3. Scaffold interview-service (ngày 6-8)
 
 **Tạo `apps/interview-service/`** — copy pattern từ user-service:
 
@@ -303,13 +389,13 @@ curl http://localhost:3304/api   # health check
 curl http://localhost:9080/interview/api  # qua APISIX
 ```
 
-#### A-4. Cập nhật auth-service sign-up (ngày 8-10)
+#### FSD-4. Cập nhật auth-service sign-up (ngày 8-10)
 
 Thêm `role` field vào `SignUpRequest`:
 - `apps/auth-service/src/modules/auth/dto/request/sign-up.dto.ts` — thêm `role: Role`
 - `apps/auth-service/src/modules/auth/auth.service.ts` — truyền role vào `user.create` message
 
-**File ownership A:**
+**File ownership FSD (Auth+Interview tasks):**
 ```
 libs/common/src/enums/app.enum.ts
 libs/common/src/grpc/ (xoa noi dung)
@@ -323,24 +409,26 @@ apps/notification-service/src/main.ts (doi transport)
 apps/notification-service/src/modules/send-mail/send-mail.consumer.ts (doi decorator)
 ```
 
-> **Lưu ý:** A chỉnh sửa file của user-service và notification-service CHỈ cho TCP migration. Sau khi merge, B own user-service.
+> **Lưu ý:** FSD chỉnh sửa file của user-service và notification-service CHỈ cho TCP migration. Sau Sprint 0, own toàn bộ recruitment services.
 
 ---
 
-## Người B: User + Job (___________) 
+## FSD — Fullstack Developer: User + Job Track
+
+> Cùng FSD ở trên. Section này gom các task liên quan user-service và job-service.
 
 ### Tuần 1
 
-#### B-1. Review architecture docs (ngày 1-2)
+#### FSD-5. Review architecture docs (ngày 1-2)
 
 Đọc kỹ các file trong `docs/architecture/`:
 - [api-contracts.md](architecture/api-contracts.md) — focus section 2 (TCP handlers user-service) và section 3.2-3.3 (user + job HTTP API)
 - [data-model.md](architecture/data-model.md) — section 1 (user_db) và section 2 (job_db)
 - [service-communication.md](service-communication.md) — hiểu TCP transport
 
-#### B-2. Cập nhật user-service cho DB riêng (ngày 3-5)
+#### FSD-6. Cập nhật user-service cho DB riêng (ngày 3-5)
 
-Sau khi C hoàn thành C-2 (multi-DB):
+Sau khi DE hoàn thành DE-2 (multi-DB):
 - `apps/user-service/src/config/database.config.ts` — đổi connection sang `user_db`
 - `apps/user-service/mikro-orm.config.ts` — đổi DB name
 - `apps/user-service/.env.example` — thêm DB env vars
@@ -351,7 +439,7 @@ pnpm --filter=user-service migration:up  # chay tren user_db
 pnpm dev --filter=user-service
 ```
 
-#### B-3. Chuẩn bị entity cho candidate/company profile (ngày 5-7)
+#### FSD-7. Chuẩn bị entity cho candidate/company profile (ngày 5-7)
 
 Tạo entity files (chưa cần controller/service, chỉ entity + migration):
 - `apps/user-service/src/data-access/candidate-profile/candidate-profile.entity.ts`
@@ -361,7 +449,7 @@ Chạy `pnpm --filter=user-service migration:create` để tạo migration.
 
 ### Tuần 2
 
-#### B-4. Scaffold job-service (ngày 6-9)
+#### FSD-8. Scaffold job-service (ngày 6-9)
 
 **Tạo `apps/job-service/`** — tương tự interview-service nhưng với TCP client:
 
@@ -394,7 +482,7 @@ curl http://localhost:3302/api
 curl http://localhost:9080/job/api  # qua APISIX
 ```
 
-#### B-5. Tạo entities + migration cho job_db (ngày 9-10)
+#### FSD-9. Tạo entities + migration cho job_db (ngày 9-10)
 
 Tạo tất cả entities theo [data-model.md](architecture/data-model.md#2-job-service--job_db):
 - `job-posting.entity.ts`
@@ -407,9 +495,9 @@ Tạo tất cả entities theo [data-model.md](architecture/data-model.md#2-job-
 
 Chạy migration.
 
-**File ownership B:**
+**File ownership FSD (User+Job tasks):**
 ```
-apps/user-service/ (toan bo, sau khi A merge TCP migration)
+apps/user-service/ (toan bo, sau khi FSD merge TCP migration)
 apps/job-service/ (tao moi)
 ```
 
@@ -417,22 +505,25 @@ apps/job-service/ (tao moi)
 
 ## Checklist Sprint 0 Done
 
-- [ ] **C:** Project renamed (`@ai-recruit/*`), containers `ai_recruit_*`
-- [ ] **C:** Kong removed (compose + config)
-- [ ] **C:** Docker multi-DB: user_db, job_db, interview_db, notification_db
-- [ ] **C:** MinIO in Docker, console accessible
-- [ ] **C:** Mock ai-service boots, health check pass
-- [ ] **C:** APISIX routes cho job, interview, ai
-- [ ] **C:** CI pipeline (lint + check-types + test)
-- [ ] **C:** `.env.example` và `turbo.json` cập nhật
-- [ ] **A:** Role enum: Admin, Candidate, Employer
-- [ ] **A:** gRPC → TCP migration, auth↔user flow works
-- [ ] **A:** Skeleton interview-service boots
-- [ ] **A:** Sign-up accepts role parameter
-- [ ] **B:** user-service trỏ đến user_db
-- [ ] **B:** candidate_profiles + company_profiles entities + migration
-- [ ] **B:** Skeleton job-service boots
-- [ ] **B:** job_db entities + migration
+- [ ] **DE:** Project renamed (`@ai-recruit/*`), containers `ai_recruit_*`
+- [ ] **DE:** Kong removed (compose + config)
+- [ ] **DE:** Docker multi-DB: user_db, job_db, interview_db, notification_db, ai_db
+- [ ] **DE:** MinIO in Docker, console accessible
+- [ ] **DE:** APISIX routes cho job, interview, ai
+- [ ] **DE:** CI pipeline (lint + check-types + test)
+- [ ] **DE:** `.env.example` và `turbo.json` cập nhật
+- [ ] **AIE:** Mock ai-service boots, health check pass
+- [ ] **AIE:** ai_db có pgvector extension, knowledge_chunks table created
+- [ ] **AIE:** RAG architecture documented (embedding model, chunking strategy)
+- [ ] **AIE:** OpenAI SDK configured, test connection GPT-4o-mini thành công
+- [ ] **FSD:** Role enum: Admin, Candidate, Employer
+- [ ] **FSD:** gRPC → TCP migration, auth↔user flow works
+- [ ] **FSD:** Skeleton interview-service boots
+- [ ] **FSD:** Sign-up accepts role parameter
+- [ ] **FSD:** user-service trỏ đến user_db
+- [ ] **FSD:** candidate_profiles + company_profiles entities + migration
+- [ ] **FSD:** Skeleton job-service boots
+- [ ] **FSD:** job_db entities + migration
 - [ ] **Team:** `docker compose up -d && pnpm dev` → tất cả services boot
 - [ ] **Team:** APISIX route tới mỗi service
 - [ ] **Team:** Review docs, merge vào main
@@ -465,4 +556,8 @@ curl -X POST http://localhost:9080/auth/api/sign-up \
 curl -X POST http://localhost:9080/ai/api/start \
   -H "Content-Type: application/json" \
   -d '{"session_id":"test","category":"Backend","difficulty":"medium"}'
+
+# 7. Verify ai_db pgvector (AIE)
+docker exec ai_recruit_db psql -U postgres -d ai_db -c "\dx"
+docker exec ai_recruit_db psql -U postgres -d ai_db -c "\d knowledge_chunks"
 ```

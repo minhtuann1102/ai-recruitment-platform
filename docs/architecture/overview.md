@@ -45,7 +45,7 @@ C4Container
     }
 
     Container_Boundary(ai, "AI Service") {
-        Container(ai_svc, "ai-service", "Python FastAPI", "Mock hien tai. Tuong lai: RAG + Agent logic")
+        Container(ai_svc, "ai-service", "Python FastAPI", "RAG + GPT-4o-mini + Agent logic. Mock fallback qua env flag")
     }
 
     Container_Boundary(data, "Data Stores") {
@@ -53,7 +53,7 @@ C4Container
         ContainerDb(job_db, "job_db", "PostgreSQL 16", "jobs, applications, skills")
         ContainerDb(interview_db, "interview_db", "PostgreSQL 16", "sessions, turns, scores")
         ContainerDb(notification_db, "notification_db", "PostgreSQL 16", "notifications")
-        ContainerDb(ai_db, "ai_db", "pgvector/pgvector:pg16", "Tuong lai: knowledge base")
+        ContainerDb(ai_db, "ai_db", "pgvector/pgvector:pg16", "knowledge_chunks: Interview Q&A + JD + Textbook (1536-dim vectors)")
         ContainerDb(redis, "Redis", "Redis 8.0", "Cache, session, queue")
         ContainerDb(minio, "MinIO", "S3-compatible", "CV files")
     }
@@ -75,7 +75,7 @@ C4Container
     Rel(job, job_db, "MikroORM")
     Rel(interview, interview_db, "MikroORM")
     Rel(notification, notification_db, "MikroORM")
-    Rel(ai_svc, ai_db, "SQLAlchemy (tuong lai)")
+    Rel(ai_svc, ai_db, "SQLAlchemy + pgvector")
     Rel(job, minio, "S3 API")
 ```
 
@@ -151,16 +151,15 @@ Candidate bat dau phong van luyen tap
 ┌──────────────────────────────────────────┐
 │ ai-service (FastAPI)                     │
 │                                          │
-│ [Hien tai — Mock]                        │
-│  - Tra ve scores co dinh                 │
-│  - Random cau hoi tu danh sach           │
-│  - agent_decision = "keep_difficulty"    │
-│                                          │
-│ [Tuong lai — Real AI]                    │
-│  - RAG: truy van knowledge base          │
-│  - LLM: danh gia cau tra loi            │
-│  - Agent logic: quyet dinh huong di      │
+│ [Real AI — Sprint 2+]                    │
+│  - RAG: query knowledge_chunks (pgvec)   │
+│  - LLM: GPT-4o-mini danh gia tra loi    │
+│  - Agent logic: deepen/switch/keep       │
 │  - Sinh cau hoi tiep theo               │
+│                                          │
+│ [Mock fallback — env AI_SERVICE_MOCK]    │
+│  - Tra ve scores co dinh                 │
+│  - Random cau hoi tu question_bank       │
 └──────────────────────────────────────────┘
 ```
 

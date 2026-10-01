@@ -362,13 +362,14 @@ APISIX route thêm:
 
 ## 7. Chiến lược chuyển từ Mock sang FastAPI thật
 
-### Phase 1: Mock (Sprint 0-3)
+### Phase 1: Mock (Sprint 0-1)
 
 - `MockAiInterviewClient` trong interview-service
 - Mock FastAPI trong Docker để test gateway routing
+- AIE setup ai_db + pgvector, RAG pipeline prototype
 - Không gọi FastAPI từ interview-service (dùng mock trực tiếp)
 
-### Phase 2: Integration (Sprint 4-5)
+### Phase 2: Integration (Sprint 2-3)
 
 1. **Tạo `RealAiInterviewClient`** implements `AiInterviewClient`:
    - Dùng `HttpModule` (NestJS) gọi REST đến ai-service
@@ -386,10 +387,11 @@ APISIX route thêm:
    ```
 
 3. **AI service thật:**
-   - FastAPI + LangChain/LlamaIndex
-   - RAG từ knowledge base (pgvector)
-   - Claude/GPT API cho evaluation
-   - Agent logic phức tạp hơn
+   - FastAPI + OpenAI SDK (openai, langchain-core)
+   - RAG từ knowledge base (pgvector — xem [Section 8](#8-rag-knowledge-base))
+   - **LLM: OpenAI GPT-4o-mini** cho evaluation + question generation
+   - **Embedding: text-embedding-3-small** (1536 dims)
+   - Agent logic: deepen / switch_topic / keep_difficulty
 
 ### Phase 3: Optimization (stretch)
 
@@ -398,8 +400,40 @@ APISIX route thêm:
 - Caching RAG results trong Redis
 - A/B testing giữa các model
 
-## Câu hỏi mở
+## 8. RAG Knowledge Base
 
-- [ ] Nhóm dùng LLM nào cho AI service? (Claude API, OpenAI GPT, self-hosted?)
-- [ ] Budget cho LLM API calls?
-- [ ] Knowledge base lấy từ nguồn nào? (textbook, documentation, curated Q&A?)
+**LLM đã chốt:** OpenAI GPT-4o-mini (cost-effective, 128k context)
+**Embedding model:** text-embedding-3-small (1536 dims, match schema pgvector)
+
+### Nguồn dữ liệu (3 loại)
+
+| Loại | Nguồn | Volume mục tiêu | Tag source_type |
+|---|---|---|---|
+| Interview Q&A | Curated Q&A phỏng vấn CNTT (Backend, Frontend, System Design, DB, DevOps) | 200+ cặp | `interview_qa` |
+| Job Descriptions | Crawl từ topcv.vn, itviec.com, linkedin — extract skills/requirements | 500+ JD | `job_description` |
+| Textbook/Tutorial | Node.js docs, React docs, PostgreSQL docs, CS fundamentals, System Design | 5000+ chunks | `textbook` |
+
+### Schema knowledge_chunks (ai_db)
+
+```sql
+CREATE TABLE knowledge_chunks (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  content     TEXT NOT NULL,
+  embedding   vector(1536),
+  source_type VARCHAR(50),   -- 'interview_qa' | 'job_description' | 'textbook'
+  metadata    JSONB,         -- { topic, difficulty, source_url, category }
+  created_at  TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE INDEX ON knowledge_chunks USING ivfflat (embedding vector_cosine_ops);
+```
+
+### Retrieval flow
+
+```
+Query (question + candidate context)
+  → embed (text-embedding-3-small)
+  → cosine similarity search (pgvector, top-5)
+  → filter by source_type nếu cần
+  → top-k chunks → inject vào prompt GPT-4o-mini
+```
