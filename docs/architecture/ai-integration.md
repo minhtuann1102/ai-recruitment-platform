@@ -385,25 +385,15 @@ APISIX route thêm:
 
 ### Schema knowledge_chunks (ai_db)
 
-```sql
-CREATE TABLE knowledge_chunks (
-  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  content     TEXT NOT NULL,
-  embedding   vector(1536),
-  source_type VARCHAR(50),   -- 'interview_qa' | 'job_description' | 'textbook'
-  metadata    JSONB,         -- { topic, difficulty, source_url, category }
-  created_at  TIMESTAMPTZ DEFAULT now()
-);
-
-CREATE INDEX ON knowledge_chunks USING ivfflat (embedding vector_cosine_ops);
-```
+Schema đầy đủ, index và lý do: xem [rag-design.md](rag-design.md#3-schema-knowledge_chunks-thay-thế-bản-trong-ai-integrationmd). Tóm tắt: cột `content`, `content_hash` (unique), `embedding vector(1536)`, `embedding_model`, `source_type`, `category`, `difficulty`, `language`, `metadata JSONB`. Chưa tạo ANN index (exact scan), thêm HNSW khi cần.
 
 ### Retrieval flow
 
+Mỗi agent có tool retrieval riêng với bộ lọc khác nhau (Interviewer, Planner, Evaluator). Chi tiết: [rag-design.md](rag-design.md#4-retrieval-theo-từng-agent).
+
 ```
-Query (question + candidate context)
+Query (category + topic + tóm tắt câu trả lời)
   → embed (text-embedding-3-small)
-  → cosine similarity search (pgvector, top-5)
-  → filter by source_type nếu cần
-  → top-k chunks → inject vào prompt GPT-4o-mini
+  → cosine similarity (pgvector, top-5) + lọc source_type/category/difficulty
+  → khử trùng lặp theo qa_id → chèn vào prompt (≤ ~1500 token)
 ```

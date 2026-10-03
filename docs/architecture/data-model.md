@@ -266,8 +266,14 @@ erDiagram
     knowledge_chunks {
         uuid id PK
         text content "noi dung kien thuc"
+        char content_hash UK "md5, upsert idempotent"
         vector embedding "pgvector, 1536 dims"
-        jsonb metadata "{source, category, subcategory}"
+        varchar embedding_model "text-embedding-3-small"
+        varchar source_type "interview_qa | job_description | textbook"
+        varchar category "Backend, Frontend, Database..."
+        varchar difficulty "easy | medium | hard, nullable"
+        varchar language "vi | en"
+        jsonb metadata "qa_id, chunk_type, tags, source_url..."
         timestamp created_at
     }
 ```
@@ -276,7 +282,7 @@ erDiagram
 - DB này **tạo từ Sprint 0** (DE init script tạo database, AIE setup pgvector extension + table).
 - LLM: **OpenAI GPT-4o-mini**. Embedding: **text-embedding-3-small** (1536 dims).
 - Image: `pgvector/pgvector:pg16` (thay vì postgres:16 thông thường).
-- `embedding` dùng cho RAG — truy vấn semantic similarity.
+- `embedding` dùng cho RAG — truy vấn semantic similarity. Thiết kế đầy đủ: [rag-design.md](rag-design.md).
 - 3 nguồn: Interview Q&A (`interview_qa`), Job Descriptions crawled (`job_description`), Textbook/Tutorial (`textbook`).
 
 ---
