@@ -107,8 +107,12 @@ apps/ai-service/app/rag/
 - **Truy vấn khác ngôn ngữ:** câu hỏi tiếng Việt tìm tài liệu tiếng Anh (textbook) cần model hoạt động tốt chéo ngôn ngữ. Kết quả chưa biết.
 - **Phối hợp AIE/DE:** S1-AIE-1 (ingestion, AIE) và S1-DE-1 (index Q&A, DE) trùng nhau một phần. Đề xuất: AIE giao `chunking.py` + `repository.py`, DE dùng lại và lo crawl, quy mô, vận hành.
 
-## 9. Câu hỏi cần nhóm chốt
+## 9. Quyết định của nhóm
 
-1. Phỏng vấn dùng **tiếng Việt, tiếng Anh, hay cả hai**? Quyết định ngôn ngữ Q&A mẫu và prompt.
-2. Ai tạo golden set? (đề xuất: AIE, vì cần để chấm RAG)
-3. Cần OpenAI API key và hạn mức để chạy S0-AIE-4 và các bước embed.
+- **Ngôn ngữ:** phỏng vấn bằng **tiếng Việt, xen thuật ngữ tiếng Anh** (code-mixed). Q&A mẫu viết tiếng Việt, giữ nguyên thuật ngữ Anh (idempotent, CAP theorem...). Textbook chủ yếu tiếng Anh. Hệ quả: query tiếng Việt phải tìm được chunk tiếng Anh; cần test cả query có dấu và không dấu.
+- **Golden set:** tổng hợp từ nhiều dataset. Yêu cầu bắt buộc:
+  - Mỗi query phải gắn nhãn tới `qa_id`/`chunk_id` **trong corpus của ta** (nhãn của dataset ngoài trỏ vào corpus của họ, không dùng trực tiếp được).
+  - Query **tách khỏi dữ liệu đã index**: không dùng nguyên văn câu hỏi trong `interview_qa`, nếu không recall bị thổi phồng.
+  - Chia nhóm để báo cáo riêng: (a) tiếng Việt thuần, (b) code-mixed, (c) tiếng Anh, (d) Việt → tài liệu Anh, (e) không dấu.
+  - Ghi `source` của từng query và kiểm tra giấy phép dataset.
+- **Còn mở:** OpenAI API key và hạn mức để chạy S0-AIE-4; phân công AIE/DE cho ingestion (mục 8).
