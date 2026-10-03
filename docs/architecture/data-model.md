@@ -198,7 +198,9 @@ erDiagram
         text question_text
         varchar question_source "bank | ai"
         text candidate_answer
-        jsonb scores "{technical_accuracy, relevance, completeness, extensibility}"
+        jsonb scores "nullable, ghi luc finalize: {technical_accuracy, relevance, completeness, extensibility}"
+        text comment "nullable, nhan xet cua Evaluator, ghi luc finalize"
+        varchar answer_signal "weak | ok | strong, tin hieu so bo noi bo"
         varchar agent_decision "deepen | switch_topic | keep_difficulty"
         text agent_reasoning
         text next_question_hint "goi y cau hoi tiep (tu AI)"
@@ -221,7 +223,7 @@ erDiagram
 ```
 
 **Ghi chú:**
-- `interview_turns.scores` là JSONB chứa điểm theo 4 tiêu chí:
+- `interview_turns.scores` và `comment` **nullable**, được ghi một lần khi finalize (Evaluator chấm cuối phiên). `answer_signal` ghi mỗi lượt, chỉ dùng nội bộ. `scores` là JSONB chứa điểm theo 4 tiêu chí:
   - `technical_accuracy` (0-10): độ chính xác kỹ thuật
   - `relevance` (0-10): mức độ liên quan đến câu hỏi
   - `completeness` (0-10): độ đầy đủ câu trả lời

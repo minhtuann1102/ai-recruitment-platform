@@ -134,17 +134,21 @@ Candidate bat dau phong van luyen tap
 │                                          │
 │ 4. Luu candidate_answer vao turn         │
 │ 5. Goi AI service (REST):               │
-│    POST /api/evaluate                    │
-│    Body: { session_context, answer,      │
-│            question, history }           │
+│    POST /api/next-turn                   │
+│    Body: { question, answer, history,    │
+│            context }                     │
 │                                          │
 │ 6. Nhan response tu AI:                  │
-│    { scores, agent_decision,             │
-│      next_question, reasoning }          │
+│    { next_question, agent_decision,      │
+│      answer_signal, reasoning }          │
 │                                          │
-│ 7. Luu scores (JSONB) vao turn           │
+│ 7. Luu decision/signal vao turn          │
 │ 8. Tao turn moi voi next_question        │
-│ 9. Tra ve client                         │
+│ 9. Tra ve client (khong co diem)         │
+│                                          │
+│ --- Ket thuc phien ---                   │
+│ 10. POST /api/finalize -> diem + nhan    │
+│     xet tung cau, luu interview_results  │
 └──────────────────┬───────────────────────┘
                    │ REST (HTTP)
                    ▼

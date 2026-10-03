@@ -823,21 +823,18 @@ interface SubmitAnswerRequest {
   answer: string;                  // required, min 10 chars
 }
 
-// Response 200
+// Response 200 — khong tra diem giua phien (diem tinh 1 lan khi ket thuc)
 interface SubmitAnswerResponse {
   data: {
     turn: {
       turnNumber: number;
       questionText: string;
       candidateAnswer: string;
-      scores: CriteriaScores;
-      agentDecision: AgentDecision;
-      agentReasoning: string;
     };
     nextQuestion: {
       turnNumber: number;
       questionText: string;
-    } | null;                      // null neu session ket thuc (VD: sau 10 turns)
+    } | null;                      // null neu session ket thuc (VD: sau 10 turns) -> BE tu goi finalize
     sessionStatus: InterviewSessionStatus;
   };
 }
@@ -852,11 +849,20 @@ interface CriteriaScores {
 
 #### POST /sessions/:id/end (Candidate)
 
+> Goi `ai-service /api/finalize` (cham tat ca cau 1 lan). Cham mat vai giay -> FE hien trang thai cho. Neu session tu ket thuc thi BE tu goi finalize, FE doc ket qua qua `GET /sessions/:id`.
+
 ```typescript
 // Response 200
 interface EndSessionResponse {
   data: {
     session: SessionResponse['data'];
+    turns: {                       // diem + nhan xet TUNG cau (do Evaluator cham)
+      turnNumber: number;
+      questionText: string;
+      candidateAnswer: string;
+      scores: CriteriaScores;
+      comment: string;
+    }[];
     result: {
       id: string;
       overallScore: number;        // 0.0 - 10.0
@@ -906,8 +912,9 @@ interface SessionDetailResponse {
       questionText: string;
       questionSource: 'bank' | 'ai';
       candidateAnswer: string;
-      scores: CriteriaScores;
-      agentDecision: AgentDecision;
+      scores: CriteriaScores | null;   // null khi phien chua completed
+      comment: string | null;          // nhan xet tung cau, null khi chua completed
+      agentDecision: AgentDecision;    // chi de debug / Employer, khong hien cho Candidate
       agentReasoning: string;
       createdAt: string;
     }[];
@@ -1101,7 +1108,7 @@ async createJob(@AuthUser() user: AuthUserPayload, @Body() dto: CreateJobRequest
 | Người A (auth + interview) | Cần từ người khác |
 |---|---|
 | auth-service | `UserResponse`, `CreateUserMessage` types từ libs/common. TCP message pattern `user.*` (B implement) |
-| interview-service | `CriteriaScores`, `AgentDecision` types từ libs/common. REST contract `/api/evaluate` (C implement mock) |
+| interview-service | `CriteriaScores`, `AgentDecision` types từ libs/common. REST contract `/api/start`, `/api/next-turn`, `/api/finalize` (C implement mock) |
 
 | Người B (user + job) | Cần từ người khác |
 |---|---|
@@ -1110,5 +1117,5 @@ async createJob(@AuthUser() user: AuthUserPayload, @Body() dto: CreateJobRequest
 
 | Người C (infra + AI mock + frontend) | Cần từ người khác |
 |---|---|
-| ai-service mock | REST contract `/api/start`, `/api/evaluate` — implement theo contract này |
+| ai-service mock | REST contract `/api/start`, `/api/next-turn`, `/api/finalize` — implement theo contract này |
 | frontend | HTTP API contracts của tất cả services — call theo contract này |

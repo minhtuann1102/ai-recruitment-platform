@@ -167,7 +167,7 @@
 
 **Giao tiếp:**
 - HTTP (client → APISIX → interview)
-- REST client → ai-service (evaluate answer, get next question)
+- REST client → ai-service (next-turn trong phiên, finalize khi kết thúc)
 
 **API chính:**
 
@@ -232,7 +232,9 @@
 
 | Method | Endpoint | Mô tả |
 |---|---|---|
-| POST | /api/evaluate | Đánh giá câu trả lời, trả về scores + next question |
+| POST | /api/start | Sinh câu hỏi đầu |
+| POST | /api/next-turn | Planner + Interviewer: câu hỏi tiếp, decision, answer_signal |
+| POST | /api/finalize | Evaluator: chấm từng câu + nhận xét + tổng kết (cuối phiên) |
 | GET | /api/health | Health check |
 
 Xem chi tiết contract tại [ai-integration.md](ai-integration.md).
