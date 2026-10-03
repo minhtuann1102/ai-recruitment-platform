@@ -48,6 +48,21 @@ services:
     networks:
       - nest-turbo-network
 
+  ai-service:
+    build:
+      context: ./apps/ai-service
+      dockerfile: Dockerfile
+    container_name: nest_turbo_ai_service
+    ports:
+      - '8000:8000'
+    networks:
+      - nest-turbo-network
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8000/api/health']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
 #  kafka:
 #    container_name: nest_turbo_kafka
 #    extends:
