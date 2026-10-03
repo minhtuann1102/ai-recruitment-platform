@@ -1,3 +1,8 @@
 fastapi==0.115.6
 uvicorn[standard]==0.34.0
 pydantic==2.10.4
+openai==2.48.0
+pgvector==0.4.2
+sqlalchemy==2.0.54
+langchain-core==0.3.86
+python-dotenv==1.2.1
