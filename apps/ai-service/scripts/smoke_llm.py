@@ -22,14 +22,19 @@ def check_chat(client, settings) -> None:
             {"role": "user", "content": SAMPLE},
         ],
         response_format={"type": "json_object"},
-        max_tokens=200,
+        max_tokens=600,
     )
     elapsed = int((time.perf_counter() - start) * 1000)
-    content = resp.choices[0].message.content or ""
-    json.loads(content)  # chung minh JSON hop le
+    choice = resp.choices[0]
+    content = choice.message.content or ""
     usage = resp.usage
-    print(f"[chat] OK model={resp.model} {elapsed}ms tokens in/out="
-          f"{usage.prompt_tokens}/{usage.completion_tokens}")
+    print(f"[chat] model={resp.model} {elapsed}ms finish_reason={choice.finish_reason} "
+          f"tokens in/out={usage.prompt_tokens}/{usage.completion_tokens}")
+    print(f"[chat] raw content: {content[:300]!r}")
+    if choice.finish_reason == "length":
+        raise RuntimeError("Output bi cat do gioi han max_tokens, JSON khong day du")
+    json.loads(content)  # chung minh JSON hop le
+    print("[chat] OK JSON hop le")
 
 
 def check_embedding(client, settings) -> None:
