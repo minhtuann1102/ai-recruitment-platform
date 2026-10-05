@@ -12,7 +12,7 @@ báo cáo, slides) là việc chung của team, không cần spec.
 
 | # | Feature | Sprint | Owner | Công cụ | Task sprint | Phụ thuộc | Trạng thái |
 |---|---|---|---|---|---|---|---|
-| 001 | [platform-foundation](001-platform-foundation/spec.md) | S0 | DE | Spec Kit | S0-DE-1..6 | — | **Spec + Plan + Tasks** |
+| 001 | [platform-foundation](001-platform-foundation/spec.md) | S0 | DE | Spec Kit | S0-DE-1..6 | — | Đang làm — PR-1 #2 (T001–T015) |
 | 002 | backend-foundation | S0 | FSD (đề xuất) | Owner chọn | S0-FSD-1..6 | 001 (multi-DB) | Chưa viết |
 | 003 | ai-service-foundation | S0 | AIE (đề xuất) | Owner chọn | S0-AIE-1..4 | 001 (ai_db) | Đang làm tại `origin/feat/aie` |
 | 004 | auth-and-user-profiles | S1 | FSD (đề xuất) | Owner chọn | S1-FSD-1..7 | 002 | Chưa viết |

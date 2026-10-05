@@ -81,6 +81,8 @@ Mỗi mục: Decision / Rationale / Alternatives. Mục đánh dấu **VERIFY** 
 - **VERIFY**: Root devDependencies có `@oxlint/binding-darwin-arm64` và `@turbo/darwin-arm64` (gói chỉ chạy trên
   macOS ARM). Nếu `pnpm install` trên Linux/Windows báo unsupported platform → gỡ khỏi `package.json`
   (oxlint/turbo tự kéo binary theo nền tảng qua optionalDependencies) và sinh lại lockfile trong PR-1.
+  - **Kết quả T003 (2026-10-05)**: `pnpm install --frozen-lockfile` thành công trên Windows (pnpm 10.17.0) dù có
+    2 gói darwin-arm64 → không gỡ (T004 N/A). Linux chưa thử (Docker tắt); job `node` của CI (T031) sẽ xác nhận.
 - **VERIFY**: `turbo.json` `test` phụ thuộc `build` → CI build toàn bộ trước test; đo thời gian, nếu > 10 phút
   cân nhắc cache.
 
@@ -100,6 +102,15 @@ Mỗi mục: Decision / Rationale / Alternatives. Mục đánh dấu **VERIFY** 
 - **Rationale**: US5 yêu cầu copy env mẫu là chạy được; placeholder rỗng làm hỏng JWT/ADC. `APISIX_KEY` hiện có
   vẻ là admin key mặc định của APISIX → không được lộ ra mạng ngoài localhost.
 - **Alternatives**: Placeholder + script sinh secret lúc setup → thêm một bước cho mỗi máy dev, lợi ích thấp ở local.
+
+## R12. Baseline của `main` trước PR-1 (đo 2026-10-05)
+
+- `build`, `check-types`: xanh. `lint`: 12 lỗi oxlint có sẵn → đã sửa trong PR-1 (commit riêng, không đổi
+  behavior) vì husky pre-commit (lint-staged) chặn commit các file bị đổi import.
+- `test`: đỏ vì jest "No tests found" (repo chưa có test). Đề xuất cho T031: thêm `--passWithNoTests` vào script
+  `test` của từng app — không phải bỏ qua test, mà là chưa có test; test thật thêm theo DoD của từng feature.
+- Lockfile khi đổi tên: `pnpm install` không frozen re-resolve peer webpack/esbuild (+102 dòng, ngoài phạm vi)
+  → thay vào đó sửa tay 8 dòng tên package trong `pnpm-lock.yaml`, kiểm chứng bằng `--frozen-lockfile`.
 
 ## R9. Biến môi trường gRPC
 

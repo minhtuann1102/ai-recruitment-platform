@@ -26,9 +26,9 @@ team (research R1).
 
 **Purpose**: phối hợp và kiểm chứng giả định trước khi sửa file dùng chung
 
-- [ ] T001 Hỏi AIE: `origin/feat/aie` merge được trong ≤ 1 ngày không? Báo FSD lịch merge PR-1 → chốt thứ tự merge (research R1)
-- [ ] T002 Tạo branch `chore/rename-project-scope` từ `main`
-- [ ] T003 [P] Kiểm tra `pnpm install` trên Windows và Linux (container `node:22`) với root devDependencies hiện tại; ghi kết quả vào `specs/001-platform-foundation/research.md` R8
+- [X] T001 Hỏi AIE: `origin/feat/aie` merge được trong ≤ 1 ngày không? Báo FSD lịch merge PR-1 → chốt thứ tự merge (research R1)
+- [X] T002 Tạo branch `chore/rename-project-scope` từ `main`
+- [X] T003 [P] Kiểm tra `pnpm install` trên Windows và Linux (container `node:22`) với root devDependencies hiện tại; ghi kết quả vào `specs/001-platform-foundation/research.md` R8
 
 ---
 
@@ -36,9 +36,9 @@ team (research R1).
 
 **Purpose**: sửa lỗi chặn mọi story trên mọi nền tảng
 
-- [ ] T004 Nếu T003 lỗi unsupported platform: gỡ `@oxlint/binding-darwin-arm64`, `@turbo/darwin-arm64` khỏi `package.json`, sinh lại `pnpm-lock.yaml`
-- [ ] T005 Thay `${PWD}/.docker/volumes/` bằng `./.docker/volumes/` trong `docker-compose.yml` (research R4)
-- [ ] T006 [P] Thêm `.gitattributes` với `*.sh text eol=lf` (tránh CRLF làm hỏng init script trong container khi commit từ Windows)
+- [X] T004 (N/A — T003 cài được, không cần gỡ) Nếu T003 lỗi unsupported platform: gỡ `@oxlint/binding-darwin-arm64`, `@turbo/darwin-arm64` khỏi `package.json`, sinh lại `pnpm-lock.yaml`
+- [X] T005 Thay `${PWD}/.docker/volumes/` bằng `./.docker/volumes/` trong `docker-compose.yml` (research R4)
+- [X] T006 [P] Thêm `.gitattributes` với `*.sh text eol=lf` (tránh CRLF làm hỏng init script trong container khi commit từ Windows)
 
 **Checkpoint**: `pnpm install` chạy được trên Windows/Linux; compose resolve đúng đường dẫn volume
 
@@ -50,17 +50,20 @@ team (research R1).
 
 **Independent Test**: quickstart §0 (`pnpm install && pnpm build` xanh) + §5 (grep tên cũ = 0)
 
-- [ ] T007 [US2] Đổi `name` trong `package.json` root → `@ai-recruit/root`, cập nhật `description`
-- [ ] T008 [P] [US2] Đổi `name` và dependency `@app/*` → `@ai-recruit/*` trong `libs/common/package.json`, `libs/core/package.json`, `libs/email-template/package.json`
-- [ ] T009 [P] [US2] Đổi `name` → `@ai-recruit/<service>` và dependency `@app/*` trong `apps/auth-service/package.json`, `apps/user-service/package.json`, `apps/notification-service/package.json`
-- [ ] T010 [US2] Đổi `paths` `@app/*` trong `tsconfig.json`; grep thêm `@app/` trong `apps/*/tsconfig*.json`, `apps/*/webpack.config.js`, cấu hình jest `moduleNameMapper`, `nest-cli.json`, `ecosystem.config.js`
-- [ ] T011 [US2] Script thay import `@app/` → `@ai-recruit/` trong `apps/*/src`, `apps/*/test`, `libs/*/src` (~62 file); chỉ thay chuỗi import, không đổi logic
-- [ ] T012 [US2] Đổi container `nest_turbo_*` → `ai_recruit_*` và network → `ai-recruit-network` trong `docker-compose.yml` (gồm block `ai-service` nếu `feat/aie` đã merge)
-- [ ] T013 [P] [US2] Xóa `docker-compose-kong.yml`, `config/kong/`, `.docker/compose/kong/`; gỡ target `deckSync` trong `Makefile`; gỡ `KONG_*`, `GW_HOST` trong `.env.example`
-- [ ] T014 [US2] `pnpm install` (sinh lại `pnpm-lock.yaml`) → `pnpm build`, `pnpm check-types`, `pnpm test` đều xanh
-- [ ] T015 [US2] Chạy quickstart §5; mở PR-1 `[root] chore: rename project scope to @ai-recruit`; sau merge báo FSD/AIE rebase
+- [X] T007 [US2] Đổi `name` trong `package.json` root → `@ai-recruit/root`, cập nhật `description`
+- [X] T008 [P] [US2] Đổi `name` và dependency `@app/*` → `@ai-recruit/*` trong `libs/common/package.json`, `libs/core/package.json`, `libs/email-template/package.json`
+- [X] T009 [P] [US2] Đổi `name` → `@ai-recruit/<service>` và dependency `@app/*` trong `apps/auth-service/package.json`, `apps/user-service/package.json`, `apps/notification-service/package.json`
+- [X] T010 [US2] Đổi `paths` `@app/*` trong `tsconfig.json`; grep thêm `@app/` trong `apps/*/tsconfig*.json`, `apps/*/webpack.config.js`, cấu hình jest `moduleNameMapper`, `nest-cli.json`, `ecosystem.config.js`
+- [X] T011 [US2] Script thay import `@app/` → `@ai-recruit/` trong `apps/*/src`, `apps/*/test`, `libs/*/src` (~62 file); chỉ thay chuỗi import, không đổi logic
+- [X] T012 [US2] Đổi container `nest_turbo_*` → `ai_recruit_*` và network → `ai-recruit-network` trong `docker-compose.yml` (gồm block `ai-service` nếu `feat/aie` đã merge)
+- [X] T013 [P] [US2] Xóa `docker-compose-kong.yml`, `config/kong/`, `.docker/compose/kong/`; gỡ target `deckSync` trong `Makefile`; gỡ `KONG_*`, `GW_HOST` trong `.env.example`
+- [X] T014 [US2] `pnpm install` (sinh lại `pnpm-lock.yaml`) → `pnpm build`, `pnpm check-types`, `pnpm test` đều xanh
+- [X] T015 [US2] Chạy quickstart §5; mở PR-1 `[root] chore: rename project scope to @ai-recruit`; sau merge báo FSD/AIE rebase
 
 **Checkpoint**: PR-1 merged — team rebase lên tên mới
+
+> **Kết quả (2026-10-05)**: PR-1 = #2. Thêm commit `style: fix pre-existing oxlint errors` (12 lỗi lint có sẵn chặn pre-commit).
+> `pnpm test` vẫn đỏ như baseline ("No tests found") → xử lý ở T031 (research R12).
 
 ---
 
