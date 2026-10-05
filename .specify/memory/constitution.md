@@ -107,7 +107,7 @@
 | AI service | Python FastAPI, dependency pin trong `requirements.txt` |
 | Data pipeline | Python, đặt tại `apps/data-pipeline/` |
 | Frontend | Next.js tại `apps/web` (ADR-005) |
-| Object storage | MinIO (S3-compatible) cho CV, avatar, logo |
+| Object storage | S3 API cho CV, avatar, logo. Local: MinIO (image `cgr.dev/chainguard/minio`, pin digest); deploy: AWS S3 hoặc S3-compatible — chỉ đổi env (`STORAGE_TYPE`, `AWS_S3_*`), không đổi code |
 | Container | Docker Compose; container prefix `ai_recruit_*` |
 | Staging | Docker Compose trên VPS/cloud, có HTTPS |
 
@@ -131,14 +131,17 @@
   `docs/architecture/adr/`.
 - Branch theo `docs/conventions.md`: `feat/{service}/{mo-ta}`, `fix/...`, `chore/...`, `docs/...`.
   Thư mục spec và tên branch độc lập với nhau.
-- PR: ≥ 1 reviewer, squash merge, Conventional Commits tiếng Anh, không nhắc tới AI tool.
-  TODO(DEVELOP_BRANCH): tạo nhánh `develop` trên origin hoặc sửa conventions cho PR vào `main`.
+- GitHub Flow: PR vào `main` (không có `develop`); `main` được bảo vệ bằng CI xanh + ≥ 1 reviewer;
+  squash merge; gắn tag `v0.N-sprintN` cuối mỗi sprint làm bản demo ổn định.
+- Conventional Commits tiếng Anh, không nhắc tới AI tool.
 
 ## Governance
 
 - Constitution này tóm tắt các quyết định đã chốt; ADR là nguồn chi tiết. Khi spec/plan mâu
   thuẫn với constitution, constitution thắng cho tới khi được amend.
-  TODO(SRS_PRECEDENCE): nếu nhóm có SRS chính thức, xác định thứ tự ưu tiên SRS ↔ constitution.
+- Thứ tự ưu tiên với SRS (nếu nhóm có SRS chính thức): về yêu cầu chức năng (làm gì), SRS > `spec.md`;
+  về quyết định kỹ thuật (làm thế nào), constitution > `plan.md`. Nếu SRS đòi ràng buộc kỹ thuật trái
+  constitution, amend constitution kèm ADR.
 - Amendment: PR sửa file này + (nếu là kiến trúc) ADR tương ứng; cần đồng ý của ít nhất 2/3 thành
   viên, trong đó có owner của workstream bị ảnh hưởng.
 - Versioning (semver): MAJOR = bỏ/định nghĩa lại principle; MINOR = thêm principle/section hoặc

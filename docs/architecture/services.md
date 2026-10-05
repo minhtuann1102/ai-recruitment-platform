@@ -6,7 +6,7 @@
 |---|---|---|---|---|---|---|
 | 1 | auth-service | NestJS | — (stateless) | 3300 | — (client only) | Có sẵn |
 | 2 | user-service | NestJS | `user_db` | 3301 | 3411 | Có sẵn, cần mở rộng |
-| 3 | job-service | NestJS | `job_db` | 3302 | 3412 | Mới |
+| 3 | job-service | NestJS | `job_db` | 3302 | — (client only; 3412 để dành) | Mới |
 | 4 | interview-service | NestJS | `interview_db` | 3304 | — | Mới |
 | 5 | notification-service | NestJS | `notification_db` | 3303 | 3413 | Có sẵn, defer |
 | 6 | ai-service | FastAPI | `ai_db` (tương lai) | 8000 | — | Mock |
