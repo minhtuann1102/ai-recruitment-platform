@@ -1,4 +1,4 @@
-import { Public, SwaggerApiDocument } from '@app/common';
+import { Public } from '@app/common';
 import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
 

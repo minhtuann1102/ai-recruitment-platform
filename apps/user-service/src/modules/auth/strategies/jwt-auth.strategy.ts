@@ -1,4 +1,9 @@
-import { ERROR_RESPONSE, jwtConfiguration, JwtTokenType, ServerException } from '@app/common';
+import {
+  ERROR_RESPONSE,
+  jwtConfiguration,
+  JwtTokenType,
+  ServerException,
+} from '@app/common';
 import { UserRequestPayload } from '@app/common';
 import { RedisService } from '@app/core';
 import { Inject, Injectable } from '@nestjs/common';
@@ -23,7 +28,7 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy, 'jwt-auth') {
   }
 
   async validate(payload: any): Promise<UserRequestPayload> {
-    const { id, email, jti, type, role, iss } = payload;
+    const { id, email, jti, type, role } = payload;
     if (type !== JwtTokenType.AccessToken)
       throw new ServerException(ERROR_RESPONSE.UNAUTHORIZED);
 
