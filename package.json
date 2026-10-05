@@ -1,8 +1,8 @@
 {
-  "name": "nest-turbo-starter",
+  "name": "@ai-recruit/root",
   "private": true,
   "version": "1.0.0",
-  "description": "Nest TypeScript starter repository",
+  "description": "AI Recruitment Platform monorepo",
   "license": "MIT",
   "workspaces": [
     "apps/*",

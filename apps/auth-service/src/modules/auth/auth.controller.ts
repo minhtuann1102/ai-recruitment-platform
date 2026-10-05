@@ -4,7 +4,7 @@ import {
   SwaggerApiDocument,
   User,
   UserRequestPayload,
-} from '@app/common';
+} from '@ai-recruit/common';
 import { Body, Controller, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';

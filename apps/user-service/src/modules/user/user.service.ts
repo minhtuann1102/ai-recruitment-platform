@@ -11,8 +11,8 @@ import {
   ServerException,
   UserRequestPayload,
   UserResponse,
-} from '@app/common';
-import { RedisService } from '@app/core';
+} from '@ai-recruit/common';
+import { RedisService } from '@ai-recruit/core';
 import { EntityManager, wrap } from '@mikro-orm/core';
 import { Inject, Injectable } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';

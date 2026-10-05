@@ -1,5 +1,5 @@
 {
-  "name": "notification-service",
+  "name": "@ai-recruit/notification-service",
   "private": true,
   "version": "1.0.0",
   "description": "Nest TypeScript starter repository",
@@ -30,9 +30,9 @@
     "webpack-node-externals": "^3.0.0"
   },
   "dependencies": {
-    "@app/common": "workspace:*",
-    "@app/core": "workspace:*",
-    "@app/email-template": "workspace:*",
+    "@ai-recruit/common": "workspace:*",
+    "@ai-recruit/core": "workspace:*",
+    "@ai-recruit/email-template": "workspace:*",
     "@aws-sdk/client-ses": "^3.808.0",
     "@nestjs/bullmq": "^11.0.2",
     "@nestjs/common": "11.1.19",

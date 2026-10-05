@@ -1,5 +1,5 @@
-import { User } from '@app/common';
-import { UserRequestPayload } from '@app/common';
+import { User } from '@ai-recruit/common';
+import { UserRequestPayload } from '@ai-recruit/common';
 import { Controller, Get } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UserService } from './user.service';

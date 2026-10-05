@@ -16,7 +16,7 @@ module.exports = function (options) {
     },
     externals: [
       nodeExternals({
-        allowlist: [/^@app\//],
+        allowlist: [/^@ai-recruit\//],
       }),
     ],
     module: {

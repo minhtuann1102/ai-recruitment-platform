@@ -6,15 +6,15 @@ import {
   kafkaConfiguration,
   rabbitmqConfiguration,
   tcpConfiguration,
-} from '@app/common';
-import { HttpLoggerMiddleware } from '@app/common';
+} from '@ai-recruit/common';
+import { HttpLoggerMiddleware } from '@ai-recruit/common';
 import {
   AppAuthGuard,
   MicroserviceModule,
   MicroserviceName,
   RedisModule,
   RoleBasedAccessControlGuard,
-} from '@app/core';
+} from '@ai-recruit/core';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService, ConfigType } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';

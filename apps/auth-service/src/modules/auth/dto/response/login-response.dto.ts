@@ -1,4 +1,4 @@
-import { PropertyDto } from '@app/common';
+import { PropertyDto } from '@ai-recruit/common';
 
 export class LoginResponseDto {
   @PropertyDto()

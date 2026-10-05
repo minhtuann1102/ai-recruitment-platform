@@ -1,4 +1,4 @@
-import { hashData, Role } from '@app/common';
+import { hashData, Role } from '@ai-recruit/common';
 import { EntityManager } from '@mikro-orm/core';
 import chalk from 'chalk';
 import { Command, CommandRunner, InquirerService, Option } from 'nest-commander';

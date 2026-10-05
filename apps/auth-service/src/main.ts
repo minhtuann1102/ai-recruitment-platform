@@ -3,8 +3,8 @@ import {
   getWinstonConfig,
   logBootstrapInfo,
   setupSwagger,
-} from '@app/common';
-import { PayloadValidationPipe } from '@app/common';
+} from '@ai-recruit/common';
+import { PayloadValidationPipe } from '@ai-recruit/common';
 import { ClassSerializerInterceptor } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
 import requestId from 'express-request-id';

@@ -1,4 +1,4 @@
-import { kafkaConfiguration, rabbitmqConfiguration } from '@app/common';
+import { kafkaConfiguration, rabbitmqConfiguration } from '@ai-recruit/common';
 import { DynamicModule, FactoryProvider, Module, Provider } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ClientOptions } from '@nestjs/microservices';

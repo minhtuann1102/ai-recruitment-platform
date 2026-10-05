@@ -3,7 +3,7 @@ import {
   ServerException,
   TokenPayload,
   UserRequestPayload,
-} from '@app/common';
+} from '@ai-recruit/common';
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-custom';

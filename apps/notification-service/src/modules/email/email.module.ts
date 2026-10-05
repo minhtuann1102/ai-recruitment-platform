@@ -1,4 +1,4 @@
-import { awsSesConfiguration, smtpConfiguration } from '@app/common';
+import { awsSesConfiguration, smtpConfiguration } from '@ai-recruit/common';
 import { Global, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AbstractEmailService } from './abstract-email.service';

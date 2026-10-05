@@ -8,7 +8,7 @@ module.exports = function (options) {
     ...options,
     externals: [
       nodeExternals({
-        allowlist: [/^@app\//],
+        allowlist: [/^@ai-recruit\//],
       }),
     ],
     module: {

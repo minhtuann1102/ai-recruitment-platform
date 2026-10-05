@@ -6,7 +6,7 @@ export const NOTIFICATION_GRPC_SERVICE = 'NotificationService';
 
 /**
  * proto-loader reads these from disk at runtime. tsc does not copy non-TS
- * files, so `@app/common`'s build mirrors `src/grpc/proto/` into
+ * files, so `@ai-recruit/common`'s build mirrors `src/grpc/proto/` into
  * `dist/grpc/proto/`, keeping `./proto` valid in both trees.
  */
 const PROTO_DIR = join(__dirname, 'proto');

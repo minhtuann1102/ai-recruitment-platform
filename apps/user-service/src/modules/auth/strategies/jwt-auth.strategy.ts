@@ -3,9 +3,9 @@ import {
   jwtConfiguration,
   JwtTokenType,
   ServerException,
-} from '@app/common';
-import { UserRequestPayload } from '@app/common';
-import { RedisService } from '@app/core';
+} from '@ai-recruit/common';
+import { UserRequestPayload } from '@ai-recruit/common';
+import { RedisService } from '@ai-recruit/core';
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';

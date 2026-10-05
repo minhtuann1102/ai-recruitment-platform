@@ -1,5 +1,5 @@
-import { codeExpiresConfiguration, jwtConfiguration } from '@app/common';
-import { GrpcGatewayAuthStrategy, GrpcJwtAuthStrategy } from '@app/core';
+import { codeExpiresConfiguration, jwtConfiguration } from '@ai-recruit/common';
+import { GrpcGatewayAuthStrategy, GrpcJwtAuthStrategy } from '@ai-recruit/core';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigType } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';

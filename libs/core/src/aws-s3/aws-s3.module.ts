@@ -1,4 +1,4 @@
-import { s3Configuration } from '@app/common';
+import { s3Configuration } from '@ai-recruit/common';
 import { Global, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AwsS3Service } from './aws-s3.service';
