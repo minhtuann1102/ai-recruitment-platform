@@ -1,8 +1,6 @@
-version: '3'
-
 services:
   db:
-    container_name: nest_turbo_db
+    container_name: ai_recruit_db
     extends:
       file: .docker/compose/postgresql/postgresql.yml
       service: postgresql
@@ -11,7 +9,7 @@ services:
     volumes:
       - ./.docker/volumes/pgdata:/var/lib/postgresql/data
     networks:
-      - nest-turbo-network
+      - ai-recruit-network
     environment:
       POSTGRES_USER: ${DEFAULT_PG_USER}
       POSTGRES_PASSWORD: ${DEFAULT_PG_PASSWORD}
@@ -20,20 +18,20 @@ services:
       - .env
 
   redis:
-    container_name: nest_turbo_redis
+    container_name: ai_recruit_redis
     extends:
       file: .docker/compose/redis/redis.yml
       service: redis
     ports:
       - '6374:6379'
     networks:
-      - nest-turbo-network
+      - ai-recruit-network
     volumes:
       - ./.docker/volumes/redis_data:/data
     command: redis-server --appendonly yes --dir /data
 
   redisinsight:
-    container_name: nest_turbo_redisinsight
+    container_name: ai_recruit_redisinsight
     extends:
       file: .docker/compose/redis/redis.yml
       service: redisinsight
@@ -46,15 +44,15 @@ services:
     links:
       - redis
     networks:
-      - nest-turbo-network
+      - ai-recruit-network
 
 #  kafka:
-#    container_name: nest_turbo_kafka
+#    container_name: ai_recruit_kafka
 #    extends:
 #      file: .docker/compose/kafka/kafka.yml
 #      service: kafka
 #    networks:
-#      - nest-turbo-network
+#      - ai-recruit-network
 #    volumes:
 #      - ./.docker/volumes/kafka_data:/var/lib/kafka/data
 #    ports:
@@ -74,12 +72,12 @@ services:
 #      KAFKAJS_NO_PARTITIONER_WARNING: 1
 #
 #  kafkaui:
-#    container_name: nest_turbo_kafka_ui
+#    container_name: ai_recruit_kafka_ui
 #    extends:
 #      file: .docker/compose/kafka/kafka.yml
 #      service: kafka_ui
 #    networks:
-#      - nest-turbo-network
+#      - ai-recruit-network
 #    depends_on:
 #      - kafka
 #    ports:
@@ -92,7 +90,7 @@ services:
 #      SPRING_SECURITY_USER_PASSWORD: secret
 #
 #  rabbitmq:
-#    container_name: nest_turbo_rabbitmq
+#    container_name: ai_recruit_rabbitmq
 #    extends:
 #          file: .docker/compose/rabbitmq/rabbitmq.yml
 #          service: rabbitmq
@@ -104,13 +102,13 @@ services:
 #      - 15682:15672
 #    restart: no
 #    networks:
-#      - nest-turbo-network
+#      - ai-recruit-network
 
   etcd:
     extends:
       file: .docker/compose/apisix/apisix.yml
       service: etcd
-    container_name: nest_turbo_apisix_etcd
+    container_name: ai_recruit_apisix_etcd
     ports:
       - "2379:2379"
       - "2380:2380"
@@ -135,7 +133,7 @@ services:
       - --initial-cluster-state
       - new
     networks:
-      - nest-turbo-network
+      - ai-recruit-network
     volumes:
       - ./.docker/volumes/etcd-data:/etcd-data
 
@@ -143,7 +141,7 @@ services:
     extends:
       file: .docker/compose/apisix/apisix.yml
       service: apisix
-    container_name: nest_turbo_apisix
+    container_name: ai_recruit_apisix
     environment:
       APISIX_PROFILE: ${APISIX_PROFILE}
     volumes:
@@ -157,7 +155,7 @@ services:
     env_file:
       - .env
     networks:
-      - nest-turbo-network
+      - ai-recruit-network
     extra_hosts:
       - 'host.docker.internal:host-gateway'
 
@@ -172,10 +170,10 @@ services:
     build:
       context: .
       dockerfile: ./.docker/compose/apisix/Dockerfile.adc
-    container_name: nest_turbo_adc
+    container_name: ai_recruit_adc
     restart: 'no'
     networks:
-      - nest-turbo-network
+      - ai-recruit-network
     depends_on:
       apisix:
         condition: service_started
@@ -191,10 +189,9 @@ services:
 volumes:
   redisinsight_data:
   kafka_data:
-  kong_db_data:
   user_pgdata:
   redis_data:
   etcd-data:
 
 networks:
-  nest-turbo-network:
+  ai-recruit-network:
