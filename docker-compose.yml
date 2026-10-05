@@ -9,7 +9,7 @@ services:
     ports:
       - '5534:5432'
     volumes:
-      - ${PWD}/.docker/volumes/pgdata:/var/lib/postgresql/data
+      - ./.docker/volumes/pgdata:/var/lib/postgresql/data
     networks:
       - nest-turbo-network
     environment:
@@ -29,7 +29,7 @@ services:
     networks:
       - nest-turbo-network
     volumes:
-      - ${PWD}/.docker/volumes/redis_data:/data
+      - ./.docker/volumes/redis_data:/data
     command: redis-server --appendonly yes --dir /data
 
   redisinsight:
@@ -40,7 +40,7 @@ services:
     depends_on:
       - redis
     volumes:
-      - ${PWD}/.docker/volumes/redisinsight_data:/db
+      - ./.docker/volumes/redisinsight_data:/db
     ports:
       - '5544:5540'
     links:
@@ -56,7 +56,7 @@ services:
 #    networks:
 #      - nest-turbo-network
 #    volumes:
-#      - ${PWD}/.docker/volumes/kafka_data:/var/lib/kafka/data
+#      - ./.docker/volumes/kafka_data:/var/lib/kafka/data
 #    ports:
 #      - '9082:9092'
 #      - '9086:9094'
