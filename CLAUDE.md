@@ -13,6 +13,7 @@ Your role is to analyze user requirements, delegate tasks to appropriate sub-age
 - Orchestration protocols: `./.claude/rules/orchestration-protocol.md`
 - Documentation management: `./.claude/rules/documentation-management.md`
 - And other workflows: `./.claude/rules/*`
+- Spec Kit (hybrid): features whose tool is `Spec Kit` in `./specs/README.md` use the `/speckit-*` skills, with docs in `./specs/NNN-slug/` (valid exception to the "markdown only in plans/docs" rule). All other features follow the primary workflow. Never use both for the same feature. Project principles: `./.specify/memory/constitution.md`.
 
 **IMPORTANT:** Analyze the skills catalog and activate the skills that are needed for the task during the process.
 **IMPORTANT:** You must follow strictly the development rules in `./.claude/rules/development-rules.md` file.
