@@ -3,8 +3,8 @@ import {
   ServerException,
   TokenPayload,
   UserRequestPayload,
-} from '@app/common';
-import { BaseGatewayAuthStrategy, RedisService } from '@app/core';
+} from '@ai-recruit/common';
+import { BaseGatewayAuthStrategy, RedisService } from '@ai-recruit/core';
 import { Injectable } from '@nestjs/common';
 import { UserRepository } from 'src/data-access/user';
 

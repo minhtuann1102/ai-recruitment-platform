@@ -7,9 +7,9 @@ import {
   kafkaConfiguration,
   rabbitmqConfiguration,
   tcpConfiguration,
-} from '@app/common';
-import { AppAuthGuard, RedisModule, RoleBasedAccessControlGuard } from '@app/core';
-import { BaseRepository } from '@app/core';
+} from '@ai-recruit/common';
+import { AppAuthGuard, RedisModule, RoleBasedAccessControlGuard } from '@ai-recruit/core';
+import { BaseRepository } from '@ai-recruit/core';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigType } from '@nestjs/config';

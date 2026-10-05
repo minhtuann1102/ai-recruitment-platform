@@ -1,4 +1,4 @@
-import { UserResponse } from '@app/common';
+import { UserResponse } from '@ai-recruit/common';
 import { User } from 'src/data-access/user';
 
 /** Serialise a Date column to the ISO string the proto contract declares. */

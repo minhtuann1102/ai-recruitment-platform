@@ -1,5 +1,5 @@
-import { APP_DEFAULTS, NodeEnv } from '@app/common';
-import { MicroserviceName } from '@app/core';
+import { APP_DEFAULTS, NodeEnv } from '@ai-recruit/common';
+import { MicroserviceName } from '@ai-recruit/core';
 import { registerAs } from '@nestjs/config';
 
 export const getAppConfig = () => ({

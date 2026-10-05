@@ -1,4 +1,4 @@
-import { PropertyDto } from '@app/common';
+import { PropertyDto } from '@ai-recruit/common';
 import { PickType } from '@nestjs/swagger';
 import { AuthBaseDto } from './auth-base.dto';
 

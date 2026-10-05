@@ -5,7 +5,7 @@ import {
   Role,
   ServerException,
   UserRequestPayload,
-} from '@app/common';
+} from '@ai-recruit/common';
 import { ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';

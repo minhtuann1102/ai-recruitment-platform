@@ -1,5 +1,5 @@
 {
-  "name": "@app/common",
+  "name": "@ai-recruit/common",
   "version": "1.0.0",
   "private": true,
   "scripts": {

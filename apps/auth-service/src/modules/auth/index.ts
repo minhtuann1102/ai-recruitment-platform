@@ -1,2 +1,2 @@
 export * from './auth.module';
-export * from '@app/common';
+export * from '@ai-recruit/common';

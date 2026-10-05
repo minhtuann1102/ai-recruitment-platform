@@ -34,8 +34,6 @@ prod:
 	pnpm prod $(f_exact)
 checkTypes:
 	pnpm check-types $(f_exact)
-deckSync:
-	docker compose run --rm kong-deck gateway sync /app/kong-dev.yaml
 
 adcSync:
 	$(if $(environment),,$(error "ERROR: 'environment' param is required. eg: make adcSync environment=dev"))

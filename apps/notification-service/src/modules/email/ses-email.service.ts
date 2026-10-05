@@ -1,4 +1,4 @@
-import { awsSesConfiguration } from '@app/common';
+import { awsSesConfiguration } from '@ai-recruit/common';
 import { SendEmailCommand, SESClient } from '@aws-sdk/client-ses';
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';

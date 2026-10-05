@@ -3,13 +3,13 @@ import {
   getWinstonConfig,
   logBootstrapInfo,
   setupSwagger,
-} from '@app/common';
-import { PayloadValidationPipe } from '@app/common';
+} from '@ai-recruit/common';
+import { PayloadValidationPipe } from '@ai-recruit/common';
 import {
   MicroserviceConfigOptions,
   MicroserviceFactory,
   MicroserviceName,
-} from '@app/core';
+} from '@ai-recruit/core';
 import { ClassSerializerInterceptor } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory, Reflector } from '@nestjs/core';

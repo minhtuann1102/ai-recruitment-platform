@@ -1,7 +1,7 @@
 import { HttpStatus } from '@nestjs/common';
 
 /**
- * gRPC status codes (grpc-js `status` enum), inlined so @app/common does not
+ * gRPC status codes (grpc-js `status` enum), inlined so @ai-recruit/common does not
  * need a runtime dependency on @grpc/grpc-js just for two lookup tables.
  */
 export enum GrpcStatus {
