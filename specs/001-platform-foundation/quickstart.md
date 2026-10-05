@@ -32,10 +32,10 @@ docker exec ai_recruit_db psql -U postgres -d ai_db -tAc "SELECT extname FROM pg
 ## 3. Object storage (US1, FR-004, SC-006)
 
 ```bash
-docker compose run --rm --entrypoint sh minio-init -c '
-  mc alias set local http://minio:9000 "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD" >/dev/null &&
-  echo "hello ai-recruit" | mc pipe local/ai-recruit-files/probe.txt &&
-  mc cat local/ai-recruit-files/probe.txt'
+docker compose run --rm --entrypoint sh storage-init -c '
+  echo "hello ai-recruit" > /tmp/probe.txt &&
+  aws --endpoint-url http://minio:9000 s3 cp /tmp/probe.txt s3://ai-recruit-files/probe.txt &&
+  aws --endpoint-url http://minio:9000 s3 cp s3://ai-recruit-files/probe.txt -'
 # phải in lại: hello ai-recruit
 # Console: http://localhost:9001
 ```
@@ -45,9 +45,7 @@ docker compose run --rm --entrypoint sh minio-init -c '
 ```bash
 make adcSync environment=dev
 curl -s -o /dev/null -w "%{http_code}\n" http://localhost:9080/job/api/anything      # 401
-curl -s -o /dev/null -w "%{http_code}\n" http://localhost:9080/interview/api/x       # 401 (route bảo vệ)
-curl -s -o /dev/null -w "%{http_code}\n" http://localhost:9080/ai/api/health         # 200 (khi ai-service chạy)
-```
+curl -s -o /dev/null -w "%{http_code}\n" http://localhost:9080/interview/api/x       # 401 (route bảo vệ)```
 
 ## 5. Định danh (US2, SC-003)
 
@@ -60,4 +58,4 @@ git ls-files | grep -v -E '^docs/|^specs/|^\.specify/|^\.claude/|pnpm-lock.yaml'
 ## 6. CI (US3, SC-004)
 
 Mở PR thử thêm một biến không dùng (vi phạm lint) → job `node` đỏ ở bước lint. Sửa → xanh. Kiểm tra job `python`
-chạy cho `ai-service` khi thư mục tồn tại.
+chỉ chạy cho app Python có trong repo (guard bỏ qua app chưa có).

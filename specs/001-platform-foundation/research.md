@@ -50,28 +50,40 @@ Mỗi mục: Decision / Rationale / Alternatives. Mục đánh dấu **VERIFY** 
 - **Rationale**: DRY, không cần sửa code config; FSD không phải đổi gì.
 - **Alternatives**: Bộ biến `MINIO_*` + `USER_DB_*` theo kickoff → phải sửa config code + validation. Bị loại.
 
-## R6. MinIO: bucket tự tạo, health check, version
+## R6. Object storage: image, bucket tự tạo, đường chuyển sang AWS S3
 
-- **Decision**: Service `minio` + one-shot `minio-init` (image `minio/mc`):
-  `mc alias set local http://minio:9000 $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD && mc mb --ignore-existing local/$AWS_S3_BUCKET_NAME`.
-  Health check `mc ready local` trong container minio. Pin tag cụ thể, không dùng `latest`.
-- **Rationale**: FR-004 (bucket tự tạo), constitution V (tái lập được).
-- **VERIFY**: Chính sách phát hành image Docker community của MinIO đã thay đổi trong 2025. Lúc implement cần
-  xác nhận tag còn pull được; nếu không, chọn image S3-compatible thay thế và ghi lại tại đây.
+- **Bối cảnh (kiểm chứng 2026-10-05)**: MinIO ngừng phát hành image community (10/2025) và đã archive (04/2026);
+  `minio/minio`, `minio/mc` bị xóa khỏi Docker Hub (404). `minio/minio:latest` trong kickoff không pull được.
+- **Decision** (tiêu chí team chốt: dễ chuyển sang AWS S3 nhất):
+  - Service `minio`: image `cgr.dev/chainguard/minio` — bản free chỉ có `latest`/`latest-dev` nên **pin theo digest**
+    (`latest` lúc kiểm chứng: `sha256:4cf4831a2bbcf13ddca09c1cbcc9faff716dd3c4247e0babc32864b8ee8e0034`).
+    Lệnh `server /data --console-address :9001`; env `MINIO_ROOT_USER/PASSWORD` như MinIO gốc.
+  - Service `storage-init` (one-shot): image `amazon/aws-cli:2.37.9`; retry tới khi endpoint sẵn sàng rồi
+    `aws --endpoint-url http://minio:9000 s3 mb s3://$AWS_S3_BUCKET_NAME` (bỏ qua nếu bucket đã có).
+- **Rationale**:
+  - MinIO tương thích S3 API cao nhất trong các lựa chọn (presigned URL, multipart, path-style).
+  - Code đã có 2 nhánh `StorageType.Minio` / `StorageType.S3` (`libs/core/src/aws-s3/aws-s3.service.ts`) → chuyển
+    sang AWS S3 chỉ đổi env (`STORAGE_TYPE=s3`, region, key thật, bucket, `AWS_S3_URL`), không đổi code.
+  - Tạo bucket bằng `aws-cli` = đúng công cụ dùng với S3 thật; không phụ thuộc `mc` đã bị gỡ.
+- **Alternatives**: SeaweedFS (đang bảo trì, có UI; cấu hình khác, S3 gateway thiếu vài tính năng) — **dự phòng** nếu
+  image Chainguard có vấn đề. Garage (thiếu bucket policy/ACL, setup bằng CLI), RustFS (beta) — loại.
+- **VERIFY lúc implement**: image Chainguard là distroless (không shell/curl/`mc`) → healthcheck trong container có thể
+  không chạy được; khi đó dùng `latest-dev` (có shell) cho local, hoặc bỏ healthcheck của `minio` và để `storage-init`
+  retry. Console bản community chỉ còn object browser (tính năng admin bị lược từ 05/2025).
 
 ## R7. Route APISIX
 
 - **Decision**: Copy pattern `user-service` trong `config/apisix/conf/apisix-dev.yaml`: route public
   (priority 1: `/{svc}/api`, `/{svc}/swagger*`, health) tắt `jwt-auth`; route chính (priority 0: `/{svc}/*`)
   bật `jwt-auth` + `serverless-post-function` set `x-auth-user`; `proxy-rewrite` bỏ prefix. Upstream từ env
-  `APISIX_{SVC}_SERVICE_HOST/PORT`. Route `/ai/*` lấy nguyên từ `feat/aie`.
+  `APISIX_{SVC}_SERVICE_HOST/PORT`. Route `/ai/*`: **hoãn** — phần AIE, tạm thời ngoài phạm vi 001.
 - **Rationale**: Nhất quán (constitution II), ít rủi ro.
 - **Ghi chú**: Lua của `x-auth-user` đang lặp ở mỗi route; `config/apisix/lua/jwt_claim_processor.lua` đã tồn
   tại. Gom về một chỗ là cải tiến sau, không làm trong feature này (YAGNI).
 
 ## R8. CI pipeline
 
-- **Decision**: `.github/workflows/ci.yml`, trigger `pull_request` + `push` vào `main`, `develop`.
+- **Decision**: `.github/workflows/ci.yml`, trigger `pull_request` + `push` vào `main` (GitHub Flow, không có `develop`).
   - Job `node`: checkout → `pnpm/action-setup` (đọc `packageManager`) → `setup-node` 22 có cache pnpm →
     `pnpm install --frozen-lockfile` → `pnpm lint` → `pnpm check-types` → `pnpm test`.
   - Job `python` (matrix `app: [ai-service, data-pipeline]`): bỏ qua nếu thư mục không có
@@ -107,7 +119,7 @@ Mỗi mục: Decision / Rationale / Alternatives. Mục đánh dấu **VERIFY** 
 
 - `build`, `check-types`: xanh. `lint`: 12 lỗi oxlint có sẵn → đã sửa trong PR-1 (commit riêng, không đổi
   behavior) vì husky pre-commit (lint-staged) chặn commit các file bị đổi import.
-- `test`: đỏ vì jest "No tests found" (repo chưa có test). Đề xuất cho T031: thêm `--passWithNoTests` vào script
+- `test`: đỏ vì jest "No tests found" (repo chưa có test). **Đã chốt** cho T031: thêm `--passWithNoTests` vào script
   `test` của từng app — không phải bỏ qua test, mà là chưa có test; test thật thêm theo DoD của từng feature.
 - Lockfile khi đổi tên: `pnpm install` không frozen re-resolve peer webpack/esbuild (+102 dòng, ngoài phạm vi)
   → thay vào đó sửa tay 8 dòng tên package trong `pnpm-lock.yaml`, kiểm chứng bằng `--frozen-lockfile`.
@@ -115,5 +127,6 @@ Mỗi mục: Decision / Rationale / Alternatives. Mục đánh dấu **VERIFY** 
 ## R9. Biến môi trường gRPC
 
 - **Decision**: Không gỡ biến `GRPC_*` trong feature này; thêm `TCP_*` theo bảng port của
-  `docs/architecture/services.md` (user 3411, job 3412, notification 3413). Gỡ `GRPC_*` thuộc S0-FSD-2.
+  `docs/architecture/services.md` (user 3411, notification 3413). job-service là **TCP client-only** (đã chốt,
+  `services.md` đã sửa) → không thêm `TCP_JOB_SERVICE_*`. Gỡ `GRPC_*` thuộc S0-FSD-2.
 - **Rationale**: Tránh làm hỏng code FSD đang chuyển transport.

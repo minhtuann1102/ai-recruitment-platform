@@ -7,7 +7,7 @@
 ## Summary
 
 Dựng nền tảng Sprint 0 cho DE: (1) đổi tên toàn monorepo sang `@ai-recruit/*` / `ai_recruit_*` và gỡ Kong,
-(2) một PostgreSQL 16 + pgvector chứa 5 database tạo bằng init script idempotent, (3) MinIO với bucket tự tạo,
+(2) một PostgreSQL 16 + pgvector chứa 5 database tạo bằng init script idempotent, (3) object storage S3 (MinIO, image Chainguard) với bucket tự tạo bằng aws-cli,
 (4) route APISIX cho job / interview / ai, (5) GitHub Actions chạy lint + check-types + test (Node) và pytest
 (Python apps), (6) env mẫu đầy đủ. Cách làm: tái dùng tối đa pattern có sẵn (route user-service, biến
 `{SERVICE}_SERVICE_DB_*`, biến `AWS_S3_*` + `STORAGE_TYPE=minio`), chia 3 PR nhỏ, PR đổi tên merge đầu tiên.
@@ -17,7 +17,7 @@ Dựng nền tảng Sprint 0 cho DE: (1) đổi tên toàn monorepo sang `@ai-re
 **Language/Version**: YAML (Docker Compose v2, GitHub Actions, APISIX ADC), Bash (init script), TypeScript
 (chỉ đổi import), Python 3.11 (chạy test ai-service / data-pipeline trong CI)
 
-**Primary Dependencies**: `pgvector/pgvector:pg16`, Redis 8, APISIX 3.14 + etcd + ADC 0.23.1, MinIO + `mc`,
+**Primary Dependencies**: `pgvector/pgvector:pg16`, Redis 8, APISIX 3.14 + etcd + ADC 0.23.1, `cgr.dev/chainguard/minio` (pin digest) + `amazon/aws-cli`,
 Turborepo, pnpm 10.17, Node 22, GitHub Actions (`pnpm/action-setup`, `actions/setup-node`, `actions/setup-python`)
 
 **Storage**: 1 PostgreSQL instance / 5 DB (`user_db`, `job_db`, `interview_db`, `notification_db`, `ai_db`);
@@ -32,8 +32,8 @@ gateway 401/200); CI tự kiểm chứng bằng PR thử; jest/pytest hiện có
 
 **Performance Goals**: hạ tầng healthy ≤ 2 phút (SC-002); CI ≤ 10 phút (SC-004)
 
-**Constraints**: CI không dùng secret thật; compose không phụ thuộc `${PWD}`; giữ nguyên thay đổi của
-`origin/feat/aie`; không đụng logic gRPC→TCP (S0-FSD-2)
+**Constraints**: CI không dùng secret thật; compose không phụ thuộc `${PWD}`;
+phần AIE (ai-service, `/ai/*`, DDL `knowledge_chunks`) tạm hoãn; không đụng logic gRPC→TCP (S0-FSD-2)
 
 **Scale/Scope**: 3 dev, 6 app (4 NestJS hiện/sắp có + ai-service + data-pipeline), ~62 file TS đổi import
 
@@ -46,7 +46,7 @@ gateway 401/200); CI tự kiểm chứng bằng PR thử; jest/pytest hiện có
 | I. DB-per-Service | ✅ | 5 DB tách biệt; init script chỉ tạo DB + extension `vector`; DDL `knowledge_chunks` thuộc AIE (ngoại lệ đã ghi trong constitution) |
 | II. Gateway & Transport | ✅ | Route mới qua APISIX, JWT + `x-auth-user` theo pattern user-service; chỉ thêm biến TCP, không thêm gRPC |
 | III. Contract-First | ✅ | Bảng route và env chốt trong [contracts/](contracts/); không đổi API contract nghiệp vụ |
-| IV. AI Stateless | ✅ N/A | Chỉ đổi tên container ai-service do AIE tạo |
+| IV. AI Stateless | ✅ N/A | Không đụng phần AIE (tạm hoãn khỏi 001) |
 | V. Data Pipeline tái lập | ✅ | `ai_db` + `vector` sẵn sàng cho feature 005; CI có slot pytest cho `apps/data-pipeline` |
 | VI. Quality Gates | ✅ (một phần) | Feature này **tạo ra** gate CI lint/types/test, không cần secret. Ngưỡng coverage 60% chưa enforce trong CI ngày đầu — xem research R10 |
 | VII. Đơn giản & phạm vi | ✅ | Gỡ Kong và tên starter; không thêm dashboard, không build image trong CI (để 014) |
@@ -83,14 +83,14 @@ apps/{auth,user,notification}-service/
 └── src/**/*.ts                      # import @app/* → @ai-recruit/*
 libs/{common,core,email-template}/package.json
 docker-compose.yml                   # prefix ai_recruit_*, network ai-recruit-network, ./ thay ${PWD},
-                                     # db → pgvector/pgvector:pg16 + init script, + minio + minio-init
+                                     # db → pgvector/pgvector:pg16 + init script, + minio + storage-init
 docker-compose-kong.yml              # XÓA
 config/kong/  .docker/compose/kong/  # XÓA
 scripts/init-databases.sh            # MỚI: tạo 5 DB idempotent + CREATE EXTENSION vector trong ai_db
-config/apisix/conf/apisix-dev.yaml   # + job-service, interview-service (ai-service lấy từ feat/aie)
-.env.example                         # gỡ Kong; + MinIO qua AWS_S3_*; + upstream job/interview/ai; + TCP ports
+config/apisix/conf/apisix-dev.yaml   # + job-service, interview-service (/ai/* hoãn — phần AIE)
+.env.example                         # gỡ Kong; + MinIO qua AWS_S3_*; + upstream job/interview; + TCP user/notification
 turbo.json                           # globalEnv: gỡ Kong/gRPC khi FSD xong; thêm biến mới
-Makefile                             # gỡ deckSync; + db-ensure, minio-check
+Makefile                             # gỡ deckSync; + db-ensure
 .github/workflows/ci.yml             # MỚI
 README.md                            # cập nhật tên, lệnh, reset volume
 ```
@@ -105,10 +105,10 @@ loạt bằng script (thay đổi cơ học, không đổi logic).
 |---|---|---|---|
 | PR-1 `chore/rename-project-scope` | Đổi tên package/import/container/network, gỡ Kong, sửa `${PWD}` | US2 | `pnpm install` + `pnpm build` xanh; báo FSD/AIE rebase ngay |
 | PR-2 `chore/docker-multi-db-minio` | pgvector image, init script, MinIO + bucket, env mẫu, Makefile, README | US1, US5 | quickstart §1–3 pass trên máy sạch |
-| PR-3 `chore/apisix-routes-ci` | Route job/interview (+ ai sau khi feat/aie merge), CI workflow | US3, US4 | PR thử đỏ/xanh đúng; quickstart §4 pass |
+| PR-3 `chore/apisix-routes-ci` | Route job/interview, CI workflow | US3, US4 | PR thử đỏ/xanh đúng; quickstart §4 pass |
 
-Phối hợp: hỏi AIE merge `origin/feat/aie` trước PR-1 nếu sẵn sàng trong ≤ 1 ngày; nếu không, PR-1 merge trước
-và AIE resolve xung đột nhỏ ở `docker-compose.yml` (1 block). Chi tiết: [research.md](research.md) R1.
+Phối hợp (đã chốt): PR-1 (#2) merge trước `feat/aie`. Phần AIE tạm hoãn khỏi 001; khi rebase, AIE tự đổi tên
+container/network của block `ai-service` (merge không báo xung đột nhưng compose sẽ lỗi network — xem PR #2).
 
 ## Complexity Tracking
 

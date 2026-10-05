@@ -75,8 +75,8 @@ team (research R1).
 
 - [ ] T016 [US1] Tạo branch `chore/docker-multi-db-minio`; tạo `scripts/init-databases.sh`: tạo idempotent `user_db`, `job_db`, `interview_db`, `notification_db`, `ai_db` bằng `\gexec`; `\c ai_db` + `CREATE EXTENSION IF NOT EXISTS vector`; chừa chỗ cho DDL của AIE ở cuối file (research R3)
 - [ ] T017 [US1] Service `db` trong `docker-compose.yml` và `.docker/compose/postgresql/postgresql.yml`: image `pgvector/pgvector:pg16`, mount `./scripts/init-databases.sh:/docker-entrypoint-initdb.d/init-databases.sh`, port `${PG_HOST_PORT:-5534}:5432`, healthcheck `pg_isready`
-- [ ] T018 [US1] Service `minio` trong `docker-compose.yml`: pin tag (VERIFY research R6), ports `${MINIO_API_PORT:-9000}`/`${MINIO_CONSOLE_PORT:-9001}`, volume `./.docker/volumes/minio_data`, healthcheck `mc ready local`
-- [ ] T019 [US1] Service `minio-init` (image `minio/mc`, `depends_on: minio: service_healthy`, `restart: "no"`, `entrypoint: ["/bin/sh", "-c"]` vì entrypoint mặc định của image là `mc`; `environment` gồm `MINIO_ROOT_USER`, `MINIO_ROOT_PASSWORD`, `AWS_S3_BUCKET_NAME`) tạo bucket bằng `mc mb --ignore-existing`
+- [ ] T018 [US1] Service `minio` trong `docker-compose.yml`: image `cgr.dev/chainguard/minio@sha256:<digest>` (research R6), command `server /data --console-address :9001`, env `MINIO_ROOT_USER/PASSWORD`, ports `${MINIO_API_PORT:-9000}`/`${MINIO_CONSOLE_PORT:-9001}`, volume `./.docker/volumes/minio_data`; healthcheck theo kết quả VERIFY R6 (distroless)
+- [ ] T019 [US1] Service `storage-init` (image `amazon/aws-cli:2.37.9`, `restart: "no"`, `entrypoint: ["/bin/sh", "-c"]` vì entrypoint mặc định là `aws`; env `AWS_ACCESS_KEY_ID=${MINIO_ROOT_USER}`, `AWS_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD}`, `AWS_DEFAULT_REGION=${AWS_S3_REGION}`, `AWS_S3_BUCKET_NAME`): retry `aws --endpoint-url http://minio:9000 s3 ls` tới khi sẵn sàng, rồi `s3 mb` nếu bucket chưa có
 - [ ] T020 [P] [US1] Healthcheck cho `redis` (`redis-cli ping`), `etcd`, `apisix`; bind port admin APISIX vào `127.0.0.1` (research R11) trong `docker-compose.yml`
 - [ ] T021 [P] [US1] Thêm target `db-ensure` (chạy lại init script qua `docker compose exec db`) trong `Makefile`
 - [ ] T022 [US1] Chạy quickstart §1–3 hai lần: volume sạch và volume cũ + `make db-ensure`; ghi kết quả vào PR
@@ -91,7 +91,7 @@ team (research R1).
 
 **Independent Test**: `docker compose config` không cảnh báo biến thiếu; quickstart §1 chạy với env copy nguyên trạng
 
-- [ ] T023 [US5] Cập nhật `.env.example` theo `contracts/env-variables.md` (Postgres, MinIO, `STORAGE_TYPE=minio` + `AWS_S3_*`, upstream job/interview/ai, TCP, `AI_SERVICE_MOCK`) kèm comment nhóm
+- [ ] T023 [US5] Cập nhật `.env.example` theo `contracts/env-variables.md` (Postgres, MinIO, `STORAGE_TYPE=minio` + `AWS_S3_*`, upstream job/interview, TCP user/notification, `AI_SERVICE_MOCK`) kèm comment nhóm; ghi chú cách chuyển sang AWS S3 (R6)
 - [ ] T024 [P] [US5] `apps/user-service/.env.example`, `apps/notification-service/.env.example`: `*_SERVICE_DB_DATABASE` → `user_db` / `notification_db`; comment host `db:5432` (Docker) vs `localhost:5534` (host)
 - [ ] T025 [US5] Thêm biến mới mà NestJS đọc vào `turbo.json` > `globalEnv` (vd `AI_SERVICE_MOCK`)
 - [ ] T026 [US5] Kiểm chứng: env copy nguyên trạng → `docker compose config` sạch cảnh báo; rà soát không còn secret thật; mở PR-2
@@ -102,13 +102,13 @@ team (research R1).
 
 ## Phase 6: User Story 4 — Gateway route mới (P2) · S0-DE-4 · PR-3
 
-**Goal**: `/job/*`, `/interview/*`, `/ai/*` theo `contracts/gateway-routes.md`
+**Goal**: `/job/*`, `/interview/*` theo `contracts/gateway-routes.md` (`/ai/*` hoãn — phần AIE)
 
 **Independent Test**: quickstart §4
 
 - [ ] T027 [US4] Tạo branch `chore/apisix-routes-ci`; thêm service `job-service` (public + protected, upstream `APISIX_JOB_SERVICE_*`) vào `config/apisix/conf/apisix-dev.yaml` theo pattern user-service
 - [ ] T028 [US4] Thêm service `interview-service` (upstream `APISIX_INTERVIEW_SERVICE_*`) vào `config/apisix/conf/apisix-dev.yaml`
-- [ ] T029 [US4] Đảm bảo service `ai-service` từ `origin/feat/aie` có trong `config/apisix/conf/apisix-dev.yaml` sau merge; khớp `APISIX_AI_SERVICE_*` trong `.env.example`
+- [ ] T029 [US4] **HOÃN — phần AIE, tạm thời không làm.** Đảm bảo service `ai-service` từ `origin/feat/aie` có trong `config/apisix/conf/apisix-dev.yaml` sau merge; khớp `APISIX_AI_SERVICE_*` trong `.env.example`
 - [ ] T030 [US4] `make adcSync environment=dev` → quickstart §4 (401 không token, 200 health)
 
 ---
@@ -119,10 +119,10 @@ team (research R1).
 
 **Independent Test**: quickstart §6
 
-- [ ] T031 [US3] Tạo `.github/workflows/ci.yml` job `node` theo `contracts/ci-pipeline.md` (pnpm theo `packageManager`, Node 22, cache, `--frozen-lockfile`, concurrency)
+- [ ] T031 [US3] Tạo `.github/workflows/ci.yml` job `node` theo `contracts/ci-pipeline.md` (trigger PR + push `main`, pnpm theo `packageManager`, Node 22, cache, `--frozen-lockfile`, concurrency); thêm `--passWithNoTests` vào script `test` của `apps/*-service/package.json` (R12)
 - [ ] T032 [US3] Thêm job `python` matrix `[ai-service, data-pipeline]` có guard `requirements.txt`, Python 3.11, `pytest` trong `.github/workflows/ci.yml`
 - [ ] T033 [US3] PR thử có lỗi lint → đỏ; sửa → xanh; ghi thời gian chạy (mục tiêu ≤ 10 phút); mở PR-3
-- [ ] T034 [US3] Nhờ admin repo bật branch protection "CI xanh mới merge" cho `main` (và `develop` khi có)
+- [ ] T034 [US3] Nhờ admin repo bật branch protection "CI xanh mới merge" cho `main` (GitHub Flow, không có `develop`); tạo tag `v0.1-sprint0` khi 001 xong
 
 **Checkpoint**: PR-3 merged — mọi PR sau đều qua gate
 
@@ -142,7 +142,7 @@ team (research R1).
 
 - **Setup (P1)** → **Foundational (P2)** → **US2 / PR-1** (chặn mọi story vì đổi tên file dùng chung)
 - Sau PR-1: **PR-2 (US1 + US5)** và **PR-3 (US4 + US3)** độc lập nhau; một người làm thì đi tuần tự PR-2 → PR-3
-- **US4** cần thêm `origin/feat/aie` đã merge cho phần `/ai/*` (T029); `/job`, `/interview` không chờ
+- **US4**: `/ai/*` (T029) hoãn — phần AIE; `/job`, `/interview` không phụ thuộc AIE
 - **Polish** sau khi 3 PR merge
 
 ### Timeline đề xuất (hạn 12/10)

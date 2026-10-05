@@ -18,9 +18,9 @@ Nguyên tắc: secret chỉ là placeholder; biến dùng trong NestJS phải c�
 | Storage (service) | `AWS_S3_URL`, `AWS_S3_BUCKET_NAME`, `AWS_S3_REGION`, `AWS_S3_ACCESS_KEY_ID`, `AWS_S3_SECRET_ACCESS_KEY`, `AWS_S3_CREDENTIALS_REQUIRED` | `http://localhost:9000`, `ai-recruit-files`, `us-east-1`, `minioadmin`, `minioadmin`, `true` | Đổi giá trị mẫu sang MinIO local |
 | Gateway upstream | `APISIX_JOB_SERVICE_HOST/PORT` | `host.docker.internal` / `3302` | Thêm |
 | Gateway upstream | `APISIX_INTERVIEW_SERVICE_HOST/PORT` | `host.docker.internal` / `3304` | Thêm |
-| Gateway upstream | `APISIX_AI_SERVICE_HOST/PORT` | `ai-service` / `8000` | Thêm (khớp `feat/aie`) |
+| Gateway upstream | `APISIX_AI_SERVICE_HOST/PORT` | — | **Hoãn** — phần AIE (có sẵn trên `feat/aie`) |
 | TCP | `TCP_USER_SERVICE_HOST/PORT`, `TCP_NOTIFICATION_SERVICE_HOST/PORT` | `0.0.0.0` / `3411`, `3413` | Bỏ comment (port theo `docs/service-communication.md`) |
-| TCP | `TCP_JOB_SERVICE_HOST/PORT` | `0.0.0.0` / `3412` | Chỉ thêm nếu FSD chốt job-service là TCP server (`services.md` ghi 3412, `service-communication.md` ghi client only) |
+| TCP | `TCP_JOB_SERVICE_HOST/PORT` | — | **Không thêm** — job-service là TCP client-only (đã chốt; 3412 để dành) |
 | AI service | `AI_SERVICE_MOCK` | `true` | Thêm (DI swap Mock/Real, `ai-integration.md` §7); biến base URL do FSD đặt khi làm S2-AIE-5 |
 | gRPC | `GRPC_*` | — | Giữ cho tới khi S0-FSD-2 xong |
 
@@ -36,3 +36,9 @@ Nguyên tắc: secret chỉ là placeholder; biến dùng trong NestJS phải c�
 | `apps/data-pipeline/.env.example` (feature 005) | `LLM_API_KEY`, `LLM_BASE_URL`, `AI_DB_URL` | placeholder |
 
 Host DB: `db` + port `5432` khi service chạy trong Docker; `localhost` + `5534` khi chạy `pnpm dev` trên máy host.
+
+## Chuyển storage sang AWS S3 (staging/production, feature 014)
+
+Chỉ đổi env, không đổi code (research R6): `STORAGE_TYPE=s3`, `AWS_S3_REGION` thật, `AWS_S3_ACCESS_KEY_ID` /
+`AWS_S3_SECRET_ACCESS_KEY` của IAM user chỉ có quyền trên bucket, `AWS_S3_BUCKET_NAME`, `AWS_S3_URL` theo bucket AWS.
+Bucket tạo bằng cùng lệnh `aws s3 mb` như `storage-init` (bỏ `--endpoint-url`).

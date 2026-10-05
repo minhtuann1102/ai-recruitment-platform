@@ -85,10 +85,10 @@ pipeline chạy trên tên mới, nên đứng sau US1/US2.
 
 ### User Story 4 - Gateway định tuyến tới các service mới (Priority: P2)
 
-Client gọi `/job/*`, `/interview/*`, `/ai/*` qua gateway như với `/auth/*`, `/user/*`: route được bảo vệ cần
+Client gọi `/job/*`, `/interview/*` qua gateway như với `/auth/*`, `/user/*`: route được bảo vệ cần
 token hợp lệ, health check công khai.
 
-**Why this priority**: FSD/AIE cần route để test end-to-end qua gateway, nhưng có thể test trực tiếp service
+**Why this priority**: FSD cần route để test end-to-end qua gateway, nhưng có thể test trực tiếp service
 trong lúc chờ.
 
 **Independent Test**: Sync cấu hình gateway → gọi route bảo vệ không token nhận 401; gọi health công khai
@@ -130,8 +130,8 @@ thêm biến nào.
 - Máy Windows (PowerShell) không có biến `PWD`: đường dẫn volume dạng `${PWD}/...` bị sai → phải chạy được trên
   Windows, macOS, Linux.
 - Port đã bị chiếm (DB 5534, storage 9000/9001, gateway 9080/9180): lỗi phải dễ nhận biết, port cấu hình được qua env.
-- Nhánh `origin/feat/aie` đã sửa compose (thêm ai-service) và gateway (route `/ai/*`) theo tên cũ: đổi tên phải
-  không làm mất thay đổi đó khi merge.
+- Nhánh `origin/feat/aie` đã sửa compose (thêm ai-service) và gateway (route `/ai/*`) theo tên cũ: merge với tên
+  mới không báo xung đột nhưng compose lỗi network — AIE tự sửa khi rebase (ghi trong PR đổi tên).
 - Dependency chỉ dành cho macOS ARM trong root devDependencies (`@oxlint/binding-darwin-arm64`,
   `@turbo/darwin-arm64`) có thể làm hỏng cài đặt trên CI Linux/Windows.
 - PR từ fork không có secret: pipeline vẫn phải chạy.
@@ -156,7 +156,8 @@ thêm biến nào.
 - **FR-006**: Mọi package MUST mang scope `@ai-recruit/*`; mọi import lib nội bộ MUST dùng tên mới; container
   MUST có prefix `ai_recruit_`; network MUST là `ai-recruit-network`.
 - **FR-007**: Cấu hình Kong (compose, config, biến env, lệnh make) MUST bị gỡ bỏ.
-- **FR-008**: Thay đổi đổi tên MUST giữ nguyên các thay đổi hạ tầng của nhánh `origin/feat/aie` khi hợp nhất.
+- **FR-008**: Feature này MUST NOT sửa phần của AIE (ai-service, route `/ai/*`, DDL `knowledge_chunks`); việc AIE
+  cần làm khi rebase lên tên mới MUST được ghi trong PR đổi tên.
 
 **CI (US3)**
 
@@ -167,7 +168,7 @@ thêm biến nào.
 
 **Gateway (US4)**
 
-- **FR-012**: Gateway MUST có route `/job/*`, `/interview/*`, `/ai/*` theo cùng mẫu với route hiện có: yêu cầu
+- **FR-012**: Gateway MUST có route `/job/*`, `/interview/*` (route `/ai/*` thuộc phần AIE, tạm hoãn) theo cùng mẫu với route hiện có: yêu cầu
   token trừ health check, gắn thông tin user cho service phía sau.
 - **FR-013**: Host/port upstream của mỗi service MUST cấu hình qua env.
 
@@ -204,12 +205,12 @@ thêm biến nào.
 - Môi trường local dùng một database server chứa nhiều database (ADR-002 cho phép); tách instance cho
   production thuộc feature 014-staging-deploy-monitoring.
 - Mock ai-service, route `/ai/*`, và DDL bảng `knowledge_chunks` do AIE làm trên `origin/feat/aie` (S0-AIE-1/2).
-  Feature này chỉ đổi tên/hợp nhất các phần đó và đảm bảo `ai_db` + extension vector tồn tại.
+  Các phần đó **tạm hoãn khỏi 001**; feature này chỉ đảm bảo `ai_db` + extension vector tồn tại.
 - Chuyển gRPC → TCP là S0-FSD-2 (FSD). Feature này chỉ thêm biến port TCP vào env mẫu; biến gRPC được gỡ khi
   FSD hoàn tất.
 - job-service và interview-service do FSD scaffold (S0-FSD-3/4); route gateway có thể tồn tại trước khi service chạy.
 - Dữ liệu local là dữ liệu dev, reset volume được chấp nhận.
 - Kafka/RabbitMQ (đang comment trong compose) giữ nguyên trạng, không thuộc phạm vi.
 - Pipeline chưa build/push image Docker; việc đó thuộc feature 014.
-- Nhánh `develop` chưa có trên origin (TODO(DEVELOP_BRANCH) trong constitution); pipeline cấu hình cho cả `main`
-  và `develop`.
+- GitHub Flow: PR vào `main`, không có `develop`; pipeline chạy trên PR và push vào `main`.
+- Object storage local là MinIO (image Chainguard) vì dễ chuyển sang AWS S3 nhất; chuyển chỉ đổi env (research R6).

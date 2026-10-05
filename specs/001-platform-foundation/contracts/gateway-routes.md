@@ -10,7 +10,7 @@ Pattern: copy service `user-service` (xem research R7).
 | job-service | `/job/*` | `APISIX_JOB_SERVICE_HOST` / 3302 | `/job/api`, `/job/swagger*` | `/job/*` | **mới** |
 | notification-service | `/notification/*` | `APISIX_NOTIFICATION_SERVICE_HOST` / 3303 | có sẵn | có sẵn | giữ nguyên |
 | interview-service | `/interview/*` | `APISIX_INTERVIEW_SERVICE_HOST` / 3304 | `/interview/api`, `/interview/swagger*` | `/interview/*` | **mới** |
-| ai-service | `/ai/*` | `APISIX_AI_SERVICE_HOST` / 8000 | `/ai/api/health` | `/ai/*` (GET, POST) | từ `feat/aie` |
+| ai-service | `/ai/*` | `APISIX_AI_SERVICE_HOST` / 8000 | `/ai/api/health` | `/ai/*` (GET, POST) | **hoãn** — phần AIE |
 
 ## Hành vi bắt buộc
 

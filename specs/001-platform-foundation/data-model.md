@@ -20,7 +20,7 @@ Validation: init script idempotent; `make db-ensure` cho volume cũ.
 
 | Bucket | Mục đích | Quyền | Tạo bởi |
 |---|---|---|---|
-| `ai-recruit-files` | CV (S2-FSD-5), avatar/logo (S1-FSD-5) | private, truy cập qua service | `minio-init` |
+| `ai-recruit-files` | CV (S2-FSD-5), avatar/logo (S1-FSD-5) | private, truy cập qua service | `storage-init` (aws-cli) |
 
 ## Env Variables / Gateway Routes / CI Checks
 
