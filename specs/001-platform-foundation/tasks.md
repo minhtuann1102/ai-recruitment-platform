@@ -26,9 +26,9 @@ team (research R1).
 
 **Purpose**: phối hợp và kiểm chứng giả định trước khi sửa file dùng chung
 
-- [X] T001 Hỏi AIE: `origin/feat/aie` merge được trong ≤ 1 ngày không? Báo FSD lịch merge PR-1 → chốt thứ tự merge (research R1)
+- [X] T001 (quyết định: đổi tên merge trước; báo FSD/AIE: **chưa**) Hỏi AIE: `origin/feat/aie` merge được trong ≤ 1 ngày không? Báo FSD lịch merge PR-1 → chốt thứ tự merge (research R1)
 - [X] T002 Tạo branch `chore/rename-project-scope` từ `main`
-- [X] T003 [P] Kiểm tra `pnpm install` trên Windows và Linux (container `node:22`) với root devDependencies hiện tại; ghi kết quả vào `specs/001-platform-foundation/research.md` R8
+- [X] T003 [P] (Windows OK; Linux → T031) Kiểm tra `pnpm install` trên Windows và Linux (container `node:22`) với root devDependencies hiện tại; ghi kết quả vào `specs/001-platform-foundation/research.md` R8
 
 ---
 
@@ -57,8 +57,8 @@ team (research R1).
 - [X] T011 [US2] Script thay import `@app/` → `@ai-recruit/` trong `apps/*/src`, `apps/*/test`, `libs/*/src` (~62 file); chỉ thay chuỗi import, không đổi logic
 - [X] T012 [US2] Đổi container `nest_turbo_*` → `ai_recruit_*` và network → `ai-recruit-network` trong `docker-compose.yml` (gồm block `ai-service` nếu `feat/aie` đã merge)
 - [X] T013 [P] [US2] Xóa `docker-compose-kong.yml`, `config/kong/`, `.docker/compose/kong/`; gỡ target `deckSync` trong `Makefile`; gỡ `KONG_*`, `GW_HOST` trong `.env.example`
-- [X] T014 [US2] `pnpm install` (sinh lại `pnpm-lock.yaml`) → `pnpm build`, `pnpm check-types`, `pnpm test` đều xanh
-- [X] T015 [US2] Chạy quickstart §5; mở PR-1 `[root] chore: rename project scope to @ai-recruit`; sau merge báo FSD/AIE rebase
+- [X] T014 [US2] (build/check-types/lint xanh; test đỏ như baseline → T031) `pnpm install` (sinh lại `pnpm-lock.yaml`) → `pnpm build`, `pnpm check-types`, `pnpm test` đều xanh
+- [ ] T015 [US2] (PR #2 đã mở; merge + báo rebase: chưa) Chạy quickstart §5; mở PR-1 `[root] chore: rename project scope to @ai-recruit`; sau merge báo FSD/AIE rebase
 
 **Checkpoint**: PR-1 merged — team rebase lên tên mới
 
