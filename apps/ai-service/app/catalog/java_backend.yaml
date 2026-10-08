@@ -1,0 +1,87 @@
+track: java_backend
+title: Java Backend Developer
+id_prefix: java
+topics:
+  - id: java.core.collections-hashmap
+    title: Java Collections và HashMap
+    levels: [fresher, junior, middle]
+    category: Backend
+    key_concepts: [hashCode và equals, collision và treeification, resize và load factor, ConcurrentHashMap, ArrayList vs LinkedList]
+  - id: java.core.oop-solid
+    title: OOP và SOLID trong Java
+    levels: [fresher, junior]
+    category: Backend
+    key_concepts: [encapsulation và polymorphism, abstract class vs interface, composition over inheritance, SOLID, immutability]
+  - id: java.core.concurrency
+    title: Đa luồng và concurrency
+    levels: [junior, middle, senior]
+    category: Backend
+    key_concepts: [thread pool và ExecutorService, synchronized vs Lock, volatile và happens-before, deadlock, CompletableFuture]
+  - id: java.core.jvm-memory-gc
+    title: JVM, bộ nhớ và Garbage Collection
+    levels: [middle, senior]
+    category: Backend
+    key_concepts: [heap và stack, generational GC, G1 và ZGC, memory leak, tuning và đọc GC log]
+  - id: java.spring.ioc-di
+    title: Spring IoC và Dependency Injection
+    levels: [fresher, junior, middle]
+    category: Backend
+    key_concepts: [IoC container, bean scope, constructor vs field injection, bean lifecycle, circular dependency]
+  - id: java.spring.transaction
+    title: Spring @Transactional
+    levels: [junior, middle, senior]
+    category: Backend
+    key_concepts: [propagation, isolation level, rollback rules, self-invocation proxy, readOnly]
+  - id: java.spring.boot-autoconfig
+    title: Spring Boot auto-configuration và profile
+    levels: [junior, middle]
+    category: Backend
+    key_concepts: [starter, auto-configuration và conditional, profile và externalized config, actuator, logging]
+  - id: java.data.jpa-hibernate
+    title: JPA và Hibernate
+    levels: [junior, middle, senior]
+    category: Backend
+    key_concepts: [entity lifecycle, lazy vs eager loading, N+1 query, cascade và orphanRemoval, first-level cache]
+  - id: java.data.sql-index-tuning
+    title: SQL, index và tối ưu truy vấn
+    levels: [fresher, junior, middle, senior]
+    category: Database
+    key_concepts: [B-tree index, composite index, EXPLAIN plan, join strategy, pagination hiệu quả]
+  - id: java.web.rest-api-design
+    title: Thiết kế REST API với Spring MVC
+    levels: [fresher, junior, middle]
+    category: Backend
+    key_concepts: [HTTP method và status code, validation, global exception handler, DTO vs entity, versioning]
+  - id: java.security.spring-security-jwt
+    title: Spring Security, JWT và OAuth2
+    levels: [junior, middle, senior]
+    category: Backend
+    key_concepts: [filter chain, authentication vs authorization, JWT và refresh token, CORS và CSRF, method security]
+  - id: java.testing.junit-mockito
+    title: Unit test với JUnit và Mockito
+    levels: [fresher, junior, middle]
+    category: Backend
+    key_concepts: [mock vs stub vs spy, test slice của Spring, parameterized test, test pyramid, Testcontainers]
+  - id: java.arch.messaging-kafka
+    title: Messaging với Kafka và RabbitMQ
+    levels: [middle, senior]
+    category: System Design
+    key_concepts: [topic và partition, consumer group, delivery semantics, idempotent consumer, dead letter queue]
+  - id: java.arch.microservices-resilience
+    title: Microservices và khả năng chịu lỗi
+    levels: [middle, senior]
+    category: System Design
+    key_concepts: [circuit breaker, retry và timeout, saga, outbox pattern, idempotency key]
+scenarios:
+  - id: scn.java.order-api-crud
+    title: Thiết kế API quản lý đơn hàng với Spring Boot
+    levels: [fresher, junior]
+  - id: scn.java.flash-sale-inventory
+    title: Xử lý tồn kho khi flash sale nhiều request đồng thời
+    levels: [middle, senior]
+  - id: scn.java.payment-idempotency
+    title: Thiết kế API thanh toán an toàn khi client retry
+    levels: [middle, senior]
+  - id: scn.java.slow-query-incident
+    title: Điều tra API chậm do truy vấn trên production
+    levels: [junior, middle]

@@ -6,3 +6,4 @@ pgvector==0.4.2
 sqlalchemy==2.0.54
 langchain-core==0.3.86
 python-dotenv==1.2.1
+pyyaml==6.0.3

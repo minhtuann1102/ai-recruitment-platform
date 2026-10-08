@@ -380,7 +380,6 @@ APISIX route thêm:
 | Loại | Nguồn | Volume mục tiêu | Tag source_type |
 |---|---|---|---|
 | Interview Q&A | Curated Q&A phỏng vấn CNTT (Backend, Frontend, System Design, DB, DevOps) | 200+ cặp | `interview_qa` |
-| Job Descriptions | Crawl từ topcv.vn, itviec.com, linkedin — extract skills/requirements | 500+ JD | `job_description` |
 | Textbook/Tutorial | Node.js docs, React docs, PostgreSQL docs, CS fundamentals, System Design | 5000+ chunks | `textbook` |
 
 ### Schema knowledge_chunks (ai_db)

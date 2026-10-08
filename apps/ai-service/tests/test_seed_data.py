@@ -28,15 +28,6 @@ def test_qa_seed_schema_and_uniqueness():
     assert {i["difficulty"] for i in items} == DIFFICULTIES
 
 
-def test_jd_seed_schema():
-    items = load("jd_seed.json")
-    assert len(items) >= 10
-    for i in items:
-        assert i["title"] and i["skills"] and i["requirements"] and i["description"]
-        assert i["synthetic"] is True
-        assert i["salary_range"] is None  # khong bia muc luong
-
-
 @pytest.mark.parametrize("name", ["tech_notes_seed.json"])
 def test_tech_notes_schema(name):
     items = load(name)

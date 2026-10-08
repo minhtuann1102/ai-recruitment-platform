@@ -209,11 +209,14 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
         category        VARCHAR(30),
         difficulty      VARCHAR(10),
         language        VARCHAR(5),
+        topic_id        VARCHAR(80),
         metadata        JSONB NOT NULL DEFAULT '{}',
         created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
     );
     CREATE INDEX IF NOT EXISTS knowledge_chunks_filter_idx
         ON knowledge_chunks (source_type, category);
+    CREATE INDEX IF NOT EXISTS knowledge_chunks_topic_idx
+        ON knowledge_chunks (source_type, topic_id);
     -- Chua tao index vector (exact scan). Xem architecture/rag-design.md muc 3.
 EOSQL
 ```

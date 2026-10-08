@@ -5,7 +5,6 @@ Dữ liệu mock cho RAG trong giai đoạn đầu, **do AIE tự soạn, `synth
 | File | source_type | Số lượng | Nguồn |
 |---|---|---|---|
 | `qa_seed.json` | `interview_qa` | 50 cặp (5 category, 3 độ khó) | Tự soạn từ kiến thức chung, tiếng Việt xen thuật ngữ Anh. **Cần người kiểm tra độ chính xác của đáp án** |
-| `jd_seed.json` | `job_description` | 12 hồ sơ vị trí | Tự soạn. Kỹ năng tham khảo tổng hợp thị trường từ [ITviec Q3-2025](https://itviec.com/blog/vietnam-it-job-market-q3-2025-shifting-skill-requirements/). **Không sao chép JD thật** |
 | `tech_notes_seed.json` | `textbook` | 19 ghi chú công nghệ | Tự soạn (`license: own-work`) |
 
 Quy ước:
