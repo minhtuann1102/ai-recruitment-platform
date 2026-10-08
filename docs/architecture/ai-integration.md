@@ -50,7 +50,7 @@ export interface AiInterviewClient {
 
 `MockAiInterviewClient` (NestJS) giữ cho dev: `start` / `nextTurn` phát câu hỏi từ `question_bank` thành một event `token` rồi `done`; `finalize` trả report điểm cố định. Mock FastAPI (`apps/ai-service/app/`) dùng để thử gateway routing.
 
-> **Trạng thái:** mock FastAPI hiện cài đặt contract cũ của ADR-007 (không SSE, không `cv/parse`, có `answer_signal`). Cần cập nhật sang contract ở docs/ai-service/06 trước khi FSD tích hợp.
+> **Trạng thái:** mock FastAPI (`apps/ai-service/app/`) đã cài đặt contract ở docs/ai-service/06: `cv/parse`, `start` và `next-turn` qua SSE, `finalize` trả report, `health`. Planner, Evaluator, Interviewer, Reporter và CV Parser trong mock dùng **quy tắc, không dùng LLM** (hình dạng request/response là thật, nội dung câu hỏi và điểm chỉ để tích hợp). Đặt `MOCK_STREAM_DELAY_MS` để mô phỏng độ trễ giữa các token khi thử streaming qua gateway.
 
 ## 5. Topic catalog và dữ liệu
 
