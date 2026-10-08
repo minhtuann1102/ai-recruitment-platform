@@ -134,15 +134,14 @@ Candidate bat dau phong van luyen tap
 │                                          │
 │ 4. Luu candidate_answer vao turn         │
 │ 5. Goi AI service (REST):               │
-│    POST /api/next-turn                   │
-│    Body: { question, answer, history,    │
-│            context }                     │
+│    POST /api/next-turn (SSE)             │
+│    Body: { plan, state, question,        │
+│            answer, topic_turns }         │
 │                                          │
 │ 6. Nhan response tu AI:                  │
-│    { next_question, agent_decision,      │
-│      answer_signal, reasoning }          │
+│    { evaluation, question, turn, state } │
 │                                          │
-│ 7. Luu decision/signal vao turn          │
+│ 7. Luu evaluation + state vao turn       │
 │ 8. Tao turn moi voi next_question        │
 │ 9. Tra ve client (khong co diem)         │
 │                                          │

@@ -776,6 +776,8 @@ interface ExperienceLevelsResponse {
 
 ### 3.4 interview-service
 
+> **Cập nhật (ADR-008):** contract public của interview-service (tạo phiên, gắn CV, `start` / `answer` qua SSE, `end`, `report`, mã lỗi, TCP `application.getCvFile`) được mô tả đầy đủ ở [docs/ai-service/06-api-contract.md](../ai-service/06-api-contract.md) §7.2–7.3 và **thay thế** các endpoint dưới đây khi FSD duyệt. Nội dung bên dưới là bản trước khi đổi, giữ để so sánh.
+
 Base URL: `/interview/api`
 
 #### POST /sessions (Candidate)

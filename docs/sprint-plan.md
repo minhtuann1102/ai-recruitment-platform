@@ -245,7 +245,7 @@ Sprint 5  07/12 ─ 21/12   Polish, Testing & Báo cáo
 |---|---|---|---|---|
 | S5-1 | Integration tests | E2E: auth → job → apply → interview với real AI | Team | Bắt buộc |
 | S5-2 | Bug fixes | Fix tất cả bugs từ Sprint 4 | Team | Bắt buộc |
-| S5-3 | Performance | DB indexes, query optimization. API < 500ms. AI next-turn < 3s | FSD + AIE | Bắt buộc |
+| S5-3 | Performance | DB indexes, query optimization. API < 500ms. AI next-turn TTFT P95 ≤ 6s | FSD + AIE | Bắt buộc |
 | S5-4 | Security review | OWASP Top 10, API keys không expose, auth bypass | FSD | Bắt buộc |
 | S5-5 | Báo cáo tốt nghiệp | Kiến trúc, AI integration, RAG pipeline, kết quả, kết luận | Team | Bắt buộc |
 | S5-6 | Slides thuyết trình | Demo flow rõ, nhấn mạnh AI + RAG feature | Team | Bắt buộc |

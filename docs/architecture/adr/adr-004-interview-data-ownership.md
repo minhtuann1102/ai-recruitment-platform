@@ -1,7 +1,7 @@
 # ADR-004: Dữ liệu phỏng vấn thuộc interview-service
 
 **Ngày:** 2026-09-28  
-**Trạng thái:** Accepted (response AI đã đổi, xem [ADR-007](adr-007-multi-agent-interview.md))
+**Trạng thái:** Accepted (nội dung request/response AI đã đổi, xem [ADR-008](adr-008-evaluator-per-turn-orchestrator.md))
 
 ## Bối cảnh
 

@@ -167,7 +167,7 @@
 
 **Giao tiếp:**
 - HTTP (client → APISIX → interview)
-- REST client → ai-service (next-turn trong phiên, finalize khi kết thúc)
+- REST client → ai-service (parse CV, start, next-turn trong phiên, finalize khi kết thúc; chi tiết ở docs/ai-service/06-api-contract.md)
 
 **API chính:**
 
@@ -232,9 +232,10 @@
 
 | Method | Endpoint | Mô tả |
 |---|---|---|
-| POST | /api/start | Sinh câu hỏi đầu |
-| POST | /api/next-turn | Planner + Interviewer: câu hỏi tiếp, decision, answer_signal |
-| POST | /api/finalize | Evaluator: chấm từng câu + nhận xét + tổng kết (cuối phiên) |
+| POST | /api/cv/parse | CV Parser: trích xuất `cv_profile` từ CV |
+| POST | /api/start | Planner → Interviewer: kế hoạch + câu hỏi đầu (SSE) |
+| POST | /api/next-turn | Evaluator → policy → Interviewer: chấm lượt vừa rồi + câu hỏi tiếp (SSE) |
+| POST | /api/finalize | Code tính điểm → Reporter: báo cáo cuối buổi |
 | GET | /api/health | Health check |
 
 Xem chi tiết contract tại [ai-integration.md](ai-integration.md).

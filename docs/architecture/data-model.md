@@ -198,9 +198,10 @@ erDiagram
         text question_text
         varchar question_source "bank | ai"
         text candidate_answer
-        jsonb scores "nullable, ghi luc finalize: {technical_accuracy, relevance, completeness, extensibility}"
-        text comment "nullable, nhan xet cua Evaluator, ghi luc finalize"
-        varchar answer_signal "weak | ok | strong, tin hieu so bo noi bo"
+        jsonb scores "ghi moi luot sau khi Evaluator cham: {technical_accuracy, relevance, completeness, extensibility}"
+        jsonb evaluation "DE XUAT: ket qua Evaluator day du (y co/thieu/sai, trich dan), cho FSD xac nhan"
+        varchar action "DE XUAT: ask_main | follow_up | hint | clarify | wrap_up | end"
+        varchar topic_id "DE XUAT: id trong topic catalog"
         varchar agent_decision "deepen | switch_topic | keep_difficulty"
         text agent_reasoning
         text next_question_hint "goi y cau hoi tiep (tu AI)"
@@ -223,7 +224,7 @@ erDiagram
 ```
 
 **Ghi chú:**
-- `interview_turns.scores` và `comment` **nullable**, được ghi một lần khi finalize (Evaluator chấm cuối phiên). `answer_signal` ghi mỗi lượt, chỉ dùng nội bộ. `scores` là JSONB chứa điểm theo 4 tiêu chí:
+- `interview_turns.scores` được ghi **mỗi lượt** sau khi Evaluator chấm (xem [ADR-008](adr/adr-008-evaluator-per-turn-orchestrator.md)); điểm **không** trả về cho ứng viên giữa phiên. Các cột `evaluation`, `action`, `topic_id` (và `phase`, `cv_application_id`... ở docs/ai-service/07) là **đề xuất, chờ FSD xác nhận migration**. `scores` là JSONB chứa điểm theo 4 tiêu chí:
   - `technical_accuracy` (0-10): độ chính xác kỹ thuật
   - `relevance` (0-10): mức độ liên quan đến câu hỏi
   - `completeness` (0-10): độ đầy đủ câu trả lời
