@@ -358,6 +358,57 @@ services:
         read: 6
         send: 6
       type: roundrobin
+  - name: ai-service
+    plugins:
+      jwt-auth:
+        _meta:
+          disable: false
+        store_in_ctx: true
+    routes:
+      - methods:
+          - GET
+          - POST
+        name: ai-route
+        plugins:
+          proxy-rewrite:
+            regex_uri:
+              - ^/ai/(.*)
+              - /$1
+        priority: 0
+        uris:
+          - /ai/*
+      - methods:
+          - GET
+        name: ai-route-public
+        plugins:
+          jwt-auth:
+            _meta:
+              disable: true
+          proxy-rewrite:
+            regex_uri:
+              - ^/ai/(.*)
+              - /$1
+        priority: 1
+        uris:
+          - /ai/api/health
+    upstream:
+      keepalive_pool:
+        idle_timeout: 60
+        requests: 1000
+        size: 320
+      name: ai-upstream
+      nodes:
+        - host: ${APISIX_AI_SERVICE_HOST}
+          port: ${APISIX_AI_SERVICE_PORT}
+          priority: 0
+          weight: 1
+      pass_host: pass
+      scheme: http
+      timeout:
+        connect: 6
+        read: 30
+        send: 30
+      type: roundrobin
 ssls: [ ]
 
 

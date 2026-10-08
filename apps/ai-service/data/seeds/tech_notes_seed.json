@@ -1,0 +1,238 @@
+[
+  {
+    "content": "Node.js > Event Loop\n\nNode.js chạy JavaScript trên một thread chính với event loop do libuv cung cấp. Các thao tác I/O bất đồng bộ được giao cho hệ điều hành hoặc thread pool, callback được đưa lại event loop khi hoàn tất. Các pha chính gồm timers, pending callbacks, poll, check (setImmediate) và close; microtask như Promise chạy giữa các pha. Tác vụ CPU nặng chạy trên thread chính sẽ chặn toàn bộ ứng dụng.",
+    "heading_path": "Node.js > Event Loop",
+    "category": "Backend",
+    "tags": [
+      "Node.js"
+    ],
+    "language": "vi",
+    "synthetic": true,
+    "source": "Ghi chú tự soạn, cần người kiểm tra độ chính xác",
+    "license": "own-work"
+  },
+  {
+    "content": "NestJS > Modules và Dependency Injection\n\nNestJS tổ chức ứng dụng thành các module, mỗi module khai báo controller, provider và các thành phần export. Container DI của Nest tạo và inject provider qua constructor, mặc định ở phạm vi singleton. Cách này giúp tách lớp xử lý nghiệp vụ khỏi controller và dễ thay thế cài đặt bằng mock khi kiểm thử.",
+    "heading_path": "NestJS > Modules và Dependency Injection",
+    "category": "Backend",
+    "tags": [
+      "NestJS",
+      "TypeScript"
+    ],
+    "language": "vi",
+    "synthetic": true,
+    "source": "Ghi chú tự soạn, cần người kiểm tra độ chính xác",
+    "license": "own-work"
+  },
+  {
+    "content": "REST > Thiết kế API\n\nAPI REST mô hình hóa tài nguyên bằng danh từ trong URL, thao tác bằng HTTP method và trả status code phù hợp. Nên dùng phân trang, lọc và sắp xếp qua query string, trả lỗi theo một định dạng thống nhất, và versioning để tránh phá vỡ client cũ. Idempotency của PUT và DELETE cho phép client retry an toàn.",
+    "heading_path": "REST > Thiết kế API",
+    "category": "Backend",
+    "tags": [
+      "REST",
+      "HTTP"
+    ],
+    "language": "vi",
+    "synthetic": true,
+    "source": "Ghi chú tự soạn, cần người kiểm tra độ chính xác",
+    "license": "own-work"
+  },
+  {
+    "content": "JWT và OAuth 2.0\n\nJWT là token tự chứa gồm header, payload và chữ ký, cho phép server xác thực mà không lưu session. OAuth 2.0 là khung ủy quyền cho phép ứng dụng truy cập tài nguyên thay mặt người dùng thông qua access token và refresh token. Access token nên sống ngắn, refresh token cần được lưu và xoay vòng an toàn.",
+    "heading_path": "JWT và OAuth 2.0",
+    "category": "Backend",
+    "tags": [
+      "JWT",
+      "OAuth2"
+    ],
+    "language": "vi",
+    "synthetic": true,
+    "source": "Ghi chú tự soạn, cần người kiểm tra độ chính xác",
+    "license": "own-work"
+  },
+  {
+    "content": "PostgreSQL > Index\n\nPostgreSQL hỗ trợ nhiều loại index: B-tree mặc định cho so sánh và sắp xếp, Hash cho so sánh bằng, GIN cho mảng, JSONB và full-text, GiST cho dữ liệu hình học và tìm kiếm tương tự. Index nhiều cột chỉ hiệu quả với tiền tố bên trái. Dùng EXPLAIN ANALYZE để kiểm tra planner có dùng index hay không và CREATE INDEX CONCURRENTLY để tạo không khóa ghi.",
+    "heading_path": "PostgreSQL > Index",
+    "category": "Database",
+    "tags": [
+      "PostgreSQL"
+    ],
+    "language": "vi",
+    "synthetic": true,
+    "source": "Ghi chú tự soạn, cần người kiểm tra độ chính xác",
+    "license": "own-work"
+  },
+  {
+    "content": "PostgreSQL > MVCC và Transaction\n\nPostgreSQL dùng MVCC: mỗi giao dịch thấy một ảnh chụp (snapshot) dữ liệu nên đọc không chặn ghi. Cập nhật tạo phiên bản dòng mới, phiên bản cũ được dọn bởi VACUUM. Mức isolation mặc định là Read Committed; Serializable dùng SSI và có thể làm giao dịch thất bại với lỗi serialization cần retry.",
+    "heading_path": "PostgreSQL > MVCC và Transaction",
+    "category": "Database",
+    "tags": [
+      "PostgreSQL"
+    ],
+    "language": "vi",
+    "synthetic": true,
+    "source": "Ghi chú tự soạn, cần người kiểm tra độ chính xác",
+    "license": "own-work"
+  },
+  {
+    "content": "Redis > Cấu trúc dữ liệu và lưu trữ\n\nRedis là kho dữ liệu trong bộ nhớ hỗ trợ string, hash, list, set, sorted set và stream. Thường dùng làm cache, bộ đếm rate limit, hàng đợi nhẹ và khóa phân tán. Độ bền dữ liệu cấu hình qua RDB (snapshot định kỳ) và AOF (ghi log từng lệnh). Cần đặt TTL và chính sách eviction để không tràn bộ nhớ.",
+    "heading_path": "Redis > Cấu trúc dữ liệu và lưu trữ",
+    "category": "Database",
+    "tags": [
+      "Redis"
+    ],
+    "language": "vi",
+    "synthetic": true,
+    "source": "Ghi chú tự soạn, cần người kiểm tra độ chính xác",
+    "license": "own-work"
+  },
+  {
+    "content": "pgvector > Tìm kiếm vector\n\npgvector thêm kiểu dữ liệu vector vào PostgreSQL và các toán tử khoảng cách: cosine, L2, inner product. Có thể quét chính xác hoặc dùng index gần đúng HNSW và IVFFlat. Với bảng nhỏ quét chính xác đã nhanh; HNSW cho độ chính xác cao và không cần huấn luyện, IVFFlat cần dữ liệu có sẵn để chia cụm.",
+    "heading_path": "pgvector > Tìm kiếm vector",
+    "category": "Database",
+    "tags": [
+      "pgvector",
+      "PostgreSQL"
+    ],
+    "language": "vi",
+    "synthetic": true,
+    "source": "Ghi chú tự soạn, cần người kiểm tra độ chính xác",
+    "license": "own-work"
+  },
+  {
+    "content": "React > Hooks\n\nHooks cho phép function component dùng state và vòng đời. useState lưu state cục bộ, useEffect chạy side effect sau render, useMemo và useCallback ghi nhớ giá trị và hàm, useRef giữ giá trị không kích hoạt render. Quy tắc: chỉ gọi hook ở cấp cao nhất của component và khai báo đầy đủ dependency để tránh stale closure.",
+    "heading_path": "React > Hooks",
+    "category": "Frontend",
+    "tags": [
+      "React"
+    ],
+    "language": "vi",
+    "synthetic": true,
+    "source": "Ghi chú tự soạn, cần người kiểm tra độ chính xác",
+    "license": "own-work"
+  },
+  {
+    "content": "React > Reconciliation và render\n\nKhi state hoặc props đổi, React render lại component và so sánh cây element mới với cây cũ để cập nhật DOM tối thiểu. Thuộc tính key giúp React nhận diện phần tử trong danh sách; dùng index làm key dễ gây lỗi khi danh sách đổi thứ tự. React.memo tránh render lại khi props không đổi.",
+    "heading_path": "React > Reconciliation và render",
+    "category": "Frontend",
+    "tags": [
+      "React"
+    ],
+    "language": "vi",
+    "synthetic": true,
+    "source": "Ghi chú tự soạn, cần người kiểm tra độ chính xác",
+    "license": "own-work"
+  },
+  {
+    "content": "Next.js > Chế độ render\n\nNext.js hỗ trợ render phía server (SSR), tạo trang tĩnh lúc build (SSG), làm mới tĩnh theo chu kỳ (ISR) và render phía client. App Router dùng React Server Components để giảm JavaScript gửi tới trình duyệt. Chọn chế độ theo độ mới của dữ liệu, nhu cầu SEO và chi phí server.",
+    "heading_path": "Next.js > Chế độ render",
+    "category": "Frontend",
+    "tags": [
+      "Next.js",
+      "React"
+    ],
+    "language": "vi",
+    "synthetic": true,
+    "source": "Ghi chú tự soạn, cần người kiểm tra độ chính xác",
+    "license": "own-work"
+  },
+  {
+    "content": "TypeScript > Hệ thống kiểu\n\nTypeScript thêm kiểu tĩnh cho JavaScript và kiểm tra lúc biên dịch. Các tính năng chính gồm interface, union và intersection type, generics, type guard và các utility type như Partial, Pick, Omit. Kiểu chỉ tồn tại lúc biên dịch và bị xóa khi chạy, nên dữ liệu từ ngoài vẫn cần được kiểm tra lúc chạy.",
+    "heading_path": "TypeScript > Hệ thống kiểu",
+    "category": "Frontend",
+    "tags": [
+      "TypeScript"
+    ],
+    "language": "vi",
+    "synthetic": true,
+    "source": "Ghi chú tự soạn, cần người kiểm tra độ chính xác",
+    "license": "own-work"
+  },
+  {
+    "content": "Docker > Image, layer và build\n\nImage Docker gồm các layer chỉ đọc, mỗi lệnh trong Dockerfile tạo một layer và được cache nếu đầu vào không đổi. Đặt các bước ít thay đổi (cài dependency) trước code ứng dụng để tận dụng cache. Multi-stage build tách môi trường build khỏi image chạy để giảm kích thước và bề mặt tấn công.",
+    "heading_path": "Docker > Image, layer và build",
+    "category": "DevOps",
+    "tags": [
+      "Docker"
+    ],
+    "language": "vi",
+    "synthetic": true,
+    "source": "Ghi chú tự soạn, cần người kiểm tra độ chính xác",
+    "license": "own-work"
+  },
+  {
+    "content": "Kubernetes > Workload và Service\n\nPod là đơn vị chạy container; Deployment quản lý số bản sao và rolling update; Service cấp địa chỉ ổn định và cân bằng tải. ConfigMap và Secret tách cấu hình khỏi image. Liveness probe quyết định restart, readiness probe quyết định có nhận traffic hay không; HorizontalPodAutoscaler thay đổi số bản sao theo tải.",
+    "heading_path": "Kubernetes > Workload và Service",
+    "category": "DevOps",
+    "tags": [
+      "Kubernetes"
+    ],
+    "language": "vi",
+    "synthetic": true,
+    "source": "Ghi chú tự soạn, cần người kiểm tra độ chính xác",
+    "license": "own-work"
+  },
+  {
+    "content": "CI/CD > Pipeline\n\nPipeline CI/CD tự động hóa lint, kiểm thử, build, quét bảo mật và triển khai mỗi khi có thay đổi. Giữ pipeline nhanh bằng cache dependency và chạy song song các job độc lập. Không để secret trong mã nguồn mà dùng kho secret của nền tảng CI, và chặn merge khi pipeline thất bại.",
+    "heading_path": "CI/CD > Pipeline",
+    "category": "DevOps",
+    "tags": [
+      "CI/CD",
+      "GitHub Actions"
+    ],
+    "language": "vi",
+    "synthetic": true,
+    "source": "Ghi chú tự soạn, cần người kiểm tra độ chính xác",
+    "license": "own-work"
+  },
+  {
+    "content": "Hệ thống phân tán > CAP và nhất quán\n\nKhi có phân vùng mạng, hệ phân tán phải chọn giữa nhất quán (CP) và sẵn sàng (AP). Eventual consistency chấp nhận dữ liệu tạm thời lệch để đổi lấy độ sẵn sàng và độ trễ thấp. Các kỹ thuật thường dùng: quorum read/write, idempotent consumer, saga cho giao dịch xuyên dịch vụ.",
+    "heading_path": "Hệ thống phân tán > CAP và nhất quán",
+    "category": "System Design",
+    "tags": [
+      "Distributed Systems"
+    ],
+    "language": "vi",
+    "synthetic": true,
+    "source": "Ghi chú tự soạn, cần người kiểm tra độ chính xác",
+    "license": "own-work"
+  },
+  {
+    "content": "Message Queue > Kafka và RabbitMQ\n\nRabbitMQ là message broker hướng hàng đợi với định tuyến linh hoạt, phù hợp phân phối tác vụ. Kafka là nền tảng log phân tán lưu sự kiện bền, cho nhiều consumer group đọc lại theo offset, phù hợp luồng sự kiện khối lượng lớn. Cả hai thường cho ngữ nghĩa giao ít nhất một lần nên consumer cần idempotent.",
+    "heading_path": "Message Queue > Kafka và RabbitMQ",
+    "category": "System Design",
+    "tags": [
+      "Kafka",
+      "RabbitMQ"
+    ],
+    "language": "vi",
+    "synthetic": true,
+    "source": "Ghi chú tự soạn, cần người kiểm tra độ chính xác",
+    "license": "own-work"
+  },
+  {
+    "content": "RAG > Truy xuất tăng cường sinh văn bản\n\nRAG kết hợp truy xuất tài liệu liên quan với mô hình ngôn ngữ để câu trả lời dựa trên dữ liệu thật. Quy trình: chia tài liệu thành chunk, tạo embedding, lưu vào cơ sở dữ liệu vector, khi có câu hỏi thì embed truy vấn, lấy top-k chunk gần nhất và chèn vào prompt. Chất lượng phụ thuộc vào cách chia chunk, chất lượng embedding và việc đo recall của bước truy xuất.",
+    "heading_path": "RAG > Truy xuất tăng cường sinh văn bản",
+    "category": "AI",
+    "tags": [
+      "RAG",
+      "LLM"
+    ],
+    "language": "vi",
+    "synthetic": true,
+    "source": "Ghi chú tự soạn, cần người kiểm tra độ chính xác",
+    "license": "own-work"
+  },
+  {
+    "content": "LLM > Prompt và đầu ra có cấu trúc\n\nPrompt hiệu quả nêu rõ vai trò, nhiệm vụ, ngữ cảnh và định dạng đầu ra. Để nhận kết quả máy đọc được nên yêu cầu JSON theo schema rồi kiểm tra lại bằng validator, và luôn kiểm tra lý do dừng của mô hình vì đầu ra bị cắt do giới hạn token sẽ cho JSON không hợp lệ. Nội dung từ người dùng hoặc tài liệu truy xuất là dữ liệu không tin cậy, cần đặt trong khối riêng để giảm rủi ro prompt injection.",
+    "heading_path": "LLM > Prompt và đầu ra có cấu trúc",
+    "category": "AI",
+    "tags": [
+      "LLM"
+    ],
+    "language": "vi",
+    "synthetic": true,
+    "source": "Ghi chú tự soạn, cần người kiểm tra độ chính xác",
+    "license": "own-work"
+  }
+]

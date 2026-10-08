@@ -177,16 +177,24 @@ Interview-service gọi ai-service qua REST/HTTP (không dùng TCP vì FastAPI k
 export class RealAiInterviewClient implements AiInterviewClient {
   constructor(private readonly httpService: HttpService) {}
 
-  async evaluateAnswer(req: EvaluateAnswerRequest): Promise<EvaluateAnswerResponse> {
+  async nextTurn(req: NextTurnRequest): Promise<NextTurnResponse> {
     const { data } = await firstValueFrom(
-      this.httpService.post(`${this.aiServiceUrl}/api/evaluate`, req),
+      this.httpService.post(`${this.aiServiceUrl}/api/next-turn`, req),
+    );
+    return data;
+  }
+
+  // finalize cham ca phien 1 lan -> cham, can timeout dai hon
+  async finalize(req: FinalizeRequest): Promise<FinalizeResponse> {
+    const { data } = await firstValueFrom(
+      this.httpService.post(`${this.aiServiceUrl}/api/finalize`, req),
     );
     return data;
   }
 }
 ```
 
-Chi tiết OpenAPI contract: [ai-integration.md](architecture/ai-integration.md#4-hop-dong-openapi--ai-service).
+Chi tiết OpenAPI contract: [ai-integration.md](architecture/ai-integration.md#5-hop-dong-rest--ai-service).
 
 ---
 
