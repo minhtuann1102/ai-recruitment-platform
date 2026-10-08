@@ -90,7 +90,7 @@ Sprint 5  07/12 ─ 21/12   Polish, Testing & Báo cáo
 |---|---|---|---|
 | S1-AIE-1 | RAG ingestion pipeline | text → chunk → embed (text-embedding-3-small) → lưu knowledge_chunks (pgvector) | Bắt buộc |
 | S1-AIE-2 | RAG retrieval | query → embed → cosine similarity → top-k chunks relevant | Bắt buộc |
-| S1-AIE-3 | Prompt template evaluation | system prompt + RAG context + question + answer → scores JSON + feedback | Bắt buộc |
+| S1-AIE-3 | Evaluator prompt + rubric + CV Parser | Evaluator chấm band 0–4 theo level kèm trích dẫn, hậu kiểm bằng code; CV Parser + `/api/cv/parse` (xem docs/ai-service roadmap tuần 1–2) | Bắt buộc |
 | S1-AIE-4 | Test GPT-4o-mini end-to-end | Câu hỏi → câu trả lời mẫu → RAG retrieve → GPT-4o-mini → CriteriaScores JSON | Bắt buộc |
 
 ### DE
@@ -131,10 +131,10 @@ Sprint 5  07/12 ─ 21/12   Polish, Testing & Báo cáo
 
 | # | Story | AC | Bắt buộc |
 |---|---|---|---|
-| S2-AIE-1 | Planner agent | Chọn `deepen` / `switch_topic` / `keep_difficulty` dựa trên `answer_signal` + history (policy code + LLM khi mơ hồ) | Bắt buộc |
-| S2-AIE-2 | Interviewer agent | GPT-4o-mini sinh câu hỏi tiếp + `answer_signal` từ decision + history + RAG context | Bắt buộc |
+| S2-AIE-1 | Planner + policy code | Planner chọn topic từ catalog một lần đầu buổi; policy viết bằng code chọn action mỗi lượt từ kết quả Evaluator | Bắt buộc |
+| S2-AIE-2 | Interviewer agent | Diễn đạt đúng một câu hỏi theo action đã chọn, stream SSE | Bắt buộc |
 | S2-AIE-3 | POST /api/start — real | RAG query → GPT-4o-mini sinh câu hỏi đầu tiên | Bắt buộc |
-| S2-AIE-4 | POST /api/next-turn — real | Planner → Interviewer → next_question + decision + answer_signal | Bắt buộc |
+| S2-AIE-4 | POST /api/next-turn — real | Evaluator → policy → Interviewer, stream SSE, trả evaluation + state mới | Bắt buộc |
 | S2-AIE-5 | RealAiInterviewClient (NestJS) | HTTP client gọi ai-service, map snake_case → camelCase, retry + timeout | Bắt buộc |
 
 ### DE
@@ -172,10 +172,10 @@ Sprint 5  07/12 ─ 21/12   Polish, Testing & Báo cáo
 
 | # | Story | AC | Bắt buộc |
 |---|---|---|---|
-| S3-AIE-1 | Full agentic E2E | Session 5 lượt: startSession → 5x nextTurn → finalize (Evaluator chấm từng câu + nhận xét) → interview_results | Bắt buộc |
+| S3-AIE-1 | Full agentic E2E + Reporter | Phiên đầy đủ: start → ~15 lượt nextTurn → finalize (code tính điểm, Reporter viết nhận xét) → interview_results | Bắt buộc |
 | S3-AIE-2 | Context window management | Trim history để giữ trong token limit. Giữ N turns gần nhất + summary | Bắt buộc |
 | S3-AIE-3 | Error handling + fallback | OpenAI timeout → fallback mock response. Retry 3x exponential backoff | Bắt buộc |
-| S3-AIE-4 | Evaluator calibration + so sánh kiến trúc | Prompts Evaluator cho scores consistent. Test 20+ câu trả lời mẫu; so sánh 1-call vs 1-agent vs 3-agent (điểm, latency, cost) | Bắt buộc |
+| S3-AIE-4 | Evaluator calibration | Prompts Evaluator cho scores consistent. Golden set 40–70 mẫu, ±1 band ≥ 80%, độ lệch khoan dung trong [−0.3, +0.3] | Bắt buộc |
 | S3-AIE-5 | Cost tracking | Log token usage per session. Alert nếu session > $0.10 | Stretch |
 
 ### DE
@@ -219,8 +219,8 @@ Sprint 5  07/12 ─ 21/12   Polish, Testing & Báo cáo
 | S4-AIE-1 | Prompt refinement | Cải thiện prompts từ test sessions. Scores realistic | Bắt buộc |
 | S4-AIE-2 | Category-specific RAG | Prompts khác nhau Backend/Frontend/System Design, RAG filter theo category | Bắt buộc |
 | S4-AIE-3 | Response caching | Cache RAG results trong Redis (TTL 1h) | Bắt buộc |
-| S4-AIE-4 | Performance | P95 latency < 3s cho next-turn endpoint | Bắt buộc |
-| S4-AIE-5 | Streaming responses | Server-Sent Events cho typing effect | Stretch |
+| S4-AIE-4 | Performance | Thời gian tới token đầu tiên của next-turn: P50 ≤ 3.5s, P95 ≤ 6s (đo bằng log thật) | Bắt buộc |
+| S4-AIE-5 | Streaming responses | Server-Sent Events cho typing effect (kéo lên Sprint 2, Bắt buộc) | Bắt buộc |
 
 ### DE
 

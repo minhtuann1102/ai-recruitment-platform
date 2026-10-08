@@ -1,7 +1,7 @@
 # ADR-007: Multi-agent phỏng vấn, chấm điểm cuối phiên
 
 **Ngày:** 2026-10-03  
-**Trạng thái:** Accepted  
+**Trạng thái:** Superseded bởi [ADR-008](adr-008-evaluator-per-turn-orchestrator.md)  
 **Cập nhật:** ADR-004 (nội dung response từ AI)
 
 ## Bối cảnh

@@ -1,6 +1,6 @@
 # Thiết kế RAG (S0-AIE-3)
 
-> Chốt thiết kế RAG cho `ai-service`. Liên quan: [ai-integration.md](ai-integration.md) (kiến trúc agent), [data-pipeline.md](data-pipeline.md) (DE: crawl, embed, index), [ADR-007](adr/adr-007-multi-agent-interview.md).
+> Chốt thiết kế RAG cho `ai-service`. Liên quan: [ai-integration.md](ai-integration.md) (kiến trúc agent), [data-pipeline.md](data-pipeline.md) (DE: crawl, embed, index), [ADR-008](adr/adr-008-evaluator-per-turn-orchestrator.md).
 
 ## 1. Quyết định
 
