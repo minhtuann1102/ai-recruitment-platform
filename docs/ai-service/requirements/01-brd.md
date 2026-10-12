@@ -2,7 +2,7 @@
 
 | Mục | Giá trị |
 |---|---|
-| Phiên bản | 0.2 (Draft, chờ team review) |
+| Phiên bản | 0.3 (Draft, chờ team review) |
 | Ngày | 2026-10-12 |
 | Owner | AIE |
 | Reviewer | FSD, DE |
@@ -16,7 +16,8 @@
 | Phiên bản | Ngày | Thay đổi |
 |---|---|---|
 | 0.1 | 2026-10-12 | Bản đầu, dựa trên design doc phỏng vấn dạng chat văn bản, 15 đến 45 phút |
-| **0.2** | 2026-10-12 | **Đổi phạm vi theo yêu cầu của owner (chưa được FSD và DE xác nhận):** (1) phỏng vấn kỹ thuật là **hội thoại trực tiếp giống cuộc họp trực tuyến (kiểu Google Meet), đảm bảo real-time, thời lượng 15 đến 20 phút**; (2) **voice và video đưa vào phạm vi**, **nhận diện cảm xúc hoãn sang giai đoạn sau**; (3) **cho phép dùng agent framework, fine-tune model, agent tự học từ dữ liệu, và thêm giao diện web vào phạm vi** |
+| 0.2 | 2026-10-12 | Đổi phạm vi theo yêu cầu của owner (chưa được FSD và DE xác nhận):** (1) phỏng vấn kỹ thuật là **hội thoại trực tiếp giống cuộc họp trực tuyến (kiểu Google Meet), đảm bảo real-time, thời lượng 15 đến 20 phút**; (2) **voice và video đưa vào phạm vi**, **nhận diện cảm xúc hoãn sang giai đoạn sau**; (3) **cho phép dùng agent framework, fine-tune model, agent tự học từ dữ liệu, và thêm giao diện web vào phạm vi** |
+| **0.3** | 2026-10-12 | **Chốt các câu hỏi mở theo trả lời của owner:** phân kỳ theo đề xuất (giai đoạn 1 là **chat**, voice gắn sau nếu ổn); yêu cầu **đồng ý trước** khi dùng giọng nói và hình ảnh; độ trễ **cải thiện dần**; giao diện kiểu cuộc họp, **video ứng viên chỉ hiển thị**, **AI là ảnh**; dùng **hạ tầng voice-agent có sẵn**; thêm mục gợi ý xử lý mâu thuẫn với constitution |
 
 ### 0.1 Tác động của thay đổi v0.2 tới tài liệu và quyết định hiện có
 
@@ -32,6 +33,31 @@ Thay đổi này **mâu thuẫn** với nhiều chỗ trong repo. BRD chỉ ghi 
 | Constitution V và NFR-AI-PRIV04 | Transcript, CV không bao giờ vào `knowledge_chunks` hay dữ liệu pipeline | "Agent tự học từ dữ liệu" và fine-tune cần dữ liệu phiên. Phải có consent, ẩn danh và sửa quy tắc |
 | Sprint plan, lộ trình 8 tuần | 8 tuần từ 12/10 đến 06/12, 1 AIE, giao diện web thuộc FSD | Phạm vi tăng đáng kể, thời gian không đổi (xem R-6) |
 | FR, NFR, kiến trúc L2 (bản v0.1) | Viết cho chat văn bản 15 đến 45 phút | Cần viết lại các phần liên quan (xem banner ở đầu từng tài liệu) |
+
+### 0.2 Quyết định đã chốt (v0.3)
+
+| # | Chủ đề | Quyết định | Câu hỏi mở liên quan |
+|---|---|---|---|
+| D1 | Phân kỳ và rủi ro tiến độ (R-6) | Theo đề xuất ở mục 4.3 | 17 (đã trả lời) |
+| D2 | Giai đoạn đầu | **Chat văn bản trước** trong giao diện kiểu cuộc họp; nếu ổn mới gắn thêm voice | 11, 16, 17 (đã trả lời) |
+| D3 | Giọng nói và hình ảnh | **Phải xin ứng viên đồng ý trước** khi bật | 19 (một phần) |
+| D4 | Độ trễ | Cho phép **cải thiện dần**, không là điều kiện chặn giai đoạn đầu | 9 (một phần) |
+| D5 | "Giống Google Meet" | Giống ở **giao diện họp**. Video ứng viên **chỉ hiển thị**. **AI là ảnh** (không avatar động) | 10 (đã trả lời) |
+| D6 | Hạ tầng real-time | **Dùng hạ tầng voice-agent có sẵn**, không tự xây | 13 (một phần: chưa chọn cụ thể) |
+
+*Diễn giải của AIE, cần owner xác nhận (A-6):* "video ứng viên chỉ hiển thị" được hiểu là **ứng viên thấy chính mình** như khung tự xem trong một cuộc họp; video **không gửi lên server và không lưu**. Nếu ý khác (ví dụ ghi lại để xem lại), nhiều yêu cầu về quyền riêng tư và lưu trữ sẽ đổi.
+
+### 0.3 Đề xuất xử lý mâu thuẫn với constitution
+
+Phần 0.1 liệt kê các mâu thuẫn. Với quyết định D2 và D6, **phần lớn mâu thuẫn tránh được** nếu tách lớp giọng nói thành một container riêng. Đây là **gợi ý của AIE**, cần team duyệt.
+
+| Nguyên tắc | Mâu thuẫn | Gợi ý | Lý do |
+|---|---|---|---|
+| **II, III** (transport) và **IV** (ai-service stateless, REST) | Hội thoại real-time cần kết nối bền | **Giữ ai-service stateless, chỉ REST và SSE.** Thêm một container **voice-gateway** (chạy hạ tầng voice-agent) nằm giữa trình duyệt và interview-service: nhận âm thanh, nhận dạng thành chữ, gọi **đúng contract hiện có**, đọc câu hỏi trả về bằng TTS. Kết nối bền chỉ nằm ở voice-gateway. Amendment II chỉ cần thêm một dòng cho kênh media giữa trình duyệt và voice-gateway, kèm ADR chọn hạ tầng | Không phải sửa ai-service, interview-service và ADR-003, ADR-004; chat và voice dùng chung một đường xử lý nên dễ đo và dễ test |
+| **VII** (không agent framework) | Nay được phép dùng framework | Sửa thành: *framework được phép khi có ADR nêu lý do và đã thử spike*. **Khuyến nghị:** dùng framework cho **lớp giọng nói và media**; giữ **orchestrator, policy, tổng hợp điểm là code của nhóm**, vì đó là phần có unit test và là bằng chứng của đồ án | Framework thay chỗ phần khó (VAD, STT, TTS, truyền âm thanh), không thay phần logic cần kiểm chứng được |
+| **V** (không dữ liệu phiên vào kho tri thức) | "Học từ dữ liệu" và fine-tune cần dữ liệu phiên | **Giữ nguyên quy tắc cho `knowledge_chunks`.** Thêm đường riêng: dữ liệu huấn luyện chỉ lấy từ phiên có cờ `learning_consent_at`, đã ẩn danh, lưu **ngoài** `knowledge_chunks`, tách khỏi golden set. **Không làm trong giai đoạn 1 và 2**; chỉ thêm sớm cột cờ consent (nullable) để sau này không phải migration | Giữ lời hứa riêng tư mặc định, mở cửa có kiểm soát khi cần |
+| **ADR-008** | Ghi "không agent framework", mẫu 30 phút | Giữ ADR-008 cho phần orchestrator; sửa dòng framework và thời lượng; viết **ADR-009** cho voice-gateway và phân kỳ | Một ADR cho một quyết định |
+| **Quy trình** | Constitution đang ở trạng thái Proposed, chưa ratify | **Gộp các sửa đổi trên vào chính PR ratify constitution** thay vì amend sau khi ratify (amend cần 2/3 thành viên, gồm owner workstream bị ảnh hưởng) | Rẻ hơn nhiều so với amend về sau |
 
 ## 1. Mục đích
 
@@ -71,11 +97,11 @@ Tài liệu mô tả **vì sao** và **cho ai** phần AI phỏng vấn được
 
 ### 4.1 Trong phạm vi
 
-- Phỏng vấn kỹ thuật **trực tiếp bằng hội thoại thời gian thực, giống cuộc họp trực tuyến (kiểu Google Meet)**: ứng viên nói, AI nghe và đáp lại bằng giọng nói. Ngôn ngữ tiếng Việt, giữ thuật ngữ tiếng Anh. **Thời lượng 15 đến 20 phút.**
-- **Voice**: nhận dạng giọng nói (STT) và tổng hợp giọng nói (TTS) cho cả hai chiều.
-- **Video**: phòng phỏng vấn có hình ảnh. *Mục đích sử dụng video (chỉ hiển thị, hay ghi lại) chưa được xác định, xem câu hỏi mở 10. Giả định tạm thời (A-6): video phục vụ trải nghiệm phòng họp, chưa phân tích nội dung.*
-- **Giao diện web** (`apps/web`) cho toàn bộ luồng: chọn vị trí và level, gắn CV, phòng phỏng vấn, trang báo cáo. Người thực hiện cần xác nhận (câu hỏi mở 16).
-- **Cho phép dùng agent framework và hạ tầng voice-agent hoặc real-time có sẵn**, nếu giúp rút ngắn thời gian. Cần khảo sát trước khi chọn.
+- Phỏng vấn kỹ thuật **trực tiếp trong giao diện giống cuộc họp trực tuyến (kiểu Google Meet)**, ngôn ngữ tiếng Việt giữ thuật ngữ tiếng Anh, **thời lượng 15 đến 20 phút**. **Giai đoạn 1: chat văn bản** trong giao diện họp. **Giai đoạn 2 (nếu giai đoạn 1 ổn): hội thoại giọng nói** (ứng viên nói, AI đáp lại bằng giọng nói).
+- **Voice (giai đoạn 2)**: nhận dạng giọng nói (STT) và tổng hợp giọng nói (TTS) cho cả hai chiều, dùng **hạ tầng voice-agent có sẵn**. Chỉ bật sau khi ứng viên đồng ý.
+- **Hình ảnh trong phòng họp**: khung **AI là ảnh tĩnh**; khung **video ứng viên chỉ hiển thị** (ứng viên thấy chính mình), không gửi lên server, không lưu. Chỉ bật camera sau khi ứng viên đồng ý.
+- **Giao diện web** (`apps/web`) cho toàn bộ luồng: chọn vị trí và level, gắn CV và consent, phòng phỏng vấn kiểu cuộc họp, trang báo cáo. Người thực hiện cần xác nhận (câu hỏi mở 16).
+- **Cho phép dùng agent framework và hạ tầng voice-agent có sẵn** (đã chốt dùng hạ tầng có sẵn cho voice). Cần khảo sát trước khi chọn cụ thể. Khuyến nghị giữ orchestrator là code của nhóm (mục 0.3).
 - **Fine-tune model** và **agent tự học từ dữ liệu**, với điều kiện có consent, ẩn danh và đo bằng golden set. Đối tượng fine-tune và cơ chế học chưa xác định (câu hỏi mở 14, 15).
 - Vị trí (track) theo topic catalog: `java_backend`, `python_backend`, `nodejs_backend`, `ai_engineer`. *Design doc gốc chỉ ghi MVP là Java và Node.js; ba vị trí còn lại do AIE bổ sung vào catalog, **cần team xác nhận**.*
 - Level: Fresher, Junior, Middle, Senior.
@@ -88,7 +114,7 @@ Tài liệu mô tả **vì sao** và **cho ai** phần AI phỏng vấn được
 - Bộ đánh giá chất lượng: golden set cho Evaluator, ứng viên giả lập chạy end-to-end.
 - Ghi nhận token, độ trễ và chi phí theo phiên.
 
-*Chưa quyết:* có giữ **chat văn bản** làm phương án dự phòng khi micro hoặc mạng không dùng được hay không (câu hỏi mở 11).
+*Đã chốt:* chat văn bản là giai đoạn đầu, và nên được giữ làm phương án dự phòng khi voice không dùng được (câu hỏi mở 11).
 
 ### 4.2 Ngoài phạm vi (hiện tại)
 
@@ -104,16 +130,18 @@ Tài liệu mô tả **vì sao** và **cho ai** phần AI phỏng vấn được
 | Phỏng vấn nhiều người cùng lúc (nhiều ứng viên trong một phòng) | Không có yêu cầu |
 | Tiếp tục phiên trên nhiều thiết bị cùng lúc | Một phiên một client |
 
-### 4.3 Đề xuất phân kỳ (đề xuất của AIE, team quyết định)
+### 4.3 Phân kỳ (đã chốt theo đề xuất của AIE, kèm quyết định D2)
 
-Phạm vi mới lớn hơn nhiều so với khả năng của 8 tuần và 1 AIE (R-6). Đề xuất chia giai đoạn để có thể cắt từ dưới lên:
+Phạm vi mới lớn hơn nhiều so với khả năng của 8 tuần và 1 AIE (R-6). Team chọn chia giai đoạn và cắt từ dưới lên.
 
 | Giai đoạn | Nội dung | Ưu tiên | Lý do |
 |---|---|---|---|
-| **1. Lõi** | Hội thoại **giọng nói** real-time end-to-end (STT, orchestrator hiện có, TTS), phiên 15 đến 20 phút, báo cáo; giao diện web tối thiểu (phòng phỏng vấn và báo cáo) | Must | Đây là phần tạo khác biệt và đủ để chứng minh giá trị; tái sử dụng được orchestrator, Evaluator, policy, Reporter đã thiết kế |
-| **2. Video** | Phòng họp có video ứng viên và trạng thái AI (đang nghe, đang nghĩ, đang nói); tối ưu độ trễ; dùng agent framework nếu giúp | Should | Tăng cảm giác "giống Google Meet" nhưng không đổi giá trị cốt lõi |
+| **1. Chat trong phòng họp** | Phỏng vấn **chat văn bản** 15 đến 20 phút trong giao diện kiểu cuộc họp (khung AI là ảnh, khung video ứng viên chỉ hiển thị, khung hội thoại, đồng hồ, trạng thái AI); báo cáo cuối buổi; consent trước khi bật camera | Must | Tái dùng orchestrator, Evaluator, policy, Reporter đã thiết kế và mock đã có; đủ để chứng minh giá trị |
+| **2. Voice** | Gắn **hội thoại giọng nói** bằng hạ tầng voice-agent có sẵn, đặt trong container voice-gateway gọi đúng contract của giai đoạn 1 (mục 0.3); chat giữ làm dự phòng | Should (chỉ làm nếu giai đoạn 1 ổn) | Phần khó nhất; làm sau khi lõi đã chạy |
 | **3. Học từ dữ liệu** | Fine-tune hoặc cơ chế học có kiểm soát | Could | Cần dữ liệu có consent và golden set để đo; hiện chưa có cả hai |
 | **Hoãn** | Nhận diện cảm xúc | Won't (lúc này) | Theo quyết định của owner |
+
+Độ trễ hội thoại được **cải thiện dần** (D4): giai đoạn 1 không cần đạt chỉ tiêu real-time của voice.
 
 ## 5. Các bên liên quan
 
@@ -149,12 +177,12 @@ Phạm vi mới lớn hơn nhiều so với khả năng của 8 tuần và 1 AIE
 | BR-14 | Chất lượng agent được **đo lặp lại được** bằng golden set và ứng viên giả lập, làm bằng chứng cho báo cáo đồ án | Must | BO-3, BO-7 | FR-AI-082 |
 | BR-15 | Thêm **vị trí phỏng vấn mới** chỉ cần bổ sung dữ liệu catalog, không sửa code điều phối | Should | BO-8 | FR-AI-002 |
 | BR-16 | Có **môi trường mock** để FSD và FE tích hợp độc lập trước khi AI thật sẵn sàng | Must | BO-7 | FR-AI-083, 090 |
-| **BR-17** | **Hội thoại giọng nói hai chiều thời gian thực:** ứng viên nói, hệ thống nhận dạng (tiếng Việt xen thuật ngữ Anh), AI đáp lại bằng giọng nói, với độ trễ đủ tự nhiên để cảm giác như nói chuyện trực tiếp | Must (giai đoạn 1) | BO-1, BO-9 | Chưa có |
-| **BR-18** | **Phòng phỏng vấn video kiểu cuộc họp trực tuyến:** hiển thị video ứng viên, trạng thái AI (đang nghe, đang nghĩ, đang nói), đồng hồ thời gian | Should (giai đoạn 2) | BO-9 | Chưa có |
+| **BR-17** | **Hội thoại giọng nói hai chiều thời gian thực:** ứng viên nói, hệ thống nhận dạng (tiếng Việt xen thuật ngữ Anh), AI đáp lại bằng giọng nói, với độ trễ đủ tự nhiên (cải thiện dần). Dùng hạ tầng voice-agent có sẵn. Chat là dự phòng | Should (giai đoạn 2) | BO-1, BO-9 | Chưa có |
+| **BR-18** | **Phòng phỏng vấn giao diện kiểu cuộc họp:** khung AI là ảnh tĩnh, khung **video ứng viên chỉ hiển thị** (ứng viên thấy chính mình, không gửi đi, không lưu), khung hội thoại, trạng thái AI, đồng hồ thời gian | Must (giai đoạn 1; video tự xem là Should) | BO-9 | Chưa có |
 | **BR-19** | **Thời lượng 15 đến 20 phút**, kết thúc đúng giờ; thời lượng mặc định cần chốt | Must | BO-1, BO-9 | Chưa có (sửa FR-AI-003, 035, 036) |
-| **BR-20** | **Giao diện web** cho toàn bộ luồng: chọn vị trí và level, gắn CV và consent, kiểm tra micro và camera, phòng phỏng vấn, trang báo cáo | Must (bản tối thiểu ở giai đoạn 1) | BO-7, BO-9 | Chưa có (thuộc FSD, đề xuất) |
+| **BR-20** | **Giao diện web** cho toàn bộ luồng: chọn vị trí và level, gắn CV và consent, kiểm tra camera (và micro ở giai đoạn 2), phòng phỏng vấn, trang báo cáo | Must (giai đoạn 1) | BO-7, BO-9 | Chưa có (thuộc FSD, đề xuất) |
 | **BR-21** | **Cải thiện chất lượng bằng dữ liệu có kiểm soát:** fine-tune model hoặc cơ chế agent học từ dữ liệu, chỉ dùng dữ liệu có consent, ẩn danh, tách khỏi golden set; mọi thay đổi phải được đo và không làm giảm chất lượng | Could (giai đoạn 3) | BO-10 | Chưa có |
-| **BR-22** | **Bảo vệ dữ liệu âm thanh và hình ảnh:** xin consent trước khi bật micro hoặc camera; nói rõ có ghi lại hay không và lưu bao lâu; chỉ gửi tới bên thứ ba đã khai báo (STT, TTS, LLM); ứng viên có thể xóa | Must | BO-5 | Chưa có |
+| **BR-22** | **Bảo vệ dữ liệu âm thanh và hình ảnh:** **xin ứng viên đồng ý trước** khi bật camera (giai đoạn 1) hoặc micro (giai đoạn 2); nói rõ có ghi lại hay không; chỉ gửi tới bên thứ ba đã khai báo (STT, TTS, LLM); ứng viên từ chối vẫn phỏng vấn được bằng chat | Must | BO-5 | Chưa có |
 
 ## 7. Quy tắc nghiệp vụ
 
@@ -173,10 +201,10 @@ Phạm vi mới lớn hơn nhiều so với khả năng của 8 tuần và 1 AIE
 | BRU-11 | Quota mặc định 5 phiên mỗi ngày mỗi ứng viên *(đề xuất)* | design 10 |
 | BRU-12 | Câu trả lời chỉ gồm cụm kiểu "không biết", "chưa học" (tối đa 6 từ) được xem là không biết và không cần Evaluator; có nội dung khác thì vẫn chấm | design 03 §4.5 |
 | **BRU-13** | Thời lượng phiên nằm trong khoảng **15 đến 20 phút**. Giá trị mặc định chưa chốt | Yêu cầu v0.2 |
-| **BRU-14** | Cần **consent riêng cho micro và camera** trước khi bắt đầu. Ứng viên **có thể tắt camera** mà vẫn phỏng vấn được *(đề xuất)*; micro là bắt buộc nếu không có chat dự phòng | Yêu cầu v0.2, BR-22 |
+| **BRU-14** | **Phải có sự đồng ý của ứng viên trước khi bật giọng nói hoặc hình ảnh** (consent riêng cho camera, và cho micro ở giai đoạn 2). Từ chối hoặc tắt vẫn phỏng vấn được bằng chat | Quyết định D3, BR-22 |
 | **BRU-15** | **Không dùng cảm xúc, biểu cảm khuôn mặt hay giọng điệu** để chấm điểm hay viết nhận xét trong giai đoạn này (nhận diện cảm xúc đã hoãn) | Yêu cầu v0.2 |
 | **BRU-16** | Dữ liệu dùng để **fine-tune hoặc để agent học** phải: có consent riêng, đã ẩn danh, **tách khỏi golden set**, và nếu lấy từ transcript hay CV thì phải sửa quy tắc "không vào `knowledge_chunks`" bằng amendment có chủ đích | Yêu cầu v0.2, constitution V |
-| **BRU-17** | Phiên video hoặc âm thanh **không được ghi lại** trừ khi ứng viên đồng ý rõ ràng và có thời hạn lưu *(đề xuất)* | BR-22 |
+| **BRU-17** | **Video ứng viên chỉ hiển thị cục bộ**, không gửi lên server, không lưu (diễn giải A-6). Âm thanh (giai đoạn 2) chỉ gửi tới nhà cung cấp STT đã khai báo và **không ghi lại** trừ khi ứng viên đồng ý rõ ràng và có thời hạn lưu *(đề xuất)* | Quyết định D5, BR-22 |
 
 ## 8. Tiêu chí thành công
 
@@ -195,7 +223,7 @@ Ngưỡng chất lượng lấy từ [design doc 10](../09-agent-quality-evaluat
 | Báo cáo | Recall lỗ hổng trong `improvements` | ≥ 70% |
 | | Điểm mạnh sai | 0 |
 | Độ bền | Lỗi format sau repair; tỉ lệ fallback | < 1%; < 2% |
-| **Hội thoại real-time** *(mới)* | Độ trễ phản hồi: từ lúc ứng viên dứt lời tới lúc AI bắt đầu nói | **Cần chốt.** Đề xuất P50 ≤ 2 s, P95 ≤ 4 s *(đề xuất, chưa đo)*. Lưu ý: ước tính đường nóng chỉ văn bản đã là ≈ 3.6 s tới token đầu, chưa gồm STT và TTS, nên mục tiêu này đòi hỏi đổi thiết kế (xem R-3) |
+| **Hội thoại real-time** *(mới; áp dụng từ giai đoạn 2, cải thiện dần, không chặn giai đoạn 1)* | Độ trễ phản hồi: từ lúc ứng viên dứt lời tới lúc AI bắt đầu nói | **Chưa chốt.** Đề xuất P50 ≤ 2 s, P95 ≤ 4 s *(đề xuất, chưa đo)*. Lưu ý: ước tính đường nóng chỉ văn bản đã là ≈ 3.6 s tới token đầu, chưa gồm STT và TTS, nên mục tiêu này đòi hỏi đổi thiết kế (xem R-3) |
 | | Chất lượng nhận dạng giọng nói tiếng Việt xen thuật ngữ Anh | **Cần đo thử các nhà cung cấp** rồi mới đặt ngưỡng; hiện chưa có số liệu |
 | | Phiên hoàn thành trọn thời lượng không đứt kết nối | ≥ 90% *(đề xuất)* |
 | | Phiên kết thúc trong thời lượng + 3 phút | 100% (giới hạn cứng bằng code) |
@@ -212,8 +240,8 @@ Ghi chú: mốc "khớp ±1 band" có hai giá trị trong tài liệu gốc (80
 | A-3 | Giả định | **Đã lỗi thời.** Phiên chuẩn 30 phút, khoảng 15 lượt, 72k token vào, 7.5k token ra. Cần tính lại cho 15 đến 20 phút và chi phí STT, TTS |
 | A-4 | Giả định | Chất lượng `text-embedding-3-small` với tiếng Việt xen thuật ngữ Anh **chưa được đo**; đo bằng golden set RAG ở Sprint 1 |
 | A-5 | Giả định | Quy mô demo vài chục người dùng, khoảng 20 phiên đồng thời. **Phiên real-time tốn tài nguyên hơn chat, con số này cần kiểm tra lại** |
-| A-6 *(mới)* | Giả định | Video chỉ phục vụ trải nghiệm phòng họp, chưa phân tích nội dung (vì nhận diện cảm xúc đã hoãn) |
-| A-7 *(mới)* | Giả định | Có nhà cung cấp STT và TTS hỗ trợ tiếng Việt xen thuật ngữ tiếng Anh đủ dùng. **Chưa khảo sát, chưa có số liệu** |
+| A-6 *(mới)* | Giả định cần xác nhận | "Video ứng viên chỉ hiển thị" nghĩa là ứng viên **thấy chính mình** trong khung tự xem; video không rời khỏi trình duyệt. AI là ảnh tĩnh. Nhận diện cảm xúc đã hoãn nên không phân tích video |
+| A-7 *(mới)* | Giả định | Hạ tầng voice-agent có sẵn kèm nhà cung cấp STT và TTS hỗ trợ tiếng Việt xen thuật ngữ tiếng Anh đủ dùng. **Chưa khảo sát, chưa có số liệu** (chỉ liên quan giai đoạn 2) |
 | A-8 *(mới)* | Giả định | Trình duyệt của ứng viên cho phép truy cập micro và camera, và mạng đủ ổn định cho hội thoại real-time |
 | C-1 | Ràng buộc thời gian | 8 tuần từ 12/10 đến 06/12/2026, feature freeze 06/12; Sprint 5 (07/12 đến 21/12) dành cho polish, test tích hợp, báo cáo. **Không đổi dù phạm vi tăng (R-6)** |
 | C-2 | Ràng buộc nhân lực | 1 AIE chính; golden set cần thêm 1 người gán nhãn độc lập. Giao diện web phòng phỏng vấn cần FSD |
@@ -248,10 +276,10 @@ Danh sách rủi ro của thiết kế văn bản ở [design doc 11](../10-risk
 |---|---|---|---|
 | R-1 | LLM **chấm dễ dãi** hoặc bịa căn cứ | Cao | Rubric có mốc, luật khắt khe, hậu kiểm bằng code, golden set có nhãn người |
 | R-2 | Đáp án mẫu hoặc `key_points` **sai** làm sai điểm | Cao | Người thứ hai review; catalog có `key_concepts` đã duyệt |
-| R-3 | **Độ trễ hội thoại vượt khả năng.** Số đo thật: một lần chat 150 đến 200 token ra mất khoảng 4 đến 5 giây qua OpenRouter. Thiết kế hiện tại chạy Evaluator rồi Interviewer **nối tiếp** (ước tính ≈ 3.6 s tới token đầu), chưa tính STT và TTS. Mục tiêu real-time đòi hỏi đổi thiết kế đường nóng | **Rất cao** | Chạy Evaluator song song hoặc sau khi AI đã bắt đầu nói; stream STT, LLM, TTS theo từng đoạn; model nhanh hơn; rút ngắn output; đo từ tuần đầu, không đợi tuần 4 |
+| R-3 | **Độ trễ vượt khả năng (rõ nhất ở giai đoạn 2).** Số đo thật: một lần chat 150 đến 200 token ra mất khoảng 4 đến 5 giây qua OpenRouter. Thiết kế hiện tại chạy Evaluator rồi Interviewer **nối tiếp** (ước tính ≈ 3.6 s tới token đầu), chưa tính STT và TTS. Mục tiêu real-time đòi hỏi đổi thiết kế đường nóng | Cao (đã chấp nhận cải thiện dần) | Chạy Evaluator song song hoặc sau khi AI đã bắt đầu nói; stream STT, LLM, TTS theo từng đoạn; model nhanh hơn; rút ngắn output; đo từ tuần đầu, không đợi tuần 4 |
 | R-4 | **Prompt injection** qua CV và câu trả lời (kể cả lời nói được chuyển thành chữ) | Cao | Cô lập CV thô chỉ ở CV Parser, khối untrusted, hậu kiểm code, bộ test adversarial |
 | R-5 | **Lộ dữ liệu cá nhân** (CV tới bên thứ ba, log) | Cao | Redact trước LLM, consent riêng, không log nội dung, chọn provider không lưu dữ liệu nếu có |
-| R-6 | **Trễ tiến độ do phạm vi tăng mạnh.** Voice real-time, video, giao diện web, fine-tune và học từ dữ liệu được thêm vào nhưng vẫn 8 tuần, 1 AIE, hạn 06/12 | **Rất cao** | Phân kỳ ở mục 4.3; cắt từ dưới lên (học từ dữ liệu, video, rồi các phần khác); dùng framework hoặc dịch vụ có sẵn; chốt phạm vi sớm với team |
+| R-6 | **Trễ tiến độ do phạm vi tăng mạnh.** Voice, giao diện web, fine-tune và học từ dữ liệu được thêm vào nhưng vẫn 8 tuần, 1 AIE, hạn 06/12 | **Cao** (giảm từ rất cao nhờ phân kỳ đã chốt) | **Đã chọn phân kỳ ở mục 4.3**: chat trước, voice nếu ổn; cắt từ dưới lên (học từ dữ liệu, rồi voice); dùng hạ tầng voice-agent có sẵn |
 | R-7 | **Lệch contract** với FSD, nặng hơn vì thêm kênh real-time và giao diện | Cao | Chốt kiến trúc và contract sớm bằng PR; mock theo contract mới |
 | R-8 | Luồng real-time bị gián đoạn qua gateway hoặc relay (buffer, timeout, NAT/firewall) | Cao | Kiểm chứng sớm bằng spike; phương án dự phòng chat văn bản (nếu giữ) |
 | R-9 *(mới)* | **Dữ liệu giọng nói và hình ảnh** thường được xem là dữ liệu nhạy cảm theo nhiều quy định; gửi tới STT, TTS, LLM bên thứ ba | Cao | Consent riêng, không ghi nếu chưa đồng ý, nêu rõ nơi xử lý và thời hạn lưu, chọn nhà cung cấp không lưu dữ liệu nếu có; nhóm đối chiếu văn bản pháp lý hiện hành (chưa kiểm chứng ở đây) |
@@ -263,27 +291,29 @@ Danh sách rủi ro của thiết kế văn bản ở [design doc 11](../10-risk
 
 ## 12. Câu hỏi mở
 
-Các câu 1 đến 8 giữ từ v0.1. Câu 9 đến 19 phát sinh từ thay đổi phạm vi v0.2 và **cần trả lời trước khi viết lại FR, NFR và kiến trúc**.
+Câu 1 đến 8 giữ từ v0.1. Câu 9 đến 19 phát sinh từ thay đổi phạm vi v0.2. Cột trạng thái cập nhật theo trả lời của owner (v0.3).
 
-1. Team có duyệt bốn vị trí (Java, Python, Node.js, AI Engineer) hay giữ MVP Java và Node.js?
-2. Ai viết và duyệt ADR-008 (cập nhật) và các amendment constitution?
-3. FSD xác nhận các cột mới của `interview_db` và pattern `application.getCvFile`?
-4. Bucket CV ở job-service là private (cần presigned) hay public (`cvUrl` hiện ghi là URL MinIO)?
-5. ~~Streaming SSE qua APISIX~~ **Thay bằng câu 13:** kênh real-time giữa trình duyệt và backend.
-6. Tài khoản OpenRouter có bật được chế độ không lưu dữ liệu (zero data retention) không?
-7. Quota phiên mỗi ngày: giữ 5 hay đổi?
-8. Quy định bảo vệ dữ liệu cá nhân hiện hành: nhóm cần tự đối chiếu văn bản (design doc nhắc Nghị định 13/2023/NĐ-CP và luật mới có hiệu lực từ 01/01/2026, chưa được kiểm chứng ở đây).
-9. **"Real-time" cụ thể là gì?** Độ trễ phản hồi chấp nhận được bao nhiêu? Có cho phép ứng viên ngắt lời AI (barge-in) và AI ngắt lời ứng viên không?
-10. **"Giống Google Meet" nghĩa là gì?** AI hiện diện thế nào (chỉ giọng nói, ảnh đại diện tĩnh, nhân vật động)? Video của ứng viên dùng để làm gì (chỉ hiển thị, hay ghi lại để xem lại)? Có ghi âm hoặc ghi hình không, lưu bao lâu?
-11. Có giữ **chat văn bản** làm phương án dự phòng khi micro hoặc mạng không dùng được không?
-12. **Thời lượng mặc định** trong khoảng 15 đến 20 phút là bao nhiêu, và số topic mỗi phiên là bao nhiêu (thiết kế cũ là 5 đến 6 topic cho 30 phút)?
-13. **Kênh real-time** giữa trình duyệt, interview-service và ai-service là gì, và có phá vỡ quy tắc REST và stateless của constitution không? Dùng hạ tầng và framework voice-agent có sẵn hay tự xây? Nhà cung cấp STT, TTS nào (cần khảo sát chất lượng tiếng Việt xen thuật ngữ Anh, chi phí)?
-14. **Fine-tune cái gì** (STT, Evaluator, Interviewer?), dữ liệu lấy từ đâu, ai gán nhãn, ngân sách tính toán?
-15. **"Agent tự học từ dữ liệu"** là học gì (câu hỏi, prompt, policy, trọng số), từ dữ liệu nào, ai duyệt thay đổi, và cơ chế ngăn việc tự làm tệ chất lượng hoặc bị thao túng?
-16. **Ai làm giao diện web** phòng phỏng vấn và trang báo cáo, trong khung thời gian nào? FSD hiện còn job-service, interview-service, auth/user, frontend các trang khác.
-17. **Tiến độ:** giữ 8 tuần và feature freeze 06/12 hay dời? Nếu giữ, phần nào bị cắt (đề xuất ở mục 4.3)?
-18. **Nhận diện cảm xúc "để sau"**: sau giai đoạn nào, điều kiện nào? Trong lúc này có thu video không?
-19. Giọng nói và hình ảnh khuôn mặt thường được coi là dữ liệu nhạy cảm theo nhiều quy định. Nhóm cần đối chiếu văn bản hiện hành (chưa kiểm chứng ở đây).
+| # | Câu hỏi | Trạng thái |
+|---|---|---|
+| 1 | Team có duyệt bốn vị trí (Java, Python, Node.js, AI Engineer) hay giữ MVP Java và Node.js? | **Mở** |
+| 2 | Ai viết và duyệt ADR (cập nhật ADR-008, ADR-009 mới) và các sửa đổi constitution? Gợi ý ở mục 0.3: gộp vào PR ratify | **Mở** |
+| 3 | FSD xác nhận các cột mới của `interview_db` và pattern `application.getCvFile`? | **Mở** |
+| 4 | Bucket CV ở job-service là private (cần presigned) hay public (`cvUrl` hiện ghi là URL MinIO)? | **Mở** |
+| 5 | Streaming SSE qua APISIX có bị buffer không? | **Mở** (vẫn cần cho giai đoạn 1, chat dùng SSE) |
+| 6 | Tài khoản OpenRouter có bật được chế độ không lưu dữ liệu (zero data retention) không? | **Mở** |
+| 7 | Quota phiên mỗi ngày: giữ 5 hay đổi? | **Mở** |
+| 8 | Quy định bảo vệ dữ liệu cá nhân hiện hành: nhóm tự đối chiếu văn bản (design doc nhắc Nghị định 13/2023/NĐ-CP và luật mới có hiệu lực từ 01/01/2026, chưa được kiểm chứng ở đây) | **Mở** |
+| 9 | "Real-time" cụ thể: độ trễ chấp nhận được, ứng viên có được ngắt lời AI (barge-in) không? | **Một phần**: độ trễ cải thiện dần (D4). Barge-in còn mở, chỉ liên quan giai đoạn 2 |
+| 10 | "Giống Google Meet" nghĩa là gì, video ứng viên dùng để làm gì? | **Đã trả lời (D5)**: giống giao diện họp; video ứng viên chỉ hiển thị; AI là ảnh. *Diễn giải "chỉ hiển thị cho chính ứng viên, không gửi đi" cần xác nhận (A-6)* |
+| 11 | Có giữ chat văn bản làm dự phòng không? | **Đã trả lời (D2)**: chat là giai đoạn đầu; giữ làm dự phòng khi thêm voice |
+| 12 | Thời lượng mặc định trong 15 đến 20 phút và số topic mỗi phiên? | **Mở.** Đề xuất ở FR-AI-003: 20 phút ≈ 5 topic, 15 phút ≈ 4 topic (xem FR) |
+| 13 | Kênh real-time, hạ tầng và nhà cung cấp STT, TTS? | **Một phần (D6)**: dùng hạ tầng voice-agent có sẵn. Chọn cụ thể và khảo sát chất lượng tiếng Việt xen thuật ngữ Anh còn **mở** (giai đoạn 2) |
+| 14 | Fine-tune cái gì, dữ liệu từ đâu, ai gán nhãn? | **Mở** (giai đoạn 3) |
+| 15 | "Agent tự học từ dữ liệu" là học gì, từ dữ liệu nào, ai duyệt? | **Mở** (giai đoạn 3) |
+| 16 | Ai làm giao diện web phòng phỏng vấn và trang báo cáo? | **Một phần**: giai đoạn 1 là chat trong giao diện họp. Người thực hiện (FSD?) còn **mở** |
+| 17 | Giữ 8 tuần và feature freeze 06/12 hay dời? | **Đã trả lời (D1)**: giữ khung, áp dụng phân kỳ mục 4.3 |
+| 18 | Nhận diện cảm xúc "để sau": giai đoạn nào, điều kiện nào? | **Mở** (hoãn; trong lúc này không phân tích video, BRU-15) |
+| 19 | Pháp lý về giọng nói và hình ảnh khuôn mặt (thường là dữ liệu nhạy cảm) | **Một phần**: đã chốt phải có sự đồng ý trước (D3). Đối chiếu văn bản pháp lý hiện hành còn **mở** |
 
 ## 13. Truy vết mục tiêu sang yêu cầu
 
@@ -300,9 +330,9 @@ Các câu 1 đến 8 giữ từ v0.1. Câu 9 đến 19 phát sinh từ thay đ�
 | BO-9 | BR-01, 11, 17, 18, 19, 20 |
 | BO-10 | BR-21 |
 
-## 14. Việc cần làm tiếp sau khi trả lời câu hỏi mở
+## 14. Việc cần làm tiếp
 
-1. Chốt phạm vi và phân kỳ (mục 4.3) với FSD và DE.
-2. Viết ADR cho kênh real-time (câu hỏi 13) và cập nhật ADR-008; amendment constitution II, IV, V, VII nếu đổi.
-3. Viết lại FR (thêm nhóm hội thoại giọng nói, video, giao diện, học từ dữ liệu; sửa FR-AI-003, 035, 036, 037, 039, 070 đến 072), NFR (độ trễ hội thoại, STT, quyền riêng tư âm thanh và hình ảnh, chi phí) và kiến trúc L2 (thêm container: dịch vụ giọng nói, media, giao diện web).
-4. Cập nhật design doc `docs/ai-service` (README, 02, 03, 06, 08) và sprint plan cho thời lượng 15 đến 20 phút, kênh real-time, giao diện web.
+1. Team duyệt BRD v0.3, đặc biệt các câu hỏi mở còn lại (1, 2, 3, 12, 16) và diễn giải A-6.
+2. Gộp các sửa đổi constitution ở mục 0.3 vào PR ratify; viết ADR-009 (voice-gateway và phân kỳ) và cập nhật ADR-008.
+3. FR, NFR và kiến trúc L2 đã được viết lại theo v0.3 cho giai đoạn 1 (chat) và phác thảo giai đoạn 2, 3. Các phần giai đoạn 2, 3 là **bản nháp** chờ chốt hạ tầng voice-agent.
+4. Cập nhật design doc `docs/ai-service` (README, 03, 06, 08) và sprint plan cho thời lượng 15 đến 20 phút và giao diện web. Chưa làm.

@@ -22,9 +22,9 @@
 | 10 | Đánh giá chất lượng agent | [09-agent-quality-evaluation.md](09-agent-quality-evaluation.md) |
 | 11–12 | Rủi ro, lộ trình 8 tuần | [10-risks-and-8-week-roadmap.md](10-risks-and-8-week-roadmap.md) |
 | 13 | Kiến trúc L2 (C4 Container): container, giao tiếp, dữ liệu, ranh giới tin cậy, triển khai | [11-architecture-l2-containers.md](11-architecture-l2-containers.md) |
-| — | Tài liệu yêu cầu: BRD | [requirements/01-brd.md](requirements/01-brd.md) |
-| — | Tài liệu yêu cầu: FR (46 yêu cầu chức năng) | [requirements/02-functional-requirements.md](requirements/02-functional-requirements.md) |
-| — | Tài liệu yêu cầu: NFR (81 yêu cầu phi chức năng) | [requirements/03-non-functional-requirements.md](requirements/03-non-functional-requirements.md) |
+| — | Tài liệu yêu cầu: BRD (v0.3) | [requirements/01-brd.md](requirements/01-brd.md) |
+| — | Tài liệu yêu cầu: FR (70 yêu cầu chức năng) | [requirements/02-functional-requirements.md](requirements/02-functional-requirements.md) |
+| — | Tài liệu yêu cầu: NFR (103 yêu cầu phi chức năng) | [requirements/03-non-functional-requirements.md](requirements/03-non-functional-requirements.md) |
 
 ## Tóm tắt nhanh
 
