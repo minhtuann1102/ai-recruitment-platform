@@ -7,7 +7,7 @@
 | Owner | AIE |
 | Tài liệu liên quan | [BRD](01-brd.md) · [FR](02-functional-requirements.md) · [Kiến trúc L2](../11-architecture-l2-containers.md) · [Latency và chi phí](../08-latency-and-cost.md) · [Đánh giá chất lượng](../09-agent-quality-evaluation.md) |
 
-> **Lưu ý (2026-10-12): tài liệu này viết theo BRD v0.1 (phỏng vấn chat văn bản, 15 đến 45 phút). [BRD v0.2](requirements/01-brd.md) đã mở rộng phạm vi sang hội thoại giọng nói và video thời gian thực 15 đến 20 phút, giao diện web, cho phép agent framework, fine-tune và học từ dữ liệu; nhận diện cảm xúc hoãn lại. Tài liệu này CHƯA được cập nhật theo v0.2. Phần bị ảnh hưởng: NFR-AI-PERF01 đến 07 (độ trễ tính bằng token đầu văn bản, không có STT và TTS); NFR-AI-SCAL01 (20 phiên đồng thời); NFR-AI-COST01, 02 (chi phí chỉ LLM văn bản, 30 phút); NFR-AI-CMP04, 05 (SSE văn bản); NFR-AI-PRIV (chưa phủ âm thanh và hình ảnh); và thiếu NFR cho độ trễ hội thoại, chất lượng STT, độ ổn định media. Nên trả lời các câu hỏi mở ở BRD mục 12 trước khi sửa.**
+> **Lưu ý (2026-10-12): tài liệu này viết theo BRD v0.1 (phỏng vấn chat văn bản, 15 đến 45 phút). [BRD v0.2](01-brd.md) đã mở rộng phạm vi sang hội thoại giọng nói và video thời gian thực 15 đến 20 phút, giao diện web, cho phép agent framework, fine-tune và học từ dữ liệu; nhận diện cảm xúc hoãn lại. Tài liệu này CHƯA được cập nhật theo v0.2. Phần bị ảnh hưởng: NFR-AI-PERF01 đến 07 (độ trễ tính bằng token đầu văn bản, không có STT và TTS); NFR-AI-SCAL01 (20 phiên đồng thời); NFR-AI-COST01, 02 (chi phí chỉ LLM văn bản, 30 phút); NFR-AI-CMP04, 05 (SSE văn bản); NFR-AI-PRIV (chưa phủ âm thanh và hình ảnh); và thiếu NFR cho độ trễ hội thoại, chất lượng STT, độ ổn định media. Nên trả lời các câu hỏi mở ở BRD mục 12 trước khi sửa.**
 
 ## 1. Cách đọc
 
