@@ -7,6 +7,8 @@
 | Owner | AIE |
 | Tài liệu liên quan | [BRD](01-brd.md) · [NFR](03-non-functional-requirements.md) · [Kiến trúc L2](../11-architecture-l2-containers.md) · [API contract](../06-api-contract.md) |
 
+> **Lưu ý (2026-10-12): tài liệu này viết theo BRD v0.1 (phỏng vấn chat văn bản, 15 đến 45 phút). [BRD v0.2](requirements/01-brd.md) đã mở rộng phạm vi sang hội thoại giọng nói và video thời gian thực 15 đến 20 phút, giao diện web, cho phép agent framework, fine-tune và học từ dữ liệu; nhận diện cảm xúc hoãn lại. Tài liệu này CHƯA được cập nhật theo v0.2. Phần bị ảnh hưởng: FR-AI-001, 003, 035, 036 (thời lượng, số lượt); FR-AI-037, 039, 040 (kênh văn bản và SSE); FR-AI-070 đến 072 (chưa phủ STT, TTS, mất kết nối media); FR-AI-080, 090 (endpoint và đo lường); và **thiếu hoàn toàn** các FR cho hội thoại giọng nói (BR-17), phòng video (BR-18), giao diện web (BR-20), học từ dữ liệu (BR-21), bảo vệ âm thanh và hình ảnh (BR-22). Nên trả lời các câu hỏi mở ở BRD mục 12 trước khi sửa.**
+
 ## 1. Cách đọc
 
 - **ID** dạng `FR-AI-NNN`. "Hệ thống" nghĩa là `ai-service`, trừ khi ghi rõ bên khác.

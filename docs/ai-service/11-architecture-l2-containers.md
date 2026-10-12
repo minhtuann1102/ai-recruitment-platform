@@ -11,6 +11,8 @@
 
 > **Giả định về thuật ngữ:** "L2" được hiểu là C4 Level 2. Nếu nhóm dùng "L2" theo nghĩa khác (ví dụ tầng thứ hai của bộ tài liệu riêng), cần điều chỉnh.
 
+> **Lưu ý (2026-10-12): tài liệu này viết theo BRD v0.1 (phỏng vấn chat văn bản, 15 đến 45 phút). [BRD v0.2](requirements/01-brd.md) đã mở rộng phạm vi sang hội thoại giọng nói và video thời gian thực 15 đến 20 phút, giao diện web, cho phép agent framework, fine-tune và học từ dữ liệu; nhận diện cảm xúc hoãn lại. Tài liệu này CHƯA được cập nhật theo v0.2. Phần bị ảnh hưởng: sơ đồ container (chưa có dịch vụ giọng nói, hạ tầng media, phần giao diện phòng phỏng vấn); luồng I1 và I4 (SSE văn bản qua REST); §8 các sequence diagram (đường nóng văn bản); §10 triển khai; nguyên tắc ai-service stateless và REST (có thể phải đổi vì hội thoại real-time cần kết nối bền). Nên trả lời các câu hỏi mở ở BRD mục 12 trước khi sửa.**
+
 ## 1. Cách đọc
 
 - **Container** ở đây là thứ chạy độc lập: ứng dụng web, service, cơ sở dữ liệu, hàng đợi, hệ thống ngoài. Module hay class trong một service không xuất hiện ở mức này.
