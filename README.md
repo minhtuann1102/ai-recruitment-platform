@@ -120,7 +120,7 @@ pnpm migration:up
 pnpm dev
 
 # Hoac chi 1 service
-pnpm dev --filter=auth-service
+pnpm dev --filter=@ai-recruit/auth-service
 ```
 
 ### Bước 6: Sync APISIX config
@@ -164,7 +164,7 @@ docker compose run --rm adc adc sync -f conf/apisix-dev.yaml
    ```bash
    pnpm install
    docker compose run --rm adc adc sync -f conf/apisix-dev.yaml
-   pnpm dev --filter=new-service
+   pnpm dev --filter=@ai-recruit/new-service
    ```
 
 ## Scripts

@@ -1,5 +1,5 @@
 {
-  "name": "@app/core",
+  "name": "@ai-recruit/core",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -20,7 +20,7 @@
     }
   },
   "dependencies": {
-    "@app/common": "workspace:*",
+    "@ai-recruit/common": "workspace:*",
     "@grpc/grpc-js": "^1.14.0",
     "@grpc/proto-loader": "^0.7.15",
     "@nestjs/common": "11.1.19",

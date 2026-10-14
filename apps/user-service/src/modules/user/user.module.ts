@@ -1,4 +1,4 @@
-import { codeExpiresConfiguration } from '@app/common';
+import { codeExpiresConfiguration } from '@ai-recruit/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';

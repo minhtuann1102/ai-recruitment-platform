@@ -5,7 +5,7 @@ import {
   ServerException,
   UserGrpcService,
   UserRequestPayload,
-} from '@app/common';
+} from '@ai-recruit/common';
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { Transport } from '@nestjs/microservices';

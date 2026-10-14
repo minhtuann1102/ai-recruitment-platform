@@ -1,5 +1,5 @@
 {
-  "name": "auth-service",
+  "name": "@ai-recruit/auth-service",
   "private": true,
   "version": "1.0.0",
   "description": "Nest TypeScript starter repository",
@@ -31,8 +31,8 @@
     "webpack-node-externals": "^3.0.0"
   },
   "dependencies": {
-    "@app/common": "workspace:*",
-    "@app/core": "workspace:*",
+    "@ai-recruit/common": "workspace:*",
+    "@ai-recruit/core": "workspace:*",
     "@nestjs/common": "11.1.19",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "11.1.19",

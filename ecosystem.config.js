@@ -1,11 +1,11 @@
 module.exports = {
   apps: [
     {
-      name: "NEST-TURBO-BE",
-      script: "pnpm prod",
+      name: 'AI-RECRUIT-BE',
+      script: 'pnpm prod',
       instances: 1,
-      exec_mode: "fork",
-      watch: false
+      exec_mode: 'fork',
+      watch: false,
     },
   ],
 };

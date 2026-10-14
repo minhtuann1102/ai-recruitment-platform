@@ -1,4 +1,4 @@
-import { BaseRepository } from '@app/core';
+import { BaseRepository } from '@ai-recruit/core';
 import { Injectable } from '@nestjs/common';
 import { User } from './user.entity';
 

@@ -5,13 +5,13 @@ import {
   ServerException,
   UserGrpcService,
   UserRequestPayload,
-} from '@app/common';
+} from '@ai-recruit/common';
 import {
   callMicroservice,
   MicroserviceName,
   MS_INJECTION_TOKEN,
   RedisService,
-} from '@app/core';
+} from '@ai-recruit/core';
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { Transport } from '@nestjs/microservices';

@@ -1,4 +1,4 @@
-import { APP_DEFAULTS } from '@app/common';
+import { APP_DEFAULTS } from '@ai-recruit/common';
 import { EntityRepository } from '@mikro-orm/core';
 import { SelectQueryBuilder } from '@mikro-orm/postgresql';
 import { BaseEntity } from './base.entity';

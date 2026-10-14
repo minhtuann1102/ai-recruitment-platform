@@ -110,10 +110,10 @@ importers:
 
   apps/auth-service:
     dependencies:
-      '@app/common':
+      '@ai-recruit/common':
         specifier: workspace:*
         version: link:../../libs/common
-      '@app/core':
+      '@ai-recruit/core':
         specifier: workspace:*
         version: link:../../libs/core
       '@grpc/grpc-js':
@@ -210,13 +210,13 @@ importers:
 
   apps/notification-service:
     dependencies:
-      '@app/common':
+      '@ai-recruit/common':
         specifier: workspace:*
         version: link:../../libs/common
-      '@app/core':
+      '@ai-recruit/core':
         specifier: workspace:*
         version: link:../../libs/core
-      '@app/email-template':
+      '@ai-recruit/email-template':
         specifier: workspace:*
         version: link:../../libs/email-template
       '@aws-sdk/client-ses':
@@ -325,10 +325,10 @@ importers:
 
   apps/user-service:
     dependencies:
-      '@app/common':
+      '@ai-recruit/common':
         specifier: workspace:*
         version: link:../../libs/common
-      '@app/core':
+      '@ai-recruit/core':
         specifier: workspace:*
         version: link:../../libs/core
       '@grpc/grpc-js':
@@ -519,7 +519,7 @@ importers:
 
   libs/core:
     dependencies:
-      '@app/common':
+      '@ai-recruit/common':
         specifier: workspace:*
         version: link:../common
       '@aws-sdk/client-s3':

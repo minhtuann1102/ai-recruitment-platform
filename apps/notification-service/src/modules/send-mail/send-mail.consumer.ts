@@ -3,7 +3,7 @@ import {
   ForgotPasswordRequest,
   NOTIFICATION_GRPC_SERVICE,
   SendMailResponse,
-} from '@app/common';
+} from '@ai-recruit/common';
 import { Controller, UseFilters } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import { EmailService } from '../email';

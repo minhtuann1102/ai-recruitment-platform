@@ -1,4 +1,4 @@
-import { GetUsersRequest } from '@app/common';
+import { GetUsersRequest } from '@ai-recruit/common';
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class GetUsersDataDto implements GetUsersRequest {
