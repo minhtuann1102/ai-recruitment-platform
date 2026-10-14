@@ -1,315 +1,61 @@
 # Tích hợp AI Service
 
-> Tài liệu thiết kế interface, hợp đồng OpenAPI, và chiến lược chuyển từ mock sang FastAPI thật.
+> Tóm tắt cách `interview-service` tích hợp `ai-service`. **Thiết kế chi tiết và contract nằm ở [docs/ai-service/](../ai-service/README.md)** (nguồn duy nhất, tránh chép lại). Quyết định kiến trúc: [ADR-008](adr/adr-008-evaluator-per-turn-orchestrator.md).
 
 ## 1. Tổng quan
 
 ```
-interview-service (NestJS)          ai-service (FastAPI)
-┌────────────────────────┐          ┌──────────────────────┐
-│ AiInterviewClient      │  REST    │ POST /api/evaluate   │
-│   .evaluateAnswer()  ──┼────────▶ │                      │
-│   .startSession()    ──┼────────▶ │ POST /api/start      │
-│   .getNextQuestion() ──┼────────▶ │ POST /api/next       │
-│                        │ ◀────────┤                      │
-│ MockAiInterviewClient  │          │ GET  /api/health     │
-│ (giai doan hien tai)   │          └──────────────────────┘
-└────────────────────────┘
+interview-service (NestJS)               ai-service (FastAPI, stateless)
+┌─────────────────────────┐   REST/SSE   ┌───────────────────────────────┐
+│ AiInterviewClient       │              │ POST /api/cv/parse            │ CV Parser
+│   .parseCv()          ──┼────────────▶ │ POST /api/start      (SSE)    │ Planner → Interviewer
+│   .start()            ──┼────────────▶ │ POST /api/next-turn  (SSE)    │ Evaluator → policy → Interviewer
+│   .nextTurn()         ──┼────────────▶ │ POST /api/finalize            │ code tính điểm → Reporter
+│   .finalize()         ──┼────────────▶ │ GET  /api/health              │
+│ MockAiInterviewClient   │ ◀────────────┤                               │
+└─────────────────────────┘              └───────────────────────────────┘
 ```
 
 **Nguyên tắc:**
-- `interview-service` sở hữu **toàn bộ dữ liệu** phỏng vấn (xem [ADR-004](adr/adr-004-interview-data-ownership.md))
-- `ai-service` là **stateless processor** — nhận context, trả về kết quả
-- Giao tiếp qua **REST/HTTP** (xem [ADR-003](adr/adr-003-tcp-rest-transport.md))
-- Giai đoạn hiện tại dùng **mock** — thay thế bằng FastAPI thật mà không đổi interview-service
+- `interview-service` sở hữu **toàn bộ dữ liệu** phỏng vấn, kể cả plan và candidate state ([ADR-004](adr/adr-004-interview-data-ownership.md)). `ai-service` nhận state kèm mỗi request và trả state mới.
+- Giao tiếp REST/HTTP, streaming bằng SSE ([ADR-003](adr/adr-003-tcp-rest-transport.md)).
+- Code điều phối luồng; LLM chỉ làm việc hẹp. Ứng viên **không thấy điểm giữa phiên**, chỉ thấy báo cáo cuối buổi.
 
-## 2. Interface AiInterviewClient
+## 2. Agent
 
-Định nghĩa trong `apps/interview-service/src/modules/ai-client/`:
+| Agent | Chạy khi | Việc |
+|---|---|---|
+| CV Parser | Khi gắn CV | Trích xuất `cv_profile` (CV đã redact PII) |
+| Planner | Một lần, đầu buổi | Chọn 5–6 topic từ topic catalog theo `track` + `level` |
+| Evaluator | Sau mỗi câu trả lời | Chấm 4 tiêu chí (band 0–4), nêu ý có / thiếu / hiểu sai kèm trích dẫn |
+| Interviewer | Mỗi lượt | Diễn đạt một câu hỏi theo action policy đã chọn, stream token |
+| Reporter | Một lần, cuối buổi | Viết nhận xét; điểm do code tổng hợp, Reporter không sửa điểm |
+
+Chi tiết: [docs/ai-service/02](../ai-service/02-multi-agent-architecture-and-prompts.md) (agent, prompt), [03](../ai-service/03-orchestrator-state-machine.md) (state machine), [04](../ai-service/04-adaptive-loop-and-candidate-state.md) (adapt), [05](../ai-service/05-rubric-and-final-report.md) (rubric, report).
+
+## 3. Contract
+
+Public API (interview-service) và internal API (ai-service) mô tả đầy đủ ở [docs/ai-service/06-api-contract.md](../ai-service/06-api-contract.md). Interface phía NestJS:
 
 ```typescript
-// ai-interview-client.interface.ts
-
-export interface StartSessionRequest {
-  sessionId: string;
-  category: string;        // "Backend" | "Frontend" | "System Design"
-  difficulty: string;      // "easy" | "medium" | "hard"
-  candidateContext?: {
-    skills: string[];
-    experienceYears: number;
-  };
-}
-
-export interface StartSessionResponse {
-  firstQuestion: string;
-  questionMetadata: {
-    topic: string;
-    difficulty: string;
-    expectedTopics: string[];
-  };
-}
-
-export interface EvaluateAnswerRequest {
-  sessionId: string;
-  turnNumber: number;
-  question: string;
-  answer: string;
-  history: TurnHistory[];  // cac luot truoc
-}
-
-export interface TurnHistory {
-  turnNumber: number;
-  question: string;
-  answer: string;
-  scores?: CriteriaScores;
-}
-
-export interface EvaluateAnswerResponse {
-  scores: CriteriaScores;
-  agentDecision: AgentDecision;
-  nextQuestion: string;
-  reasoning: string;       // ly do ngan gon cho quyet dinh
-}
-
-export interface CriteriaScores {
-  technicalAccuracy: number;  // 0.0 - 10.0
-  relevance: number;          // 0.0 - 10.0
-  completeness: number;       // 0.0 - 10.0
-  extensibility: number;      // 0.0 - 10.0
-}
-
-export type AgentDecision = 'deepen' | 'switch_topic' | 'keep_difficulty';
-
-// Interface chinh
 export interface AiInterviewClient {
-  startSession(req: StartSessionRequest): Promise<StartSessionResponse>;
-  evaluateAnswer(req: EvaluateAnswerRequest): Promise<EvaluateAnswerResponse>;
+  parseCv(input: ParseCvInput): Promise<ParseCvResult>;
+  start(req: AiStartRequest): AsyncIterable<AiStreamEvent>;       // meta | token | replace | done | error
+  nextTurn(req: AiNextTurnRequest): AsyncIterable<AiStreamEvent>;
+  finalize(req: AiFinalizeRequest): Promise<AiReport>;
 }
 ```
 
-## 3. Mock Implementation
+## 4. Mock
 
-Giai đoạn hiện tại, `MockAiInterviewClient` implements interface trên:
+`MockAiInterviewClient` (NestJS) giữ cho dev: `start` / `nextTurn` phát câu hỏi từ `question_bank` thành một event `token` rồi `done`; `finalize` trả report điểm cố định. Mock FastAPI (`apps/ai-service/app/`) dùng để thử gateway routing.
 
-```typescript
-// mock-ai-interview-client.ts
+> **Trạng thái:** mock FastAPI (`apps/ai-service/app/`) đã cài đặt contract ở docs/ai-service/06: `cv/parse`, `start` và `next-turn` qua SSE, `finalize` trả report, `health`. Planner, Evaluator, Interviewer, Reporter và CV Parser trong mock dùng **quy tắc, không dùng LLM** (hình dạng request/response là thật, nội dung câu hỏi và điểm chỉ để tích hợp). Đặt `MOCK_STREAM_DELAY_MS` để mô phỏng độ trễ giữa các token khi thử streaming qua gateway.
 
-@Injectable()
-export class MockAiInterviewClient implements AiInterviewClient {
-  constructor(
-    // Inject question bank repository
-    private readonly questionBankRepo: QuestionBankRepository,
-  ) {}
+## 5. Topic catalog và dữ liệu
 
-  async startSession(req: StartSessionRequest): Promise<StartSessionResponse> {
-    const question = await this.questionBankRepo.findRandom({
-      category: req.category,
-      difficulty: req.difficulty,
-    });
-
-    return {
-      firstQuestion: question.questionText,
-      questionMetadata: {
-        topic: question.subcategory,
-        difficulty: question.difficulty,
-        expectedTopics: question.expectedTopics,
-      },
-    };
-  }
-
-  async evaluateAnswer(req: EvaluateAnswerRequest): Promise<EvaluateAnswerResponse> {
-    // Mock: tra ve scores co dinh + random cau hoi tiep
-    const nextQuestion = await this.questionBankRepo.findRandom({
-      category: req.history[0]?.question ? 'Backend' : 'General',
-    });
-
-    return {
-      scores: {
-        technicalAccuracy: 7.0,
-        relevance: 7.5,
-        completeness: 6.5,
-        extensibility: 6.0,
-      },
-      agentDecision: 'keep_difficulty',
-      nextQuestion: nextQuestion.questionText,
-      reasoning: 'Mock evaluation — scores co dinh.',
-    };
-  }
-}
-```
-
-**Đăng ký qua DI:**
-
-```typescript
-// ai-client.module.ts
-const AI_CLIENT_TOKEN = 'AI_INTERVIEW_CLIENT';
-
-@Module({
-  providers: [
-    {
-      provide: AI_CLIENT_TOKEN,
-      useClass: MockAiInterviewClient, // doi thanh RealAiInterviewClient sau
-    },
-  ],
-  exports: [AI_CLIENT_TOKEN],
-})
-export class AiClientModule {}
-```
-
-## 4. Hợp đồng OpenAPI — AI Service
-
-> Dùng làm contract trước khi code. Mock ai-service (FastAPI) implement contract này.
-
-### POST /api/evaluate
-
-**Request:**
-
-```json
-{
-  "session_id": "019234ab-...",
-  "turn_number": 3,
-  "question": "Giai thich su khac biet giua REST va GraphQL?",
-  "answer": "REST su dung HTTP methods, moi endpoint...",
-  "history": [
-    {
-      "turn_number": 1,
-      "question": "HTTP methods nao ban biet?",
-      "answer": "GET, POST, PUT, DELETE, PATCH...",
-      "scores": {
-        "technical_accuracy": 8.0,
-        "relevance": 9.0,
-        "completeness": 7.0,
-        "extensibility": 6.0
-      }
-    }
-  ],
-  "context": {
-    "category": "Backend",
-    "difficulty": "medium",
-    "candidate_skills": ["nodejs", "typescript", "postgresql"]
-  }
-}
-```
-
-**Response (200 OK):**
-
-```json
-{
-  "scores": {
-    "technical_accuracy": 7.5,
-    "relevance": 8.0,
-    "completeness": 6.5,
-    "extensibility": 7.0
-  },
-  "agent_decision": "deepen",
-  "next_question": "Ban da noi ve REST endpoints. Vay lam sao de thiet ke API co versioning tot?",
-  "reasoning": "Ung vien hieu co ban ve REST nhung chua de cap versioning va HATEOAS. Dao sau de danh gia chieu sau.",
-  "metadata": {
-    "model_version": "mock-v1",
-    "processing_time_ms": 150
-  }
-}
-```
-
-### POST /api/start
-
-**Request:**
-
-```json
-{
-  "session_id": "019234ab-...",
-  "category": "Backend",
-  "difficulty": "medium",
-  "candidate_context": {
-    "skills": ["nodejs", "typescript"],
-    "experience_years": 2
-  }
-}
-```
-
-**Response (200 OK):**
-
-```json
-{
-  "first_question": "Hay giai thich cach ban thiet ke mot REST API cho he thong quan ly nguoi dung.",
-  "question_metadata": {
-    "topic": "API Design",
-    "difficulty": "medium",
-    "expected_topics": ["REST principles", "HTTP methods", "resource naming", "status codes"]
-  }
-}
-```
-
-### GET /api/health
-
-**Response (200 OK):**
-
-```json
-{
-  "status": "healthy",
-  "version": "mock-v1",
-  "model_loaded": false
-}
-```
-
-### Error Response (4xx/5xx):
-
-```json
-{
-  "error": "invalid_request",
-  "message": "session_id is required",
-  "details": {}
-}
-```
-
-## 5. Mock FastAPI Service
-
-File `apps/ai-service/main.py` (chạy trong Docker):
-
-```python
-from fastapi import FastAPI
-import random
-
-app = FastAPI(title="AI Interview Service (Mock)", version="0.1.0")
-
-MOCK_QUESTIONS = [
-    "Giai thich su khac biet giua process va thread?",
-    "Design pattern nao ban thuong dung nhat? Tai sao?",
-    "Lam sao de toi uu hoa query SQL chay cham?",
-    "Giai thich CAP theorem va ap dung vao thiet ke he thong?",
-    "Event-driven architecture la gi? Khi nao nen dung?",
-]
-
-@app.get("/api/health")
-def health():
-    return {"status": "healthy", "version": "mock-v1", "model_loaded": False}
-
-@app.post("/api/start")
-def start_session(body: dict):
-    return {
-        "first_question": random.choice(MOCK_QUESTIONS),
-        "question_metadata": {
-            "topic": body.get("category", "General"),
-            "difficulty": body.get("difficulty", "medium"),
-            "expected_topics": ["concept", "example", "trade-off"],
-        },
-    }
-
-@app.post("/api/evaluate")
-def evaluate_answer(body: dict):
-    return {
-        "scores": {
-            "technical_accuracy": round(random.uniform(5.0, 9.0), 1),
-            "relevance": round(random.uniform(5.0, 9.0), 1),
-            "completeness": round(random.uniform(4.0, 8.0), 1),
-            "extensibility": round(random.uniform(4.0, 8.0), 1),
-        },
-        "agent_decision": random.choice(["deepen", "switch_topic", "keep_difficulty"]),
-        "next_question": random.choice(MOCK_QUESTIONS),
-        "reasoning": "Mock: random evaluation for testing.",
-        "metadata": {"model_version": "mock-v1", "processing_time_ms": 50},
-    }
-```
+- Chủ đề phỏng vấn theo vị trí nằm trong `apps/ai-service/app/catalog/*.yaml` (`java_backend`, `python_backend`, `nodejs_backend`, `ai_engineer`). Planner chỉ chọn topic có trong catalog.
+- RAG chỉ dùng `interview_qa` và `textbook`. Thiết kế đầy đủ: [rag-design.md](rag-design.md).
 
 ## 6. Docker Compose — Mock AI Service
 
@@ -372,7 +118,7 @@ APISIX route thêm:
 ### Phase 2: Integration (Sprint 2-3)
 
 1. **Tạo `RealAiInterviewClient`** implements `AiInterviewClient`:
-   - Dùng `HttpModule` (NestJS) gọi REST đến ai-service
+   - Gọi REST/SSE đến ai-service (đọc stream, không chờ cả body)
    - Map response từ snake_case (Python) sang camelCase (TS)
    - Retry logic, timeout, circuit breaker
 
@@ -391,12 +137,12 @@ APISIX route thêm:
    - RAG từ knowledge base (pgvector — xem [Section 8](#8-rag-knowledge-base))
    - **LLM: OpenAI GPT-4o-mini** cho evaluation + question generation
    - **Embedding: text-embedding-3-small** (1536 dims)
-   - Agent logic: deepen / switch_topic / keep_difficulty
+   - Orchestrator bằng code, policy chọn action (xem docs/ai-service)
 
 ### Phase 3: Optimization (stretch)
 
 - gRPC thay REST (nếu cần performance)
-- Streaming response (cho real-time typing effect)
+- (Streaming SSE đã chuyển vào phạm vi bắt buộc, xem ADR-008)
 - Caching RAG results trong Redis
 - A/B testing giữa các model
 
@@ -410,30 +156,19 @@ APISIX route thêm:
 | Loại | Nguồn | Volume mục tiêu | Tag source_type |
 |---|---|---|---|
 | Interview Q&A | Curated Q&A phỏng vấn CNTT (Backend, Frontend, System Design, DB, DevOps) | 200+ cặp | `interview_qa` |
-| Job Descriptions | Crawl từ topcv.vn, itviec.com, linkedin — extract skills/requirements | 500+ JD | `job_description` |
 | Textbook/Tutorial | Node.js docs, React docs, PostgreSQL docs, CS fundamentals, System Design | 5000+ chunks | `textbook` |
 
 ### Schema knowledge_chunks (ai_db)
 
-```sql
-CREATE TABLE knowledge_chunks (
-  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  content     TEXT NOT NULL,
-  embedding   vector(1536),
-  source_type VARCHAR(50),   -- 'interview_qa' | 'job_description' | 'textbook'
-  metadata    JSONB,         -- { topic, difficulty, source_url, category }
-  created_at  TIMESTAMPTZ DEFAULT now()
-);
-
-CREATE INDEX ON knowledge_chunks USING ivfflat (embedding vector_cosine_ops);
-```
+Schema đầy đủ, index và lý do: xem [rag-design.md](rag-design.md#3-schema-knowledge_chunks-thay-thế-bản-trong-ai-integrationmd). Tóm tắt: cột `content`, `content_hash` (unique), `embedding vector(1536)`, `embedding_model`, `source_type`, `category`, `difficulty`, `language`, `metadata JSONB`. Chưa tạo ANN index (exact scan), thêm HNSW khi cần.
 
 ### Retrieval flow
 
+Mỗi agent có tool retrieval riêng với bộ lọc khác nhau (Interviewer, Planner, Evaluator). Chi tiết: [rag-design.md](rag-design.md#4-retrieval-theo-từng-agent).
+
 ```
-Query (question + candidate context)
+Query (category + topic + tóm tắt câu trả lời)
   → embed (text-embedding-3-small)
-  → cosine similarity search (pgvector, top-5)
-  → filter by source_type nếu cần
-  → top-k chunks → inject vào prompt GPT-4o-mini
+  → cosine similarity (pgvector, top-5) + lọc source_type/category/difficulty
+  → khử trùng lặp theo qa_id → chèn vào prompt (≤ ~1500 token)
 ```

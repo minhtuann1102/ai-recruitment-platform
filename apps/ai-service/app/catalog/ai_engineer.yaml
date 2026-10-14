@@ -1,0 +1,77 @@
+track: ai_engineer
+title: AI/ML Engineer
+id_prefix: ai
+topics:
+  - id: ai.ml.fundamentals
+    title: Nền tảng machine learning
+    levels: [fresher, junior]
+    category: AI
+    key_concepts: [supervised vs unsupervised, bias và variance, overfitting và regularization, train/validation/test split, cross-validation]
+  - id: ai.ml.evaluation-metrics
+    title: Chỉ số đánh giá mô hình
+    levels: [fresher, junior, middle, senior]
+    category: AI
+    key_concepts: [precision recall F1, ROC AUC, dữ liệu mất cân bằng, chọn ngưỡng, metric theo bài toán]
+  - id: ai.ml.feature-leakage
+    title: Feature engineering và data leakage
+    levels: [fresher, junior, middle]
+    category: AI
+    key_concepts: [xử lý giá trị thiếu, encoding biến phân loại, scaling, data leakage, pipeline tái lập]
+  - id: ai.dl.neural-network-training
+    title: Huấn luyện mạng nơ-ron
+    levels: [fresher, junior, middle]
+    category: AI
+    key_concepts: [backpropagation, optimizer, learning rate, vanishing gradient, dropout và batch norm]
+  - id: ai.dl.transformers-attention
+    title: Transformer và attention
+    levels: [middle, senior]
+    category: AI
+    key_concepts: [self-attention, positional encoding, encoder vs decoder, độ phức tạp theo độ dài chuỗi, tokenization]
+  - id: ai.llm.prompting-structured-output
+    title: Prompt và đầu ra có cấu trúc
+    levels: [fresher, junior, middle]
+    category: AI
+    key_concepts: [system prompt, few-shot, JSON schema output, temperature, xử lý đầu ra bị cắt]
+  - id: ai.llm.embeddings-vector-search
+    title: Embedding và tìm kiếm vector
+    levels: [fresher, junior, middle, senior]
+    category: AI
+    key_concepts: [embedding là gì, cosine similarity, index HNSW vs IVFFlat, chọn embedding model, đa ngôn ngữ]
+  - id: ai.llm.rag-pipeline
+    title: Pipeline RAG
+    levels: [junior, middle, senior]
+    category: AI
+    key_concepts: [chunking, retrieval và rerank, hybrid search, chống hallucination, đo recall]
+  - id: ai.llm.evaluation-hallucination
+    title: Đánh giá LLM và hallucination
+    levels: [middle, senior]
+    category: AI
+    key_concepts: [golden set, LLM-as-judge và thiên lệch, faithfulness, regression test cho prompt, human review]
+  - id: ai.llm.agents-tool-use
+    title: Agent và tool use
+    levels: [middle, senior]
+    category: AI
+    key_concepts: [workflow vs agent, function calling, vòng lặp plan act observe, giới hạn bước, prompt injection]
+  - id: ai.llm.cost-latency
+    title: Tối ưu chi phí và độ trễ LLM
+    levels: [middle, senior]
+    category: AI
+    key_concepts: [token budget, streaming, prompt caching, chọn model nhỏ, batching]
+  - id: ai.mlops.serving-monitoring
+    title: Triển khai và giám sát mô hình
+    levels: [middle, senior]
+    category: DevOps
+    key_concepts: [model serving, versioning, data drift, canary release, logging và alert]
+scenarios:
+  - id: scn.ai.cv-job-matching
+    title: Xây dựng hệ thống gợi ý việc làm từ CV
+    levels: [fresher, junior, middle]
+  - id: scn.ai.docs-qa-rag
+    title: Thiết kế chatbot hỏi đáp tài liệu nội bộ bằng RAG
+    levels: [middle, senior]
+  - id: scn.ai.model-drift-incident
+    title: Điều tra mô hình giảm chất lượng sau khi triển khai
+    levels: [senior]
+  - id: scn.ai.prompt-injection-defense
+    title: Bảo vệ ứng dụng LLM khỏi prompt injection
+    levels: [junior, middle, senior]

@@ -1,0 +1,82 @@
+track: nodejs_backend
+title: Node.js Backend Developer
+id_prefix: node
+topics:
+  - id: node.core.event-loop
+    title: Event loop của Node.js
+    levels: [fresher, junior, middle, senior]
+    category: Backend
+    key_concepts: [các pha của event loop, microtask vs macrotask, blocking vs non-blocking, libuv thread pool, setImmediate vs nextTick]
+  - id: node.core.async-promises
+    title: Bất đồng bộ, Promise và async/await
+    levels: [fresher, junior, middle]
+    category: Backend
+    key_concepts: [callback hell, Promise.all vs allSettled, xử lý lỗi với async/await, unhandled rejection, thứ tự thực thi]
+  - id: node.core.streams-buffers
+    title: Stream và Buffer
+    levels: [middle, senior]
+    category: Backend
+    key_concepts: [readable và writable stream, backpressure, pipeline, Buffer, xử lý file lớn]
+  - id: node.core.worker-cluster
+    title: Worker threads và cluster
+    levels: [middle, senior]
+    category: Backend
+    key_concepts: [tác vụ CPU-bound, worker_threads, cluster và nhiều process, giao tiếp giữa worker, scale theo chiều ngang]
+  - id: node.web.express-middleware
+    title: Express và middleware
+    levels: [fresher, junior]
+    category: Backend
+    key_concepts: [thứ tự middleware, error-handling middleware, routing, body parsing, xử lý bất đồng bộ trong route]
+  - id: node.web.nestjs-di
+    title: NestJS module và Dependency Injection
+    levels: [fresher, junior, middle]
+    category: Backend
+    key_concepts: [module và provider, injection scope, guard interceptor pipe, DTO và validation, custom provider]
+  - id: node.web.api-auth-jwt
+    title: Xác thực JWT và phân quyền
+    levels: [junior, middle, senior]
+    category: Backend
+    key_concepts: [JWT cấu trúc và rủi ro, refresh token rotation, RBAC, bcrypt hash mật khẩu, CORS]
+  - id: node.data.orm-transactions
+    title: ORM, transaction và migration
+    levels: [junior, middle, senior]
+    category: Database
+    key_concepts: [unit of work, N+1 query, transaction và isolation, migration an toàn, connection pool]
+  - id: node.data.redis-caching
+    title: Cache với Redis
+    levels: [middle, senior]
+    category: Database
+    key_concepts: [cache-aside, TTL và eviction, cache stampede, rate limiting bằng Redis, persistence RDB và AOF]
+  - id: node.arch.queues-bullmq
+    title: Hàng đợi tác vụ (BullMQ, RabbitMQ)
+    levels: [middle, senior]
+    category: System Design
+    key_concepts: [producer và worker, retry và backoff, idempotency, dead letter, giám sát hàng đợi]
+  - id: node.perf.profiling-memory
+    title: Profiling và rò rỉ bộ nhớ
+    levels: [senior]
+    category: Backend
+    key_concepts: [heap snapshot, event loop lag, closure và listener gây leak, clinic và 0x, giới hạn heap]
+  - id: node.lang.typescript-types
+    title: TypeScript cho backend
+    levels: [fresher, junior, middle]
+    category: Backend
+    key_concepts: [interface vs type, generics, union và narrowing, utility types, kiểm tra dữ liệu lúc chạy]
+  - id: node.test.jest-testing
+    title: Kiểm thử với Jest
+    levels: [fresher, junior, middle]
+    category: Backend
+    key_concepts: [unit vs integration test, mock và spy, supertest, test bất đồng bộ, test isolation]
+scenarios:
+  - id: scn.node.file-upload-service
+    title: Thiết kế dịch vụ upload file lớn
+    levels: [fresher, junior, middle]
+  - id: scn.node.rate-limit-api
+    title: Thêm rate limit cho API công khai
+    levels: [junior, middle]
+  - id: scn.node.realtime-notifications
+    title: Thiết kế thông báo thời gian thực cho nhiều người dùng
+    levels: [middle, senior]
+  - id: scn.node.cache-stampede
+    title: Xử lý cache stampede khi key nóng hết hạn
+    levels: [senior]

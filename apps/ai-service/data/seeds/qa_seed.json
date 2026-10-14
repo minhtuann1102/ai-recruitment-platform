@@ -1,0 +1,603 @@
+[
+  {
+    "question": "Các HTTP method GET, POST, PUT, PATCH, DELETE khác nhau thế nào và dùng khi nào?",
+    "answer": "GET dùng để đọc tài nguyên, không thay đổi dữ liệu. POST tạo tài nguyên mới hoặc kích hoạt một hành động. PUT thay thế toàn bộ tài nguyên, PATCH chỉ cập nhật một phần. DELETE xóa tài nguyên. GET, PUT, DELETE là idempotent còn POST thì không.",
+    "category": "Backend",
+    "difficulty": "easy",
+    "tags": [
+      "http",
+      "rest"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "Idempotent trong REST API nghĩa là gì? Cho ví dụ với PUT và DELETE.",
+    "answer": "Một request là idempotent khi gọi nó một lần hay nhiều lần đều để hệ thống ở cùng một trạng thái. PUT /users/1 với cùng body nhiều lần cho cùng kết quả cuối. DELETE /users/1 lần đầu xóa, các lần sau trả 404 nhưng trạng thái hệ thống không đổi. Tính chất này giúp client retry an toàn khi mạng lỗi.",
+    "category": "Backend",
+    "difficulty": "medium",
+    "tags": [
+      "rest",
+      "idempotent"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "Ý nghĩa của các status code 200, 201, 204, 400, 401, 403, 404, 409, 500?",
+    "answer": "200 thành công, 201 đã tạo mới, 204 thành công nhưng không có body. 400 request sai, 401 chưa xác thực, 403 đã xác thực nhưng không đủ quyền, 404 không tìm thấy, 409 xung đột trạng thái (ví dụ trùng email). 500 lỗi phía server.",
+    "category": "Backend",
+    "difficulty": "easy",
+    "tags": [
+      "http",
+      "status-code"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "Authentication khác Authorization thế nào? JWT hoạt động ra sao?",
+    "answer": "Authentication xác minh bạn là ai, Authorization quyết định bạn được làm gì. JWT gồm header, payload và signature; server ký token bằng secret hoặc private key sau khi login, client gửi token trong header Authorization. Server chỉ cần verify chữ ký và đọc claims, không cần lưu session, nhưng không nên để dữ liệu nhạy cảm trong payload vì nó chỉ được encode chứ không mã hóa.",
+    "category": "Backend",
+    "difficulty": "medium",
+    "tags": [
+      "auth",
+      "jwt"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "JWT có nhược điểm gì? Làm sao hỗ trợ logout và thu hồi token?",
+    "answer": "JWT stateless nên khó thu hồi trước khi hết hạn. Cách xử lý: access token sống ngắn (vài phút) kết hợp refresh token lưu server-side để có thể revoke, hoặc dùng blacklist/jti trong Redis cho các token cần vô hiệu ngay. Cần xoay vòng refresh token (rotation) và phát hiện tái sử dụng để chống đánh cắp.",
+    "category": "Backend",
+    "difficulty": "hard",
+    "tags": [
+      "jwt",
+      "security"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "Event loop trong Node.js là gì? Vì sao Node.js single-thread vẫn xử lý được nhiều request?",
+    "answer": "Event loop là cơ chế lặp lấy callback từ các hàng đợi để thực thi trên một thread JavaScript. Các tác vụ I/O như mạng, file được giao cho libuv và hệ điều hành xử lý bất đồng bộ, khi xong mới đẩy callback về event loop. Vì thread không bị chặn khi chờ I/O nên một process xử lý được hàng nghìn kết nối đồng thời.",
+    "category": "Backend",
+    "difficulty": "medium",
+    "tags": [
+      "nodejs",
+      "event-loop"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "Điều gì xảy ra khi tác vụ CPU-bound chặn event loop và cách xử lý?",
+    "answer": "Tác vụ CPU nặng như tính hash lớn hay xử lý JSON khổng lồ chiếm thread chính khiến mọi request khác bị treo, latency tăng đột biến. Giải pháp: chuyển sang worker_threads hoặc child process, đẩy vào hàng đợi (BullMQ, RabbitMQ) cho worker riêng xử lý, hoặc chia nhỏ công việc bằng setImmediate. Cần đo bằng event loop lag để phát hiện.",
+    "category": "Backend",
+    "difficulty": "hard",
+    "tags": [
+      "nodejs",
+      "performance"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "So sánh REST và GraphQL. Khi nào chọn cái nào?",
+    "answer": "REST đơn giản, dễ cache bằng HTTP, phù hợp API tài nguyên rõ ràng. GraphQL cho client chọn đúng trường cần lấy, giảm over-fetching và gộp nhiều tài nguyên trong một request, hợp với client đa dạng. Đổi lại GraphQL khó cache, dễ gặp N+1, và cần giới hạn độ sâu và độ phức tạp query để tránh bị lạm dụng.",
+    "category": "Backend",
+    "difficulty": "medium",
+    "tags": [
+      "rest",
+      "graphql"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "Có những cách nào để versioning một API? Ưu nhược điểm?",
+    "answer": "Phổ biến nhất là đặt version trong URL như /v1/users, dễ thấy và dễ route nhưng URL thay đổi. Cách khác là header (Accept: application/vnd.api.v2+json) hoặc query param, sạch URL hơn nhưng khó test bằng trình duyệt. Dù chọn cách nào, nên tránh breaking change, thêm trường thay vì đổi nghĩa, và có chính sách deprecate rõ ràng.",
+    "category": "Backend",
+    "difficulty": "medium",
+    "tags": [
+      "api",
+      "versioning"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "Rate limiting là gì? Giải thích token bucket và sliding window.",
+    "answer": "Rate limiting giới hạn số request trong một khoảng thời gian để chống lạm dụng và bảo vệ tài nguyên. Token bucket cấp token đều đặn vào xô, mỗi request lấy một token, cho phép bùng phát ngắn trong dung lượng xô. Sliding window đếm request trong cửa sổ trượt nên mượt hơn fixed window và tránh bùng phát ở ranh giới cửa sổ. Thường lưu bộ đếm trong Redis.",
+    "category": "Backend",
+    "difficulty": "medium",
+    "tags": [
+      "rate-limit",
+      "security"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "Làm sao đảm bảo API thanh toán không trừ tiền hai lần khi client retry?",
+    "answer": "Dùng idempotency key: client gửi một key duy nhất cho mỗi thao tác, server lưu key cùng kết quả trong bảng có ràng buộc unique. Nếu nhận lại cùng key thì trả về kết quả đã lưu thay vì xử lý lại. Cần xử lý cả trường hợp hai request cùng key đến đồng thời bằng unique constraint hoặc lock, và đặt thời hạn lưu key.",
+    "category": "Backend",
+    "difficulty": "hard",
+    "tags": [
+      "payment",
+      "idempotency"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "Dependency Injection là gì và lợi ích khi dùng trong NestJS?",
+    "answer": "DI là kỹ thuật để một class nhận các phụ thuộc từ bên ngoài thay vì tự tạo. NestJS có container quản lý vòng đời provider và tự inject qua constructor. Lợi ích: code ít phụ thuộc cứng, dễ thay bằng mock khi viết unit test, và dễ thay thế cài đặt (ví dụ chuyển từ mock client sang client thật) mà không sửa nơi dùng.",
+    "category": "Backend",
+    "difficulty": "easy",
+    "tags": [
+      "di",
+      "nestjs"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "Pagination kiểu offset và cursor khác nhau thế nào?",
+    "answer": "Offset dùng LIMIT và OFFSET, dễ cài đặt, cho phép nhảy trang nhưng chậm dần khi offset lớn và có thể trùng hoặc sót bản ghi nếu dữ liệu thay đổi giữa các trang. Cursor dùng giá trị của bản ghi cuối (ví dụ id hoặc thời gian tạo) để lấy trang kế tiếp, nhanh và ổn định với dữ liệu lớn nhưng không nhảy được tới trang tùy ý.",
+    "category": "Backend",
+    "difficulty": "medium",
+    "tags": [
+      "api",
+      "pagination"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "N+1 query là gì? Cách phát hiện và khắc phục khi dùng ORM?",
+    "answer": "N+1 xảy ra khi lấy danh sách N bản ghi rồi chạy thêm một query cho mỗi bản ghi để lấy quan hệ, tổng N+1 query. Phát hiện bằng log query hoặc công cụ profiling. Khắc phục bằng eager loading hoặc join (populate trong MikroORM, include trong Prisma), batch query theo danh sách id, hoặc DataLoader trong GraphQL.",
+    "category": "Backend",
+    "difficulty": "hard",
+    "tags": [
+      "orm",
+      "n+1",
+      "performance"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "Virtual DOM là gì và tại sao React dùng nó?",
+    "answer": "Virtual DOM là biểu diễn nhẹ của cây DOM bằng object JavaScript. Khi state đổi, React tạo cây mới, so sánh với cây cũ (reconciliation) và chỉ áp dụng phần khác biệt lên DOM thật. Cách này giúp cập nhật giao diện khai báo và tránh thao tác DOM thủ công, nhưng không phải lúc nào cũng nhanh hơn thao tác DOM trực tiếp.",
+    "category": "Frontend",
+    "difficulty": "easy",
+    "tags": [
+      "react",
+      "virtual-dom"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "useEffect hoạt động thế nào? Dependency array và cleanup dùng để làm gì?",
+    "answer": "useEffect chạy sau khi render để thực hiện side effect như gọi API hay đăng ký sự kiện. Dependency array xác định khi nào effect chạy lại: mảng rỗng chạy một lần, có giá trị thì chạy khi giá trị đó đổi. Hàm cleanup được gọi trước lần chạy tiếp theo và khi unmount, dùng để hủy subscription, timer hoặc request. Thiếu dependency dễ gây stale closure.",
+    "category": "Frontend",
+    "difficulty": "medium",
+    "tags": [
+      "react",
+      "hooks"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "useMemo và useCallback khác nhau thế nào? Khi nào nên dùng?",
+    "answer": "useMemo ghi nhớ kết quả của một phép tính, useCallback ghi nhớ chính hàm. Chúng hữu ích khi tính toán tốn kém hoặc khi truyền props xuống component được bọc React.memo để tránh render lại thừa. Dùng bừa bãi thì tốn bộ nhớ và làm code khó đọc, nên đo bằng profiler trước khi tối ưu.",
+    "category": "Frontend",
+    "difficulty": "medium",
+    "tags": [
+      "react",
+      "performance"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "So sánh Context, Redux và các thư viện như Zustand, React Query để quản lý state.",
+    "answer": "Context phù hợp dữ liệu ít thay đổi như theme, nhưng khi value đổi mọi consumer đều render lại. Redux (Toolkit) cho luồng dữ liệu một chiều rõ ràng, devtools mạnh, hợp ứng dụng lớn. Zustand nhẹ hơn, ít boilerplate. Với dữ liệu từ server nên dùng React Query hoặc SWR để lo cache, refetch và trạng thái loading thay vì tự đặt vào store.",
+    "category": "Frontend",
+    "difficulty": "medium",
+    "tags": [
+      "react",
+      "state-management"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "Event bubbling và event delegation là gì?",
+    "answer": "Bubbling là việc sự kiện nổi từ phần tử con lên các phần tử cha. Event delegation tận dụng điều này bằng cách gắn một listener ở phần tử cha và dùng event.target để xác định phần tử con được tác động. Cách này tiết kiệm listener và hoạt động với phần tử được thêm động sau này.",
+    "category": "Frontend",
+    "difficulty": "easy",
+    "tags": [
+      "javascript",
+      "dom"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "CORS là gì? Preflight request hoạt động thế nào?",
+    "answer": "CORS là cơ chế trình duyệt cho phép hoặc chặn request giữa các origin khác nhau dựa trên header phản hồi như Access-Control-Allow-Origin. Với request không đơn giản (method khác GET/POST, header tùy chỉnh) trình duyệt gửi trước một request OPTIONS gọi là preflight để hỏi server có cho phép không. CORS do trình duyệt thực thi, không bảo vệ API khỏi các client khác.",
+    "category": "Frontend",
+    "difficulty": "medium",
+    "tags": [
+      "http",
+      "cors",
+      "security"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "Closure trong JavaScript là gì? Cho một ví dụ ứng dụng.",
+    "answer": "Closure là hàm ghi nhớ được biến ở phạm vi bên ngoài nơi nó được tạo ra, kể cả khi phạm vi đó đã kết thúc. Ví dụ hàm tạo bộ đếm trả về một hàm tăng biến count giữ riêng, hoặc debounce giữ timer. Closure cũng là nguyên nhân của stale closure trong hooks khi hàm giữ giá trị state cũ.",
+    "category": "Frontend",
+    "difficulty": "medium",
+    "tags": [
+      "javascript",
+      "closure"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "Làm sao tối ưu hiển thị danh sách hàng chục nghìn phần tử trong React?",
+    "answer": "Dùng virtualization (react-window, TanStack Virtual) để chỉ render các dòng nhìn thấy trong viewport. Kết hợp key ổn định, React.memo cho item, tránh tạo object hoặc hàm mới ở mỗi render, phân trang hoặc infinite scroll phía server. Đo bằng React Profiler để xác nhận điểm nghẽn thật sự.",
+    "category": "Frontend",
+    "difficulty": "hard",
+    "tags": [
+      "react",
+      "performance",
+      "virtualization"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "So sánh CSR, SSR và SSG. Next.js hỗ trợ ra sao?",
+    "answer": "CSR render ở trình duyệt, tải ban đầu chậm và SEO kém hơn. SSR render HTML trên server mỗi request, tốt cho SEO và dữ liệu luôn mới nhưng tốn tài nguyên server. SSG dựng HTML sẵn lúc build, rất nhanh và rẻ nhưng dữ liệu cũ nếu không dùng revalidate. Next.js cho chọn theo từng trang, có ISR để làm mới trang tĩnh theo chu kỳ.",
+    "category": "Frontend",
+    "difficulty": "medium",
+    "tags": [
+      "nextjs",
+      "ssr"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "Core Web Vitals gồm những chỉ số nào và cải thiện ra sao?",
+    "answer": "Gồm LCP (tốc độ hiển thị nội dung chính), INP (độ phản hồi khi tương tác) và CLS (độ ổn định bố cục). Cải thiện LCP bằng tối ưu ảnh, preload tài nguyên quan trọng, giảm blocking JS. INP bằng chia nhỏ tác vụ JS dài. CLS bằng đặt kích thước cho ảnh, quảng cáo và font để bố cục không bị dịch chuyển.",
+    "category": "Frontend",
+    "difficulty": "medium",
+    "tags": [
+      "web-performance",
+      "core-web-vitals"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "Index trong cơ sở dữ liệu là gì? Ưu và nhược điểm?",
+    "answer": "Index là cấu trúc dữ liệu phụ (thường là B-tree) giúp tìm bản ghi nhanh mà không phải quét toàn bảng. Ưu điểm: truy vấn đọc, lọc, sắp xếp nhanh hơn nhiều. Nhược điểm: tốn dung lượng và làm chậm INSERT, UPDATE, DELETE vì phải cập nhật index, nên chỉ tạo index cho cột thực sự được truy vấn nhiều.",
+    "category": "Database",
+    "difficulty": "easy",
+    "tags": [
+      "index",
+      "performance"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "Composite index: thứ tự cột quan trọng thế nào? Nguyên tắc leftmost prefix là gì?",
+    "answer": "Composite index trên (a, b, c) sắp xếp theo a, rồi b, rồi c nên chỉ dùng hiệu quả khi truy vấn lọc theo a, hoặc a và b, hoặc cả ba (leftmost prefix). Lọc chỉ theo b hoặc c thường không tận dụng được index. Nên đặt cột có điều kiện bằng (equality) và có độ chọn lọc cao lên trước, cột dùng cho range hoặc sắp xếp đặt sau.",
+    "category": "Database",
+    "difficulty": "medium",
+    "tags": [
+      "index",
+      "postgresql"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "ACID là gì? Giải thích từng thành phần.",
+    "answer": "Atomicity: giao dịch thực hiện hết hoặc không gì cả. Consistency: giao dịch đưa dữ liệu từ trạng thái hợp lệ này sang trạng thái hợp lệ khác theo ràng buộc. Isolation: các giao dịch đồng thời không nhìn thấy trạng thái dở dang của nhau. Durability: sau khi commit, dữ liệu không mất kể cả khi hệ thống sập, thường nhờ write-ahead log.",
+    "category": "Database",
+    "difficulty": "medium",
+    "tags": [
+      "transaction",
+      "acid"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "Các mức isolation level và những hiện tượng dirty read, non-repeatable read, phantom read?",
+    "answer": "Read Uncommitted cho phép dirty read (đọc dữ liệu chưa commit). Read Committed chặn dirty read nhưng vẫn có non-repeatable read (đọc lại một dòng thấy giá trị khác). Repeatable Read chặn non-repeatable read, còn phantom read (xuất hiện dòng mới) tùy hệ quản trị. Serializable chặn hết nhưng tốn hiệu năng. PostgreSQL mặc định Read Committed.",
+    "category": "Database",
+    "difficulty": "medium",
+    "tags": [
+      "transaction",
+      "isolation"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "INNER JOIN và LEFT JOIN khác nhau thế nào?",
+    "answer": "INNER JOIN chỉ trả các dòng có khớp ở cả hai bảng. LEFT JOIN trả tất cả dòng của bảng bên trái, với cột của bảng phải là NULL khi không có dòng khớp. Dùng LEFT JOIN khi cần giữ cả các bản ghi chưa có dữ liệu liên quan, ví dụ liệt kê mọi user kể cả chưa có đơn hàng.",
+    "category": "Database",
+    "difficulty": "easy",
+    "tags": [
+      "sql",
+      "join"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "Chuẩn hóa dữ liệu là gì? Khi nào nên denormalize?",
+    "answer": "Chuẩn hóa tách dữ liệu thành các bảng để giảm trùng lặp và tránh bất thường khi cập nhật (thường tới dạng chuẩn 3). Denormalize là chủ động lưu trùng một phần dữ liệu để đọc nhanh hơn, ví dụ lưu sẵn tổng số bình luận, khi chi phí join quá lớn. Đổi lại phải tự giữ đồng bộ dữ liệu trùng lặp.",
+    "category": "Database",
+    "difficulty": "medium",
+    "tags": [
+      "normalization",
+      "design"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "Làm sao phân tích và tối ưu một câu query chậm trong PostgreSQL?",
+    "answer": "Chạy EXPLAIN (ANALYZE, BUFFERS) để xem kế hoạch thực thi thật: có Seq Scan trên bảng lớn không, số dòng ước lượng lệch nhiều so với thực tế không, thời gian nằm ở node nào. Hướng xử lý: thêm hoặc sửa index phù hợp, viết lại điều kiện để dùng được index, cập nhật thống kê bằng ANALYZE, tránh SELECT *, và xem xét phân trang hoặc materialized view cho truy vấn nặng.",
+    "category": "Database",
+    "difficulty": "hard",
+    "tags": [
+      "postgresql",
+      "explain",
+      "performance"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "Khi nào chọn SQL và khi nào chọn NoSQL?",
+    "answer": "SQL hợp dữ liệu có cấu trúc, quan hệ rõ ràng và cần giao dịch ACID, truy vấn linh hoạt bằng join. NoSQL (document, key-value, wide-column) hợp dữ liệu schema linh hoạt, cần mở rộng ngang lớn hoặc truy cập theo khóa với độ trễ thấp. Nhiều hệ thống dùng cả hai, ví dụ PostgreSQL cho dữ liệu chính và Redis cho cache.",
+    "category": "Database",
+    "difficulty": "medium",
+    "tags": [
+      "sql",
+      "nosql"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "Deadlock là gì? Cách giảm thiểu trong ứng dụng?",
+    "answer": "Deadlock xảy ra khi hai giao dịch giữ khóa mà mỗi bên chờ khóa của bên kia, không ai tiếp tục được; hệ quản trị sẽ hủy một giao dịch. Giảm thiểu bằng cách luôn khóa tài nguyên theo cùng một thứ tự, giữ giao dịch ngắn, tránh tương tác người dùng trong giao dịch, và thiết kế retry cho lỗi deadlock.",
+    "category": "Database",
+    "difficulty": "hard",
+    "tags": [
+      "transaction",
+      "deadlock"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "Làm sao thay đổi schema không gây downtime (zero-downtime migration)?",
+    "answer": "Áp dụng mô hình expand và contract: thêm cột hoặc bảng mới tương thích ngược, triển khai code ghi vào cả hai, backfill dữ liệu cũ theo lô nhỏ, chuyển code đọc sang cấu trúc mới rồi mới xóa cấu trúc cũ ở bản phát hành sau. Tránh thao tác khóa bảng lâu như thêm cột NOT NULL có default trên bảng lớn ở phiên bản cũ, và tạo index với CONCURRENTLY.",
+    "category": "Database",
+    "difficulty": "medium",
+    "tags": [
+      "migration",
+      "zero-downtime"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "Giải thích định lý CAP và cách áp dụng khi thiết kế hệ thống.",
+    "answer": "CAP nói rằng khi xảy ra phân vùng mạng (Partition), hệ phân tán chỉ có thể chọn giữ Consistency hoặc Availability. Hệ CP ưu tiên dữ liệu nhất quán và có thể từ chối request khi phân vùng, hệ AP luôn phản hồi nhưng dữ liệu có thể tạm thời lệch (eventual consistency). Cần chọn theo nghiệp vụ: số dư tài khoản cần nhất quán, còn số lượt thích có thể chấp nhận trễ.",
+    "category": "System Design",
+    "difficulty": "medium",
+    "tags": [
+      "cap",
+      "distributed"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "Các chiến lược caching: cache-aside, write-through, write-back? Vấn đề invalidation?",
+    "answer": "Cache-aside: ứng dụng tự đọc cache, nếu trượt thì đọc DB rồi ghi vào cache. Write-through ghi đồng thời cache và DB, dữ liệu nhất quán nhưng ghi chậm hơn. Write-back ghi cache trước rồi đồng bộ DB sau, nhanh nhưng có nguy cơ mất dữ liệu. Invalidation khó vì phải giữ cache khớp dữ liệu gốc; thường dùng TTL kết hợp xóa key khi dữ liệu thay đổi.",
+    "category": "System Design",
+    "difficulty": "medium",
+    "tags": [
+      "cache",
+      "redis"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "Load balancer L4 và L7 khác nhau thế nào? Các thuật toán phân phối phổ biến?",
+    "answer": "L4 cân bằng ở tầng TCP/UDP dựa trên IP và port, nhanh và đơn giản. L7 hiểu HTTP nên có thể định tuyến theo URL, header, cookie và terminate TLS. Thuật toán gồm round-robin, least connections, và consistent hashing khi cần gắn client với một server cụ thể. Cần kèm health check để loại server lỗi.",
+    "category": "System Design",
+    "difficulty": "medium",
+    "tags": [
+      "load-balancer",
+      "networking"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "Thiết kế dịch vụ rút gọn URL (URL shortener).",
+    "answer": "Yêu cầu chính: tạo link ngắn, redirect nhanh, đọc nhiều hơn ghi rất nhiều. Sinh mã bằng bộ đếm phân tán mã hóa base62 hoặc hash cắt ngắn có kiểm tra trùng. Lưu ánh xạ trong key-value store hoặc PostgreSQL có index trên mã, đặt Redis cache phía trước cho các link nóng. Redirect dùng 301 hoặc 302 tùy nhu cầu thống kê, thêm rate limit và hạn sử dụng cho link.",
+    "category": "System Design",
+    "difficulty": "hard",
+    "tags": [
+      "url-shortener",
+      "design"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "Khi nào dùng message queue? So sánh at-least-once và exactly-once.",
+    "answer": "Dùng queue để tách các thành phần, xử lý bất đồng bộ, san phẳng tải đột biến và chịu lỗi tạm thời của consumer. At-least-once đảm bảo không mất message nhưng có thể giao lặp, nên consumer phải idempotent. Exactly-once rất khó và đắt, thường đạt được bằng at-least-once cộng khử trùng lặp hoặc giao dịch ở phía xử lý.",
+    "category": "System Design",
+    "difficulty": "medium",
+    "tags": [
+      "message-queue",
+      "async"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "Đánh đổi giữa monolith và microservices?",
+    "answer": "Monolith đơn giản để phát triển, triển khai và debug, phù hợp đội nhỏ và giai đoạn đầu. Microservices cho phép mở rộng và triển khai độc lập theo từng service, tách biệt lỗi và phù hợp nhiều đội, nhưng kéo theo chi phí vận hành, giao dịch phân tán, độ trễ mạng và khó theo dõi. Nên bắt đầu bằng monolith có ranh giới module rõ rồi tách dần khi có nhu cầu thật.",
+    "category": "System Design",
+    "difficulty": "hard",
+    "tags": [
+      "microservices",
+      "architecture"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "Sharding và replication khác nhau thế nào? Khi nào cần mỗi loại?",
+    "answer": "Replication sao chép cùng dữ liệu sang nhiều node để tăng khả năng đọc và chịu lỗi, nhưng không tăng dung lượng ghi. Sharding chia dữ liệu thành các phần đặt trên các node khác nhau để mở rộng cả dung lượng lẫn thông lượng ghi. Sharding làm phức tạp truy vấn xuyên shard và việc chọn shard key; chỉ nên dùng khi một node không còn đáp ứng nổi.",
+    "category": "System Design",
+    "difficulty": "hard",
+    "tags": [
+      "sharding",
+      "replication",
+      "database"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "Event-driven architecture là gì? Khi nào nên dùng?",
+    "answer": "Các thành phần giao tiếp bằng cách phát và lắng nghe sự kiện thay vì gọi trực tiếp nhau, thường qua message broker. Lợi ích: giảm phụ thuộc, dễ thêm consumer mới, xử lý bất đồng bộ. Hợp với luồng nghiệp vụ nhiều bước hoặc thông báo cho nhiều bên. Nhược điểm: khó theo dõi luồng, cần xử lý thứ tự, trùng lặp và nhất quán cuối cùng.",
+    "category": "System Design",
+    "difficulty": "medium",
+    "tags": [
+      "event-driven",
+      "architecture"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "Docker image và container khác nhau thế nào?",
+    "answer": "Image là bản mẫu chỉ đọc gồm các lớp (layer) chứa code, thư viện và cấu hình. Container là một instance đang chạy của image, có thêm lớp ghi mỏng và được cô lập bằng namespace và cgroups. Một image có thể chạy nhiều container cùng lúc.",
+    "category": "DevOps",
+    "difficulty": "easy",
+    "tags": [
+      "docker"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "Những thực hành tốt khi viết Dockerfile?",
+    "answer": "Dùng multi-stage build để image cuối nhỏ, sắp xếp lệnh COPY và RUN sao cho tận dụng layer cache (copy file dependency trước), dùng base image nhỏ và ghim version, chạy bằng user không phải root, thêm .dockerignore, và không nhúng secret vào image. Mỗi container nên chạy một tiến trình chính.",
+    "category": "DevOps",
+    "difficulty": "medium",
+    "tags": [
+      "docker",
+      "best-practices"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "CI và CD khác nhau thế nào? Một pipeline thường gồm những bước nào?",
+    "answer": "CI tích hợp code liên tục: mỗi lần push tự động build, lint và chạy test để phát hiện lỗi sớm. CD là phát hành liên tục: tự động đưa bản build đã qua kiểm tra lên môi trường staging hoặc production (delivery cần duyệt tay, deployment tự động hoàn toàn). Pipeline thường có các bước lint, test, build image, quét bảo mật, deploy và smoke test.",
+    "category": "DevOps",
+    "difficulty": "medium",
+    "tags": [
+      "ci-cd"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "Pod, Deployment và Service trong Kubernetes là gì?",
+    "answer": "Pod là đơn vị nhỏ nhất chạy một hoặc vài container chia sẻ mạng và storage. Deployment mô tả số bản sao mong muốn, quản lý rolling update và tự thay Pod lỗi. Service cung cấp địa chỉ ổn định và cân bằng tải tới tập Pod được chọn bằng label, vì IP của Pod thay đổi liên tục.",
+    "category": "DevOps",
+    "difficulty": "medium",
+    "tags": [
+      "kubernetes"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "So sánh triển khai blue-green và canary.",
+    "answer": "Blue-green duy trì hai môi trường giống nhau, triển khai bản mới lên môi trường rảnh rồi chuyển toàn bộ traffic, rollback bằng cách chuyển lại, nhưng tốn gấp đôi tài nguyên. Canary đưa bản mới tới một phần nhỏ người dùng, theo dõi chỉ số rồi tăng dần, giảm rủi ro nhưng cần giám sát tốt và hạ tầng định tuyến theo tỉ lệ.",
+    "category": "DevOps",
+    "difficulty": "medium",
+    "tags": [
+      "deployment",
+      "strategy"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "Liveness và readiness probe khác nhau thế nào? Dùng sai gây hậu quả gì?",
+    "answer": "Liveness cho biết container còn sống không, thất bại thì Kubernetes khởi động lại. Readiness cho biết container sẵn sàng nhận traffic chưa, thất bại thì bị loại khỏi Service nhưng không restart. Nếu liveness phụ thuộc vào dịch vụ bên ngoài như DB, sự cố DB có thể khiến mọi Pod bị restart hàng loạt; nên để liveness nhẹ và đặt kiểm tra phụ thuộc ở readiness.",
+    "category": "DevOps",
+    "difficulty": "hard",
+    "tags": [
+      "kubernetes",
+      "health-check"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "Git merge và rebase khác nhau thế nào?",
+    "answer": "Merge hợp nhất hai nhánh bằng một commit merge, giữ nguyên lịch sử thực tế. Rebase viết lại các commit của nhánh lên đỉnh nhánh đích để có lịch sử tuyến tính. Không nên rebase nhánh đã chia sẻ công khai vì thay đổi lịch sử sẽ gây xung đột cho người khác.",
+    "category": "DevOps",
+    "difficulty": "easy",
+    "tags": [
+      "git"
+    ],
+    "language": "vi",
+    "synthetic": true
+  },
+  {
+    "question": "Quản lý secret (API key, mật khẩu DB) trong hệ thống như thế nào cho an toàn?",
+    "answer": "Không commit secret vào git hay nhúng vào image. Dùng biến môi trường được inject lúc chạy hoặc secret manager (Vault, AWS Secrets Manager, Kubernetes Secrets mã hóa), phân quyền tối thiểu, xoay vòng định kỳ và bật quét secret trong CI. Khi lộ key phải thu hồi và thay ngay, xóa khỏi lịch sử git chưa đủ.",
+    "category": "DevOps",
+    "difficulty": "medium",
+    "tags": [
+      "security",
+      "secrets"
+    ],
+    "language": "vi",
+    "synthetic": true
+  }
+]

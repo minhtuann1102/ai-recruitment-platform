@@ -198,7 +198,10 @@ erDiagram
         text question_text
         varchar question_source "bank | ai"
         text candidate_answer
-        jsonb scores "{technical_accuracy, relevance, completeness, extensibility}"
+        jsonb scores "ghi moi luot sau khi Evaluator cham: {technical_accuracy, relevance, completeness, extensibility}"
+        jsonb evaluation "DE XUAT: ket qua Evaluator day du (y co/thieu/sai, trich dan), cho FSD xac nhan"
+        varchar action "DE XUAT: ask_main | follow_up | hint | clarify | wrap_up | end"
+        varchar topic_id "DE XUAT: id trong topic catalog"
         varchar agent_decision "deepen | switch_topic | keep_difficulty"
         text agent_reasoning
         text next_question_hint "goi y cau hoi tiep (tu AI)"
@@ -221,7 +224,7 @@ erDiagram
 ```
 
 **Ghi chú:**
-- `interview_turns.scores` là JSONB chứa điểm theo 4 tiêu chí:
+- `interview_turns.scores` được ghi **mỗi lượt** sau khi Evaluator chấm (xem [ADR-008](adr/adr-008-evaluator-per-turn-orchestrator.md)); điểm **không** trả về cho ứng viên giữa phiên. Các cột `evaluation`, `action`, `topic_id` (và `phase`, `cv_application_id`... ở docs/ai-service/07) là **đề xuất, chờ FSD xác nhận migration**. `scores` là JSONB chứa điểm theo 4 tiêu chí:
   - `technical_accuracy` (0-10): độ chính xác kỹ thuật
   - `relevance` (0-10): mức độ liên quan đến câu hỏi
   - `completeness` (0-10): độ đầy đủ câu trả lời
@@ -264,8 +267,15 @@ erDiagram
     knowledge_chunks {
         uuid id PK
         text content "noi dung kien thuc"
+        char content_hash UK "md5, upsert idempotent"
         vector embedding "pgvector, 1536 dims"
-        jsonb metadata "{source, category, subcategory}"
+        varchar embedding_model "text-embedding-3-small"
+        varchar source_type "interview_qa | textbook"
+        varchar topic_id "id trong topic catalog, nullable"
+        varchar category "Backend, Database, System Design, DevOps, AI"
+        varchar difficulty "easy | medium | hard, nullable"
+        varchar language "vi | en"
+        jsonb metadata "qa_id, chunk_type, tags, source_url..."
         timestamp created_at
     }
 ```
@@ -274,8 +284,8 @@ erDiagram
 - DB này **tạo từ Sprint 0** (DE init script tạo database, AIE setup pgvector extension + table).
 - LLM: **OpenAI GPT-4o-mini**. Embedding: **text-embedding-3-small** (1536 dims).
 - Image: `pgvector/pgvector:pg16` (thay vì postgres:16 thông thường).
-- `embedding` dùng cho RAG — truy vấn semantic similarity.
-- 3 nguồn: Interview Q&A (`interview_qa`), Job Descriptions crawled (`job_description`), Textbook/Tutorial (`textbook`).
+- `embedding` dùng cho RAG — truy vấn semantic similarity. Thiết kế đầy đủ: [rag-design.md](rag-design.md).
+- 2 nguồn dùng cho AI: Interview Q&A (`interview_qa`) và Textbook/Tutorial (`textbook`). JD (`job_description`) không còn dùng cho AI; index JD là Stretch của DE.
 
 ---
 
