@@ -97,7 +97,7 @@ Sprint 5  07/12 ─ 21/12   Polish, Testing & Báo cáo
 
 | # | Story | AC | Bắt buộc |
 |---|---|---|---|
-| S1-DE-1 | Thu thập Interview Q&A | 200+ cặp Q&A phỏng vấn CNTT (Backend, Frontend, System Design, DB, DevOps). Format JSON | Bắt buộc |
+| S1-DE-1 | Thu thập Interview Q&A | 200+ cặp Q&A phỏng vấn CNTT gắn `topic_id` theo topic catalog (Backend, Frontend, Database, System Design, DevOps, AI), mỗi topic ≥ 2 cặp, ≥ 50% từ nguồn công khai có giấy phép. Format JSON (xem specs/005) | Bắt buộc |
 | S1-DE-2 | Setup crawling tools | Scrapy/BeautifulSoup + Playwright. Crawl được 1 source mẫu | Bắt buộc |
 | S1-DE-3 | Data pipeline script | Python: load raw → clean → chunk → ready for embedding | Bắt buộc |
 | S1-DE-4 | Index Q&A vào ai_db | Chạy ingestion với Q&A data. Verify search trả kết quả relevant | Bắt buộc |
