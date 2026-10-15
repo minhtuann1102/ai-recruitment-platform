@@ -177,8 +177,7 @@
 | POST | /api/sessions/:id/answer | JWT (Candidate) | Gửi câu trả lời |
 | POST | /api/sessions/:id/end | JWT (Candidate) | Kết thúc phiên |
 | GET | /api/sessions | JWT (Candidate) | Lịch sử phiên của tôi |
-| GET | /api/sessions/:id | JWT (Candidate/Employer) | Chi tiết phiên + turns |
-| GET | /api/sessions/candidate/:candidateId | JWT (Employer) | Xem kết quả của ứng viên |
+| GET | /api/sessions/:id | JWT (Candidate, chủ phiên) | Chi tiết phiên + turns |
 | GET | /api/question-bank | JWT (Admin) | Danh sách câu hỏi |
 | POST | /api/question-bank | JWT (Admin) | Thêm câu hỏi |
 | PUT | /api/question-bank/:id | JWT (Admin) | Sửa câu hỏi |

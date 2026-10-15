@@ -8,7 +8,7 @@ Hệ thống tuyển dụng trực tuyến ngành CNTT tích hợp AI Agentic ph
 
 Platform giúp:
 - **Candidate:** tìm việc IT, ứng tuyển, luyện phỏng vấn với AI
-- **Employer:** đăng tin tuyển dụng, quản lý ứng viên, xem kết quả phỏng vấn ứng viên
+- **Employer:** đăng tin tuyển dụng, quản lý ứng viên (hồ sơ, trạng thái ứng tuyển). Kết quả luyện tập phỏng vấn là riêng tư, Employer không xem
 - **Admin:** quản trị hệ thống, duyệt tin, quản lý danh mục và bộ câu hỏi
 
 **Điểm nổi bật:** AI Agentic interview — phỏng vấn luyện tập thông minh với scoring theo tiêu chí, agent quyết định đào sâu / chuyển hướng / giữ độ khó.

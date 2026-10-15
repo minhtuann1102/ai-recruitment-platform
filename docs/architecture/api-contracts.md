@@ -902,7 +902,7 @@ interface SessionListResponse {
 }
 ```
 
-#### GET /sessions/:id (Candidate or Employer)
+#### GET /sessions/:id (Candidate, chủ phiên)
 
 ```typescript
 // Response 200 — chi tiet phien + tat ca turns
@@ -925,18 +925,7 @@ interface SessionDetailResponse {
 }
 ```
 
-#### GET /sessions/candidate/:candidateId (Employer)
-
-```typescript
-// Employer xem ket qua phong van cua ung vien (tin hieu tham khao)
-// Query: PaginationQuery
-
-// Response 200
-interface CandidateSessionsResponse {
-  data: SessionListResponse['data'];
-  meta: PaginationMeta;
-}
-```
+> Phiên luyện tập riêng tư (quyết định 2026-10-15): không có endpoint cho Employer xem kết quả phỏng vấn của ứng viên.
 
 #### Question Bank — Admin CRUD
 

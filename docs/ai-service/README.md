@@ -1,6 +1,6 @@
 # AI Service — Design Doc: Phỏng vấn kỹ thuật agentic
 
-> **Trạng thái:** Draft, chờ team review · **Ngày:** 2026-10-06 · **Owner đề xuất:** AIE · **Reviewer:** FSD, DE
+> **Trạng thái:** Draft, chờ team review · **Ngày:** 2026-10-06 (cập nhật 2026-10-15: voice, JD, riêng tư) · **Owner đề xuất:** AIE · **Reviewer:** FSD, DE
 >
 > **Phạm vi tài liệu:** thiết kế `apps/ai-service` (Python FastAPI) và phần liên quan trong `interview-service`
 > (NestJS) cho tính năng luyện phỏng vấn kỹ thuật bằng AI. Đây là feature `006-ai-interview-agents` +
@@ -47,14 +47,16 @@ Repo đã chốt stack và LLM provider nên tài liệu không đặt câu hỏ
 |---|---|---|---|
 | A1 | LLM provider | API **OpenAI-compatible**, cấu hình qua `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`; mặc định OpenRouter | Constitution IV; `apps/ai-service/app/config.py` (nhánh `feat/aie`) |
 | A2 | Model mặc định | `gpt-4o-mini` cho mọi agent; **override riêng từng agent bằng env** (§9) | Constitution IV, [rag-design.md](../architecture/rag-design.md) ¹ |
-| A3 | Embedding / RAG | `text-embedding-3-small` (1536 dims), pgvector `knowledge_chunks`; chỉ dùng `interview_qa` + `textbook`, **không dùng JD** | rag-design.md ¹; yêu cầu "không dùng JD" |
+| A3 | Embedding / RAG | `text-embedding-3-small` (1536 dims), pgvector `knowledge_chunks`; chỉ dùng `interview_qa` + `textbook`, **JD không vào RAG** (JD chỉ vào Planner, xem A11) | rag-design.md ¹; quyết định của team 2026-10-15 |
 | A4 | ai-service | Python FastAPI, Pydantic v2, `openai` SDK. **Không dùng LangGraph/agent framework**: state machine tự viết | Constitution VII (KISS) |
 | A5 | Quyền sở hữu dữ liệu | interview-service sở hữu toàn bộ dữ liệu phỏng vấn; ai-service không lưu phiên | ADR-004, constitution IV |
 | A6 | Transport | REST giữa interview-service ↔ ai-service; streaming bằng **SSE** | ADR-003 |
 | A7 | Ngôn ngữ | Phỏng vấn tiếng Việt, giữ thuật ngữ tiếng Anh | rag-design.md §9 ¹ |
-| A8 | Kênh | Chat văn bản. Voice ngoài phạm vi | Thời gian 2 tháng |
+| A8 | Kênh | Chat văn bản là lõi. Voice là **lớp kênh Stretch** (S4): TTS đọc `done.question`, STT bấm-để-nói rồi gửi transcript qua `/answer` hiện có. Không đổi trường bắt buộc của `/answer` (chỉ thêm trường tùy chọn cho bản STT gốc, tên chốt ở spec 015); ai-service không biết có voice | Quyết định của team 2026-10-15 |
 | A9 | Track MVP | `java_backend`, `nodejs_backend`. Thêm track = thêm 1 file topic catalog | Đề bài |
 | A10 | CV | **Dùng lại CV đã nộp ở job-service** (PDF / DOCX); interview-service không nhận upload, không lưu bản sao file | Quyết định của team 2026-10-06 (§2, §8) |
+| A11 | JD | **Input của Planner, không vào RAG**: trích có cấu trúc (`jd_profile`) từ JD của job trong application mà ứng viên chọn khi gắn CV, map kỹ năng về `topic_id`. Không embed JD; retriever vẫn chỉ lấy `interview_qa` + `textbook`. JD là dữ liệu không tin cậy, chống injection như CV. Đề bài gốc ghi không dùng JD; giảng viên đã chấp thuận dùng JD làm input phỏng vấn | Quyết định của team 2026-10-15, giảng viên chấp thuận |
+| A12 | Riêng tư | Phiên luyện tập **luôn riêng tư**: chỉ ứng viên xem; Employer không xem kết quả | Quyết định của team 2026-10-15 |
 
 ¹ `rag-design.md`, `adr-007-multi-agent-interview.md` và bản mới của `ai-integration.md` hiện **chỉ có trên
 nhánh `origin/feat/aie`**, link sẽ chạy khi nhánh đó merge vào `main`.
@@ -89,11 +91,14 @@ test được, ít thành phần.
 
 ### 1.3 In-scope
 
-- Input: track (Java BE, NodeJS BE), level (Fresher / Junior / Middle / Senior), CV đã nộp ở job-service (PDF / DOCX), thời
-  lượng (mặc định 30 phút).
+- Input: track (Java BE, NodeJS BE), level (Fresher / Junior / Middle / Senior), CV đã nộp ở job-service (PDF / DOCX) và JD của job trong
+  application đó (A11), thời lượng (mặc định 30 phút).
 - 5 agent: CV Parser, Planner, Evaluator, Interviewer, Reporter.
 - Orchestrator state machine 4 phase, policy adapt, giới hạn follow-up / gợi ý / thời gian.
 - Rubric 4 tiêu chí theo level, báo cáo cuối buổi (điểm từng phần, điểm mạnh, cần cải thiện, gợi ý học).
+- Độ bao phủ yêu cầu JD trong báo cáo: mỗi yêu cầu có trạng thái `assessed | not_assessed | out_of_catalog`, không coi
+  "chưa hỏi" là "yếu" (A11).
+- Voice (Stretch, S4): TTS đọc câu hỏi, STT bấm-để-nói, sửa được transcript, lưu bản STT gốc (A8).
 - Streaming câu hỏi (SSE) từ ai-service → interview-service → APISIX → client.
 - Xử lý lỗi LLM: retry giới hạn, repair JSON, fallback để buổi phỏng vấn không chết.
 - Chống prompt injection từ CV và câu trả lời; redact PII trước khi gửi LLM.
@@ -104,12 +109,13 @@ test được, ít thành phần.
 
 | Hạng mục | Lý do / hướng sau này |
 |---|---|
-| Job Description làm input | Đề bài yêu cầu không dùng JD |
-| Voice (STT/TTS), video, nhận diện cảm xúc | Không kịp 2 tháng |
+| Embed JD vào RAG (truy hồi theo JD) | JD chỉ vào Planner dạng `jd_profile` (A11); index JD vào `ai_db` (S2-DE-3) là Stretch, không agent nào dùng |
+| Video, nhận diện cảm xúc, chấm cách nói (tốc độ, ngập ngừng, tự tin) | Không kịp 2 tháng; tín hiệu yếu, nguy cơ thiên vị theo giọng vùng miền và người nói không phải tiếng mẹ đẻ |
+| Voice hội thoại realtime (STT streaming, ngắt lời) | TTFT ~3.6 s (xem [08-latency-and-cost.md](08-latency-and-cost.md)), turn-taking phải thiết kế lại; voice chỉ làm TTS + STT bấm-để-nói |
 | Live coding / chạy code ứng viên | Cần sandbox; scenario phase chỉ hỏi đáp bằng lời |
 | OCR CV dạng ảnh scan | Báo lỗi "CV không đọc được", gợi ý chọn CV khác hoặc phỏng vấn không CV |
 | Track ngoài Backend (Frontend, DevOps, Data...) | Kiến trúc hỗ trợ, chỉ cần thêm topic catalog; không làm trong 8 tuần |
-| Employer xem kết quả luyện tập của ứng viên | Cần cơ chế consent riêng; phiên luyện tập mặc định riêng tư |
+| Employer xem / nhận kết quả luyện tập của ứng viên | Quyết định 2026-10-15: phiên luyện tập luôn riêng tư (A12). Muốn chia sẻ cần consent theo từng nhà tuyển dụng, chống gian lận bắt buộc (S5-8), đánh giá công bằng; để hướng phát triển |
 | Chống gian lận (copy-paste, tra cứu) | Stretch S5-8 trong sprint plan |
 | Fine-tune model, agent tự học từ dữ liệu | Không đủ dữ liệu và thời gian |
 | Tiếp tục phiên trên nhiều thiết bị cùng lúc | Một phiên một client; refresh trang thì resume được (§7) |
@@ -157,6 +163,10 @@ Tài liệu này **đi theo kiến trúc đã chốt** và ghi rõ các điểm 
 | 2026-10-06 | `knowledge_chunks` thêm **cột** `topic_id` (thay vì để trong `metadata`) | §8.7, cập nhật rag-design §3 |
 | 2026-10-06 | Topic catalog **AIE + DE đồng sở hữu** | §8.1, §8.7 |
 | 2026-10-06 | **Dùng lại CV đã nộp ở job-service**, không upload / lưu riêng cho phỏng vấn | §2.3, §7.2–7.3, §8 |
+| 2026-10-15 | **Voice là lớp kênh Stretch ở S4, TTS trước, STT sau.** TTS đọc `done.question`, không đọc theo token (tránh lệch khi có sự kiện `replace`) | A8, feature 015, S4-DE-5 |
+| 2026-10-15 | **Cho sửa transcript tự do**, chỉ vì phiên riêng tư: lưu cả bản STT gốc và bản đã sửa, tỉ lệ từ bị sửa là số đo độ chính xác STT, có nút nói lại. **Không lưu audio**, chỉ transcript | A8, A12, §8 |
+| 2026-10-15 | **Phiên luyện tập riêng tư**: bỏ Employer xem kết quả (S3-FSD-6 phần Employer, endpoint `GET /sessions/candidate/:candidateId`) | A12 |
+| 2026-10-15 | **Luyện tập theo job cụ thể**: JD + CV vào Planner; báo cáo thêm khối `requirements` ba trạng thái; không kết luận tuyển / không tuyển | A11, §6 |
 
 **Việc cần làm khi tài liệu được duyệt** (không làm trong tài liệu này):
 
@@ -168,6 +178,13 @@ Tài liệu này **đi theo kiến trúc đã chốt** và ghi rõ các điểm 
 4. Cập nhật `data-pipeline.md` (Q&A có `topic_id` + `key_points`, nguồn textbook Java/Spring) và `rag-design.md`
    §3–4 (cột `topic_id`, bỏ `retrieve_topics` trên JD).
 5. Amendment **constitution V**: transcript / CV không bao giờ vào `knowledge_chunks` hay dataset pipeline.
+6. (2026-10-15, AIE đã đồng ý; task S2-AIE-6) JD Parser + `jd_profile` vào request `/api/start` (AIE); pattern TCP lấy JD của job theo application
+   (FSD, job-service). Cập nhật §3 (Planner) và §7.
+7. (2026-10-15, AIE đã đồng ý; task S3-AIE-6) Khối `requirements` trong schema report §6.4 (AIE): `status`, `band`, `evidence_turns`, `confidence`;
+   hiển thị "đã đánh giá X/Y yêu cầu".
+8. (2026-10-15) `interview_db` lưu bản STT gốc, tỉ lệ từ bị sửa, kiểu nhập (`text | voice`) (FSD, §8); `/answer` nhận
+   thêm trường tùy chọn tương ứng.
+9. (2026-10-15) Viết spec `015-voice-mode` (DE, Spec Kit); cần tài khoản STT/TTS.
 
 ## Câu hỏi chưa giải quyết
 
@@ -176,3 +193,5 @@ Tài liệu này **đi theo kiến trúc đã chốt** và ghi rõ các điểm 
 3. FSD xác nhận job-service làm pattern `application.getCvFile` + presigned URL (§7.3), và bucket CV đang private (cần presigned) hay public (`cvUrl` hiện ghi là "MinIO URL").
 4. Streaming SSE qua APISIX: cần kiểm chứng proxy buffering và timeout (§7.5) trong tuần 4.
 5. Quota phiên/ngày cho mỗi ứng viên (đề xuất 5) và tài khoản OpenRouter có bật zero-data-retention được không.
+6. (2026-10-15) FSD xác nhận S2-FSD-11 (pattern TCP lấy JD theo application) và S3-FSD-8 (gắn CV + JD vào phiên) trong
+   `sprint-plan.md`; hai task này đang ghi "đề xuất, chờ FSD xác nhận".
