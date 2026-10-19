@@ -13,7 +13,7 @@ Docker Desktop cài ở `/Applications/Docker.app`; nếu shell không thấy `d
 ## Git và PR
 - Git chưa cấu hình `user.name`; username dùng trong tên nhánh là `thang`.
 - Remote: `https://github.com/minhtuann1102/ai-recruitment-platform.git`. Push bằng HTTPS đã chạy được.
-- **Không có `gh`, `glab`, `brew`**: mở PR bằng link `pull/new/<nhánh>`. Cài `gh` và `gh auth login` thì tự động hóa được.
+- **`gh` 2.102.0** cài ở `~/.local/bin/gh` (tải từ bản phát hành chính thức, đã đối chiếu SHA-256, ngày 2026-10-19). Không có `glab`, `brew`. Owner tự chạy `gh auth login` (HTTPS, trình duyệt); khi `gh auth status` báo đã đăng nhập thì mở PR bằng `gh pr create --base main --head <nhánh>`. Chưa đăng nhập thì dùng link `pull/new/<nhánh>`.
 
 ## Biến môi trường ai-service (`apps/ai-service/.env`, không commit)
 `LLM_API_KEY`, `LLM_BASE_URL` (mặc định OpenRouter), `LLM_MODEL`, `EMBEDDING_MODEL`, `EMBEDDING_DIMENSIONS`, `LLM_TIMEOUT_SECONDS`, `MOCK_STREAM_DELAY_MS`. Khóa do owner giữ; **không đọc, không in, không commit**.

@@ -15,7 +15,7 @@ Owner đã cho phép thường trực. Mỗi lần hoàn thành một việc (m�
 1. Chạy test và `python apps/ai-service/scripts/check_docs.py` (xem `environment.md`).
 2. `git commit` theo Conventional Commits bằng tiếng Anh, **không có dòng ghi công AI**.
 3. `git push -u origin thang/<tính-năng>`.
-4. Mở PR vào `main`. Máy dev **không có `gh`**, nên dùng link `https://github.com/minhtuann1102/ai-recruitment-platform/pull/new/<nhánh>` và dán nội dung theo mẫu dưới.
+4. Mở PR vào `main`. Dùng `gh pr create --base main --head <nhánh>` (xem `environment.md`); nếu `gh` chưa đăng nhập thì dùng link `https://github.com/minhtuann1102/ai-recruitment-platform/pull/new/<nhánh>` và dán nội dung theo mẫu dưới.
 5. Cập nhật `context/project-state.md` (trong PR kế tiếp hoặc cùng PR nếu liên quan).
 
 ## 3. Mỗi thay đổi phải đồng bộ tài liệu cùng PR
