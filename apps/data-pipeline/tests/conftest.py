@@ -41,6 +41,7 @@ def make_pair():
             "license": "MIT",
             "attribution": "DevLoversTeam/nodejs-interview-questions contributors",
             "synthetic": False,
+            "reviewed_by": "reviewer",
         }
         pair.update(overrides)
         return {k: v for k, v in pair.items() if v is not ...}  # truyen ... de xoa truong

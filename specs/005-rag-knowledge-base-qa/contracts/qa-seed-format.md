@@ -21,7 +21,7 @@ Mỗi file là một mảng JSON; loader gộp mọi file theo thứ tự tên. 
 | `license` | string | có | thuộc danh sách cho phép (research R6). Cặp ngoài: giấy phép của nguồn; cặp `self`: giấy phép của bộ seed (khai trong `NOTICE`) |
 | `attribution` | string | khi `source ≠ "self"` | tác giả / dự án gốc, vd `"sudheerj/reactjs-interview-questions contributors"` |
 | `synthetic` | bool | có | `true` khi đáp án tự soạn (kể cả câu hỏi lấy từ nguồn công khai); `false` chỉ khi cả hỏi lẫn đáp lấy/chuyển thể từ nguồn có giấy phép. Quota 50% chỉ đếm `false` |
-| `reviewed_by` | string | khi `synthetic = true` | người review đáp án (FR-003) |
+| `reviewed_by` | string | có (mọi cặp) | người đã đọc đáp án; cặp dịch/chuyển thể phải được đối chiếu bản gốc. Chỉ điền sau khi đọc thật — bản nháp để trống nên `validate` thất bại cho tới khi duyệt |
 
 `category` **không** có trong seed: suy ra từ catalog theo `topic_id`.
 
@@ -32,7 +32,9 @@ Mỗi file là một mảng JSON; loader gộp mọi file theo thứ tự tên. 
 | Thiếu trường / sai kiểu / sai enum / sai pattern | lỗi | FR-001 |
 | `topic_id` không thuộc catalog hoặc là id scenario | lỗi | FR-002 |
 | `license` ngoài danh sách cho phép; `source ≠ "self"` mà không phải URL hoặc thiếu `attribution`; `synthetic=false` mà `source = "self"` | lỗi | FR-003, SC-002 |
-| `synthetic=true` mà thiếu `reviewed_by` | lỗi | FR-003 |
+| Thiếu `reviewed_by` (mọi cặp) | lỗi | FR-003 |
+| Cặp `source = "self"` mà `license` ≠ giấy phép bộ seed (`CC-BY-4.0`, khai trong `NOTICE`) | lỗi | research R6 |
+| Cặp `CC-BY-SA-*` khi bộ seed chưa chuyển sang `CC-BY-SA-4.0` (share-alike) | lỗi | research R6 |
 | `qa_id` trùng | lỗi | Clarifications |
 | Câu hỏi trùng tuyệt đối (sau làm sạch + lower) — báo cả hai `qa_id` | lỗi | US1-3 |
 | Câu hỏi gần trùng (ratio ≥ 0.9 sau bỏ dấu, research R3) | cảnh báo | FR-005 |
@@ -42,7 +44,7 @@ Mỗi file là một mảng JSON; loader gộp mọi file theo thứ tự tên. 
 
 Mặc định chỉ cảnh báo các ngưỡng phân bố để soạn dần được; nghiệm thu chạy `validate --strict`.
 
-Báo cáo phân bố: số cặp theo topic / category / difficulty / language / license / synthetic, tỉ lệ công khai.
+Báo cáo phân bố: số cặp theo topic / category / difficulty / language / license / nguồn (`self`, `owner/repo` GitHub hoặc tên miền), tỉ lệ công khai.
 
 ### Ví dụ
 

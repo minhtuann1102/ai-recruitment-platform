@@ -31,7 +31,11 @@ def test_valid_seed_has_no_pair_errors(make_pair, topics):
         ({"license": "GPL-2.0"}, "license"),
         ({"attribution": ...}, "provenance"),
         ({"source": "self"}, "provenance"),
-        ({"synthetic": True}, "review"),
+        ({"reviewed_by": ...}, "review"),
+        ({"reviewed_by": "  "}, "review"),
+        ({"synthetic": True, "reviewed_by": ...}, "review"),
+        ({"license": "CC-BY-SA-4.0"}, "license"),
+        ({"source": "self", "license": "MIT", "synthetic": True, "attribution": ...}, "license"),
         ({"qa_id": "qa-1"}, "qa_id"),
         ({"difficulty": "expert"}, "enum"),
         ({"answer": "Gọi 0912 345 678 để được giải thích event loop chi tiết hơn nhé"}, "pii"),
@@ -76,6 +80,24 @@ def test_public_share_counts_only_non_synthetic(make_pair, topics):
     result = validate_seed(pairs, topics)
     assert result.report["public_pairs"] == 1
     assert ("public_share" in {i.rule for i in result.issues})
+
+
+def test_report_has_per_source_and_per_topic_counts(make_pair, topics):
+    synthetic = dict(source="self", license="CC-BY-4.0", synthetic=True, attribution=...)
+    pairs = items(
+        make_pair(1),
+        make_pair(2, source="https://github.com/sudheerj/reactjs-interview-questions/blob/master/README.md"),
+        make_pair(3, source="https://react.dev/learn/synchronizing-with-effects", license="CC-BY-4.0"),
+        make_pair(4, topic_id="smp.data.sql-index", **synthetic),
+    )
+    report = validate_seed(pairs, topics).report
+    assert report["by_source"] == {
+        "DevLoversTeam/nodejs-interview-questions": 1,
+        "react.dev": 1,
+        "self": 1,
+        "sudheerj/reactjs-interview-questions": 1,
+    }
+    assert report["by_topic"] == {"smp.core.event-loop": 3, "smp.data.sql-index": 1}
 
 
 def test_loader_merges_files_in_name_order_and_reports_bad_json(tmp_path, make_pair):

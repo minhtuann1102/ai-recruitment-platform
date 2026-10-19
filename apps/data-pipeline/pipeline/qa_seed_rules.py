@@ -13,6 +13,9 @@ from .text_cleaning import clean_text
 # Giay phep cho phep sua doi + phan phoi lai (FR-003, research R6). Ngoai danh sach (ND/NC, GPL,
 # khong ro) la loi.
 LICENSE_ALLOWLIST = frozenset({"CC0-1.0", "MIT", "Apache-2.0", "CC-BY-4.0", "CC-BY-SA-4.0", "CC-BY-SA-2.5"})
+# Giay phep cua ca bo seed, khai trong data/seeds/interview_qa/NOTICE; cap tu soan dung giay phep nay.
+# Them nguon CC-BY-SA thi phai doi ca bo sang CC-BY-SA-4.0 (share-alike).
+DATASET_LICENSE = "CC-BY-4.0"
 SELF_SOURCE = "self"
 DIFFICULTIES = ("easy", "medium", "hard")
 LANGUAGES = ("vi", "en")
@@ -80,6 +83,10 @@ def check_pair(item: SeedItem, topics: Dict[str, str]) -> List[Issue]:
 
     if pair["license"] not in LICENSE_ALLOWLIST:
         error("license", f"giay phep '{pair['license']}' khong thuoc danh sach cho phep")
+    elif pair["license"].startswith("CC-BY-SA") and not DATASET_LICENSE.startswith("CC-BY-SA"):
+        error("license", f"nguon share-alike: doi giay phep bo seed sang CC-BY-SA-4.0 (NOTICE, DATASET_LICENSE)")
+    if pair["source"] == SELF_SOURCE and pair["license"] != DATASET_LICENSE:
+        error("license", f"cap tu soan phai dung giay phep bo seed {DATASET_LICENSE}")
     if pair["source"] != SELF_SOURCE:
         if not URL_RE.match(pair["source"]):
             error("provenance", "source phai la URL hoac 'self'")
@@ -87,8 +94,9 @@ def check_pair(item: SeedItem, topics: Dict[str, str]) -> List[Issue]:
             error("provenance", "cap co noi dung tu nguon ngoai phai co attribution")
     elif not pair["synthetic"]:
         error("provenance", "synthetic=false nhung source='self' (cap cong khai can URL nguon)")
-    if pair["synthetic"] and not _non_empty_str(pair.get("reviewed_by")):
-        error("review", "cap synthetic phai co reviewed_by (nguoi da doc dap an)")
+    # Moi cap deu qua nguoi doc: cap cong khai cung la ban dich/chuyen the, phai doi chieu ban goc
+    if not _non_empty_str(pair.get("reviewed_by")):
+        error("review", "thieu reviewed_by: chi dien sau khi nguoi review da doc (va doi chieu ban goc neu dich)")
 
     for field in ("question", "answer"):
         for kind, value in find_pii(pair[field]):

@@ -33,7 +33,8 @@ Hợp đồng chung DE (ghi) ↔ AIE (đọc). Schema bảng: [rag-design.md §3
 ## Ngữ nghĩa ghi (chỉ pipeline DE)
 
 - Bản ghi mới: `INSERT ... ON CONFLICT (content_hash) DO NOTHING`.
-- Hash đã có cùng `dataset`: cập nhật `category`, `difficulty`, `topic_id`, `language`, `metadata`; giữ `embedding`.
+- Hash đã có cùng `dataset`: cập nhật `content`, `category`, `difficulty`, `topic_id`, `language`, `metadata`; giữ
+  `embedding`. Cập nhật cả `content` vì hash bỏ qua hoa/thường: sửa chỉ chữ hoa/thường giữ nguyên hash.
 - Hash đã có khác `dataset`: không đụng, đếm "skipped".
 - Dọn: xóa bản ghi `source_type = 'interview_qa'` cùng `dataset` có hash không thuộc lần chạy; chỉ khi lần chạy 0 lỗi
   embedding. Không bao giờ xóa bản ghi khác `dataset`.

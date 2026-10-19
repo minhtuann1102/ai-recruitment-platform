@@ -7,9 +7,10 @@ from collections import Counter
 from dataclasses import dataclass, field
 from difflib import SequenceMatcher
 from typing import Dict, List
+from urllib.parse import urlparse
 
 from .qa_seed_loader import SeedItem
-from .qa_seed_rules import Issue, check_pair
+from .qa_seed_rules import SELF_SOURCE, Issue, check_pair
 from .text_cleaning import clean_text, normalize_for_compare
 
 MIN_PAIRS = 200
@@ -61,6 +62,17 @@ def _warn_near_duplicates(kept: List[SeedItem], issues: List[Issue]) -> None:
                 issues.append(Issue(id_b, "near_duplicate", "warning", f"cau hoi gan trung voi {id_a}"))
 
 
+def source_key(source: str) -> str:
+    """Gom nguon de bao cao: 'self', 'owner/repo' voi GitHub, hoac ten mien."""
+    if source == SELF_SOURCE:
+        return SELF_SOURCE
+    parsed = urlparse(source)
+    parts = [p for p in parsed.path.split("/") if p]
+    if parsed.netloc.endswith("github.com") and len(parts) >= 2:
+        return f"{parts[0]}/{parts[1]}"
+    return parsed.netloc or source
+
+
 def _distribution(kept: List[SeedItem], topics: Dict[str, str], strict: bool, issues: List[Issue]) -> Dict:
     level = "error" if strict else "warning"
     total = len(kept)
@@ -91,6 +103,7 @@ def _distribution(kept: List[SeedItem], topics: Dict[str, str], strict: bool, is
         "by_difficulty": dict(sorted(by_difficulty.items())),
         "by_language": dict(sorted(Counter(it.data["language"] for it in kept).items())),
         "by_license": dict(sorted(Counter(it.data["license"] for it in kept).items())),
+        "by_source": dict(sorted(Counter(source_key(it.data["source"]) for it in kept).items())),
         "by_topic": dict(sorted(by_topic.items())),
     }
 

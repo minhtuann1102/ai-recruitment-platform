@@ -29,8 +29,10 @@ def _print_validation(result: ValidationResult) -> None:
     print("== phan bo")
     print(f"cap: {report['pairs_valid']}/{report['pairs_in']} hop le; cong khai {report['public_pairs']} ({report['public_share']:.0%})")
     print(f"topic du >= 2 cap: {report['topics_covered']}/{report['topics_in_catalog']}")
-    for key in ("by_category", "by_difficulty", "by_language", "by_license"):
+    for key in ("by_category", "by_difficulty", "by_language", "by_license", "by_source"):
         print(f"{key[3:]}: {json.dumps(report[key], ensure_ascii=False)}")
+    topic_counts = ", ".join(f"{topic}={count}" for topic, count in report["by_topic"].items())
+    print(f"topic: {topic_counts or '-'}")
 
 
 def run_validate(args: argparse.Namespace) -> int:
