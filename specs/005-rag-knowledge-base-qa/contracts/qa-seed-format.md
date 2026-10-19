@@ -40,7 +40,7 @@ Mỗi file là một mảng JSON; loader gộp mọi file theo thứ tự tên. 
 | Câu hỏi gần trùng (ratio ≥ 0.9 sau bỏ dấu, research R3) | cảnh báo | FR-005 |
 | Email hoặc số điện thoại (regex) trong `question`/`answer` | lỗi | FR-005, SC-002 |
 | Topic trong catalog có < 2 cặp | lỗi (`--strict`) / cảnh báo (mặc định) | SC-001 |
-| < 200 cặp; mức độ khó nào < 20%; tỉ lệ công khai < 50% | lỗi (`--strict`) / cảnh báo (mặc định) | SC-001, SC-002 |
+| < 200 cặp; topic có level `middle`/`senior` có < 2 cặp `hard` | lỗi (`--strict`) / cảnh báo (mặc định) | SC-001 (sửa 2026-10-19) |
 
 Mặc định chỉ cảnh báo các ngưỡng phân bố để soạn dần được; nghiệm thu chạy `validate --strict`.
 

@@ -32,3 +32,13 @@ ai.json .................... de-qa-0300 .. de-qa-0399
 devops.json ................ de-qa-0400 .. de-qa-0499
 frontend.json .............. de-qa-0500 .. de-qa-0599
 aie-reviewed.json .......... de-qa-0600 .. de-qa-0649
+hard-nodejs.json ........... de-qa-1000 .. de-qa-1049   (cau hard viet boi Claude, bam tai lieu that)
+hard-python.json ........... de-qa-1050 .. de-qa-1099
+hard-java.json ............. de-qa-1100 .. de-qa-1149
+hard-ai.json ............... de-qa-1150 .. de-qa-1199
+hard-devops.json ........... de-qa-1200 .. de-qa-1249
+hard-frontend.json ......... de-qa-1250 .. de-qa-1299
+
+Hard pairs are original Vietnamese text written with Claude, grounded in the crawled advanced
+sources and official docs listed in each pair's "grounding_urls"; source "self", license CC-BY-4.0,
+every pair read by a human reviewer (reviewed_by).

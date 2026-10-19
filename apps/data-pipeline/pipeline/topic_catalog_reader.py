@@ -4,7 +4,7 @@ Chi lay topics[], bo scenarios[]: topic_id cua Q&A phai tro toi topic (FR-002). 
 ai-service (research R1, R5); hop dong chung la chinh file YAML.
 """
 from pathlib import Path
-from typing import Dict, Iterable, List
+from typing import Dict, Iterable, List, Set
 
 import yaml
 
@@ -37,6 +37,7 @@ def load_topics(dirs: Iterable[Path]) -> List[Dict[str, str]]:
                         "category": category,
                         "title": str(topic.get("title", "")),
                         "key_concepts": ", ".join(str(c) for c in topic.get("key_concepts") or []),
+                        "levels": ", ".join(str(lv) for lv in topic.get("levels") or []),
                     }
                 )
     return topics
@@ -44,3 +45,8 @@ def load_topics(dirs: Iterable[Path]) -> List[Dict[str, str]]:
 
 def load_topic_categories(dirs: Iterable[Path]) -> Dict[str, str]:
     return {topic["id"]: topic["category"] for topic in load_topics(dirs)}
+
+
+def hard_topic_ids(topics: List[Dict[str, str]]) -> Set[str]:
+    """Topic co level middle hoac senior: can cau hard cho phien ung vien cap cao (SC-001)."""
+    return {t["id"] for t in topics if {"middle", "senior"} & set(t.get("levels", "").split(", "))}

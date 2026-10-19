@@ -10,7 +10,7 @@ from .qa_seed_loader import SeedError, load_seed_items
 from .qa_seed_validator import ValidationResult, validate_seed
 from .run_report import RunReport
 from .settings import CRAWLED_DATASET, CURATED_DATASET, ENRICHED_DIR, PROCESSED_DIR, SEEDS_DIR, catalog_dir
-from .topic_catalog_reader import CatalogError, load_topic_categories
+from .topic_catalog_reader import CatalogError, hard_topic_ids, load_topics
 
 EXIT_OK, EXIT_INPUT_ERROR = 0, 1
 PROCESSED_FILE = "interview_qa.jsonl"
@@ -19,9 +19,12 @@ MAX_ERRORS_SHOWN, MAX_WARNINGS_SHOWN = 50, 5
 
 def _load_inputs(args: argparse.Namespace, strict: bool, near_duplicates: bool) -> Tuple[Dict[str, str], ValidationResult]:
     dirs = [catalog_dir()] + [Path(d) for d in getattr(args, "extra_catalog", [])]
-    topics = load_topic_categories(dirs)
+    catalog = load_topics(dirs)
+    topics = {t["id"]: t["category"] for t in catalog}
     items = load_seed_items([(SEEDS_DIR, CURATED_DATASET), (ENRICHED_DIR, CRAWLED_DATASET)])
-    return topics, validate_seed(items, topics, strict=strict, near_duplicates=near_duplicates)
+    return topics, validate_seed(
+        items, topics, strict=strict, near_duplicates=near_duplicates, hard_topics=hard_topic_ids(catalog)
+    )
 
 
 def _print_validation(result: ValidationResult) -> None:
@@ -38,7 +41,7 @@ def _print_validation(result: ValidationResult) -> None:
     print("== phan bo")
     print(f"cap: {report['pairs_valid']}/{report['pairs_in']} hop le; tu nguon ngoai {report['public_pairs']} ({report['public_share']:.0%})")
     print(f"dataset: {json.dumps(report['by_dataset'], ensure_ascii=False)}")
-    print(f"topic du >= 2 cap: {report['topics_covered']}/{report['topics_in_catalog']}")
+    print(f"topic du >= 2 cap: {report['topics_covered']}/{report['topics_in_catalog']}; topic middle/senior thieu cap hard: {report['topics_missing_hard']}")
     for key in ("by_category", "by_difficulty", "by_language", "by_license", "by_source"):
         print(f"{key[3:]}: {json.dumps(report[key], ensure_ascii=False)}")
     topic_counts = ", ".join(f"{topic}={count}" for topic, count in report["by_topic"].items())

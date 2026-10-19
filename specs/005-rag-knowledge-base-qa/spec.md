@@ -67,7 +67,13 @@ knowledge_chunks và verify retrieval relevant."
   code thu thập + danh sách nguồn; nội dung nằm ở `data/raw/` (gitignore) và `ai_db`; tái lập bằng lệnh `collect`.
   Seed curated (`data/seeds/`) chỉ chứa cặp tự soạn hoặc có giấy phép cho phép phân phối lại.
 - Q: Review thế nào khi có hàng nghìn cặp dịch máy? → A: Review theo mẫu (vd ~10 cặp ngẫu nhiên mỗi nguồn, đối chiếu
-  bản gốc), ghi kết quả; `reviewed_by` từng cặp chỉ bắt buộc với seed curated. Cách duyệt chi tiết: còn thảo luận.
+  bản gốc), ghi kết quả; `reviewed_by` từng cặp chỉ bắt buộc với seed curated. Công cụ: lệnh `review-sample` (bảng
+  đọc không commit + CSV `cid, verdict, reviewer` commit được).
+- Q: Dữ liệu crawl gần như không có câu hard (~1–2%) — giữ "mỗi độ khó ≥ 20%"? → A (DE chốt): **Không.** SC-001 đổi
+  thành mỗi topic có level `middle` hoặc `senior` có ≥ 2 cặp `hard` (phiên senior cần câu hard theo từng topic, không
+  cần 20% toàn kho). Câu hard thiếu được sinh bằng Claude trong phiên làm việc, bám tài liệu thật (nguồn crawl nâng
+  cao, tài liệu chính thức; ghi `grounding_urls`), viết bằng tiếng Việt → vào seed curated (`source = self`,
+  `synthetic = true`, commit), DE duyệt từng cặp (`reviewed_by`). Báo AIE vì Interviewer lọc theo độ khó.
 - Q: Tách dữ liệu crawl khỏi seed curated? → A: Có. `dataset = de_crawled_qa`, định danh `cr-<nguồn>-<8 hex>` sinh
   từ URL + câu hỏi gốc (nguồn upstream là sự thật, khác `de-qa-NNNN`); dọn bản cũ (FR-013) theo từng dataset.
 
@@ -308,7 +314,7 @@ tra, khoảng cách giữa các request ≥ mức cấu hình, không có email/
 ### Measurable Outcomes
 
 - **SC-001**: Bộ dữ liệu có ≥ 200 cặp hợp lệ; 100% có `topic_id` thuộc catalog; mỗi topic trong catalog lúc nghiệm thu
-  có ≥ 2 cặp; mỗi mức độ khó chiếm ≥ 20%.
+  có ≥ 2 cặp; mỗi topic có level `middle`/`senior` có ≥ 2 cặp `hard` *(sửa 2026-10-19, thay "mỗi mức độ khó ≥ 20%")*.
 - **SC-002** *(sửa 2026-10-19)*: 100% cặp có `source`; 0 cặp chứa thông tin cá nhân; 0 cặp trùng tuyệt đối; 0 nội
   dung crawl trong git; review mẫu được ghi lại cho mỗi nguồn.
 - **SC-003**: Kho tri thức có ≥ 400 bản ghi `interview_qa` sau một lần chạy; ≥ 99% có vector; tỉ lệ dedup < 5%.

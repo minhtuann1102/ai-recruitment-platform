@@ -6,7 +6,7 @@ Cau hoi trung tuyet doi: uu tien seed curated, roi qa_id nho hon (deterministic)
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 from difflib import SequenceMatcher
-from typing import Dict, List
+from typing import Dict, List, Optional, Set
 from urllib.parse import urlparse
 
 from .qa_seed_loader import SeedItem
@@ -16,7 +16,8 @@ from .text_cleaning import clean_text, normalize_for_compare
 
 MIN_PAIRS = 200
 MIN_PAIRS_PER_TOPIC = 2
-MIN_DIFFICULTY_SHARE = 0.2
+# SC-001 (sua 2026-10-19): topic co level middle/senior can >= 2 cap hard
+MIN_HARD_PER_TOPIC = 2
 NEAR_DUPLICATE_RATIO = 0.9
 
 
@@ -82,7 +83,7 @@ def source_key(source: str) -> str:
     return parsed.netloc or source
 
 
-def _distribution(kept: List[SeedItem], topics: Dict[str, str], strict: bool, issues: List[Issue]) -> Dict:
+def _distribution(kept: List[SeedItem], topics: Dict[str, str], hard_topics: Set[str], strict: bool, issues: List[Issue]) -> Dict:
     level = "error" if strict else "warning"
     total = len(kept)
     by_topic = Counter(it.data["topic_id"] for it in kept)
@@ -95,10 +96,10 @@ def _distribution(kept: List[SeedItem], topics: Dict[str, str], strict: bool, is
         issues.append(Issue(None, "coverage", level, f"{len(thin_topics)} topic co < {MIN_PAIRS_PER_TOPIC} cap: {', '.join(thin_topics)}"))
     if total < MIN_PAIRS:
         issues.append(Issue(None, "total", level, f"chi co {total} cap hop le (can >= {MIN_PAIRS})"))
-    for difficulty in ("easy", "medium", "hard"):
-        share = by_difficulty[difficulty] / total if total else 0.0
-        if share < MIN_DIFFICULTY_SHARE:
-            issues.append(Issue(None, "difficulty", level, f"{difficulty} chiem {share:.0%} (can >= 20%)"))
+    hard_by_topic = Counter(it.data["topic_id"] for it in kept if it.data["difficulty"] == "hard")
+    missing_hard = sorted(t for t in hard_topics if hard_by_topic[t] < MIN_HARD_PER_TOPIC)
+    if missing_hard:
+        issues.append(Issue(None, "hard_coverage", level, f"{len(missing_hard)} topic middle/senior co < {MIN_HARD_PER_TOPIC} cap hard: {', '.join(missing_hard)}"))
 
     return {
         "pairs_valid": total,
@@ -106,6 +107,7 @@ def _distribution(kept: List[SeedItem], topics: Dict[str, str], strict: bool, is
         "public_share": round(public_share, 4),
         "topics_covered": sum(1 for t in topics if by_topic[t] >= MIN_PAIRS_PER_TOPIC),
         "topics_in_catalog": len(topics),
+        "topics_missing_hard": len(missing_hard),
         "by_dataset": dict(sorted(Counter(it.dataset for it in kept).items())),
         "by_category": dict(sorted(Counter(topics[it.data["topic_id"]] for it in kept).items())),
         "by_difficulty": dict(sorted(by_difficulty.items())),
@@ -117,9 +119,15 @@ def _distribution(kept: List[SeedItem], topics: Dict[str, str], strict: bool, is
 
 
 def validate_seed(
-    items: List[SeedItem], topics: Dict[str, str], strict: bool = False, near_duplicates: bool = True
+    items: List[SeedItem],
+    topics: Dict[str, str],
+    strict: bool = False,
+    near_duplicates: bool = True,
+    hard_topics: Optional[Set[str]] = None,
 ) -> ValidationResult:
-    """near_duplicates=False cho process/index: buoc nay chi sinh canh bao, khong doi ket qua."""
+    """near_duplicates=False cho process/index: buoc nay chi sinh canh bao, khong doi ket qua.
+    hard_topics: topic can >= 2 cap hard (level middle/senior); None = khong kiem.
+    """
     issues: List[Issue] = []
     candidates = []
     for item in items:
@@ -130,5 +138,5 @@ def validate_seed(
     kept = _drop_duplicates(candidates, issues)
     if near_duplicates:
         _warn_near_duplicates(kept, issues)
-    report = {"pairs_in": len(items), **_distribution(kept, topics, strict, issues)}
+    report = {"pairs_in": len(items), **_distribution(kept, topics, hard_topics or set(), strict, issues)}
     return ValidationResult(valid=kept, issues=issues, report=report)

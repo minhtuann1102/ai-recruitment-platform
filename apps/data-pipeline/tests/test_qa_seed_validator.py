@@ -150,3 +150,12 @@ def test_loader_merges_files_in_name_order_and_reports_bad_json(tmp_path, make_p
         load_seed_items([(tmp_path, CURATED_DATASET)])
     with pytest.raises(SeedError, match="khong co cap"):
         load_seed_items([(tmp_path / "missing", CURATED_DATASET)])
+
+
+def test_hard_coverage_checks_only_middle_senior_topics(make_pair, topics):
+    pairs = items(make_pair(1, difficulty="hard"), make_pair(2, difficulty="hard"), make_pair(3, topic_id="smp.data.sql-index"))
+    result = validate_seed(pairs, topics, strict=True, hard_topics={"smp.core.event-loop", "smp.data.sql-index"})
+    issue = next(i for i in result.issues if i.rule == "hard_coverage")
+    assert issue.level == "error" and "smp.data.sql-index" in issue.message and "smp.core.event-loop" not in issue.message
+    assert result.report["topics_missing_hard"] == 1
+    assert "hard_coverage" not in {i.rule for i in validate_seed(pairs, topics, strict=True).issues}
