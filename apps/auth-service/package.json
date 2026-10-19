@@ -18,7 +18,7 @@
     "start:prod": "node dist/main",
     "check-types": "tsc --noEmit -p tsconfig.build.json",
     "lint": "oxlint .",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/jest/bin/jest --runInBand",

@@ -119,9 +119,9 @@ team (research R1).
 
 **Independent Test**: quickstart §6
 
-- [ ] T031 [US3] Tạo `.github/workflows/ci.yml` job `node` theo `contracts/ci-pipeline.md` (trigger PR + push `main`, pnpm theo `packageManager`, Node 22, cache, `--frozen-lockfile`, concurrency); thêm `--passWithNoTests` vào script `test` của `apps/*-service/package.json` (R12)
-- [ ] T032 [US3] Thêm job `python` matrix `[ai-service, data-pipeline]` có guard `requirements.txt`, Python 3.11, `pytest` trong `.github/workflows/ci.yml`
-- [ ] T033 [US3] PR thử có lỗi lint → đỏ; sửa → xanh; ghi thời gian chạy (mục tiêu ≤ 10 phút); mở PR-3
+- [X] T031 [US3] (PR #5) Tạo `.github/workflows/ci.yml` job `node` theo `contracts/ci-pipeline.md` (trigger PR + push `main`, pnpm theo `packageManager`, Node 22, cache, `--frozen-lockfile`, concurrency); thêm `--passWithNoTests` vào script `test` của `apps/*-service/package.json` (R12)
+- [X] T032 [US3] (PR #5) Thêm job `python` matrix `[ai-service, data-pipeline]` có guard `requirements.txt`, Python 3.11, `pytest` trong `.github/workflows/ci.yml`
+- [ ] T033 [US3] (xanh: PR #5 node 49s, python 20s; thử đỏ: chưa) PR thử có lỗi lint → đỏ; sửa → xanh; ghi thời gian chạy (mục tiêu ≤ 10 phút); mở PR-3
 - [ ] T034 [US3] Nhờ admin repo bật branch protection "CI xanh mới merge" cho `main` (GitHub Flow, không có `develop`); tạo tag `v0.1-sprint0` khi 001 xong
 
 **Checkpoint**: PR-3 merged — mọi PR sau đều qua gate
