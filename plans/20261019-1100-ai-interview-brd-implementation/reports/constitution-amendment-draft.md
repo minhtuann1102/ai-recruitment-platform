@@ -1,6 +1,6 @@
 # Bản nháp sửa constitution (gộp vào PR ratify)
 
-> Constitution đang **Proposed**. Sửa trực tiếp trong PR ratify rẻ hơn amend sau khi đã ratify (amend cần ≥ 2/3 thành viên, gồm owner workstream bị ảnh hưởng). Đây là **đề xuất**, chưa sửa file constitution. Lý do và bối cảnh: [BRD §0.3](../../../docs/ai-service/requirements/01-brd.md).
+> Constitution đang **Proposed**. Sửa trực tiếp trong PR ratify rẻ hơn amend sau khi đã ratify (amend cần ≥ 2/3 thành viên, gồm owner workstream bị ảnh hưởng). Hướng xử lý này **đã được owner chấp nhận (2026-10-19)**; file constitution chưa được sửa, các đoạn dưới sẽ đưa vào PR ratify. Lý do và bối cảnh: [BRD §0.3](../../../docs/ai-service/requirements/01-brd.md).
 
 ## 1. Principle IV: cập nhật tên ADR và contract (cần làm bất kể chọn voice nào)
 

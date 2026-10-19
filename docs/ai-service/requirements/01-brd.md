@@ -2,8 +2,8 @@
 
 | Mục | Giá trị |
 |---|---|
-| Phiên bản | 0.4 (Draft, chờ team review) |
-| Ngày | 2026-10-12 |
+| Phiên bản | 0.5 (Draft, chờ team review) |
+| Ngày | 2026-10-19 |
 | Owner | AIE |
 | Reviewer | FSD, DE |
 | Phạm vi | Phần AIE: `apps/ai-service` và phần tích hợp liên quan trong `interview-service` và giao diện web cho tính năng phỏng vấn kỹ thuật trực tiếp bằng AI |
@@ -18,7 +18,8 @@
 | 0.1 | 2026-10-12 | Bản đầu, dựa trên design doc phỏng vấn dạng chat văn bản, 15 đến 45 phút |
 | 0.2 | 2026-10-12 | Đổi phạm vi theo yêu cầu của owner (chưa được FSD và DE xác nhận):** (1) phỏng vấn kỹ thuật là **hội thoại trực tiếp giống cuộc họp trực tuyến (kiểu Google Meet), đảm bảo real-time, thời lượng 15 đến 20 phút**; (2) **voice và video đưa vào phạm vi**, **nhận diện cảm xúc hoãn sang giai đoạn sau**; (3) **cho phép dùng agent framework, fine-tune model, agent tự học từ dữ liệu, và thêm giao diện web vào phạm vi** |
 | 0.3 | 2026-10-12 | **Chốt các câu hỏi mở theo trả lời của owner:** phân kỳ theo đề xuất (giai đoạn 1 là **chat**, voice gắn sau nếu ổn); yêu cầu **đồng ý trước** khi dùng giọng nói và hình ảnh; độ trễ **cải thiện dần**; giao diện kiểu cuộc họp, **video ứng viên chỉ hiển thị**, **AI là ảnh**; dùng **hạ tầng voice-agent có sẵn**; thêm mục gợi ý xử lý mâu thuẫn với constitution |
-| **0.4** | 2026-10-19 | **Đồng bộ với `main`:** quyết định của team ngày 15/10 (voice là Stretch do DE sở hữu theo kiểu TTS + STT bấm-để-nói, JD là đầu vào của Planner, phiên luyện tập riêng tư, DE sở hữu đường ghi RAG), 6 track theo đề xuất của DE, và các mặc định Q1–Q6 của [kế hoạch triển khai](../../../plans/20261019-1100-ai-interview-brd-implementation/plan.md). **Các mặc định này chờ owner xác nhận** |
+| 0.4 | 2026-10-19 | **Đồng bộ với `main`:** quyết định của team ngày 15/10 (voice là Stretch do DE sở hữu theo kiểu TTS + STT bấm-để-nói, JD là đầu vào của Planner, phiên luyện tập riêng tư, DE sở hữu đường ghi RAG), 6 track theo đề xuất của DE, và các mặc định Q1–Q6 của [kế hoạch triển khai](../../../plans/20261019-1100-ai-interview-brd-implementation/plan.md). **Các mặc định này chờ owner xác nhận** |
+| **0.5** | 2026-10-19 | **Owner xác nhận:** diễn giải A-6 (video ứng viên chỉ hiển thị = ứng viên tự thấy mình như khung tự xem, không gửi lên server, không lưu) và **chấp nhận đề xuất xử lý mâu thuẫn với constitution** (mục 0.3). D7–D12 vẫn là mặc định chờ xác nhận |
 
 ### 0.1 Tác động của thay đổi v0.2 tới tài liệu và quyết định hiện có
 
@@ -43,7 +44,7 @@ Thay đổi này **mâu thuẫn** với nhiều chỗ trong repo. BRD chỉ ghi 
 | D2 | Giai đoạn đầu | **Chat văn bản trước** trong giao diện kiểu cuộc họp; nếu ổn mới gắn thêm voice | 11, 16, 17 (đã trả lời) |
 | D3 | Giọng nói và hình ảnh | **Phải xin ứng viên đồng ý trước** khi bật | 19 (một phần) |
 | D4 | Độ trễ | Cho phép **cải thiện dần**, không là điều kiện chặn giai đoạn đầu | 9 (một phần) |
-| D5 | "Giống Google Meet" | Giống ở **giao diện họp**. Video ứng viên **chỉ hiển thị**. **AI là ảnh** (không avatar động) | 10 (đã trả lời) |
+| D5 | "Giống Google Meet" | Giống ở **giao diện họp**. Video ứng viên **chỉ hiển thị**. **AI là ảnh** (không avatar động). Diễn giải A-6 **đã xác nhận 19/10** | 10 (đã trả lời) |
 | D6 | Hạ tầng real-time | **Dùng hạ tầng voice-agent có sẵn**, không tự xây | 13 (một phần: chưa chọn cụ thể) |
 | D7 *(v0.4)* | JD | **JD của job trong application là đầu vào của Planner** (`jd_profile`), **không vào RAG**; báo cáo có khối `requirements`. Thay mục "ngoài phạm vi" của v0.3 | 17 (mới) |
 | D8 *(v0.4)* | Voice | **Tùy chọn A theo `main`:** Stretch S4 do DE sở hữu: TTS đọc `done.question`, STT bấm-để-nói gửi transcript qua `/answer`, lưu bản STT gốc và bản sửa, **không lưu audio**, ai-service không đổi. Tùy chọn B (voice-gateway realtime, D6) **ra khỏi kế hoạch mặc định** | 13, 20 |
@@ -54,11 +55,11 @@ Thay đổi này **mâu thuẫn** với nhiều chỗ trong repo. BRD chỉ ghi 
 
 *D7–D12 là mặc định của kế hoạch triển khai, bám quyết định đã nằm trên `main`; chờ owner xác nhận.*
 
-*Diễn giải của AIE, cần owner xác nhận (A-6):* "video ứng viên chỉ hiển thị" được hiểu là **ứng viên thấy chính mình** như khung tự xem trong một cuộc họp; video **không gửi lên server và không lưu**. Nếu ý khác (ví dụ ghi lại để xem lại), nhiều yêu cầu về quyền riêng tư và lưu trữ sẽ đổi.
+*Diễn giải A-6 **đã được owner xác nhận (2026-10-19)**:* "video ứng viên chỉ hiển thị" nghĩa là **ứng viên thấy chính mình** như khung tự xem trong một cuộc họp; video **không gửi lên server và không lưu**.
 
 ### 0.3 Đề xuất xử lý mâu thuẫn với constitution
 
-Phần 0.1 liệt kê các mâu thuẫn. Với quyết định D2 và D6, **phần lớn mâu thuẫn tránh được** nếu tách lớp giọng nói thành một container riêng. Đây là **gợi ý của AIE**, cần team duyệt.
+Phần 0.1 liệt kê các mâu thuẫn. Với quyết định D2 và D6, **phần lớn mâu thuẫn tránh được** nếu tách lớp giọng nói thành một container riêng. Các đề xuất dưới đây **đã được owner chấp nhận (2026-10-19)**; chúng sẽ được gộp vào PR ratify constitution (bản nháp ở `plans/20261019-1100-ai-interview-brd-implementation/reports/constitution-amendment-draft.md`), team duyệt khi ratify.
 
 | Nguyên tắc | Mâu thuẫn | Gợi ý | Lý do |
 |---|---|---|---|
@@ -258,7 +259,7 @@ Ghi chú: mốc "khớp ±1 band" có hai giá trị trong tài liệu gốc (80
 | A-3 | Giả định | **Đã lỗi thời.** Phiên chuẩn 30 phút, khoảng 15 lượt, 72k token vào, 7.5k token ra. Cần tính lại cho 15 đến 20 phút và chi phí STT, TTS |
 | A-4 | Giả định | Chất lượng `text-embedding-3-small` với tiếng Việt xen thuật ngữ Anh **chưa được đo**; đo bằng golden set RAG ở Sprint 1 |
 | A-5 | Giả định | Quy mô demo vài chục người dùng, khoảng 20 phiên đồng thời. **Phiên real-time tốn tài nguyên hơn chat, con số này cần kiểm tra lại** |
-| A-6 *(mới)* | Giả định cần xác nhận | "Video ứng viên chỉ hiển thị" nghĩa là ứng viên **thấy chính mình** trong khung tự xem; video không rời khỏi trình duyệt. AI là ảnh tĩnh. Nhận diện cảm xúc đã hoãn nên không phân tích video |
+| A-6 *(mới)* | Giả định **đã xác nhận (owner, 19/10)** | "Video ứng viên chỉ hiển thị" nghĩa là ứng viên **thấy chính mình** trong khung tự xem; video không rời khỏi trình duyệt. AI là ảnh tĩnh. Nhận diện cảm xúc đã hoãn nên không phân tích video |
 | A-7 *(mới)* | Giả định | Hạ tầng voice-agent có sẵn kèm nhà cung cấp STT và TTS hỗ trợ tiếng Việt xen thuật ngữ tiếng Anh đủ dùng. **Chưa khảo sát, chưa có số liệu** (chỉ liên quan giai đoạn 2) |
 | A-8 *(mới)* | Giả định | Trình duyệt của ứng viên cho phép truy cập micro và camera, và mạng đủ ổn định cho hội thoại real-time |
 | C-1 | Ràng buộc thời gian | 8 tuần từ 12/10 đến 06/12/2026, feature freeze 06/12; Sprint 5 (07/12 đến 21/12) dành cho polish, test tích hợp, báo cáo. **Không đổi dù phạm vi tăng (R-6)** |
@@ -317,7 +318,7 @@ Câu 1 đến 8 giữ từ v0.1. Câu 9 đến 19 phát sinh từ thay đổi ph
 | # | Câu hỏi | Trạng thái |
 |---|---|---|
 | 1 | Team có duyệt 6 track (thêm `frontend_react`, `devops_engineer`, topic AI) hay giữ 4? | **Mặc định: duyệt** (đề xuất DE, spec 005); chờ owner xác nhận |
-| 2 | Ai viết và duyệt ADR (cập nhật ADR-008, ADR-009 mới) và các sửa đổi constitution? Gợi ý ở mục 0.3: gộp vào PR ratify | **Mở** |
+| 2 | Ai viết và duyệt ADR (cập nhật ADR-008, ADR-009 mới) và các sửa đổi constitution? Gợi ý ở mục 0.3: gộp vào PR ratify | **Một phần**: hướng xử lý ở mục 0.3 đã được owner chấp nhận (19/10). Việc viết ADR và đưa vào PR ratify còn **mở** |
 | 3 | FSD xác nhận các cột mới của `interview_db` và pattern `application.getCvFile`? | **Mở** |
 | 4 | Bucket CV ở job-service là private (cần presigned) hay public (`cvUrl` hiện ghi là URL MinIO)? | **Mở** |
 | 5 | Streaming SSE qua APISIX có bị buffer không? | **Mở** (vẫn cần cho giai đoạn 1, chat dùng SSE) |
@@ -325,7 +326,7 @@ Câu 1 đến 8 giữ từ v0.1. Câu 9 đến 19 phát sinh từ thay đổi ph
 | 7 | Quota phiên mỗi ngày: giữ 5 hay đổi? | **Mở** |
 | 8 | Quy định bảo vệ dữ liệu cá nhân hiện hành: nhóm tự đối chiếu văn bản (design doc nhắc Nghị định 13/2023/NĐ-CP và luật mới có hiệu lực từ 01/01/2026, chưa được kiểm chứng ở đây) | **Mở** |
 | 9 | "Real-time" cụ thể: độ trễ chấp nhận được, ứng viên có được ngắt lời AI (barge-in) không? | **Một phần**: độ trễ cải thiện dần (D4). Barge-in còn mở, chỉ liên quan giai đoạn 2 |
-| 10 | "Giống Google Meet" nghĩa là gì, video ứng viên dùng để làm gì? | **Đã trả lời (D5)**: giống giao diện họp; video ứng viên chỉ hiển thị; AI là ảnh. *Diễn giải "chỉ hiển thị cho chính ứng viên, không gửi đi" cần xác nhận (A-6)* |
+| 10 | "Giống Google Meet" nghĩa là gì, video ứng viên dùng để làm gì? | **Đã trả lời (D5)**: giống giao diện họp; video ứng viên chỉ hiển thị; AI là ảnh. *Diễn giải "chỉ hiển thị cho chính ứng viên, không gửi đi" đã xác nhận 19/10 (A-6)* |
 | 11 | Có giữ chat văn bản làm dự phòng không? | **Đã trả lời (D2)**: chat là giai đoạn đầu; giữ làm dự phòng khi thêm voice |
 | 12 | Thời lượng mặc định trong 15 đến 20 phút và số topic mỗi phiên? | **Mở.** Đề xuất ở FR-AI-003: 20 phút ≈ 5 topic, 15 phút ≈ 4 topic (xem FR) |
 | 13 | Kênh real-time, hạ tầng và nhà cung cấp STT, TTS? | **Một phần (D6, D8)**: dùng hạ tầng có sẵn; theo `main` voice là tùy chọn A do DE sở hữu. Chọn cụ thể và khảo sát chất lượng tiếng Việt xen thuật ngữ Anh còn **mở** (giai đoạn 2) |
@@ -357,6 +358,6 @@ Câu 1 đến 8 giữ từ v0.1. Câu 9 đến 19 phát sinh từ thay đổi ph
 
 ## 14. Việc cần làm tiếp
 
-1. Owner xác nhận các mặc định D7–D12 (đặc biệt D8 voice và D12 thời lượng); team duyệt BRD v0.4.
+1. Owner xác nhận các mặc định D7–D12 (đặc biệt D8 voice và D12 thời lượng); team duyệt BRD v0.5. (A-6 và hướng xử lý constitution đã xác nhận 19/10.)
 2. Mở PR tài liệu (nhánh `thang/brd-v04-reconcile`), nhờ FSD và DE review; gộp sửa đổi constitution vào PR ratify (bản nháp ở `plans/20261019-1100-ai-interview-brd-implementation/reports/`).
-3. Triển khai theo [kế hoạch](../../../plans/20261019-1100-ai-interview-brd-implementation/plan.md); mỗi tính năng một nhánh `thang/<tính-năng>`, mỗi PR đồng bộ BRD, FR, NFR, L2 và chạy `apps/ai-service/scripts/check_docs.py`.
+3. Triển khai theo [kế hoạch](../../../plans/20261019-1100-ai-interview-brd-implementation/plan.md); mỗi tính năng một nhánh `thang/<tính-năng>`; xong một việc thì commit, push và mở PR vào `main`; mỗi PR đồng bộ BRD, FR, NFR, L2 và chạy `apps/ai-service/scripts/check_docs.py`.
