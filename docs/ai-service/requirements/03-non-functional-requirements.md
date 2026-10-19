@@ -7,7 +7,7 @@
 | Owner | AIE |
 | Tài liệu liên quan | [BRD](01-brd.md) · [FR](02-functional-requirements.md) · [Kiến trúc L2](../11-architecture-l2-containers.md) · [Latency và chi phí](../08-latency-and-cost.md) · [Đánh giá chất lượng](../09-agent-quality-evaluation.md) |
 
-> **Cập nhật theo [BRD v0.4](01-brd.md) (2026-10-12).** Giai đoạn 1 là chat văn bản trong giao diện kiểu cuộc họp, 15 đến 20 phút; giai đoạn 2 là voice Stretch (mặc định tùy chọn A theo `main`, DE sở hữu); học từ dữ liệu hoãn; JD là đầu vào của Planner. **NFR-AI-PERF10, PERF11, SCAL05, REL11, SEC10, MNT10, OBS05, CMP08 chỉ áp dụng cho tùy chọn B** (voice-gateway realtime, ngoài kế hoạch mặc định); QUAL16, QUAL17, PRIV09, PRIV11, SEC11, USE05 áp dụng cả tùy chọn A (phần STT, TTS do DE sở hữu). Quyết định D4: **độ trễ cải thiện dần**, các chỉ tiêu độ trễ là mục tiêu theo dõi chứ không là cổng chặn giai đoạn 1. NFR có đánh dấu **(GĐ2)** hoặc **(GĐ3)** thuộc giai đoạn sau và là bản nháp; không đánh dấu là giai đoạn 1.
+> **Cập nhật theo [BRD v0.5](01-brd.md) (2026-10-12).** Giai đoạn 1 là chat văn bản trong giao diện kiểu cuộc họp, 15 đến 20 phút; giai đoạn 2 là voice Stretch (mặc định tùy chọn A theo `main`, DE sở hữu); học từ dữ liệu hoãn; JD là đầu vào của Planner. **NFR-AI-PERF10, PERF11, SCAL05, REL11, SEC10, MNT10, OBS05, CMP08 chỉ áp dụng cho tùy chọn B** (voice-gateway realtime, ngoài kế hoạch mặc định); QUAL16, QUAL17, PRIV09, PRIV11, SEC11, USE05 áp dụng cả tùy chọn A (phần STT, TTS do DE sở hữu). Quyết định D4: **độ trễ cải thiện dần**, các chỉ tiêu độ trễ là mục tiêu theo dõi chứ không là cổng chặn giai đoạn 1. NFR có đánh dấu **(GĐ2)** hoặc **(GĐ3)** thuộc giai đoạn sau và là bản nháp; không đánh dấu là giai đoạn 1.
 
 ## 1. Cách đọc
 
@@ -133,7 +133,7 @@ Lưu ý phương pháp:
 | NFR-AI-PRIV07 | Chọn LLM provider **không lưu hoặc huấn luyện** trên dữ liệu (zero data retention) nếu có; tắt prompt logging ở tài khoản | Cấu hình tài khoản OpenRouter đã kiểm tra | Cần kiểm chứng | Spike | D10 P1 |
 | NFR-AI-PRIV08 | **Tuân thủ pháp lý** về dữ liệu cá nhân (chuyển dữ liệu ra nước ngoài, quyền xóa, consent): nhóm tự đối chiếu văn bản hiện hành và ghi vào báo cáo | Có mục pháp lý trong báo cáo đồ án | Cần kiểm chứng | Rev | D10 P7 |
 | NFR-AI-PRIV09 | **Đồng ý trước khi bật camera** (GĐ1) và **micro** (GĐ2): không truy cập thiết bị khi chưa đồng ý; từ chối vẫn phỏng vấn được bằng chat | 100% phiên có media đều có `media_consent_at` (FSD) | Ràng buộc (quyết định D3) | T1 (FSD) + T3 | BRD BRU-14 |
-| NFR-AI-PRIV10 | **Video ứng viên không rời trình duyệt**: không gửi lên server, không lưu. *Diễn giải A-6 cần xác nhận* | Kiểm tra mạng: không có luồng video đi | Ràng buộc (quyết định D5, cần xác nhận) | Rev + kiểm thủ công | BRD BRU-17 |
+| NFR-AI-PRIV10 | **Video ứng viên không rời trình duyệt**: không gửi lên server, không lưu. *Diễn giải A-6 đã được owner xác nhận (19/10)* | Kiểm tra mạng: không có luồng video đi | Ràng buộc (quyết định D5; A-6 đã xác nhận 19/10) | Rev + kiểm thủ công | BRD BRU-17 |
 | NFR-AI-PRIV11 | **(GĐ2)** Âm thanh chỉ gửi tới nhà cung cấp STT đã khai báo, **không ghi lại, không lưu**; thông báo đồng ý nêu rõ nơi xử lý | Không có file âm thanh trong lưu trữ | Ràng buộc | Rev | BRD BRU-17 |
 | NFR-AI-PRIV12 | **Không phân tích cảm xúc** và không dùng hình ảnh, âm thanh, giọng điệu để chấm điểm hay nhận xét | 0 thành phần xử lý hình ảnh trong ai-service | Ràng buộc | Rev | BRD BRU-15 |
 | NFR-AI-PRIV13 | **(GĐ3)** Dữ liệu huấn luyện chỉ từ phiên có cờ đồng ý riêng, đã ẩn danh, **tách khỏi golden set** và khỏi `knowledge_chunks` | 0 PII; 0 giao nhau với golden set | Ràng buộc (BRU-16) | Rev + T1 | BRD BRU-16 |
@@ -248,7 +248,7 @@ Nhóm QUAL được tính là "Đề xuất" (bảng không có cột căn cứ 
 | 6 | OpenRouter có zero data retention không | NFR-AI-PRIV07 | Kiểm tra cấu hình tài khoản |
 | 7 | Ngưỡng weak, strong, verdict | QUAL09, QUAL10 | Chạy ứng viên giả lập rồi chỉnh |
 | 8 | Quy định pháp lý bảo vệ dữ liệu cá nhân hiện hành | NFR-AI-PRIV08 | Nhóm tự đối chiếu văn bản |
-| 9 | Diễn giải "video chỉ hiển thị" là tự xem cục bộ (A-6) | NFR-AI-PRIV10 | Owner xác nhận |
+| 9 | ~~Diễn giải "video chỉ hiển thị" là tự xem cục bộ (A-6)~~ | NFR-AI-PRIV10 | **Đã xác nhận 19/10** |
 | 10 | Chất lượng STT tiếng Việt xen thuật ngữ Anh | NFR-AI-QUAL16, 17 | Đo thử các nhà cung cấp của hạ tầng voice-agent |
 | 11 | Chi phí và độ trễ STT, TTS | NFR-AI-PERF10, 11, COST06 | Đo sau khi chọn hạ tầng |
 | 12 | Số phiên giọng nói đồng thời | NFR-AI-SCAL05 | Spike |

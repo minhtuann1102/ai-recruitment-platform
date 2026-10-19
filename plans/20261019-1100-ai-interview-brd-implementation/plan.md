@@ -27,7 +27,7 @@ branch: tách từ main theo phase, dạng feat/ai-service/<mô-tả> (nhánh fe
 | Q3 | Thời lượng | 15–20 phút | Docs vẫn 30 phút | **15–20**, mặc định 20, turn cap 16 (đề xuất, cần team duyệt) |
 | Q4 | Track | 4 | DE đề xuất 6 track, 90 topic, thêm category `Frontend` | **Nhận đề xuất DE** |
 | Q5 | Framework, fine-tune | Cho phép | Docs ghi không dùng | Không dùng framework cho chat; học từ dữ liệu hoãn |
-| Q6 | A-6 video tự xem, không gửi đi | Cần xác nhận | Chưa nói | Giữ diễn giải của BRD |
+| Q6 | A-6 video tự xem, không gửi đi | Cần xác nhận | Chưa nói | **Đã xác nhận (owner, 19/10)** |
 
 ## Phases
 
@@ -62,7 +62,7 @@ Cắt từ trên xuống: voice → JD (S2-AIE-6, S3-AIE-6) → Redis cache → 
 1. **Mỗi phase có Bàn giao và Cách test** (mục tương ứng trong từng file phase); PR ghi lại kết quả test.
 2. **Mọi thay đổi phải đồng bộ BRD, FR, NFR, L2 và tài liệu thiết kế trong cùng PR**, rồi chạy `check_docs.py`.
 3. **Mỗi tính năng một nhánh `thang/<tính-năng>`** (username/feature), tách từ `main`; nhánh phụ thuộc thì xếp chồng và ghi rõ. Một nhánh một PR.
-4. Không push và không mở PR khi chưa được đồng ý.
+4. **Xong một việc thì commit, push và mở PR vào `main`** (owner cho phép thường trực từ 19/10). Ngoài ra không push thẳng vào `main`. Ghi chú quy trình lưu ở thư mục `context/`.
 
 ## Definition of Done (mọi phase)
 

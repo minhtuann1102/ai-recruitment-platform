@@ -11,7 +11,7 @@
 
 > **Giả định về thuật ngữ:** "L2" được hiểu là C4 Level 2. Nếu nhóm dùng "L2" theo nghĩa khác (ví dụ tầng thứ hai của bộ tài liệu riêng), cần điều chỉnh.
 
-> **Cập nhật theo [BRD v0.4](requirements/01-brd.md) (2026-10-19).** Giai đoạn 1: chat văn bản trong phòng họp, 15 đến 20 phút, **luyện theo CV và JD** (JD vào Planner, không vào RAG). Giai đoạn 2 là voice Stretch: **mặc định tùy chọn A theo `main`** (lớp voice nằm trong Web App, DE sở hữu: TTS và STT bấm-để-nói, ai-service không đổi). **voice-gateway trong sơ đồ là tùy chọn B**, ngoài kế hoạch mặc định, chỉ làm nếu owner xác nhận và có ADR-009. Giai đoạn 3 (học từ dữ liệu) hoãn.
+> **Cập nhật theo [BRD v0.5](requirements/01-brd.md) (2026-10-19).** Giai đoạn 1: chat văn bản trong phòng họp, 15 đến 20 phút, **luyện theo CV và JD** (JD vào Planner, không vào RAG). Giai đoạn 2 là voice Stretch: **mặc định tùy chọn A theo `main`** (lớp voice nằm trong Web App, DE sở hữu: TTS và STT bấm-để-nói, ai-service không đổi). **voice-gateway trong sơ đồ là tùy chọn B**, ngoài kế hoạch mặc định, chỉ làm nếu owner xác nhận và có ADR-009. Giai đoạn 3 (học từ dữ liệu) hoãn.
 
 ## 1. Cách đọc
 
