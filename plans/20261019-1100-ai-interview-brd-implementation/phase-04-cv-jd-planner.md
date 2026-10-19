@@ -47,6 +47,24 @@ Số topic technical = `max(2, round(gốc × thời lượng / 30))`; turn cap 
 ## Success Criteria
 - Plan hợp lệ 100% (kể cả khi LLM lỗi nhờ fallback); có CV liên quan thì topic intro `source = cv`; có `jd_profile` thì ≥ 1 topic technical ưu tiên theo JD; injection không đổi plan.
 
+## Delivery (bàn giao)
+- CV Parser LLM + prompt + tập CV mẫu
+- JD Parser: `POST /api/jd/parse`, `jd_profile` trong `/api/start`
+- Planner LLM + `plan_validator` + plan dự phòng + công thức 15–20 phút
+
+## Cách test và nghiệm thu
+1. `pytest` với FakeLlm: schema hợp lệ, hậu kiểm, injection bị loại
+2. `python -m evals.run_cv_samples`: 10 CV (PDF, DOCX) ra profile hợp lệ; 3 CV injection không lọt chỉ dẫn
+3. JD: 2 JD injection không đổi plan; yêu cầu ngoài catalog ra `out_of_catalog`
+4. Planner: bảng test công thức (Junior 20 phút = 1 intro + 3 technical + 1 scenario; 15 phút = 2 technical); LLM trả plan sai → dùng plan dự phòng, test chứng minh
+
+## Đồng bộ tài liệu (bắt buộc, cùng PR với thay đổi)
+**Contract trước code**: `docs/ai-service/06-api-contract.md` và `docs/architecture/api-contracts.md` (JD endpoint, `jd_profile`, thời lượng). BRD (BR-23, A11), FR-AI-013/016/017/020–023/003, L2 (luồng JD, I16), ADR-008 (thêm JD Parser), NFR PERF07/SEC12/PRIV14.
+Sau khi sửa: chạy `python apps/ai-service/scripts/check_docs.py` (link, ID, truy vết BR→FR→NFR, số lượng trong mục lục).
+
+## Nhánh
+3 nhánh độc lập: `thang/cv-parser-llm`, `thang/jd-parser`, `thang/planner-llm` (Planner sau cùng vì cần hai nhánh kia). Mỗi nhánh một PR; mô tả PR ghi lại kết quả các bước test ở trên.
+
 ## Risk Assessment
 - Planner dài (≈ 15–25 s) → chạy một lần, hiển thị trạng thái chờ; mức tin cậy của JD map thấp → `out_of_catalog`, không ép.
 - Phụ thuộc FSD `getJobDescription` (S2-FSD-11) → dùng JD dán tay trong harness.

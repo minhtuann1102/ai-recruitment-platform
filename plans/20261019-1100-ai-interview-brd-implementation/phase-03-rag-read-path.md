@@ -40,6 +40,24 @@
 ## Success Criteria
 - Truy vấn mẫu trả đúng topic; lookup `qa_id` trả đúng `qa_pair`; ai_db tắt thì ai-service vẫn chạy không RAG; recall@5 được đo (mục tiêu ≥ 0.8, không đạt thì báo cáo hướng cải thiện, không chặn merge).
 
+## Delivery (bàn giao)
+- `app/rag/` (embedder truy vấn, repository đọc, retriever, map độ khó)
+- `evals/run_rag.py` + `evals/rag_golden.json` đã được duyệt nhãn
+- Test tích hợp pgvector (marker `integration`)
+
+## Cách test và nghiệm thu
+1. `pytest` (repo giả): topic_id trước, dưới 2 kết quả thì vector fallback, khử trùng, cắt token
+2. Tích hợp: bật DB bằng Compose rồi `pytest -m integration`; lookup theo `qa_id` trả đúng `qa_pair`
+3. `python -m evals.run_rag` in recall@5 theo nhóm (Việt, code-mixed, Anh, không dấu, Việt→Anh); mục tiêu ≥ 0.8
+4. Tắt `ai_db`: ai-service vẫn trả lời (không RAG)
+
+## Đồng bộ tài liệu (bắt buộc, cùng PR với thay đổi)
+`rag-design.md` §4/§7 (đường đọc đã cài, kết quả recall), FR-AI-022/060/061, NFR-AI-QUAL14 chuyển sang "Đã đo" (ghi ngày), L2 I9; BRD A-4 (chất lượng embedding tiếng Việt: có số đo hay chưa).
+Sau khi sửa: chạy `python apps/ai-service/scripts/check_docs.py` (link, ID, truy vết BR→FR→NFR, số lượng trong mục lục).
+
+## Nhánh
+`thang/rag-read-path`. Mỗi nhánh một PR; mô tả PR ghi lại kết quả các bước test ở trên.
+
 ## Risk Assessment
 - Bộ Q&A canonical chưa có khi cần → dùng seed mock gắn `topic_id` cục bộ để phát triển.
 - Embedding tiếng Việt chưa đo → thử model khác nếu recall thấp (đổi model là thay đổi contract dữ liệu, cần ADR).

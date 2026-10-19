@@ -4,7 +4,7 @@
 - [plan.md](plan.md) · [BRD §0.1–0.3, §12](../../docs/ai-service/requirements/01-brd.md) · commit `35a3cc2` trên `main` (quyết định 15/10) · [spec 005](../../specs/005-rag-knowledge-base-qa/spec.md)
 
 ## Overview
-- **Priority:** P1 (chặn các phase còn lại) · **Status:** chưa bắt đầu · **Tuần:** W2 (19–25/10)
+- **Priority:** P1 (chặn các phase còn lại) · **Status:** đang làm (nhánh tài liệu xong 19/10; catalog đang làm) · **Tuần:** W2 (19–25/10)
 - Đưa nhánh làm việc về trạng thái khớp `main`, đóng các điểm lệch giữa BRD v0.3 và quyết định đã nằm trên `main`, mở PR tài liệu để FSD và DE review sớm.
 
 ## Key Insights
@@ -34,15 +34,34 @@ Không đổi kiến trúc. Chỉ quyết định cách tách voice (A: lớp k�
 7. Cập nhật `specs/README.md` trạng thái 006, 011.
 
 ## Todo List
-- [ ] Merge main, test 3.11 xanh
+- [x] Merge main, test 3.11 xanh (29 test, Docker `python:3.11-slim`)
 - [ ] Q1–Q6 có câu trả lời ghi lại (BRD §0.2)
 - [ ] Catalog 6 track, test xanh
-- [ ] BRD v0.4, FR/NFR/L2 đồng bộ
+- [x] BRD v0.4, FR/NFR/L2 đồng bộ (`check_docs.py` 0 lỗi)
 - [ ] PR tài liệu đã mở, FSD và DE đã nhận câu hỏi
-- [ ] Sửa constitution đã đưa vào PR ratify
+- [x] Bản nháp sửa constitution đã soạn (chưa đưa vào PR ratify)
 
 ## Success Criteria
 - `main` chứa BRD v0.4 và catalog 6 track; CI Python xanh; mọi quyết định Q1–Q6 có ghi nhận; FSD xác nhận bằng văn bản ít nhất contract và `getCvFile`.
+
+## Delivery (bàn giao)
+- BRD v0.4 + FR/NFR/L2 đồng bộ với quyết định 15/10 và mặc định Q1–Q6 (ghi rõ "chờ owner xác nhận")
+- Plan có Bàn giao/Test/Đồng bộ tài liệu cho mọi phase
+- `apps/ai-service/scripts/check_docs.py` (công cụ kiểm tài liệu dùng cho mọi phase sau)
+- Bản nháp sửa constitution (`reports/constitution-amendment-draft.md`), ADR-008 cập nhật, `specs/README.md` trỏ về plan
+- Catalog 6 track, 90 topic, category `Frontend` (nhánh riêng)
+
+## Cách test và nghiệm thu
+1. `check_docs.py` thoát 0 (không link hỏng, không ID trùng, mọi BR có FR và NFR, số lượng khớp mục lục)
+2. Nhánh catalog: `docker run --rm -v "$PWD":/w -w /w/apps/ai-service python:3.11-slim sh -c "pip install -q -r requirements-dev.txt && python -m pytest -q"` (đúng bản Python của CI); `tests/test_topic_catalog.py` xác nhận 6 track, mỗi level ≥ 5 topic và ≥ 1 scenario
+3. Đọc lại BRD §0.2: mỗi quyết định Q1–Q6 có trạng thái (đã chốt / mặc định chờ xác nhận)
+
+## Đồng bộ tài liệu (bắt buộc, cùng PR với thay đổi)
+Phase này **là** bước đồng bộ tài liệu. Nhánh catalog sửa thêm `rag-design.md` (category), `data-model.md`, `docs/ai-service/README.md` (A9), `data-pipeline.md §4` (link) và FR-AI-002.
+Sau khi sửa: chạy `python apps/ai-service/scripts/check_docs.py` (link, ID, truy vết BR→FR→NFR, số lượng trong mục lục).
+
+## Nhánh
+`thang/brd-v04-reconcile` (tài liệu + công cụ kiểm tài liệu, nền cho các nhánh sau); `thang/catalog-6-tracks` (code catalog, **xếp chồng** lên nhánh trên để sửa tài liệu cùng PR). Mỗi nhánh một PR; mô tả PR ghi lại kết quả các bước test ở trên.
 
 ## Risk Assessment
 - FSD/DE chậm review → các phase 02–06 không phụ thuộc nên vẫn chạy; chỉ Phase 07 bị ảnh hưởng.

@@ -40,6 +40,22 @@
 ## Success Criteria
 - Mốc W5: ±1 band ≥ 80%, độ lệch khoan dung trong [−0.3, +0.3], bắt manipulation 100%. Cổng cuối (Phase 09): ±1 band ≥ 90%.
 
+## Delivery (bàn giao)
+- Evaluator LLM + `evaluation_checks` + prompt v1
+- Golden set v1 (≥ 40 mẫu, 2 người gán nhãn) + `run_evaluator.py` + báo cáo `plans/reports/eval-evaluator-*.md`
+
+## Cách test và nghiệm thu
+1. `pytest` mọi luật hậu kiểm (quote, cap, ép 0)
+2. `python -m evals.run_evaluator --prompt v1 --model <m>` in ±1 band, MAE, độ lệch khoan dung, thứ tự đúng, nhất quán 3 lần, bắt manipulation
+3. Mốc W5: ±1 band ≥ 80%, độ lệch khoan dung trong [−0.3, +0.3], manipulation 100%; không đạt thì đổi prompt và chạy lại, **không** chỉnh nhãn
+
+## Đồng bộ tài liệu (bắt buộc, cùng PR với thay đổi)
+BRD §8 (bảng chỉ số ghi số đo), NFR QUAL01–08 sang "Đã đo" kèm ngày, FR-AI-030–032, design 05 (rubric nếu đổi) và 09 §10.2 (ngưỡng thực tế), L2 §9.
+Sau khi sửa: chạy `python apps/ai-service/scripts/check_docs.py` (link, ID, truy vết BR→FR→NFR, số lượng trong mục lục).
+
+## Nhánh
+`thang/evaluator-llm` rồi `thang/evaluator-golden-set` (golden set và công cụ đo). Mỗi nhánh một PR; mô tả PR ghi lại kết quả các bước test ở trên.
+
 ## Risk Assessment
 - Cần người gán nhãn thứ hai (2–3 giờ mỗi lần) → đặt lịch sớm; thiếu người thì golden set nhỏ hơn và ghi rõ giới hạn.
 - Chấm dễ dãi → tăng luật cứng bằng code trước khi đổi sang model lớn.

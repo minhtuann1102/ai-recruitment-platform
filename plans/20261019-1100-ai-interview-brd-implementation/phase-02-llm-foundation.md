@@ -47,6 +47,24 @@ Agent registry: AGENT_<NAME>_MODE = mock | llm  (mock giữ làm fallback)
 ## Success Criteria
 - CI xanh không cần khóa; test chứng minh retry ≤ 2, không retry 4xx, repair 1 lần; một lần gọi thật qua gateway trả JSON hợp lệ kèm usage.
 
+## Delivery (bàn giao)
+- Gói `app/llm/` (gateway, retry, structured output, usage), `app/prompts/` có phiên bản, `FakeLlm`, registry mock/llm
+- `.env.example` cập nhật biến theo agent
+- `scripts/smoke_llm.py` chạy qua gateway
+
+## Cách test và nghiệm thu
+1. `pytest`: retry đúng 2 lần, backoff 0.5 s rồi 1.5 s, không retry 400/401/403, repair 1 lần, `length` thử lại ×1.5 (bằng FakeLlm, không mạng)
+2. CI Python 3.11 xanh: `docker run --rm -v "$PWD":/w -w /w/apps/ai-service python:3.11-slim sh -c "pip install -q -r requirements-dev.txt && python -m pytest -q"` (đúng bản Python của CI)
+3. Một lần chạy thật: `python -m scripts.smoke_llm` in model, thời gian, token, JSON hợp lệ
+4. Kiểm tay: `LOG_LLM_IO=false` thì log không có nội dung prompt hay khóa
+
+## Đồng bộ tài liệu (bắt buộc, cùng PR với thay đổi)
+FR-AI-063/070/080/081 đổi trạng thái; NFR REL02, MNT05, MNT07, OBS01; design 03 §4.6 và 08 §9.3 ghi "đã cài đặt"; L2 §9 (bảng thành phần ai-service); `ai-integration.md`. BRD chỉ cập nhật bảng truy vết/trạng thái nếu yêu cầu đổi.
+Sau khi sửa: chạy `python apps/ai-service/scripts/check_docs.py` (link, ID, truy vết BR→FR→NFR, số lượng trong mục lục).
+
+## Nhánh
+`thang/llm-foundation`. Mỗi nhánh một PR; mô tả PR ghi lại kết quả các bước test ở trên.
+
 ## Risk Assessment
 - Một số model OpenRouter không hỗ trợ `json_schema` → có nhánh dự phòng `json_object`.
 - Tốn tiền khi thử: giới hạn bằng `max_tokens` và chạy mock mặc định.

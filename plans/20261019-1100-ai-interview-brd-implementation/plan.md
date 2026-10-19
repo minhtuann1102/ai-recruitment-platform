@@ -33,7 +33,7 @@ branch: tách từ main theo phase, dạng feat/ai-service/<mô-tả> (nhánh fe
 
 | # | Phase | Tuần | Trạng thái | Task | FR / NFR chính |
 |---|---|---|---|---|---|
-| 01 | [Đồng bộ main, chốt quyết định](phase-01-sync-and-decisions.md) | W2 | Chưa bắt đầu | — | — |
+| 01 | [Đồng bộ main, chốt quyết định](phase-01-sync-and-decisions.md) | W2 | **Đang làm**: nhánh tài liệu xong, catalog đang làm, chờ owner xác nhận Q1–Q6 | — | — |
 | 02 | [Nền tảng LLM](phase-02-llm-foundation.md) | W2–W3 | Chưa bắt đầu | S1-AIE-4 | FR-063, 070, 080, 081 |
 | 03 | [RAG đường đọc](phase-03-rag-read-path.md) | W2–W4 | Chưa bắt đầu | S1-AIE-2 | FR-022, 060, 061 · QUAL14 |
 | 04 | [CV, JD, Planner](phase-04-cv-jd-planner.md) | W3–W4 | Chưa bắt đầu | S1-AIE-3, S2-AIE-1, 3, 6 | FR-003, 013, 016, 017, 020–023 |
@@ -56,6 +56,13 @@ W2 19–25/10 · W3 26/10–01/11 · W4 02–08/11 (**khóa contract**) · W5 09
 ## Mốc cắt giảm (sprint plan, thêm cho AIE)
 
 Cắt từ trên xuống: voice → JD (S2-AIE-6, S3-AIE-6) → Redis cache → category-specific RAG → RAG grounding. **Không cắt:** Evaluator mỗi lượt, policy, tính điểm bằng code, quality gates.
+
+## Quy tắc làm việc (bắt buộc, từ 19/10)
+
+1. **Mỗi phase có Bàn giao và Cách test** (mục tương ứng trong từng file phase); PR ghi lại kết quả test.
+2. **Mọi thay đổi phải đồng bộ BRD, FR, NFR, L2 và tài liệu thiết kế trong cùng PR**, rồi chạy `check_docs.py`.
+3. **Mỗi tính năng một nhánh `thang/<tính-năng>`** (username/feature), tách từ `main`; nhánh phụ thuộc thì xếp chồng và ghi rõ. Một nhánh một PR.
+4. Không push và không mở PR khi chưa được đồng ý.
 
 ## Definition of Done (mọi phase)
 

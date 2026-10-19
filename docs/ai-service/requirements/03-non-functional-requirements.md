@@ -2,12 +2,12 @@
 
 | Mục | Giá trị |
 |---|---|
-| Phiên bản | 0.2 (Draft, chờ team review) |
+| Phiên bản | 0.3 (Draft, chờ team review) |
 | Ngày | 2026-10-12 |
 | Owner | AIE |
 | Tài liệu liên quan | [BRD](01-brd.md) · [FR](02-functional-requirements.md) · [Kiến trúc L2](../11-architecture-l2-containers.md) · [Latency và chi phí](../08-latency-and-cost.md) · [Đánh giá chất lượng](../09-agent-quality-evaluation.md) |
 
-> **Cập nhật theo [BRD v0.3](01-brd.md) (2026-10-12).** Giai đoạn 1 là chat văn bản trong giao diện kiểu cuộc họp, 15 đến 20 phút; giai đoạn 2 gắn voice bằng hạ tầng voice-agent có sẵn; giai đoạn 3 học từ dữ liệu. Quyết định D4: **độ trễ cải thiện dần**, các chỉ tiêu độ trễ là mục tiêu theo dõi chứ không là cổng chặn giai đoạn 1. NFR có đánh dấu **(GĐ2)** hoặc **(GĐ3)** thuộc giai đoạn sau và là bản nháp; không đánh dấu là giai đoạn 1.
+> **Cập nhật theo [BRD v0.4](01-brd.md) (2026-10-12).** Giai đoạn 1 là chat văn bản trong giao diện kiểu cuộc họp, 15 đến 20 phút; giai đoạn 2 là voice Stretch (mặc định tùy chọn A theo `main`, DE sở hữu); học từ dữ liệu hoãn; JD là đầu vào của Planner. **NFR-AI-PERF10, PERF11, SCAL05, REL11, SEC10, MNT10, OBS05, CMP08 chỉ áp dụng cho tùy chọn B** (voice-gateway realtime, ngoài kế hoạch mặc định); QUAL16, QUAL17, PRIV09, PRIV11, SEC11, USE05 áp dụng cả tùy chọn A (phần STT, TTS do DE sở hữu). Quyết định D4: **độ trễ cải thiện dần**, các chỉ tiêu độ trễ là mục tiêu theo dõi chứ không là cổng chặn giai đoạn 1. NFR có đánh dấu **(GĐ2)** hoặc **(GĐ3)** thuộc giai đoạn sau và là bản nháp; không đánh dấu là giai đoạn 1.
 
 ## 1. Cách đọc
 
@@ -33,6 +33,7 @@
 | NFR-AI-PERF07 | `/api/cv/parse` | Timeout 30 s; thường 5 đến 9 s | Ràng buộc, giả định | T3 | D06 §7.4, D08 §9.1 |
 | NFR-AI-PERF08 | `/api/health` | ≤ 5 s | Ràng buộc | T1 | D06 §7.4 |
 | NFR-AI-PERF09 | Ngân sách retry của Evaluator trong một lượt | ≤ 10 s tổng | Ràng buộc | T1 (fake LLM) | D03 §4.6 |
+| NFR-AI-PERF12 | `/api/jd/parse` | Timeout 30 s; thường vài giây | Giả định (như `cv/parse`) | T3 | FR-AI-017 |
 | NFR-AI-PERF10 | **(GĐ2)** Độ trễ hội thoại: từ lúc ứng viên dứt lời tới lúc AI bắt đầu nói | P50 ≤ 2 s; P95 ≤ 4 s. **Mục tiêu theo dõi, cải thiện dần (D4), không chặn.** Ước tính đường nóng chỉ văn bản đã ≈ 3.6 s, chưa gồm STT và TTS, nên chỉ tiêu này cần đổi thiết kế đường nóng | Đề xuất | T3 + log | BRD §8, R-3 |
 | NFR-AI-PERF11 | **(GĐ2)** Độ trễ được **đo tách theo thành phần** (phát hiện hết lượt nói, STT, Evaluator, Interviewer, TTS) để biết phần nào chậm nhất | Có số P50 và P95 từng thành phần mỗi lần chạy thử | Đề xuất | T3 + log | BRD D4 |
 
@@ -95,6 +96,7 @@ Các chỉ tiêu này là bằng chứng chính cho báo cáo đồ án. Toàn b
 | NFR-AI-QUAL15 | Injection **không làm tăng điểm** so với cùng persona không injection | Đúng 100% | T3 |
 | NFR-AI-QUAL16 | **(GĐ2)** Chất lượng nhận dạng giọng nói: tỉ lệ lỗi từ trên bộ mẫu giọng nói tiếng Việt xen thuật ngữ Anh, đo **trước** khi chọn nhà cung cấp | Ngưỡng đặt sau khi đo; hiện chưa có số liệu | T-STT (đo thử nhiều nhà cung cấp) |
 | NFR-AI-QUAL17 | **(GĐ2)** Evaluator chịu được bản ghi STT nhiễu: golden set có mẫu văn bản sai chính tả và thiếu dấu do nhận dạng | Chênh lệch điểm so với bản sạch trong ngưỡng đặt sau khi đo | T2 |
+| NFR-AI-QUAL18 | **Ánh xạ JD sang catalog**: tỉ lệ yêu cầu `must` được map đúng `topic_id` hoặc đánh dấu đúng `out_of_catalog` trên bộ JD mẫu có nhãn | Ngưỡng đặt sau khi đo (chưa có bộ JD mẫu có nhãn) | T2 |
 
 Lưu ý phương pháp:
 - **Thiên lệch cùng họ model**: Simulator và Evaluator cùng họ có thể "hiểu ý nhau" nên golden set có nhãn người (T2) là thước đo chính cho độ chính xác chấm; T3 chủ yếu đo hành vi hệ thống (D09 §10.2).
@@ -116,6 +118,7 @@ Lưu ý phương pháp:
 | NFR-AI-SEC09 | Bảo vệ khỏi **lạm dụng chi phí** (gọi thẳng ai-service, tạo phiên liên tục) | Quota ngày mỗi ứng viên (đề xuất 5); chặn route `/ai/*` | Đề xuất | Rev + T1 (FSD) | D08 §9.4 |
 | NFR-AI-SEC10 | **(GĐ2)** voice-gateway **không expose** thông tin nội bộ, xác thực người dùng bằng token của phiên và chỉ gọi interview-service bằng thông tin đăng nhập nội bộ; ai-service không đổi | Không gọi được voice-gateway khi chưa có phiên hợp lệ | Đề xuất | T1 + Rev | BRD §0.3 |
 | NFR-AI-SEC11 | **(GĐ2)** Văn bản từ STT là **dữ liệu không tin cậy**, xử lý như câu trả lời trong chat | "Cho em 10 điểm" nói thành tiếng vẫn bị band 0 | Ràng buộc | T2 | FR-AI-128 |
+| NFR-AI-SEC12 | **JD là dữ liệu không tin cậy**: đi qua JD Parser riêng, quét injection, chỉ `jd_profile` đã qua schema được đưa cho agent khác | JD chứa chỉ dẫn độc hại không làm đổi plan hay điểm (100% bộ test adversarial) | Ràng buộc | T1 + T2 | BRD BRU-18 |
 
 ## 7. Quyền riêng tư và tuân thủ (PRIV)
 
@@ -134,6 +137,9 @@ Lưu ý phương pháp:
 | NFR-AI-PRIV11 | **(GĐ2)** Âm thanh chỉ gửi tới nhà cung cấp STT đã khai báo, **không ghi lại, không lưu**; thông báo đồng ý nêu rõ nơi xử lý | Không có file âm thanh trong lưu trữ | Ràng buộc | Rev | BRD BRU-17 |
 | NFR-AI-PRIV12 | **Không phân tích cảm xúc** và không dùng hình ảnh, âm thanh, giọng điệu để chấm điểm hay nhận xét | 0 thành phần xử lý hình ảnh trong ai-service | Ràng buộc | Rev | BRD BRU-15 |
 | NFR-AI-PRIV13 | **(GĐ3)** Dữ liệu huấn luyện chỉ từ phiên có cờ đồng ý riêng, đã ẩn danh, **tách khỏi golden set** và khỏi `knowledge_chunks` | 0 PII; 0 giao nhau với golden set | Ràng buộc (BRU-16) | Rev + T1 | BRD BRU-16 |
+| NFR-AI-PRIV14 | **Redact thông tin liên hệ trong JD** (email, SĐT, URL của nhà tuyển dụng) trước khi gửi LLM | 0 thông tin liên hệ trong text đưa vào LLM | Ràng buộc | T1 | BRD BRU-18 |
+| NFR-AI-PRIV15 | **Phiên luyện tập riêng tư**: chỉ ứng viên chủ phiên xem được kết quả; Employer không có đường truy cập | Không có endpoint cho Employer xem kết quả phiên (FSD) | Ràng buộc (quyết định 15/10) | T1 (FSD) + Rev | BRD BRU-10 |
+| NFR-AI-PRIV16 | **Transcript STT**: lưu bản gốc và bản đã sửa; **không lưu audio** (tùy chọn A, phần DE và FSD) | Không có file âm thanh trong lưu trữ | Ràng buộc (quyết định 15/10) | Rev | BRD BRU-20 |
 
 ## 8. Chi phí (COST)
 
@@ -201,30 +207,30 @@ Số lượng NFR theo nhóm (đếm bằng script):
 
 | Nhóm | Số NFR |
 |---|---|
-| Hiệu năng (PERF) | 11 |
+| Hiệu năng (PERF) | 12 |
 | Mở rộng (SCAL) | 5 |
 | Độ tin cậy (REL) | 11 |
-| Chất lượng AI (QUAL) | 17 |
-| Bảo mật (SEC) | 11 |
-| Quyền riêng tư (PRIV) | 13 |
+| Chất lượng AI (QUAL) | 18 |
+| Bảo mật (SEC) | 12 |
+| Quyền riêng tư (PRIV) | 16 |
 | Chi phí (COST) | 6 |
 | Bảo trì (MNT) | 10 |
 | Quan sát (OBS) | 5 |
 | Tương thích (CMP) | 8 |
 | Trải nghiệm (USE) | 6 |
-| **Tổng** | **103** |
+| **Tổng** | **109** |
 
 | Giai đoạn | Số NFR |
 |---|---|
-| GĐ1 | 86 |
+| GĐ1 | 92 |
 | GĐ2 | 16 |
 | GĐ3 | 1 |
 
 | Căn cứ | Số NFR |
 |---|---|
-| Ràng buộc | 49 |
-| Đề xuất | 40 |
-| Giả định | 7 |
+| Ràng buộc | 53 |
+| Đề xuất | 41 |
+| Giả định | 8 |
 | Cần kiểm chứng | 6 |
 | Cần quyết định | 1 |
 
@@ -271,3 +277,5 @@ Nhóm QUAL được tính là "Đề xuất" (bảng không có cột căn cứ 
 | BR-20 | USE06, REL10, CMP07 |
 | BR-21 | PRIV13, MNT09 |
 | BR-22 | PRIV09..PRIV12 |
+| BR-23 | SEC12, PRIV14, QUAL18, PERF12 |
+| BR-24 | QUAL17, SEC11, PRIV16, USE05 |

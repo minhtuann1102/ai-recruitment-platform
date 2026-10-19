@@ -4,14 +4,14 @@
 
 | Mục | Giá trị |
 |---|---|
-| Phiên bản | 0.2 (Draft, chờ team review) |
+| Phiên bản | 0.3 (Draft, chờ team review) |
 | Ngày | 2026-10-12 |
 | Owner | AIE |
 | Mức C4 | **Level 2 (Container)**. Level 1 (Context) tóm tắt ở §2; Level 3 (Component) của ai-service xem sơ lược ở §9 và chi tiết ở [02](02-multi-agent-architecture-and-prompts.md), [03](03-orchestrator-state-machine.md) |
 
 > **Giả định về thuật ngữ:** "L2" được hiểu là C4 Level 2. Nếu nhóm dùng "L2" theo nghĩa khác (ví dụ tầng thứ hai của bộ tài liệu riêng), cần điều chỉnh.
 
-> **Cập nhật theo [BRD v0.3](requirements/01-brd.md) (2026-10-12).** Giai đoạn 1: chat văn bản trong phòng họp, 15 đến 20 phút. Giai đoạn 2 (nếu giai đoạn 1 ổn): thêm **voice-gateway** dùng hạ tầng voice-agent có sẵn. Giai đoạn 3: học từ dữ liệu. Các phần của giai đoạn 2 và 3 trong tài liệu này là **bản nháp**, chờ chọn hạ tầng voice-agent và duyệt ADR-009.
+> **Cập nhật theo [BRD v0.4](requirements/01-brd.md) (2026-10-19).** Giai đoạn 1: chat văn bản trong phòng họp, 15 đến 20 phút, **luyện theo CV và JD** (JD vào Planner, không vào RAG). Giai đoạn 2 là voice Stretch: **mặc định tùy chọn A theo `main`** (lớp voice nằm trong Web App, DE sở hữu: TTS và STT bấm-để-nói, ai-service không đổi). **voice-gateway trong sơ đồ là tùy chọn B**, ngoài kế hoạch mặc định, chỉ làm nếu owner xác nhận và có ADR-009. Giai đoạn 3 (học từ dữ liệu) hoãn.
 
 ## 1. Cách đọc
 
@@ -103,14 +103,15 @@ Chú giải màu: xanh lá = đã có trong repo; vàng = mock; xám nét đứt
 | Container | Công nghệ | Trách nhiệm trong phạm vi phần AI | Chủ sở hữu | Hiện trạng |
 |---|---|---|---|---|
 | **Web App** | Next.js (`apps/web`, ADR-005) | **Phòng họp** kiểu cuộc họp trực tuyến: khung AI là ảnh tĩnh, khung video ứng viên (tự xem cục bộ, không gửi đi), khung chat, đồng hồ, trạng thái AI; xin đồng ý trước khi bật camera (và micro ở GĐ2); đọc stream SSE bằng `fetch`; trang báo cáo | FSD (đề xuất) | Kế hoạch |
-| **voice-gateway** *(GĐ2)* | Hạ tầng voice-agent có sẵn (chưa chọn), kèm STT và TTS | Nhận âm thanh ứng viên đã đồng ý, phát hiện hết lượt nói, chuyển thành văn bản, **gọi đúng contract chat** qua interview-service, đọc câu hỏi trả về bằng TTS; khi lỗi thì chuyển sang chat. **Không giữ dữ liệu phiên, không ghi âm** | AIE + DE (đề xuất) | Kế hoạch (chờ ADR-009) |
+| **Lớp voice trong Web App** *(GĐ2, tùy chọn A, mặc định)* | Trình duyệt (TTS, STT bấm-để-nói) | TTS đọc `done.question`; STT bấm-để-nói, cho sửa transcript, gửi qua `/answer` kèm bản STT gốc; **không ghi âm** | DE (feature 015, S4-DE-5) | Kế hoạch (Stretch) |
+| **voice-gateway** *(GĐ2, tùy chọn B)* | Hạ tầng voice-agent có sẵn (chưa chọn), kèm STT và TTS | Nhận âm thanh ứng viên đã đồng ý, phát hiện hết lượt nói, chuyển thành văn bản, **gọi đúng contract chat** qua interview-service, đọc câu hỏi trả về bằng TTS; khi lỗi thì chuyển sang chat. **Không giữ dữ liệu phiên, không ghi âm** | AIE + DE (đề xuất) | Kế hoạch (chờ ADR-009) |
 | **STT / TTS provider** *(GĐ2)* | Dịch vụ ngoài (chưa chọn) | Nhận dạng và tổng hợp giọng nói tiếng Việt xen thuật ngữ Anh | Bên ngoài | Chưa khảo sát |
 | **API Gateway** | Apache APISIX 3.14 + etcd, ADC sync | Điểm vào công khai duy nhất; xác thực JWT; inject `x-auth-user`; định tuyến; chỉ cho `/ai/api/health` ra ngoài; không buffer SSE | DE | Có (route `/ai/*` thêm trong nhánh `feat/aie`, chưa kiểm chứng) |
 | **auth-service** | NestJS | Đăng ký, đăng nhập, JWT | FSD | Có |
 | **user-service** | NestJS | Hồ sơ người dùng | FSD | Có |
-| **job-service** | NestJS | Tin tuyển dụng và **ứng tuyển, giữ file CV**; cung cấp TCP `application.getCvFile` kèm presigned URL | FSD | Kế hoạch |
+| **job-service** | NestJS | Tin tuyển dụng và **ứng tuyển, giữ file CV**; cung cấp TCP `application.getCvFile` kèm presigned URL và `application.getJobDescription` (JD của job gắn application, S2-FSD-11) | FSD | Kế hoạch |
 | **interview-service** | NestJS | **Chủ sở hữu mọi dữ liệu phỏng vấn** (session, plan, candidate state, transcript, evaluation, report, `cv_profile`); điều phối gọi ai-service qua `AiInterviewClient`; relay SSE; khóa phiên và quota qua Redis; chống gửi trùng | FSD | Kế hoạch |
-| **ai-service** | Python 3.11 hoặc 3.12, FastAPI, Pydantic v2, SDK `openai` | Thực hiện **toàn bộ logic AI không trạng thái**: CV Parser, Planner, Evaluator, Interviewer, Reporter; orchestrator, policy, tổng hợp điểm; truy xuất RAG; SSE | AIE | Mock |
+| **ai-service** | Python 3.11 hoặc 3.12, FastAPI, Pydantic v2, SDK `openai` | Thực hiện **toàn bộ logic AI không trạng thái**: CV Parser, **JD Parser**, Planner, Evaluator, Interviewer, Reporter; orchestrator, policy, tổng hợp điểm; truy xuất RAG; SSE | AIE | Mock |
 | **Topic catalog** | YAML (`app/catalog/*.yaml`) | Danh sách chủ đề và tình huống theo vị trí; đóng gói cùng image ai-service | AIE + DE | Có (nội dung chưa review) |
 | **interview_db** | PostgreSQL 16 | Dữ liệu phỏng vấn của interview-service | FSD | Kế hoạch |
 | **ai_db** | PostgreSQL 16 + pgvector (`pgvector/pgvector:pg16`) | Bảng `knowledge_chunks` (`interview_qa`, `textbook`) | AIE (DDL) + DE (tạo DB, nạp dữ liệu) | Kế hoạch (DDL đã thiết kế, chưa chạy) |
@@ -126,8 +127,9 @@ Chú giải màu: xanh lá = đã có trong repo; vàng = mock; xám nét đứt
 | I1 | Web App | API Gateway | HTTPS, JSON và SSE qua `fetch` | Mọi lời gọi của ứng viên | JWT | `EventSource` không dùng được vì cần header `Authorization` và POST (D06 §7.5) |
 | I2 | API Gateway | interview-service | HTTP | Định tuyến `/interview/*` | Gateway verify JWT, inject `x-auth-user` | `timeout.read` upstream ≥ 60 s cho SSE |
 | I3 | API Gateway | ai-service | HTTP | **Chỉ** `GET /ai/api/health` | Công khai | Route còn lại yêu cầu JWT trong cấu hình hiện tại; mục tiêu là chặn hẳn (SEC01) |
-| I4 | interview-service | ai-service | REST/HTTP, SSE | `cv/parse`, `start`, `next-turn`, `finalize`, `health` | Header `X-Internal-Token` (chưa làm) | 30 s, 40 s, 45 s, 90 s, 5 s (D06 §7.4); snake_case ở biên, ánh xạ camelCase làm ở client |
+| I4 | interview-service | ai-service | REST/HTTP, SSE | `cv/parse`, `jd/parse`, `start`, `next-turn`, `finalize`, `health` | Header `X-Internal-Token` (chưa làm) | 30 s, 40 s, 45 s, 90 s, 5 s (D06 §7.4); snake_case ở biên, ánh xạ camelCase làm ở client |
 | I5 | interview-service | job-service | NestJS TCP | `application.getCvFile`: kiểm tra application thuộc ứng viên, trả presigned URL | Nội bộ | Kiểm quyền sở hữu là bắt buộc (D10 P9) |
+| I16 | interview-service | job-service | NestJS TCP | `application.getJobDescription`: JD của job gắn application, kiểm application thuộc ứng viên | Nội bộ | S2-FSD-11 (đề xuất, chờ FSD xác nhận); JD thô được gửi tới ai-service qua I4, không lưu |
 | I6 | interview-service | MinIO / S3 | HTTPS, presigned URL | Tải file CV, stream, tối đa 10 MB, không ghi đĩa | URL có hạn 5 phút | |
 | I7 | interview-service | interview_db | SQL (MikroORM) | Lưu và đọc dữ liệu phiên | | State có `state_version` để khóa lạc quan |
 | I8 | interview-service | Redis | Redis protocol | Khóa phiên TTL 60 s, quota ngày | | |
@@ -156,6 +158,9 @@ Quy tắc ràng buộc (constitution): service **không** truy vấn hay ghi DB 
 | Token, độ trễ, phiên bản prompt, fallback | `ai_meta` JSONB trong `interview_db` | interview-service | Tạo `metadata` trong response |
 | Dữ liệu phiên trong ai-service | **Không có** | | Log chỉ chứa id và số đo |
 | **Video ứng viên** | **Không lưu ở đâu cả**: chỉ hiển thị trong trình duyệt của chính ứng viên | Trình duyệt | Không nhận (diễn giải A-6) |
+| `jd_profile` (yêu cầu đã trích từ JD) | `interview_db` (đề xuất) | interview-service | Tạo ra (JD Parser) rồi trả về |
+| **JD gốc** | `job_db` (job-service) | job-service | Chỉ thấy văn bản trong một request `jd/parse`, không lưu |
+| Transcript STT gốc và bản đã sửa (tùy chọn A) | `interview_db` (đề xuất) | interview-service | Chỉ nhận văn bản, không có audio |
 | **Âm thanh ứng viên** *(GĐ2)* | Không lưu; chỉ đi tới nhà cung cấp STT đã khai báo | voice-gateway | Không nhận âm thanh, chỉ nhận văn bản |
 | Cờ đồng ý (`media_consent_at`, `learning_consent_at`) | `interview_db` (đề xuất; FSD xác nhận) | interview-service | Không |
 
@@ -222,6 +227,25 @@ sequenceDiagram
     I-->>W: cvStatus parsed
 ```
 
+### 8.1b Chọn job để luyện theo JD (tùy chọn)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant I as interview-service
+    participant J as job-service
+    participant A as ai-service
+    participant L as LLM provider
+    I->>J: TCP application.getJobDescription (applicationId, candidateId)
+    J-->>I: JD của job (đã kiểm application thuộc ứng viên)
+    I->>A: POST /api/jd/parse (văn bản JD, track)
+    A->>A: chuẩn hóa, redact liên hệ, quét injection
+    A->>L: JD đã redact, yêu cầu JSON theo schema
+    L-->>A: jd_profile (must, nice, topic_id hoặc out_of_catalog)
+    A-->>I: jd_profile
+    Note over I,A: jd_profile đi vào POST /api/start. Planner tăng trọng số topic. JD không vào RAG.
+```
+
 ### 8.2 Một lượt phỏng vấn (đường nóng)
 
 ```mermaid
@@ -266,7 +290,7 @@ sequenceDiagram
     W->>I: GET /sessions/:id/report (polling)
 ```
 
-### 8.4 Một lượt bằng giọng nói (GĐ2, bản nháp)
+### 8.4 Một lượt bằng giọng nói (tùy chọn B, ngoài kế hoạch mặc định, bản nháp)
 
 Voice-gateway là bộ chuyển đổi: toàn bộ logic phỏng vấn vẫn đi qua đường chat ở §8.2.
 
@@ -371,7 +395,7 @@ flowchart LR
 | ADR-006 | Gộp application vào job-service | I5 (CV lấy từ job-service) |
 | **ADR-008** | Evaluator mỗi lượt, Planner một lần, orchestrator bằng code | §9 |
 | Constitution IV, V | AI stateless; pipeline tái lập, không dữ liệu cá nhân vào kho | §6, §7; cần amendment vì ADR-008 đổi nội dung contract |
-| **ADR-009** *(đề xuất, chưa viết)* | voice-gateway, hạ tầng voice-agent, phân kỳ chat trước voice | §3, §8.4; xem BRD §0.3 |
+| **ADR-009** *(đề xuất, chưa viết; chỉ khi chọn tùy chọn B)* | voice-gateway, hạ tầng voice-agent, phân kỳ chat trước voice | §3, §8.4; xem BRD §0.3 |
 
 ## 13. Khoảng cách giữa mục tiêu và hiện trạng
 
@@ -392,6 +416,8 @@ flowchart LR
 | G13 | Lưu cờ đồng ý | `media_consent_at`, `learning_consent_at` trong `interview_db` | Chưa có | FSD xác nhận migration |
 | G14 | Thời lượng 15 đến 20 phút | Planner và policy theo công thức mới | Mock vẫn nhận 15 đến 45 phút | FR-AI-001, 003, 035 |
 | G15 | voice-gateway | Có (GĐ2) | Chưa chọn hạ tầng voice-agent, chưa có ADR | Khảo sát, ADR-009 (chỉ khi giai đoạn 1 ổn) |
+| G16 | JD Parser và TCP lấy JD | Có (S2-AIE-6, S2-FSD-11) | Chưa | Phase 04; FSD xác nhận S2-FSD-11 |
+| G17 | Đường ghi RAG | DE sở hữu (spec 005) | Chưa chạy | DE; AIE chỉ làm đường đọc (Phase 03) |
 
 ## 14. Câu hỏi mở
 
@@ -403,3 +429,4 @@ flowchart LR
 6. voice-gateway đặt ở biên công khai (cùng lớp với gateway) hay trong mạng nội bộ? Kênh âm thanh thời gian thực có đi qua APISIX không, hay mở cổng riêng? (phụ thuộc hạ tầng voice-agent chọn)
 7. Cờ đồng ý và thời điểm đồng ý lưu ở interview-service (đề xuất). Có cần lưu bản chữ của thông báo đồng ý theo phiên bản không?
 8. Khung chat có nên hiển thị lại câu hệ thống nghe được khi dùng voice (FR-AI-123)?
+9. Với tùy chọn A (voice trong Web App), có cần container hay route nào mới ở phía gateway không? (Mặc định: không, vì dùng lại `/answer`.)

@@ -45,6 +45,24 @@ finalize : code tính điểm → Reporter (JSON) → kiểm evidence_turns, tra
 ## Success Criteria
 - 0 phiên vượt giới hạn cứng (test biên); mọi nhánh trong bảng lỗi design 03 §4.6 có test; fallback < 2% và lỗi format < 1% trong phiên giả lập; unit test orchestrator ≥ 90% nhánh.
 
+## Delivery (bàn giao)
+- Giới hạn cứng/ngân sách thời gian/mượn thời gian; Interviewer stream + fallback + `replace` + chống lặp
+- Reporter + `requirements` (JD) + partial
+- Middleware `X-Internal-Token`
+
+## Cách test và nghiệm thu
+1. `pytest` biên cho từng dòng bảng policy và điều kiện chuyển phase (≥ 90% nhánh orchestrator, đo bằng `pytest --cov`)
+2. Kịch bản lỗi bằng FakeLlm: Interviewer lỗi trước token → `backup_question`; giữa stream → `replace`; Evaluator lỗi → degraded; Reporter lỗi → `partial`
+3. Gọi không token → 401, `/api/health` vẫn mở
+4. Phiên mô phỏng: 0 phiên vượt giới hạn cứng
+
+## Đồng bộ tài liệu (bắt buộc, cùng PR với thay đổi)
+design 03 §4.4/§4.6 và 05 §6.4 (khối `requirements`), `06-api-contract.md` (`replace`, lỗi), FR-AI-035–039/052–056/070–072/091, NFR REL01–04/09, SEC01, L2 §7 (ranh giới tin cậy), BRD BR-23.
+Sau khi sửa: chạy `python apps/ai-service/scripts/check_docs.py` (link, ID, truy vết BR→FR→NFR, số lượng trong mục lục).
+
+## Nhánh
+4 nhánh: `thang/orchestrator-limits`, `thang/interviewer-llm`, `thang/reporter-llm`, `thang/internal-token-auth`. Mỗi nhánh một PR; mô tả PR ghi lại kết quả các bước test ở trên.
+
 ## Risk Assessment
 - Evaluator rồi Interviewer nối tiếp chậm → đo từ Phase 07; phương án design 08 §9.2 (Evaluator gọn, model nhanh hơn, tách Evaluator hai pha).
 - Reporter bịa → chặn bằng kiểm `evidence_turns` và link từ catalog.

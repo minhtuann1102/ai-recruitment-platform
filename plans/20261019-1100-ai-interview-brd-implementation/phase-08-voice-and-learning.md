@@ -40,6 +40,22 @@ B (ngoài kế hoạch): thêm container voice-gateway, xem [L2 §3, §8.4](../.
 ## Success Criteria
 - Có quyết định gate ghi lại. Tùy chọn A: ai-service không đổi contract, báo cáo giữ chất lượng khi transcript nhiễu. Không có file audio trong lưu trữ.
 
+## Delivery (bàn giao)
+- Biên bản gate 22/11
+- Prompt Evaluator xử lý transcript STT nhiễu + mẫu golden nhiễu
+- Đề xuất cột `media_consent_at`, `learning_consent_at` gửi FSD
+
+## Cách test và nghiệm thu
+1. Chạy lại `run_evaluator` trên tập có mẫu nhiễu: chênh lệch điểm so với bản sạch trong ngưỡng đặt sau khi đo
+2. Kiểm tay: không có file audio được lưu; contract `/answer` giữ nguyên trường bắt buộc
+
+## Đồng bộ tài liệu (bắt buộc, cùng PR với thay đổi)
+BRD §0.2 (kết quả gate, A hay B), §4.3, BR-17/18, FR nhóm K và L, NFR QUAL17/PRIV09–13, L2 (nếu B thì thêm ADR-009 và cập nhật sơ đồ).
+Sau khi sửa: chạy `python apps/ai-service/scripts/check_docs.py` (link, ID, truy vết BR→FR→NFR, số lượng trong mục lục).
+
+## Nhánh
+`thang/voice-evaluator-noise` (nếu go tùy chọn A), `thang/consent-columns-proposal` (tài liệu đề xuất cho FSD). Mỗi nhánh một PR; mô tả PR ghi lại kết quả các bước test ở trên.
+
 ## Risk Assessment
 - Cố làm realtime trong 8 tuần làm trễ các phase lõi → mặc định cắt voice trước (mức cắt 1 của sprint plan).
 - Chất lượng STT tiếng Việt chưa có số liệu → đo trước khi chọn.

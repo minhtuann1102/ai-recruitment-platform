@@ -40,6 +40,25 @@
 ## Success Criteria
 - Phiên giỏi > trung bình > yếu ở ≥ 7/8 tổ hợp, khoảng cách ≥ 3.0 điểm; recall lỗ hổng ≥ 70%; điểm mạnh sai = 0; injection không làm tăng điểm; TTFT và chi phí có số đo (mục tiêu P50 ≤ 3.5 s, P95 ≤ 6 s theo dõi, cải thiện dần).
 
+## Delivery (bàn giao)
+- PR contract được FSD duyệt + mock theo contract chốt
+- Kết quả spike SSE qua APISIX (có số liệu)
+- Simulator + 28 phiên + báo cáo baseline
+- `RealAiInterviewClient` (hoặc client + test hợp đồng)
+
+## Cách test và nghiệm thu
+1. `curl -N` qua cổng 9080: token đến dần (ghi mốc thời gian từng event), không dồn cuối
+2. `python -m evals.simulate --matrix full` ra bảng: phân biệt (≥ 7/8 tổ hợp, khoảng cách ≥ 3.0), thích ứng, recall lỗ hổng ≥ 70%, điểm mạnh sai = 0, injection không tăng điểm
+3. Số đo TTFT P50/P95 và chi phí mỗi phiên từ log
+4. Test hợp đồng client với mock
+
+## Đồng bộ tài liệu (bắt buộc, cùng PR với thay đổi)
+`api-contracts.md`, `ai-integration.md`, `06-api-contract.md` (bản khóa), NFR PERF01–02/COST01–03 sang "Đã đo", BRD §8 và R-3 (độ trễ thật), L2 §5 và G7.
+Sau khi sửa: chạy `python apps/ai-service/scripts/check_docs.py` (link, ID, truy vết BR→FR→NFR, số lượng trong mục lục).
+
+## Nhánh
+4 nhánh: `thang/contract-freeze`, `thang/sse-gateway-spike`, `thang/simulator-harness`, `thang/real-ai-client`. Mỗi nhánh một PR; mô tả PR ghi lại kết quả các bước test ở trên.
+
 ## Risk Assessment
 - TTFT vượt mục tiêu → áp dụng tuần tự: Evaluator gọn, model nhanh hơn, Evaluator chạy song song với Interviewer cho các lượt `ok`.
 - Simulator cùng họ model Evaluator → dùng model khác cho Simulator nếu được.

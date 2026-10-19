@@ -40,6 +40,23 @@ Không đổi. Chỉ tối ưu prompt, cache và cấu hình.
 ## Success Criteria
 - Demo end-to-end ổn định trên staging; mọi số liệu trong báo cáo trích từ `plans/reports/`; `main` build và CI xanh; không còn "giả định" chưa ghi rõ trong NFR.
 
+## Delivery (bàn giao)
+- `plans/reports/eval-final.md` (tầng 2 đủ 70 mẫu, tầng 3 đủ 28 phiên)
+- Prompt v2, cache RAG (nếu cần)
+- Bộ tài liệu cuối khớp code, chương báo cáo, slide, kịch bản demo
+
+## Cách test và nghiệm thu
+1. Chạy đầy đủ `run_evaluator` và `simulate`; so với baseline Phase 07
+2. Đối chiếu cổng cuối: ±1 band ≥ 90%, độ lệch khoan dung trong ngưỡng, fallback < 2%, lỗi format < 1%
+3. `check_docs.py` thoát 0; CI xanh trên `main`; demo end-to-end trên staging
+
+## Đồng bộ tài liệu (bắt buộc, cùng PR với thay đổi)
+Rà soát toàn bộ BRD/FR/NFR/L2: không còn dòng "giả định" chưa đánh dấu; ghi khoảng cách so với mục tiêu nếu không đạt; ADR và constitution khớp.
+Sau khi sửa: chạy `python apps/ai-service/scripts/check_docs.py` (link, ID, truy vết BR→FR→NFR, số lượng trong mục lục).
+
+## Nhánh
+`thang/final-evaluation`, `thang/rag-cache` (nếu làm), `thang/docs-final`. Mỗi nhánh một PR; mô tả PR ghi lại kết quả các bước test ở trên.
+
 ## Risk Assessment
 - Số đo cuối kém mục tiêu → báo cáo trung thực khoảng cách và hướng cải thiện (không chỉnh số).
 - Trễ nhịp từ các phase trước → áp mốc cắt giảm trong plan.md.
