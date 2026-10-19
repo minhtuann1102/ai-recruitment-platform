@@ -1,0 +1,77 @@
+# Contract: Q&A Seed và Golden Set
+
+Lệnh `validate` (FR-005) kiểm mọi luật dưới đây; vi phạm mức **lỗi** → thoát mã 1, mức **cảnh báo** → chỉ in.
+
+## Seed: `apps/data-pipeline/data/seeds/interview_qa/*.json`
+
+Mỗi file là một mảng JSON; loader gộp mọi file theo thứ tự tên. Mỗi phần tử:
+
+| Trường | Kiểu | Bắt buộc | Luật |
+|---|---|---|---|
+| `qa_id` | string | có | `^de-qa-\d{4}$`; duy nhất toàn bộ seed; gán khi tạo, không đổi, không tái sử dụng |
+| `topic_id` | string | có | id của một **topic** (không phải scenario) trong catalog lúc chạy (FR-002) |
+| `question` | string | có | ≥ 10 ký tự sau làm sạch |
+| `answer` | string | có | ≥ 30 ký tự sau làm sạch |
+| `difficulty` | enum | có | `easy` (rubric 1–2) \| `medium` (3) \| `hard` (4–5) — FR-001 |
+| `language` | enum | có | `vi` \| `en` (FR-004: đáp án tiếng Việt giữ thuật ngữ Anh; tiếng Anh phải gắn `en`) |
+| `tags` | string[] | không | chữ thường, không trùng |
+| `source` | string | có | URL nguồn (cặp công khai) hoặc `"synthetic"` |
+| `license` | string | có | thuộc danh sách cho phép (research R6) hoặc `"synthetic"` |
+| `attribution` | string | khi `synthetic = false` | tác giả / dự án gốc, vd `"sudheerj/reactjs-interview-questions contributors"` |
+| `synthetic` | bool | có | `true` khi đáp án tự soạn (kể cả câu hỏi lấy từ nguồn công khai); `false` chỉ khi cả hỏi lẫn đáp lấy/chuyển thể từ nguồn có giấy phép |
+| `reviewed_by` | string | khi `synthetic = true` | người review đáp án (FR-003) |
+
+`category` **không** có trong seed: suy ra từ catalog theo `topic_id`.
+
+### Luật kiểm tra
+
+| Luật | Mức | Nguồn |
+|---|---|---|
+| Thiếu trường / sai kiểu / sai enum / sai pattern | lỗi | FR-001 |
+| `topic_id` không thuộc catalog hoặc là id scenario | lỗi | FR-002 |
+| `license` ngoài danh sách cho phép; `synthetic=false` mà `source`/`attribution` trống hoặc `license="synthetic"` | lỗi | FR-003 |
+| `synthetic=true` mà thiếu `reviewed_by` | lỗi | FR-003 |
+| `qa_id` trùng | lỗi | Clarifications |
+| Câu hỏi trùng tuyệt đối (sau làm sạch + lower) — báo cả hai `qa_id` | lỗi | US1-3 |
+| Câu hỏi gần trùng (ratio ≥ 0.9 sau bỏ dấu, research R3) | cảnh báo | FR-005 |
+| Email hoặc số điện thoại (regex) trong `question`/`answer` | lỗi | FR-005, SC-002 |
+| Topic trong catalog có < 2 cặp | lỗi (`--strict`) / cảnh báo (mặc định) | SC-001 |
+| < 200 cặp; mức độ khó nào < 20%; tỉ lệ công khai < 50% | lỗi (`--strict`) / cảnh báo (mặc định) | SC-001, SC-002 |
+
+Mặc định chỉ cảnh báo các ngưỡng phân bố để soạn dần được; nghiệm thu chạy `validate --strict`.
+
+Báo cáo phân bố: số cặp theo topic / category / difficulty / language / license / synthetic, tỉ lệ công khai.
+
+### Ví dụ
+
+```json
+{
+  "qa_id": "de-qa-0001",
+  "topic_id": "node.core.event-loop",
+  "question": "Giải thích các pha của event loop trong Node.js?",
+  "answer": "Event loop gồm các pha timers, pending callbacks, poll, check, close callbacks ...",
+  "difficulty": "medium",
+  "language": "vi",
+  "tags": ["event-loop"],
+  "source": "https://github.com/DevLoversTeam/nodejs-interview-questions",
+  "license": "MIT",
+  "attribution": "DevLoversTeam/nodejs-interview-questions contributors",
+  "synthetic": false
+}
+```
+
+## Golden set: `apps/data-pipeline/data/seeds/golden_set.json`
+
+Mảng JSON; mỗi phần tử:
+
+| Trường | Kiểu | Bắt buộc | Luật |
+|---|---|---|---|
+| `query_id` | string | có | `^gq-\d{3}$`, duy nhất |
+| `query` | string | có | MUST NOT trùng nguyên văn (sau làm sạch + lower) câu hỏi nào trong seed (US4-2) |
+| `group` | enum | có | `vi` (a) \| `mixed` (b) \| `en` (c) \| `vi_to_en` (d) \| `no_diacritics` (e) |
+| `expected_qa_ids` | string[] | có | ≥ 1 phần tử, mỗi `qa_id` có trong seed |
+| `filters` | object | không | khóa như bộ lọc truy hồi ([knowledge-chunks-io.md](knowledge-chunks-io.md)) |
+| `source` | string | có | nguồn truy vấn (`"handwritten"` hoặc URL dataset + giấy phép) |
+| `approved_by` | string | không | AIE điền khi duyệt nhãn (FR-020); trống → báo cáo ghi "chưa duyệt" |
+
+Ràng buộc tập: ≥ 20 truy vấn; mỗi nhóm (a)–(e) ≥ 1 truy vấn (lỗi nếu thiếu).
