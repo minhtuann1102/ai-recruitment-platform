@@ -18,8 +18,9 @@ _HTML_TAG_NAMES = (
 _HTML_TAG_RE = re.compile(rf"</?(?:{_HTML_TAG_NAMES})(?:\s[^<>]*)?/?>")
 _LINE_BREAK_TAG_RE = re.compile(r"<br\s*/?>|</(?:p|div|li|h[1-6]|tr|summary|details|blockquote|pre)>")
 # Ky tu dieu khien C0/C1 tru \t, \n; zero-width space; BOM
-_CONTROL_RE = re.compile("[\x00-\x08\x0b-\x1f\x7f-\x9f​﻿]")
-_INLINE_SPACE_RE = re.compile(r"[ \t ]+")
+_CONTROL_RANGES = ((0x00, 0x08), (0x0B, 0x1F), (0x7F, 0x9F), (0x200B, 0x200B), (0xFEFF, 0xFEFF))
+_CONTROL_RE = re.compile("[" + "".join(f"{chr(lo)}-{chr(hi)}" for lo, hi in _CONTROL_RANGES) + "]")
+_INLINE_SPACE_RE = re.compile("[ " + chr(0x09) + chr(0xA0) + "]+")  # space, tab, NBSP
 _MANY_BLANK_LINES_RE = re.compile(r"\n{3,}")
 
 

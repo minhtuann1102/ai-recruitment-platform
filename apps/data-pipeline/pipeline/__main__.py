@@ -6,6 +6,7 @@ import argparse
 import sys
 from typing import Callable, Dict, List, Optional
 
+from .collect_command import run_collect
 from .offline_commands import run_process, run_validate
 
 EXIT_OK = 0
@@ -22,7 +23,7 @@ def _not_implemented(args: argparse.Namespace) -> int:
 
 
 # Moi lenh dang ky handler khi story tuong ung duoc hien thuc (tasks.md)
-HANDLERS: Dict[str, Handler] = {"validate": run_validate, "process": run_process}
+HANDLERS: Dict[str, Handler] = {"validate": run_validate, "process": run_process, "collect": run_collect}
 
 
 def _add_catalog_option(parser: argparse.ArgumentParser) -> None:
@@ -58,6 +59,10 @@ def build_parser() -> argparse.ArgumentParser:
 
     evaluate = sub.add_parser("eval", help="recall@k tren golden set (US4)")
     evaluate.add_argument("--k", type=int, default=5)
+
+    collect = sub.add_parser("collect", help="tai Q&A tu cac repo GitHub -> data/raw/collected_qa/")
+    collect.add_argument("--only", action="append", default=[], metavar="SOURCE", help="chi tai nguon nay (lap lai duoc)")
+    collect.add_argument("--delay", type=float, default=0.5, help="giay nghi toi thieu giua hai request")
 
     crawl = sub.add_parser("crawl", help="crawler mau (US5)")
     crawl.add_argument("source", choices=["react-docs"])
