@@ -99,7 +99,8 @@ def test_crawled_pair_needs_no_license_or_reviewer(make_pair, topics):
 )
 def test_crawled_pair_still_needs_source_and_attribution(make_pair, topics, overrides, rule):
     pair = make_pair(1, **{"qa_id": "cr-devi-java-0a1b2c3d", "license": "unknown", **overrides})
-    assert rule in {i.rule for i in validate_seed([crawled(pair)], topics).errors}
+    result = validate_seed([crawled(pair)], topics)
+    assert rule in {i.rule for i in result.issues if i.level == "warning"} and result.valid == []
 
 
 def test_crawled_duplicates_are_warnings_and_curated_pair_wins(make_pair, topics):
@@ -159,3 +160,10 @@ def test_hard_coverage_checks_only_middle_senior_topics(make_pair, topics):
     assert issue.level == "error" and "smp.data.sql-index" in issue.message and "smp.core.event-loop" not in issue.message
     assert result.report["topics_missing_hard"] == 1
     assert "hard_coverage" not in {i.rule for i in validate_seed(pairs, topics, strict=True).issues}
+
+
+def test_invalid_crawled_pair_is_dropped_with_warning_not_error(make_pair, topics):
+    bad = make_pair(1, qa_id="cr-devi-java-0a1b2c3d", license="unknown", answer="ngắn quá", source="https://github.com/x/y/blob/HEAD/README.md")
+    result = validate_seed([crawled(bad)], topics)
+    assert result.errors == [] and result.valid == []
+    assert ("cr-devi-java-0a1b2c3d", "length") in rules_of(result, "warning")

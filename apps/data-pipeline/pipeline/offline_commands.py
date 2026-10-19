@@ -61,9 +61,11 @@ def run_validate(args: argparse.Namespace) -> int:
 
 
 def rejected_entries(result: ValidationResult) -> List[Dict]:
+    """Cap bi loai kem ly do: moi issue gan voi cap khong nam trong ket qua (gom cap crawl chi canh bao)."""
+    kept = {item.qa_id for item in result.valid}
     reasons: Dict[str, List[str]] = {}
-    for issue in result.errors:
-        if issue.qa_id is not None:
+    for issue in result.issues:
+        if issue.qa_id is not None and issue.qa_id not in kept:
             reasons.setdefault(issue.qa_id, []).append(f"{issue.rule}: {issue.message}")
     return [{"qa_id": qa_id, "reasons": reasons[qa_id]} for qa_id in sorted(reasons)]
 

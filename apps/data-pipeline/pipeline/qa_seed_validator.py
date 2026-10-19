@@ -132,6 +132,11 @@ def validate_seed(
     candidates = []
     for item in items:
         pair_issues = check_pair(item, topics)
+        if pair_issues and item.dataset != CURATED_DATASET:
+            # Du lieu crawl hang nghin cap: cap loi bi loai va bao canh bao, khong chan ca bo (nhu cap trung)
+            pair_issues = [Issue(i.qa_id, i.rule, "warning", i.message) for i in pair_issues]
+            issues.extend(pair_issues)
+            continue
         issues.extend(pair_issues)
         if not any(i.level == "error" for i in pair_issues):
             candidates.append(item)
