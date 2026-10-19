@@ -10,7 +10,7 @@
 | `thang/catalog-6-tracks` | #10 | **Đã merge** |
 | `thang/difficulty-bounds-align` | #11 | **Đã merge** |
 | `thang/context-folder` | #12 | **Đã merge** |
-| `thang/llm-foundation` | (đang mở) | Phase 02: gateway LLM, retry, structured output, prompt store, registry; 182 test |
+| `thang/llm-foundation` | #13 | Phase 02: gateway LLM, retry, structured output, prompt store, registry; 182 test |
 
 Quy ước merge của owner: merge commit (không squash). Tiêu đề PR dạng `[scope] type: mô tả`.
 
