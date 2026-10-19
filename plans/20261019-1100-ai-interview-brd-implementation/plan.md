@@ -14,7 +14,7 @@ branch: tách từ main theo phase, dạng feat/ai-service/<mô-tả> (nhánh fe
 
 ## Hiện trạng (19/10)
 
-- **Đã có trên `main`:** mock ai-service đủ contract (cv/parse, start, next-turn SSE, finalize), trích CV + redact, catalog 4 track, 29 test, CI Python 3.11, đổi tên `ai_recruit_*`. DE đã viết DDL `knowledge_chunks` (nhánh `chore/docker-multi-db-minio`).
+- **Đã có trên `main`:** mock ai-service đủ contract (cv/parse, start, next-turn SSE, finalize), trích CV + redact, catalog 6 track (nhánh `thang/catalog-6-tracks`), 132 test, CI Python 3.11, đổi tên `ai_recruit_*`. DE đã viết DDL `knowledge_chunks` (nhánh `chore/docker-multi-db-minio`).
 - **Chưa có:** mọi agent LLM, RAG đường đọc, golden set, simulator, `interview-service`, `job-service`, `apps/web`.
 - **Lệch BRD, đã nằm trên `main` từ 15/10 (xem Quyết định cần chốt):** voice, JD, 6 track, DE sở hữu đường ghi RAG.
 
@@ -33,7 +33,7 @@ branch: tách từ main theo phase, dạng feat/ai-service/<mô-tả> (nhánh fe
 
 | # | Phase | Tuần | Trạng thái | Task | FR / NFR chính |
 |---|---|---|---|---|---|
-| 01 | [Đồng bộ main, chốt quyết định](phase-01-sync-and-decisions.md) | W2 | **Đang làm**: nhánh tài liệu xong, catalog đang làm, chờ owner xác nhận Q1–Q6 | — | — |
+| 01 | [Đồng bộ main, chốt quyết định](phase-01-sync-and-decisions.md) | W2 | **Gần xong**: 2 nhánh tài liệu + catalog xong, còn nhánh sửa biên độ khó; chờ owner xác nhận Q1–Q6 và quyền push | — | — |
 | 02 | [Nền tảng LLM](phase-02-llm-foundation.md) | W2–W3 | Chưa bắt đầu | S1-AIE-4 | FR-063, 070, 080, 081 |
 | 03 | [RAG đường đọc](phase-03-rag-read-path.md) | W2–W4 | Chưa bắt đầu | S1-AIE-2 | FR-022, 060, 061 · QUAL14 |
 | 04 | [CV, JD, Planner](phase-04-cv-jd-planner.md) | W3–W4 | Chưa bắt đầu | S1-AIE-3, S2-AIE-1, 3, 6 | FR-003, 013, 016, 017, 020–023 |

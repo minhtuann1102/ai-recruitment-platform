@@ -64,7 +64,7 @@ apps/data-pipeline/
   có review)
 - Phân loại theo **topic catalog** (`apps/ai-service/app/catalog/*.yaml`): mỗi cặp bắt buộc `topic_id`, `category`
   suy ra từ topic (`Backend`, `Frontend`, `Database`, `System Design`, `DevOps`, `AI`). Track Frontend, DevOps và các
-  topic AI mới: xem đề xuất trong `specs/005-rag-knowledge-base-qa/contracts/topic-catalog-proposal/`
+  topic AI mới: đã được nhận vào `apps/ai-service/app/catalog/` (`frontend_react.yaml`, `devops_engineer.yaml`, topic AI mới trong `ai_engineer.yaml`)
 - Mỗi topic ≥ 2 cặp. Difficulty `easy | medium | hard` theo rubric 1–5 của ai-service: easy = định nghĩa, ví dụ
   (1–2); medium = áp dụng, so sánh, xử lý lỗi (3); hard = internals, trade-off ở scale (4–5)
 

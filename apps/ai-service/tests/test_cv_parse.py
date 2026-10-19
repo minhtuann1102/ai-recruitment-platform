@@ -94,3 +94,30 @@ def test_pdf_text_is_extracted():
 def test_broken_pdf_is_rejected_as_invalid_format(client):
     r = client.post("/api/cv/parse", files={"file": ("cv.pdf", b"%PDF-1.4 broken")}, data={"track": "java_backend"})
     assert r.status_code == 415 and r.json()["error"] == "cv_invalid_format"
+
+
+FRONTEND_CV = [
+    "Frontend Developer tại Công ty Y 05/2022 - nay",
+    "Xây dựng giao diện bán hàng bằng React, Next.js, TypeScript, Redux, HTML và CSS",
+    "Dự án Shop web",
+    "Giao diện thương mại điện tử dùng React và Redux, tối ưu tải trang",
+    "- Giảm thời gian tải trang từ 4s xuống 1.5s",
+    "Kỹ sư Công nghệ thông tin, tốt nghiệp 2022",
+    "Kỹ năng: React, Next.js, TypeScript, Redux, HTML, CSS, Git, Jest, Agile, REST",
+]
+DEVOPS_CV = [
+    "DevOps Engineer tại Công ty Z 01/2021 - nay",
+    "Triển khai CI/CD bằng GitHub Actions và Jenkins, vận hành Kubernetes trên AWS với Terraform và Docker",
+    "Dự án Platform",
+    "Hạ tầng container hóa cho hơn 20 dịch vụ bằng Docker, Kubernetes và Terraform",
+    "- Giảm thời gian triển khai từ 40 phút xuống 8 phút",
+    "Kỹ sư Công nghệ thông tin, tốt nghiệp 2020",
+    "Kỹ năng: Docker, Kubernetes, Terraform, Jenkins, AWS, GitHub Actions, CI/CD, Git, Agile, REST",
+]
+
+
+def test_frontend_and_devops_tracks_get_high_relevance(client):
+    for track, lines in (("frontend_react", FRONTEND_CV), ("devops_engineer", DEVOPS_CV)):
+        r = post_cv(client, make_docx(lines), track=track)
+        assert r.status_code == 200, r.text
+        assert r.json()["cv_profile"]["track_relevance"] == "high", track

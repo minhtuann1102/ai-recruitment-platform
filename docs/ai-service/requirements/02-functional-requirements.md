@@ -41,7 +41,7 @@
 | ID | Yêu cầu | Ưu tiên | Tiêu chí chấp nhận | Nguồn | Task | Trạng thái |
 |---|---|---|---|---|---|---|
 | FR-AI-001 | Hệ thống **xác thực đầu vào** mỗi request bằng schema: `track` thuộc catalog, `level` thuộc {fresher, junior, middle, senior}, `duration_minutes` trong **15 đến 20** (mặc định chưa chốt, đề xuất 20), `answer` 1 đến 4000 ký tự | Must | Với `track` lạ hoặc `level` sai, trả 422 `invalid_request` theo format `{error, message, details}` | D01 §2.1, D06 §7.4 | S1-AIE-3 | Một phần (mock vẫn nhận 15 đến 45) |
-| FR-AI-002 | Hệ thống nạp **topic catalog** từ file YAML, mỗi file là một vị trí (`track`) gồm topic (id, title, levels, category, key_concepts) và scenario. Thêm vị trí chỉ cần thêm file | Must | Có **6 vị trí**: `java_backend`, `python_backend`, `nodejs_backend`, `ai_engineer`, `frontend_react`, `devops_engineer` (90 topic, đề xuất DE); mỗi level có ≥ 5 topic và ≥ 1 scenario; id không trùng, đúng tiền tố track (kiểm bằng test) | D02 §3.3.2, D07 §8.7 | S1-AIE-3 | Một phần (4/6 track; 2 track và topic AI mới chờ nhánh `thang/catalog-6-tracks`; chưa có `resources`) |
+| FR-AI-002 | Hệ thống nạp **topic catalog** từ file YAML, mỗi file là một vị trí (`track`) gồm topic (id, title, levels, category, key_concepts) và scenario. Thêm vị trí chỉ cần thêm file | Must | Có **6 vị trí**: `java_backend`, `python_backend`, `nodejs_backend`, `ai_engineer`, `frontend_react`, `devops_engineer` (90 topic, đề xuất DE); mỗi level có ≥ 5 topic và ≥ 1 scenario; id không trùng, đúng tiền tố track (kiểm bằng test) | D02 §3.3.2, D07 §8.7 | S1-AIE-3 | Mock (6 track, 90 topic, test xanh; nội dung chưa review, chưa có `resources`) |
 | FR-AI-003 | Hệ thống áp **cấu hình phase theo level** cho phiên **15 đến 20 phút**: số topic technical = `max(2, round(số topic gốc × thời lượng / 30))` (gốc: Fresher và Junior 4, Middle và Senior 3), 1 topic intro, 1 scenario, 1 lượt wrap-up; thời lượng mỗi phase chia theo tỉ lệ; follow-up tối đa 2 hoặc 3 (scenario 3 hoặc 4), 1 hint, 1 clarify. *Công thức và số liệu là đề xuất (thiết kế gốc cho 30 phút, 5 đến 6 topic)* | Must | Phiên 20 phút Junior có 1 intro, 3 technical, 1 scenario; phiên 15 phút có 2 technical; tổng số topic từ 4 đến 5 | D03 §4.3, BRD BR-19 | S2-AIE-1 | Một phần (mock chia theo 30 phút, chưa dùng công thức này) |
 
 ## 4. Nhóm B. Xử lý CV
@@ -63,7 +63,7 @@
 |---|---|---|---|---|---|---|
 | FR-AI-020 | **Planner** chạy một lần đầu buổi, sinh `InterviewPlan` gồm các phase intro, technical, scenario; mỗi topic có `id`, `title`, `source` (cv, catalog, scenario, generic), `key_points` (3 đến 6), `start_difficulty`, `opening_hint`, `backup_question`. Chỉ chọn topic có trong catalog (trừ topic intro từ CV). Có CV thì topic intro lấy từ dự án trong CV | Must | Plan có đúng số topic mỗi phase theo level; mỗi topic có `backup_question`; `catalog_ref` tồn tại; có CV liên quan thì intro `source = cv` | D02 §3.3.2 | S2-AIE-1 | Mock (quy tắc, chưa có LLM) |
 | FR-AI-021 | Code **kiểm tra plan** (số topic đúng template, `catalog_ref` và `cv_ref` tồn tại, không trùng, độ khó trong khoảng). Sai thì repair retry một lần; vẫn sai thì dùng **plan dự phòng** chọn từ catalog theo level | Must | Plan không hợp lệ không bao giờ đến Interviewer; có test cho đường fallback | D02 §3.3.2, D03 §4.6 | S2-AIE-1 | Chưa |
-| FR-AI-022 | Sau khi plan hợp lệ, orchestrator lấy tối đa 3 chunk RAG cho mỗi topic (`interview_qa` và `textbook`), lưu `reference_snippets` (≤ 600 token mỗi topic) vào plan để Evaluator dùng lại. Không gọi RAG mỗi lượt | Should | Plan có `reference_snippets`; không có RAG thì Evaluator vẫn chạy chỉ dựa vào `key_points` | D02 §3.3.2, D07 §8.7 | S1-AIE-2 | Chưa |
+| FR-AI-022 | Sau khi plan hợp lệ, orchestrator lấy tối đa 3 chunk RAG cho mỗi topic (`interview_qa` và `textbook`), lưu `reference_snippets` (≤ 600 token mỗi topic) vào plan để Evaluator dùng lại. Không gọi RAG mỗi lượt. **Phase scenario không lấy `interview_qa`** (scenario không có `topic_id`), chỉ `key_points` và `textbook` theo category của track | Should | Plan có `reference_snippets`; không có RAG thì Evaluator vẫn chạy chỉ dựa vào `key_points` | D02 §3.3.2, D07 §8.7 | S1-AIE-2 | Chưa |
 | FR-AI-023 | Planner **tăng trọng số topic theo `jd_profile`** khi có (ưu tiên topic ánh xạ từ yêu cầu `must`), vẫn chỉ chọn topic trong catalog và giữ cấu trúc phase | Must | Với JD yêu cầu Spring, ≥ 1 topic technical thuộc nhóm Spring; plan hợp lệ | A11 | S2-AIE-6 | Chưa |
 
 ## 6. Nhóm D. Xử lý một lượt trả lời
@@ -215,8 +215,8 @@ Cột **GĐ** là giai đoạn triển khai. **Owner đề xuất** nằm trong 
 
 | Trạng thái | Số FR |
 |---|---|
-| Mock (đã có, dùng quy tắc thay LLM hoặc code thật cho phần không cần LLM) | 24 |
-| Một phần | 9 |
+| Mock (đã có, dùng quy tắc thay LLM hoặc code thật cho phần không cần LLM) | 25 |
+| Một phần | 8 |
 | Chưa làm | 40 |
 | Ngoài phạm vi ai-service (FSD, DE) | 2 |
 | **Tổng** | **75** |
@@ -225,7 +225,7 @@ Theo giai đoạn (nhóm A đến I tính giai đoạn 1; FR nhiều giai đoạ
 
 | Giai đoạn | Số FR | Mock | Một phần | Chưa | Ngoài |
 |---|---|---|---|---|---|
-| 1 | 60 | 24 | 9 | 25 | 2 |
+| 1 | 60 | 25 | 8 | 25 | 2 |
 | 2 | 11 | 0 | 0 | 11 | 0 |
 | 3 | 4 | 0 | 0 | 4 | 0 |
 

@@ -112,7 +112,7 @@ Chú giải màu: xanh lá = đã có trong repo; vàng = mock; xám nét đứt
 | **job-service** | NestJS | Tin tuyển dụng và **ứng tuyển, giữ file CV**; cung cấp TCP `application.getCvFile` kèm presigned URL và `application.getJobDescription` (JD của job gắn application, S2-FSD-11) | FSD | Kế hoạch |
 | **interview-service** | NestJS | **Chủ sở hữu mọi dữ liệu phỏng vấn** (session, plan, candidate state, transcript, evaluation, report, `cv_profile`); điều phối gọi ai-service qua `AiInterviewClient`; relay SSE; khóa phiên và quota qua Redis; chống gửi trùng | FSD | Kế hoạch |
 | **ai-service** | Python 3.11 hoặc 3.12, FastAPI, Pydantic v2, SDK `openai` | Thực hiện **toàn bộ logic AI không trạng thái**: CV Parser, **JD Parser**, Planner, Evaluator, Interviewer, Reporter; orchestrator, policy, tổng hợp điểm; truy xuất RAG; SSE | AIE | Mock |
-| **Topic catalog** | YAML (`app/catalog/*.yaml`) | Danh sách chủ đề và tình huống theo vị trí; đóng gói cùng image ai-service | AIE + DE | Có (nội dung chưa review) |
+| **Topic catalog** | YAML (`app/catalog/*.yaml`) | Danh sách chủ đề và tình huống theo vị trí (6 track, 90 topic); đóng gói cùng image ai-service | AIE + DE | Có (nội dung chưa review) |
 | **interview_db** | PostgreSQL 16 | Dữ liệu phỏng vấn của interview-service | FSD | Kế hoạch |
 | **ai_db** | PostgreSQL 16 + pgvector (`pgvector/pgvector:pg16`) | Bảng `knowledge_chunks` (`interview_qa`, `textbook`) | AIE (DDL) + DE (tạo DB, nạp dữ liệu) | Kế hoạch (DDL đã thiết kế, chưa chạy) |
 | **Redis 8** | Redis | Khóa phiên `interview:lock:{sessionId}`, quota ngày; cache RAG (Sprint 4) | FSD (+ AIE cho cache) | Có trong compose |

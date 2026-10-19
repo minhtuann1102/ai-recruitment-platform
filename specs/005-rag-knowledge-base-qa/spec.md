@@ -25,7 +25,7 @@ knowledge_chunks và verify retrieval relevant."
 
 - Q: Bộ phân loại Q&A? → A: Theo **topic catalog** của ai-service. Mỗi cặp bắt buộc `topic_id` của một topic trong
   catalog; nhóm kiến thức lấy từ `category` của topic đó. Catalog PR #3 (51 topic, 4 track backend/AI) **mở rộng** theo
-  đề xuất [`contracts/topic-catalog-proposal/`](contracts/topic-catalog-proposal/): thêm track `frontend_react` (13
+  đề xuất (đã được AIE nhận vào `apps/ai-service/app/catalog/`, nhánh `thang/catalog-6-tracks`): thêm track `frontend_react` (13
   topic), `devops_engineer` (12 topic) và 14 topic AI cutting-edge cho `ai_engineer` → 6 track, 90 topic (Backend 30,
   AI 25, DevOps 14, Frontend 12, System Design 5, Database 4). Đề xuất đã chạy qua planner + test catalog của AIE.
   Thêm category `Frontend` là thay đổi của AIE.
@@ -341,7 +341,7 @@ tra, khoảng cách giữa các request ≥ mức cấu hình, không có email/
   6. Thêm `"Frontend"` vào `Category` (`app/catalog/models.py`), danh sách category trong `rag-design.md` §3 và
      `data-model.md` (`knowledge_chunks.category`); review + merge 3 file trong `contracts/topic-catalog-proposal/`.
      Track mới còn cần: keyword trong `_TRACK_HINTS` (`mock_cv_parser.py`), nếu không `track_relevance` luôn `low` và
-     phase intro không dùng dự án trong CV; cập nhật enum `track` trong `docs/ai-service/01`, `07`, `README` — AIE.
+     phase intro không dùng dự án trong CV; cập nhật enum `track` trong `docs/ai-service/01`, `07`, `README` — AIE. **Đã xử lý (AIE, 2026-10-19):** nhánh `thang/catalog-6-tracks`.
   7. FR-002 chỉ cho `topic_id` trỏ tới topic, không tới scenario (scenario không có `category`) → phase scenario không
      có `interview_qa` theo topic và không dùng được fallback theo category. Cần AIE xác nhận phase scenario không dựa
-     vào `interview_qa` — AIE.
+     vào `interview_qa` — AIE. **Đã xử lý (AIE, 2026-10-19):** xác nhận phase scenario không dựa vào `interview_qa`, xem `rag-design.md` §4.1.

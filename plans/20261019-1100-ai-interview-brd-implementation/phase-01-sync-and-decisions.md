@@ -4,7 +4,7 @@
 - [plan.md](plan.md) · [BRD §0.1–0.3, §12](../../docs/ai-service/requirements/01-brd.md) · commit `35a3cc2` trên `main` (quyết định 15/10) · [spec 005](../../specs/005-rag-knowledge-base-qa/spec.md)
 
 ## Overview
-- **Priority:** P1 (chặn các phase còn lại) · **Status:** đang làm (nhánh tài liệu xong 19/10; catalog đang làm) · **Tuần:** W2 (19–25/10)
+- **Priority:** P1 (chặn các phase còn lại) · **Status:** gần xong (19/10): 2 nhánh xong, còn `thang/difficulty-bounds-align`; chưa push · **Tuần:** W2 (19–25/10)
 - Đưa nhánh làm việc về trạng thái khớp `main`, đóng các điểm lệch giữa BRD v0.3 và quyết định đã nằm trên `main`, mở PR tài liệu để FSD và DE review sớm.
 
 ## Key Insights
@@ -18,6 +18,14 @@
 
 ## Architecture
 Không đổi kiến trúc. Chỉ quyết định cách tách voice (A: lớp kênh ngoài ai-service; B: voice-gateway) và nơi đặt JD parse (endpoint `/api/jd/parse`, kết quả đi vào `/api/start`).
+
+## Việc DE báo cho AIE khi review spec 005 (xử lý ở phase này)
+- Mục 6 (nhận catalog: Category `Frontend`, `_TRACK_HINTS`, enum `track` trong docs): **xong** ở `thang/catalog-6-tracks`.
+- Mục 7 (scenario không dựa vào `interview_qa`): **xác nhận** trong `rag-design.md` §4.1.
+- Mục 1 (biên độ khó lệch docs): nhánh `thang/difficulty-bounds-align`.
+- Mục 2 (hàm map độ khó 1–5 sang easy/medium/hard): Phase 03 (`app/rag/difficulty.py`).
+- Mục 3, 4 (contract session, cột `difficulty` của `interview_turns`): thuộc FSD, đưa vào danh sách câu hỏi gửi FSD.
+- Mục 5 (`qa_id`, `topic_id` cho seed): DE gán khi nhập bộ canonical; seed của AIE chỉ dùng cho test.
 
 ## Related Code Files
 - **Sửa:** `apps/ai-service/app/catalog/models.py` (thêm category `Frontend`), 3 file YAML catalog + thêm `frontend_react.yaml`, `devops_engineer.yaml` từ `specs/005-.../contracts/topic-catalog-proposal/`; `tests/test_topic_catalog.py` (danh sách track).
@@ -36,7 +44,8 @@ Không đổi kiến trúc. Chỉ quyết định cách tách voice (A: lớp k�
 ## Todo List
 - [x] Merge main, test 3.11 xanh (29 test, Docker `python:3.11-slim`)
 - [ ] Q1–Q6 có câu trả lời ghi lại (BRD §0.2)
-- [ ] Catalog 6 track, test xanh
+- [x] Catalog 6 track, 90 topic, test xanh (132 test; Python 3.11)
+- [ ] Biên độ khó trong code khớp design 01 §2.1 (Middle 2–4, Senior 2–5; nhánh `thang/difficulty-bounds-align`, DE báo lệch)
 - [x] BRD v0.4, FR/NFR/L2 đồng bộ (`check_docs.py` 0 lỗi)
 - [ ] PR tài liệu đã mở, FSD và DE đã nhận câu hỏi
 - [x] Bản nháp sửa constitution đã soạn (chưa đưa vào PR ratify)

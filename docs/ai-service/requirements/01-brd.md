@@ -49,7 +49,7 @@ Thay đổi này **mâu thuẫn** với nhiều chỗ trong repo. BRD chỉ ghi 
 | D7 *(v0.4)* | JD | **JD của job trong application là đầu vào của Planner** (`jd_profile`), **không vào RAG**; báo cáo có khối `requirements`. Thay mục "ngoài phạm vi" của v0.3 | 17 (mới) |
 | D8 *(v0.4)* | Voice | **Tùy chọn A theo `main`:** Stretch S4 do DE sở hữu: TTS đọc `done.question`, STT bấm-để-nói gửi transcript qua `/answer`, lưu bản STT gốc và bản sửa, **không lưu audio**, ai-service không đổi. Tùy chọn B (voice-gateway realtime, D6) **ra khỏi kế hoạch mặc định** | 13, 20 |
 | D9 *(v0.4)* | Riêng tư | Phiên luyện tập **riêng tư**, Employer không xem (khớp BRU-10) | — |
-| D10 *(v0.4)* | Track | **6 track** (thêm `frontend_react`, `devops_engineer`, 14 topic AI): 90 topic, thực hiện ở nhánh `thang/catalog-6-tracks` | 1 |
+| D10 *(v0.4)* | Track | **6 track** (thêm `frontend_react`, `devops_engineer`, 14 topic AI): 90 topic, đã triển khai ở nhánh `thang/catalog-6-tracks` (xếp chồng trên nhánh tài liệu) | 1 |
 | D11 *(v0.4)* | RAG | **DE sở hữu đường ghi** (load, chunk, embed, upsert), **AIE sở hữu đường đọc** | — |
 | D12 *(v0.4)* | Thời lượng | 15 đến 20 phút, mặc định 20, turn cap 16 *(đề xuất, chờ team)* | 12 |
 
@@ -114,7 +114,7 @@ Tài liệu mô tả **vì sao** và **cho ai** phần AI phỏng vấn được
 - **Giao diện web** (`apps/web`) cho toàn bộ luồng: chọn vị trí và level, gắn CV và consent, phòng phỏng vấn kiểu cuộc họp, trang báo cáo. Người thực hiện cần xác nhận (câu hỏi mở 16).
 - Agent framework: **không cần cho chat**; chỉ cân nhắc cho lớp giọng nói nếu chọn tùy chọn B, qua ADR (mục 0.3). Orchestrator là code của nhóm.
 - **Fine-tune và agent tự học từ dữ liệu: hoãn**, không nằm trong kế hoạch 8 tuần (giai đoạn 3). Chỉ chuẩn bị tiền đề (cờ consent), điều kiện ở BRU-16.
-- Vị trí (track) theo topic catalog: **6 track** `java_backend`, `python_backend`, `nodejs_backend`, `ai_engineer`, `frontend_react`, `devops_engineer` (90 topic, theo đề xuất của DE trong spec 005; triển khai ở nhánh `thang/catalog-6-tracks`). *Design doc gốc ghi MVP là Java và Node.js.*
+- Vị trí (track) theo topic catalog: **6 track** `java_backend`, `python_backend`, `nodejs_backend`, `ai_engineer`, `frontend_react`, `devops_engineer` (90 topic, theo đề xuất của DE trong spec 005; đã triển khai ở nhánh `thang/catalog-6-tracks`). *Design doc gốc ghi MVP là Java và Node.js.*
 - Level: Fresher, Junior, Middle, Senior.
 - Dùng lại **CV đã nộp ở job-service** (PDF hoặc DOCX), khuyến nghị nhưng không bắt buộc.
 - Sáu vai trò agent: CV Parser, **JD Parser**, Planner, Evaluator, Interviewer, Reporter.
