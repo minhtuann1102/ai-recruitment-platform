@@ -1,7 +1,7 @@
 # Trạng thái dự án (cập nhật 2026-10-19)
 
 ## Kế hoạch
-`plans/20261019-1100-ai-interview-brd-implementation/` (9 phase, nằm trong PR `thang/brd-v04-reconcile` cho tới khi merge). Phase 01 **đã merge** (PR #9–#12, 2026-10-19). Phase hiện tại: **02 Nền tảng LLM** (nhánh `thang/llm-foundation`, đang chờ PR). Tiếp theo: Phase 03 `thang/rag-read-path`.
+`plans/20261019-1100-ai-interview-brd-implementation/` (9 phase, đã có trên `main`). Phase 01 **đã merge** (PR #9–#12, 2026-10-19). Phase hiện tại: **02 Nền tảng LLM** (nhánh `thang/llm-foundation`, PR #13 đang chờ review và CI). Tiếp theo: Phase 03 `thang/rag-read-path`.
 
 ## Nhánh và PR
 | Nhánh | PR | Trạng thái |
