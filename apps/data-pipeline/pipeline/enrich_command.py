@@ -53,7 +53,7 @@ def enrich_all(args: argparse.Namespace, topics: List[Dict], complete: CompleteF
         try:
             text, prompt_tokens, completion_tokens = complete(build_messages(record, topics_text))
         except Exception as exc:  # loi mang / provider sau retry: dem, khong cache
-            return record, None, f"error: {type(exc).__name__}", (0, 0)
+            return record, None, f"error: {type(exc).__name__}: {str(exc)[:200]}", (0, 0)
         enriched, reason = parse_response(text, record, topic_ids)
         return record, enriched, reason, (prompt_tokens, completion_tokens)
 
@@ -76,6 +76,8 @@ def enrich_all(args: argparse.Namespace, topics: List[Dict], complete: CompleteF
                     stats["enriched"] += 1
                 elif reason.startswith("error"):
                     stats["errors"] += 1
+                    if stats["errors"] <= 3:  # vai mau de chan doan, khong in het
+                        print(f"[loi] {record['cid']}: {reason}", file=sys.stderr)
                 else:
                     rejected.append({"cid": record["cid"], "source": source, "reason": reason})
                     stats[f"rejected:{reason}"] += 1
