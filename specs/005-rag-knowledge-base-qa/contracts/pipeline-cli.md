@@ -13,7 +13,7 @@
 
 ## Thống kê mỗi lần chạy (FR-016, constitution V)
 
-`process` và `index` in một khối và ghi `data/processed/run-report-<timestamp>.json`:
+`process` và `index` in một khối và ghi `data/processed/run-report-<lệnh>-<timestamp>.json`:
 
 ```text
 records_in        cặp Q&A đọc được

@@ -1,0 +1,87 @@
+import json
+
+import pytest
+
+from pipeline.qa_seed_loader import SeedError, SeedItem, load_seed_items
+from pipeline.qa_seed_validator import validate_seed
+
+
+def items(*pairs):
+    return [SeedItem(data=p, file="seed.json", index=i) for i, p in enumerate(pairs)]
+
+
+def rules_of(result, level="error"):
+    return {(i.qa_id, i.rule) for i in result.issues if i.level == level}
+
+
+def test_valid_seed_has_no_pair_errors(make_pair, topics):
+    pairs = [make_pair(1), make_pair(2, topic_id="smp.data.sql-index"), make_pair(3, source="self", license="CC-BY-4.0", synthetic=True, reviewed_by="DE", attribution=...)]
+    result = validate_seed(items(*pairs), topics)
+    assert result.errors == []
+    assert [it.qa_id for it in result.valid] == ["de-qa-0001", "de-qa-0002", "de-qa-0003"]
+
+
+@pytest.mark.parametrize(
+    "overrides, rule",
+    [
+        ({"answer": ...}, "schema"),
+        ({"topic_id": "smp.unknown.topic"}, "topic_id"),
+        ({"topic_id": "scn.smp.cache-stampede"}, "topic_id"),
+        ({"license": "CC-BY-NC-4.0"}, "license"),
+        ({"license": "GPL-2.0"}, "license"),
+        ({"attribution": ...}, "provenance"),
+        ({"source": "self"}, "provenance"),
+        ({"synthetic": True}, "review"),
+        ({"qa_id": "qa-1"}, "qa_id"),
+        ({"difficulty": "expert"}, "enum"),
+        ({"answer": "Gọi 0912 345 678 để được giải thích event loop chi tiết hơn nhé"}, "pii"),
+    ],
+)
+def test_invalid_pair_is_listed_with_reason(make_pair, topics, overrides, rule):
+    bad = make_pair(2, **overrides)
+    result = validate_seed(items(make_pair(1), bad), topics)
+    assert rule in {r for _, r in rules_of(result)}
+    assert [it.qa_id for it in result.valid] == ["de-qa-0001"]
+    assert result.rejected_qa_ids and result.rejected_qa_ids[0] in (bad.get("qa_id"), "seed.json#1")
+
+
+def test_exact_duplicate_question_reports_both_ids_and_keeps_lower(make_pair, topics):
+    a = make_pair(7, question="Event loop   là gì?")
+    b = make_pair(3, question="event LOOP là gì?")
+    result = validate_seed(items(a, b), topics)
+    dup = [i for i in result.issues if i.rule == "duplicate_question"]
+    assert len(dup) == 1 and dup[0].qa_id == "de-qa-0007" and "de-qa-0003" in dup[0].message
+    assert [it.qa_id for it in result.valid] == ["de-qa-0003"]
+
+
+def test_near_duplicate_is_only_a_warning(make_pair, topics):
+    a = make_pair(1, question="Sự khác nhau giữa process và thread là gì?")
+    b = make_pair(2, question="Su khac nhau giua process va thread la gi")
+    result = validate_seed(items(a, b), topics)
+    assert ("de-qa-0002", "near_duplicate") in rules_of(result, "warning")
+    assert len(result.valid) == 2
+
+
+def test_thin_topic_is_warning_then_error_when_strict(make_pair, topics):
+    pairs = items(make_pair(1), make_pair(2))  # smp.data.sql-index co 0 cap
+    assert ("coverage" in {i.rule for i in validate_seed(pairs, topics).issues if i.level == "warning"})
+    strict = validate_seed(pairs, topics, strict=True)
+    assert (None, "coverage") in rules_of(strict)
+    assert (None, "total") in rules_of(strict)
+
+
+def test_public_share_counts_only_non_synthetic(make_pair, topics):
+    synthetic = dict(source="self", license="CC-BY-4.0", synthetic=True, reviewed_by="DE", attribution=...)
+    pairs = items(make_pair(1), make_pair(2, **synthetic), make_pair(3, **synthetic))
+    result = validate_seed(pairs, topics)
+    assert result.report["public_pairs"] == 1
+    assert ("public_share" in {i.rule for i in result.issues})
+
+
+def test_loader_merges_files_in_name_order_and_reports_bad_json(tmp_path, make_pair):
+    (tmp_path / "b.json").write_text(json.dumps([make_pair(2)]), encoding="utf-8")
+    (tmp_path / "a.json").write_text(json.dumps([make_pair(1)]), encoding="utf-8")
+    assert [it.qa_id for it in load_seed_items(tmp_path)] == ["de-qa-0001", "de-qa-0002"]
+    (tmp_path / "c.json").write_text("[{", encoding="utf-8")
+    with pytest.raises(SeedError, match="c.json"):
+        load_seed_items(tmp_path)

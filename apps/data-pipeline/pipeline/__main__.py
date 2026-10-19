@@ -6,6 +6,8 @@ import argparse
 import sys
 from typing import Callable, Dict, List, Optional
 
+from .offline_commands import run_process, run_validate
+
 EXIT_OK = 0
 EXIT_INPUT_ERROR = 1  # seed / catalog / golden set loi, hoac crawl thu 0 record
 EXIT_PREFLIGHT_ERROR = 2  # thieu key, DB chua san sang, provider loi; lenh chua lam cung dung ma nay
@@ -20,7 +22,7 @@ def _not_implemented(args: argparse.Namespace) -> int:
 
 
 # Moi lenh dang ky handler khi story tuong ung duoc hien thuc (tasks.md)
-HANDLERS: Dict[str, Handler] = {}
+HANDLERS: Dict[str, Handler] = {"validate": run_validate, "process": run_process}
 
 
 def _add_catalog_option(parser: argparse.ArgumentParser) -> None:

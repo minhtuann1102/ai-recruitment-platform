@@ -1,0 +1,34 @@
+Interview Q&A seed (dataset: de_interview_qa)
+=============================================
+
+License of this dataset: CC-BY-4.0
+(Switch to CC-BY-SA-4.0 if any CC-BY-SA source is added; MIT, Apache-2.0 and CC-BY-4.0
+material is compatible with either.)
+
+Pairs adapted from public sources keep their own license in the "license" field and credit
+the original authors in "attribution". Fully self-written pairs use source "self" and the
+dataset license above. Format and rules: specs/005-rag-knowledge-base-qa/contracts/qa-seed-format.md
+
+Sources (license verified via GitHub API on 2026-10-19)
+-------------------------------------------------------
+- DevLoversTeam/nodejs-interview-questions ............ MIT ......... https://github.com/DevLoversTeam/nodejs-interview-questions
+- DevLoversTeam/python-interview-questions ............ MIT ......... https://github.com/DevLoversTeam/python-interview-questions
+- yakimka/python_interview_questions .................. MIT ......... https://github.com/yakimka/python_interview_questions
+- crossoverJie/JCSprout ............................... MIT ......... https://github.com/crossoverJie/JCSprout
+- codefarm0/Spring-Boot-Interview-Question-Answers .... MIT ......... https://github.com/codefarm0/Spring-Boot-Interview-Question-Answers
+- alexeygrigorev/data-science-interviews .............. CC-BY-4.0 ... https://github.com/alexeygrigorev/data-science-interviews
+- donnemartin/system-design-primer .................... CC-BY-4.0 ... https://github.com/donnemartin/system-design-primer
+- jakshi/devops-interview-questions (questions only) .. Apache-2.0 .. https://github.com/jakshi/devops-interview-questions
+- sudheerj/reactjs-interview-questions ................ MIT ......... https://github.com/sudheerj/reactjs-interview-questions
+- lydiahallie/javascript-questions .................... MIT ......... https://github.com/lydiahallie/javascript-questions
+- react.dev documentation ............................. CC-BY-4.0 ... https://react.dev (LICENSE-DOCS.md of reactjs/react.dev)
+
+qa_id ranges per file (assigned once, never reused)
+---------------------------------------------------
+backend-nodejs.json ........ de-qa-0001 .. de-qa-0099
+backend-python.json ........ de-qa-0100 .. de-qa-0199
+backend-java.json .......... de-qa-0200 .. de-qa-0299
+ai.json .................... de-qa-0300 .. de-qa-0399
+devops.json ................ de-qa-0400 .. de-qa-0499
+frontend.json .............. de-qa-0500 .. de-qa-0599
+aie-reviewed.json .......... de-qa-0600 .. de-qa-0649
