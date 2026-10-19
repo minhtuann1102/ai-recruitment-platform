@@ -59,53 +59,44 @@ apps/data-pipeline/
 ## 4. Sprint 1 — Interview Q&A
 
 ### Nguồn dữ liệu
-- Tự curate 200+ cặp Q&A phỏng vấn CNTT
-- Phân loại theo category: `Backend`, `Frontend`, `Database`, `System Design`, `DevOps`
-- Difficulty: `easy`, `medium`, `hard`
+- 200+ cặp Q&A phỏng vấn CNTT: ≥ 50% từ nguồn công khai có giấy phép cho phép sửa đổi và phân phối lại (CC0, MIT,
+  Apache-2.0, CC BY, CC BY-SA; không dùng ND/NC hoặc không rõ giấy phép), phần còn lại tự soạn (`synthetic: true`,
+  có review)
+- Phân loại theo **topic catalog** (`apps/ai-service/app/catalog/*.yaml`): mỗi cặp bắt buộc `topic_id`, `category`
+  suy ra từ topic (`Backend`, `Frontend`, `Database`, `System Design`, `DevOps`, `AI`). Track Frontend, DevOps và các
+  topic AI mới: xem đề xuất trong `specs/005-rag-knowledge-base-qa/contracts/topic-catalog-proposal/`
+- Mỗi topic ≥ 2 cặp. Difficulty `easy | medium | hard` theo rubric 1–5 của ai-service: easy = định nghĩa, ví dụ
+  (1–2); medium = áp dụng, so sánh, xử lý lỗi (3); hard = internals, trade-off ở scale (4–5)
 
-### Format `data/seeds/qa_seed.json`
+Yêu cầu đầy đủ: [specs/005-rag-knowledge-base-qa](../../specs/005-rag-knowledge-base-qa/spec.md).
+
+### Format seed Q&A
 
 ```json
 [
   {
-    "question": "Giải thích sự khác biệt giữa process và thread?",
-    "answer": "Process là ...",
-    "category": "System Design",
+    "qa_id": "de-qa-0001",
+    "topic_id": "node.core.event-loop",
+    "question": "Giải thích các pha của event loop trong Node.js?",
+    "answer": "Event loop gồm các pha ...",
     "difficulty": "medium",
-    "tags": ["os", "concurrency"]
+    "language": "vi",
+    "tags": ["event-loop"],
+    "source": "https://github.com/...",
+    "license": "MIT",
+    "synthetic": false
   }
 ]
 ```
 
-### Processing (`qa_processor.py`)
+`qa_id` gán khi tạo, không đổi, không tái sử dụng. Pipeline ghi thêm `metadata.dataset` để chỉ dọn bản ghi của
+chính bộ dữ liệu đó.
 
-```python
-def process_qa(item: dict) -> list[dict]:
-    # Mỗi cặp Q&A tạo ra 2 chunks:
-    # 1. Question chunk (dùng để match câu hỏi tương tự)
-    # 2. Answer chunk (dùng để lấy context khi evaluate)
-    question_chunk = {
-        "content": f"Q: {item['question']}",
-        "source_type": "interview_qa",
-        "metadata": {
-            "category": item["category"],
-            "difficulty": item["difficulty"],
-            "chunk_type": "question",
-            "tags": item.get("tags", []),
-        },
-    }
-    answer_chunk = {
-        "content": f"Q: {item['question']}\nA: {item['answer']}",
-        "source_type": "interview_qa",
-        "metadata": {
-            "category": item["category"],
-            "difficulty": item["difficulty"],
-            "chunk_type": "qa_pair",
-            "tags": item.get("tags", []),
-        },
-    }
-    return [question_chunk, answer_chunk]
-```
+### Processing
+
+Mỗi cặp sinh 2 bản ghi `question` (chỉ câu hỏi) và `qa_pair` (câu hỏi + đáp án), cùng `qa_id`, `topic_id`,
+`category`, `difficulty`, `language` (cột thật, không chỉ trong JSONB). Chi tiết chunking và schema:
+[rag-design.md](rag-design.md) §2, §3.
 
 **Output Sprint 1:** ~400+ chunks (200 Q&A × 2 chunks/cặp) → index vào ai_db.
 
@@ -208,6 +199,11 @@ def process_doc(raw_text: str, metadata: dict) -> list[dict]:
 ---
 
 ## 7. Embedding & Indexing
+
+> **Lỗi thời một phần:** code dưới đây là phác thảo ban đầu. `ON CONFLICT DO NOTHING` không có tác dụng khi bảng
+> không có ràng buộc unique, và schema đã đổi (cột `category`, `difficulty`, `topic_id`, `content_hash UNIQUE`...).
+> Dùng [rag-design.md](rag-design.md) §3 và [specs/005](../../specs/005-rag-knowledge-base-qa/spec.md) FR-011–FR-016;
+> thiết kế indexer chốt ở plan 005.
 
 ### `pipeline/embedder.py`
 
@@ -327,8 +323,8 @@ python pipeline/test_search.py --query "REST API design best practices" --top_k 
 | Metric | Mức tối thiểu | Cách đo |
 |---|---|---|
 | Số chunks indexed | 200 (S1), 1500 (S2), 6000 (S3) | `SELECT COUNT(*) FROM knowledge_chunks` |
-| Retrieval relevance | Top-3 kết quả liên quan (manual review 20 queries) | `test_search.py --eval` |
-| Chunk coverage | Backend, Frontend, DB, System Design đều có > 200 chunks | `GROUP BY metadata->>'category'` |
+| Retrieval relevance | Golden set ≥ 20 queries, recall@5 ≥ 0.8 (mục tiêu, báo cáo, không chặn merge) + xem tay top-3 | lệnh đánh giá golden set (spec 005 US4) |
+| Chunk coverage | S1: mỗi topic trong catalog ≥ 2 cặp Q&A. S3: theo `category` — chốt lại ở 012 | `GROUP BY category, topic_id` |
 | Embedding success rate | >= 99% chunks có embedding not null | `SELECT COUNT(*) WHERE embedding IS NULL` |
 | Dedup ratio | < 5% trùng lặp | log từ deduper |
 

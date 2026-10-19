@@ -1,5 +1,5 @@
 import * as admin from 'firebase-admin';
-import { firebaseConfiguration } from '@app/common';
+import { firebaseConfiguration } from '@ai-recruit/common';
 import { Global, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { app as Firebase } from 'firebase-admin';

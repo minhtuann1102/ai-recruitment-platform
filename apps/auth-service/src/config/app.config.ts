@@ -1,4 +1,4 @@
-import { MicroserviceName } from '@app/core';
+import { MicroserviceName } from '@ai-recruit/core';
 import { registerAs } from '@nestjs/config';
 
 export const getAppConfig = () => ({

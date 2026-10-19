@@ -1,4 +1,4 @@
-import { ERROR_RESPONSE, GrpcStatus, grpcToHttpStatus } from '@app/common';
+import { ERROR_RESPONSE, GrpcStatus, grpcToHttpStatus } from '@ai-recruit/common';
 import { HttpException } from '@nestjs/common';
 import { catchError, lastValueFrom, Observable, timeout } from 'rxjs';
 

@@ -1,4 +1,4 @@
-import { Public } from '@app/common';
+import { Public } from '@ai-recruit/common';
 import { applyDecorators, UseGuards } from '@nestjs/common';
 import { RefreshTokenGuard } from '../guards';
 

@@ -1,5 +1,5 @@
 {
-  "name": "user-service",
+  "name": "@ai-recruit/user-service",
   "private": true,
   "version": "1.0.0",
   "description": "Nest TypeScript starter repository",
@@ -17,7 +17,7 @@
     "start:prod": "node dist/main",
     "check-types": "tsc --noEmit -p tsconfig.build.json",
     "lint": "oxlint .",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/jest/bin/jest --runInBand",
@@ -41,8 +41,8 @@
     "webpack-node-externals": "^3.0.0"
   },
   "dependencies": {
-    "@app/common": "workspace:*",
-    "@app/core": "workspace:*",
+    "@ai-recruit/common": "workspace:*",
+    "@ai-recruit/core": "workspace:*",
     "@mikro-orm/core": "7.0.10",
     "@mikro-orm/migrations": "7.0.10",
     "@mikro-orm/nestjs": "7.0.1",

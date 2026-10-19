@@ -1,4 +1,4 @@
-import { PropertyDto } from '@app/common';
+import { PropertyDto } from '@ai-recruit/common';
 import { IsEmail, IsStrongPassword, Matches, MaxLength } from 'class-validator';
 
 export class AuthBaseDto {

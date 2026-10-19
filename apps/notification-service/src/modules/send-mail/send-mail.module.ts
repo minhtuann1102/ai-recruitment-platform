@@ -1,4 +1,4 @@
-import { codeExpiresConfiguration } from '@app/common';
+import { codeExpiresConfiguration } from '@ai-recruit/common';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { SendMailConsumer } from './send-mail.consumer';

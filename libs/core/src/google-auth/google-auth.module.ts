@@ -1,4 +1,4 @@
-import { googleConfiguration } from '@app/common';
+import { googleConfiguration } from '@ai-recruit/common';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { GoogleAuthService } from './google-auth.service';

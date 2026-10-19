@@ -1,5 +1,5 @@
 import * as dotenv from 'dotenv';
-import { NodeEnv } from '@app/common';
+import { NodeEnv } from '@ai-recruit/common';
 import { ReflectMetadataProvider } from '@mikro-orm/decorators/legacy';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import { registerAs } from '@nestjs/config';

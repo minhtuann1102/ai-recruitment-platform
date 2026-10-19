@@ -1,4 +1,4 @@
-import { codeExpiresConfiguration, jwtConfiguration } from '@app/common';
+import { codeExpiresConfiguration, jwtConfiguration } from '@ai-recruit/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigType } from '@nestjs/config';

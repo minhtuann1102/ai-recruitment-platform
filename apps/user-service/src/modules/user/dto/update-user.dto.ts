@@ -1,4 +1,4 @@
-import { Gender, UpdateUserRequest } from '@app/common';
+import { Gender, UpdateUserRequest } from '@ai-recruit/common';
 import {
   IsBoolean,
   IsDateString,

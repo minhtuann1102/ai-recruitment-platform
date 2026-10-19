@@ -8,7 +8,7 @@ import {
   PayloadValidationPipe,
   USER_GRPC_SERVICE,
   UserResponse,
-} from '@app/common';
+} from '@ai-recruit/common';
 import { Controller, UseFilters, UseInterceptors, UsePipes } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import {

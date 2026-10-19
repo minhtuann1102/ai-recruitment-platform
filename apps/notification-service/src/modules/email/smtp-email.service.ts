@@ -1,10 +1,10 @@
 import * as nodemailer from 'nodemailer';
+import { smtpConfiguration } from '@ai-recruit/common';
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { smtpConfiguration } from '@app/common';
-import { AbstractEmailService } from './abstract-email.service';
 import { Logger } from 'winston';
+import { AbstractEmailService } from './abstract-email.service';
 import { EmailOptions } from './email.interface';
 
 @Injectable()

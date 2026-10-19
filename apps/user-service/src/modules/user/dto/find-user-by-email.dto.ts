@@ -1,4 +1,4 @@
-import { FindUserByEmailRequest } from '@app/common';
+import { FindUserByEmailRequest } from '@ai-recruit/common';
 import { IsEmail } from 'class-validator';
 
 export class FindUserByEmailDataDto implements FindUserByEmailRequest {

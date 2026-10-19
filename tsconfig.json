@@ -14,24 +14,12 @@
     "libReplacement": true,
     "allowSyntheticDefaultImports": true,
     "paths": {
-      "@app/common": [
-        "./libs/common/src/index.ts"
-      ],
-      "@app/common/*": [
-        "./libs/common/src/*"
-      ],
-      "@app/core": [
-        "./libs/core/src/index.ts"
-      ],
-      "@app/core/*": [
-        "./libs/core/src/*"
-      ],
-      "@app/email-template": [
-        "./libs/email-template/index.ts"
-      ],
-      "@app/email-template/*": [
-        "./libs/email-template/*"
-      ]
+      "@ai-recruit/common": ["./libs/common/src/index.ts"],
+      "@ai-recruit/common/*": ["./libs/common/src/*"],
+      "@ai-recruit/core": ["./libs/core/src/index.ts"],
+      "@ai-recruit/core/*": ["./libs/core/src/*"],
+      "@ai-recruit/email-template": ["./libs/email-template/index.ts"],
+      "@ai-recruit/email-template/*": ["./libs/email-template/*"]
     }
   },
   "ts-node": { "require": ["tsconfig-paths/register"] }
