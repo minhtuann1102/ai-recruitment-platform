@@ -183,6 +183,8 @@ async def run_turn(req: NextTurnRequest) -> AsyncIterator[SseEvent]:
    `temperature = 0`.
 5. `finish_reason = "length"` (output bị cắt): retry 1 lần với `max_tokens × 1.5`.
 
+> **Cài đặt (Phase 02):** các mục 1–5 ở trên nằm ở `app/llm/` (`gateway.py`, `retry.py`, `structured_output.py`); chưa nối vào agent. Bảng fallback theo agent bên dưới sẽ cài ở Phase 06. Biến `LLM_STRUCTURED_OUTPUTS` bật/tắt `json_schema` strict (mặc định bật).
+
 ### Bảng xử lý theo loại lỗi
 
 | Lỗi | Phát hiện | Xử lý | Ảnh hưởng tới ứng viên |

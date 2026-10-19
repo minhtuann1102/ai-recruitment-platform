@@ -4,7 +4,7 @@
 - [plan.md](plan.md) · [design 03 §4.6](../../docs/ai-service/03-orchestrator-state-machine.md) (xử lý lỗi) · [design 08 §9.3](../../docs/ai-service/08-latency-and-cost.md) (model từng agent) · FR-AI-063, 070, 080, 081
 
 ## Overview
-- **Priority:** P1 · **Status:** chưa bắt đầu · **Tuần:** W2–W3
+- **Priority:** P1 · **Status:** xong code ngày 19/10 (182 test pass); chờ review PR và smoke test thật · **Tuần:** W2–W3
 - Dựng lớp gọi LLM dùng chung cho 6 agent: retry, structured output, repair, đo usage, prompt có phiên bản, **LLM giả** để test logic điều phối trong CI.
 
 ## Key Insights
@@ -38,11 +38,12 @@ Agent registry: AGENT_<NAME>_MODE = mock | llm  (mock giữ làm fallback)
 6. Registry chọn `mock` hoặc `llm` theo env; mặc định `mock` để CI không cần khóa.
 
 ## Todo List
-- [ ] Settings + gateway + retry + structured output
-- [ ] Prompt store và cờ `LOG_LLM_IO`
-- [ ] FakeLlm và test: đúng số lần retry, đúng backoff, repair, length
-- [ ] Registry mode mock/llm, mặc định mock
-- [ ] `smoke_llm.py` dùng gateway; một lần chạy thật xác nhận
+- [x] Settings + gateway + retry + structured output
+- [x] Prompt store và cờ `LOG_LLM_IO`
+- [x] FakeLlm và test: đúng số lần retry, đúng backoff, repair, length
+- [x] Registry mode mock/llm, mặc định mock
+- [x] `smoke_llm.py` dùng gateway
+- [ ] Một lần chạy thật xác nhận (owner chạy: `python -m scripts.smoke_llm`)
 
 ## Success Criteria
 - CI xanh không cần khóa; test chứng minh retry ≤ 2, không retry 4xx, repair 1 lần; một lần gọi thật qua gateway trả JSON hợp lệ kèm usage.
