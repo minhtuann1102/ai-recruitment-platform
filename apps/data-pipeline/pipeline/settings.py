@@ -46,6 +46,25 @@ def catalog_dir() -> Path:
 
 
 @dataclass(frozen=True)
+class LlmSettings:
+    api_key: str
+    base_url: str
+    llm_model: str
+
+
+def require_llm_settings() -> LlmSettings:
+    """Cau hinh cho enrich (dich + gan topic): chi can key LLM, khong can DB."""
+    api_key = os.getenv("LLM_API_KEY", "").strip()
+    if not api_key:
+        raise ConfigError("thieu bien moi truong: LLM_API_KEY. Copy .env.example thanh .env va dien gia tri.")
+    return LlmSettings(
+        api_key=api_key,
+        base_url=os.getenv("LLM_BASE_URL", "https://openrouter.ai/api/v1"),
+        llm_model=os.getenv("LLM_MODEL", "openai/gpt-4o-mini"),
+    )
+
+
+@dataclass(frozen=True)
 class IndexSettings:
     api_key: str
     base_url: str

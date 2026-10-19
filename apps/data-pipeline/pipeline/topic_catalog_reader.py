@@ -4,7 +4,7 @@ Chi lay topics[], bo scenarios[]: topic_id cua Q&A phai tro toi topic (FR-002). 
 ai-service (research R1, R5); hop dong chung la chinh file YAML.
 """
 from pathlib import Path
-from typing import Dict, Iterable
+from typing import Dict, Iterable, List
 
 import yaml
 
@@ -13,9 +13,10 @@ class CatalogError(RuntimeError):
     pass
 
 
-def load_topic_categories(dirs: Iterable[Path]) -> Dict[str, str]:
-    """Gop topic cua moi *.yaml trong cac thu muc theo thu tu; id trung giua cac file la loi."""
-    topics: Dict[str, str] = {}
+def load_topics(dirs: Iterable[Path]) -> List[Dict[str, str]]:
+    """[{id, category, title}] cua moi *.yaml trong cac thu muc theo thu tu; id trung giua cac file la loi."""
+    topics: List[Dict[str, str]] = []
+    seen = set()
     for directory in dirs:
         directory = Path(directory)
         files = sorted(directory.glob("*.yaml"))
@@ -27,7 +28,12 @@ def load_topic_categories(dirs: Iterable[Path]) -> Dict[str, str]:
                 topic_id, category = topic.get("id"), topic.get("category")
                 if not topic_id or not category:
                     raise CatalogError(f"{path.name}: topic thieu id hoac category: {topic!r}")
-                if topic_id in topics:
+                if topic_id in seen:
                     raise CatalogError(f"topic_id trung giua cac file catalog: {topic_id} ({path.name})")
-                topics[topic_id] = category
+                seen.add(topic_id)
+                topics.append({"id": topic_id, "category": category, "title": str(topic.get("title", ""))})
     return topics
+
+
+def load_topic_categories(dirs: Iterable[Path]) -> Dict[str, str]:
+    return {topic["id"]: topic["category"] for topic in load_topics(dirs)}

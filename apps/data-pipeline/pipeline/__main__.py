@@ -7,6 +7,7 @@ import sys
 from typing import Callable, Dict, List, Optional
 
 from .collect_command import run_collect
+from .enrich_command import run_enrich
 from .offline_commands import run_process, run_validate
 
 EXIT_OK = 0
@@ -23,7 +24,12 @@ def _not_implemented(args: argparse.Namespace) -> int:
 
 
 # Moi lenh dang ky handler khi story tuong ung duoc hien thuc (tasks.md)
-HANDLERS: Dict[str, Handler] = {"validate": run_validate, "process": run_process, "collect": run_collect}
+HANDLERS: Dict[str, Handler] = {
+    "validate": run_validate,
+    "process": run_process,
+    "collect": run_collect,
+    "enrich": run_enrich,
+}
 
 
 def _add_catalog_option(parser: argparse.ArgumentParser) -> None:
@@ -63,6 +69,13 @@ def build_parser() -> argparse.ArgumentParser:
     collect = sub.add_parser("collect", help="tai Q&A tu cac repo GitHub -> data/raw/collected_qa/")
     collect.add_argument("--only", action="append", default=[], metavar="SOURCE", help="chi tai nguon nay (lap lai duoc)")
     collect.add_argument("--delay", type=float, default=0.5, help="giay nghi toi thieu giua hai request")
+
+    enrich = sub.add_parser("enrich", help="LLM dich sang tieng Viet + gan topic + do kho -> data/raw/enriched_qa/")
+    _add_catalog_option(enrich)
+    enrich.add_argument("--only", action="append", default=[], metavar="SOURCE", help="chi xu ly nguon nay")
+    enrich.add_argument("--per-source", type=int, default=0, metavar="N", help="toi da N cap moi nguon (thu / mau review)")
+    enrich.add_argument("--workers", type=int, default=8, help="so loi goi LLM song song")
+    enrich.add_argument("--retry-rejected", action="store_true", help="thu lai cap da bi loai (vd sau khi catalog doi)")
 
     crawl = sub.add_parser("crawl", help="crawler mau (US5)")
     crawl.add_argument("source", choices=["react-docs"])

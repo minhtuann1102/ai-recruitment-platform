@@ -65,6 +65,13 @@ Báo cáo phân bố: số cặp theo topic / category / difficulty / language /
 }
 ```
 
+## Dữ liệu crawl: `apps/data-pipeline/data/raw/enriched_qa/*.json` (dataset `de_crawled_qa`, KHÔNG commit)
+
+Sinh bởi `enrich` (quyết định 2026-10-19). Cùng các trường trên, khác ở: `qa_id` khớp `^cr-[a-z0-9-]+-[0-9a-f]{8}$`
+(md5 của URL + câu hỏi gốc); `language = vi`; `source` là URL; `license` ghi nếu biết, còn lại `unknown` (không kiểm
+danh sách); `synthetic = false`; không cần `reviewed_by` từng cặp (review theo mẫu); thêm `source_lang`,
+`question_original`, `answer_original`, `truncated` để đối chiếu bản dịch. Luật topic, độ dài, PII, trùng như seed.
+
 ## Golden set: `apps/data-pipeline/data/seeds/golden_set.json`
 
 Mảng JSON; mỗi phần tử:
