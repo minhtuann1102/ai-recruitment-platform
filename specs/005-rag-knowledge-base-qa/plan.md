@@ -82,7 +82,8 @@ apps/data-pipeline/
 │   ├── settings.py                  # env + tên model chuẩn (R2)
 │   ├── topic_catalog_reader.py      # YAML → {topic_id: category} (R5)
 │   ├── qa_seed_loader.py            # đọc data/seeds/interview_qa/*.json
-│   ├── qa_seed_validator.py         # luật qa-seed-format + báo cáo phân bố (US1)
+│   ├── qa_seed_rules.py             # luật mức cặp (dùng chung validate / process)
+│   ├── qa_seed_validator.py         # luật mức tập + báo cáo phân bố (US1)
 │   ├── pii_patterns.py              # regex email / số điện thoại (US1, US5)
 │   ├── text_cleaning.py             # NFC, HTML, control chars, whitespace (R3)
 │   ├── qa_record_builder.py         # 1 cặp → 2 record + content_hash + dedup (US2)
