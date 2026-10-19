@@ -5,9 +5,11 @@ services:
       file: .docker/compose/postgresql/postgresql.yml
       service: postgresql
     ports:
-      - '5534:5432'
+      - '${PG_HOST_PORT:-5534}:5432'
     volumes:
       - ./.docker/volumes/pgdata:/var/lib/postgresql/data
+      # Creates user_db, job_db, interview_db, notification_db, ai_db (+ vector); re-run: make db-ensure
+      - ./scripts/init-databases.sh:/docker-entrypoint-initdb.d/init-databases.sh:ro
     networks:
       - ai-recruit-network
     environment:
@@ -16,6 +18,53 @@ services:
       POSTGRES_DB: ${DEFAULT_PG_DATABASE}
     env_file:
       - .env
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$${POSTGRES_USER}" -d postgres']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # S3-compatible storage for CV/avatar/logo. Switching to AWS S3 only needs env changes
+  # (STORAGE_TYPE=s3, AWS_S3_*), see specs/001-platform-foundation/research.md R6.
+  minio:
+    image: cgr.dev/chainguard/minio@sha256:4cf4831a2bbcf13ddca09c1cbcc9faff716dd3c4247e0babc32864b8ee8e0034
+    container_name: ai_recruit_minio
+    restart: unless-stopped
+    command: server /data --console-address :9001
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    ports:
+      - '${MINIO_API_PORT:-9000}:9000'
+      - '${MINIO_CONSOLE_PORT:-9001}:9001'
+    volumes:
+      - ./.docker/volumes/minio_data:/data
+    networks:
+      - ai-recruit-network
+
+  # One-shot: waits for MinIO, then creates the bucket if missing.
+  storage-init:
+    image: amazon/aws-cli:2.37.9
+    container_name: ai_recruit_storage_init
+    restart: 'no'
+    depends_on:
+      - minio
+    entrypoint: ['/bin/sh', '-c']
+    command:
+      - |
+        n=0
+        until aws --endpoint-url http://minio:9000 s3 ls >/dev/null 2>&1; do
+          n=$$((n + 1)); [ "$$n" -ge 30 ] && echo 'minio not ready after 60s' && exit 1
+          sleep 2
+        done
+        aws --endpoint-url http://minio:9000 s3api head-bucket --bucket "$$AWS_S3_BUCKET_NAME" 2>/dev/null           || aws --endpoint-url http://minio:9000 s3 mb "s3://$$AWS_S3_BUCKET_NAME"
+    environment:
+      AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
+      AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
+      AWS_DEFAULT_REGION: ${AWS_S3_REGION}
+      AWS_S3_BUCKET_NAME: ${AWS_S3_BUCKET_NAME}
+    networks:
+      - ai-recruit-network
 
   redis:
     container_name: ai_recruit_redis
@@ -29,6 +78,11 @@ services:
     volumes:
       - ./.docker/volumes/redis_data:/data
     command: redis-server --appendonly yes --dir /data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
   redisinsight:
     container_name: ai_recruit_redisinsight
@@ -151,6 +205,11 @@ services:
       - ai-recruit-network
     volumes:
       - ./.docker/volumes/etcd-data:/etcd-data
+    healthcheck:
+      test: ['CMD', 'etcdctl', 'endpoint', 'health']
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   apisix:
     extends:
@@ -164,9 +223,16 @@ services:
       - ./config/apisix/conf/debug-${APISIX_PROFILE}.yaml:/usr/local/apisix/conf/debug-${APISIX_PROFILE}.yaml
     ports:
       - "${APISIX_NODE_LISTEN}:${APISIX_NODE_LISTEN}"
-      - "${APISIX_DEPLOYMENT_ADMIN_LISTEN}:${APISIX_DEPLOYMENT_ADMIN_LISTEN}"
+      # Admin API stays on localhost: APISIX_KEY is a local-only sample value
+      - "127.0.0.1:${APISIX_DEPLOYMENT_ADMIN_LISTEN}:${APISIX_DEPLOYMENT_ADMIN_LISTEN}"
     depends_on:
-      - etcd
+      etcd:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'bash -c "</dev/tcp/127.0.0.1/$${APISIX_NODE_LISTEN}"']
+      interval: 5s
+      timeout: 3s
+      retries: 20
     env_file:
       - .env
     networks:

@@ -44,3 +44,7 @@ adcDump:
 dir ?= apps
 clean:
 	./clean.sh $(dir)
+
+# Re-run the idempotent DB init on an existing volume (initdb.d only runs on an empty one)
+db-ensure:
+	docker compose exec db bash /docker-entrypoint-initdb.d/init-databases.sh
