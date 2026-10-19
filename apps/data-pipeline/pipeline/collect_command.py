@@ -69,6 +69,20 @@ def records_from_markdown(source: QASource, path: str, markdown: str, collected_
     return records
 
 
+def _expand_paths(client: GithubRawClient, source: QASource, failures: List[str]) -> List[str]:
+    """'thu-muc/*.md' -> cac file .md trong thu muc; duong dan file giu nguyen."""
+    paths: List[str] = []
+    for path in source.paths:
+        if not path.endswith("/*.md"):
+            paths.append(path)
+            continue
+        try:
+            paths.extend(client.list_markdown(source.repo, path[: -len("/*.md")]))
+        except httpx.HTTPError as exc:
+            failures.append(f"{source.repo}/{path}: {exc}")
+    return paths
+
+
 def run_collect(args: argparse.Namespace) -> int:
     selected = [s for s in SOURCES if not args.only or s.name in args.only]
     client = GithubRawClient(delay=args.delay)
@@ -78,7 +92,7 @@ def run_collect(args: argparse.Namespace) -> int:
     try:
         for source in selected:
             records: List[Dict] = []
-            for path in source.paths:
+            for path in _expand_paths(client, source, failures):
                 try:
                     markdown = client.fetch(source.repo, path)
                 except httpx.HTTPError as exc:

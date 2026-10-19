@@ -5,7 +5,7 @@ Nghi `delay` giay giua hai request (constitution V: co rate limit).
 """
 import os
 import time
-from typing import Optional
+from typing import List, Optional
 
 import httpx
 
@@ -23,14 +23,24 @@ class GithubRawClient:
         self._delay = delay
         self._last_request = 0.0
 
-    def fetch(self, repo: str, path: str) -> str:
+    def _get(self, url: str, accept: str) -> httpx.Response:
         wait = self._delay - (time.monotonic() - self._last_request)
         if wait > 0:
             time.sleep(wait)
         self._last_request = time.monotonic()
-        response = self._client.get(API_URL.format(repo=repo, path=path))
+        response = self._client.get(url, headers={"Accept": accept})
         response.raise_for_status()
-        return response.text
+        return response
+
+    def fetch(self, repo: str, path: str) -> str:
+        return self._get(API_URL.format(repo=repo, path=path), "application/vnd.github.raw").text
+
+    def list_markdown(self, repo: str, directory: str) -> List[str]:
+        """Duong dan cac file .md trong thu muc (khong de quy), bo README.md (thuong la muc luc)."""
+        entries = self._get(API_URL.format(repo=repo, path=directory), "application/vnd.github+json").json()
+        return sorted(
+            e["path"] for e in entries if e.get("type") == "file" and e["name"].endswith(".md") and e["name"] != "README.md"
+        )
 
     def close(self) -> None:
         self._client.close()

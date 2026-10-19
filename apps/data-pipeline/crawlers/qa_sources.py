@@ -8,14 +8,14 @@ import re
 from dataclasses import dataclass
 from typing import Callable, List, Tuple
 
-from .qa_markdown_parsers import HeadingFormat, QAPair, parse_details, parse_headings
+from .qa_markdown_parsers import HeadingFormat, QAPair, parse_article, parse_details, parse_headings
 
 
 @dataclass(frozen=True)
 class QASource:
     name: str  # dung trong cid: cr-<name>-<hash>
     repo: str
-    paths: Tuple[str, ...]
+    paths: Tuple[str, ...]  # file, hoac "thu-muc/*.md" (moi file .md trong thu muc, tru README.md)
     parse: Callable[[str], List[QAPair]]
     lang: str  # en | uk | ru
     license: str
@@ -66,4 +66,15 @@ SOURCES: Tuple[QASource, ...] = (
     QASource("devlovers-python", "DevLoversTeam/python-interview-questions", ("README.md",), parse_details, "uk", "MIT", "DevLoversTeam contributors"),
     QASource("yakimka-python", "yakimka/python_interview_questions", ("questions.md",), _headings(r"^### (.+)$", r"^## "), "ru", "MIT", "yakimka and contributors"),
     QASource("grigorev-ml", "alexeygrigorev/data-science-interviews", ("theory.md",), _headings(r"^\*\*(.+?)\*\*\s*$", r"^## "), "en", "CC-BY-4.0", "Alexey Grigorev and contributors"),
+    # Nguon nang cao (cau hard; quyet dinh DE 2026-10-19): moi file la mot cau phong van he phan tan / tai cao
+    QASource(
+        "doocs-advanced-java",
+        "doocs/advanced-java",
+        tuple(f"docs/{d}/*.md" for d in ("high-concurrency", "distributed-system", "high-availability", "micro-services")),
+        lambda markdown: parse_article(markdown, re.compile(r"^##\s*面试题剖析\s*$", re.MULTILINE)),
+        "zh",
+        "CC-BY-SA-4.0",
+        "doocs/advanced-java contributors",
+    ),
+    QASource("genai-60", "aishwaryanr/awesome-generative-ai-guide", ("interview_prep/60_gen_ai_questions.md",), _headings(r"^\d+\.\s+(.+)$", r"^## |^---\s*$", dedent=True), "en", "MIT", "Aishwarya Naresh Reganti and contributors"),
 )

@@ -23,6 +23,9 @@ _LEADING_NUMBER_RE = re.compile(r"^\s*\d+[.)]\s+")
 _UNDERSCORE_EMPHASIS_RE = re.compile(r"(?<![\w`])_([^_\n]+?)_(?![\w`])")
 _BOLD_RE = re.compile(r"\*\*(.+?)\*\*")
 _DETAILS_RE = re.compile(r"<summary>(.*?)</summary>(.*?)</details>", re.DOTALL | re.IGNORECASE)
+# Dong nhan "- Answer:" va dong "Image Source: ..."
+_LABEL_LINE_RE = re.compile(r"^\s*(?:[-*]\s*)?(?:\*\*)?Answer:?(?:\*\*)?\s*$|^\s*Image Source:", re.IGNORECASE)
+_ARTICLE_TITLE_RE = re.compile(r"^#\s+(.+)$", re.MULTILINE)
 
 
 @dataclass(frozen=True)
@@ -45,7 +48,11 @@ def clean_question(text: str) -> str:
 
 
 def clean_answer(lines: List[str], dedent: bool = False) -> str:
-    kept = [ln for ln in lines if not _FOOTER_LINE_RE.search(ln) and not _HTML_ONLY_LINE_RE.match(ln)]
+    kept = [
+        ln
+        for ln in lines
+        if not _FOOTER_LINE_RE.search(ln) and not _HTML_ONLY_LINE_RE.match(ln) and not _LABEL_LINE_RE.match(ln)
+    ]
     text = "\n".join(kept)
     if dedent:
         text = textwrap.dedent(text)
@@ -73,6 +80,18 @@ def parse_headings(markdown: str, fmt: HeadingFormat) -> List[QAPair]:
             body.append(line)
     flush()
     return pairs
+
+
+def parse_article(markdown: str, answer_heading: Optional[Pattern[str]] = None) -> List[QAPair]:
+    """Moi file la mot cau: cau hoi = tieu de h1; dap an = phan sau `answer_heading` (neu co) hoac sau h1."""
+    title = _ARTICLE_TITLE_RE.search(markdown)
+    if not title:
+        return []
+    start = title.end()
+    if answer_heading is not None:
+        section = answer_heading.search(markdown, start)
+        start = section.end() if section else start
+    return [(clean_question(title.group(1)), clean_answer(markdown[start:].splitlines()))]
 
 
 def parse_details(markdown: str) -> List[QAPair]:

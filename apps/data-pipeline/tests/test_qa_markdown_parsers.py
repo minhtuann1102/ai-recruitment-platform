@@ -103,3 +103,59 @@ def test_truncate_answer_cuts_at_paragraph_and_closes_code_fence():
     assert truncated and text.startswith("intro paragraph")
     assert text.count("```") % 2 == 0
     assert truncate_answer("short", limit=80) == ("short", False)
+
+
+ARTICLE_MD = """# 分库分表如何平滑过渡？
+
+## 面试题
+
+现在有一个未分库分表的系统，如何迁移？
+
+## 面试官心理分析
+
+考察迁移经验。
+
+## 面试题剖析
+
+### 双写迁移方案
+
+新旧库同时写入，后台工具迁移历史数据，校验一致后切换读流量。
+"""
+
+GENAI_MD = """## Generative Models
+
+1. **What is mode collapse in GANs and how do you mitigate it?**
+- Answer:
+    Mode collapse happens when the generator produces limited variety; use minibatch discrimination.
+
+    Image Source: [https://example.com/x](https://example.com/x)
+
+---
+
+2. Short?
+- Answer:
+"""
+
+
+def test_article_parser_uses_title_and_analysis_section():
+    pairs = PARSERS["doocs-advanced-java"].parse(ARTICLE_MD)
+    assert pairs[0][0] == "分库分表如何平滑过渡？"
+    assert "双写迁移方案" in pairs[0][1] and "考察迁移经验" not in pairs[0][1]
+
+
+def test_genai_parser_drops_answer_label_image_source_and_separator():
+    pairs = PARSERS["genai-60"].parse(GENAI_MD)
+    assert pairs[0][0] == "What is mode collapse in GANs and how do you mitigate it?"
+    assert pairs[0][1].startswith("Mode collapse happens") and "Image Source" not in pairs[0][1] and "---" not in pairs[0][1]
+
+
+def test_directory_paths_are_expanded():
+    from pipeline.collect_command import _expand_paths
+
+    class FakeClient:
+        def list_markdown(self, repo, directory):
+            return [f"{directory}/a.md", f"{directory}/b.md"]
+
+    failures = []
+    paths = _expand_paths(FakeClient(), PARSERS["doocs-advanced-java"], failures)
+    assert paths[:2] == ["docs/high-concurrency/a.md", "docs/high-concurrency/b.md"] and len(paths) == 8 and not failures
