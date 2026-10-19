@@ -106,7 +106,7 @@ Max content:      max-w-7xl (1280px)
 | `/employer/jobs/new` | Create Job | `POST /job/api/jobs`, `GET /job/api/skills`, `GET /job/api/experience-levels` |
 | `/employer/jobs/:id/edit` | Edit Job | `PUT /job/api/jobs/:id` |
 | `/employer/jobs/:id/applicants` | Applicants | `GET /job/api/applications/job/:id` |
-| `/employer/applicants/:id` | Applicant Detail | Application data + `GET /interview/api/sessions/candidate/:candidateId` |
+| `/employer/applicants/:id` | Applicant Detail | Application data (hồ sơ, CV) |
 
 ### Admin (auth required, role=Admin)
 
@@ -727,7 +727,7 @@ Max content:      max-w-7xl (1280px)
 │          │ │ └────┘ 3 năm KN • Backend Developer    │   │
 │          │ │        [Node.js] [TypeScript] [Postgres]│   │
 │          │ │                                        │   │
-│          │ │  📄 CV  │  🎤 Phỏng vấn: 7.5/10        │   │
+│          │ │  📄 CV                                 │   │
 │          │ │                                        │   │
 │          │ │  Trạng thái: [🟡 Pending ▾]            │   │
 │          │ │                    ┌──────────────┐    │   │
@@ -745,7 +745,7 @@ Max content:      max-w-7xl (1280px)
 │          │ │ └────┘ 1 năm KN • Frontend Developer   │   │
 │          │ │        [React] [JavaScript]            │   │
 │          │ │                                        │   │
-│          │ │  📄 CV  │  🎤 Chưa phỏng vấn           │   │
+│          │ │  📄 CV                                 │   │
 │          │ │                                        │   │
 │          │ │  Trạng thái: [🟡 Pending ▾]            │   │
 │          │ └────────────────────────────────────────┘   │
@@ -754,9 +754,9 @@ Max content:      max-w-7xl (1280px)
 ```
 
 **UX Notes:**
-- Click vào tên ứng viên → xem chi tiết profile + CV + kết quả phỏng vấn
+- Click vào tên ứng viên → xem chi tiết profile + CV
 - Dropdown đổi trạng thái trực tiếp trên card
-- "Phỏng vấn: 7.5/10" — link tới kết quả phỏng vấn của ứng viên
+- Kết quả luyện tập phỏng vấn là riêng tư, Employer không xem (quyết định 2026-10-15)
 - Filter theo status
 
 ---

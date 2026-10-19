@@ -6,7 +6,7 @@
 |---|---|---|---|---|---|---|
 | 1 | auth-service | NestJS | — (stateless) | 3300 | — (client only) | Có sẵn |
 | 2 | user-service | NestJS | `user_db` | 3301 | 3411 | Có sẵn, cần mở rộng |
-| 3 | job-service | NestJS | `job_db` | 3302 | 3412 | Mới |
+| 3 | job-service | NestJS | `job_db` | 3302 | — (client only; 3412 để dành) | Mới |
 | 4 | interview-service | NestJS | `interview_db` | 3304 | — | Mới |
 | 5 | notification-service | NestJS | `notification_db` | 3303 | 3413 | Có sẵn, defer |
 | 6 | ai-service | FastAPI | `ai_db` (tương lai) | 8000 | — | Mock |
@@ -167,7 +167,7 @@
 
 **Giao tiếp:**
 - HTTP (client → APISIX → interview)
-- REST client → ai-service (evaluate answer, get next question)
+- REST client → ai-service (parse CV, start, next-turn trong phiên, finalize khi kết thúc; chi tiết ở docs/ai-service/06-api-contract.md)
 
 **API chính:**
 
@@ -177,8 +177,7 @@
 | POST | /api/sessions/:id/answer | JWT (Candidate) | Gửi câu trả lời |
 | POST | /api/sessions/:id/end | JWT (Candidate) | Kết thúc phiên |
 | GET | /api/sessions | JWT (Candidate) | Lịch sử phiên của tôi |
-| GET | /api/sessions/:id | JWT (Candidate/Employer) | Chi tiết phiên + turns |
-| GET | /api/sessions/candidate/:candidateId | JWT (Employer) | Xem kết quả của ứng viên |
+| GET | /api/sessions/:id | JWT (Candidate, chủ phiên) | Chi tiết phiên + turns |
 | GET | /api/question-bank | JWT (Admin) | Danh sách câu hỏi |
 | POST | /api/question-bank | JWT (Admin) | Thêm câu hỏi |
 | PUT | /api/question-bank/:id | JWT (Admin) | Sửa câu hỏi |
@@ -232,7 +231,10 @@
 
 | Method | Endpoint | Mô tả |
 |---|---|---|
-| POST | /api/evaluate | Đánh giá câu trả lời, trả về scores + next question |
+| POST | /api/cv/parse | CV Parser: trích xuất `cv_profile` từ CV |
+| POST | /api/start | Planner → Interviewer: kế hoạch + câu hỏi đầu (SSE) |
+| POST | /api/next-turn | Evaluator → policy → Interviewer: chấm lượt vừa rồi + câu hỏi tiếp (SSE) |
+| POST | /api/finalize | Code tính điểm → Reporter: báo cáo cuối buổi |
 | GET | /api/health | Health check |
 
 Xem chi tiết contract tại [ai-integration.md](ai-integration.md).

@@ -90,14 +90,14 @@ Sprint 5  07/12 ─ 21/12   Polish, Testing & Báo cáo
 |---|---|---|---|
 | S1-AIE-1 | RAG ingestion pipeline | text → chunk → embed (text-embedding-3-small) → lưu knowledge_chunks (pgvector) | Bắt buộc |
 | S1-AIE-2 | RAG retrieval | query → embed → cosine similarity → top-k chunks relevant | Bắt buộc |
-| S1-AIE-3 | Prompt template evaluation | system prompt + RAG context + question + answer → scores JSON + feedback | Bắt buộc |
+| S1-AIE-3 | Evaluator prompt + rubric + CV Parser | Evaluator chấm band 0–4 theo level kèm trích dẫn, hậu kiểm bằng code; CV Parser + `/api/cv/parse` (xem docs/ai-service roadmap tuần 1–2) | Bắt buộc |
 | S1-AIE-4 | Test GPT-4o-mini end-to-end | Câu hỏi → câu trả lời mẫu → RAG retrieve → GPT-4o-mini → CriteriaScores JSON | Bắt buộc |
 
 ### DE
 
 | # | Story | AC | Bắt buộc |
 |---|---|---|---|
-| S1-DE-1 | Thu thập Interview Q&A | 200+ cặp Q&A phỏng vấn CNTT (Backend, Frontend, System Design, DB, DevOps). Format JSON | Bắt buộc |
+| S1-DE-1 | Thu thập Interview Q&A | 200+ cặp Q&A phỏng vấn CNTT gắn `topic_id` theo topic catalog (Backend, Frontend, Database, System Design, DevOps, AI), mỗi topic ≥ 2 cặp, ≥ 50% từ nguồn công khai có giấy phép. Format JSON (xem specs/005) | Bắt buộc |
 | S1-DE-2 | Setup crawling tools | Scrapy/BeautifulSoup + Playwright. Crawl được 1 source mẫu | Bắt buộc |
 | S1-DE-3 | Data pipeline script | Python: load raw → clean → chunk → ready for embedding | Bắt buộc |
 | S1-DE-4 | Index Q&A vào ai_db | Chạy ingestion với Q&A data. Verify search trả kết quả relevant | Bắt buộc |
@@ -126,16 +126,18 @@ Sprint 5  07/12 ─ 21/12   Polish, Testing & Báo cáo
 | S2-FSD-8 | Lưu việc làm | saved_jobs CRUD | Bắt buộc |
 | S2-FSD-9 | Admin duyệt tin | approve/reject job postings | Bắt buộc |
 | S2-FSD-10 | Swagger + Unit tests | Coverage >= 60% job-service | Bắt buộc |
+| S2-FSD-11 | Pattern TCP lấy JD theo application | job-service: `application.getJobDescription` trả JD của job gắn application, kiểm `candidate_id` như `application.getCvFile`. Đề xuất 2026-10-15, chờ FSD xác nhận | Bắt buộc |
 
 ### AIE
 
 | # | Story | AC | Bắt buộc |
 |---|---|---|---|
-| S2-AIE-1 | Agent decision logic | `deepen` / `switch_topic` / `keep_difficulty` dựa trên scores GPT-4o-mini | Bắt buộc |
-| S2-AIE-2 | Next question generation | GPT-4o-mini sinh câu hỏi tiếp theo từ agent decision + history + RAG context | Bắt buộc |
+| S2-AIE-1 | Planner + policy code | Planner chọn topic từ catalog một lần đầu buổi; policy viết bằng code chọn action mỗi lượt từ kết quả Evaluator | Bắt buộc |
+| S2-AIE-2 | Interviewer agent | Diễn đạt đúng một câu hỏi theo action đã chọn, stream SSE | Bắt buộc |
 | S2-AIE-3 | POST /api/start — real | RAG query → GPT-4o-mini sinh câu hỏi đầu tiên | Bắt buộc |
-| S2-AIE-4 | POST /api/evaluate — real | RAG retrieve → GPT-4o-mini evaluate → scores + decision + next_question | Bắt buộc |
+| S2-AIE-4 | POST /api/next-turn — real | Evaluator → policy → Interviewer, stream SSE, trả evaluation + state mới | Bắt buộc |
 | S2-AIE-5 | RealAiInterviewClient (NestJS) | HTTP client gọi ai-service, map snake_case → camelCase, retry + timeout | Bắt buộc |
+| S2-AIE-6 | JD Parser + `jd_profile` | Trích yêu cầu từ JD (must / nice), map kỹ năng về `topic_id` catalog, chống injection như CV Parser; Planner tăng trọng số topic theo `jd_profile` khi có. JD không vào RAG. AIE đã đồng ý 2026-10-15 | Bắt buộc |
 
 ### DE
 
@@ -146,7 +148,7 @@ Sprint 5  07/12 ─ 21/12   Polish, Testing & Báo cáo
 | S2-DE-3 | Index JD vào ai_db | Embed + lưu JD chunks. Tag `source_type = 'job_description'` | Bắt buộc |
 | S2-DE-4 | Seed 200 job postings | Dùng crawled JD data seed job_db | Bắt buộc |
 
-**Demo:** Full job lifecycle. AIE: real GPT-4o-mini evaluate + sinh câu hỏi tiếp qua ai-service.
+**Demo:** Full job lifecycle. AIE: real GPT-4o-mini sinh câu hỏi tiếp (next-turn) qua ai-service.
 
 **Phụ thuộc:** Sprint 1 (FSD: user profiles, RBAC).
 
@@ -163,20 +165,22 @@ Sprint 5  07/12 ─ 21/12   Polish, Testing & Báo cáo
 | S3-FSD-1 | Question bank (Admin CRUD) | Category, subcategory, difficulty, expected_topics | Bắt buộc |
 | S3-FSD-2 | DI swap Mock → Real | Đổi DI từ `MockAiInterviewClient` → `RealAiInterviewClient` qua env `AI_SERVICE_MOCK` | Bắt buộc |
 | S3-FSD-3 | Bắt đầu phiên | POST /api/sessions → gọi real AI startSession, trả câu hỏi đầu | Bắt buộc |
-| S3-FSD-4 | Gửi câu trả lời | POST /api/sessions/:id/answer → real AI evaluateAnswer, lưu scores, trả câu hỏi tiếp | Bắt buộc |
-| S3-FSD-5 | Kết thúc phiên | Tổng hợp scores, tạo interview_results | Bắt buộc |
-| S3-FSD-6 | Lịch sử phiên | Candidate xem lại. Employer xem kết quả ứng viên (tín hiệu tham khảo) | Bắt buộc |
+| S3-FSD-4 | Gửi câu trả lời | POST /api/sessions/:id/answer → real AI nextTurn, lưu decision/signal, trả câu hỏi tiếp (không trả điểm) | Bắt buộc |
+| S3-FSD-5 | Kết thúc phiên | Gọi AI finalize, lưu scores + comment từng turn, tạo interview_results. Timeout dài, FE có trạng thái chờ | Bắt buộc |
+| S3-FSD-6 | Lịch sử phiên | Candidate xem lại các phiên của mình. Phiên luyện tập riêng tư: Employer không xem (quyết định 2026-10-15) | Bắt buộc |
 | S3-FSD-7 | Swagger + Unit tests | Coverage >= 60% interview-service | Bắt buộc |
+| S3-FSD-8 | Gắn application (CV + JD) vào phiên | Từ `cvApplicationId` lấy CV và JD cùng application, gọi AI parse JD, lưu `jd_profile`, trả tóm tắt yêu cầu. Phiên không có application vẫn chạy theo track + level. Đề xuất 2026-10-15, chờ FSD xác nhận | Bắt buộc |
 
 ### AIE
 
 | # | Story | AC | Bắt buộc |
 |---|---|---|---|
-| S3-AIE-1 | Full agentic E2E | Session 5 lượt: startSession → 5x evaluateAnswer (GPT-4o-mini + RAG) → interview_results | Bắt buộc |
+| S3-AIE-1 | Full agentic E2E + Reporter | Phiên đầy đủ: start → ~15 lượt nextTurn → finalize (code tính điểm, Reporter viết nhận xét) → interview_results | Bắt buộc |
 | S3-AIE-2 | Context window management | Trim history để giữ trong token limit. Giữ N turns gần nhất + summary | Bắt buộc |
 | S3-AIE-3 | Error handling + fallback | OpenAI timeout → fallback mock response. Retry 3x exponential backoff | Bắt buộc |
-| S3-AIE-4 | Scoring calibration | Điều chỉnh prompts để scores consistent. Test với 20+ câu trả lời mẫu | Bắt buộc |
+| S3-AIE-4 | Evaluator calibration | Prompts Evaluator cho scores consistent. Golden set 40–70 mẫu, ±1 band ≥ 80%, độ lệch khoan dung trong [−0.3, +0.3] | Bắt buộc |
 | S3-AIE-5 | Cost tracking | Log token usage per session. Alert nếu session > $0.10 | Stretch |
+| S3-AIE-6 | Độ bao phủ yêu cầu JD trong report | Khối `requirements`: mỗi yêu cầu `assessed / not_assessed / out_of_catalog` kèm band, evidence_turns, confidence; hiển thị "đã đánh giá X/Y". Không kết luận tuyển / không tuyển. AIE đã đồng ý 2026-10-15 | Bắt buộc |
 
 ### DE
 
@@ -209,7 +213,7 @@ Sprint 5  07/12 ─ 21/12   Polish, Testing & Báo cáo
 | S4-FSD-5 | Apply flow | Upload CV, cover letter, xem trạng thái | Bắt buộc |
 | S4-FSD-6 | Employer dashboard | Quản lý tin, xem ứng viên, đổi trạng thái | Bắt buộc |
 | S4-FSD-7 | Profile pages | Candidate + Company, edit forms | Bắt buộc |
-| S4-FSD-8 | Interview practice UI | Bắt đầu phiên, câu hỏi, form trả lời, scores real-time, lịch sử | Bắt buộc |
+| S4-FSD-8 | Interview practice UI | Bắt đầu phiên, câu hỏi, form trả lời, scores real-time, lịch sử; chọn application (job) để luyện theo JD (tùy chọn); report hiển thị độ bao phủ yêu cầu | Bắt buộc |
 | S4-FSD-9 | Admin pages | Quản lý users, duyệt tin, skills, câu hỏi | Stretch |
 
 ### AIE
@@ -219,8 +223,8 @@ Sprint 5  07/12 ─ 21/12   Polish, Testing & Báo cáo
 | S4-AIE-1 | Prompt refinement | Cải thiện prompts từ test sessions. Scores realistic | Bắt buộc |
 | S4-AIE-2 | Category-specific RAG | Prompts khác nhau Backend/Frontend/System Design, RAG filter theo category | Bắt buộc |
 | S4-AIE-3 | Response caching | Cache RAG results trong Redis (TTL 1h) | Bắt buộc |
-| S4-AIE-4 | Performance | P95 latency < 3s cho evaluate endpoint | Bắt buộc |
-| S4-AIE-5 | Streaming responses | Server-Sent Events cho typing effect | Stretch |
+| S4-AIE-4 | Performance | Thời gian tới token đầu tiên của next-turn: P50 ≤ 3.5s, P95 ≤ 6s (đo bằng log thật) | Bắt buộc |
+| S4-AIE-5 | Streaming responses | Server-Sent Events cho typing effect (kéo lên Sprint 2, Bắt buộc) | Bắt buộc |
 
 ### DE
 
@@ -230,6 +234,7 @@ Sprint 5  07/12 ─ 21/12   Polish, Testing & Báo cáo
 | S4-DE-2 | Seed data hoàn chỉnh | 200+ job postings, 50+ companies, 100+ candidates, question bank | Bắt buộc |
 | S4-DE-3 | Deploy staging | Docker Compose trên VPS/cloud, HTTPS | Bắt buộc |
 | S4-DE-4 | Monitoring | Logs, metrics, uptime check | Stretch |
+| S4-DE-5 | Voice mode | TTS đọc câu hỏi (từ `done.question`), STT bấm-để-nói rồi gửi transcript qua `/answer`; lưu bản STT gốc + bản sửa. TTS trước, STT sau. Cần tài khoản STT/TTS | Stretch |
 
 **Demo:** Luồng đầy đủ browser: Register → Job → Apply → Interview AI thật → kết quả.
 
@@ -245,7 +250,7 @@ Sprint 5  07/12 ─ 21/12   Polish, Testing & Báo cáo
 |---|---|---|---|---|
 | S5-1 | Integration tests | E2E: auth → job → apply → interview với real AI | Team | Bắt buộc |
 | S5-2 | Bug fixes | Fix tất cả bugs từ Sprint 4 | Team | Bắt buộc |
-| S5-3 | Performance | DB indexes, query optimization. API < 500ms. AI evaluate < 3s | FSD + AIE | Bắt buộc |
+| S5-3 | Performance | DB indexes, query optimization. API < 500ms. AI next-turn TTFT P95 ≤ 6s | FSD + AIE | Bắt buộc |
 | S5-4 | Security review | OWASP Top 10, API keys không expose, auth bypass | FSD | Bắt buộc |
 | S5-5 | Báo cáo tốt nghiệp | Kiến trúc, AI integration, RAG pipeline, kết quả, kết luận | Team | Bắt buộc |
 | S5-6 | Slides thuyết trình | Demo flow rõ, nhấn mạnh AI + RAG feature | Team | Bắt buộc |
@@ -257,10 +262,10 @@ Sprint 5  07/12 ─ 21/12   Polish, Testing & Báo cáo
 ## Mốc cắt giảm phạm vi (nếu chậm)
 
 ### Mức 1: Cut Stretch goals
-Bỏ: streaming, cost tracking, monitoring, admin pages, anti-cheat, notification enhancement.
+Bỏ: streaming, cost tracking, monitoring, admin pages, anti-cheat, notification enhancement, voice mode.
 
 ### Mức 2: Đơn giản hóa AI
-Fallback về mock AI nếu RAG/OpenAI không ổn định đủ cho demo.
+Fallback về mock AI nếu RAG/OpenAI không ổn định đủ cho demo. Bỏ luyện tập theo job cụ thể (JD): chỉ luyện theo track + level, bỏ S2-FSD-11, S2-AIE-6, S3-FSD-8, S3-AIE-6.
 
 ### Mức 3: Đơn giản hóa Frontend
 Chỉ Candidate + Employer flow. Bỏ Admin. Desktop only.

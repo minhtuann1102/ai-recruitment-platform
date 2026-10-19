@@ -205,24 +205,24 @@ Ví dụ: `[job-service] feat: add job posting CRUD with search and filter`
 ### Review Rules
 
 - Mỗi PR cần **ít nhất 1 reviewer**
-- Không merge vào `main` trực tiếp — dùng `develop` branch
+- Không push thẳng vào `main` — mọi thay đổi đi qua PR, CI phải xanh
 - Squash merge khi merge vào main
 - Delete branch sau khi merge
 
-## 6. Branching Strategy
+## 6. Branching Strategy (GitHub Flow)
 
 ```
-main ← production-ready code
-  └── develop ← integration branch
-        ├── feat/job-service/crud
-        ├── feat/user-service/profiles
-        └── fix/auth-service/token-bug
+main ← nhánh duy nhất lâu dài, luôn build được, được bảo vệ bằng CI
+  ├── feat/job-service/crud
+  ├── feat/user-service/profiles
+  └── fix/auth-service/token-bug
 ```
 
-- `main`: chỉ chứa code đã test, sẵn sàng deploy
-- `develop`: nhánh tích hợp, merge feature vào đây trước
-- Feature branches: tách từ `develop`, merge lại `develop`
-- Hotfix: tách từ `main`, merge vào cả `main` và `develop`
+- `main`: nhánh tích hợp duy nhất; branch protection yêu cầu CI xanh + ≥ 1 approve
+- Feature/fix branches: tách từ `main`, PR lại vào `main`, sống ngắn (≤ vài ngày), rebase thường xuyên
+- Bản ổn định để demo: gắn tag cuối mỗi sprint, vd `v0.1-sprint0`, `v0.2-sprint1`; cần quay lại bản demo thì
+  checkout tag
+- Hotfix: như feature branch (`fix/...`), PR vào `main`
 
 ## 7. Definition of Done
 

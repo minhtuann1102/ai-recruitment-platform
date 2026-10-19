@@ -1,0 +1,90 @@
+# DE PROPOSAL (spec 005) — CHỈ PHẦN BỔ SUNG, không phải track hoàn chỉnh.
+# Khi chuyển: cập nhật link tới thư mục này trong docs/architecture/data-pipeline.md §4.
+# AIE nối `topics` và `scenarios` dưới đây vào apps/ai-service/app/catalog/ai_engineer.yaml sau khi PR #3 merge,
+# rồi xóa file này. Không copy nguyên file vào catalog/ (loader nạp mọi *.yaml).
+# Đã tránh trùng với topic hiện có: rag-pipeline (hybrid, rerank), evaluation-hallucination (golden set,
+# LLM-as-judge), agents-tool-use (workflow vs agent, function calling), cost-latency (prompt caching, batching).
+topics:
+  - id: ai.llm.finetuning-peft
+    title: Fine-tuning và PEFT
+    levels: [middle, senior]
+    category: AI
+    key_concepts: [khi nào fine-tune vs RAG vs prompt, SFT và chuẩn bị dữ liệu, LoRA và QLoRA, catastrophic forgetting, đánh giá sau fine-tune]
+  - id: ai.llm.preference-alignment
+    title: "Alignment: RLHF và DPO"
+    levels: [senior]
+    category: AI
+    key_concepts: [SFT rồi preference tuning, reward model và RLHF, DPO, reward hacking, an toàn và từ chối]
+  - id: ai.llm.reasoning-models
+    title: Reasoning model và test-time compute
+    levels: [junior, middle, senior]
+    category: AI
+    key_concepts: [chain-of-thought, reasoning effort và budget token, khi nào cần reasoning model, đánh đổi chi phí và độ trễ, đánh giá bài toán nhiều bước]
+  - id: ai.llm.context-engineering
+    title: Context engineering và long context
+    levels: [junior, middle, senior]
+    category: AI
+    key_concepts: [context window và token budget, long context vs RAG, lost in the middle, nén và tóm tắt lịch sử hội thoại, sắp xếp thông tin trong prompt]
+  - id: ai.rag.advanced-retrieval
+    title: "RAG nâng cao: query rewriting, GraphRAG và agentic RAG"
+    levels: [middle, senior]
+    category: AI
+    key_concepts: [query rewriting và multi-query, parent-document và contextual chunking, GraphRAG và knowledge graph, agentic RAG, đánh giá riêng retrieval và generation]
+  - id: ai.agent.multi-agent-orchestration
+    title: Multi-agent và orchestration
+    levels: [middle, senior]
+    category: AI
+    key_concepts: [planner và executor, handoff giữa agent, chia sẻ state và memory, human-in-the-loop, quan sát và debug hệ multi-agent]
+  - id: ai.agent.mcp-tool-integration
+    title: Model Context Protocol và tích hợp tool
+    levels: [junior, middle, senior]
+    category: AI
+    key_concepts: [MCP client và server, mô tả tool và schema rõ ràng, phân quyền và sandbox cho tool, lỗi và timeout của tool, tool có side effect và idempotency]
+  - id: ai.infer.serving-optimization
+    title: Tối ưu inference và tự host LLM
+    levels: [middle, senior]
+    category: AI
+    key_concepts: [quantization INT8 và INT4, KV cache, continuous batching, speculative decoding, tự host vs gọi API]
+  - id: ai.llm.model-selection-routing
+    title: "Chọn model: API, open-weight và small model"
+    levels: [junior, middle, senior]
+    category: AI
+    key_concepts: [API đóng vs open-weight, small language model và on-device, model routing và cascade, giấy phép model, benchmark công khai vs eval nội bộ]
+  - id: ai.mm.vision-document-ai
+    title: "Multimodal: vision-language và document AI"
+    levels: [junior, middle, senior]
+    category: AI
+    key_concepts: [vision-language model, OCR vs VLM đọc tài liệu, trích xuất dữ liệu có cấu trúc từ PDF và ảnh, chi phí token ảnh, kiểm tra kết quả trích xuất]
+  - id: ai.mm.speech-voice-agents
+    title: Speech và voice agent realtime
+    levels: [middle, senior]
+    category: AI
+    key_concepts: [ASR và TTS, streaming realtime, turn-taking và ngắt lời, ngân sách độ trễ, speech-to-speech model]
+  - id: ai.sec.llm-security-guardrails
+    title: Bảo mật ứng dụng LLM và guardrails
+    levels: [junior, middle, senior]
+    category: AI
+    key_concepts: [prompt injection trực tiếp và gián tiếp, jailbreak, rò rỉ dữ liệu qua tool, guardrails input và output, OWASP Top 10 cho LLM]
+  - id: ai.llmops.production-monitoring
+    title: "LLMOps: giám sát chất lượng trong production"
+    levels: [middle, senior]
+    category: AI
+    key_concepts: [tracing lời gọi LLM và agent, giám sát chất lượng online, thu thập feedback người dùng, A/B test prompt và model, cảnh báo khi chất lượng giảm]
+  - id: ai.nlp.vietnamese-language
+    title: Xử lý tiếng Việt với LLM và embedding
+    levels: [fresher, junior, middle, senior]
+    category: AI
+    key_concepts: [tokenization tiếng Việt và chi phí token, có dấu và không dấu, model đa ngôn ngữ vs model tiếng Việt, embedding đa ngôn ngữ, bộ đánh giá tiếng Việt]
+scenarios:
+  - id: scn.ai.support-agent-handoff
+    title: Agent chăm sóc khách hàng gọi tool và chuyển cho người khi cần
+    levels: [middle, senior]
+  - id: scn.ai.llm-cost-reduction
+    title: Giảm một nửa chi phí LLM mà giữ chất lượng
+    levels: [middle, senior]
+  - id: scn.ai.model-upgrade-rollout
+    title: Nâng cấp lên model mới mà không làm giảm chất lượng
+    levels: [senior]
+  - id: scn.ai.voice-interview-agent
+    title: Agent phỏng vấn bằng giọng nói realtime
+    levels: [middle, senior]

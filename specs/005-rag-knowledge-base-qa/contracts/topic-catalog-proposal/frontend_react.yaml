@@ -1,0 +1,86 @@
+# DE PROPOSAL (spec 005) — chưa phải nguồn sự thật.
+# Khi chuyển: cập nhật link tới thư mục này trong docs/architecture/data-pipeline.md §4.
+# Sau khi PR #3 merge và AIE review: chuyển file này vào apps/ai-service/app/catalog/ rồi xóa khỏi specs/.
+# Cần AIE thêm "Frontend" vào Category trong app/catalog/models.py (và rag-design.md, data-model.md).
+track: frontend_react
+title: Frontend Developer (React/Next.js)
+id_prefix: fe
+topics:
+  - id: fe.web.html-css-layout
+    title: HTML semantic, CSS layout và responsive
+    levels: [fresher, junior]
+    category: Frontend
+    key_concepts: [HTML semantic, box model, Flexbox vs Grid, responsive và media query, CSS specificity]
+  - id: fe.js.core-closure-this
+    title: "JavaScript core: scope, closure và this"
+    levels: [fresher, junior, middle]
+    category: Frontend
+    key_concepts: [scope và hoisting, closure, this và bind call apply, prototype, == vs ===]
+  - id: fe.js.async-event-loop
+    title: Bất đồng bộ trong trình duyệt
+    levels: [fresher, junior, middle]
+    category: Frontend
+    key_concepts: [event loop trình duyệt, microtask vs macrotask, Promise và async/await, fetch và AbortController, debounce vs throttle]
+  - id: fe.ts.typescript-frontend
+    title: TypeScript cho frontend
+    levels: [fresher, junior, middle]
+    category: Frontend
+    key_concepts: [type vs interface, generics, union và type narrowing, utility types, typing props và event]
+  - id: fe.react.components-hooks
+    title: React component và hooks
+    levels: [fresher, junior, middle]
+    category: Frontend
+    key_concepts: [props vs state, useState và useEffect, dependency array và cleanup, controlled vs uncontrolled input, custom hook]
+  - id: fe.react.rendering-performance
+    title: Rendering và tối ưu hiệu năng React
+    levels: [junior, middle, senior]
+    category: Frontend
+    key_concepts: [khi nào component re-render, reconciliation và key, React.memo, useMemo vs useCallback, list virtualization]
+  - id: fe.react.state-management
+    title: Quản lý state trong ứng dụng React
+    levels: [junior, middle, senior]
+    category: Frontend
+    key_concepts: [local vs global state, Context và prop drilling, store như Redux hoặc Zustand, server state với React Query, cache và invalidation]
+  - id: fe.next.ssr-rsc
+    title: "Next.js: SSR, SSG và Server Components"
+    levels: [junior, middle, senior]
+    category: Frontend
+    key_concepts: [CSR vs SSR vs SSG vs ISR, Server Components vs Client Components, hydration, data fetching và cache, SEO]
+  - id: fe.web.performance-web-vitals
+    title: Hiệu năng web và Core Web Vitals
+    levels: [middle, senior]
+    category: Frontend
+    key_concepts: [critical rendering path, LCP INP CLS, code splitting và lazy loading, tối ưu ảnh và font, bundle analysis]
+  - id: fe.web.security
+    title: Bảo mật frontend
+    levels: [junior, middle, senior]
+    category: Frontend
+    key_concepts: [XSS và escape output, CSRF, CORS, Content Security Policy, lưu token cookie httpOnly vs localStorage]
+  - id: fe.web.accessibility
+    title: Accessibility (a11y)
+    levels: [fresher, junior, middle]
+    category: Frontend
+    key_concepts: [HTML semantic cho screen reader, ARIA, điều hướng bàn phím và focus, độ tương phản màu, kiểm tra a11y tự động]
+  - id: fe.test.component-e2e
+    title: Kiểm thử frontend
+    levels: [fresher, junior, middle]
+    category: Frontend
+    key_concepts: [unit vs component vs E2E, Testing Library và query theo vai trò, mock API, E2E với Playwright, test flaky]
+  - id: fe.arch.frontend-architecture
+    title: Kiến trúc ứng dụng frontend lớn
+    levels: [senior]
+    category: System Design
+    key_concepts: [cấu trúc thư mục theo feature, design system và component library, monorepo, micro-frontend, lớp API client dùng chung]
+scenarios:
+  - id: scn.fe.job-list-infinite-scroll
+    title: Hiển thị hàng nghìn tin tuyển dụng với tìm kiếm và cuộn vô hạn
+    levels: [fresher, junior, middle]
+  - id: scn.fe.multi-step-apply-form
+    title: Form ứng tuyển nhiều bước có upload CV và validate
+    levels: [fresher, junior]
+  - id: scn.fe.slow-page-lcp
+    title: Điều tra trang chủ tải chậm, LCP cao trên mobile
+    levels: [middle, senior]
+  - id: scn.fe.realtime-interview-ui
+    title: Giao diện phỏng vấn realtime stream câu hỏi và xử lý mất kết nối
+    levels: [middle, senior]

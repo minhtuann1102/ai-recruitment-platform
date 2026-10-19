@@ -200,15 +200,24 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
     \c ai_db
     CREATE EXTENSION IF NOT EXISTS vector;
     CREATE TABLE IF NOT EXISTS knowledge_chunks (
-        id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        content     TEXT NOT NULL,
-        embedding   vector(1536),
-        source_type VARCHAR(50),
-        metadata    JSONB,
-        created_at  TIMESTAMPTZ DEFAULT now()
+        id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        content         TEXT NOT NULL,
+        content_hash    CHAR(32) NOT NULL UNIQUE,
+        embedding       vector(1536) NOT NULL,
+        embedding_model VARCHAR(50) NOT NULL DEFAULT 'text-embedding-3-small',
+        source_type     VARCHAR(30) NOT NULL,
+        category        VARCHAR(30),
+        difficulty      VARCHAR(10),
+        language        VARCHAR(5),
+        topic_id        VARCHAR(80),
+        metadata        JSONB NOT NULL DEFAULT '{}',
+        created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
     );
-    CREATE INDEX IF NOT EXISTS knowledge_chunks_embedding_idx
-        ON knowledge_chunks USING ivfflat (embedding vector_cosine_ops);
+    CREATE INDEX IF NOT EXISTS knowledge_chunks_filter_idx
+        ON knowledge_chunks (source_type, category);
+    CREATE INDEX IF NOT EXISTS knowledge_chunks_topic_idx
+        ON knowledge_chunks (source_type, topic_id);
+    -- Chua tao index vector (exact scan). Xem architecture/rag-design.md muc 3.
 EOSQL
 ```
 

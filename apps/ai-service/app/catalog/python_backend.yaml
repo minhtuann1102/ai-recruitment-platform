@@ -1,0 +1,77 @@
+track: python_backend
+title: Python Backend Developer
+id_prefix: py
+topics:
+  - id: py.core.data-structures
+    title: Cấu trúc dữ liệu và độ phức tạp trong Python
+    levels: [fresher, junior]
+    category: Backend
+    key_concepts: [list vs tuple vs set vs dict, hashing và độ phức tạp, mutable vs immutable, comprehension, copy vs deepcopy]
+  - id: py.core.generators-iterators
+    title: Iterator và generator
+    levels: [fresher, junior, middle]
+    category: Backend
+    key_concepts: [iterator protocol, yield, lazy evaluation, tiết kiệm bộ nhớ, generator expression]
+  - id: py.core.decorators-context
+    title: Decorator và context manager
+    levels: [junior, middle]
+    category: Backend
+    key_concepts: [closure, functools.wraps, decorator có tham số, with và contextlib, class-based vs function-based]
+  - id: py.core.typing-pydantic
+    title: Type hint, dataclass và Pydantic
+    levels: [fresher, junior, middle]
+    category: Backend
+    key_concepts: [type hint và mypy, dataclass, Pydantic validation, Optional và Union, Protocol]
+  - id: py.core.gil-concurrency
+    title: GIL, threading, multiprocessing và asyncio
+    levels: [junior, middle, senior]
+    category: Backend
+    key_concepts: [GIL, CPU-bound vs I/O-bound, threading vs multiprocessing, asyncio event loop, race condition]
+  - id: py.web.fastapi-async
+    title: FastAPI, async và dependency injection
+    levels: [junior, middle, senior]
+    category: Backend
+    key_concepts: [async def vs def, Depends, Pydantic request/response model, background task, lifespan]
+  - id: py.web.django-orm
+    title: Django ORM và queryset
+    levels: [junior, middle, senior]
+    category: Backend
+    key_concepts: [lazy queryset, select_related và prefetch_related, N+1 query, migration, transaction.atomic]
+  - id: py.web.api-auth
+    title: Xác thực và phân quyền API
+    levels: [junior, middle, senior]
+    category: Backend
+    key_concepts: [JWT và refresh token, OAuth2 password flow, hash mật khẩu, permission, rate limiting]
+  - id: py.data.sqlalchemy-sessions
+    title: SQLAlchemy session và transaction
+    levels: [middle, senior]
+    category: Database
+    key_concepts: [session lifecycle, unit of work, lazy loading và N+1, connection pool, async session]
+  - id: py.async.celery-queues
+    title: Task queue với Celery
+    levels: [middle, senior]
+    category: System Design
+    key_concepts: [broker và worker, retry và backoff, idempotent task, acks_late, theo dõi task]
+  - id: py.test.pytest-fixtures
+    title: Kiểm thử với pytest
+    levels: [fresher, junior, middle]
+    category: Backend
+    key_concepts: [fixture và scope, parametrize, mock và monkeypatch, test database, coverage]
+  - id: py.ops.packaging-deployment
+    title: Đóng gói và triển khai ứng dụng Python
+    levels: [fresher, junior, middle]
+    category: DevOps
+    key_concepts: [virtualenv và pin dependency, Dockerfile cho Python, uvicorn và gunicorn workers, biến môi trường, health check]
+scenarios:
+  - id: scn.py.report-export-timeout
+    title: API xuất báo cáo bị timeout với dữ liệu lớn
+    levels: [fresher, junior, middle]
+  - id: scn.py.webhook-ingest
+    title: Nhận webhook từ bên thứ ba không mất và không xử lý trùng
+    levels: [middle, senior]
+  - id: scn.py.multi-tenant-api
+    title: Thiết kế API đa tenant với phân quyền theo tổ chức
+    levels: [senior]
+  - id: scn.py.csv-import-pipeline
+    title: Xây dựng chức năng nhập CSV hàng trăm nghìn dòng
+    levels: [junior, middle]
