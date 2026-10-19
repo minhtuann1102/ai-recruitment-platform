@@ -7,7 +7,7 @@
 | Owner | AIE |
 | Tài liệu liên quan | [BRD](01-brd.md) · [NFR](03-non-functional-requirements.md) · [Kiến trúc L2](../11-architecture-l2-containers.md) · [API contract](../06-api-contract.md) |
 
-> **Cập nhật theo [BRD v0.4](01-brd.md) (2026-10-12).** Phạm vi: **giai đoạn 1 là chat văn bản trong giao diện kiểu cuộc họp, 15 đến 20 phút**; giai đoạn 2 là voice Stretch (mặc định tùy chọn A theo `main`, DE sở hữu); học từ dữ liệu và nhận diện cảm xúc hoãn; **JD là đầu vào của Planner**. Các nhóm A đến I (đã có từ v0.1) thuộc **giai đoạn 1** trừ khi ghi khác; nhóm J đến M là mới. **Nhóm L (voice) và M (học từ dữ liệu) là bản nháp** chờ chốt hạ tầng voice-agent và dữ liệu.
+> **Cập nhật theo [BRD v0.5](01-brd.md) (2026-10-12).** Phạm vi: **giai đoạn 1 là chat văn bản trong giao diện kiểu cuộc họp, 15 đến 20 phút**; giai đoạn 2 là voice Stretch (mặc định tùy chọn A theo `main`, DE sở hữu); học từ dữ liệu và nhận diện cảm xúc hoãn; **JD là đầu vào của Planner**. Các nhóm A đến I (đã có từ v0.1) thuộc **giai đoạn 1** trừ khi ghi khác; nhóm J đến M là mới. **Nhóm L (voice) và M (học từ dữ liệu) là bản nháp** chờ chốt hạ tầng voice-agent và dữ liệu.
 
 ## 1. Cách đọc
 
@@ -152,7 +152,7 @@ Cột **GĐ** là giai đoạn triển khai. **Owner đề xuất** nằm trong 
 |---|---|---|---|---|---|---|
 | FR-AI-110 | **Xin sự đồng ý riêng** trước khi bật camera (giai đoạn 1) và micro (giai đoạn 2). Thông báo nêu rõ mục đích, nơi xử lý (bên thứ ba cho âm thanh) và việc có ghi lại hay không. Lưu thời điểm đồng ý (`media_consent_at`, đề xuất; FSD) | Must | 1 và 2 | Chưa đồng ý thì không gọi API truy cập thiết bị của trình duyệt | BRD BRU-14, D3 | Chưa |
 | FR-AI-111 | **Từ chối hoặc thu hồi** sự đồng ý không làm hỏng phiên: phỏng vấn tiếp tục bằng chat | Must | 1 và 2 | Từ chối camera vẫn hoàn tất được phiên chat | BRD BRU-14 | Chưa |
-| FR-AI-112 | **Video ứng viên chỉ hiển thị cục bộ** trong trình duyệt: không gửi lên server, không lưu. *Diễn giải A-6 cần xác nhận* | Must | 1 | Kiểm tra mạng: không có luồng video đi; không có thành phần xử lý hình ảnh trong ai-service | BRD BRU-17, D5, A-6 | Chưa |
+| FR-AI-112 | **Video ứng viên chỉ hiển thị cục bộ** trong trình duyệt: không gửi lên server, không lưu. *Diễn giải A-6 đã được owner xác nhận (19/10)* | Must | 1 | Kiểm tra mạng: không có luồng video đi; không có thành phần xử lý hình ảnh trong ai-service | BRD BRU-17, D5, A-6 | Chưa |
 | FR-AI-113 | **Âm thanh chỉ gửi tới nhà cung cấp STT đã khai báo**, không ghi lại và không lưu file âm thanh theo mặc định | Must | 2 | Không có file âm thanh trong lưu trữ; nhà cung cấp được nêu trong thông báo đồng ý | BRD BRU-17 | Chưa |
 | FR-AI-114 | Hệ thống **không phân tích cảm xúc, biểu cảm hay giọng điệu** và không dùng dữ liệu hình ảnh hoặc âm thanh để chấm điểm hay viết nhận xét | Must | 1 và 2 | ai-service không nhận video; điểm chỉ dựa trên nội dung câu trả lời | BRD BRU-15 | Mock (đúng theo thiết kế: ai-service chỉ nhận văn bản) |
 
@@ -238,7 +238,7 @@ Số liệu đếm bằng script từ cột "Trạng thái". Khối lượng cò
 3. FR-AI-053: chờ DE bổ sung `resources` vào catalog.
 4. FR-AI-091: cơ chế cấp và xoay vòng `X-Internal-Token` (biến môi trường chung giữa hai service?).
 5. FR-AI-061: `topic_id` của Q&A do DE gán hay AIE gán? Hai bên đồng sở hữu catalog nhưng chưa nói ai gán.
-6. FR-AI-112: xác nhận diễn giải A-6 ("video chỉ hiển thị" là tự xem cục bộ, không gửi đi, không lưu).
+6. ~~FR-AI-112: xác nhận diễn giải A-6~~ **Đã xác nhận 19/10**: "video chỉ hiển thị" là tự xem cục bộ, không gửi đi, không lưu.
 7. FR-AI-001, 003, 035: thời lượng mặc định trong 15 đến 20 phút; công thức số topic và turn cap 16 là đề xuất chưa kiểm chứng.
 8. FR-AI-120: chọn hạ tầng voice-agent cụ thể và khảo sát chất lượng tiếng Việt xen thuật ngữ Anh trước khi quyết định làm giai đoạn 2.
 9. FR-AI-130: có thêm sớm cột `learning_consent_at` (và `media_consent_at`) vào migration `interview_db` của giai đoạn 1 không (FSD)?
