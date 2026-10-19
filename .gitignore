@@ -18,3 +18,14 @@
 # logs
 *.log
 .claude/hooks/.logs/
+
+# test coverage
+**/coverage
+
+# python
+__pycache__/
+*.pyc
+.venv/
+
+# os
+.DS_Store

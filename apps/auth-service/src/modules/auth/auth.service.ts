@@ -15,14 +15,14 @@ import {
   UserGrpcService,
   UserRequestPayload,
   verifyHashed,
-} from '@app/common';
+} from '@ai-recruit/common';
 import {
   BaseService,
   GoogleAuthService,
   MicroserviceName,
   MS_INJECTION_TOKEN,
   RedisService,
-} from '@app/core';
+} from '@ai-recruit/core';
 import { Inject, Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';

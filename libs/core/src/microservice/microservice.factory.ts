@@ -2,7 +2,7 @@ import {
   GRPC_LOADER_OPTIONS,
   kafkaConfiguration,
   rabbitmqConfiguration,
-} from '@app/common';
+} from '@ai-recruit/common';
 import { ConfigService, ConfigType } from '@nestjs/config';
 import {
   ClientGrpc,

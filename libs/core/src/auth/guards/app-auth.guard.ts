@@ -1,4 +1,4 @@
-import { ERROR_RESPONSE, IS_PUBLIC_KEY, ServerException } from '@app/common';
+import { ERROR_RESPONSE, IS_PUBLIC_KEY, ServerException } from '@ai-recruit/common';
 import { ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';

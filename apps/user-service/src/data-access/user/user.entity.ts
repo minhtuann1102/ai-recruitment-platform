@@ -1,5 +1,5 @@
-import { Gender, Role } from '@app/common';
-import { BaseEntity } from '@app/core';
+import { Gender, Role } from '@ai-recruit/common';
+import { BaseEntity } from '@ai-recruit/core';
 import { EntityRepositoryType, Hidden } from '@mikro-orm/core';
 import { Entity, Filter, Property } from '@mikro-orm/decorators/legacy';
 import { UserRepository } from './user.repository';

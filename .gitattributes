@@ -1,0 +1,2 @@
+# Shell scripts run inside Linux containers and Git Bash: keep LF on every OS
+*.sh text eol=lf

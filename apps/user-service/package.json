@@ -1,5 +1,5 @@
 {
-  "name": "user-service",
+  "name": "@ai-recruit/user-service",
   "private": true,
   "version": "1.0.0",
   "description": "Nest TypeScript starter repository",
@@ -41,8 +41,8 @@
     "webpack-node-externals": "^3.0.0"
   },
   "dependencies": {
-    "@app/common": "workspace:*",
-    "@app/core": "workspace:*",
+    "@ai-recruit/common": "workspace:*",
+    "@ai-recruit/core": "workspace:*",
     "@mikro-orm/core": "7.0.10",
     "@mikro-orm/migrations": "7.0.10",
     "@mikro-orm/nestjs": "7.0.1",
