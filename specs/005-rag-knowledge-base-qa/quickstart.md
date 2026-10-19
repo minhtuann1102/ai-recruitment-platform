@@ -18,7 +18,8 @@ cp .env.example .env                                   # §4–6: điền LLM_AP
 python -m pipeline validate --strict
 ```
 
-Kỳ vọng: thoát 0; báo cáo ≥ 200 cặp, mọi topic ≥ 2 cặp, mỗi độ khó ≥ 20%, công khai ≥ 50%, 0 trùng, 0 PII.
+Kỳ vọng: thoát 0; báo cáo ≥ 200 cặp (seed curated + dữ liệu crawl đã `enrich`), mọi topic ≥ 2 cặp, mỗi độ khó ≥ 20%,
+0 trùng, 0 PII.
 Kiểm luật lỗi: `pytest tests -k validator` (fixture thiếu trường, `topic_id` lạ, giấy phép NC, câu trùng, topic thiếu).
 
 ## 1b. Thu thập + dịch (US1, quyết định 2026-10-19)
