@@ -9,7 +9,7 @@ from .qa_record_builder import build_records
 from .qa_seed_loader import SeedError, load_seed_items
 from .qa_seed_validator import ValidationResult, validate_seed
 from .run_report import RunReport
-from .settings import PROCESSED_DIR, SEEDS_DIR, catalog_dir
+from .settings import CRAWLED_DATASET, CURATED_DATASET, ENRICHED_DIR, PROCESSED_DIR, SEEDS_DIR, catalog_dir
 from .topic_catalog_reader import CatalogError, load_topic_categories
 
 EXIT_OK, EXIT_INPUT_ERROR = 0, 1
@@ -19,7 +19,8 @@ PROCESSED_FILE = "interview_qa.jsonl"
 def _load_inputs(args: argparse.Namespace, strict: bool) -> Tuple[Dict[str, str], ValidationResult]:
     dirs = [catalog_dir()] + [Path(d) for d in getattr(args, "extra_catalog", [])]
     topics = load_topic_categories(dirs)
-    return topics, validate_seed(load_seed_items(SEEDS_DIR), topics, strict=strict)
+    items = load_seed_items([(SEEDS_DIR, CURATED_DATASET), (ENRICHED_DIR, CRAWLED_DATASET)])
+    return topics, validate_seed(items, topics, strict=strict)
 
 
 def _print_validation(result: ValidationResult) -> None:
@@ -27,7 +28,8 @@ def _print_validation(result: ValidationResult) -> None:
         print(f"[{issue.level}] {issue.qa_id or '-'} {issue.rule}: {issue.message}")
     report = result.report
     print("== phan bo")
-    print(f"cap: {report['pairs_valid']}/{report['pairs_in']} hop le; cong khai {report['public_pairs']} ({report['public_share']:.0%})")
+    print(f"cap: {report['pairs_valid']}/{report['pairs_in']} hop le; tu nguon ngoai {report['public_pairs']} ({report['public_share']:.0%})")
+    print(f"dataset: {json.dumps(report['by_dataset'], ensure_ascii=False)}")
     print(f"topic du >= 2 cap: {report['topics_covered']}/{report['topics_in_catalog']}")
     for key in ("by_category", "by_difficulty", "by_language", "by_license", "by_source"):
         print(f"{key[3:]}: {json.dumps(report[key], ensure_ascii=False)}")

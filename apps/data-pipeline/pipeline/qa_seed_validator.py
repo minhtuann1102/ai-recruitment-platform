@@ -16,7 +16,6 @@ from .text_cleaning import clean_text, normalize_for_compare
 MIN_PAIRS = 200
 MIN_PAIRS_PER_TOPIC = 2
 MIN_DIFFICULTY_SHARE = 0.2
-MIN_PUBLIC_SHARE = 0.5
 NEAR_DUPLICATE_RATIO = 0.9
 
 
@@ -90,8 +89,6 @@ def _distribution(kept: List[SeedItem], topics: Dict[str, str], strict: bool, is
         share = by_difficulty[difficulty] / total if total else 0.0
         if share < MIN_DIFFICULTY_SHARE:
             issues.append(Issue(None, "difficulty", level, f"{difficulty} chiem {share:.0%} (can >= 20%)"))
-    if public_share < MIN_PUBLIC_SHARE:
-        issues.append(Issue(None, "public_share", level, f"cap cong khai chiem {public_share:.0%} (can >= 50%)"))
 
     return {
         "pairs_valid": total,
@@ -99,6 +96,7 @@ def _distribution(kept: List[SeedItem], topics: Dict[str, str], strict: bool, is
         "public_share": round(public_share, 4),
         "topics_covered": sum(1 for t in topics if by_topic[t] >= MIN_PAIRS_PER_TOPIC),
         "topics_in_catalog": len(topics),
+        "by_dataset": dict(sorted(Counter(it.dataset for it in kept).items())),
         "by_category": dict(sorted(Counter(topics[it.data["topic_id"]] for it in kept).items())),
         "by_difficulty": dict(sorted(by_difficulty.items())),
         "by_language": dict(sorted(Counter(it.data["language"] for it in kept).items())),

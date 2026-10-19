@@ -14,9 +14,12 @@ SEEDS_DIR = APP_DIR / "data" / "seeds" / "interview_qa"
 GOLDEN_SET_PATH = APP_DIR / "data" / "seeds" / "golden_set.json"
 PROCESSED_DIR = APP_DIR / "data" / "processed"
 RAW_DIR = APP_DIR / "data" / "raw"
+# Q&A crawl da dich + gan topic (lenh enrich); gitignore vi repo public (spec 005 Clarifications 2026-10-19)
+ENRICHED_DIR = RAW_DIR / "enriched_qa"
 
 # Dau bo du lieu: chi don ban ghi cung dataset (FR-013)
-DATASET = "de_interview_qa"
+CURATED_DATASET = "de_interview_qa"  # seed commit trong repo
+CRAWLED_DATASET = "de_crawled_qa"  # crawl + dich, khong commit
 SOURCE_TYPE = "interview_qa"
 
 # Chi doc .env cua app, khong lan len .env goc cua monorepo

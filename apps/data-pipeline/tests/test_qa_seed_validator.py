@@ -4,6 +4,7 @@ import pytest
 
 from pipeline.qa_seed_loader import SeedError, SeedItem, load_seed_items
 from pipeline.qa_seed_validator import validate_seed
+from pipeline.settings import CRAWLED_DATASET, CURATED_DATASET
 
 
 def items(*pairs):
@@ -74,12 +75,31 @@ def test_thin_topic_is_warning_then_error_when_strict(make_pair, topics):
     assert (None, "total") in rules_of(strict)
 
 
-def test_public_share_counts_only_non_synthetic(make_pair, topics):
+def test_public_share_is_informational_only(make_pair, topics):
     synthetic = dict(source="self", license="CC-BY-4.0", synthetic=True, reviewed_by="DE", attribution=...)
     pairs = items(make_pair(1), make_pair(2, **synthetic), make_pair(3, **synthetic))
-    result = validate_seed(pairs, topics)
+    result = validate_seed(pairs, topics, strict=True)
     assert result.report["public_pairs"] == 1
-    assert ("public_share" in {i.rule for i in result.issues})
+    assert "public_share" not in {i.rule for i in result.issues}  # FR-003 bo nguong (2026-10-19)
+
+
+def crawled(pair):
+    return SeedItem(data=pair, file="devi-java.json", index=0, dataset=CRAWLED_DATASET)
+
+
+def test_crawled_pair_needs_no_license_or_reviewer(make_pair, topics):
+    pair = make_pair(1, qa_id="cr-devi-java-0a1b2c3d", license="unknown", reviewed_by=..., source="https://github.com/x/y/blob/HEAD/README.md")
+    result = validate_seed([crawled(pair)], topics)
+    assert result.errors == [] and result.valid[0].dataset == CRAWLED_DATASET
+
+
+@pytest.mark.parametrize(
+    "overrides, rule",
+    [({"qa_id": "de-qa-0001"}, "qa_id"), ({"source": "self"}, "provenance"), ({"attribution": ...}, "provenance"), ({"synthetic": True}, "provenance")],
+)
+def test_crawled_pair_still_needs_source_and_attribution(make_pair, topics, overrides, rule):
+    pair = make_pair(1, **{"qa_id": "cr-devi-java-0a1b2c3d", "license": "unknown", **overrides})
+    assert rule in {i.rule for i in validate_seed([crawled(pair)], topics).errors}
 
 
 def test_report_has_per_source_and_per_topic_counts(make_pair, topics):
@@ -103,7 +123,10 @@ def test_report_has_per_source_and_per_topic_counts(make_pair, topics):
 def test_loader_merges_files_in_name_order_and_reports_bad_json(tmp_path, make_pair):
     (tmp_path / "b.json").write_text(json.dumps([make_pair(2)]), encoding="utf-8")
     (tmp_path / "a.json").write_text(json.dumps([make_pair(1)]), encoding="utf-8")
-    assert [it.qa_id for it in load_seed_items(tmp_path)] == ["de-qa-0001", "de-qa-0002"]
+    loaded = load_seed_items([(tmp_path, CURATED_DATASET), (tmp_path / "missing", CRAWLED_DATASET)])
+    assert [it.qa_id for it in loaded] == ["de-qa-0001", "de-qa-0002"]
     (tmp_path / "c.json").write_text("[{", encoding="utf-8")
     with pytest.raises(SeedError, match="c.json"):
-        load_seed_items(tmp_path)
+        load_seed_items([(tmp_path, CURATED_DATASET)])
+    with pytest.raises(SeedError, match="khong co cap"):
+        load_seed_items([(tmp_path / "missing", CURATED_DATASET)])

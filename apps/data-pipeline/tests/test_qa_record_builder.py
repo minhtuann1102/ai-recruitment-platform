@@ -59,6 +59,7 @@ def test_process_skips_bad_pairs_and_output_is_deterministic(tmp_path, monkeypat
     pairs = [make_pair(1), make_pair(2, topic_id="smp.gone.topic"), make_pair(3, topic_id="smp.data.sql-index")]
     (seeds / "seed.json").write_text(json.dumps(pairs, ensure_ascii=False), encoding="utf-8")
     monkeypatch.setattr(offline_commands, "SEEDS_DIR", seeds)
+    monkeypatch.setattr(offline_commands, "ENRICHED_DIR", tmp_path / "no-enriched")
     monkeypatch.setattr(offline_commands, "catalog_dir", lambda: sample_catalog_dir)
     args = argparse.Namespace(command="process", extra_catalog=[])
 

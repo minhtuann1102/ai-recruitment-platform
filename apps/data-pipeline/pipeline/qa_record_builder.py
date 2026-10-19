@@ -8,7 +8,7 @@ from typing import Dict, List, Tuple
 
 from .qa_seed_loader import SeedItem
 from .qa_seed_rules import SELF_SOURCE
-from .settings import DATASET, SOURCE_TYPE
+from .settings import SOURCE_TYPE
 from .text_cleaning import clean_text
 
 
@@ -35,7 +35,7 @@ def _records_for_pair(item: SeedItem, topics: Dict[str, str]) -> List[Dict]:
                 "metadata": {
                     "qa_id": pair["qa_id"],
                     "chunk_type": chunk_type,
-                    "dataset": DATASET,
+                    "dataset": item.dataset,
                     "tags": list(pair.get("tags", [])),
                     "source_url": None if pair["source"] == SELF_SOURCE else pair["source"],
                     "license": pair["license"],
