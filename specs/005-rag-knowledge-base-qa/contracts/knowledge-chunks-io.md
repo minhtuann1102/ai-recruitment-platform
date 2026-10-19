@@ -26,7 +26,7 @@ Hợp đồng chung DE (ghi) ↔ AIE (đọc). Schema bảng: [rag-design.md §3
 | `chunk_type` | `question` \| `qa_pair` |
 | `dataset` | `de_interview_qa` |
 | `tags` | mảng string (có thể rỗng) |
-| `source_url` | URL nguồn hoặc `null` khi synthetic |
+| `source_url` | URL nguồn hoặc `null` khi `source = "self"` |
 | `license` | giá trị `license` của cặp |
 | `synthetic` | bool |
 

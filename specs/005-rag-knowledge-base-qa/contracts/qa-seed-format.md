@@ -60,7 +60,8 @@ Báo cáo phân bố: số cặp theo topic / category / difficulty / language /
   "source": "https://github.com/DevLoversTeam/nodejs-interview-questions",
   "license": "MIT",
   "attribution": "DevLoversTeam/nodejs-interview-questions contributors",
-  "synthetic": false
+  "synthetic": false,
+  "reviewed_by": "<người đã đọc và đối chiếu bản gốc>"
 }
 ```
 
