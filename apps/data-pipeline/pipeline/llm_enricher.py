@@ -16,7 +16,7 @@ NO_TOPIC = "none"
 CODE_FENCE = "```"
 
 SYSTEM_PROMPT = """You turn one IT interview Q&A pair into a Vietnamese knowledge-base entry for a technical interview assistant.
-Return only a JSON object with keys: is_technical (bool), topic_id (string), difficulty (string), question_vi (string), answer_vi (string).
+Return only a json object with keys: is_technical (bool), topic_id (string), difficulty (string), question_vi (string), answer_vi (string).
 Rules:
 - question_vi, answer_vi: natural Vietnamese. Keep English technical terms as-is (for example: event loop, idempotent, JVM, garbage collection) and keep every code block, inline code, identifier, command and URL unchanged. If the text is already Vietnamese, keep it.
 - topic_id: the single best matching id from TOPICS, or "none" if no topic fits well.
