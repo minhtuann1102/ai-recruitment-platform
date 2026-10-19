@@ -102,6 +102,26 @@ def test_crawled_pair_still_needs_source_and_attribution(make_pair, topics, over
     assert rule in {i.rule for i in validate_seed([crawled(pair)], topics).errors}
 
 
+def test_crawled_duplicates_are_warnings_and_curated_pair_wins(make_pair, topics):
+    crawl_fields = dict(license="unknown", reviewed_by=..., source="https://github.com/x/y/blob/HEAD/README.md")
+    curated = SeedItem(data=make_pair(9, question="Docker là gì?"), file="seed.json", index=0)
+    crawl_a = crawled(make_pair(1, qa_id="cr-devi-docker-00000001", question="docker là gì?", **crawl_fields))
+    crawl_b = crawled(make_pair(2, qa_id="cr-lz-docker-00000002", question="Docker  là gì?", **crawl_fields))
+    result = validate_seed([crawl_a, crawl_b, curated], topics)
+    assert result.errors == []
+    assert [it.qa_id for it in result.valid] == ["de-qa-0009"]
+    dups = [i for i in result.issues if i.rule == "duplicate_question"]
+    assert {i.qa_id for i in dups} == {"cr-devi-docker-00000001", "cr-lz-docker-00000002"}
+    assert all(i.level == "warning" and "de-qa-0009" in i.message for i in dups)
+
+
+def test_near_duplicate_check_can_be_skipped(make_pair, topics):
+    a = make_pair(1, question="Sự khác nhau giữa process và thread là gì?")
+    b = make_pair(2, question="Su khac nhau giua process va thread la gi")
+    result = validate_seed(items(a, b), topics, near_duplicates=False)
+    assert "near_duplicate" not in {i.rule for i in result.issues}
+
+
 def test_report_has_per_source_and_per_topic_counts(make_pair, topics):
     synthetic = dict(source="self", license="CC-BY-4.0", synthetic=True, attribution=...)
     pairs = items(

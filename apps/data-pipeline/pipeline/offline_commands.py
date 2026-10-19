@@ -14,18 +14,26 @@ from .topic_catalog_reader import CatalogError, load_topic_categories
 
 EXIT_OK, EXIT_INPUT_ERROR = 0, 1
 PROCESSED_FILE = "interview_qa.jsonl"
+MAX_ERRORS_SHOWN, MAX_WARNINGS_SHOWN = 50, 5
 
 
-def _load_inputs(args: argparse.Namespace, strict: bool) -> Tuple[Dict[str, str], ValidationResult]:
+def _load_inputs(args: argparse.Namespace, strict: bool, near_duplicates: bool) -> Tuple[Dict[str, str], ValidationResult]:
     dirs = [catalog_dir()] + [Path(d) for d in getattr(args, "extra_catalog", [])]
     topics = load_topic_categories(dirs)
     items = load_seed_items([(SEEDS_DIR, CURATED_DATASET), (ENRICHED_DIR, CRAWLED_DATASET)])
-    return topics, validate_seed(items, topics, strict=strict)
+    return topics, validate_seed(items, topics, strict=strict, near_duplicates=near_duplicates)
 
 
 def _print_validation(result: ValidationResult) -> None:
-    for issue in sorted(result.issues, key=lambda i: (i.level, i.qa_id or "", i.rule)):
-        print(f"[{issue.level}] {issue.qa_id or '-'} {issue.rule}: {issue.message}")
+    """In loi theo tung luat (toi da 50 vi du); canh bao chi in so luong + 5 vi du moi luat."""
+    groups: Dict[Tuple[str, str], List] = {}
+    for issue in sorted(result.issues, key=lambda i: (i.level, i.rule, i.qa_id or "")):
+        groups.setdefault((issue.level, issue.rule), []).append(issue)
+    for (level, rule), issues in groups.items():
+        limit = MAX_ERRORS_SHOWN if level == "error" else MAX_WARNINGS_SHOWN
+        print(f"[{level}] {rule}: {len(issues)}")
+        for issue in issues[:limit]:
+            print(f"    {issue.qa_id or '-'}: {issue.message}")
     report = result.report
     print("== phan bo")
     print(f"cap: {report['pairs_valid']}/{report['pairs_in']} hop le; tu nguon ngoai {report['public_pairs']} ({report['public_share']:.0%})")
@@ -39,7 +47,7 @@ def _print_validation(result: ValidationResult) -> None:
 
 def run_validate(args: argparse.Namespace) -> int:
     try:
-        _, result = _load_inputs(args, strict=args.strict)
+        _, result = _load_inputs(args, strict=args.strict, near_duplicates=True)
     except (CatalogError, SeedError) as exc:
         print(f"loi: {exc}", file=sys.stderr)
         return EXIT_INPUT_ERROR
@@ -59,7 +67,7 @@ def rejected_entries(result: ValidationResult) -> List[Dict]:
 
 def process_seed(args: argparse.Namespace) -> Tuple[List[Dict], RunReport]:
     """Doc seed -> loai cap loi kem ly do -> ban ghi da dedup. Dung chung cho process va index."""
-    topics, result = _load_inputs(args, strict=False)
+    topics, result = _load_inputs(args, strict=False, near_duplicates=False)
     records, dropped = build_records(result.valid, topics)
     report = RunReport(
         command=args.command,

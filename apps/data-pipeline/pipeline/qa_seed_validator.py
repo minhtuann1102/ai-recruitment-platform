@@ -1,9 +1,9 @@
 """Luat muc tap + bao cao phan bo cho seed Q&A (FR-005, SC-001, SC-002).
 
 Ket qua `valid` la cac cap dua vao xu ly: qua luat muc cap, khong trung qa_id / cau hoi.
-Cau hoi trung tuyet doi giu cap co qa_id nho hon de ket qua deterministic.
+Cau hoi trung tuyet doi: uu tien seed curated, roi qa_id nho hon (deterministic).
 """
-from collections import Counter
+from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 from difflib import SequenceMatcher
 from typing import Dict, List
@@ -11,6 +11,7 @@ from urllib.parse import urlparse
 
 from .qa_seed_loader import SeedItem
 from .qa_seed_rules import SELF_SOURCE, Issue, check_pair
+from .settings import CURATED_DATASET
 from .text_cleaning import clean_text, normalize_for_compare
 
 MIN_PAIRS = 200
@@ -35,30 +36,39 @@ class ValidationResult:
 
 
 def _drop_duplicates(candidates: List[SeedItem], issues: List[Issue]) -> List[SeedItem]:
+    """Bo cap trung qa_id / cau hoi. Seed curated xep truoc nen luon duoc giu khi trung voi cap crawl.
+
+    Trung giua hai cap curated la loi (nguoi soan phai sua); cap crawl trung (cac nguon chong lan,
+    dich ra cung cau) chi canh bao va bi bo, output van 0 cap trung (SC-002).
+    """
     kept: List[SeedItem] = []
     seen_ids, seen_questions = set(), {}
-    for item in sorted(candidates, key=lambda it: (it.qa_id, it.file, it.index)):
+    order = sorted(candidates, key=lambda it: (it.dataset != CURATED_DATASET, it.qa_id, it.file, it.index))
+    for item in order:
         key = clean_text(item.data["question"]).lower()
+        level = "error" if item.dataset == CURATED_DATASET else "warning"
         if item.qa_id in seen_ids:
-            issues.append(Issue(item.qa_id, "duplicate_qa_id", "error", f"{item.file}#{item.index}: qa_id trung"))
+            issues.append(Issue(item.qa_id, "duplicate_qa_id", level, f"{item.file}#{item.index}: qa_id trung"))
         elif key in seen_questions:
-            issues.append(
-                Issue(item.qa_id, "duplicate_question", "error", f"cau hoi trung voi {seen_questions[key]}")
-            )
+            issues.append(Issue(item.qa_id, "duplicate_question", level, f"cau hoi trung voi {seen_questions[key]}"))
         else:
             seen_ids.add(item.qa_id)
             seen_questions[key] = item.qa_id
             kept.append(item)
-    return kept
+    return sorted(kept, key=lambda it: (it.qa_id, it.file, it.index))
 
 
 def _warn_near_duplicates(kept: List[SeedItem], issues: List[Issue]) -> None:
-    normalized = [(it.qa_id, normalize_for_compare(it.data["question"])) for it in kept]
-    for i, (id_a, text_a) in enumerate(normalized):
-        for id_b, text_b in normalized[i + 1 :]:
-            matcher = SequenceMatcher(None, text_a, text_b)
-            if matcher.quick_ratio() >= NEAR_DUPLICATE_RATIO and matcher.ratio() >= NEAR_DUPLICATE_RATIO:
-                issues.append(Issue(id_b, "near_duplicate", "warning", f"cau hoi gan trung voi {id_a}"))
+    """So cap trong cung topic_id (O(n^2) toan bo mat ~3.5 phut voi ~4.800 cap)."""
+    by_topic: Dict[str, List] = defaultdict(list)
+    for it in kept:
+        by_topic[it.data["topic_id"]].append((it.qa_id, normalize_for_compare(it.data["question"])))
+    for normalized in by_topic.values():
+        for i, (id_a, text_a) in enumerate(normalized):
+            for id_b, text_b in normalized[i + 1 :]:
+                matcher = SequenceMatcher(None, text_a, text_b)
+                if matcher.quick_ratio() >= NEAR_DUPLICATE_RATIO and matcher.ratio() >= NEAR_DUPLICATE_RATIO:
+                    issues.append(Issue(id_b, "near_duplicate", "warning", f"cau hoi gan trung voi {id_a}"))
 
 
 def source_key(source: str) -> str:
@@ -106,7 +116,10 @@ def _distribution(kept: List[SeedItem], topics: Dict[str, str], strict: bool, is
     }
 
 
-def validate_seed(items: List[SeedItem], topics: Dict[str, str], strict: bool = False) -> ValidationResult:
+def validate_seed(
+    items: List[SeedItem], topics: Dict[str, str], strict: bool = False, near_duplicates: bool = True
+) -> ValidationResult:
+    """near_duplicates=False cho process/index: buoc nay chi sinh canh bao, khong doi ket qua."""
     issues: List[Issue] = []
     candidates = []
     for item in items:
@@ -115,6 +128,7 @@ def validate_seed(items: List[SeedItem], topics: Dict[str, str], strict: bool = 
         if not any(i.level == "error" for i in pair_issues):
             candidates.append(item)
     kept = _drop_duplicates(candidates, issues)
-    _warn_near_duplicates(kept, issues)
+    if near_duplicates:
+        _warn_near_duplicates(kept, issues)
     report = {"pairs_in": len(items), **_distribution(kept, topics, strict, issues)}
     return ValidationResult(valid=kept, issues=issues, report=report)
