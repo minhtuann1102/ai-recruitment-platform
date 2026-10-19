@@ -26,11 +26,11 @@ mạng, không key, không DB; research R10). DB/API kiểm chứng bằng [quic
 
 **Purpose**: khung app Python, chạy được trong job `python` của CI (#5)
 
-- [ ] T001 Tạo branch `feat/data-pipeline/qa-offline` từ `main`; tạo thư mục `apps/data-pipeline/{pipeline,crawlers,tests/fixtures,data/seeds/interview_qa}` với `pipeline/__init__.py`, `crawlers/__init__.py`
-- [ ] T002 Tạo `apps/data-pipeline/requirements.txt` pin phiên bản: `openai==2.48.0`, `psycopg[binary]`, `pgvector==0.4.2`, `pyyaml==6.0.3`, `python-dotenv==1.2.1`, `httpx`, `beautifulsoup4`, `playwright` (bản mới nhất ổn định lúc cài, ghi số cụ thể); `requirements-dev.txt` = `-r requirements.txt` + `pytest==8.3.4`
-- [ ] T003 [P] Tạo `apps/data-pipeline/.env.example` đúng bảng Env trong `contracts/pipeline-cli.md` (`LLM_API_KEY` trống, `LLM_BASE_URL`, `EMBEDDING_MODEL=openai/text-embedding-3-small`, `EMBEDDING_DIMENSIONS=1536`, `AI_DB_URL=postgresql://postgres:secret@localhost:5534/ai_db`, `CATALOG_DIR=../ai-service/app/catalog`)
-- [ ] T004 [P] Thêm vào `.gitignore` gốc: `apps/data-pipeline/data/raw/`, `apps/data-pipeline/data/processed/`, `apps/data-pipeline/.venv/`
-- [ ] T005 [P] Tạo `apps/data-pipeline/tests/conftest.py` (fixture đường dẫn `tests/fixtures/`) và `tests/fixtures/catalog/sample_track.yaml` (2 topic khác category + 1 scenario) để test không phụ thuộc catalog thật
+- [X] T001 Tạo branch `feat/data-pipeline/qa-offline` từ `main`; tạo thư mục `apps/data-pipeline/{pipeline,crawlers,tests/fixtures,data/seeds/interview_qa}` với `pipeline/__init__.py`, `crawlers/__init__.py`
+- [X] T002 Tạo `apps/data-pipeline/requirements.txt` pin phiên bản: `openai==2.48.0`, `psycopg[binary]`, `pgvector==0.4.2`, `pyyaml==6.0.3`, `python-dotenv==1.2.1`, `httpx`, `beautifulsoup4`, `playwright==1.64.0`, `psycopg[binary]==3.3.6`, `httpx==0.28.1`, `beautifulsoup4==4.15.0` (bản ổn định 2026-10-19); `requirements-dev.txt` = `-r requirements.txt` + `pytest==8.3.4`
+- [X] T003 [P] Tạo `apps/data-pipeline/.env.example` đúng bảng Env trong `contracts/pipeline-cli.md` (`LLM_API_KEY` trống, `LLM_BASE_URL`, `EMBEDDING_MODEL=openai/text-embedding-3-small`, `EMBEDDING_DIMENSIONS=1536`, `AI_DB_URL=postgresql://postgres:secret@localhost:5534/ai_db`, `CATALOG_DIR=../ai-service/app/catalog`)
+- [X] T004 [P] Thêm vào `.gitignore` gốc: `apps/data-pipeline/data/raw/`, `apps/data-pipeline/data/processed/`, `apps/data-pipeline/.venv/`
+- [X] T005 [P] Tạo `apps/data-pipeline/tests/conftest.py` (fixture đường dẫn `tests/fixtures/`) và `tests/fixtures/catalog/sample_track.yaml` (2 topic khác category + 1 scenario) để test không phụ thuộc catalog thật
 
 ---
 
@@ -38,12 +38,12 @@ mạng, không key, không DB; research R10). DB/API kiểm chứng bằng [quic
 
 **Purpose**: module dùng chung cho US1, US2, US5 và CLI
 
-- [ ] T006 `pipeline/settings.py`: đọc env bằng `python-dotenv` (không bắt buộc key khi import); hàm `canonical_embedding_model(name)` trả phần sau dấu `/` cuối (`openai/text-embedding-3-small` → `text-embedding-3-small`, research R2); hàm `require_index_settings()` báo lỗi rõ khi thiếu `LLM_API_KEY` hoặc `AI_DB_URL`
-- [ ] T007 [P] `pipeline/topic_catalog_reader.py`: đọc mọi `*.yaml` trong `CATALOG_DIR` (+ các thư mục `--extra-catalog`) bằng `pyyaml`, trả `{topic_id: category}` chỉ từ `topics[]`, **bỏ `scenarios[]`** (FR-002); id trùng giữa file → lỗi
-- [ ] T008 [P] `pipeline/text_cleaning.py`: `clean_text()` theo thứ tự NFC → bỏ thẻ HTML (`html.parser`, giữ text) → `html.unescape` → bỏ ký tự điều khiển trừ `\n`, `\t` → gộp khoảng trắng trong dòng, tối đa 1 dòng trống → strip (research R3); `normalize_for_compare()` = lower + bỏ dấu (NFD bỏ combining mark, `đ`→`d`) + bỏ dấu câu, dùng cho trùng gần đúng và golden set
-- [ ] T009 [P] `pipeline/pii_patterns.py`: `find_pii(text)` / `scrub_pii(text)` với regex email và số điện thoại (VN `+84`/`0` + 9–10 số, có/không dấu cách, chấm, gạch); không bắt nhầm số phiên bản, port, năm
-- [ ] T010 `pipeline/__main__.py`: argparse 6 lệnh `validate | process | index | search | eval | crawl` với cờ và mã thoát đúng bảng `contracts/pipeline-cli.md`; lệnh chưa làm in "not implemented" và thoát 2
-- [ ] T011 [P] Tests `tests/test_text_cleaning.py` (chuỗi NFD và NFC cho cùng kết quả; HTML sót bị bỏ; giữ "Thuật toán", "idempotent", code `a<b`), `tests/test_pii_patterns.py`, `tests/test_topic_catalog_reader.py` (scenario id không có trong map)
+- [X] T006 `pipeline/settings.py`: đọc env bằng `python-dotenv` (không bắt buộc key khi import); hàm `canonical_embedding_model(name)` trả phần sau dấu `/` cuối (`openai/text-embedding-3-small` → `text-embedding-3-small`, research R2); hàm `require_index_settings()` báo lỗi rõ khi thiếu `LLM_API_KEY` hoặc `AI_DB_URL`
+- [X] T007 [P] `pipeline/topic_catalog_reader.py`: đọc mọi `*.yaml` trong `CATALOG_DIR` (+ các thư mục `--extra-catalog`) bằng `pyyaml`, trả `{topic_id: category}` chỉ từ `topics[]`, **bỏ `scenarios[]`** (FR-002); id trùng giữa file → lỗi
+- [X] T008 [P] `pipeline/text_cleaning.py`: `clean_text()` theo thứ tự NFC → bỏ thẻ HTML (`html.parser`, giữ text) → `html.unescape` → bỏ ký tự điều khiển trừ `\n`, `\t` → gộp khoảng trắng trong dòng, tối đa 1 dòng trống → strip (research R3); `normalize_for_compare()` = lower + bỏ dấu (NFD bỏ combining mark, `đ`→`d`) + bỏ dấu câu, dùng cho trùng gần đúng và golden set
+- [X] T009 [P] `pipeline/pii_patterns.py`: `find_pii(text)` / `scrub_pii(text)` với regex email và số điện thoại (VN `+84`/`0` + 9–10 số, có/không dấu cách, chấm, gạch); không bắt nhầm số phiên bản, port, năm
+- [X] T010 `pipeline/__main__.py`: argparse 6 lệnh `validate | process | index | search | eval | crawl` với cờ và mã thoát đúng bảng `contracts/pipeline-cli.md`; lệnh chưa làm in "not implemented" và thoát 2
+- [X] T011 [P] Tests `tests/test_text_cleaning.py` (chuỗi NFD và NFC cho cùng kết quả; HTML sót bị bỏ; giữ "Thuật toán", "idempotent", code `a<b`), `tests/test_pii_patterns.py`, `tests/test_topic_catalog_reader.py` (scenario id không có trong map)
 
 **Checkpoint**: `python -m pytest -q` xanh; `python -m pipeline --help` liệt kê 6 lệnh
 

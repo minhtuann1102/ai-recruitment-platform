@@ -1,0 +1,18 @@
+track: sample_track
+title: Sample Track
+id_prefix: smp
+topics:
+  - id: smp.core.event-loop
+    title: Event loop mẫu
+    levels: [junior, middle]
+    category: Backend
+    key_concepts: [a, b, c]
+  - id: smp.data.sql-index
+    title: Index SQL mẫu
+    levels: [middle]
+    category: Database
+    key_concepts: [a, b, c]
+scenarios:
+  - id: scn.smp.cache-stampede
+    title: Kịch bản cache stampede
+    levels: [senior]

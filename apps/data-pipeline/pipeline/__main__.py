@@ -1,0 +1,78 @@
+"""CLI: python -m pipeline <lenh> (chay trong apps/data-pipeline/).
+
+Lenh va ma thoat: specs/005-rag-knowledge-base-qa/contracts/pipeline-cli.md.
+"""
+import argparse
+import sys
+from typing import Callable, Dict, List, Optional
+
+EXIT_OK = 0
+EXIT_INPUT_ERROR = 1  # seed / catalog / golden set loi, hoac crawl thu 0 record
+EXIT_PREFLIGHT_ERROR = 2  # thieu key, DB chua san sang, provider loi; lenh chua lam cung dung ma nay
+EXIT_EMBED_ERRORS = 3  # index xong nhung con ban ghi embed loi
+
+Handler = Callable[[argparse.Namespace], int]
+
+
+def _not_implemented(args: argparse.Namespace) -> int:
+    print(f"lenh '{args.command}' chua duoc hien thuc", file=sys.stderr)
+    return EXIT_PREFLIGHT_ERROR
+
+
+# Moi lenh dang ky handler khi story tuong ung duoc hien thuc (tasks.md)
+HANDLERS: Dict[str, Handler] = {}
+
+
+def _add_catalog_option(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--extra-catalog",
+        action="append",
+        default=[],
+        metavar="DIR",
+        help="them thu muc YAML catalog (chi de soan truoc voi de xuat; nghiem thu khong dung)",
+    )
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(prog="python -m pipeline", description="Data pipeline RAG (spec 005)")
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    validate = sub.add_parser("validate", help="kiem tra seed Q&A (US1)")
+    validate.add_argument("--strict", action="store_true", help="nguong phan bo SC-001/SC-002 thanh loi")
+    _add_catalog_option(validate)
+
+    process = sub.add_parser("process", help="lam sach -> 2 ban ghi/cap -> dedup, offline (US2)")
+    _add_catalog_option(process)
+
+    sub.add_parser("index", help="embed ban ghi moi va ghi vao knowledge_chunks (US3)")
+
+    search = sub.add_parser("search", help="truy hoi chi doc de kiem chung (US3)")
+    search.add_argument("query")
+    search.add_argument("--k", type=int, default=5)
+    search.add_argument("--category")
+    search.add_argument("--difficulty", choices=["easy", "medium", "hard"])
+    search.add_argument("--topic-id")
+    search.add_argument("--chunk-type", choices=["question", "qa_pair"])
+
+    evaluate = sub.add_parser("eval", help="recall@k tren golden set (US4)")
+    evaluate.add_argument("--k", type=int, default=5)
+
+    crawl = sub.add_parser("crawl", help="crawler mau (US5)")
+    crawl.add_argument("source", choices=["react-docs"])
+    crawl.add_argument("--max-pages", type=int, default=60)
+    crawl.add_argument("--delay", type=float, default=1.0, help="giay nghi toi thieu giua hai request")
+    crawl.add_argument("--render", action="store_true", help="dung Playwright cho trang can JavaScript")
+    return parser
+
+
+def main(argv: Optional[List[str]] = None) -> int:
+    # Console Windows mac dinh cp1252: in tieng Viet se loi neu khong ep UTF-8
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8")
+    args = build_parser().parse_args(argv)
+    return HANDLERS.get(args.command, _not_implemented)(args)
+
+
+if __name__ == "__main__":
+    sys.exit(main())
