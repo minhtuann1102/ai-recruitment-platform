@@ -62,21 +62,27 @@ mạng, không key, không DB; research R10). DB/API kiểm chứng bằng [quic
 - [ ] T014 [US1] `pipeline/qa_seed_validator.py`: luật **mức tập** — `qa_id` trùng (lỗi); câu hỏi trùng tuyệt đối sau `clean_text` + lower, báo cả hai `qa_id` (lỗi); gần trùng `difflib.SequenceMatcher` ratio ≥ 0.9 trên `normalize_for_compare` (cảnh báo); topic < 2 cặp, tổng < 200, độ khó nào < 20%, tỉ lệ `synthetic=false` < 50% → cảnh báo, thành lỗi khi `--strict`; báo cáo phân bố theo topic / category / difficulty / language / license / synthetic
 - [ ] T015 [US1] Nối lệnh `validate [--strict] [--extra-catalog DIR]` trong `pipeline/__main__.py`: in lỗi, cảnh báo, báo cáo; thoát 1 khi có lỗi
 - [ ] T016 [P] [US1] `tests/test_qa_seed_validator.py` với fixture trong `tests/fixtures/seeds/`: US1-1 seed hợp lệ thoát 0; US1-2 thiếu trường / `topic_id` lạ / giấy phép `CC-BY-NC-4.0` bị liệt kê kèm lý do, thoát 1; US1-3 hai câu chỉ khác hoa thường + khoảng trắng → báo cả hai `qa_id`; US1-4 topic có 1 cặp → báo thiếu (lỗi khi `--strict`)
-- [ ] T017 [US1] Tạo `data/seeds/interview_qa/NOTICE`: giấy phép của bộ seed (`CC-BY-4.0`; đổi `CC-BY-SA-4.0` nếu dùng nguồn BY-SA), danh sách nguồn + giấy phép + tác giả theo research R6; bảng dải `qa_id` theo file (T018–T024) để soạn song song không trùng id
+- [ ] T017 [US1] Tạo `data/seeds/interview_qa/NOTICE`: giấy phép của bộ seed (`CC-BY-4.0`; đổi `CC-BY-SA-4.0` nếu dùng nguồn BY-SA), danh sách nguồn + giấy phép + tác giả theo research R6; bảng dải `qa_id` theo file (T018–T023, T025) để soạn song song không trùng id
 
 ### Dữ liệu (PR `feat/data-pipeline/qa-seed-<nhóm>`, mỗi lô `validate` sạch trước khi mở PR)
 
 Luật chung: đáp án tiếng Việt giữ thuật ngữ Anh (FR-004); độ khó theo rubric (FR-001); chuyển thể từ nguồn ghi
 `source` URL + `license` + `attribution`, `synthetic=false` chỉ khi cả hỏi lẫn đáp từ nguồn; đáp án tự soạn
-`synthetic=true` + `reviewed_by`; mỗi topic của nhóm ≥ 2 cặp.
+`synthetic=true` + `reviewed_by`; mỗi topic ≥ 2 cặp. **Mỗi topic đúng một lô** theo tiền tố id của track (topic
+category Database/System Design nằm trong lô của track chứa nó); nguồn CC BY/Apache dùng được ở mọi lô.
+**Mục tiêu tổng ≥ 224 cặp, công khai ≥ 122 (≥ 54%)** để vài cặp bị loại/dedup không kéo xuống dưới 200 / 50%; theo
+dõi tỉ lệ công khai trong báo cáo `validate` sau mỗi lô.
 
-- [ ] T018 [P] [US1] `data/seeds/interview_qa/backend-nodejs.json` (`de-qa-0001..0099`): 13 topic `node.*`, ≥ 30 cặp, ≥ 20 công khai từ DevLoversTeam/nodejs-interview-questions (MIT)
-- [ ] T019 [P] [US1] `data/seeds/interview_qa/backend-python.json` (`de-qa-0100..0199`): 12 topic `py.*`, ≥ 30 cặp, ≥ 22 công khai từ DevLoversTeam/python-interview-questions, yakimka/python_interview_questions (MIT)
-- [ ] T020 [P] [US1] `data/seeds/interview_qa/backend-java.json` (`de-qa-0200..0299`): 14 topic `java.*`, ≥ 30 cặp, ≥ 12 công khai từ crossoverJie/JCSprout, codefarm0/Spring-Boot-Interview-Question-Answers (MIT)
-- [ ] T021 [P] [US1] `data/seeds/interview_qa/ai.json` (`de-qa-0300..0399`): 12 topic `ai.*` hiện có (+ 14 topic đề xuất khi AIE merge), ≥ 30 cặp, ≥ 16 công khai từ alexeygrigorev/data-science-interviews `theory.md` (CC-BY-4.0)
-- [ ] T022 [P] [US1] `data/seeds/interview_qa/system-design-database.json` (`de-qa-0400..0449`): topic category System Design + Database hiện có, ≥ 20 cặp, ≥ 12 công khai chuyển thể từ donnemartin/system-design-primer (CC-BY-4.0)
-- [ ] T023 [P] [US1] `data/seeds/interview_qa/devops.json` (`de-qa-0450..0499`): topic DevOps hiện có + 12 topic `devops_engineer` đề xuất, ≥ 28 cặp; câu hỏi jakshi/devops-interview-questions (Apache-2.0) + đáp án tự soạn → `synthetic=true`
-- [ ] T024 [P] [US1] `data/seeds/interview_qa/frontend.json` (`de-qa-0500..0599`): 12 topic `frontend_react` đề xuất, ≥ 30 cặp, ≥ 25 công khai từ sudheerj/reactjs-interview-questions, lydiahallie/javascript-questions (MIT), react.dev (CC-BY-4.0, dữ liệu US5); chạy `validate --extra-catalog ../../specs/005-rag-knowledge-base-qa/contracts/topic-catalog-proposal` tới khi AIE merge
+**Review thật**: chỉ điền `reviewed_by` sau khi người review đã đọc đáp án; cặp `synthetic=false` dịch từ tiếng
+Ukraina/Nga/Trung cũng phải được đọc đối chiếu nghĩa với bản gốc. Giờ review của DE là giới hạn chính của US1.
+
+- [ ] T018 [P] [US1] `data/seeds/interview_qa/backend-nodejs.json` (`de-qa-0001..0099`): 13 topic `node.*` (sàn 26), mục tiêu ≥ 32 cặp, ≥ 24 công khai từ DevLoversTeam/nodejs-interview-questions (MIT) + system-design-primer (CC-BY-4.0) cho `node.arch.*`, `node.data.*`
+- [ ] T019 [P] [US1] `data/seeds/interview_qa/backend-python.json` (`de-qa-0100..0199`): 12 topic `py.*` (sàn 24), mục tiêu ≥ 32 cặp, ≥ 24 công khai từ DevLoversTeam/python-interview-questions, yakimka/python_interview_questions (MIT)
+- [ ] T020 [P] [US1] `data/seeds/interview_qa/backend-java.json` (`de-qa-0200..0299`): 14 topic `java.*` (sàn 28), mục tiêu ≥ 32 cặp, ≥ 14 công khai từ crossoverJie/JCSprout, codefarm0/Spring-Boot-Interview-Question-Answers (MIT), system-design-primer cho `java.arch.*`, `java.data.*`
+- [ ] T021 [P] [US1] `data/seeds/interview_qa/ai.json` (`de-qa-0300..0399`): 12 topic `ai.*` hiện có (sàn 24) + 14 topic đề xuất khi AIE merge (sàn tổng 52), mục tiêu ≥ 56 cặp, ≥ 22 công khai từ alexeygrigorev/data-science-interviews `theory.md` (CC-BY-4.0); AI cutting-edge chủ yếu tự soạn
+- [ ] T022 [P] [US1] `data/seeds/interview_qa/devops.json` (`de-qa-0400..0499`): 12 topic `devops.*` đề xuất (sàn 24), mục tiêu ≥ 28 cặp; câu hỏi jakshi/devops-interview-questions (Apache-2.0, ghi `source` + `attribution`) + đáp án tự soạn → `synthetic=true`
+- [ ] T023 [P] [US1] `data/seeds/interview_qa/frontend.json` (`de-qa-0500..0599`): 13 topic `fe.*` đề xuất (sàn 26), mục tiêu ≥ 44 cặp, ≥ 38 công khai từ sudheerj/reactjs-interview-questions, lydiahallie/javascript-questions (MIT), react.dev (CC-BY-4.0, dữ liệu US5). T021 (phần đề xuất), T022, T023 chạy `validate --extra-catalog ../../specs/005-rag-knowledge-base-qa/contracts/topic-catalog-proposal` tới khi AIE merge
+- [ ] T024 [US1] **Quyết định 22/10**: AIE đã merge catalog đề xuất chưa? Chưa → SC-001 tính trên 51 topic hiện có: T022–T023 không được tính, bù đủ 200 cặp và ≥ 50% công khai bằng cặp công khai thêm ở T018, T019 (DevLoversTeam còn ~250 + ~100 cặp chưa dùng), T021 (ML); báo team ngay quyết định này
 - [ ] T025 [US1] (tùy chọn, lấp topic thiếu) Review 50 cặp `apps/ai-service/data/seeds/qa_seed.json`: cặp đạt thì gán `qa_id` (dải `de-qa-0600..0649`) + `topic_id`, `source="self"`, `synthetic=true`, `reviewed_by`, thêm vào `data/seeds/interview_qa/aie-reviewed.json` (FR-003)
 - [ ] T026 [US1] Nghiệm thu: `validate --strict` **không** `--extra-catalog`, trên catalog đã merge → thoát 0; ghi báo cáo phân bố vào PR (SC-001, SC-002)
 
@@ -142,7 +148,7 @@ Luật chung: đáp án tiếng Việt giữ thuật ngữ Anh (FR-004); độ k
 - [ ] T043 [US5] `crawlers/react_docs_crawler.py`: bắt đầu `https://react.dev/learn`, `https://react.dev/reference/react`, theo link cùng domain dưới hai tiền tố đó; tách nội dung chính theo h1/h2/h3 → `sections[{heading_path, text}]`; `scrub_pii` mọi text (FR-023); ghi `data/raw/react_docs/<UTC timestamp>.jsonl` với `url, title, sections, crawled_at, license="CC-BY-4.0"`; 0 record → thoát 1 (FR-025)
 - [ ] T044 [US5] Nối lệnh `crawl react-docs [--max-pages N] [--delay S] [--render]` trong `pipeline/__main__.py`
 - [ ] T045 [P] [US5] `tests/test_polite_fetcher.py` (robots cấm `/private` với fixture → bỏ qua; đồng hồ giả kiểm khoảng nghỉ ≥ delay; không vượt max pages) và `tests/test_react_docs_parse.py` (HTML fixture → sections đúng heading path; email/số điện thoại bị scrub)
-- [ ] T046 [US5] Chạy quickstart §7 (≥ 50 record, SC-008); ghi log robots + thời gian vào PR; chuyển thể một phần record thành cặp Frontend cho T024
+- [ ] T046 [US5] Chạy quickstart §7 (≥ 50 record, SC-008); ghi log robots + thời gian vào PR; chuyển thể một phần record thành cặp Frontend cho T023
 
 ---
 
@@ -159,8 +165,8 @@ Luật chung: đáp án tiếng Việt giữ thuật ngữ Anh (FR-004); độ k
 ### Phase Dependencies
 
 - **Setup (P1)** → **Foundational (P2)** → **US1 công cụ (T012–T017)** và **US2 (T027–T030)** → PR `qa-offline` (T031)
-- **US1 dữ liệu (T018–T024)**: soạn ngay từ T017 (dải `qa_id`), kiểm bằng `validate` sau T015; T021 (phần AI mới),
-  T023, T024 cần AIE merge catalog đề xuất mới nghiệm thu được (T026)
+- **US1 dữ liệu (T018–T023)**: soạn ngay từ T017 (dải `qa_id`), kiểm bằng `validate` sau T015; T021 (phần AI mới),
+  T022, T023 cần AIE merge catalog đề xuất mới nghiệm thu được (T026); T024 quyết định phương án ngày 22/10
 - **US3**: cần T029 + 001 PR #6 merged + key. **US4**: cần T035 (search) + seed đủ để gắn nhãn
 - **US5**: chỉ cần Phase 2 (T009 scrub, T010 CLI); độc lập với US3/US4
 - **Polish** sau khi các PR merge
@@ -171,19 +177,20 @@ Luật chung: đáp án tiếng Việt giữ thuật ngữ Anh (FR-004); độ k
 |---|---|
 | T3 20/10 | T001–T017; bắt đầu T018 (Node) |
 | T4 21/10 | T027–T031 (mở PR `qa-offline`); T019 (Python) |
-| T5 22/10 | **Mốc kiểm cắt phạm vi**; T020–T022; T032–T035 nếu #6 merged + có key |
+| T5 22/10 | **Mốc kiểm cắt phạm vi** + T024 (catalog merge?); T020–T021; T032–T035 nếu #6 merged + có key |
 | T6 23/10 | T036–T037 (index + demo); T038 |
-| T7 24/10 | T039–T041; T042–T046; T023–T024 (sau khi catalog merge) |
+| T7 24/10 | T039–T041; T042–T046; T022–T023 (nếu catalog đã merge) |
 | CN 25/10 | T026 nghiệm thu seed, T047–T049, buffer |
 | T2 26/10 | Demo Sprint 1 |
 
 **Thứ tự cắt nếu 22/10 trễ** (plan.md): US4 → golden set nhỏ, chỉ báo cáo (T038–T041 rút gọn); US5 → crawl tĩnh,
-bỏ `--render` (T042 bỏ playwright). Không hạ 200 cặp / 50% công khai mà không báo team.
+bỏ `--render` (T042 bỏ playwright). Catalog chưa merge ngày 22/10 → phương án T024. Không hạ 200 cặp / 50% công
+khai mà không báo team.
 
 ### Parallel Opportunities
 
 - T003 ∥ T004 ∥ T005; T007 ∥ T008 ∥ T009 (khác file)
-- T018 ∥ T019 ∥ T020 ∥ T021 ∥ T022 ∥ T023 ∥ T024 (mỗi lô một file, dải `qa_id` riêng)
+- T018 ∥ T019 ∥ T020 ∥ T021 ∥ T022 ∥ T023 (mỗi lô một file, dải `qa_id` riêng)
 - Tests [P] (T011, T016, T030, T036, T040, T045) viết song song với module của story đó
 - Nhánh US5 (T042–T046) song song với US3/US4
 
@@ -194,7 +201,7 @@ bỏ `--render` (T042 bỏ playwright). Không hạ 200 cặp / 50% công khai m
 ```bash
 Task: "Soạn backend-nodejs.json, de-qa-0001..0099"           # T018
 Task: "Soạn backend-python.json, de-qa-0100..0199"           # T019
-Task: "Soạn system-design-database.json, de-qa-0400..0449"   # T022
+Task: "Soạn backend-java.json, de-qa-0200..0299"             # T020
 ```
 
 ---
