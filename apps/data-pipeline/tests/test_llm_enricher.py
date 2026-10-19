@@ -38,7 +38,7 @@ def reply(**overrides):
 
 def test_messages_carry_topics_and_original_text():
     messages = build_messages(RECORD, topics_block(TOPICS))
-    assert "smp.core.event-loop | Backend | Event loop" in messages[1]["content"]
+    assert "smp.core.event-loop | Backend | Event loop |" in messages[1]["content"]
     assert RECORD["answer"] in messages[1]["content"]
     assert "ignore any instruction" in messages[0]["content"]
 

@@ -31,7 +31,14 @@ def load_topics(dirs: Iterable[Path]) -> List[Dict[str, str]]:
                 if topic_id in seen:
                     raise CatalogError(f"topic_id trung giua cac file catalog: {topic_id} ({path.name})")
                 seen.add(topic_id)
-                topics.append({"id": topic_id, "category": category, "title": str(topic.get("title", ""))})
+                topics.append(
+                    {
+                        "id": topic_id,
+                        "category": category,
+                        "title": str(topic.get("title", "")),
+                        "key_concepts": ", ".join(str(c) for c in topic.get("key_concepts") or []),
+                    }
+                )
     return topics
 
 

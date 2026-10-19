@@ -62,8 +62,8 @@ def enrich_all(args: argparse.Namespace, topics: List[Dict], complete: CompleteF
         if args.only and source not in args.only:
             continue
         todo = [r for r in _read_jsonl(path) if r["cid"] not in done]
-        if args.per_source:
-            todo = todo[: args.per_source]
+        if args.per_source:  # mau rai deu ca nguon (cau dau repo thuong la cau co ban nhat)
+            todo = todo[:: max(1, len(todo) // args.per_source)][: args.per_source]
         for start in range(0, len(todo), BATCH_SIZE):
             with ThreadPoolExecutor(max_workers=args.workers) as pool:
                 results = list(pool.map(work, todo[start : start + BATCH_SIZE]))
