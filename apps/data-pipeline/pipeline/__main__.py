@@ -9,6 +9,7 @@ from typing import Callable, Dict, List, Optional
 from .collect_command import run_collect
 from .enrich_command import run_enrich
 from .offline_commands import run_process, run_validate
+from .review_sample_command import run_review_sample
 
 EXIT_OK = 0
 EXIT_INPUT_ERROR = 1  # seed / catalog / golden set loi, hoac crawl thu 0 record
@@ -29,6 +30,7 @@ HANDLERS: Dict[str, Handler] = {
     "process": run_process,
     "collect": run_collect,
     "enrich": run_enrich,
+    "review-sample": run_review_sample,
 }
 
 
@@ -76,6 +78,10 @@ def build_parser() -> argparse.ArgumentParser:
     enrich.add_argument("--per-source", type=int, default=0, metavar="N", help="toi da N cap moi nguon (thu / mau review)")
     enrich.add_argument("--workers", type=int, default=8, help="so loi goi LLM song song")
     enrich.add_argument("--retry-rejected", action="store_true", help="thu lai cap da bi loai (vd sau khi catalog doi)")
+
+    review = sub.add_parser("review-sample", help="lay mau cap da dich de duyet (ban goc canh ban dich)")
+    review.add_argument("--per-source", type=int, default=10, metavar="N")
+    review.add_argument("--seed", type=int, default=2026, help="seed ngau nhien (cung seed -> cung mau)")
 
     crawl = sub.add_parser("crawl", help="crawler mau (US5)")
     crawl.add_argument("source", choices=["react-docs"])
