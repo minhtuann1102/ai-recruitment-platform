@@ -54,6 +54,16 @@ Các quyết định đi kèm:
 - Đổi `AiInterviewClient` phía NestJS (`parseCv`, `start`, `nextTurn`, `finalize`).
 - Migration `interview_db`: thêm `action`, `phase`, `topic_id`, `evaluation`... (FSD xác nhận).
 - `knowledge_chunks` thêm cột `topic_id`.
-- Mock ai-service (`apps/ai-service/app/`) hiện theo contract cũ của ADR-007, cần cập nhật sang contract mới.
+- Mock ai-service (`apps/ai-service/app/`) đã cài đặt contract mới (cv/parse, start, next-turn SSE, finalize); agent bên trong là quy tắc, chưa dùng LLM.
 - Sprint plan: S2-AIE-1 thành policy code, S4-AIE-5 (streaming) từ Stretch thành Bắt buộc.
 - Cần amendment constitution IV (nội dung contract đổi) và V (transcript, CV không vào `knowledge_chunks`).
+
+## Cập nhật 2026-10-19
+
+Đồng bộ với [BRD v0.4](../../ai-service/requirements/01-brd.md) và quyết định của team ngày 15/10:
+
+- **Thêm vai trò JD Parser** (S2-AIE-6): trích `jd_profile` từ JD của job trong application; JD là đầu vào của Planner, **không vào RAG**. Từ 5 thành 6 vai trò agent. Contract thêm `POST /api/jd/parse` và `jd_profile` trong `/api/start`; báo cáo thêm khối `requirements` (S3-AIE-6).
+- **Thời lượng mục tiêu 15 đến 20 phút** *(đề xuất, chờ team duyệt)* thay cho mẫu 30 phút; số topic technical tính theo `max(2, round(số topic gốc × thời lượng / 30))`.
+- **Agent framework:** không dùng cho chat và orchestrator (giữ nguyên quyết định). Chỉ cân nhắc cho lớp giọng nói nếu chọn voice tùy chọn B, qua ADR riêng.
+- **Voice:** mặc định tùy chọn A (DE sở hữu, TTS và STT bấm-để-nói qua `/answer`), ai-service không đổi contract. Tùy chọn B (voice-gateway realtime) cần ADR-009.
+- **RAG:** DE sở hữu đường ghi, AIE sở hữu đường đọc (spec 005).

@@ -21,6 +21,10 @@
 | 9 | Latency & chi phí, chọn model | [08-latency-and-cost.md](08-latency-and-cost.md) |
 | 10 | Đánh giá chất lượng agent | [09-agent-quality-evaluation.md](09-agent-quality-evaluation.md) |
 | 11–12 | Rủi ro, lộ trình 8 tuần | [10-risks-and-8-week-roadmap.md](10-risks-and-8-week-roadmap.md) |
+| 13 | Kiến trúc L2 (C4 Container): container, giao tiếp, dữ liệu, ranh giới tin cậy, triển khai | [11-architecture-l2-containers.md](11-architecture-l2-containers.md) |
+| — | Tài liệu yêu cầu: BRD (v0.4) | [requirements/01-brd.md](requirements/01-brd.md) |
+| — | Tài liệu yêu cầu: FR (75 yêu cầu chức năng) | [requirements/02-functional-requirements.md](requirements/02-functional-requirements.md) |
+| — | Tài liệu yêu cầu: NFR (109 yêu cầu phi chức năng) | [requirements/03-non-functional-requirements.md](requirements/03-non-functional-requirements.md) |
 
 ## Tóm tắt nhanh
 
