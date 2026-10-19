@@ -26,7 +26,7 @@ Trường và luật kiểm tra: [contracts/qa-seed-format.md](contracts/qa-seed
   | Sửa câu hỏi | cả 2 bản ghi thay mới |
   | Đổi `topic_id` / độ khó / tags, nội dung giữ nguyên | cập nhật cột, không embed lại |
   | Xóa cặp | 2 bản ghi bị dọn |
-  | `topic_id` thành mồ côi (catalog đổi) | `validate` lỗi → `index` dừng ở bước seed; sửa seed rồi chạy lại |
+  | `topic_id` thành mồ côi (catalog đổi) hoặc cặp không hợp lệ | `validate` lỗi; `index` loại cặp kèm lý do, dọn 2 bản ghi cũ của nó |
 
 ## Topic (catalog, chỉ đọc)
 

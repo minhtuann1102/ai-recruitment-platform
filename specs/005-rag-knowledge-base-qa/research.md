@@ -27,7 +27,8 @@ Mỗi mục: Decision / Rationale / Alternatives. **VERIFY** = kiểm chứng l�
 - **Provider**: client OpenAI-compatible (`openai` SDK, `base_url` từ `LLM_BASE_URL`), cùng tên env với ai-service
   (`LLM_API_KEY`, `LLM_BASE_URL`, `EMBEDDING_MODEL`, `EMBEDDING_DIMENSIONS`).
 - **VERIFY**: key Thắng chia sẻ gọi được endpoint `/embeddings` của provider đó (OpenRouter hay OpenAI) và trả 1536
-  chiều. Lệnh `index` gọi thử 1 lần trong preflight; lỗi → dừng trước khi ghi (FR-019). Nếu OpenRouter không phục vụ
+  chiều. Lệnh `index` gọi thử 1 lần trước lần ghi đầu tiên, chỉ khi có bản ghi mới (R4);
+  lỗi → dừng trước khi ghi (FR-019). Nếu OpenRouter không phục vụ
   embeddings: đặt `LLM_BASE_URL=https://api.openai.com/v1`, `EMBEDDING_MODEL=text-embedding-3-small`.
 
 ## R3. `content_hash`, chuẩn hóa và dedup
@@ -46,18 +47,24 @@ Mỗi mục: Decision / Rationale / Alternatives. **VERIFY** = kiểm chứng l�
 ## R4. Ghi idempotent và dọn bản cũ (FR-012, FR-013)
 
 - **Decision**: Theo thứ tự trong một lần `index`:
-  1. Preflight (FR-019): có key, kết nối DB được, có extension `vector` và bảng `knowledge_chunks`, embed thử 1 chuỗi.
+  0. `process`: cặp không hợp lệ (thiếu trường, `topic_id` mồ côi, giấy phép sai, PII) bị **loại kèm lý do và chạy
+     tiếp** (US2-1, edge case "catalog đổi"); câu hỏi trùng tuyệt đối giữ cặp có `qa_id` nhỏ hơn (deterministic).
+     `validate` mới là cổng chặn (thoát 1); `process`/`index` không dừng vì seed.
+  1. Preflight (FR-019), không gọi API: có key, kết nối DB được, có extension `vector` và bảng `knowledge_chunks`.
      Lỗi → thoát mã 2, chưa ghi gì.
   2. Tra hash đã có: `SELECT content_hash, metadata->>'dataset' FROM knowledge_chunks WHERE content_hash = ANY(...)`.
-  3. Hash mới → embed theo batch (100) → `INSERT ... ON CONFLICT (content_hash) DO NOTHING`, commit theo batch.
+  3. Hash mới → **chỉ khi có hash mới**: embed thử 1 chuỗi kiểm provider + số chiều (lỗi → thoát 2, chưa ghi gì) →
+     embed theo batch (100) → `INSERT ... ON CONFLICT (content_hash) DO NOTHING`, commit theo batch. Chạy lại không có
+     hash mới → 0 lời gọi embed (SC-004).
   4. Hash đã có, **cùng `dataset`** → `UPDATE` các cột phân loại + `metadata` (đổi `topic_id`/độ khó/tags mà nội dung
      không đổi), không embed lại.
   5. Hash đã có, **khác `dataset`** (vd seed mock của AIE) → bỏ qua, đếm vào "skipped (dataset khác)".
   6. Dọn: `DELETE FROM knowledge_chunks WHERE source_type = 'interview_qa' AND metadata->>'dataset' = :dataset AND
      content_hash <> ALL(:hashes_of_this_run)`. **Chỉ chạy khi lần này 0 embedding lỗi**; có lỗi thì báo
      "cleanup skipped" để không xóa bản cũ khi bản mới chưa vào kho.
-- **Rationale**: SC-004 (chạy lại: 0 bản ghi mới, 0 lời gọi embed) nhờ bước 2. Sửa đáp án → hash `qa_pair` đổi → bản
-  mới vào, bản cũ bị dọn ở bước 6. Xóa cặp khỏi seed → cả hai bản bị dọn. Không đụng dataset khác (FR-013).
+- **Rationale**: SC-004 (chạy lại: 0 bản ghi mới, 0 lời gọi embed) nhờ bước 2–3. Sửa đáp án → hash `qa_pair` đổi →
+  bản mới vào, bản cũ bị dọn ở bước 6. Xóa cặp khỏi seed hoặc cặp bị loại ở bước 0 → cả hai bản bị dọn. Không đụng
+  dataset khác (FR-013).
 - **Đổi model embedding**: S1 chỉ một model; FR-014 lưu tên model là đủ để nhận diện. Embed lại khi đổi model để dành
   cho lúc có quyết định đổi model (constitution IV: cần ADR).
 - **Alternatives**: xóa hết dataset rồi ghi lại → embed lại toàn bộ mỗi lần, vi phạm SC-004. Bị loại.
@@ -76,10 +83,13 @@ Mỗi mục: Decision / Rationale / Alternatives. **VERIFY** = kiểm chứng l�
 
 - **Danh sách giấy phép cho phép (tường minh)**: `CC0-1.0`, `MIT`, `Apache-2.0`, `CC-BY-4.0`, `CC-BY-SA-4.0`,
   `CC-BY-SA-2.5` (MDN, nếu dùng). Mọi giá trị khác, kể cả GPL, `NOASSERTION`, ND/NC → lỗi kiểm tra.
-- **Luật tính 50% công khai**: cặp chỉ tính là công khai khi **cả câu hỏi và đáp án** lấy/chuyển thể từ nguồn có giấy
-  phép trên (`synthetic = false`, có `source` URL + `attribution`). Lấy câu hỏi từ nguồn công khai nhưng tự soạn đáp
-  án → `synthetic = true`, **không tính**. Dịch/chuyển thể sang tiếng Việt vẫn là cặp công khai (giấy phép cho phép
-  sửa đổi).
+- **Nguồn gốc tách khỏi cờ synthetic**: mọi cặp có phần chữ lấy từ ngoài (câu hỏi hoặc đáp án) MUST có `source` URL,
+  `license` thuộc danh sách, `attribution` — kể cả khi đáp án tự soạn (câu hỏi vẫn mang nghĩa vụ ghi công). Cặp tự soạn
+  hoàn toàn: `source = "self"`, `license` = giấy phép của bộ seed (khai trong `NOTICE`). Nhờ vậy 100% cặp có nguồn +
+  giấy phép thuộc danh sách (SC-002).
+- **Luật tính 50% công khai**: chỉ đếm `synthetic = false`, tức **cả câu hỏi và đáp án** lấy/chuyển thể từ nguồn có
+  giấy phép. Câu hỏi công khai + đáp án tự soạn → `synthetic = true`, **không tính**. Dịch/chuyển thể sang tiếng Việt
+  vẫn là cặp công khai (giấy phép cho phép sửa đổi).
 - **Nguồn đã kiểm giấy phép qua GitHub API (2026-10-19)**:
 
   | Nhóm | Nguồn | Giấy phép | Có đáp án | Ghi chú |
@@ -91,18 +101,24 @@ Mỗi mục: Decision / Rationale / Alternatives. **VERIFY** = kiểm chứng l�
   | Backend Python | yakimka/python_interview_questions | MIT | có | tiếng Nga |
   | Backend Node | DevLoversTeam/nodejs-interview-questions | MIT | có | tiếng Ukraina, ~100 cặp |
   | Backend Java | codefarm0/Spring-Boot-Interview-Question-Answers | MIT | có | ít |
+  | Backend Java | crossoverJie/JCSprout | MIT | chuyển thể | tiếng Trung; JVM, concurrency, phân tán |
   | AI (ML cổ điển) | alexeygrigorev/data-science-interviews (`theory.md`) | CC-BY-4.0 | có | |
   | System Design | donnemartin/system-design-primer | CC-BY-4.0 | chuyển thể | |
   | DevOps | jakshi/devops-interview-questions | Apache-2.0 | **không** | đáp án tự soạn → synthetic |
   | Frontend | h5bp/Front-end-Developer-Interview-Questions | MIT | **không** | đáp án tự soạn → synthetic |
 
   **Loại**: bregman-arie/devops-exercises (CC BY-NC-ND 3.0), ByteByteGoHq/system-design-101 (CC BY-NC-ND 4.0),
-  arialdomartini/Back-End-Developer-Interview-Questions (GPL-2.0, ngoài danh sách), các repo không có giấy phép
-  (sudheerj/javascript-interview-questions, chiphuyen/ml-interviews-book, ...).
-- **Khả thi**: Java backend, Database, DevOps, AI cutting-edge gần như phải tự soạn. Đạt ≥ 50% công khai khi lấy
-  > 2 cặp/topic ở Frontend, Python, Node, ML, System Design (~110 cặp). Catalog 90 topic × 2 = 180 cặp tối thiểu.
-- **Giấy phép của seed**: nếu có nội dung CC BY-SA thì cả bộ seed phát hành CC BY-SA 4.0 (tương thích MIT, CC BY,
-  Apache-2.0 khi gộp). File `NOTICE` trong thư mục seed liệt kê nguồn + giấy phép + tác giả.
+  arialdomartini/Back-End-Developer-Interview-Questions (GPL-2.0, ngoài danh sách), Snailclimb/JavaGuide (LICENSE
+  Apache-2.0 nhưng README cấm "搬运" và cảnh báo pháp lý → coi là không rõ), doocs/advanced-java (README: nội dung bản
+  quyền của tác giả khác), các repo không có giấy phép (sudheerj/javascript-interview-questions,
+  chiphuyen/ml-interviews-book, CyC2018/CS-Notes, ...).
+- **Khả thi**: Java backend, Database, DevOps, AI cutting-edge phần lớn phải tự soạn. Ước tính cặp công khai trên
+  catalog **hiện tại** (51 topic, chưa có Frontend): Python ~25–30, Node ~25, ML ~16, System Design ~12, Java ~10–15,
+  Database ~2 → **~90–100, sát ngưỡng 100**. Khi AIE merge track `frontend_react` (+~25–30 từ sudheerj, lydiahallie,
+  react.dev) → ~120, đạt thoải mái. Catalog 90 topic × 2 = 180 cặp tối thiểu; 51 topic × 2 = 102.
+- **Giấy phép của seed**: mặc định `CC-BY-4.0`; nếu có nội dung CC BY-SA thì cả bộ phát hành `CC-BY-SA-4.0` (tương
+  thích MIT, CC BY, Apache-2.0 khi gộp). File `NOTICE` trong thư mục seed khai giấy phép của bộ và liệt kê nguồn +
+  giấy phép + tác giả.
 
 ## R7. Định dạng seed và tổ chức file
 
@@ -132,7 +148,8 @@ Mỗi mục: Decision / Rationale / Alternatives. **VERIFY** = kiểm chứng l�
 
 - **Decision**: File `apps/data-pipeline/data/seeds/golden_set.json` (commit; thay vị trí
   `apps/ai-service/tests/rag_golden.json` ở rag-design §7 vì DE soạn và chạy). Recall@5 của một truy vấn =
-  |nhãn ∩ `qa_id` trong top-5 bản ghi| / |nhãn|; tổng = trung bình. Tìm trên `interview_qa` cả hai `chunk_type`.
+  |nhãn ∩ top-5 `qa_id`| / |nhãn|; tổng = trung bình. Tìm trên `interview_qa` cả hai `chunk_type`, **dedup theo
+  `qa_id` trước khi cắt còn k** (rag-design §4) — nếu không, `question` và `qa_pair` của cùng một cặp chiếm 2/5 chỗ.
   Lệnh `eval` luôn thoát 0 khi chạy xong (FR-021: không chặn CI/merge); thoát khác 0 chỉ khi lỗi cấu hình.
 - **Kiểm tra golden set**: truy vấn trùng nguyên văn (sau chuẩn hóa) một câu hỏi trong seed → lỗi (US4-2); nhãn trỏ
   tới `qa_id` không tồn tại → lỗi; mỗi nhóm (a)–(e) có ≥ 1 truy vấn; `approved_by` rỗng → báo cáo ghi "nhãn chưa duyệt".

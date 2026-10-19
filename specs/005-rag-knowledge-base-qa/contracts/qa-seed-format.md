@@ -1,6 +1,8 @@
 # Contract: Q&A Seed và Golden Set
 
 Lệnh `validate` (FR-005) kiểm mọi luật dưới đây; vi phạm mức **lỗi** → thoát mã 1, mức **cảnh báo** → chỉ in.
+`process`/`index` dùng cùng luật mức cặp nhưng **loại cặp lỗi kèm lý do và chạy tiếp** (US2-1); câu hỏi trùng tuyệt
+đối giữ cặp có `qa_id` nhỏ hơn.
 
 ## Seed: `apps/data-pipeline/data/seeds/interview_qa/*.json`
 
@@ -15,10 +17,10 @@ Mỗi file là một mảng JSON; loader gộp mọi file theo thứ tự tên. 
 | `difficulty` | enum | có | `easy` (rubric 1–2) \| `medium` (3) \| `hard` (4–5) — FR-001 |
 | `language` | enum | có | `vi` \| `en` (FR-004: đáp án tiếng Việt giữ thuật ngữ Anh; tiếng Anh phải gắn `en`) |
 | `tags` | string[] | không | chữ thường, không trùng |
-| `source` | string | có | URL nguồn (cặp công khai) hoặc `"synthetic"` |
-| `license` | string | có | thuộc danh sách cho phép (research R6) hoặc `"synthetic"` |
-| `attribution` | string | khi `synthetic = false` | tác giả / dự án gốc, vd `"sudheerj/reactjs-interview-questions contributors"` |
-| `synthetic` | bool | có | `true` khi đáp án tự soạn (kể cả câu hỏi lấy từ nguồn công khai); `false` chỉ khi cả hỏi lẫn đáp lấy/chuyển thể từ nguồn có giấy phép |
+| `source` | string | có | URL nguồn khi **bất kỳ** phần chữ nào lấy từ ngoài; `"self"` khi tự soạn hoàn toàn |
+| `license` | string | có | thuộc danh sách cho phép (research R6). Cặp ngoài: giấy phép của nguồn; cặp `self`: giấy phép của bộ seed (khai trong `NOTICE`) |
+| `attribution` | string | khi `source ≠ "self"` | tác giả / dự án gốc, vd `"sudheerj/reactjs-interview-questions contributors"` |
+| `synthetic` | bool | có | `true` khi đáp án tự soạn (kể cả câu hỏi lấy từ nguồn công khai); `false` chỉ khi cả hỏi lẫn đáp lấy/chuyển thể từ nguồn có giấy phép. Quota 50% chỉ đếm `false` |
 | `reviewed_by` | string | khi `synthetic = true` | người review đáp án (FR-003) |
 
 `category` **không** có trong seed: suy ra từ catalog theo `topic_id`.
@@ -29,7 +31,7 @@ Mỗi file là một mảng JSON; loader gộp mọi file theo thứ tự tên. 
 |---|---|---|
 | Thiếu trường / sai kiểu / sai enum / sai pattern | lỗi | FR-001 |
 | `topic_id` không thuộc catalog hoặc là id scenario | lỗi | FR-002 |
-| `license` ngoài danh sách cho phép; `synthetic=false` mà `source`/`attribution` trống hoặc `license="synthetic"` | lỗi | FR-003 |
+| `license` ngoài danh sách cho phép; `source ≠ "self"` mà không phải URL hoặc thiếu `attribution`; `synthetic=false` mà `source = "self"` | lỗi | FR-003, SC-002 |
 | `synthetic=true` mà thiếu `reviewed_by` | lỗi | FR-003 |
 | `qa_id` trùng | lỗi | Clarifications |
 | Câu hỏi trùng tuyệt đối (sau làm sạch + lower) — báo cả hai `qa_id` | lỗi | US1-3 |

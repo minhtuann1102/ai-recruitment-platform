@@ -3,9 +3,9 @@
 | Lệnh | Story | Cần DB | Cần key | Việc | Mã thoát |
 |---|---|---|---|---|---|
 | `validate [--strict] [--extra-catalog DIR]` | US1 | không | không | kiểm seed ([qa-seed-format.md](qa-seed-format.md)), in báo cáo phân bố | 0 sạch · 1 có lỗi |
-| `process [--extra-catalog DIR]` | US2 | không | không | `validate` → làm sạch → 2 bản ghi/cặp → dedup → ghi `data/processed/interview_qa.jsonl` (sắp theo `qa_id`, `chunk_type`) | 0 · 1 seed lỗi |
-| `index` | US3 | có | có | `process` → preflight → embed bản ghi mới → ghi / cập nhật / dọn ([knowledge-chunks-io.md](knowledge-chunks-io.md)) | 0 · 1 seed lỗi · 2 preflight lỗi · 3 có embedding lỗi |
-| `search "<query>" [--k 5] [--category C] [--difficulty D] [--topic-id T] [--chunk-type question\|qa_pair]` | US3 | có | có | truy hồi chỉ đọc, in top-k: điểm, `qa_id`, `chunk_type`, `topic_id`, 120 ký tự đầu | 0 · 2 preflight lỗi |
+| `process [--extra-catalog DIR]` | US2 | không | không | đọc seed → loại cặp lỗi kèm lý do → làm sạch → 2 bản ghi/cặp → dedup → ghi `data/processed/interview_qa.jsonl` (sắp theo `qa_id`, `chunk_type`) | 0 · 1 không đọc được seed/catalog |
+| `index` | US3 | có | có | `process` → preflight (không gọi API) → embed thử + embed bản ghi mới (chỉ khi có) → ghi / cập nhật / dọn ([knowledge-chunks-io.md](knowledge-chunks-io.md)) | 0 · 1 như `process` · 2 preflight / embed thử lỗi · 3 có embedding lỗi |
+| `search "<query>" [--k 5] [--category C] [--difficulty D] [--topic-id T] [--chunk-type question\|qa_pair]` | US3 | có | có | truy hồi chỉ đọc, dedup theo `qa_id`, in top-k: điểm, `qa_id`, `chunk_type`, `topic_id`, 120 ký tự đầu | 0 · 2 preflight lỗi |
 | `eval [--k 5]` | US4 | có | có | kiểm golden set → recall@k tổng + theo nhóm + truy vấn trượt + top-3 mỗi truy vấn; ghi báo cáo `data/processed/eval-<timestamp>.json` | 0 khi chạy xong (kể cả < 0.8) · 1 golden set lỗi · 2 preflight lỗi |
 | `crawl react-docs [--max-pages N] [--delay S] [--render]` | US5 | không | không | crawl nguồn mẫu → `data/raw/react_docs/<timestamp>.jsonl` | 0 · 1 thu 0 record |
 

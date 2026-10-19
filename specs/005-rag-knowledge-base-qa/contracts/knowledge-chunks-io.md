@@ -44,6 +44,8 @@ Hợp đồng chung DE (ghi) ↔ AIE (đọc). Schema bảng: [rag-design.md §3
 - **Tìm tương đồng**: `ORDER BY embedding <=> :query_vec LIMIT :k` (cosine), điểm trả về `1 - (embedding <=> :q)`.
   Bộ lọc tùy chọn, ghép `AND`: `source_type`, `metadata->>'chunk_type'`, `category`, `difficulty`, `topic_id`.
   Luôn lọc `embedding_model = '<tên chuẩn>'` và embed truy vấn bằng đúng model đó. `k` mặc định 5.
+  **Dedup theo `qa_id`** (rag-design §4): lấy dư (vd 4k bản ghi), giữ bản ghi điểm cao nhất của mỗi `qa_id`, rồi cắt
+  còn k — để `question` và `qa_pair` của cùng một cặp không chiếm hai chỗ.
 - **Tra đáp án mẫu theo cặp** (FR-018): `WHERE source_type = 'interview_qa' AND metadata->>'qa_id' = :qa_id AND
   metadata->>'chunk_type' = 'qa_pair'` — không qua tìm tương đồng.
 - Mỗi kết quả trả tối thiểu: `id`, `content`, `score`, `metadata.qa_id`, `metadata.chunk_type`, `topic_id`,
