@@ -2,7 +2,7 @@
 
 Kiem: (1) link tuong doi, (2) ID FR/NFR khong trung, (3) moi FR/NFR duoc nhac den deu ton tai,
 (4) moi BR trong BRD co dong truy vet o FR va NFR, (5) so luong trong muc luc khop,
-(6) banner "BRD vX" o FR/NFR/L2 khop phien ban BRD.
+(6) banner "BRD vX" o FR/NFR/L2 khop phien ban BRD, (7) bang tong ket trang thai FR khop so dem.
 
 Chay: python apps/ai-service/scripts/check_docs.py   (thoat 1 neu co loi)
 """
@@ -88,6 +88,24 @@ def check_counts(fr_ids, nfr_ids):
             errors.append(f"README.md: ghi {m.group(1)} {label} nhung co {n}")
 
 
+def check_fr_summary():
+    t = read(FR)
+    counts = {"Mock": 0, "Một phần": 0, "Chưa": 0, "Ngoài": 0}
+    for line in re.findall(r"^\| FR-AI-\d+ \|.*\|$", t, re.M):
+        status = line.rsplit("|", 2)[-2].strip()
+        for k in counts:
+            if status.startswith(k):
+                counts[k] += 1
+    sec = t[t.index("## 14. Tổng kết trạng thái"):]
+    for key, label in (("Mock", "Mock (đã có"), ("Một phần", "Một phần"), ("Chưa", "Chưa làm"), ("Ngoài", "Ngoài phạm vi")):
+        m = re.search(r"^\| " + re.escape(label) + r"[^|]* \| (\d+) \|", sec, re.M)
+        if not m or int(m.group(1)) != counts[key]:
+            errors.append(f"FR bang tong ket: '{label}' ghi {m.group(1) if m else '?'} nhung dem duoc {counts[key]}")
+    m = re.search(r"\| \*\*Tổng\*\* \| \*\*(\d+)\*\*", sec)
+    if not m or int(m.group(1)) != sum(counts.values()):
+        errors.append("FR bang tong ket: tong khong khop")
+
+
 def check_versions():
     m = re.search(r"\| Phiên bản \| (\d+\.\d+)", read(BRD))
     ver = m.group(1)
@@ -103,6 +121,7 @@ def main() -> int:
     fr_ids, nfr_ids = check_ids()
     check_traceability(fr_ids)
     check_counts(fr_ids, nfr_ids)
+    check_fr_summary()
     check_versions()
     for e in errors:
         print("LOI:", e)

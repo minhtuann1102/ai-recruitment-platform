@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field, model_validator
 
 Level = Literal["fresher", "junior", "middle", "senior"]
 # Khop cot knowledge_chunks.category (xem docs/architecture/rag-design.md)
-Category = Literal["Backend", "Database", "System Design", "DevOps", "AI"]
+Category = Literal["Backend", "Frontend", "Database", "System Design", "DevOps", "AI"]
 
 
 class Topic(BaseModel):

@@ -9,7 +9,7 @@ Input của một phiên được gửi lên **interview-service** (public API, 
 
 | Field | Kiểu | Bắt buộc | Giá trị / validate | Ghi chú |
 |---|---|---|---|---|
-| `track` | enum | Có | `java_backend` \| `nodejs_backend` (lấy từ topic catalog) | Map sang `category = "Backend"` của schema hiện có |
+| `track` | enum | Có | `java_backend` \| `python_backend` \| `nodejs_backend` \| `ai_engineer` \| `frontend_react` \| `devops_engineer` (lấy từ topic catalog) | `category` của từng topic lấy từ catalog (Backend, Frontend, Database, System Design, DevOps, AI) |
 | `level` | enum | Có | `fresher` \| `junior` \| `middle` \| `senior` | Quyết định độ khó khởi đầu, khoảng độ khó, rubric, trọng số |
 | `durationMinutes` | int | Không | 15–45, mặc định **30** | Thời gian chia cho các phase theo tỉ lệ (§4.3) |
 | `cvApplicationId` | uuid | Không ¹ | Id một application **của chính ứng viên** trong job-service. Bỏ trống thì lấy CV của lần ứng tuyển gần nhất | Gửi ở endpoint gắn CV sau khi tạo session (§7) |

@@ -40,7 +40,7 @@ CREATE TABLE knowledge_chunks (
   embedding        vector(1536) NOT NULL,
   embedding_model  VARCHAR(50) NOT NULL DEFAULT 'text-embedding-3-small',
   source_type      VARCHAR(30) NOT NULL,       -- interview_qa | textbook (job_description: Stretch, AI không dùng)
-  category         VARCHAR(30),                -- Backend | Database | System Design | DevOps | AI (khớp catalog)
+  category         VARCHAR(30),                -- Backend | Frontend | Database | System Design | DevOps | AI (khớp catalog)
   difficulty       VARCHAR(10),                -- easy | medium | hard (null với textbook)
   topic_id         VARCHAR(80),                -- id trong topic catalog; Q&A luôn có, textbook để NULL
   language         VARCHAR(5),                 -- vi | en
@@ -72,7 +72,9 @@ Mỗi agent có tool riêng (xem ai-integration.md mục 2). Tất cả dùng ch
 
 ### 4.1 Topic catalog (chủ đề theo vị trí phỏng vấn)
 
-Mỗi vị trí phỏng vấn (`track`) có một file YAML trong `apps/ai-service/app/catalog/`: `java_backend`, `python_backend`, `nodejs_backend`, `ai_engineer`. Mỗi topic có `id`, `title`, `levels`, `category`, `key_concepts`; kèm danh sách `scenarios` theo level. Thêm vị trí mới = thêm một file YAML, loader và test tự nhận.
+Mỗi vị trí phỏng vấn (`track`) có một file YAML trong `apps/ai-service/app/catalog/`: `java_backend`, `python_backend`, `nodejs_backend`, `ai_engineer`, `frontend_react`, `devops_engineer` (6 track, 90 topic: Backend 30, AI 25, DevOps 14, Frontend 12, System Design 5, Database 4). Mỗi topic có `id`, `title`, `levels`, `category`, `key_concepts`; kèm danh sách `scenarios` theo level. Thêm vị trí mới = thêm một file YAML, loader và test tự nhận.
+
+**Scenario không có `topic_id` hay `category`** nên phase scenario **không** lấy `interview_qa` theo topic; Evaluator chấm scenario bằng `key_points` chung của scenario, RAG chỉ bổ sung `textbook` lọc theo category của track (AIE xác nhận mục 7 trong spec 005).
 
 Lấy ngữ cảnh cho từng topic: `interview_qa` theo `topic_id` trước (khớp chính xác); dưới 2 kết quả thì bổ sung bằng vector search lọc `category` + `difficulty`, cả `interview_qa` và `textbook`. Pipeline index từ chối chunk có `topic_id` không có trong catalog.
 

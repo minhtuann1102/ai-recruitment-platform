@@ -1,6 +1,3 @@
-# DE PROPOSAL (spec 005) — chưa phải nguồn sự thật.
-# Khi chuyển: cập nhật link tới thư mục này trong docs/architecture/data-pipeline.md §4.
-# Sau khi PR #3 merge và AIE review: chuyển file này vào apps/ai-service/app/catalog/ rồi xóa khỏi specs/.
 track: devops_engineer
 title: DevOps Engineer
 id_prefix: devops

@@ -12,9 +12,9 @@ from .models_cv import (CvEducation, CvExperience, CvFlags, CvParseMetadata, CvP
                         CvProfile, CvProject, CvSkill)
 
 _VOCAB = {
-    "language": ["Java", "Python", "JavaScript", "TypeScript", "Go", "C#", "Kotlin", "PHP", "SQL", "Dart"],
+    "language": ["Java", "Python", "JavaScript", "TypeScript", "Go", "C#", "Kotlin", "PHP", "SQL", "Dart", "HTML", "CSS"],
     "framework": ["Spring Boot", "Spring", "Hibernate", "Django", "FastAPI", "Flask", "NestJS", "Express",
-                  "React", "Next.js", "Vue", "Node.js", "PyTorch", "TensorFlow", "scikit-learn", "LangChain"],
+                  "React", "Next.js", "Redux", "Vue", "Node.js", "PyTorch", "TensorFlow", "scikit-learn", "LangChain"],
     "database": ["PostgreSQL", "MySQL", "MongoDB", "Redis", "Oracle", "Elasticsearch", "pgvector"],
     "devops": ["Docker", "Kubernetes", "Jenkins", "Terraform", "AWS", "GCP", "Azure", "CI/CD", "GitHub Actions"],
     "tool": ["Kafka", "RabbitMQ", "Git", "Postman", "Celery", "BullMQ", "Airflow", "Spark"],
@@ -25,6 +25,8 @@ _TRACK_HINTS = {
     "python_backend": {"python", "django", "fastapi", "flask", "celery"},
     "nodejs_backend": {"node.js", "nestjs", "express", "typescript", "javascript", "bullmq"},
     "ai_engineer": {"pytorch", "tensorflow", "scikit-learn", "langchain", "rag", "llm", "machine learning"},
+    "frontend_react": {"react", "next.js", "typescript", "javascript", "redux", "html", "css", "vue"},
+    "devops_engineer": {"docker", "kubernetes", "terraform", "jenkins", "aws", "gcp", "azure", "ci/cd", "github actions"},
 }
 _RANGE = re.compile(r"(\d{1,2})/(\d{4})\s*[-–—]\s*(?:(\d{1,2})/(\d{4})|(nay|hiện tại|present))", re.I)
 _PROJECT = re.compile(r"^(dự án|project)\s*[:\-]?\s*(.+)$", re.I)
