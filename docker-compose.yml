@@ -19,7 +19,7 @@ services:
     env_file:
       - .env
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U "$${POSTGRES_USER}" -d postgres']
+      test: ['CMD-SHELL', 'pg_isready -h 127.0.0.1 -U "$${POSTGRES_USER}" -d postgres']
       interval: 5s
       timeout: 5s
       retries: 10
@@ -41,6 +41,12 @@ services:
       - ./.docker/volumes/minio_data:/data
     networks:
       - ai-recruit-network
+    healthcheck:
+      # Image has bash but no curl/wget
+      test: ['CMD', 'bash', '-c', '</dev/tcp/127.0.0.1/9000']
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
   # One-shot: waits for MinIO, then creates the bucket if missing.
   storage-init:
