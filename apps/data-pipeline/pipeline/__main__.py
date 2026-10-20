@@ -7,6 +7,7 @@ import sys
 from typing import Callable, Dict, List, Optional
 
 from .collect_command import run_collect
+from .db_commands import run_index, run_search
 from .enrich_command import run_enrich
 from .offline_commands import run_process, run_validate
 from .review_sample_command import run_review_sample
@@ -34,6 +35,8 @@ HANDLERS: Dict[str, Handler] = {
     "review-sample": run_review_sample,
     "review-seed": run_review_seed,
     "approve-seed": run_approve_seed,
+    "index": run_index,
+    "search": run_search,
 }
 
 
@@ -58,7 +61,8 @@ def build_parser() -> argparse.ArgumentParser:
     process = sub.add_parser("process", help="lam sach -> 2 ban ghi/cap -> dedup, offline (US2)")
     _add_catalog_option(process)
 
-    sub.add_parser("index", help="embed ban ghi moi va ghi vao knowledge_chunks (US3)")
+    index = sub.add_parser("index", help="embed ban ghi moi va ghi vao knowledge_chunks (US3)")
+    _add_catalog_option(index)
 
     search = sub.add_parser("search", help="truy hoi chi doc de kiem chung (US3)")
     search.add_argument("query")

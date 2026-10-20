@@ -78,17 +78,21 @@ class IndexSettings:
 
 
 def require_index_settings() -> IndexSettings:
-    """Doc cau hinh cho index / search / eval; thieu key hoac DB thi bao loi ro (FR-019)."""
-    api_key = os.getenv("LLM_API_KEY", "").strip()
+    """Doc cau hinh cho index / search / eval; thieu key hoac DB thi bao loi ro (FR-019).
+
+    Key embedding co the khac key LLM dich (vd DeepSeek de dich, OpenAI de embed): EMBEDDING_API_KEY /
+    EMBEDDING_BASE_URL, khong dat thi dung LLM_API_KEY / LLM_BASE_URL.
+    """
+    api_key = (os.getenv("EMBEDDING_API_KEY", "").strip() or os.getenv("LLM_API_KEY", "").strip())
     db_url = os.getenv("AI_DB_URL", "").strip()
-    missing = [name for name, value in (("LLM_API_KEY", api_key), ("AI_DB_URL", db_url)) if not value]
+    missing = [name for name, value in (("EMBEDDING_API_KEY/LLM_API_KEY", api_key), ("AI_DB_URL", db_url)) if not value]
     if missing:
         raise ConfigError(
             f"thieu bien moi truong: {', '.join(missing)}. Copy .env.example thanh .env va dien gia tri."
         )
     return IndexSettings(
         api_key=api_key,
-        base_url=os.getenv("LLM_BASE_URL", "https://openrouter.ai/api/v1"),
+        base_url=os.getenv("EMBEDDING_BASE_URL", "").strip() or os.getenv("LLM_BASE_URL", "https://openrouter.ai/api/v1"),
         embedding_model=os.getenv("EMBEDDING_MODEL", "openai/text-embedding-3-small"),
         embedding_dimensions=int(os.getenv("EMBEDDING_DIMENSIONS", "1536")),
         db_url=db_url,
