@@ -394,5 +394,24 @@
       "https://www.django-rest-framework.org/api-guide/permissions/",
       "https://api-security.owasp.org/editions/2023/en/0xa1-broken-object-level-authorization"
     ]
+  },
+  {
+    "qa_id": "de-qa-1071",
+    "topic_id": "py.core.gil-concurrency",
+    "question": "Một service Python xử lý tác vụ tính toán viết bằng Python thuần (CPU-bound) dùng ThreadPoolExecutor 8 thread trên máy 8 core, nhưng throughput gần như không tăng so với 1 thread. Giải thích nguyên nhân và so sánh các hướng khắc phục: multiprocessing, đẩy phần nặng xuống code native, và bản build free-threaded của CPython.",
+    "answer": "**Nguyên nhân.** Ở bản build mặc định của CPython, GIL (Global Interpreter Lock) chỉ cho một thread thực thi bytecode Python tại một thời điểm. Với tác vụ CPU-bound viết bằng Python thuần, 8 thread chỉ thay phiên nhau giữ GIL nên không dùng được nhiều core, lại tốn thêm chi phí chuyển đổi giữa các thread. Thread vẫn có ích cho tác vụ I/O-bound vì GIL được nhả trong lúc chờ I/O.\n\n**Các hướng khắc phục và trade-off:**\n\n1. **`multiprocessing` / `ProcessPoolExecutor`:** mỗi process có interpreter và GIL riêng nên chạy song song thật. Đổi lại, khởi tạo process tốn kém, dữ liệu gửi qua lại phải pickle (đắt với object lớn) và bộ nhớ nhân theo số process. Hợp khi mỗi task đủ nặng so với chi phí truyền dữ liệu; mảng lớn có thể chia sẻ qua `multiprocessing.shared_memory` để tránh copy.\n2. **Đẩy phần nặng xuống code native** (NumPy, `hashlib`...): nhiều extension nhả GIL trong lúc chạy vòng lặp native, nên thread lại chạy song song mà không tốn chi phí process. Cần kiểm chứng thư viện thực sự nhả GIL cho đúng thao tác mình dùng.\n3. **Bản build free-threaded (từ CPython 3.13):** bản build tùy chọn không có GIL, cho thread chạy code Python song song. Trade-off: chạy đơn luồng chậm hơn và tốn bộ nhớ hơn; extension chưa khai báo hỗ trợ free threading sẽ khiến interpreter bật lại GIL; code dùng chung dữ liệu phải tự đảm bảo thread-safety. Kiểm tra trạng thái bằng `sys._is_gil_enabled()`.\n\n**Cách chọn.** Profile trước để chắc phần chậm là CPU-bound trong Python. Nếu vector hóa hoặc dùng thư viện native được thì ưu tiên; với code hiện có, `ProcessPoolExecutor` là bước an toàn nhất; chỉ cân nhắc free-threaded khi toàn bộ dependency đã hỗ trợ và đã đo lại hiệu năng.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": ["gil", "multiprocessing", "free-threading", "cpu-bound"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.python.org/3/glossary.html",
+      "https://docs.python.org/3/library/concurrent.futures.html",
+      "https://docs.python.org/3/library/multiprocessing.shared_memory.html",
+      "https://peps.python.org/pep-0703/",
+      "https://docs.python.org/3/howto/free-threading-python.html"
+    ]
   }
 ]
