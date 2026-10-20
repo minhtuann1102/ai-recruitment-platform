@@ -10,6 +10,7 @@ from .collect_command import run_collect
 from .enrich_command import run_enrich
 from .offline_commands import run_process, run_validate
 from .review_sample_command import run_review_sample
+from .seed_review_command import run_approve_seed, run_review_seed
 
 EXIT_OK = 0
 EXIT_INPUT_ERROR = 1  # seed / catalog / golden set loi, hoac crawl thu 0 record
@@ -31,6 +32,8 @@ HANDLERS: Dict[str, Handler] = {
     "collect": run_collect,
     "enrich": run_enrich,
     "review-sample": run_review_sample,
+    "review-seed": run_review_seed,
+    "approve-seed": run_approve_seed,
 }
 
 
@@ -82,6 +85,11 @@ def build_parser() -> argparse.ArgumentParser:
     review = sub.add_parser("review-sample", help="lay mau cap da dich de duyet (ban goc canh ban dich)")
     review.add_argument("--per-source", type=int, default=10, metavar="N")
     review.add_argument("--seed", type=int, default=2026, help="seed ngau nhien (cung seed -> cung mau)")
+
+    sub.add_parser("review-seed", help="xuat cap seed curated chua duyet ra data/processed/seed-review.txt")
+    approve_seed = sub.add_parser("approve-seed", help="dien reviewed_by cho cac cap seed da doc")
+    approve_seed.add_argument("--reviewer", required=True)
+    approve_seed.add_argument("--ids", required=True, help="vd de-qa-1000..1021,de-qa-1050")
 
     crawl = sub.add_parser("crawl", help="crawler mau (US5)")
     crawl.add_argument("source", choices=["react-docs"])
