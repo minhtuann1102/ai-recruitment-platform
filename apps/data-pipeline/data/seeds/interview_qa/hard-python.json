@@ -1,0 +1,398 @@
+[
+  {
+    "qa_id": "de-qa-1050",
+    "topic_id": "py.async.celery-queues",
+    "question": "Hệ thống dùng Celery với Redis làm broker. Task `charge_order` đôi khi chạy hai lần: một lần sau khi worker bị OOM kill, và một số task đặt countdown dài thì bị chạy lặp đi lặp lại. Giải thích cơ chế acknowledgement (mặc định và acks_late), visibility timeout của Redis broker, và thiết kế để an toàn.",
+    "answer": "Ack mặc định: worker ack message ngay trước khi chạy task, nên task đã bắt đầu sẽ không bị chạy lại kể cả khi worker chết giữa chừng — worker crash thì mất việc đó.\n\nacks_late=True: ack sau khi task chạy xong. Worker crash giữa chừng thì message được giao lại, tức at-least-once: task có thể chạy nhiều lần. Lưu ý: kể cả với acks_late, nếu tiến trình con bị kill (OOM, segfault) thì mặc định message vẫn được ack, để tránh vòng lặp message \"độc\" liên tục làm sập worker. Muốn giao lại trong trường hợp này phải bật task_reject_on_worker_lost và chấp nhận rủi ro vòng lặp.\n\nVisibility timeout (Redis): message đã giao mà chưa được ack trong khoảng này (mặc định 1 giờ) sẽ được giao lại cho worker khác. Task có ETA/countdown dài hơn timeout, hoặc task chạy lâu hơn timeout khi dùng acks_late, sẽ bị chạy lặp. Tăng visibility_timeout (trong broker_transport_options) giảm việc lặp nhưng task thật sự bị mất phải chờ lâu hơn mới được giao lại. Lịch xa không nên dùng countdown dài; lưu lịch trong DB và dùng periodic task quét.\n\nThiết kế an toàn:\n1. Task idempotent: khóa theo nghiệp vụ (order_id); trong transaction kiểm tra và ghi trạng thái \"đã charge\" với unique constraint; gọi cổng thanh toán kèm idempotency key nếu cổng hỗ trợ.\n2. Truyền ID thay vì object; task đọc trạng thái mới nhất từ DB khi chạy.\n3. Tách side effect không được lặp (charge) khỏi bước lặp được (gửi email có khóa chống trùng).\n4. Đặt timeout cho I/O và time_limit cho task để task treo không giữ worker mãi.\n5. Dùng acks_late thì đặt worker_prefetch_multiplier = 1 để mỗi process chỉ giữ một task, giảm số task bị giao lại khi crash.\n\nChọn chế độ: mất việc chấp nhận được hơn chạy lặp (vd gửi SMS không quan trọng) thì ack sớm; bắt buộc hoàn thành và task đã idempotent thì acks_late.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": ["celery", "acks-late", "visibility-timeout", "idempotency", "redis"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.celeryq.dev/en/stable/userguide/tasks.html",
+      "https://docs.celeryq.dev/en/stable/getting-started/backends-and-brokers/redis.html",
+      "https://docs.celeryq.dev/en/stable/userguide/optimizing.html"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1051",
+    "topic_id": "py.async.celery-queues",
+    "question": "Một cụm Celery xử lý cả task ngắn (gửi thông báo, vài trăm ms) lẫn task dài (render báo cáo, vài phút). Người dùng phàn nàn thông báo bị trễ hàng phút dù nhiều worker process đang rảnh, và khi dịch vụ email gặp sự cố thì hàng nghìn task retry cùng lúc làm nó sập tiếp. Phân tích nguyên nhân và đề xuất cấu hình.",
+    "answer": "Vì sao task ngắn bị trễ dù có process rảnh: prefetch. Mỗi worker giữ trước tối đa worker_prefetch_multiplier × số concurrency slot message. Một task ngắn có thể đã bị worker A giữ trước nhưng xếp sau task dài đang chạy, trong khi process rảnh ở worker B không lấy được vì message chưa ack vẫn thuộc về A.\n\nKhắc phục:\n1. Tách queue theo thời lượng hoặc mức ưu tiên: route task dài vào queue reports, task ngắn vào queue notifications, chạy hai nhóm worker riêng với concurrency và prefetch riêng. Tài liệu Celery khuyến nghị đây là cách tốt nhất cho hỗn hợp task dài và ngắn.\n2. Worker chạy task dài: worker_prefetch_multiplier = 1, kết hợp acks_late để mỗi process chỉ giữ đúng một task (task phải idempotent). Worker task ngắn có thể để prefetch cao hơn để tăng throughput.\n3. Đặt soft_time_limit/time_limit cho task dài để không chiếm slot vô hạn.\n\nRetry storm khi dịch vụ ngoài lỗi:\n- autoretry_for chỉ với exception tạm thời (timeout, 5xx), không retry lỗi dữ liệu.\n- retry_backoff=True để delay tăng theo cấp số nhân, có trần retry_backoff_max (mặc định 600 giây), cùng retry_jitter (mặc định bật) để delay là giá trị ngẫu nhiên dưới trần, tránh hàng nghìn task cùng retry một lúc.\n- max_retries (mặc định 3) hợp lý; hết lượt thì ghi nhận thất bại vào bảng hoặc queue riêng để xử lý lại có kiểm soát.\n- Thêm rate limit hoặc circuit breaker cho task gọi dịch vụ đó để giảm áp lực khi nó đang phục hồi.\n- Retry có countdown dựa trên ETA; với Redis broker, countdown vượt visibility timeout sẽ gây chạy lặp.\n\nGiám sát: độ dài từng queue, thời gian chờ trước khi chạy, tỉ lệ retry và failure theo task (Flower hoặc exporter Prometheus); cảnh báo khi độ trễ của queue notifications vượt ngưỡng cam kết.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": ["celery", "prefetch", "routing", "retry", "backoff", "jitter"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.celeryq.dev/en/stable/userguide/optimizing.html",
+      "https://docs.celeryq.dev/en/stable/userguide/tasks.html",
+      "https://docs.celeryq.dev/en/stable/getting-started/backends-and-brokers/redis.html"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1052",
+    "topic_id": "py.core.gil-concurrency",
+    "question": "Một service asyncio có p99 latency tăng vọt; bật debug mode của asyncio thì log báo nhiều callback chạy quá 100ms. Code gọi một SDK đồng bộ dùng requests, parse JSON lớn, tính toán thuần Python và một số phép numpy. Phân tích từng loại tác vụ dưới góc độ GIL và event loop, và chọn cách offload phù hợp cho mỗi loại.",
+    "answer": "Nguyên lý: event loop chạy mọi coroutine trên một thread; đoạn code nào không await (I/O đồng bộ, tính toán dài) sẽ chặn toàn bộ request khác trong thời gian đó. Debug mode (PYTHONASYNCIODEBUG=1, -X dev hoặc asyncio.run(debug=True)) log các callback chạy lâu hơn loop.slow_callback_duration (mặc định 100ms) — chính là triệu chứng này.\n\nTheo loại tác vụ:\n1. I/O đồng bộ (requests, driver DB sync, đọc file): thread nhả GIL khi chờ I/O, nên đẩy sang thread là hiệu quả: await asyncio.to_thread(fn) hoặc loop.run_in_executor với ThreadPoolExecutor. Về lâu dài nên thay bằng client async (httpx, aiohttp, asyncpg). Thread pool có kích thước giới hạn; SDK chậm có thể làm cạn pool và tạo nút cổ chai mới.\n2. CPU-bound thuần Python (vòng lặp, parse lớn): GIL chỉ cho một thread chạy bytecode Python tại một thời điểm, nên to_thread không tăng tốc mà còn tranh GIL với event loop. Dùng ProcessPoolExecutor qua run_in_executor để chạy song song thật trên nhiều core, đổi lại chi phí pickle tham số/kết quả và bộ nhớ mỗi process; chỉ đáng khi phần tính toán lớn hơn nhiều chi phí serialize. Việc rất nặng nên đưa ra task queue thay vì làm trong request.\n3. Tính toán trong extension C có nhả GIL (nhiều phép numpy trên mảng lớn, hashlib, nén): to_thread có thể chạy song song thật và rẻ hơn process. Phải đo, vì không phải hàm nào cũng nhả GIL.\n4. Bản free-threaded của CPython (từ 3.13, build tắt GIL): thread chạy song song trên nhiều core, nhưng code đơn luồng chậm hơn một chút, tốn bộ nhớ hơn, và GIL tự bật lại khi import extension chưa hỗ trợ free-threading — kiểm tra thư viện trước khi dựa vào.\n\nThêm: giới hạn kích thước payload; giữ reference tới task tạo bằng create_task vì event loop chỉ giữ weak reference; đo độ trễ event loop như một metric thường trực.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": ["gil", "asyncio", "threading", "multiprocessing", "cpu-bound", "io-bound"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.python.org/3/library/asyncio-dev.html",
+      "https://docs.python.org/3/library/asyncio-task.html",
+      "https://docs.python.org/3/howto/free-threading-python.html"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1053",
+    "topic_id": "py.web.fastapi-async",
+    "question": "Một API FastAPI chuyển toàn bộ endpoint sang `async def` để \"nhanh hơn\", nhưng throughput giảm mạnh và health check timeout dưới tải, trong khi trước đó các endpoint `def` chạy ổn. Giải thích cách FastAPI thực thi `def` và `async def` (kể cả dependency), vì sao điều này xảy ra, và quy tắc chọn.",
+    "answer": "Cách FastAPI chạy:\n- Path operation khai báo bằng def được chạy trong threadpool bên ngoài rồi được await, nên code blocking bên trong không chặn event loop. Dependency khai báo bằng def cũng chạy trong threadpool.\n- async def được gọi trực tiếp trên event loop. Mọi lời gọi blocking bên trong (requests, driver DB đồng bộ, time.sleep, đọc file lớn, tính toán nặng) chặn cả event loop: mọi request khác, kể cả health check, phải chờ.\nVì vậy đổi def sang async def mà vẫn gọi thư viện đồng bộ biến mô hình \"nhiều thread\" thành \"một luồng duy nhất\": throughput sụp, probe timeout, Kubernetes có thể restart pod.\n\nThreadpool cũng có giới hạn: hàm sync được chạy qua AnyIO, limiter mặc định của AnyIO là 40 thread. Endpoint def gọi dịch vụ chậm có thể chiếm hết 40 slot khiến request sau xếp hàng; có thể tăng total_tokens của default thread limiter, đổi lại tốn bộ nhớ và tranh GIL.\n\nQuy tắc chọn:\n1. Thư viện I/O có bản async (httpx.AsyncClient, asyncpg, SQLAlchemy AsyncSession, redis.asyncio): dùng async def và await; hiệu quả nhất với nhiều kết nối đồng thời.\n2. Buộc dùng thư viện đồng bộ: khai báo def, hoặc trong async def bọc lời gọi bằng await run_in_threadpool / asyncio.to_thread.\n3. CPU-bound nặng: không làm trong request; dùng process pool hoặc task queue, thread không giúp vì GIL.\n4. Hàm tiện ích tự viết (không phải endpoint hay dependency) không được FastAPI tự đưa vào threadpool: gọi hàm def blocking từ async def vẫn chặn loop.\n\nChẩn đoán: bật asyncio debug mode để log callback chậm, đo event loop lag, dùng profiler lấy mẫu như py-spy để xem stack đang block, và so số thread đang bận với giới hạn của limiter.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": ["fastapi", "async-await", "threadpool", "event-loop", "anyio"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://fastapi.tiangolo.com/async/",
+      "https://anyio.readthedocs.io/en/stable/threads.html",
+      "https://docs.python.org/3/library/asyncio-dev.html"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1054",
+    "topic_id": "py.web.fastapi-async",
+    "question": "Trong một service FastAPI, mỗi request tạo `httpx.AsyncClient()` và engine SQLAlchemy mới; dependency `get_db` dùng `yield` nhưng có khối `except Exception: pass`; BackgroundTasks dùng lại session của request để ghi log sau khi trả response. Dưới tải xuất hiện cạn kết nối, lỗi bị nuốt mất và lỗi session đã đóng. Hãy thiết kế lại vòng đời tài nguyên.",
+    "answer": "Phân tầng vòng đời:\n1. Tài nguyên dùng chung toàn ứng dụng (engine và connection pool, httpx.AsyncClient, model ML): tạo một lần trong lifespan — async context manager truyền vào FastAPI(lifespan=...), code trước yield chạy lúc startup, sau yield chạy lúc shutdown (đóng client, dispose engine). Tạo client/engine mỗi request làm mất connection pooling, tốn handshake TCP/TLS và dễ vượt max_connections của DB. Khi đã có lifespan, handler on_event startup/shutdown (đã deprecated) không còn được gọi; lifespan chỉ chạy cho app chính, không chạy cho sub-app được mount.\n2. Tài nguyên theo request (session DB): dependency có yield với try/finally đóng session.\n3. Việc chạy sau response (BackgroundTasks): không dùng lại session của request mà tự mở session mới trong task. Thứ tự giữa exit code của yield dependency và background task từng thay đổi qua các phiên bản FastAPI; hiện có Depends(..., scope=\"function\") để exit code chạy trước khi gửi response, còn scope mặc định \"request\" chạy sau. Đừng để code phụ thuộc vào thứ tự đó.\n\nException trong yield dependency: dependency nhận được exception phát sinh sau yield (từ endpoint hay dependency khác). except mà không raise lại là nuốt lỗi: client nhận 500 còn server không có log. Quy tắc: rollback rồi raise lại (hoặc raise HTTPException khác), dọn dẹp trong finally.\n\n```python\nasync def get_db(request: Request):\n    async with request.app.state.sessionmaker() as session:\n        try:\n            yield session\n        except Exception:\n            await session.rollback()\n            raise\n```\nsessionmaker và engine được tạo trong lifespan và gắn vào app.state.\n\nThêm: background task chỉ hợp với việc nhẹ, chấp nhận mất khi process restart; việc cần bền vững (email, báo cáo) nên đưa vào task queue. Đặt timeout và giới hạn pool cho httpx client để dịch vụ ngoài chậm không giữ kết nối vô hạn.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": [
+      "fastapi",
+      "lifespan",
+      "dependency-injection",
+      "background-tasks",
+      "connection-pool"
+    ],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://fastapi.tiangolo.com/advanced/events/",
+      "https://fastapi.tiangolo.com/tutorial/dependencies/dependencies-with-yield/"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1055",
+    "topic_id": "py.data.sqlalchemy-sessions",
+    "question": "Khi chuyển một service sang SQLAlchemy 2.0 `AsyncSession`, team gặp lỗi `MissingGreenlet` khi truy cập `order.items` sau khi query, lỗi tương tự khi đọc thuộc tính object ngay sau `commit()`, và dữ liệu sai lệch khi dùng chung một session trong `asyncio.gather`. Giải thích nguyên nhân từng lỗi và cách thiết kế session lifecycle cho ứng dụng async.",
+    "answer": "Gốc chung: với asyncio, mọi I/O phải là một điểm await tường minh. ORM đồng bộ quen với I/O ngầm khi truy cập thuộc tính — lazy load relationship, nạp lại thuộc tính đã expire. Trong AsyncSession, truy cập thuộc tính là thao tác đồng bộ không await được, nên SQLAlchemy không thể phát SQL ở đó và báo lỗi (MissingGreenlet).\n\n1. order.items lazy load: relationship mặc định nạp khi truy cập lần đầu. Sửa bằng eager load tường minh trong query: selectinload(Order.items) cho collection (một SELECT phụ với IN theo khóa chính, chia batch), joinedload cho many-to-one. Khi thật sự cần nạp muộn, dùng AsyncAttrs và await order.awaitable_attrs.items. Đặt lazy=\"raise\" hoặc raiseload(\"*\") để mọi lazy load ngoài kế hoạch báo lỗi sớm, đồng thời chặn N+1.\n2. Sau commit(): mặc định expire_on_commit=True, mọi object bị expire và nạp lại ở lần truy cập sau — lại là I/O ngầm. Tài liệu khuyên với asyncio đặt expire_on_commit=False trên async_sessionmaker; đổi lại object có thể cũ hơn DB, cần await session.refresh(obj) khi muốn giá trị mới.\n3. gather với một session: Session/AsyncSession đại diện cho một transaction, có state, không an toàn cho nhiều task đồng thời. Mỗi task dùng session riêng (mỗi session lấy connection riêng từ pool), hoặc chạy tuần tự trong cùng session.\n\nThiết kế lifecycle:\n- Một AsyncEngine cho cả process: tạo lúc khởi động, await engine.dispose() khi tắt; không dùng chung engine (với pool mặc định) giữa các event loop khác nhau.\n- Một session cho mỗi request hoặc unit of work, mở/đóng bằng async with. Lifecycle quản lý ở tầng ngoài (dependency, middleware); hàm truy cập dữ liệu nhận session làm tham số.\n- Transaction ngắn; không gọi HTTP bên ngoài khi đang giữ transaction.\n- Tầng service trả về DTO/schema đã nạp đủ dữ liệu, không đẩy ORM object \"nửa nạp\" ra tầng serialize.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": [
+      "sqlalchemy",
+      "asyncsession",
+      "lazy-loading",
+      "session-lifecycle",
+      "asyncio"
+    ],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html",
+      "https://docs.sqlalchemy.org/en/20/orm/session_basics.html",
+      "https://docs.sqlalchemy.org/en/20/orm/queryguide/relationships.html"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1056",
+    "topic_id": "py.data.sqlalchemy-sessions",
+    "question": "Một API dùng SQLAlchemy (sync) chạy gunicorn 8 worker trên 4 pod. Endpoint danh sách khách hàng kèm đơn hàng sinh hàng trăm query mỗi request; khi tải tăng thì DB báo \"too many connections\", và ứng dụng thỉnh thoảng gặp lỗi kết nối đã bị đóng sau thời gian idle. Phân tích và đề xuất cấu hình loading strategy và connection pool.",
+    "answer": "N+1: relationship mặc định lazy load, nên lặp qua N khách hàng rồi truy cập customer.orders phát thêm N câu SELECT. Sửa ngay trong query:\n- Collection (one-to-many, many-to-many): selectinload — một SELECT phụ với IN theo khóa chính của parent (chia batch), không nhân bản dòng; tài liệu SQLAlchemy coi đây thường là lựa chọn tốt nhất cho collection.\n- Many-to-one: joinedload, thêm JOIN vào câu chính. joinedload một collection sẽ nhân dòng parent; bản 2.0 bắt buộc gọi .unique() trên result, và với collection lớn còn tốn băng thông.\n- Phân trang trước rồi mới eager load; chỉ lấy cột cần (load_only) cho danh sách lớn.\n- Phát hiện sớm: raiseload(\"*\") trong test/dev, hoặc đếm số query mỗi request trong test.\n\nCạn kết nối: mỗi process có pool riêng. QueuePool mặc định pool_size=5, max_overflow=10, tức tối đa 15 kết nối mỗi process; 8 worker × 4 pod × 15 = 480 kết nối tiềm năng, dễ vượt max_connections. Cấu hình:\n- Tính ngược từ ngân sách kết nối của DB, giảm pool_size và max_overflow mỗi process, đặt pool_timeout để fail nhanh thay vì treo; số process lớn thì cân nhắc pooler phía DB như PgBouncer.\n- Không chia sẻ connection qua fork: nếu engine được tạo trước khi gunicorn fork (preload), gọi engine.dispose(close=False) trong process con để mỗi worker có pool mới, tránh hai process dùng chung một socket.\n\nKết nối chết sau idle (firewall, proxy hoặc DB cắt kết nối rảnh):\n- pool_pre_ping=True: ping nhẹ trước mỗi lần checkout và thay kết nối chết; tốn thêm một round-trip, không cứu được kết nối đứt giữa transaction.\n- pool_recycle nhỏ hơn timeout idle của hạ tầng để thay kết nối quá tuổi khi checkout.\n\nTheo dõi: số kết nối đang dùng và đang chờ của pool, thời gian chờ checkout, số query mỗi request.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": ["sqlalchemy", "n-plus-one", "eager-loading", "connection-pool", "gunicorn"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.sqlalchemy.org/en/20/orm/queryguide/relationships.html",
+      "https://docs.sqlalchemy.org/en/20/core/pooling.html"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1057",
+    "topic_id": "py.web.django-orm",
+    "question": "Trong Django, view đổi điểm thưởng làm: đọc `wallet.points`, kiểm tra đủ điểm, trừ rồi `save()`, sau đó gửi email và đẩy task Celery tạo voucher. Dưới tải xuất hiện điểm âm, đôi khi task Celery chạy mà không thấy bản ghi vừa tạo, hoặc email đã gửi dù giao dịch bị rollback. Phân tích và viết lại cho đúng.",
+    "answer": "Vấn đề 1 — race condition đọc-sửa-ghi: hai request cùng đọc 100 điểm, cùng thấy đủ, cùng save; giá trị ghi sau dựa trên bản đọc cũ nên số dư sai hoặc âm.\nCách sửa:\n- Cập nhật nguyên tử có điều kiện: Wallet.objects.filter(pk=wallet_id, points__gte=cost).update(points=F(\"points\") - cost); update() trả về số dòng được cập nhật, bằng 0 nghĩa là không đủ điểm. F() để DB tính trên giá trị hiện tại lúc UPDATE thay vì giá trị Python đã đọc. Lưu ý: gán F() vào field rồi save() thì biểu thức còn trên instance và áp dụng lại ở lần save sau, cần refresh_from_db().\n- Khóa dòng: trong transaction.atomic(), Wallet.objects.select_for_update().get(pk=wallet_id) khóa tới cuối transaction; hợp khi logic kiểm tra phức tạp. Đánh giá select_for_update ngoài transaction là lỗi TransactionManagementError; nowait hoặc skip_locked khi không muốn chờ.\n- Thêm CheckConstraint points >= 0 làm lưới an toàn.\n\nVấn đề 2 — side effect chạy trước khi commit: email và task được gửi ngay trong transaction. Rollback thì email đã đi; worker Celery nhận task trước khi commit thì không thấy bản ghi mới.\nSửa: transaction.on_commit(lambda: create_voucher.delay(redemption.id)) — callback chỉ chạy sau khi commit thành công và bị hủy nếu rollback. Lưu ý: ở autocommit (ngoài atomic) on_commit chạy ngay; callback lỗi không rollback được transaction đã commit, robust=True giúp một callback lỗi không chặn các callback sau; vẫn còn cửa sổ commit xong nhưng process chết trước khi gửi task, nên dữ liệu không được phép mất thì dùng outbox.\n\nThêm:\n- Không bắt exception bên trong atomic rồi chạy tiếp, vì Django dựa vào exception để quyết định rollback; bắt bên ngoài, hoặc dùng atomic lồng nhau (savepoint) cho phần được phép lỗi.\n- ATOMIC_REQUESTS bọc mỗi view trong transaction: tiện nhưng có chi phí và kéo dài transaction cả view; ưu tiên atomic quanh đúng đoạn cần.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": [
+      "django",
+      "transaction",
+      "select-for-update",
+      "f-expression",
+      "on-commit",
+      "race-condition"
+    ],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.djangoproject.com/en/5.2/topics/db/transactions/",
+      "https://docs.djangoproject.com/en/5.2/ref/models/querysets/",
+      "https://docs.djangoproject.com/en/5.2/ref/models/expressions/"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1058",
+    "topic_id": "py.web.django-orm",
+    "question": "Endpoint xuất 200.000 đơn hàng kèm khách hàng và các dòng sản phẩm trong Django chạy rất chậm, tốn vài GB RAM, và log cho thấy hàng nghìn query giống nhau. Phân tích nguyên nhân liên quan tới lazy QuerySet, N+1 và cache của QuerySet, rồi viết lại truy vấn cho hiệu quả.",
+    "answer": "Nguyên nhân:\n1. N+1: QuerySet lazy và quan hệ chỉ nạp khi truy cập. Vòng lặp qua đơn hàng gọi order.customer và order.items.all() sinh thêm query cho mỗi đơn.\n2. Cache của QuerySet: khi được đánh giá (lặp, list(), len()), QuerySet giữ toàn bộ model instance trong bộ nhớ để tái sử dụng; 200.000 đơn cộng các dòng sản phẩm là vài GB.\n3. Đánh giá thừa: len(qs) nạp mọi dòng chỉ để đếm; if qs: nạp cả tập chỉ để kiểm tra tồn tại.\n4. Defer sai: only()/defer() rồi lại truy cập field đã bỏ, phát query riêng cho từng object.\n\nViết lại:\n- select_related(\"customer\") cho quan hệ đơn trị (foreign key, one-to-one): một JOIN.\n- prefetch_related cho quan hệ nhiều: một query riêng rồi ghép trong Python. Dùng Prefetch(\"items\", queryset=OrderItem.objects.select_related(\"product\").only(...), to_attr=\"item_list\") để lọc, chọn cột và nhận thẳng list; to_attr được khuyến nghị khi lọc prefetch.\n- Đếm và kiểm tra tồn tại bằng count() và exists() thay vì len() hay bool.\n- Xử lý theo luồng: qs.iterator(chunk_size=...) không giữ cache nên bộ nhớ ổn định; prefetch_related chỉ có hiệu lực với iterator() khi truyền chunk_size. Ghi output từng phần (StreamingHttpResponse hoặc ghi file theo chunk) thay vì dựng một list lớn.\n- Chỉ cần dữ liệu thô thì values()/values_list() nhẹ hơn model instance.\n- Kiểm tra index cho cột lọc và sắp xếp; xem kế hoạch bằng qs.explain() hoặc Django Debug Toolbar.\n\nExport rất lớn: chạy nền bằng task queue rồi trả link tải, không giữ request HTTP nhiều phút; cân nhắc đọc từ replica để không ảnh hưởng DB chính.\n\nChống tái phát: dùng assertNumQueries trong test để phát hiện N+1 khi ai đó thêm truy cập quan hệ mới vào serializer.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": [
+      "django",
+      "queryset",
+      "n-plus-one",
+      "prefetch-related",
+      "select-related",
+      "memory"
+    ],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": ["https://docs.djangoproject.com/en/5.2/ref/models/querysets/"]
+  },
+  {
+    "qa_id": "de-qa-1059",
+    "topic_id": "py.core.decorators-context",
+    "question": "Bạn viết decorator `@retry(times=3)` dùng cho cả hàm đồng bộ lẫn `async def`. Phiên bản đầu dùng một wrapper thường bọc try/except quanh `func(*args, **kwargs)`: với hàm async nó không retry lần nào, còn framework (FastAPI, pytest) đọc sai chữ ký và không nhận ra hàm là coroutine function. Giải thích nguyên nhân và cách viết decorator đúng.",
+    "answer": "Vì sao không retry: gọi hàm async def chỉ tạo coroutine object, chưa chạy thân hàm nên không ném lỗi. Wrapper đồng bộ gọi func(...) thành công ngay và trả coroutine ra ngoài; exception chỉ xảy ra khi coroutine được await, lúc đó đã ra khỏi try/except. Ngoài ra wrapper là def nên inspect.iscoroutinefunction(wrapper) trả False; framework dựa vào kiểm tra này (FastAPI quyết định chạy trên event loop hay threadpool) sẽ xử lý sai.\n\nVì sao sai chữ ký: thiếu functools.wraps thì wrapper mang __name__, __qualname__, __doc__, __annotations__ của chính nó. wraps sao chép các thuộc tính đó và thêm __wrapped__ trỏ về hàm gốc; inspect.signature mặc định đi theo __wrapped__, nên framework đọc tham số (dependency, fixture) thấy đúng chữ ký gốc.\n\nCách viết: decorator factory rẽ nhánh theo loại hàm.\n\n```python\ndef retry(times=3, exceptions=(Exception,)):\n    def deco(func):\n        if inspect.iscoroutinefunction(func):\n            @functools.wraps(func)\n            async def wrapper(*args, **kwargs):\n                for attempt in range(1, times + 1):\n                    try:\n                        return await func(*args, **kwargs)\n                    except exceptions:\n                        if attempt == times:\n                            raise\n            return wrapper\n        ...  # nhánh sync: cùng cấu trúc với def wrapper\n    return deco\n```\nBackoff ở nhánh async dùng await asyncio.sleep; dùng time.sleep ở đây sẽ chặn event loop.\n\nLưu ý khác:\n- @retry khác @retry(): factory phải được gọi; muốn hỗ trợ cả hai thì kiểm tra đối số đầu có phải callable.\n- Thứ tự xếp chồng: decorator gần hàm nhất được áp dụng trước; đặt retry trong hay ngoài cache/timeout cho hành vi khác nhau.\n- Chỉ retry exception tạm thời và thao tác idempotent; ghi log mỗi lần thử.\n- Generator và async generator cần nhánh riêng; không hỗ trợ thì raise TypeError sớm thay vì sai âm thầm.\n- Hàm sync trả về coroutine có thể đánh dấu bằng inspect.markcoroutinefunction (Python 3.12+) để được nhận diện là coroutine function.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": ["decorator", "functools-wraps", "asyncio", "coroutine", "retry"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.python.org/3/library/functools.html",
+      "https://docs.python.org/3/library/inspect.html",
+      "https://fastapi.tiangolo.com/async/"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1060",
+    "topic_id": "py.core.decorators-context",
+    "question": "Code review phát hiện một context manager viết bằng `@contextmanager` để giữ kết nối và lock: `yield` không nằm trong try/finally, có khối `except Exception: log(...)` không raise lại, và một hàm khác mở số lượng file/kết nối thay đổi theo input bằng các `with` lồng nhau viết tay. Phân tích các lỗi về ngữ nghĩa exception và giải phóng tài nguyên, và cách sửa.",
+    "answer": "1. yield không có try/finally: khi khối with ném exception, contextlib ném lại exception đó vào generator ngay tại yield. Không có finally thì code giải phóng sau yield không chạy: lock không được nhả, kết nối bị rò. Mẫu đúng: lấy tài nguyên → try: yield tài nguyên → finally: giải phóng.\n\n2. Bắt exception mà không raise lại: nếu generator bắt exception rồi kết thúc bình thường, with coi như exception đã được xử lý và chạy tiếp lệnh sau with. Lỗi bị nuốt âm thầm và code phía sau chạy trên trạng thái sai. Chỉ muốn log hay rollback thì phải raise lại. Với context manager dạng class cũng vậy: __exit__ trả giá trị truthy nghĩa là suppress exception; chỉ trả True khi chủ đích nuốt một loại lỗi cụ thể (như contextlib.suppress), mặc định trả None.\n\n3. Số tài nguyên thay đổi: with lồng nhau viết tay không xử lý được N động, và khi mở tài nguyên thứ k thất bại thì k-1 tài nguyên trước phải được đóng. ExitStack giải quyết: enter_context(cm) cho từng tài nguyên, callback(fn, ...) cho hàm dọn dẹp bất kỳ; khi thoát, mọi callback chạy theo thứ tự ngược lúc đăng ký, kể cả khi lỗi giữa chừng. pop_all() chuyển quyền sở hữu ra ngoài khi khởi tạo thành công (vd factory trả về object giữ các tài nguyên). Phía async có AsyncExitStack (enter_async_context, await aclose()) và @asynccontextmanager.\n\n4. Điểm tinh tế khác:\n- Context manager từ @contextmanager là single-use; dùng lại cùng instance báo RuntimeError, nên tạo mới ngay trong header của with.\n- Nó cũng dùng được làm decorator (ContextDecorator), mỗi lần gọi tạo generator mới.\n- KeyboardInterrupt hay GeneratorExit kế thừa BaseException nên except Exception không bắt; finally vẫn là nơi dọn dẹp đáng tin cậy.\n- Với lock, ưu tiên with lock: trực tiếp; bọc thêm logic thì vẫn cần finally.\n\nKiểm thử: viết test ném exception bên trong with để khẳng định tài nguyên được giải phóng và exception vẫn lan ra ngoài.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": [
+      "context-manager",
+      "contextlib",
+      "exitstack",
+      "exception-handling",
+      "resource-cleanup"
+    ],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": ["https://docs.python.org/3/library/contextlib.html"]
+  },
+  {
+    "qa_id": "de-qa-1061",
+    "topic_id": "py.core.generators-iterators",
+    "question": "Một hàm generator mở cursor DB (hoặc file) bên trong `with` rồi `yield` từng dòng. Consumer thường `break` sớm hoặc chỉ gọi `next()` một lần, và trên production số kết nối/cursor đang mở tăng dần, nhất là khi generator được giữ trong object sống lâu hoặc nằm trong reference cycle. Giải thích vòng đời của generator, khi nào khối finally/with bên trong thực sự chạy, và cách thiết kế an toàn.",
+    "answer": "Vòng đời: generator dừng ở mỗi yield và giữ nguyên frame, kể cả các with/try đang mở. Khối finally (hoặc __exit__ của with) bên trong chỉ chạy khi: generator chạy hết; một exception lan ra; hoặc close() được gọi — close() ném GeneratorExit tại yield đang dừng để finally chạy. Nếu không ai resume, Python gọi close() khi generator bị finalize, tức lúc refcount về 0 hoặc khi bị garbage collector thu gom.\n\nHệ quả: consumer break sớm thì generator vẫn treo ở yield và cursor vẫn mở cho tới khi generator bị thu hồi. Trên CPython, nếu tham chiếu biến mất ngay thì refcount về 0 và cleanup chạy gần như tức thì; nhưng nếu generator nằm trong attribute, cache, closure hoặc reference cycle, cleanup phải chờ GC hoặc không bao giờ xảy ra. Implementation không dùng refcount như PyPy còn trễ hơn. Dựa vào GC để giải phóng tài nguyên khan hiếm là thiết kế sai.\n\nThiết kế an toàn:\n1. Để consumer quản lý vòng đời: with contextlib.closing(gen()) as rows: ..., hoặc biến generator thành context manager, để close() được gọi khi thoát vòng lặp sớm hay có lỗi.\n2. Tách tài nguyên ra ngoài: hàm nhận cursor/connection đã mở (caller giữ bằng with) và chỉ yield dữ liệu; generator không sở hữu tài nguyên.\n3. Đọc theo lô rồi đóng sớm: fetchmany hoặc itertools.batched (Python 3.12+) để rút ngắn thời gian giữ tài nguyên.\n4. Async generator khó hơn: aclose() phải được await; dùng contextlib.aclosing hoặc cấu trúc async with tương đương.\n5. Trong generator, nếu bắt GeneratorExit thì không được yield thêm (close() sẽ báo RuntimeError); chỉ dọn dẹp rồi return.\n\nGiám sát: theo dõi số kết nối đang mở của pool, bật hiển thị ResourceWarning trong môi trường dev (-W default) để lộ tài nguyên không được đóng.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": [
+      "generator",
+      "resource-cleanup",
+      "garbage-collection",
+      "context-manager",
+      "lazy-evaluation"
+    ],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.python.org/3/reference/expressions.html",
+      "https://docs.python.org/3/library/contextlib.html",
+      "https://docs.python.org/3/library/itertools.html"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1062",
+    "topic_id": "py.core.generators-iterators",
+    "question": "Một pipeline ETL viết bằng chuỗi generator và generator expression để xử lý file vài chục GB. Team gặp các lỗi khó hiểu: bước thống kê thứ hai luôn ra kết quả rỗng, `itertools.tee` làm RAM tăng vọt, lỗi dữ liệu nổ ở chỗ tiêu thụ thay vì chỗ khai báo, và một generator expression dùng biến bị gán lại sau đó cho kết quả bất ngờ. Giải thích và đưa ra nguyên tắc thiết kế.",
+    "answer": "1. Iterator chỉ dùng được một lần: generator là iterator; lần duyệt đầu đã tiêu thụ hết, lần thứ hai trên cùng object nhận ngay StopIteration nên ra rỗng mà không báo lỗi. Muốn duyệt nhiều lần thì gọi lại hàm generator (factory), hoặc viết class iterable có __iter__ trả generator mới mỗi lần; tốt hơn nữa là gom các phép thống kê vào một lượt duyệt.\n\n2. tee và bộ nhớ: tee tạo nhiều iterator từ một nguồn bằng cách đệm những phần tử mà iterator chậm hơn chưa đọc. Nếu một nhánh đọc gần hết dữ liệu trước khi nhánh kia bắt đầu, gần như toàn bộ dữ liệu nằm trong bộ đệm; tài liệu nói khi đó dùng list() còn nhanh hơn. Iterator từ tee cũng không thread-safe. Giải pháp: một vòng lặp cập nhật nhiều accumulator cùng lúc, hoặc đọc nguồn hai lần nếu nguồn đọc lại được (file).\n\n3. Lỗi xuất hiện muộn: generator lười, thân hàm chỉ chạy khi được kéo. Với generator expression, iterable của mệnh đề for ngoài cùng được đánh giá ngay lúc khai báo (lỗi ở đó báo ngay), còn mọi biểu thức khác đánh giá lười, nên lỗi dữ liệu nổ ở nơi tiêu thụ, xa chỗ gây lỗi. Validate sớm và đưa ngữ cảnh (tên file, số dòng) vào exception.\n\n4. Late binding: biến tự do trong generator expression (ngoài iterable ngoài cùng) được đọc lúc từng phần tử được tạo, không phải lúc khai báo; gán lại biến trước khi tiêu thụ sẽ đổi kết quả. Truyền giá trị qua tham số của hàm generator để cố định nó.\n\nNguyên tắc thiết kế pipeline:\n- Mỗi bước là hàm nhận iterable và trả iterator; bộ nhớ không phụ thuộc kích thước dữ liệu nếu không bước nào gom toàn bộ (sorted, list, set lớn).\n- islice để lấy mẫu hoặc giới hạn (lưu ý nó tiêu thụ luôn phần bị bỏ qua của iterator gốc); batched (3.12+) để ghi DB theo lô.\n- Ghi checkpoint, vì generator không tua lại được sau lỗi.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": ["generator", "iterator", "itertools", "lazy-evaluation", "memory"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.python.org/3/library/itertools.html",
+      "https://docs.python.org/3/reference/expressions.html"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1063",
+    "topic_id": "py.core.typing-pydantic",
+    "question": "Một service dùng Pydantic v2 nhận dữ liệu từ đối tác. Sau một sự cố, team phát hiện chuỗi số tiền \"100\" được ép thành int mà không ai biết đối tác đã đổi định dạng, một validator kiểm tra định dạng chạy trước khi giá trị được chuẩn hóa nên đánh giá sai, và một developer dùng `model_construct()` cho dữ liệu từ API để tăng tốc. Phân tích và đề xuất cấu hình validation phù hợp.",
+    "answer": "Lax mode (mặc định): Pydantic cố chuyển dữ liệu về kiểu khai báo, ví dụ chuỗi '123' thành 123 cho field int. Tiện cho form hay query string, nhưng với contract giữa hai hệ thống, coercion che mất lỗi phía đối tác và có thể đổi nghĩa dữ liệu.\n\nStrict mode: tắt coercion, sai kiểu là lỗi. Bật ở nhiều mức: ConfigDict(strict=True) cho cả model (từng field có thể override), Field(strict=True) hoặc StrictInt/StrictStr/StrictBool cho từng field, hoặc strict=True khi gọi model_validate. Với input JSON, strict mode vẫn cho một số kiểu đi từ chuỗi (như ngày giờ) vì JSON không có kiểu đó. Số tiền nên dùng Decimal với định dạng quy định rõ, không dùng float.\n\nValidator modes:\n- before: chạy trên dữ liệu thô trước khi Pydantic parse và ép kiểu; dùng để chuẩn hóa đầu vào, phải chịu được mọi kiểu input.\n- after: chạy sau validation nội bộ, nhận giá trị đã đúng kiểu, an toàn kiểu hơn; kiểm tra định dạng và nghiệp vụ nên đặt ở đây — lỗi trong sự cố là chọn sai mode.\n- plain: thay hẳn validation của field, Pydantic không kiểm tra kiểu nữa, dễ lọt dữ liệu sai.\n- wrap: bao quanh handler, chạy trước/sau hoặc dừng sớm.\n- model_validator(mode=\"after\") cho ràng buộc giữa nhiều field.\nTrong validator raise ValueError; tránh assert vì bị bỏ qua khi chạy python -O.\n\nmodel_construct(): tạo model không validate, có thể sinh object không hợp lệ và không chuyển dict lồng nhau thành model con. Chỉ dùng cho dữ liệu đã validate hoặc hoàn toàn tin cậy (vd đọc lại từ cache do chính hệ thống ghi). Tài liệu lưu ý với model đơn giản, validate có khi còn nhanh hơn, nên phải đo trước khi tối ưu.\n\nTăng tốc đúng cách: model_validate_json cho payload JSON thay vì json.loads rồi model_validate; validate một lần ở biên. Thêm extra=\"forbid\" để phát hiện field lạ khi contract thay đổi, và log lỗi validation có cấu trúc để báo lại đối tác.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": ["pydantic", "validation", "strict-mode", "field-validator", "data-contract"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://pydantic.dev/docs/validation/latest/concepts/strict_mode/",
+      "https://pydantic.dev/docs/validation/latest/concepts/validators/",
+      "https://pydantic.dev/docs/validation/latest/concepts/models/"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1064",
+    "topic_id": "py.core.typing-pydantic",
+    "question": "Bạn thiết kế lớp abstraction cho storage (S3, local, GCS) trong codebase Python chạy mypy strict. Team tranh luận nên dùng ABC hay `typing.Protocol`; sau đó gặp lỗi mypy khi truyền `list[LocalStorage]` vào hàm nhận `list[Storage]`, và một kiểm tra `isinstance(obj, Storage)` với `@runtime_checkable` vẫn cho qua object có method sai chữ ký. Phân tích các đánh đổi và cách sửa.",
+    "answer": "ABC (nominal): class phải kế thừa tường minh; @abstractmethod chặn khởi tạo class thiếu method ngay lúc chạy; chứa được logic dùng chung; isinstance chính xác theo cây kế thừa. Hợp khi bạn sở hữu cả interface lẫn các implementation và muốn ép buộc lúc runtime.\n\nProtocol (structural): class chỉ cần có member tương thích là thỏa, không phải kế thừa. Hợp để mô tả \"thứ có read/write\" cho class bên thứ ba hay test double mà không bắt import base class, giảm coupling giữa module. Kiểm tra diễn ra lúc type check. Vẫn có thể kế thừa Protocol tường minh để nhận default implementation và để type checker báo lỗi ngay tại định nghĩa class.\n\nLỗi list[LocalStorage] → list[Storage]: list là invariant. Nếu được phép, hàm nhận list[Storage] có thể append một GCSStorage vào list mà caller vẫn tin chỉ chứa LocalStorage. Sửa: tham số chỉ đọc thì khai báo Sequence[Storage] hoặc Iterable[Storage] (covariant). Callable là contravariant theo kiểu tham số. Với generic class tự viết theo cú pháp Python 3.12, mypy tự suy variance (một attribute mutable public sẽ khiến class thành invariant); với TypeVar kiểu cũ phải khai báo covariant/contravariant đúng.\n\nruntime_checkable: isinstance với protocol chỉ kiểm tra sự tồn tại của các attribute/method, bỏ qua chữ ký và kiểu, nên object có upload() sai tham số vẫn qua. Không dùng nó để validate plugin; cần kiểm tra lúc chạy thì dùng ABC hoặc kiểm tra tường minh, còn chữ ký để mypy lo. issubclass với protocol chỉ dùng được cho protocol không có data member.\n\nKhuyến nghị:\n- Protocol cho port/interface ở ranh giới (dependency inversion, dễ fake trong test); ABC khi cần ép buộc runtime hoặc chia sẻ code.\n- Tham số dùng kiểu trừu tượng chỉ đọc (Sequence, Mapping, Iterable) thay vì list/dict cụ thể; giá trị trả về có thể cụ thể hơn.\n- Chạy mypy --strict trong CI để lỗi variance và chữ ký lộ ra trước khi merge.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": ["typing", "protocol", "abc", "variance", "mypy"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://typing.python.org/en/latest/spec/protocol.html",
+      "https://mypy.readthedocs.io/en/stable/generics.html",
+      "https://docs.python.org/3/library/typing.html"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1065",
+    "topic_id": "py.ops.packaging-deployment",
+    "question": "Bạn triển khai API FastAPI lên Kubernetes với Dockerfile chạy gunicorn và Uvicorn worker, số worker tính bằng `2 * $(nproc) + 1`. Trên node 32 core, mỗi pod (CPU limit 2, memory limit 1Gi) sinh ra 65 worker và liên tục bị OOMKill; khi deploy thì một số request bị cắt ngang. Phân tích cách chọn số worker, cấu hình gunicorn/uvicorn và health check cho môi trường container.",
+    "answer": "Vì sao ra 65 worker: nproc trong container thường trả số CPU của node chứ không phải CPU limit. Công thức (2 × core) + 1 trong tài liệu gunicorn chỉ là điểm xuất phát rồi phải chỉnh theo tải; tài liệu nhấn mạnh worker không tương ứng với số client, thường 4–12 worker đã chịu được tải lớn, và quá nhiều worker còn làm giảm throughput. Mỗi worker là một process Python với bộ nhớ riêng (app, thư viện, cache), nên 65 process vượt xa 1Gi.\n\nChọn số worker:\n- Tính theo CPU limit chứ không theo nproc của node. Worker async (Uvicorn) đã phục vụ được nhiều request đồng thời trong một process, nên thường chỉ cần khoảng 1–2 worker mỗi core được cấp. Đặt tường minh qua WEB_CONCURRENCY hoặc -w, đo bộ nhớ mỗi worker và kiểm tra tổng nằm trong limit.\n- Hoặc một process mỗi container rồi scale ngang bằng replica/HPA, giúp memory accounting và probe đơn giản hơn.\n\nCấu hình đáng chú ý:\n- Worker class: module uvicorn.workers đã deprecated, chuyển sang package uvicorn-worker; hoặc chạy uvicorn --workers (uvicorn dùng spawn, không pre-fork).\n- timeout (mặc định 30 giây): worker im lặng quá ngưỡng bị kill và khởi động lại.\n- graceful_timeout (mặc định 30 giây) phải nhỏ hơn terminationGracePeriodSeconds của pod để worker xử lý xong request đang chạy khi nhận SIGTERM; kết hợp readiness fail sớm hoặc preStop ngắn để load balancer ngừng gửi traffic trước — đây là nguyên nhân request bị cắt khi deploy.\n- max_requests kèm max_requests_jitter: khởi động lại worker sau một số request để hạn chế hậu quả rò rỉ bộ nhớ, jitter tránh mọi worker restart cùng lúc; không thay cho sửa leak.\n- preload_app: nạp code trước khi fork, nhưng không được mở kết nối DB hay thread trước fork.\n- Sau reverse proxy: bật proxy headers và chỉ tin IP của proxy (forwarded-allow-ips).\n\nHealth check: liveness chỉ kiểm tra process còn phản hồi (không gọi DB, tránh restart dây chuyền); readiness kiểm tra phụ thuộc thiết yếu và trả lỗi khi đang shutdown.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": [
+      "gunicorn",
+      "uvicorn",
+      "kubernetes",
+      "workers",
+      "graceful-shutdown",
+      "deployment"
+    ],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://gunicorn.org/design/",
+      "https://gunicorn.org/reference/settings/",
+      "https://uvicorn.dev/deployment/"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1066",
+    "topic_id": "py.ops.packaging-deployment",
+    "question": "Image Docker của một service Python build hôm nay khác hôm qua dù code không đổi: một dependency bắc cầu lên phiên bản mới gây lỗi production, image nặng gần 1GB vì chứa cả compiler, và đội security yêu cầu chứng minh các package được cài đúng là bản đã duyệt. Thiết kế quy trình quản lý dependency và Dockerfile để build tái lập, gọn và an toàn.",
+    "answer": "Nguyên nhân: requirements chỉ ghi dependency trực tiếp hoặc dùng >=, nên mỗi lần build pip resolve lại và có thể kéo phiên bản bắc cầu mới; base image theo tag trôi (vd python:3.12) cũng thay đổi theo thời gian.\n\nQuản lý dependency:\n1. Tách khai báo và lock: pyproject.toml khai báo dependency trực tiếp với khoảng phiên bản hợp lý; file lock ghim mọi dependency, kể cả bắc cầu, bằng == và được sinh bằng công cụ (pip-tools, uv, Poetry...). Lock được commit, chỉ thay đổi qua PR có review, cập nhật định kỳ bằng bot kèm chạy test.\n2. Hash-checking: thêm --hash cho từng package trong lock. Chỉ cần một requirement có hash là pip bật kiểm tra hash cho toàn bộ, và khi đó mọi package kể cả bắc cầu phải được ghim và có hash; package bị thay nội dung mà không đổi version sẽ bị từ chối. Dùng --require-hashes trong script deploy để chắc chắn chế độ này luôn bật. Cân nhắc --only-binary :all: để không chạy code build của sdist.\n3. Cài chính project bằng pip install --no-deps . để không kéo thêm thứ ngoài lock.\n\nDockerfile multi-stage:\n- Stage build: base có compiler, cài dependency từ file lock vào virtualenv hoặc build wheel.\n- Stage runtime: base slim, chỉ COPY --from=build virtualenv/wheel và mã nguồn; không còn compiler hay cache pip, image nhỏ hơn và bề mặt tấn công giảm.\n- Ghim base image theo digest, hoặc tag cụ thể kèm quy trình cập nhật có kiểm soát.\n- Thứ tự layer: copy file lock và cài dependency trước, copy code sau, để sửa code không làm mất cache layer dependency.\n- Chạy bằng user non-root.\n\nChuỗi cung ứng: quét lỗ hổng image trong CI, sinh SBOM, dùng private index hoặc mirror nếu cần chặn package chưa duyệt.\n\nĐánh đổi: lock chặt đòi hỏi cập nhật đều đặn; bỏ bê lock sẽ tích tụ bản vá bảo mật bị bỏ lỡ, nên cần lịch cập nhật và test tự động đủ tốt để nâng phiên bản an toàn.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": [
+      "packaging",
+      "dependency-pinning",
+      "docker",
+      "multi-stage-build",
+      "supply-chain"
+    ],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://pip.pypa.io/en/stable/topics/repeatable-installs/",
+      "https://pip.pypa.io/en/stable/topics/secure-installs/",
+      "https://docs.docker.com/build/building/multi-stage/"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1067",
+    "topic_id": "py.test.pytest-fixtures",
+    "question": "Bộ test pytest cho một service dùng PostgreSQL mất 25 phút vì mỗi test tạo lại schema. Khi chuyển engine sang fixture scope session và chạy song song bằng pytest-xdist, test bắt đầu fail ngẫu nhiên do dữ liệu của test này lọt sang test khác. Thiết kế lại hệ thống fixture: scope, teardown và cô lập dữ liệu khi chạy song song.",
+    "answer": "Nguyên tắc scope: scope rộng (session, module) cho thứ đắt và không đổi trạng thái — container DB, engine, schema; scope hẹp (function) cho thứ thay đổi trạng thái — transaction, dữ liệu test. Fixture được dùng fixture có scope rộng hơn hoặc bằng nó, không làm ngược lại được.\n\nThiết kế:\n1. session: khởi động DB (Testcontainers hoặc service của CI), tạo engine, chạy migration thật một lần để phát hiện luôn lỗi migration.\n2. function: mỗi test mở connection, BEGIN transaction bao ngoài, gắn session của ứng dụng vào connection đó và rollback ở teardown. Code dưới test có gọi commit thì dùng savepoint (nested transaction) để commit chỉ giải phóng savepoint, rollback ngoài cùng vẫn xóa sạch. Nhanh hơn nhiều so với tạo lại schema.\n3. Teardown bằng yield: code sau yield chạy lúc teardown theo thứ tự ngược với setup, nên rollback chạy trước khi đóng connection. Mỗi fixture chỉ làm một thay đổi trạng thái kèm teardown của chính nó, để lỗi ở một fixture không làm sót dọn dẹp của fixture khác.\n4. pytest-xdist: mỗi worker là một process và chạy fixture session của riêng nó; nếu các worker cùng ghi một database, dữ liệu tạo ngoài transaction, sequence hay bảng dùng chung sẽ va nhau. Dùng fixture worker_id (hoặc biến PYTEST_XDIST_WORKER) để tạo database/schema riêng cho mỗi worker, ví dụ test_db_gw0. Việc chỉ được làm một lần cho mọi worker (tạo dữ liệu tham chiếu lớn) thì dùng FileLock như tài liệu xdist gợi ý.\n5. Test không bọc được trong transaction (cần commit thật, nhiều connection, LISTEN/NOTIFY) đánh dấu riêng và dọn bằng TRUNCATE.\n\nBẫy thường gặp: autouse fixture phạm vi quá rộng làm chậm mọi test; dữ liệu seed ở fixture session bị test sửa rồi ảnh hưởng test sau; fixture có params có thể được tạo nhiều lần trong cùng scope. Dùng --durations để tìm fixture và test chậm nhất trước khi tối ưu.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": ["pytest", "fixtures", "test-database", "pytest-xdist", "test-isolation"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.pytest.org/en/stable/how-to/fixtures.html",
+      "https://pytest-xdist.readthedocs.io/en/stable/how-to.html"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1068",
+    "topic_id": "py.test.pytest-fixtures",
+    "question": "Một test dùng `@patch('app.payments.stripe_client.charge')` nhưng vẫn gọi API thật; test khác mock `send_email` và pass, trong khi production lỗi vì hàm thật đã đổi chữ ký; còn mock cho hàm async thì `await` báo lỗi. Giải thích nguyên tắc patch đúng chỗ, autospec, mock hàm async, và khi nào nên tránh mock.",
+    "answer": "1. Patch nơi tên được tra cứu, không phải nơi định nghĩa: patch thay object mà một tên trỏ tới. Nếu module service viết from app.payments.stripe_client import charge thì service đã giữ reference riêng tới hàm thật, nên patch app.payments.stripe_client.charge không có tác dụng; phải patch app.service.charge. Ngược lại, nếu service import module rồi gọi stripe_client.charge(...) thì patch trên module stripe_client mới đúng. monkeypatch.setattr của pytest theo cùng nguyên tắc.\n\n2. Mock thường chấp nhận mọi thứ: Mock/MagicMock tạo attribute khi được truy cập và nhận mọi đối số, nên test vẫn pass khi chữ ký hàm thật đã đổi hoặc gõ sai tên method — test xanh nhưng vô nghĩa. Dùng autospec=True hoặc create_autospec: mock mang đúng chữ ký của object thật, gọi sai đối số ném TypeError, truy cập attribute không tồn tại báo lỗi. Nên đặt autospec làm mặc định khi patch hàm hay class của chính codebase.\n\n3. Mock async: khi không truyền new, patch tự dùng AsyncMock nếu đối tượng bị patch là async function; kết quả gọi là awaitable và có các assert_awaited_*. Lỗi hay gặp là tự gán MagicMock cho hàm async nên giá trị trả về không await được.\n\n4. Khi nào tránh mock:\n- Thứ bạn sở hữu và rẻ để chạy thật (hàm thuần, repository với DB test): mock khiến test chỉ kiểm tra cách gọi, không kiểm tra hành vi.\n- Mock ở ranh giới hệ thống (HTTP ra ngoài, cổng thanh toán, thời gian, random). Tốt hơn nữa là bọc client bên thứ ba sau interface của mình rồi fake interface đó, hoặc dùng thư viện chặn HTTP để kiểm tra request thật được gửi đi.\n- Ưu tiên assert kết quả và hành vi hơn assert_called_with từng tham số, để refactor không làm vỡ test vô ích.\n\n5. Gắn với pytest: tạo patch qua fixture (monkeypatch hoặc mocker) để tự hoàn tác sau mỗi test, tránh patch thủ công rò sang test khác. Bổ sung contract test hoặc integration test với sandbox của đối tác để bắt thay đổi API mà mock không thể phát hiện.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": ["pytest", "mock", "monkeypatch", "autospec", "asyncmock"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": ["https://docs.python.org/3/library/unittest.mock.html"]
+  },
+  {
+    "qa_id": "de-qa-1069",
+    "topic_id": "py.web.api-auth",
+    "question": "Review module đăng nhập của một API Python: mật khẩu băm bằng SHA-256 có salt, token reset mật khẩu được so sánh bằng `==`, endpoint login trả về nhanh hơn rõ rệt khi email không tồn tại, và team muốn nâng tham số băm mà không bắt mọi người đặt lại mật khẩu. Phân tích rủi ro và đề xuất thiết kế.",
+    "answer": "1. SHA-256 có salt vẫn không đủ: hàm băm nhanh cho phép thử số lượng rất lớn mật khẩu mỗi giây trên GPU khi DB bị lộ; salt chỉ chống rainbow table. Cần hàm chậm, tốn bộ nhớ, có tham số điều chỉnh. OWASP khuyến nghị:\n- Argon2id là lựa chọn đầu, tối thiểu 19 MiB bộ nhớ, 2 vòng lặp, parallelism 1;\n- scrypt khi không có Argon2id;\n- bcrypt chỉ cho hệ thống cũ, work factor từ 10 trở lên, giới hạn input 72 byte; không tự pre-hash trước bcrypt vì có rủi ro (null byte, password shucking);\n- PBKDF2-HMAC-SHA256 với 600.000 vòng khi bắt buộc tuân thủ FIPS.\nDùng thư viện chuẩn (argon2-cffi, password hasher của Django...) thay vì tự ghép.\n\n2. Nâng tham số mà không bắt reset: lưu hash ở định dạng tự mô tả (thuật toán, tham số, salt). Khi user đăng nhập thành công, nếu hash dùng tham số cũ thì băm lại mật khẩu vừa nhập với tham số mới và lưu. User lâu không đăng nhập: cho hash cũ hết hạn và buộc reset.\n\n3. So sánh bằng ==: so sánh chuỗi dừng ở ký tự khác đầu tiên nên có thể rò rỉ qua thời gian phản hồi. Dùng hmac.compare_digest cho token, chữ ký, OTP (vẫn có thể lộ độ dài, không lộ nội dung). Tốt hơn nữa: DB chỉ lưu hash của token reset; token dùng một lần và hết hạn nhanh.\n\n4. Lộ tài khoản tồn tại (user enumeration): khi email không tồn tại vẫn chạy verify trên một hash giả cùng tham số để thời gian phản hồi tương đương; trả thông báo chung \"email hoặc mật khẩu không đúng\"; endpoint quên mật khẩu luôn trả cùng một phản hồi.\n\n5. Bổ sung: rate limit theo IP và theo tài khoản, khóa tạm hoặc CAPTCHA khi thử sai nhiều; pepper (secret nằm ngoài DB) là lớp phòng thủ thêm nhưng xoay vòng khó; MFA cho tài khoản quan trọng. Trong framework async, chạy hàm băm trên threadpool vì Argon2/bcrypt tốn CPU và sẽ chặn event loop.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": [
+      "password-hashing",
+      "argon2",
+      "timing-attack",
+      "user-enumeration",
+      "authentication"
+    ],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html",
+      "https://docs.python.org/3/library/hmac.html"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1070",
+    "topic_id": "py.web.api-auth",
+    "question": "Pentest báo một API Django REST Framework cho phép người dùng đọc và sửa hóa đơn của người khác chỉ bằng cách đổi `id` trên URL, dù mọi view đều có `IsAuthenticated` và một permission class tự viết có `has_object_permission`. Giải thích vì sao lỗi BOLA vẫn xảy ra và thiết kế phân quyền mức object một cách có hệ thống.",
+    "answer": "BOLA (Broken Object Level Authorization, mục đầu tiên của OWASP API Security Top 10 2023): endpoint hợp lệ với người dùng, nhưng server không kiểm tra người đó có quyền trên đúng đối tượng được chỉ định bởi ID từ client.\n\nVì sao DRF vẫn lọt dù có has_object_permission:\n- has_permission chạy cho mọi request; has_object_permission chỉ chạy khi view gọi get_object() (generic view làm việc này cho retrieve/update/destroy) và chỉ sau khi has_permission đã pass.\n- View tự viết hoặc override get_object mà không gọi self.check_object_permissions(request, obj) thì kiểm tra mức object không bao giờ chạy.\n- List view không kiểm tra object permission cho từng phần tử; phải lọc queryset.\n- Create không gọi has_object_permission: user có thể tạo bản ghi gắn với tài khoản hay tenant khác qua field trong payload; phải kiểm tra trong serializer hoặc perform_create.\n- Action tùy chỉnh hoặc truy vấn trực tiếp Invoice.objects.get(pk=...) bỏ qua toàn bộ cơ chế này.\n\nThiết kế có hệ thống:\n1. Scoping queryset làm hàng rào chính: get_queryset() luôn lọc theo chủ sở hữu hoặc tenant (vd filter(org=request.user.org)); đối tượng ngoài phạm vi trả 404, không lộ sự tồn tại. Đặt logic này ở base viewset hoặc custom manager để không view nào quên.\n2. Object permission cho quy tắc chi tiết hơn (chủ sở hữu được sửa, kế toán chỉ đọc), luôn đi qua get_object().\n3. Trường sở hữu không lấy từ payload: gán owner/org từ request.user trong perform_create, serializer đánh dấu read_only.\n4. ID khó đoán (UUID) giảm khả năng dò nhưng không thay kiểm tra quyền; chỉ so user id trong JWT với tham số URL cũng chỉ bao được một phần nhỏ trường hợp.\n5. Test tự động: với mỗi endpoint và mỗi method, user A truy cập tài nguyên của user B phải nhận 404/403; chặn deploy khi test này fail.\n6. Ghi audit log cho truy cập bị từ chối, cảnh báo khi một user dò nhiều ID liên tiếp, kết hợp rate limiting.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": ["authorization", "bola", "django-rest-framework", "permissions", "owasp"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://www.django-rest-framework.org/api-guide/permissions/",
+      "https://api-security.owasp.org/editions/2023/en/0xa1-broken-object-level-authorization"
+    ]
+  }
+]

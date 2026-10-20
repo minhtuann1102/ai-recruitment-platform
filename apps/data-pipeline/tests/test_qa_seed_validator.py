@@ -167,3 +167,14 @@ def test_invalid_crawled_pair_is_dropped_with_warning_not_error(make_pair, topic
     result = validate_seed([crawled(bad)], topics)
     assert result.errors == [] and result.valid == []
     assert ("cr-devi-java-0a1b2c3d", "length") in rules_of(result, "warning")
+
+
+def test_pairs_missing_only_reviewer_are_duplicate_checked_and_counted_as_pending(make_pair, topics):
+    reviewed = make_pair(1, question="Vì sao event loop bị block khi chạy vòng lặp CPU nặng?")
+    pending_dup = make_pair(2, question="Vi sao event loop bi block khi chay vong lap CPU nang", reviewed_by=..., difficulty="hard")
+    pending_hard = make_pair(3, question="Thiết kế worker pool cho tác vụ CPU-bound trong Node.js thế nào?", reviewed_by=..., difficulty="hard")
+    result = validate_seed(items(reviewed, pending_dup, pending_hard), topics, hard_topics={"smp.core.event-loop"})
+    assert [it.qa_id for it in result.valid] == ["de-qa-0001"]
+    assert ("de-qa-0002", "near_duplicate") in rules_of(result, "warning")
+    assert result.report["pairs_pending_review"] == 2
+    assert result.report["topics_missing_hard"] == 1 and result.report["topics_missing_hard_after_review"] == 0

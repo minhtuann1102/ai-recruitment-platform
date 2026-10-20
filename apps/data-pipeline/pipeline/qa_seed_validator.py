@@ -83,7 +83,10 @@ def source_key(source: str) -> str:
     return parsed.netloc or source
 
 
-def _distribution(kept: List[SeedItem], topics: Dict[str, str], hard_topics: Set[str], strict: bool, issues: List[Issue]) -> Dict:
+def _distribution(
+    kept: List[SeedItem], pending: List[SeedItem], topics: Dict[str, str], hard_topics: Set[str], strict: bool, issues: List[Issue]
+) -> Dict:
+    """Phan bo tren cap da vao kho (kept); `pending` = cap seed chi thieu reviewed_by, dem rieng de thay sau khi duyet."""
     level = "error" if strict else "warning"
     total = len(kept)
     by_topic = Counter(it.data["topic_id"] for it in kept)
@@ -98,6 +101,8 @@ def _distribution(kept: List[SeedItem], topics: Dict[str, str], hard_topics: Set
         issues.append(Issue(None, "total", level, f"chi co {total} cap hop le (can >= {MIN_PAIRS})"))
     hard_by_topic = Counter(it.data["topic_id"] for it in kept if it.data["difficulty"] == "hard")
     missing_hard = sorted(t for t in hard_topics if hard_by_topic[t] < MIN_HARD_PER_TOPIC)
+    hard_by_topic_after_review = hard_by_topic + Counter(it.data["topic_id"] for it in pending if it.data["difficulty"] == "hard")
+    missing_hard_after_review = [t for t in hard_topics if hard_by_topic_after_review[t] < MIN_HARD_PER_TOPIC]
     if missing_hard:
         issues.append(Issue(None, "hard_coverage", level, f"{len(missing_hard)} topic middle/senior co < {MIN_HARD_PER_TOPIC} cap hard: {', '.join(missing_hard)}"))
 
@@ -108,6 +113,8 @@ def _distribution(kept: List[SeedItem], topics: Dict[str, str], hard_topics: Set
         "topics_covered": sum(1 for t in topics if by_topic[t] >= MIN_PAIRS_PER_TOPIC),
         "topics_in_catalog": len(topics),
         "topics_missing_hard": len(missing_hard),
+        "topics_missing_hard_after_review": len(missing_hard_after_review),
+        "pairs_pending_review": len(pending),
         "by_dataset": dict(sorted(Counter(it.dataset for it in kept).items())),
         "by_category": dict(sorted(Counter(topics[it.data["topic_id"]] for it in kept).items())),
         "by_difficulty": dict(sorted(by_difficulty.items())),
@@ -129,7 +136,7 @@ def validate_seed(
     hard_topics: topic can >= 2 cap hard (level middle/senior); None = khong kiem.
     """
     issues: List[Issue] = []
-    candidates = []
+    candidates, pending = [], []
     for item in items:
         pair_issues = check_pair(item, topics)
         if pair_issues and item.dataset != CURATED_DATASET:
@@ -138,10 +145,17 @@ def validate_seed(
             issues.extend(pair_issues)
             continue
         issues.extend(pair_issues)
-        if not any(i.level == "error" for i in pair_issues):
+        error_rules = {i.rule for i in pair_issues if i.level == "error"}
+        if not error_rules:
             candidates.append(item)
-    kept = _drop_duplicates(candidates, issues)
+        elif error_rules == {"review"}:
+            # Chi thieu reviewed_by: van kiem trung / gan trung ngay, nhung chua vao kho cho toi khi duyet
+            pending.append(item)
+    pending_ids = {it.qa_id for it in pending}
+    checked = _drop_duplicates(candidates + pending, issues)
+    kept = [it for it in checked if it.qa_id not in pending_ids]
     if near_duplicates:
-        _warn_near_duplicates(kept, issues)
-    report = {"pairs_in": len(items), **_distribution(kept, topics, hard_topics or set(), strict, issues)}
+        _warn_near_duplicates(checked, issues)
+    still_pending = [it for it in checked if it.qa_id in pending_ids]
+    report = {"pairs_in": len(items), **_distribution(kept, still_pending, topics, hard_topics or set(), strict, issues)}
     return ValidationResult(valid=kept, issues=issues, report=report)

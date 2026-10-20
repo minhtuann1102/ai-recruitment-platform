@@ -41,7 +41,7 @@ def _print_validation(result: ValidationResult) -> None:
     print("== phan bo")
     print(f"cap: {report['pairs_valid']}/{report['pairs_in']} hop le; tu nguon ngoai {report['public_pairs']} ({report['public_share']:.0%})")
     print(f"dataset: {json.dumps(report['by_dataset'], ensure_ascii=False)}")
-    print(f"topic du >= 2 cap: {report['topics_covered']}/{report['topics_in_catalog']}; topic middle/senior thieu cap hard: {report['topics_missing_hard']}")
+    print(f"topic du >= 2 cap: {report['topics_covered']}/{report['topics_in_catalog']}; topic middle/senior thieu cap hard: {report['topics_missing_hard']} (sau khi duyet {report['pairs_pending_review']} cap cho duyet: {report['topics_missing_hard_after_review']})")
     for key in ("by_category", "by_difficulty", "by_language", "by_license", "by_source"):
         print(f"{key[3:]}: {json.dumps(report[key], ensure_ascii=False)}")
     topic_counts = ", ".join(f"{topic}={count}" for topic, count in report["by_topic"].items())

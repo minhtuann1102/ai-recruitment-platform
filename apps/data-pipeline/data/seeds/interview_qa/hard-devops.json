@@ -1,0 +1,339 @@
+[
+  {
+    "qa_id": "de-qa-1200",
+    "topic_id": "devops.docker.compose-networking",
+    "question": "Một VPS chạy stack Docker Compose (nginx, api, postgres), ufw chỉ cho phép port 22, 80, 443. Vậy mà quét từ Internet vẫn thấy Postgres mở ở 5432, vì file compose có `ports: \"5432:5432\"`. Giải thích vì sao firewall bị \"bỏ qua\" và thiết kế lại network cho stack này.",
+    "answer": "**Vì sao ufw bị bỏ qua**\n- Docker tự quản lý rule iptables cho traffic của container. Port publish được DNAT trong bảng `nat`, nên gói tin được định tuyến (forward) thẳng tới container trước khi đi qua các chain của ufw. Tài liệu Docker xác nhận Docker và ufw không tương thích về cách dùng firewall rule.\n- Mặc định port publish trên **mọi địa chỉ** của host (IPv4 và IPv6). Docker ghi rõ \"publishing container ports is insecure by default\".\n\n**Hiểu sai gốc rễ:** các container cùng network gọi nhau bằng tên service và `CONTAINER_PORT` qua DNS nội bộ. `HOST_PORT` chỉ dùng khi truy cập từ ngoài network. Như vậy api hoàn toàn không cần Postgres publish port.\n\n**Thiết kế lại**\n1. **Chỉ nginx publish 80/443.** Bỏ `ports` của postgres và api.\n2. **Tách network:**\n   - `frontend` gồm nginx và api; `backend` gồm api và db.\n   - nginx không chạm được db vì hai bên không chung network.\n   - `backend` có thể đặt `internal: true`, tức network không có kết nối ra interface của host: db không ra được Internet và không bị truy cập từ ngoài.\n3. **Khi cần truy cập DB để quản trị:** bind loopback (`127.0.0.1:5432:5432`) rồi dùng SSH tunnel. Có thể cấu hình daemon để loopback thành địa chỉ publish mặc định.\n4. **Port buộc phải publish nhưng cần lọc theo IP nguồn:** đặt rule trong chain `DOCKER-USER`, là chain Docker dành cho rule của người dùng, thay vì rule ufw thông thường.\n5. **Phòng thủ nhiều lớp:**\n   - Cloud firewall/security group phía ngoài host.\n   - Postgres dùng mật khẩu mạnh và giới hạn `pg_hba.conf`.\n   - Quét port định kỳ từ bên ngoài để phát hiện cấu hình trôi.\n\n**Đánh đổi:**\n- Network `internal` chặn luôn outbound của db (thường là điều mong muốn). Nhưng service nào cần gọi API bên ngoài thì phải nằm thêm ở một network thường.\n- Bind loopback nghĩa là máy khác trong mạng nội bộ không truy cập được. Muốn mở cho chúng thì phải bind đúng IP private và kết hợp firewall.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": ["docker", "docker-compose", "networking", "firewall", "port-publishing"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.docker.com/engine/network/packet-filtering-firewalls/",
+      "https://docs.docker.com/engine/network/firewall-iptables/",
+      "https://docs.docker.com/engine/network/port-publishing/",
+      "https://docs.docker.com/compose/how-tos/networking/"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1201",
+    "topic_id": "devops.docker.compose-networking",
+    "question": "Bạn scale `api` lên 3 replica (`docker compose up --scale api=3`) phía sau nginx với `proxy_pass http://api:8080;`. Lần lượt gặp ba lỗi: báo xung đột port; sửa xong thì traffic không chia đều cho replica mới; và sau mỗi lần deploy (container tạo lại) nginx trả 502 cho tới khi restart. Phân tích từng lỗi và cách sửa.",
+    "answer": "**Lỗi 1: xung đột port.** `ports: \"8080:8080\"` cố định khiến mọi replica cùng tranh một host port. Khi scale, mỗi replica cần port riêng. Giải pháp đúng là api không publish port nào: chỉ nginx publish, còn nginx gọi api qua network nội bộ bằng tên service và `CONTAINER_PORT`.\n\n**Cơ chế discovery:** mỗi service đăng ký tên với DNS nội bộ. Trên network user-defined, container dùng embedded DNS server của Docker ở `127.0.0.11`. Với nhiều replica, tên `api` phân giải ra địa chỉ các replica đang chạy.\n\n**Lỗi 2 và 3: nginx giữ DNS cũ.**\n- Với `proxy_pass` dùng hostname tĩnh, nginx open source phân giải tên **một lần** khi nạp cấu hình. Nếu ra nhiều địa chỉ, nó round-robin giữa đúng các địa chỉ đó.\n- Replica thêm sau đó không bao giờ được thấy, nên traffic không chia đều.\n- Khi container được tạo lại, nó vào network với IP mới nhưng giữ tên cũ; kết nối tới container cũ bị đóng. Docker nói rõ mỗi client phải tự phân giải lại tên và kết nối lại. nginx vẫn gửi tới IP cũ, sinh ra 502.\n\n**Cách sửa:**\n1. **Phân giải lúc chạy:** `resolver 127.0.0.11 valid=10s;` kết hợp biến trong `proxy_pass` (`set $api http://api:8080; proxy_pass $api;`). Khi giá trị chứa biến, tên không khớp upstream group sẽ được phân giải qua resolver. Đánh đổi: không còn dùng được các tính năng của block `upstream` (keepalive, tham số server).\n2. **Giữ block upstream:** từ nginx 1.27.3, bản open source hỗ trợ tham số `resolve` của `server` (cần `resolver` và upstream nằm trong shared memory zone). nginx sẽ theo dõi thay đổi IP mà không cần restart. Trước phiên bản đó, tính năng này chỉ có ở bản thương mại.\n3. **Đơn giản nhất:** chạy `nginx -s reload` trong script deploy. Dễ làm nhưng cũng dễ quên.\n\n**Lưu ý thêm:**\n- Health check bị động của nginx mặc định `max_fails=1`, `fail_timeout=10s`.\n- `proxy_next_upstream` mặc định chỉ retry khi `error timeout`, và không gửi lại request non-idempotent (POST) đã gửi đi, trừ khi bật rõ.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": ["docker-compose", "service-discovery", "dns", "nginx", "scaling"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.docker.com/compose/how-tos/networking/",
+      "https://docs.docker.com/engine/network/",
+      "https://nginx.org/en/docs/http/ngx_http_proxy_module.html",
+      "https://nginx.org/en/docs/http/ngx_http_upstream_module.html"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1202",
+    "topic_id": "devops.k8s.core-objects",
+    "question": "Team sửa giá trị trong ConfigMap (feature flag và file `nginx.conf`) rồi `kubectl apply`. Một số Pod vẫn chạy cấu hình cũ sau nhiều giờ, một số khác nhận cấu hình mới vào các thời điểm khác nhau. Giải thích cơ chế ConfigMap được đưa vào Pod, và đề xuất cách rollout cấu hình an toàn, có thể rollback.",
+    "answer": "**Cơ chế phụ thuộc vào cách Pod tiêu thụ ConfigMap**\n- **Biến môi trường** (`env`/`envFrom`): đọc lúc container khởi động, **không bao giờ** tự cập nhật; phải restart Pod (Pod \"cũ mãi\").\n- **Volume mount:** cập nhật \"eventually\". Mỗi lần periodic sync, kubelet kiểm tra, nhưng đọc từ cache cục bộ (mặc định theo watch, hoặc TTL). Độ trễ có thể bằng sync period cộng độ trễ lan truyền cache. Pod trên các node khác nhau nhận thay đổi vào lúc khác nhau, khớp với triệu chứng thứ hai.\n- **`subPath` mount:** không bao giờ nhận cập nhật.\n- Ngay cả khi file trên đĩa đã đổi, ứng dụng vẫn phải tự reload (nginx cần reload; app chỉ đọc file lúc start sẽ không thấy gì).\n\n**Vấn đề gốc:** sửa ConfigMap tại chỗ là một lần \"deploy\" không qua rollout. Không có `maxUnavailable`, không có readiness chặn cấu hình hỏng, không có revision để `kubectl rollout undo`. Cấu hình sai sẽ lan dần ra mọi Pod.\n\n**Rollout an toàn**\n1. **Version hóa config:** tạo ConfigMap mới có tên gắn version hoặc hash (Kustomize `configMapGenerator` tự thêm hash suffix) và đổi reference trong pod template của Deployment.\n   - Đổi template kích hoạt rolling update bình thường.\n   - Readiness probe chặn được cấu hình hỏng.\n   - `kubectl rollout undo` trỏ về ConfigMap cũ, vẫn còn nguyên vẹn.\n2. **Giữ tên cố định (thường gặp với Helm):** thêm annotation checksum của nội dung config vào pod template, để config đổi thì template đổi và rollout chạy. Nhược điểm: rollback template vẫn trỏ vào cùng ConfigMap đã bị sửa, nên **không** khôi phục được config.\n3. **Đánh dấu `immutable: true` cho ConfigMap đã version hóa:**\n   - chống sửa nhầm;\n   - giảm tải kube-apiserver vì kubelet đóng watch.\n   - Không thể đảo lại thành mutable, chỉ có thể xóa rồi tạo mới.\n4. **Hot reload qua volume** chỉ dành cho cấu hình được thiết kế để reload an toàn (log level, flag), có validate trước khi áp dụng.\n\nSecret dùng cùng cơ chế; đánh đổi của version hóa là phải dọn object cũ.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": ["kubernetes", "configmap", "secret", "rollout", "configuration-management"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": ["https://kubernetes.io/docs/concepts/configuration/configmap/"]
+  },
+  {
+    "qa_id": "de-qa-1203",
+    "topic_id": "devops.k8s.core-objects",
+    "question": "Service `payments` trong Kubernetes thỉnh thoảng lỗi với một phần nhỏ request (connection refused, hoặc nhận response từ phiên bản cũ), trong khi `kubectl get pods` cho thấy mọi Pod đều Running. Trình bày quy trình debug từ Service xuống Pod, các nguyên nhân thường gặp và cách xác nhận từng nguyên nhân bằng kubectl.",
+    "answer": "**Đường đi của request:** client → DNS (`payments.<ns>.svc.cluster.local`) → ClusterIP → rule của kube-proxy (iptables hoặc IPVS) → một endpoint trong EndpointSlice → `PodIP:targetPort`. EndpointSlice là kết quả của control loop đánh giá selector của Service. Lỗi chỉ xảy ra với một phần request nghĩa là trong pool có vài endpoint xấu.\n\n**Quy trình và nguyên nhân thường gặp**\n1. **Xem endpoint thật:** `kubectl get endpointslices -l kubernetes.io/service-name=payments -o yaml`. Đếm số endpoint so với số Pod mong đợi, xem trạng thái `ready` và `terminating`.\n2. **Selector quá rộng:** Service chọn `app=payments`, nhưng Pod phiên bản cũ, canary hay Pod debug cũng mang label đó, nên traffic lọt vào Pod lạ. Đối chiếu bằng `kubectl get pods -l app=payments --show-labels`.\n3. **`targetPort` sai với một nhóm Pod:** phiên bản mới đổi named port hoặc đổi port; hoặc port khai báo dạng chuỗi `\"9376\"` thay vì số. Kết quả là connection refused trên đúng các Pod đó.\n4. **Readiness:**\n   - Running không đồng nghĩa Ready.\n   - Thiếu readiness probe thì Pod nhận traffic khi app chưa listen, gây refused lúc khởi động hoặc scale.\n   - Khi readiness fail, Pod bị gỡ khỏi EndpointSlice; đây là cơ chế cần có.\n5. **Restart thường xuyên** (cột `RESTARTS`) gây lỗi ngắt quãng.\n6. **Lúc rollout:** app thoát ngay khi nhận SIGTERM trong lúc các node chưa cập nhật rule, nên request bị refused.\n7. **kube-proxy hỏng trên một node:** lỗi chỉ xuất hiện với client ở node đó. Kiểm `iptables-save | grep payments` hoặc `ipvsadm -ln` trên node và đọc log kube-proxy.\n8. **NetworkPolicy** chặn traffic từ một số namespace.\n\n**Cô lập lỗi:** gọi thẳng từng `PodIP:port` từ một Pod khác để tách lỗi của Service khỏi lỗi của Pod.\n- Image distroless không có shell: dùng `kubectl debug -it <pod> --image=busybox --target=<container>` để thêm ephemeral container dùng chung process namespace với container đích.\n- Debug trên bản sao Pod mà không đụng Pod thật: dùng `kubectl debug <pod> --copy-to=<tên> --share-processes`.\n\n**Phòng ngừa:** selector đủ đặc thù, readiness đúng, alert khi số endpoint ready lệch số replica.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": [
+      "kubernetes",
+      "service",
+      "endpointslice",
+      "kubectl-debug",
+      "troubleshooting"
+    ],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://kubernetes.io/docs/tasks/debug/debug-application/debug-service/",
+      "https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/",
+      "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1204",
+    "topic_id": "devops.k8s.scaling-reliability",
+    "question": "Mỗi lần rolling update Deployment `checkout`, dashboard ghi nhận vài giây lỗi 502/connection reset ở ingress, dù readiness probe đã cấu hình và đã có PodDisruptionBudget `minAvailable: 80%`. Giải thích vì sao lỗi vẫn xảy ra, và thiết kế graceful shutdown cùng chiến lược rollout không lỗi.",
+    "answer": "**PDB không bảo vệ rollout:** PDB giới hạn voluntary disruption đi qua Eviction API (`kubectl drain`, cluster autoscaler). Tài liệu Kubernetes nói rõ Deployment/StatefulSet **không** bị PDB giới hạn khi rolling upgrade; hành vi đó do `strategy` của workload quyết định.\n\n**Race khi Pod bị terminate:**\n- Kubelet chạy `preStop` (nếu có) rồi gửi SIGTERM tới PID 1 của container.\n- **Cùng lúc đó**, endpoint chuyển sang terminating (`ready: false`), và kube-proxy trên mọi node, ingress controller, load balancer bên ngoài cập nhật một cách bất đồng bộ.\n- Nếu app thoát ngay khi nhận SIGTERM, các request vẫn đang được route tới trong khoảng trễ đó sẽ bị reset hoặc thành 502. Request đang xử lý dở cũng bị cắt ngang.\n\n**Nguyên nhân phụ:**\n- PID 1 là shell script không chuyển tiếp SIGTERM, nên app chỉ chết khi bị SIGKILL lúc hết grace period.\n- Kết nối keep-alive từ ingress tới Pod cũ vẫn được dùng tiếp.\n\n**Thiết kế**\n1. **`preStop` sleep ngắn** (vài giây) để việc gỡ endpoint kịp lan truyền trước khi app nhận SIGTERM.\n2. **App xử lý SIGTERM đúng cách:** ngừng nhận kết nối mới, hoàn tất request đang chạy, đóng keep-alive, rồi thoát với exit code 0.\n3. **`terminationGracePeriodSeconds`** (mặc định 30 giây) phải lớn hơn thời gian preStop cộng thời gian drain dài nhất. Nếu preStop vẫn chạy khi hết grace period, kubelet chỉ gia hạn một lần 2 giây rồi gửi SIGKILL.\n4. **Rollout strategy:**\n   - `maxUnavailable: 0` và `maxSurge` lớn hơn 0 để luôn đủ capacity.\n   - `minReadySeconds` để Pod mới ổn định trước khi Pod cũ bị gỡ.\n   - Readiness phản ánh khả năng phục vụ thật.\n5. **Ingress/LB:** bật connection draining hoặc deregistration delay khớp với thời gian trên.\n6. **Vẫn giữ PDB** cho node drain và autoscaler, đúng mục đích của nó.\n\n**Kiểm chứng:** chạy load test liên tục trong lúc rollout và yêu cầu tỉ lệ lỗi bằng 0.\n\n**Đánh đổi:** preStop và grace period dài làm rollout chậm hơn; request rất dài (upload, streaming) nên có retry/resume phía client.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": [
+      "kubernetes",
+      "rolling-update",
+      "graceful-shutdown",
+      "poddisruptionbudget",
+      "readiness-probe"
+    ],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/",
+      "https://kubernetes.io/docs/concepts/workloads/pods/disruptions/"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1205",
+    "topic_id": "devops.k8s.scaling-reliability",
+    "question": "Service `search` có p99 latency tăng vọt giờ cao điểm, trong khi dashboard cho thấy CPU trung bình chỉ khoảng 40% và HPA (target CPU utilization 70%) không scale thêm. Container đặt `requests.cpu: 1`, `limits.cpu: 1`. Phân tích nguyên nhân và cách cấu hình lại.",
+    "answer": "**CPU limit được thực thi bằng throttling:** khi container chạm `cpu` limit, kernel (qua cgroups) chặn bớt thời gian CPU của nó. Quota được tính theo từng chu kỳ ngắn. Một ứng dụng nhiều luồng có thể tiêu hết quota ngay đầu chu kỳ (burst), rồi bị dừng tới chu kỳ sau. Request phải chờ nên tail latency tăng, trong khi CPU trung bình theo phút vẫn thấp vì metric trung bình đã làm phẳng các burst.\n\n**Vì sao HPA \"đúng\" khi không scale:**\n- Utilization được tính theo **% của request** (không phải limit), lấy trung bình trên các Pod.\n- `desiredReplicas = ceil(currentReplicas × current / target)`. Với 40% so với target 70%, không có lý do để scale up.\n- HPA còn bỏ qua dao động trong mức tolerance (mặc định 10%), và tính bảo thủ với Pod chưa ready hoặc thiếu metric.\n- Vấn đề ở đây không phải thiếu tổng CPU, mà là các burst bị chặn.\n\n**Xác nhận:** xem metric throttling của cgroup do cAdvisor xuất ra (`container_cpu_cfs_throttled_periods_total` so với `container_cpu_cfs_periods_total`). Nếu tỉ lệ chu kỳ bị throttle tăng cùng lúc với p99 thì đã khớp nguyên nhân.\n\n**Cấu hình lại:**\n1. **Với service nhạy latency, nâng hoặc bỏ CPU limit** và đặt request đúng nhu cầu thực. Request quyết định việc scheduling và lượng CPU được đảm bảo; container được dùng vượt request khi node còn trống. Đánh đổi: dễ gặp noisy neighbor, và nếu Pod đang Guaranteed thì sẽ thành Burstable.\n2. **Khớp số thread/worker của runtime với lượng CPU thực sự được cấp** để giảm burst.\n3. **HPA:**\n   - Hạ target để có headroom cho burst, hoặc scale theo metric sát SLO hơn (RPS mỗi Pod, độ dài hàng đợi) qua custom/external metrics.\n   - Dùng `behavior` để scale up nhanh; scale down vốn đã có stabilization window mặc định 300 giây.\n4. **Memory khác hẳn CPU:** vượt memory limit dẫn tới OOM kill (thực thi kiểu phản ứng), không có throttling. Vì vậy memory nên giữ limit chặt và đo kỹ.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": ["kubernetes", "hpa", "cpu-throttling", "resource-limits", "autoscaling"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
+      "https://kubernetes.io/docs/concepts/workloads/autoscaling/horizontal-pod-autoscale/"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1206",
+    "topic_id": "devops.iac.terraform",
+    "question": "Một repo Terraform quản lý toàn bộ hạ tầng production trong một state duy nhất: `terraform plan` mất hơn 15 phút, thường xuyên kẹt lock, và lần nào plan cũng thấy thay đổi lạ vì có người sửa tay trên console. Bạn tái cấu trúc state và xây quy trình phát hiện, xử lý drift như thế nào?",
+    "answer": "**Vấn đề của state nguyên khối:**\n- Blast radius lớn: một lần apply lỗi có thể đụng mọi thứ.\n- Plan chậm vì phải refresh toàn bộ resource.\n- Mọi team tranh nhau cùng một lock.\n- Ai đọc được state là đọc được mọi giá trị nhạy cảm nằm trong đó.\n\n**Tách state**\n- **Ranh giới:** theo vòng đời và ownership, ví dụ network (ít đổi), data (DB, nhạy cảm), compute/app (đổi thường xuyên). Mỗi môi trường dùng backend riêng.\n- **Nối các state:** qua output kết hợp `terraform_remote_state`, hoặc data source tra theo tag/tên. Tránh phụ thuộc vòng.\n- **Di chuyển resource không tạo lại:**\n  - Trong cùng cấu hình: dùng `moved` block để đổi địa chỉ mà không destroy.\n  - Sang state khác: `terraform state mv`, hoặc import vào state mới rồi `state rm` ở state cũ.\n  - Làm từng bước nhỏ; sau mỗi bước, plan của cả hai phía phải là \"No changes\".\n\n**Phát hiện drift:** chạy job định kỳ `terraform plan -detailed-exitcode`. Mã thoát 0 là không đổi, 1 là lỗi, 2 là có thay đổi; mã 2 thì tạo alert hoặc ticket.\n\n**Xử lý drift theo từng trường hợp:**\n- **Sửa tay là sai:** apply để đưa hạ tầng về đúng code.\n- **Sửa tay là đúng** (hotfix trong sự cố): cập nhật code cho khớp. Mode `-refresh-only` dùng để ghi nhận giá trị thực vào state mà không đụng hạ tầng.\n- **Thuộc tính do hệ thống khác quản lý** (desired count của autoscaler, tag do tool khác gắn): dùng `ignore_changes` một cách có chủ đích.\n\n**Phòng ngừa:**\n- Quyền console production chỉ đọc; mọi thay đổi đi qua PR (plan trong PR, apply sau review).\n- Không dùng `-target` cho vận hành thường xuyên; tài liệu Terraform chỉ khuyến nghị nó cho trường hợp ngoại lệ, vì nó che dependency.\n\n**Đánh đổi:**\n- Nhiều state đồng nghĩa với nhiều pipeline, và thứ tự apply giữa các stack phụ thuộc nhau phải được điều phối.\n- Chia quá vụn thì khó nhìn toàn cảnh và tăng chi phí bảo trì.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": [
+      "terraform",
+      "state-management",
+      "drift",
+      "infrastructure-as-code",
+      "refactoring"
+    ],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://developer.hashicorp.com/terraform/cli/commands/plan",
+      "https://developer.hashicorp.com/terraform/language/modules/develop/refactoring",
+      "https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1207",
+    "topic_id": "devops.iac.terraform",
+    "question": "Một PR Terraform chỉ \"đổi tên\" vài thứ, nhưng `terraform plan` báo database production `must be replaced` (`-/+`), và reviewer suýt approve. Bạn đọc plan và xử lý thế nào để không mất dữ liệu? Về lâu dài, dùng những cơ chế nào để chặn loại sự cố này?",
+    "answer": "**Đọc plan:**\n- Ký hiệu `-/+` cùng chú thích \"forces replacement\" chỉ ra thuộc tính mà provider không thể đổi tại chỗ.\n- Mặc định Terraform **destroy trước rồi mới create**. Với database, điều đó có nghĩa là xóa dữ liệu.\n\n**Phân loại nguyên nhân:**\n1. **Đổi địa chỉ resource** (đổi tên block, chuyển vào module): Terraform hiểu là xóa cái cũ và tạo cái mới.\n   - Cách sửa: thêm `moved` block để cập nhật địa chỉ mà không destroy, hoặc dùng `terraform state mv`.\n2. **Đổi thuộc tính thật sự cần replace** (tên instance, engine, subnet group...): trước hết hỏi có thực sự cần đổi không. Nếu bắt buộc, lập kế hoạch migration riêng:\n   - tạo DB mới song song;\n   - restore/replicate dữ liệu;\n   - cutover;\n   - xóa DB cũ sau, ở một thay đổi khác.\n3. **Diff giả do hệ thống khác sửa thuộc tính:** dùng `ignore_changes` có chủ đích.\n4. **Resource được tạo ngoài Terraform:** dùng import, không tạo mới.\n\n**`create_before_destroy`:** tạo bản mới trước rồi mới xóa bản cũ. Giảm downtime cho resource stateless (launch template, certificate). Nhưng đây là opt-in vì nhiều object yêu cầu tên duy nhất, và với DB nó không giải quyết được chuyện dữ liệu.\n\n**Rào chắn lâu dài:**\n- **`prevent_destroy = true`** trong `lifecycle` cho DB, bucket, KMS key: plan nào phải destroy chúng sẽ bị từ chối kèm lỗi.\n  - Giới hạn: nó không bảo vệ khi xóa luôn block resource khỏi cấu hình.\n  - Vì vậy cần kết hợp deletion protection phía dịch vụ cloud và backup độc lập.\n- **Policy-as-code trên plan JSON** (`terraform show -json plan.out`): chặn PR có hành động delete/replace với resource được gắn nhãn stateful; yêu cầu approval riêng cho những PR đó.\n- **Apply đúng plan file đã review** (`terraform apply plan.out`), không plan lại lúc apply.\n- **Khi chủ ý muốn thay thế** (ví dụ instance hỏng): dùng `-replace=ADDRESS` để hành động hiện tường minh trong plan.\n\n**Đánh đổi:** thêm approval làm thay đổi hợp lệ chậm hơn, chấp nhận được với resource không tái tạo được.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": ["terraform", "lifecycle", "prevent-destroy", "plan-review", "data-safety"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle",
+      "https://developer.hashicorp.com/terraform/language/modules/develop/refactoring",
+      "https://developer.hashicorp.com/terraform/cli/commands/plan"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1208",
+    "topic_id": "devops.cloud.core-services",
+    "question": "Workload trên private subnet ở 3 AZ của AWS đi ra Internet và S3 qua một NAT gateway duy nhất đặt ở AZ-a. Hóa đơn NAT tăng mạnh (phần lớn traffic là đọc/ghi S3), và trong một sự cố ở AZ-a, workload ở AZ-b và AZ-c mất kết nối ra ngoài. Phân tích và thiết kế lại egress.",
+    "answer": "**Phân tích:**\n- **Availability:** NAT gateway (loại zonal) được tạo trong một AZ cụ thể và chỉ có dư thừa bên trong AZ đó. Khi nhiều AZ dùng chung một NAT, AZ chứa NAT sập là các AZ khác mất Internet. Đó là single point of failure theo AZ.\n- **Chi phí:** NAT tính tiền theo giờ và theo mỗi GB dữ liệu xử lý. Traffic S3 đi qua NAT bị tính phí xử lý. Traffic từ AZ-b/c sang NAT ở AZ-a còn chịu thêm phí data transfer liên AZ.\n\n**Thiết kế lại**\n1. **S3 và DynamoDB: dùng gateway VPC endpoint.**\n   - Không cần internet gateway hay NAT, và không tính thêm phí.\n   - Route table của subnet có route tới prefix list của dịch vụ, trỏ vào endpoint. Nhờ longest prefix match, traffic S3 cùng region đi qua endpoint dù vẫn có route `0.0.0.0/0`.\n   - Lưu ý: chỉ có tác dụng với dịch vụ cùng region (prefix list gắn với region). Security group phải cho phép outbound tới prefix list.\n   - Gắn endpoint policy để giới hạn bucket được truy cập, giảm rủi ro rò rỉ dữ liệu ra bucket lạ.\n2. **Dịch vụ AWS khác có traffic lớn** (registry, secrets...): dùng interface endpoint (PrivateLink). Loại này có phí riêng, nên cần tính điểm hòa vốn so với phí NAT.\n3. **Phần Internet egress còn lại**, chọn một trong hai:\n   - **NAT zonal ở mỗi AZ:** mỗi AZ có route table riêng trỏ tới NAT cùng AZ. Các AZ độc lập với nhau và không còn phí liên AZ, nhưng tốn thêm phí giờ.\n   - **Regional NAT gateway:** tự mở rộng hoặc thu hẹp theo những AZ có workload, không cần public subnet, chỉ một route chung. Giới hạn: không hỗ trợ private NAT, và khi mở rộng sang AZ mới có thể mất tới 60 phút; trong thời gian đó traffic được xử lý chéo zone.\n\n**Đánh đổi:** endpoint policy chặt đòi hỏi cập nhật mỗi khi thêm bucket hợp lệ.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": ["aws", "vpc", "nat-gateway", "vpc-endpoint", "high-availability"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-basics.html",
+      "https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateways-regional.html",
+      "https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-pricing.html",
+      "https://docs.aws.amazon.com/vpc/latest/privatelink/gateway-endpoints.html"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1209",
+    "topic_id": "devops.cloud.core-services",
+    "question": "Trong AWS Organizations có nhiều account, role CI ở account `tooling` assume role sang account `prod` để ghi file vào S3 bucket mã hóa bằng KMS key, và nhận `AccessDenied` dù policy của role đã có `Allow s3:PutObject`. Trình bày logic đánh giá policy của AWS và quy trình tìm ra lớp nào đang chặn.",
+    "answer": "**Logic đánh giá trong một account:**\n- Mặc định mọi request bị **implicit deny**.\n- AWS gom mọi policy áp dụng cho request: SCP, RCP, resource-based, identity-based, permissions boundary, session policy. Chỉ cần một **explicit Deny** ở bất kỳ đâu là kết quả cuối cùng là Deny.\n- Nếu không có explicit Deny:\n  - SCP/RCP phải có Allow. Chúng chỉ giới hạn, không cấp quyền.\n  - Identity-based policy hoặc resource-based policy phải Allow.\n  - Permissions boundary và session policy chỉ thu hẹp quyền (lấy giao).\n\n**Cross-account:** AWS đánh giá hai lần, một ở account gọi và một ở account sở hữu tài nguyên. Request chỉ được Allow khi **cả hai** cùng Allow.\n\n**Ba chặng trong kịch bản này:**\n1. **Assume role:** trust policy của role trong prod phải cho phép principal từ tooling, và principal đó phải được phép `sts:AssumeRole`.\n2. **Ghi S3:** sau khi assume, request là của role session trong prod.\n   - Cần identity policy của role đó Allow.\n   - Bucket policy có thể chứa explicit Deny theo condition: bắt buộc TLS, bắt buộc đúng KMS key, chỉ cho phép đi qua VPC endpoint nhất định.\n3. **KMS:** object mã hóa SSE-KMS đòi hỏi quyền trên key. Key policy là ngoại lệ: nó phải cho phép principal một cách tường minh, hoặc ủy quyền cho IAM policy của account.\n\nSCP của OU chứa prod và permissions boundary của role cũng có thể là lớp chặn.\n\n**Quy trình tìm lớp chặn:**\n1. Đọc kỹ thông báo lỗi; nhiều dịch vụ cho biết loại policy gây ra lệnh từ chối.\n2. Tra CloudTrail theo `errorCode` AccessDenied: xác định principal thực (ARN của role session), action, resource, và account ghi nhận lỗi.\n3. Kiểm tra theo thứ tự chặng: AssumeRole có thành công không, rồi SCP, permissions boundary, identity policy, bucket policy (đặc biệt Deny kèm condition), cuối cùng key policy.\n\n**Nguyên tắc least privilege:**\n- Không \"mở toang\" `s3:*` hay `kms:*` cho chạy được; chỉ cấp action và resource cụ thể.\n- CI nên dùng credential ngắn hạn (OIDC federation) thay cho access key dài hạn.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": ["aws", "iam", "policy-evaluation", "cross-account", "least-privilege"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html",
+      "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic_policy-eval-denyallow.html",
+      "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic-cross-account.html"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1210",
+    "topic_id": "devops.net.reverse-proxy-tls",
+    "question": "Sau khi đặt API phía sau ALB và một tầng nginx, rate limiting theo IP của ứng dụng chặn nhầm hàng loạt người dùng vì mọi request đều có \"cùng một IP\". Team sửa bằng cách đọc phần tử đầu tiên của `X-Forwarded-For`, và kẻ tấn công lập tức vượt qua rate limit. Giải thích chuỗi tin cậy của client IP qua các tầng proxy và cách cấu hình đúng.",
+    "answer": "**Vì sao app thấy \"cùng một IP\":** mỗi proxy mở kết nối TCP mới tới upstream, nên app chỉ thấy IP của proxy liền trước (nginx). Client IP thật chỉ còn nằm trong header do các proxy thêm vào.\n\n**XFF hoạt động thế nào:**\n- Ở chế độ `append` (mặc định của ALB), proxy nối IP của kết nối mà nó nhận được vào **cuối** `X-Forwarded-For`.\n- Nếu client tự gửi sẵn XFF, giá trị đó vẫn đứng ở đầu danh sách.\n- Phần tử đầu tiên vì thế là thứ client tự khai, có thể giả mạo tùy ý. AWS cảnh báo XFF chỉ đáng tin khi được thêm bởi hệ thống được bảo vệ trong mạng.\n\n**Cách đọc đúng:** đi từ **phải sang trái**, bỏ qua các IP thuộc proxy tin cậy, và lấy địa chỉ đầu tiên không tin cậy. Với nginx:\n\n```nginx\nset_real_ip_from 10.0.0.0/16;   # CIDR của ALB/VPC\nreal_ip_header   X-Forwarded-For;\nreal_ip_recursive on;           # lấy địa chỉ không tin cậy cuối cùng\n```\n\n- Nếu dùng load balancer L4 kèm PROXY protocol: `real_ip_header proxy_protocol`.\n- Ở tầng ứng dụng, cấu hình \"trusted proxies\" của framework (theo CIDR hoặc số hop), không tự parse header.\n\n**Chặn đường vòng:** backend chỉ được nhận kết nối từ proxy (security group, network policy). Nếu không, client gọi thẳng backend kèm header giả, và mọi cấu hình trên trở nên vô nghĩa.\n\n**Liên quan TLS termination:**\n- Terminate TLS ở ALB: app dựa vào `X-Forwarded-Proto` để biết scheme gốc (redirect, cookie `Secure`). Header này cũng chỉ đáng tin khi đến từ proxy tin cậy.\n- Cần mã hóa tới tận backend: dùng re-encrypt (ALB gọi target bằng HTTPS), hoặc TLS passthrough ở L4. Passthrough mất khả năng routing L7 và không chèn được header, nên phải dùng PROXY protocol để giữ client IP.\n\n**Thiết kế rate limit:**\n- Đặt ở edge (WAF, ALB, nginx), dùng khóa đáng tin: IP đã chuẩn hóa, hoặc user id/API key cho người dùng đã đăng nhập.\n- Lưu ý NAT/CGNAT khiến nhiều người dùng thật chung một IP, nên limit chỉ theo IP dễ chặn nhầm.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": [
+      "reverse-proxy",
+      "x-forwarded-for",
+      "nginx",
+      "tls-termination",
+      "rate-limiting"
+    ],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/x-forwarded-headers.html",
+      "https://nginx.org/en/docs/http/ngx_http_realip_module.html"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1211",
+    "topic_id": "devops.net.reverse-proxy-tls",
+    "question": "Endpoint `/health` dùng cho load balancer kiểm tra luôn kết nối tới DB và Redis. Một lần DB chậm vài phút, mọi target bị đánh unhealthy và hệ thống sập hẳn, kể cả các endpoint không cần DB. Phân tích failure mode này và thiết kế lại health check ở tầng load balancer/proxy.",
+    "answer": "**Failure mode:** health check \"sâu\" biến lỗi của một dependency dùng chung thành lỗi đồng loạt của **mọi** instance. Load balancer rút tất cả khỏi rotation, và một sự cố lẽ ra chỉ làm hệ thống degraded trở thành outage toàn phần. Liveness probe sâu còn tệ hơn: restart storm dồn tải lên chính DB đang yếu.\n\n**Hành vi khác nhau giữa các load balancer:**\n- **ALB:** khi mọi target trong target group đều unhealthy, ALB **fail open**, tức là route tới tất cả target bất kể trạng thái health. Health check sâu vì vậy không bảo vệ được gì khi sự cố là chung, chỉ gây nhiễu và chậm hồi phục.\n\n**Thiết kế lại**\n1. **Tách ba loại tín hiệu:**\n   - **Health cho LB/liveness:** nông và nhanh, chỉ trả lời \"process này còn phục vụ được không\", không phụ thuộc dependency dùng chung.\n   - **Readiness:** phản ánh trạng thái của chính instance (đã warm-up chưa, có đang shutdown không).\n   - **Dependency health:** đưa vào metric và alert, không dùng làm lý do rút instance.\n2. **Xử lý lỗi dependency ngay trong request path:** timeout, circuit breaker, trả lỗi nhanh hoặc degrade (dùng cache, chế độ read-only) cho endpoint cần DB. Endpoint không cần DB vẫn phục vụ bình thường.\n3. **Chỉ lỗi cục bộ mới làm instance unhealthy:** đĩa đầy, thread pool cạn, deadlock. Rút instance ra trong những trường hợp này thật sự có ích.\n4. **Tinh chỉnh tham số:**\n   - Mặc định của ALB (instance/ip): interval 30 giây, timeout 5 giây, unhealthy threshold 2, healthy threshold 5. Cân bằng giữa phát hiện nhanh và flapping.\n   - Passive check của nginx mặc định `max_fails=1`, `fail_timeout=10s`: chỉ một lỗi là server bị loại 10 giây. Lỗi do một truy vấn chậm có thể loại oan, nên cân nhắc tăng `max_fails`.\n   - `proxy_next_upstream` chỉ retry request idempotent; giới hạn số lần retry để tránh nhân tải khi cả cụm đang quá tải.\n\n**Câu hỏi kiểm tra:** \"rút instance này ra có giúp gì không?\" Lỗi chung mọi instance thì không, và health check không nên fail.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": ["load-balancer", "health-check", "cascading-failure", "nginx", "resilience"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-health-checks.html",
+      "https://nginx.org/en/docs/http/ngx_http_upstream_module.html",
+      "https://nginx.org/en/docs/http/ngx_http_proxy_module.html"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1212",
+    "topic_id": "devops.observability.monitoring",
+    "question": "On-call nhận hơn trăm alert mỗi tuần từ các rule kiểu \"error rate > 1% trong 5 phút\" hay \"CPU > 80%\", phần lớn không cần hành động gì; trong khi một sự cố suy giảm chậm kéo dài nhiều giờ lại không ai được báo. Bạn thiết kế lại alerting dựa trên SLO như thế nào?",
+    "answer": "**Chẩn đoán**\n- Alert theo **nguyên nhân** (CPU, memory) không gắn với ảnh hưởng tới người dùng.\n- Alert theo ngưỡng error rate thô có precision thấp: nó bắn cả khi sự kiện không đe dọa SLO. Ví dụ trong SRE Workbook: 0,1% lỗi kéo dài 10 phút chỉ tiêu khoảng 0,02% error budget của tháng.\n- Ngược lại, lỗi nhỏ kéo dài, luôn nằm dưới ngưỡng, âm thầm ăn hết budget mà không alert nào bắn.\n\n**Thiết kế lại**\n1. **SLI theo hành trình người dùng:** tỉ lệ request thành công, tỉ lệ request nhanh hơn một ngưỡng, đo ở điểm gần người dùng (load balancer, ingress). Ví dụ SLO 99,9% trong 30 ngày cho error budget 0,1%.\n2. **Burn rate:** tốc độ tiêu error budget so với SLO. Burn rate bằng 1 nghĩa là tiêu vừa hết budget đúng vào cuối chu kỳ SLO.\n3. **Multiwindow, multi-burn-rate** (SRE Workbook, với SLO 99,9%):\n   - **Page:** burn rate 14,4 trong 1 giờ (tiêu 2% budget) hoặc 6 trong 6 giờ (5% budget).\n   - **Ticket:** burn rate 1 trong 3 ngày (10% budget).\n   - Mỗi điều kiện cửa sổ dài đi kèm một cửa sổ ngắn (ví dụ 5 phút cho cửa sổ 1 giờ), và alert chỉ bắn khi cả hai cùng vượt. Nhờ vậy alert ngừng bắn sớm khi sự cố đã hết, có reset time tốt.\n   - Bắt được cả sự cố nhanh lẫn suy giảm chậm kéo dài, đúng loại đang bị lọt.\n4. **Phân tầng:**\n   - Chỉ page khi cần người can thiệp ngay và người dùng đang bị ảnh hưởng.\n   - Phần còn lại thành ticket hoặc dashboard.\n   - CPU/disk thành cảnh báo dự báo hoặc chỉ hiển thị trên dashboard.\n5. **Vệ sinh alert:** mỗi alert có owner và runbook; alert không dẫn tới hành động thì xóa hoặc hạ cấp.\n\n**Đánh đổi:**\n- Cần dữ liệu SLI chất lượng.\n- Service traffic thấp có tỉ lệ dao động mạnh, nên cần đặt số request tối thiểu cho điều kiện alert hoặc bổ sung synthetic probe.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": ["slo", "error-budget", "burn-rate", "alerting", "alert-fatigue"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": ["https://sre.google/workbook/alerting-on-slos/"]
+  },
+  {
+    "qa_id": "de-qa-1213",
+    "topic_id": "devops.observability.monitoring",
+    "question": "Sau khi team thêm label `user_id` và `path` (URL đầy đủ) vào metric `http_request_duration_seconds`, RAM của Prometheus tăng liên tục rồi OOM. Cùng lúc, dashboard \"p99 latency toàn hệ thống\" đang được tính bằng cách lấy trung bình p99 từ summary của từng pod. Phân tích hai vấn đề này và cách instrument lại metric latency cho đúng.",
+    "answer": "**Vấn đề 1: bùng nổ cardinality**\n- Mỗi tổ hợp giá trị label là một time series riêng, và mỗi series tốn RAM, CPU, disk và network.\n- `user_id` và URL đầy đủ (chứa id, như `/orders/123`) là các tập giá trị không giới hạn. Số series bị nhân lên theo: user × path × status × số bucket (mỗi bucket của histogram là một series) × số pod. Dữ liệu trong RAM phình to và Prometheus OOM.\n- Prometheus khuyến nghị không dùng label có cardinality cao như user ID hay email; giữ cardinality phần lớn metric dưới 10, và tìm giải pháp khác cho metric có thể vượt 100.\n\n**Cách sửa:**\n- Bỏ `user_id`. Thay `path` bằng route template (`/orders/:id`) lấy từ router.\n- Nhu cầu phân tích theo từng user chuyển sang log hoặc trace (kèm trace id), hoặc hệ thống phân tích chuyên dụng.\n- Phòng ngừa: theo dõi trang TSDB status, đặt `sample_limit` trong scrape config, review label khi code review.\n\n**Vấn đề 2: tính percentile sai**\n- Summary tính quantile ngay phía client, mỗi pod ra một giá trị riêng. Các quantile này **không aggregate được**: lấy trung bình chúng là vô nghĩa về thống kê. p99 toàn hệ thống khác trung bình p99 của từng pod, vì pod ít traffic kéo lệch kết quả.\n- Dùng histogram: cộng bucket của mọi pod trước, rồi mới tính quantile.\n\n```promql\nhistogram_quantile(0.99,\n  sum by (le) (rate(http_request_duration_seconds_bucket[5m])))\n```\n\n- Sai số của ước lượng nằm trong độ rộng của bucket chứa quantile, nên đặt bucket dày quanh ngưỡng SLO (ví dụ 300 ms).\n- Với SLO dạng \"x% request dưới 300 ms\", tính trực tiếp tỉ lệ `rate(..._bucket{le=\"0.3\"})` chia `rate(..._count)`. Cách này chính xác hơn việc ước lượng p99.\n- Nếu hạ tầng hỗ trợ, Prometheus khuyến nghị native histogram hơn cả classic histogram lẫn summary.\n\n**Đánh đổi:**\n- Thêm bucket làm tăng số series, nên cần cân bằng giữa độ chính xác và cardinality.\n- Bỏ label làm mất một chiều phân tích; bù bằng trace và log.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": ["prometheus", "cardinality", "histogram", "percentile", "instrumentation"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://prometheus.io/docs/practices/naming/",
+      "https://prometheus.io/docs/practices/instrumentation/",
+      "https://prometheus.io/docs/practices/histograms/"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1214",
+    "topic_id": "devops.security.secrets-hardening",
+    "question": "Một developer vô tình push access key AWS dài hạn lên repo GitHub, 20 phút sau mới phát hiện; key này cũng đang được CI sử dụng. Trình bày quy trình xử lý sự cố theo thứ tự ưu tiên, và những thay đổi kiến trúc để loại bỏ cả lớp rủi ro này.",
+    "answer": "**Nguyên tắc:** coi secret đã lộ là đã bị khai thác. Ưu tiên cắt quyền trước, dọn dấu vết sau.\n\n**Thứ tự xử lý**\n1. **Thu hồi và rotate ngay lập tức:** vô hiệu hóa key, cấp credential mới cho các nơi dùng hợp lệ. Chấp nhận CI gãy tạm thời còn hơn để key tiếp tục sống.\n2. **Điều tra phạm vi bằng audit log** (CloudTrail) từ thời điểm push: API call hay region lạ, user/key/role mới được tạo (cửa hậu), tài nguyên bất thường, truy cập dữ liệu.\n3. **Khoanh vùng và khắc phục:** xóa tài nguyên lạ, thu hồi mọi credential phát sinh.\n4. **Dọn repo:** viết lại lịch sử bằng `git-filter-repo`. Việc này chỉ giảm phơi nhiễm, không thu hồi được secret: nó vẫn có thể tồn tại trong các clone, fork, cached view theo SHA, và pull request có tham chiếu. Vì thế bước 1 mới là bước quyết định.\n\n**Thay đổi kiến trúc**\n- **Bỏ hẳn credential dài hạn trong CI, chuyển sang OIDC federation:** cloud kiểm tra claim của OIDC token (repo, branch, environment) theo trust condition đã cấu hình, rồi cấp token ngắn hạn chỉ hợp lệ cho một job và tự hết hạn. Không còn secret nào để lộ.\n- **Workload chạy trên cloud** dùng role gắn với instance hoặc pod. **Con người** dùng SSO với credential tạm thời.\n- **Secret còn lại** tập trung trong secret manager, cấp động, rotate tự động, phân quyền least privilege theo môi trường.\n- **Chặn từ gốc:** bật secret scanning push protection để chặn push chứa secret trước khi vào repo. Người có quyền ghi vẫn bypass được, nhưng mỗi lần bypass đều tạo alert và audit log. Bổ sung pre-commit hook quét secret.\n\n**Đánh đổi:** OIDC đòi hỏi cấu hình trust policy cẩn thận. Điều kiện quá lỏng (wildcard repo hoặc branch) có thể cho repo khác hay workflow từ PR assume được role production.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": [
+      "secret-management",
+      "incident-response",
+      "oidc",
+      "audit-log",
+      "least-privilege"
+    ],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository",
+      "https://docs.github.com/en/actions/concepts/security/openid-connect",
+      "https://docs.github.com/en/code-security/secret-scanning/introduction/about-push-protection"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1215",
+    "topic_id": "devops.security.secrets-hardening",
+    "question": "Image production của team bị scanner báo hàng trăm CVE, trong đó vài chục mức Critical. Developer phàn nàn rằng chặn pipeline theo mọi CVE thì không deploy được gì, còn bỏ chặn thì không ai xử lý. Thiết kế quy trình quét lỗ hổng và vá image bền vững.",
+    "answer": "**Nguyên nhân gốc thường gặp:**\n- Base image lớn và cũ, kéo theo nhiều package không dùng đến.\n- Image build một lần rồi chạy hàng tháng mà không rebuild.\n\n**1. Giảm bề mặt tấn công**\n- Chọn base image nhỏ từ nguồn tin cậy (minimal/distroless): ít package thì ít CVE.\n- Dùng multi-stage build để image cuối chỉ chứa artifact cần chạy, không có compiler hay công cụ build.\n\n**2. Vá theo nhịp cố định**\n- Rebuild định kỳ kể cả khi code không đổi, với `--pull` (lấy base mới) và `--no-cache` khi cần cài lại dependency.\n- Pin base theo digest để build tái lập được. Nhưng pin đồng nghĩa với tự từ chối bản vá tự động, nên cần bot (Dependabot, Renovate) mở PR cập nhật tag/digest theo lịch.\n\n**3. Quét ở nhiều điểm**\n- **Trong CI**, trên image vừa build, với gate theo chính sách: chặn CVE Critical/High **đã có bản fix** và **mới phát sinh** so với baseline. CVE chưa có fix thì theo dõi, không chặn.\n- **Quét lại định kỳ** các image đang chạy, vì CVE mới vẫn được công bố sau khi image đã build xong.\n- **Admission control** chỉ cho chạy image từ registry tin cậy, đã qua scan và được ký.\n\n**4. Triage có kỷ luật**\n- Ưu tiên theo khả năng khai thác trong ngữ cảnh thật (package có được load không, có expose ra mạng không), không chỉ dựa vào điểm CVSS.\n- Mỗi ngoại lệ có thời hạn, owner và lý do được ghi lại.\n- Duy trì SBOM để biết nhanh image nào chứa thư viện bị lỗi.\n\n**5. Dependency của ứng dụng**\n- Không vội nâng lên bản vừa phát hành nếu chưa tin tác giả, vì bản cập nhật mới là mục tiêu ưa thích của tấn công supply chain.\n\n**Đo lường:** số CVE Critical đã có fix tồn tại quá N ngày, tuổi trung bình image đang chạy.\n\n**Đánh đổi:** rebuild thường xuyên tăng tải CI và rủi ro thay đổi ngoài ý muốn; bù bằng test tự động và rollout dần.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": [
+      "vulnerability-scanning",
+      "container-security",
+      "patch-management",
+      "supply-chain",
+      "docker"
+    ],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.docker.com/build/building/best-practices/",
+      "https://github.com/bregman-arie/devops-exercises/blob/HEAD/topics/security/README.md"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1216",
+    "topic_id": "devops.cicd.pipelines",
+    "question": "Team chạy canary 10% traffic cho phiên bản mới của một service, nhưng phiên bản này đổi tên cột `fullname` thành `display_name` trong database dùng chung. Migration chạy trước deploy làm phiên bản cũ (đang nhận 90% traffic) lỗi hàng loạt, và rollback app cũng không cứu được vì schema đã đổi. Bạn thiết kế lại quy trình release để canary và rollback vẫn an toàn khi có thay đổi schema như thế nào?",
+    "answer": "**Vấn đề:** canary (chuyển dần một phần traffic sang bản mới) và blue-green (chạy song song rồi chuyển toàn bộ, rollback nhanh) đều giả định **hai phiên bản chạy cùng lúc**. Nhưng database là trạng thái dùng chung, không có \"bản 1\" và \"bản 2\". Một migration phá vỡ tương thích ngược sẽ làm hỏng bản cũ ngay lập tức, và rollback app không rollback được schema hay dữ liệu.\n\n**Giải pháp: expand/contract (parallel change)**, tách thay đổi thành nhiều release, mỗi bước đều tương thích với cả phiên bản trước và sau:\n1. **Expand:** thêm cột `display_name` (nullable), không xóa hay đổi tên gì. Bản cũ không bị ảnh hưởng.\n2. **Dual-write:** deploy app ghi vào cả hai cột, vẫn đọc cột cũ. Chạy canary bình thường; rollback an toàn vì schema có đủ cả hai cột.\n3. **Backfill:** chuyển dữ liệu cũ sang cột mới theo lô, tránh khóa bảng lớn và theo dõi replication lag.\n4. **Chuyển đọc:** đọc từ cột mới, bật qua feature flag để tắt được mà không cần deploy.\n5. **Ngừng ghi cột cũ:** chỉ khi chắc chắn không còn phiên bản nào đang dùng nó.\n6. **Contract:** xóa cột cũ ở một release sau.\n\n**Thay đổi trong pipeline:**\n- **Migration là stage riêng**, chạy trước deploy, có kiểm tra tự động:\n  - chạy test của phiên bản đang chạy (N-1) trên schema mới;\n  - lint chặn `DROP`/`RENAME` cột còn được dùng trong cùng một release.\n- **Canary có phân tích tự động:** so sánh error rate và latency của canary với baseline; vượt ngưỡng thì tự động rollback app. Rollback app giờ đã an toàn vì schema luôn tương thích ngược.\n- **Build once, promote:** cùng một artifact (cùng digest) đi qua staging rồi production.\n\n**Đánh đổi:**\n- Một thay đổi nhỏ kéo dài qua nhiều release, và code tạm (dual-write) phải được dọn sau đó.\n- Đổi lại: zero-downtime và khả năng rollback ở mọi bước.\n- Bảng rất lớn cần thêm công cụ online schema change.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": [
+      "canary-deployment",
+      "database-migration",
+      "expand-contract",
+      "rollback",
+      "continuous-delivery"
+    ],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://github.com/bregman-arie/devops-exercises/blob/HEAD/topics/kubernetes/README.md"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1217",
+    "topic_id": "devops.cicd.pipelines",
+    "question": "Pipeline CI của một monorepo (nhiều service Node.js, mỗi service build một Docker image) mất khoảng 40 phút cho mỗi PR. Runner là máy tạm (ephemeral) nên lần nào cũng cài lại dependency và build image từ đầu. Bạn tối ưu thế nào mà vẫn giữ build đúng và an toàn?",
+    "answer": "**Đo trước khi tối ưu:** đo thời gian từng stage và tỉ lệ cache hit, rồi tối ưu chỗ tốn nhiều nhất.\n\n**1. Chỉ build phần bị ảnh hưởng**\n- Dựng đồ thị phụ thuộc giữa các package. PR chỉ đổi service A thì không build/test service B.\n- Đổi thư viện dùng chung thì kích hoạt mọi service phụ thuộc vào nó.\n\n**2. Cache dependency**\n- Tạo key từ hash lockfile (`hashFiles('**/package-lock.json')`), kèm `restore-keys` để dùng cache gần đúng khi lockfile đổi.\n- Lưu ý phạm vi của cache GitHub Actions: một run chỉ restore được cache của branch hiện tại hoặc default branch (PR thì thêm base branch). Vì vậy nên warm cache trên `main`.\n- Cache không được truy cập quá 7 ngày sẽ bị xóa; giới hạn mặc định 10 GB mỗi repo.\n- Không lưu thông tin nhạy cảm trong cache.\n\n**3. Docker layer cache**\n- Một layer thay đổi thì mọi layer sau nó đều phải build lại. Vì vậy sắp xếp Dockerfile: copy manifest và lockfile, cài dependency, rồi mới copy source.\n- Runner tạm không giữ cache giữa các lần chạy, nên phải dùng external cache: buildx `--cache-to`/`--cache-from` với backend registry hoặc gha.\n- `mode=max` cache cả layer của các stage trung gian; `min` (mặc định) chỉ cache layer có trong image cuối.\n\n**4. Song song hóa:** chia nhỏ test (sharding); chạy lint, test, build song song; mỗi service độc lập là một job trong matrix.\n\n**5. Build once, promote:** image chỉ build một lần, tag theo commit SHA, rồi deploy bằng digest qua dev, staging, production. Thứ đã được test chính là thứ chạy production.\n\n**Giữ build đúng và an toàn**\n- Cache chỉ là tối ưu: build phải cho kết quả đúng ngay cả khi cache miss. Định kỳ build không dùng cache để phát hiện phụ thuộc ngầm.\n- Chống cache poisoning: cache do PR không tin cậy ghi ra không được dùng cho build release. Build release chạy trên branch được bảo vệ.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": ["ci-cd", "build-cache", "monorepo", "docker-buildx", "github-actions"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.docker.com/build/cache/",
+      "https://docs.docker.com/build/cache/backends/",
+      "https://docs.github.com/en/actions/reference/workflows-and-actions/dependency-caching"
+    ]
+  }
+]
