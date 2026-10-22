@@ -1,0 +1,10 @@
+Ngô Bảo Ngọc
+AI Engineer
+Email chau.ngo@example.com
+Kinh nghiệm
+AI Engineer tại công ty sản phẩm (08/2024 - nay)
+Xây dựng chatbot RAG nội bộ bằng LangChain, pgvector, OpenAI API.
+Dự án: Trợ lý tra cứu tài liệu nội bộ
+Index 20.000 trang tài liệu, đánh giá bằng golden set 200 câu hỏi.
+- Recall@5 tăng từ 0.62 lên 0.81 sau khi đổi chunking
+Học vấn: Kỹ sư Khoa học dữ liệu 2024

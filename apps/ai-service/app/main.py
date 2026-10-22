@@ -11,7 +11,7 @@ from fastapi.responses import JSONResponse, StreamingResponse
 
 from .api_error import ApiError
 from .llm.usage import UsageCollector
-from .mock_cv_parser import parse_cv_bytes
+from .agents.cv_parser import get_cv_parser
 from .mock_planner import load_track
 from .models_cv import CvParseResponse
 from .models_interview import FinalizeRequest, NextTurnRequest, StartRequest
@@ -46,7 +46,7 @@ def health():
 @app.post("/api/cv/parse", response_model=CvParseResponse)
 async def cv_parse(file: UploadFile = File(...), track: str = Form(...)):
     load_track(track)  # 422 neu track khong co trong catalog
-    return parse_cv_bytes(await file.read(), track)
+    return await get_cv_parser().parse(await file.read(), track)
 
 
 def _usage_meta(started: float, collector: Optional[UsageCollector] = None) -> dict:
