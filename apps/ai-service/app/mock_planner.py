@@ -10,6 +10,7 @@ from .catalog.models import Scenario, Topic
 from .models_common import LEVEL_CONFIG
 from .models_cv import CvProfile
 from .models_jd import JdProfile
+from .plan_template import build_template
 from .models_interview import InterviewPlan, PlanPhase, PlanTopic
 
 
@@ -89,11 +90,10 @@ def _rank_with_jd(topics: List[Topic], skills: List[str], jd: Optional[JdProfile
 def build_plan(track: str, level: str, duration_minutes: int, cv: Optional[CvProfile],
                jd: Optional[JdProfile] = None) -> InterviewPlan:
     catalog = load_track(track)
-    cfg = LEVEL_CONFIG[level]
+    tpl = build_template(level, duration_minutes)
     skills = [s.name for s in cv.skills] if cv else []
-    scale = duration_minutes / 30
-    m_intro, m_tech, m_scn = (max(1, round(m * scale)) for m in cfg["minutes"])
-    n_tech = cfg["technical"] - (1 if duration_minutes <= 15 else 0)
+    m_intro, m_tech, m_scn = (tpl.minutes[p] for p in ("intro", "technical", "scenario"))
+    n_tech = tpl.topics["technical"]
 
     topics = _rank_with_jd(catalog.topics_for(level), skills, jd)[:n_tech]
     scenarios = _rank(catalog.scenarios_for(level), lambda s: s.title, skills)

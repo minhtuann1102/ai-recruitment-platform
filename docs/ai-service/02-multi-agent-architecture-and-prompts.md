@@ -250,6 +250,8 @@ trong catalog đã đưa; `cv_ref` tồn tại trong `cv_profile`; không trùng
 `[min, max]`; mỗi topic có `backup_question`. Không có CV hoặc `track_relevance = "low"` thì topic intro dùng
 `source = "generic"`.
 
+**Đã cài (2026-10-22):** `app/agents/planner.py` + `app/plan_validator.py` + `app/plan_template.py`. Khác thiết kế: LLM không trả `id` và `time_budget_min` (code gán theo khung); validator thêm hai luật (nội dung nghi injection; có yêu cầu `must` của JD ánh xạ được thì ≥ 1 topic technical theo JD); toàn bộ Planner (retry, repair) có hạn 22 s, quá hạn thì dùng plan dự phòng của `mock_planner`. Đầu vào thêm `jd_priority` và khối `jd_requirements`.
+
 **RAG ở bước plan:** sau khi plan hợp lệ, orchestrator lấy tối đa 3 chunk `interview_qa` / `textbook` cho
 mỗi topic (query = `title + key_points`), lưu `reference_snippets` (≤ 600 token / topic) vào plan. Evaluator
 dùng lại ở các lượt sau, **không phải gọi RAG mỗi lượt** (§9.2).

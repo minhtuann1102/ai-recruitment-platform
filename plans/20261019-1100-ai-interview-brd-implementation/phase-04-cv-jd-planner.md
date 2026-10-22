@@ -41,8 +41,8 @@ Số topic technical = `max(2, round(gốc × thời lượng / 30))`; turn cap 
 - [x] Contract JD cập nhật (docs + mock): `/api/jd/parse`, `jd_profile` trong `/api/start`
 - [x] CV Parser LLM + test (LLM giả); 10 CV mẫu + `evals/run_cv_samples.py` (parser quy tắc qua kiểm cứng; LLM thật chưa chạy)
 - [x] JD Parser LLM + test injection (LLM giả; parser quy tắc làm mặc định và dự phòng; LLM thật chưa chạy)
-- [ ] Planner LLM + validator + fallback + công thức 15–20
-- [ ] 10 CV mẫu ra profile hợp lệ; 3 CV injection không lọt
+- [x] Planner LLM + validator + fallback + công thức 15–20 (LLM giả; `reference_snippets` gắn sau plan; LLM thật chưa chạy)
+- [ ] 10 CV mẫu ra profile hợp lệ; 3 CV injection không lọt: parser quy tắc đã qua; chờ chạy `AGENT_CV_PARSER_MODE=llm python -m evals.run_cv_samples` với khóa thật
 
 ## Success Criteria
 - Plan hợp lệ 100% (kể cả khi LLM lỗi nhờ fallback); có CV liên quan thì topic intro `source = cv`; có `jd_profile` thì ≥ 1 topic technical ưu tiên theo JD; injection không đổi plan.

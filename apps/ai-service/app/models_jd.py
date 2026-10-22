@@ -25,6 +25,10 @@ class JdProfile(BaseModel):
     requirements: List[JdRequirement] = Field(default_factory=list, max_length=15)
     flags: JdFlags = Field(default_factory=JdFlags)
 
+    def must_topic_ids(self) -> List[str]:
+        """Chi topic tu yeu cau bat buoc: validator chi ep phai co topic JD khi yeu cau la must."""
+        return list(dict.fromkeys(t for r in self.requirements if r.kind == "must" for t in r.topic_ids))
+
     def priority_topic_ids(self) -> List[str]:
         """Topic theo thu tu uu tien cho Planner (FR-AI-023): must truoc, nice sau, khong trung."""
         ordered: List[str] = []
