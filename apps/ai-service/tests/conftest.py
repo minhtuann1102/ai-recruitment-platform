@@ -21,3 +21,7 @@ def parse_sse(text: str) -> List[Tuple[str, dict]]:
         data = next(l[6:] for l in lines if l.startswith("data: "))
         events.append((name, json.loads(data)))
     return events
+
+
+def pytest_configure(config):
+    config.addinivalue_line("markers", "integration: can Postgres + pgvector that (AI_DB_TEST_URL), bo qua trong CI")
