@@ -11,7 +11,7 @@ from .agents.evaluator_provider import Evaluator, get_evaluator
 from .api_error import ApiError
 from .llm.usage import UsageCollector
 from .mock_evaluator import fold
-from .agents.interviewer import QuestionSpec
+from .agents.interviewer import QuestionSpec, safe_focus
 from .agents.planner import get_planner
 from .mock_planner import load_track
 from .plan_snippets import attach_reference_snippets, get_retriever
@@ -118,7 +118,7 @@ async def next_turn(req: NextTurnRequest, evaluator: Optional[Evaluator] = None,
     action, phase_changed, next_pos = apply_action(state, topics, pos, dec.action, dec.difficulty_delta,
                                                    req.elapsed_seconds)
     n_phase, n_topic = (topics[next_pos] if next_pos is not None else ("wrap_up", None))
-    spec = QuestionSpec(action, n_phase, n_topic, state.current_difficulty, focus=dec.focus,
+    spec = QuestionSpec(action, n_phase, n_topic, state.current_difficulty, focus=safe_focus(dec.focus),
                         last_question=req.question, last_answer=req.answer, phase_changed=phase_changed,
                         asked_on_topic=[t.q for t in req.topic_turns] + [req.question] if action != "ask_main" else [],
                         time_hint=_time_hint(req.elapsed_seconds, plan, n_phase))

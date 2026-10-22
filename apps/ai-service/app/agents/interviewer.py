@@ -9,7 +9,7 @@ import os
 from dataclasses import dataclass, field
 from typing import AsyncIterator, List, Optional
 
-from .. import mock_interviewer
+from .. import cv_text, mock_interviewer
 from ..llm.gateway import LlmGateway
 from ..llm.usage import UsageCollector
 from ..models_interview import PlanTopic
@@ -34,6 +34,14 @@ class QuestionSpec:
     time_hint: str = "normal"  # normal | hurry
 
 
+def safe_focus(focus: Optional[str]) -> Optional[str]:
+    """focus lay tu missing_points cua Evaluator, ma Evaluator doc cau tra loi khong tin cay: cat do dai va bo
+    neu nghi injection truoc khi dua vao prompt Interviewer hay cau du phong."""
+    if not focus or cv_text.has_injection(focus):
+        return None
+    return " ".join(focus.split())[:150]
+
+
 def fallback_question(spec: QuestionSpec) -> str:
     """Cau mau bang code: backup_question cua topic khi ask_main, mau co dinh cho cac hanh dong khac."""
     return mock_interviewer.compose(spec.action, spec.topic, spec.phase, spec.focus, spec.last_question,
@@ -42,13 +50,14 @@ def fallback_question(spec: QuestionSpec) -> str:
 
 def build_messages(system: str, spec: QuestionSpec) -> List[dict]:
     topic = spec.topic
-    data = {"action": spec.action, "phase": spec.phase, "difficulty": spec.difficulty, "focus": spec.focus,
+    data = {"action": spec.action, "phase": spec.phase, "difficulty": spec.difficulty,
             "first_turn": spec.first_turn, "time_hint": spec.time_hint,
             "topic": {"title": topic.title, "objective": topic.objective, "opening_hint": topic.opening_hint}
             if topic else None,
             "transition": {"phase_changed": spec.phase_changed} if spec.action == "ask_main" else None,
             "last_question": spec.last_question, "asked_questions_on_topic": spec.asked_on_topic[-5:]}
-    user = json.dumps(data, ensure_ascii=False) + "\n\n" + wrap_untrusted("last_answer", spec.last_answer[:2000])
+    user = "\n\n".join([json.dumps(data, ensure_ascii=False), wrap_untrusted("focus", spec.focus or "(không có)"),
+                        wrap_untrusted("last_answer", spec.last_answer[:2000])])
     return [{"role": "system", "content": f"{system}\n\n{UNTRUSTED_NOTICE}"}, {"role": "user", "content": user}]
 
 
