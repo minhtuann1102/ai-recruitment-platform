@@ -127,7 +127,7 @@ Chú giải màu: xanh lá = đã có trong repo; vàng = mock; xám nét đứt
 | I1 | Web App | API Gateway | HTTPS, JSON và SSE qua `fetch` | Mọi lời gọi của ứng viên | JWT | `EventSource` không dùng được vì cần header `Authorization` và POST (D06 §7.5) |
 | I2 | API Gateway | interview-service | HTTP | Định tuyến `/interview/*` | Gateway verify JWT, inject `x-auth-user` | `timeout.read` upstream ≥ 60 s cho SSE |
 | I3 | API Gateway | ai-service | HTTP | **Chỉ** `GET /ai/api/health` | Công khai | Route còn lại yêu cầu JWT trong cấu hình hiện tại; mục tiêu là chặn hẳn (SEC01) |
-| I4 | interview-service | ai-service | REST/HTTP, SSE | `cv/parse`, `jd/parse`, `start`, `next-turn`, `finalize`, `health` | Header `X-Internal-Token` (chưa làm) | 30 s, 40 s, 45 s, 90 s, 5 s (D06 §7.4); snake_case ở biên, ánh xạ camelCase làm ở client |
+| I4 | interview-service | ai-service | REST/HTTP, SSE | `cv/parse`, `jd/parse`, `start`, `next-turn`, `finalize`, `health` | Header `X-Internal-Token` (đã cài ở ai-service 2026-10-22, biến `AI_SERVICE_INTERNAL_TOKEN`) | 30 s, 40 s, 45 s, 90 s, 5 s (D06 §7.4); snake_case ở biên, ánh xạ camelCase làm ở client |
 | I5 | interview-service | job-service | NestJS TCP | `application.getCvFile`: kiểm tra application thuộc ứng viên, trả presigned URL | Nội bộ | Kiểm quyền sở hữu là bắt buộc (D10 P9) |
 | I16 | interview-service | job-service | NestJS TCP | `application.getJobDescription`: JD của job gắn application, kiểm application thuộc ứng viên | Nội bộ | S2-FSD-11 (đề xuất, chờ FSD xác nhận); JD thô được gửi tới ai-service qua I4, không lưu |
 | I6 | interview-service | MinIO / S3 | HTTPS, presigned URL | Tải file CV, stream, tối đa 10 MB, không ghi đĩa | URL có hạn 5 phút | |
