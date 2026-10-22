@@ -1,7 +1,7 @@
 # Trạng thái dự án (cập nhật 2026-10-22)
 
 ## Kế hoạch
-`plans/20261019-1100-ai-interview-brd-implementation/` (9 phase, đã có trên `main`). Phase 01 **đã merge** (PR #9–#12, 2026-10-19). Phase 02 (`thang/llm-foundation`, PR #13) CI xanh, chờ review. Phase 03 **xong code đường đọc RAG** (`thang/rag-read-path`, xếp chồng trên #13, chờ review); đo recall@5 chờ DE nạp dữ liệu và duyệt golden set. Phase 05 đang làm: Evaluator LLM xong code (`thang/evaluator-llm`), golden set + công cụ đo ở `thang/evaluator-golden-set` (chờ 2 người gán nhãn). Phase 04 xong code (3 PR xếp chồng trên #16: CV Parser LLM, JD Parser, Planner LLM + RAG snippet).
+`plans/20261019-1100-ai-interview-brd-implementation/` (9 phase, đã có trên `main`). Phase 01 **đã merge** (PR #9–#12, 2026-10-19). Phase 02 (`thang/llm-foundation`, PR #13) CI xanh, chờ review. Phase 03 **xong code đường đọc RAG** (`thang/rag-read-path`, xếp chồng trên #13, chờ review); đo recall@5 chờ DE nạp dữ liệu và duyệt golden set. Phase 05 đang làm: Evaluator LLM xong code (`thang/evaluator-llm`), golden set + công cụ đo ở `thang/evaluator-golden-set` (chờ 2 người gán nhãn). Phase 04 xong code (#17–#19). Phase 06 xong code (4 PR xếp chồng trên #19). Tiếp theo: Phase 07 (tích hợp, đo, simulator).
 
 ## Nhánh và PR
 | Nhánh | PR | Trạng thái |
@@ -14,9 +14,13 @@
 | `thang/rag-read-path` | #14 | Phase 03: `app/rag/` đường đọc, golden set RAG bản nháp, `evals/run_rag.py`; 207 test + 5 test tích hợp |
 | `thang/evaluator-llm` | #15 | Phase 05 phần 1: Evaluator LLM, hậu kiểm bằng code, prompt v1 có mẫu neo; 248 test; xếp chồng trên #14 |
 | `thang/evaluator-golden-set` | #16 | Phase 05 phần 2: golden set 48 mẫu (chưa nhãn), phiếu gán nhãn, `evals/run_evaluator.py`; 253 test; xếp chồng trên #15 |
-| `thang/cv-parser-llm` | (mới) | Phase 04: CV Parser LLM, 10 CV mẫu; xếp chồng trên #16 |
-| `thang/jd-parser` | (mới) | Phase 04: `/api/jd/parse`, `jd_profile` trong start |
-| `thang/planner-llm` | (mới) | Phase 04: Planner LLM, validator, khung 15–20 phút, `reference_snippets`; 321 test |
+| `thang/cv-parser-llm` | #17 | Phase 04: CV Parser LLM, 10 CV mẫu; xếp chồng trên #16 |
+| `thang/jd-parser` | #18 | Phase 04: `/api/jd/parse`, `jd_profile` trong start |
+| `thang/planner-llm` | #19 | Phase 04: Planner LLM, validator, khung 15–20 phút, `reference_snippets`; 321 test |
+| `thang/orchestrator-limits` | (mới) | Phase 06: hạn cứng, ngân sách phase/topic, turn cap theo thời lượng |
+| `thang/interviewer-llm` | (mới) | Phase 06: Interviewer stream, fallback, `replace`, chống lặp |
+| `thang/reporter-llm` | (mới) | Phase 06: Reporter, `partial`, khối `requirements` |
+| `thang/internal-token-auth` | (mới) | Phase 06: `X-Internal-Token`; 355 test |
 
 Quy ước merge của owner: merge commit (không squash). Tiêu đề PR dạng `[scope] type: mô tả`.
 

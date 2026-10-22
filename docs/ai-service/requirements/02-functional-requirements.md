@@ -128,7 +128,7 @@
 | ID | Yêu cầu | Ưu tiên | Tiêu chí chấp nhận | Nguồn | Task | Trạng thái |
 |---|---|---|---|---|---|---|
 | FR-AI-090 | ai-service cung cấp các endpoint nội bộ: `POST /api/cv/parse` (JSON, timeout phía gọi 30 s), `POST /api/start` (SSE, 40 s, event đầu ≤ 25 s), `POST /api/next-turn` (SSE, 45 s, event đầu ≤ 15 s), `POST /api/finalize` (JSON, 90 s), `GET /api/health` (5 s) | Must | Khớp [contract](../06-api-contract.md) §7.4; mapping snake_case và camelCase làm ở biên client (FSD) | D06 §7.4, CON III | S2-AIE-4 | Mock |
-| FR-AI-091 | ai-service **chỉ nhận request nội bộ**: các endpoint khác `health` yêu cầu header `X-Internal-Token`; gateway chỉ expose `/ai/api/health` | Must | Gọi trực tiếp không token → 401; route `/ai/*` khác `health` không public qua APISIX | D06 §7.1, D10 P5 | S2-AIE-4 | Chưa (route APISIX có, token chưa) |
+| FR-AI-091 | ai-service **chỉ nhận request nội bộ**: các endpoint khác `health` yêu cầu header `X-Internal-Token`; gateway chỉ expose `/ai/api/health` | Must | Gọi trực tiếp không token → 401; route `/ai/*` khác `health` không public qua APISIX | D06 §7.1, D10 P5 | S2-AIE-4 | Một phần (middleware `app/security.py`: mọi endpoint trừ `/api/health` cần `X-Internal-Token` khớp `AI_SERVICE_INTERNAL_TOKEN`, so sánh hằng thời gian, sai → 401; chưa đặt biến thì không kiểm khi `APP_ENV=dev` (dev/CI), còn staging/production thì trả 503. Route APISIX chỉ mở health: DE kiểm) |
 | FR-AI-092 | **(FSD)** interview-service giữ khóa phiên và `turnNumber` mong đợi để chống gửi trùng, đọc hết stream từ ai-service kể cả khi client ngắt kết nối, lưu plan, state, evaluation, report | Must | Gửi trùng `turnNumber` trả lại câu hỏi đã lưu; đang xử lý trả 409 `TURN_CONFLICT` | D03 §4.6 | S3-FSD | Ngoài phạm vi ai-service |
 
 ## 12. Nhóm J đến M. Phạm vi mới theo BRD v0.2 và v0.3
@@ -216,8 +216,8 @@ Cột **GĐ** là giai đoạn triển khai. **Owner đề xuất** nằm trong 
 | Trạng thái | Số FR |
 |---|---|
 | Mock (đã có, dùng quy tắc thay LLM hoặc code thật cho phần không cần LLM) | 25 |
-| Một phần | 20 |
-| Chưa làm | 28 |
+| Một phần | 21 |
+| Chưa làm | 27 |
 | Ngoài phạm vi ai-service (FSD, DE) | 2 |
 | **Tổng** | **75** |
 
@@ -225,7 +225,7 @@ Theo giai đoạn (nhóm A đến I tính giai đoạn 1; FR nhiều giai đoạ
 
 | Giai đoạn | Số FR | Mock | Một phần | Chưa | Ngoài |
 |---|---|---|---|---|---|
-| 1 | 60 | 25 | 20 | 13 | 2 |
+| 1 | 60 | 25 | 21 | 12 | 2 |
 | 2 | 11 | 0 | 0 | 11 | 0 |
 | 3 | 4 | 0 | 0 | 4 | 0 |
 

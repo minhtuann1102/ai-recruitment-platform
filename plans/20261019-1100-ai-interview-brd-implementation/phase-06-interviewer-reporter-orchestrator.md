@@ -4,7 +4,7 @@
 - [plan.md](plan.md) · [design 03](../../docs/ai-service/03-orchestrator-state-machine.md) · [design 04](../../docs/ai-service/04-adaptive-loop-and-candidate-state.md) · [design 05 §6.3–6.4](../../docs/ai-service/05-rubric-and-final-report.md) · FR-AI-035–039, 052–056, 070–072, 091
 
 ## Overview
-- **Priority:** P1 · **Status:** đang làm (2026-10-22): `thang/orchestrator-limits` → `thang/interviewer-llm` → `thang/reporter-llm` → `thang/internal-token-auth` · **Tuần:** W4–W6
+- **Priority:** P1 · **Status:** xong code, chờ review (2026-10-22); chưa chạy LLM thật: `thang/orchestrator-limits` → `thang/interviewer-llm` → `thang/reporter-llm` → `thang/internal-token-auth` · **Tuần:** W4–W6
 - Interviewer LLM stream, Reporter LLM, hoàn thiện luật orchestrator và toàn bộ nhánh lỗi/fallback.
 
 ## Key Insights
@@ -40,7 +40,7 @@ finalize : code tính điểm → Reporter (JSON) → kiểm evidence_turns, tra
 - [x] Interviewer stream + fallback + replace + chống lặp (LLM giả; chất lượng câu hỏi đo ở Phase 07)
 - [x] Reporter + partial + evidence kiểm (LLM giả; chất lượng đo ở Phase 07)
 - [x] Khối `requirements`
-- [ ] Nhánh lỗi có test; token nội bộ
+- [x] Nhánh lỗi có test; token nội bộ (`tests/test_interviewer_stream.py`, `test_reporter.py`, `test_internal_token.py`)
 
 ## Success Criteria
 - 0 phiên vượt giới hạn cứng (test biên); mọi nhánh trong bảng lỗi design 03 §4.6 có test; fallback < 2% và lỗi format < 1% trong phiên giả lập; unit test orchestrator ≥ 90% nhánh.
