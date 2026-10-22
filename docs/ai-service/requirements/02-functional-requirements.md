@@ -118,9 +118,9 @@
 
 | ID | Yêu cầu | Ưu tiên | Tiêu chí chấp nhận | Nguồn | Task | Trạng thái |
 |---|---|---|---|---|---|---|
-| FR-AI-080 | Mỗi lời gọi LLM ghi **số token vào và ra, độ trễ, phiên bản prompt, fallback** vào `metadata` của response để interview-service lưu; tổng hợp chi phí mỗi phiên; cảnh báo khi vượt $0.10/phiên. Không log nội dung câu hỏi, câu trả lời hay CV (cờ `LOG_LLM_IO` mặc định tắt) | Should | Mỗi response `done` có `metadata.usage` và `latency_ms`; log chỉ có id và số đo | D08 §9.4, D07 | S3-AIE-5 | Một phần (`UsageCollector` tạo `metadata`; chưa nối vào response) |
+| FR-AI-080 | Mỗi lời gọi LLM ghi **số token vào và ra, độ trễ, phiên bản prompt, fallback** vào `metadata` của response để interview-service lưu; tổng hợp chi phí mỗi phiên; cảnh báo khi vượt $0.10/phiên. Không log nội dung câu hỏi, câu trả lời hay CV (cờ `LOG_LLM_IO` mặc định tắt) | Should | Mỗi response `done` có `metadata.usage` và `latency_ms`; log chỉ có id và số đo | D08 §9.4, D07 | S3-AIE-5 | Một phần (`metadata.usage`, `latency_ms`, `prompt_versions`, `fallbacks` có trong `done` của start/next-turn và `metadata` của finalize; harness `evals/cost_latency.py` tính chi phí theo giá giả định và cảnh báo > $0.10/phiên; **chưa có số đo với LLM thật**) |
 | FR-AI-081 | **Cấu hình model theo từng agent** bằng biến môi trường (`LLM_MODEL_CV_PARSER`, `_PLANNER`, `_EVALUATOR`, `_INTERVIEWER`, `_REPORTER`), không đặt thì dùng `LLM_MODEL`; `temperature` và `max_tokens` theo bảng cấu hình | Should | Đổi model của một agent không ảnh hưởng agent khác | D08 §9.3 | S2-AIE-1 | Mock (cấu hình model theo agent qua env; chưa nối vào agent) |
-| FR-AI-082 | **Bộ đánh giá chất lượng ba tầng**: (1) unit test không LLM chạy trong CI; (2) golden set Evaluator ~70 mẫu có nhãn người (+ adversarial); (3) 24 phiên ứng viên giả lập + 4 phiên adversarial. Tầng 2 và 3 không chạy trong CI. Mỗi thay đổi prompt hoặc model Evaluator phải chạy lại tầng 2 | Must | Có script `evals.run_evaluator` và harness simulator; kết quả lưu ở `plans/reports/eval-{ngày}.md` | D09 §10 | S3-AIE-4 | Chưa (tầng 1 có một phần) |
+| FR-AI-082 | **Bộ đánh giá chất lượng ba tầng**: (1) unit test không LLM chạy trong CI; (2) golden set Evaluator ~70 mẫu có nhãn người (+ adversarial); (3) 24 phiên ứng viên giả lập + 4 phiên adversarial. Tầng 2 và 3 không chạy trong CI. Mỗi thay đổi prompt hoặc model Evaluator phải chạy lại tầng 2 | Must | Có script `evals.run_evaluator` và harness simulator; kết quả lưu ở `plans/reports/eval-{ngày}.md` | D09 §10 | S3-AIE-4 | Một phần (tầng 1: pytest trong CI; tầng 2: `evals/run_evaluator.py` + golden set chờ nhãn; tầng 3: `evals/simulate.py`, 28 persona, đã chạy với mock ở `plans/.../reports/eval-sim-20261022-mock-baseline.md`; chạy với LLM chờ khóa API) |
 | FR-AI-083 | Có **chế độ mock** để FSD và FE tích hợp độc lập: cùng contract, dùng quy tắc thay LLM, có thể mô phỏng độ trễ giữa các token (`MOCK_STREAM_DELAY_MS`) để thử streaming qua gateway | Must | Mock chạy được `cv/parse`, `start`, `next-turn`, `finalize` đúng schema; có test | CON III, D06 §7.4 | S2-AIE-5 | Mock |
 
 ## 11. Nhóm I. Tích hợp
@@ -216,8 +216,8 @@ Cột **GĐ** là giai đoạn triển khai. **Owner đề xuất** nằm trong 
 | Trạng thái | Số FR |
 |---|---|
 | Mock (đã có, dùng quy tắc thay LLM hoặc code thật cho phần không cần LLM) | 25 |
-| Một phần | 21 |
-| Chưa làm | 27 |
+| Một phần | 22 |
+| Chưa làm | 26 |
 | Ngoài phạm vi ai-service (FSD, DE) | 2 |
 | **Tổng** | **75** |
 
@@ -225,7 +225,7 @@ Theo giai đoạn (nhóm A đến I tính giai đoạn 1; FR nhiều giai đoạ
 
 | Giai đoạn | Số FR | Mock | Một phần | Chưa | Ngoài |
 |---|---|---|---|---|---|
-| 1 | 60 | 25 | 21 | 12 | 2 |
+| 1 | 60 | 25 | 22 | 11 | 2 |
 | 2 | 11 | 0 | 0 | 11 | 0 |
 | 3 | 4 | 0 | 0 | 4 | 0 |
 

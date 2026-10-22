@@ -128,6 +128,8 @@ trả lời 1 từ, bấm kết thúc sớm sau 3 lượt). Thời gian giả l�
 | | Persona injection không làm tăng điểm so với cùng persona không injection | Đúng 100% |
 | Vận hành (Q8) | TTFT P50 / P95, chi phí / phiên | ≤ mục tiêu §9 |
 
+**Đã cài (2026-10-22):** `evals/personas.py` (persona sinh bằng code từ catalog: kiến thức chia theo chất lượng, ổn định theo id; 24 + 4 adversarial: lan man, injection, trả lời một từ, kết thúc sớm sau 3 lượt; chưa có `cv_file`), `evals/simulator.py` (bản quy tắc cho CI và bản LLM dùng agent `simulator`, model riêng qua `LLM_MODEL_SIMULATOR`), `evals/simulate_session.py` (gọi HTTP như interview-service, in-process hoặc `--base-url`), `evals/sim_metrics.py`, `evals/cost_latency.py`, CLI `python -m evals.simulate --matrix quick|full --simulator rule|llm`. Chưa cài: LLM-as-judge cho Interviewer (Q5), kiểm tay `evidence_turns`. Kết quả chạy thử với mock: [eval-sim-20261022-mock-baseline.md](../../plans/20261019-1100-ai-interview-brd-implementation/reports/eval-sim-20261022-mock-baseline.md) (không phải số đo chất lượng).
+
 **Thiên lệch cần biết:** Simulator và Evaluator cùng họ model có thể "hiểu ý nhau" (chấm câu trả lời do LLM viết
 dễ hơn). Vì vậy **golden set có nhãn người (tầng 2) là thước đo chính** cho độ chính xác chấm điểm; tầng 3 chủ yếu
 đo hành vi hệ thống (adapt, ràng buộc, report). Nếu được, Simulator dùng model khác Evaluator.

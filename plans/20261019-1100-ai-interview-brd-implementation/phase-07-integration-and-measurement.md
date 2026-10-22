@@ -4,7 +4,7 @@
 - [plan.md](plan.md) · [design 06](../../docs/ai-service/06-api-contract.md) (contract, §7.5 SSE) · [design 08](../../docs/ai-service/08-latency-and-cost.md) · [design 09 §10.2 tầng 3](../../docs/ai-service/09-agent-quality-evaluation.md) · FR-AI-080, 082, 083, 090
 
 ## Overview
-- **Priority:** P1 · **Status:** chưa bắt đầu · **Tuần:** W4–W7
+- **Priority:** P1 · **Status:** đang làm (2026-10-22): harness tầng 3 xong code (`thang/simulator-harness`); khóa contract, spike SSE qua APISIX, `RealAiInterviewClient` chưa làm (cần FSD, DE) · **Tuần:** W4–W7
 - Khóa contract với FSD, cập nhật mock theo contract chốt, spike SSE qua APISIX, harness ứng viên giả lập (tầng 3) và **số đo thật đầu tiên** về độ trễ và chi phí.
 
 ## Key Insights
@@ -34,7 +34,7 @@
 - [ ] Contract khóa, FSD duyệt
 - [ ] Spike SSE qua APISIX có kết quả
 - [ ] RealAiInterviewClient (hoặc client + test hợp đồng)
-- [ ] Simulator + 28 phiên + báo cáo baseline
+- [x] Simulator + 28 phiên + báo cáo baseline **bằng mock** ([eval-sim-20261022-mock-baseline.md](reports/eval-sim-20261022-mock-baseline.md)); bản LLM chờ khóa API
 - [ ] Số đo thật TTFT, chi phí; NFR cập nhật
 
 ## Success Criteria

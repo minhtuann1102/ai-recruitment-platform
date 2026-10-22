@@ -39,7 +39,7 @@ branch: tách từ main theo phase, dạng feat/ai-service/<mô-tả> (nhánh fe
 | 04 | [CV, JD, Planner](phase-04-cv-jd-planner.md) | W3–W4 | **Xong code, chờ review** (3 PR: CV Parser, JD Parser, Planner LLM + RAG snippet); chưa chạy LLM thật | S1-AIE-3, S2-AIE-1, 3, 6 | FR-003, 013, 016, 017, 020–023 |
 | 05 | [Evaluator và golden set](phase-05-evaluator-golden-set.md) | W3–W5 | **Đang làm**: Evaluator LLM + hậu kiểm xong code (`thang/evaluator-llm`); golden set + công cụ đo (`thang/evaluator-golden-set`); chưa đo | S1-AIE-3, S3-AIE-4 | FR-030–032 · QUAL01–08 |
 | 06 | [Interviewer, Reporter, orchestrator](phase-06-interviewer-reporter-orchestrator.md) | W4–W6 | **Xong code, chờ review** (4 PR: giới hạn thời gian, Interviewer stream, Reporter + `requirements`, token nội bộ); chưa chạy LLM thật | S2-AIE-2, 4, S3-AIE-1, 2, 3, 6 | FR-035–039, 052–056, 070–072, 091 |
-| 07 | [Tích hợp và đo](phase-07-integration-and-measurement.md) | W4–W7 | Chưa bắt đầu | S2-AIE-5, S3-AIE-5, S4-AIE-4, 5 | FR-082, 083, 090 · PERF, COST |
+| 07 | [Tích hợp và đo](phase-07-integration-and-measurement.md) | W4–W7 | **Đang làm**: harness tầng 3 xong code, chạy thử mock; chờ khóa API, FSD (contract, client), DE (APISIX) | S2-AIE-5, S3-AIE-5, S4-AIE-4, 5 | FR-082, 083, 090 · PERF, COST |
 | 08 | [Voice và học từ dữ liệu (có điều kiện)](phase-08-voice-and-learning.md) | W7+ | Chưa bắt đầu | S4-DE-5 (DE) | FR-120–133 · gate 22/11 |
 | 09 | [Hoàn thiện và báo cáo](phase-09-polish-and-report.md) | W8–S5 | Chưa bắt đầu | S4-AIE-1–3, S5-3, 5, 6, 8 | tất cả NFR |
 
