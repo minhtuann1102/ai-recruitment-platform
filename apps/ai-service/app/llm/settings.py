@@ -10,6 +10,8 @@ from .errors import ConfigError
 load_dotenv()
 
 AGENTS = ("cv_parser", "jd_parser", "planner", "evaluator", "interviewer", "reporter")
+# Agent chi dung trong evals (ung vien gia lap, design 09 muc 10.2 tang 3); nen dat LLM_MODEL_SIMULATOR khac Evaluator
+EVAL_AGENTS = ("simulator",)
 
 # agent -> (temperature, max_tokens, timeout_s, seed, tong ngan sach retry s)
 # Theo bang design 08 muc 9.3. jd_parser chua co trong design: dung thong so nhu cv_parser (gia dinh).
@@ -20,6 +22,7 @@ _DEFAULTS = {
     "evaluator": (0.0, 350, 8.0, 7, 10.0),
     "interviewer": (0.7, 200, 5.0, None, None),
     "reporter": (0.3, 2000, 60.0, None, None),
+    "simulator": (0.8, 350, 20.0, None, None),
 }
 
 

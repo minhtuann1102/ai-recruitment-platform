@@ -115,5 +115,8 @@ async def finalize(req: FinalizeRequest):
     """Code tinh diem -> Reporter viet nhan xet; Reporter loi thi status = partial (van 200, FR-AI-054)."""
     collector = UsageCollector()
     report = await get_reporter().report(req, collector)
-    report.setdefault("meta", {})["fallbacks"] = collector.to_metadata()["fallbacks"]
+    usage = collector.to_metadata()
+    report.setdefault("meta", {})["fallbacks"] = usage["fallbacks"]
+    # FR-AI-080: token cua Reporter de tinh chi phi ca phien (start + next-turn + finalize)
+    report["metadata"] = {**report.get("metadata", {}), "usage": usage["usage"], "latency_ms_by_agent": usage["latency_ms"]}
     return report

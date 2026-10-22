@@ -1,7 +1,7 @@
 # Trạng thái dự án (cập nhật 2026-10-22)
 
 ## Kế hoạch
-`plans/20261019-1100-ai-interview-brd-implementation/` (9 phase, đã có trên `main`). Phase 01 **đã merge** (PR #9–#12, 2026-10-19). Phase 02 (`thang/llm-foundation`, PR #13) CI xanh, chờ review. Phase 03 **xong code đường đọc RAG** (`thang/rag-read-path`, xếp chồng trên #13, chờ review); đo recall@5 chờ DE nạp dữ liệu và duyệt golden set. Phase 05 đang làm: Evaluator LLM xong code (`thang/evaluator-llm`), golden set + công cụ đo ở `thang/evaluator-golden-set` (chờ 2 người gán nhãn). Phase 04 xong code (#17–#19). Phase 06 xong code (4 PR xếp chồng trên #19). Tiếp theo: Phase 07 (tích hợp, đo, simulator).
+`plans/20261019-1100-ai-interview-brd-implementation/` (9 phase, đã có trên `main`). Phase 01 **đã merge** (PR #9–#12, 2026-10-19). Phase 02 (`thang/llm-foundation`, PR #13) CI xanh, chờ review. Phase 03 **xong code đường đọc RAG** (`thang/rag-read-path`, xếp chồng trên #13, chờ review); đo recall@5 chờ DE nạp dữ liệu và duyệt golden set. Phase 05 đang làm: Evaluator LLM xong code (`thang/evaluator-llm`), golden set + công cụ đo ở `thang/evaluator-golden-set` (chờ 2 người gán nhãn). Phase 04 xong code (#17–#19). Phase 06 xong code (4 PR xếp chồng trên #19). Phase 07: harness tầng 3 xong code (`thang/simulator-harness`), chạy thử mock; còn khóa contract (FSD), spike SSE qua APISIX (DE), client NestJS, chạy đo với LLM thật.
 
 ## Nhánh và PR
 | Nhánh | PR | Trạng thái |
@@ -17,10 +17,11 @@
 | `thang/cv-parser-llm` | #17 | Phase 04: CV Parser LLM, 10 CV mẫu; xếp chồng trên #16 |
 | `thang/jd-parser` | #18 | Phase 04: `/api/jd/parse`, `jd_profile` trong start |
 | `thang/planner-llm` | #19 | Phase 04: Planner LLM, validator, khung 15–20 phút, `reference_snippets`; 321 test |
-| `thang/orchestrator-limits` | (mới) | Phase 06: hạn cứng, ngân sách phase/topic, turn cap theo thời lượng |
-| `thang/interviewer-llm` | (mới) | Phase 06: Interviewer stream, fallback, `replace`, chống lặp |
-| `thang/reporter-llm` | (mới) | Phase 06: Reporter, `partial`, khối `requirements` |
-| `thang/internal-token-auth` | (mới) | Phase 06: `X-Internal-Token`; 355 test |
+| `thang/orchestrator-limits` | #20 | Phase 06: hạn cứng, ngân sách phase/topic, turn cap theo thời lượng |
+| `thang/interviewer-llm` | #21 | Phase 06: Interviewer stream, fallback, `replace`, chống lặp |
+| `thang/reporter-llm` | #22 | Phase 06: Reporter, `partial`, khối `requirements` |
+| `thang/internal-token-auth` | #23 | Phase 06: `X-Internal-Token`; 358 test |
+| `thang/simulator-harness` | (mới) | Phase 07: simulator, harness tầng 3, độ trễ và chi phí; 363 test |
 
 Quy ước merge của owner: merge commit (không squash). Tiêu đề PR dạng `[scope] type: mô tả`.
 

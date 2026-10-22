@@ -1,0 +1,7 @@
+{
+  "note": "GIA DINH (USD / 1M token), lay tu design 08 muc 9.4 cho gpt-4o-mini; kiem trang gia OpenRouter truoc khi dua vao bao cao. Doi model cho agent nao thi them gia vao agents.",
+  "default": {"input": 0.15, "output": 0.60},
+  "agents": {
+    "embedding": {"input": 0.02, "output": 0.0}
+  }
+}
