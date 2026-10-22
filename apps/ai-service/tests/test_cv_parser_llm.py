@@ -63,6 +63,11 @@ def test_postcheck_drops_injection_fixes_dates_and_code_computes_years():
     assert check_profile(CV, profile.model_dump(), injection=True) == []
 
 
+def test_output_pii_is_redacted_again():
+    profile = parse(make([llm_out(headline="Dev, liên hệ dev@example.com hoặc 0900 000 999")])[0]).cv_profile
+    assert "example.com" not in profile.headline and "[EMAIL]" in profile.headline
+
+
 def test_llm_error_falls_back_to_rule_parser():
     resp = parse(make([status_error(500)] * 3)[0])
     assert resp.metadata.model == "mock-rule-based" and resp.cv_profile.flags.injection_suspected

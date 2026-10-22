@@ -51,8 +51,8 @@ class CvParserOutput(BaseModel):
 
 
 def _clean(value: str, limit: int) -> str:
-    """Bo chuoi co dau hieu injection (FR-AI-012) va cat do dai."""
-    return "" if cv_text.has_injection(value) else value.strip()[:limit]
+    """Bo chuoi co dau hieu injection (FR-AI-012), redact lai PII (lop phu cho prompt) va cat do dai."""
+    return "" if cv_text.has_injection(value) else cv_text.redact_pii(value.strip())[:limit]
 
 
 def _clean_list(values: List[str], limit: int, size: int) -> List[str]:
