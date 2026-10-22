@@ -92,7 +92,7 @@ Các chỉ tiêu này là bằng chứng chính cho báo cáo đồ án. Toàn b
 | NFR-AI-QUAL11 | Không lặp câu hỏi (Jaccard ≥ 0.8 với câu đã hỏi) | < 5% lượt | T3 |
 | NFR-AI-QUAL12 | **Báo cáo trung thực**: recall lỗ hổng trong `improvements`; điểm mạnh sai; `evidence_turns` tồn tại | ≥ 70%; 0; 100% | T3 + người kiểm 5 báo cáo mỗi lần |
 | NFR-AI-QUAL13 | Chất lượng Interviewer (một câu hỏi/lượt, đúng action, không lộ đáp án hay điểm, tự nhiên) | Judge LLM trung bình ≥ 4.0/5; người đọc 5 transcript mỗi lần | T3 |
-| NFR-AI-QUAL14 | Truy xuất RAG | recall@5 ≥ 0.8 trên golden set RAG (≥ 20 query, nhiều nhóm ngôn ngữ) | RAG eval |
+| NFR-AI-QUAL14 | Truy xuất RAG | recall@5 ≥ 0.8 trên golden set RAG (≥ 20 query, nhiều nhóm ngôn ngữ) | RAG eval (`python -m evals.run_rag`; golden set 24 query bản nháp ở `apps/ai-service/evals/rag_golden.json`, chờ DE duyệt nhãn; **chưa đo**) |
 | NFR-AI-QUAL15 | Injection **không làm tăng điểm** so với cùng persona không injection | Đúng 100% | T3 |
 | NFR-AI-QUAL16 | **(GĐ2)** Chất lượng nhận dạng giọng nói: tỉ lệ lỗi từ trên bộ mẫu giọng nói tiếng Việt xen thuật ngữ Anh, đo **trước** khi chọn nhà cung cấp | Ngưỡng đặt sau khi đo; hiện chưa có số liệu | T-STT (đo thử nhiều nhà cung cấp) |
 | NFR-AI-QUAL17 | **(GĐ2)** Evaluator chịu được bản ghi STT nhiễu: golden set có mẫu văn bản sai chính tả và thiếu dấu do nhận dạng | Chênh lệch điểm so với bản sạch trong ngưỡng đặt sau khi đo | T2 |
@@ -174,7 +174,7 @@ Lưu ý phương pháp:
 | NFR-AI-OBS01 | Mỗi response `done` có `metadata`: token vào/ra từng agent, độ trễ (TTFT, tổng), phiên bản prompt, danh sách fallback | Đủ trường theo contract | Ràng buộc | T1 | D06 §7.4 |
 | NFR-AI-OBS02 | Log có cấu trúc kèm `session_id`, `turn_number`, agent; **không** có nội dung | Rà log | Ràng buộc | Rev | D07 |
 | NFR-AI-OBS03 | Theo dõi được TTFT P50 và P95, tỉ lệ fallback, lỗi format, chi phí mỗi phiên | Bảng tổng hợp từ `ai_meta` sau mỗi lần chạy T3 | Đề xuất | T3 | D09 §10.2 |
-| NFR-AI-OBS04 | Log similarity score và id chunk của mỗi lần truy xuất RAG để chọn ngưỡng dựa trên dữ liệu | Có trong log debug | Đề xuất | Rev | rag-design §4 |
+| NFR-AI-OBS04 | Log similarity score và id chunk của mỗi lần truy xuất RAG để chọn ngưỡng dựa trên dữ liệu | Có trong log (`rag_retrieve topic=… hits=qa_id:score`, không log nội dung) | Đề xuất | Rev + T1 (`test_rag_retriever.py`) | rag-design §4 |
 | NFR-AI-OBS05 | **(GĐ2)** Log độ trễ theo thành phần mỗi lượt (hết lượt nói, STT, Evaluator, Interviewer, TTS) kèm `session_id`, không kèm nội dung | Có trong `metadata` hoặc log | Đề xuất | T3 | BRD D4 |
 
 ## 11. Tương thích và triển khai (CMP)

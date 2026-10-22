@@ -63,7 +63,7 @@
 |---|---|---|---|---|---|---|
 | FR-AI-020 | **Planner** chạy một lần đầu buổi, sinh `InterviewPlan` gồm các phase intro, technical, scenario; mỗi topic có `id`, `title`, `source` (cv, catalog, scenario, generic), `key_points` (3 đến 6), `start_difficulty`, `opening_hint`, `backup_question`. Chỉ chọn topic có trong catalog (trừ topic intro từ CV). Có CV thì topic intro lấy từ dự án trong CV | Must | Plan có đúng số topic mỗi phase theo level; mỗi topic có `backup_question`; `catalog_ref` tồn tại; có CV liên quan thì intro `source = cv` | D02 §3.3.2 | S2-AIE-1 | Mock (quy tắc, chưa có LLM) |
 | FR-AI-021 | Code **kiểm tra plan** (số topic đúng template, `catalog_ref` và `cv_ref` tồn tại, không trùng, độ khó trong khoảng). Sai thì repair retry một lần; vẫn sai thì dùng **plan dự phòng** chọn từ catalog theo level | Must | Plan không hợp lệ không bao giờ đến Interviewer; có test cho đường fallback | D02 §3.3.2, D03 §4.6 | S2-AIE-1 | Chưa |
-| FR-AI-022 | Sau khi plan hợp lệ, orchestrator lấy tối đa 3 chunk RAG cho mỗi topic (`interview_qa` và `textbook`), lưu `reference_snippets` (≤ 600 token mỗi topic) vào plan để Evaluator dùng lại. Không gọi RAG mỗi lượt. **Phase scenario không lấy `interview_qa`** (scenario không có `topic_id`), chỉ `key_points` và `textbook` theo category của track | Should | Plan có `reference_snippets`; không có RAG thì Evaluator vẫn chạy chỉ dựa vào `key_points` | D02 §3.3.2, D07 §8.7 | S1-AIE-2 | Chưa |
+| FR-AI-022 | Sau khi plan hợp lệ, orchestrator lấy tối đa 3 chunk RAG cho mỗi topic (`interview_qa` và `textbook`), lưu `reference_snippets` (≤ 600 token mỗi topic) vào plan để Evaluator dùng lại. Không gọi RAG mỗi lượt. **Phase scenario không lấy `interview_qa`** (scenario không có `topic_id`), chỉ `key_points` và `textbook` theo category của track | Should | Plan có `reference_snippets`; không có RAG thì Evaluator vẫn chạy chỉ dựa vào `key_points` | D02 §3.3.2, D07 §8.7 | S1-AIE-2 | Một phần (`Retriever.plan_snippets` trong `app/rag/` đã có: ≤ 3 chunk, ≤ 600 token, chế độ scenario chỉ textbook; chưa nối vào plan, làm cùng Planner ở Phase 04) |
 | FR-AI-023 | Planner **tăng trọng số topic theo `jd_profile`** khi có (ưu tiên topic ánh xạ từ yêu cầu `must`), vẫn chỉ chọn topic trong catalog và giữ cấu trúc phase | Must | Với JD yêu cầu Spring, ≥ 1 topic technical thuộc nhóm Spring; plan hợp lệ | A11 | S2-AIE-6 | Chưa |
 
 ## 6. Nhóm D. Xử lý một lượt trả lời
@@ -99,7 +99,7 @@
 | ID | Yêu cầu | Ưu tiên | Tiêu chí chấp nhận | Nguồn | Task | Trạng thái |
 |---|---|---|---|---|---|---|
 | FR-AI-060 | Hệ thống lưu tri thức trong `ai_db.knowledge_chunks` (pgvector, 1536 chiều) với `content_hash` UNIQUE, `source_type` (`interview_qa` hoặc `textbook`), `category`, `difficulty`, `topic_id`, `language`, `metadata`. **Không bao giờ** lưu transcript, câu trả lời, `cv_profile` hay file CV | Must | DDL chạy trên DB sạch; upsert hai lần cùng nội dung không tạo bản ghi trùng | rag-design §3, D07 §8.7 | S0-AIE-2 | Chưa (DDL đã thiết kế, chưa chạy trên DB) |
-| FR-AI-061 | **Truy xuất**: với mỗi topic, lấy `interview_qa` theo `topic_id` trước (khớp chính xác); dưới 2 kết quả thì bổ sung bằng vector search (cosine) lọc `category` và `difficulty`. Top-5, khử trùng lặp, chèn tối đa khoảng 1.500 token. Ghi log điểm tương đồng và id | Should | recall@5 trên golden set RAG ≥ 0.8 (đề xuất); chạy được khi không có RAG | rag-design §4, D07 §8.7 | S1-AIE-2 | Chưa |
+| FR-AI-061 | **Truy xuất**: với mỗi topic, lấy `interview_qa` theo `topic_id` trước (khớp chính xác); dưới 2 kết quả thì bổ sung bằng vector search (cosine) lọc `category` và `difficulty`. Top-5, khử trùng lặp, chèn tối đa khoảng 1.500 token. Ghi log điểm tương đồng và id | Should | recall@5 trên golden set RAG ≥ 0.8 (đề xuất); chạy được khi không có RAG | rag-design §4, D07 §8.7 | S1-AIE-2 | Một phần (`app/rag/retriever.py` đã cài, test đơn vị + test tích hợp pgvector; golden set 24 query bản nháp chờ DE duyệt; **recall@5 chưa đo**: cần dữ liệu DE trong `ai_db` và khóa API) |
 | FR-AI-062 | **(DE sở hữu đường ghi theo spec 005; AIE chỉ dùng chung module)** **Nạp dữ liệu** dùng chung module chunking và repository giữa ai-service và data-pipeline: Q&A giữ nguyên cặp (2 bản ghi `question` và `qa_pair` cùng `qa_id`), textbook cắt theo heading (512 token, overlap 50). Pipeline idempotent, từ chối chunk có `topic_id` ngoài catalog | Should | Chạy lại pipeline không tạo chunk trùng; in thống kê số vào, số chunk, tỉ lệ dedup, số embedding lỗi | rag-design §2, CON V | S1-AIE-1 | Ngoài phạm vi ai-service (DE) |
 | FR-AI-063 | **Embedding và LLM** gọi qua một client OpenAI-compatible cấu hình bằng biến môi trường (`LLM_API_KEY`, `LLM_BASE_URL`, `LLM_MODEL`, `EMBEDDING_MODEL`, `EMBEDDING_DIMENSIONS`); đổi nhà cung cấp không sửa code | Must | `scripts/smoke_llm.py` chạy chat và embedding thành công, embedding đúng 1536 chiều, phát hiện output bị cắt (`finish_reason = length`) | CON IV, D08 §9.3 | S0-AIE-4 | Mock (gateway `app/llm/` đã cài đặt, test bằng LLM giả; chưa nối vào agent; smoke test thật do owner chạy) |
 | FR-AI-064 | Có **dữ liệu seed mock** để phát triển khi chưa có dữ liệu DE: Q&A và ghi chú công nghệ, gắn `synthetic: true` để lọc hoặc xóa sau | Should | 50 Q&A tiếng Việt đủ 5 category và 3 độ khó; không trùng câu hỏi | rag-design §9 | S0-AIE-3 | Mock (chưa có `topic_id`, `key_points`) |
@@ -216,8 +216,8 @@ Cột **GĐ** là giai đoạn triển khai. **Owner đề xuất** nằm trong 
 | Trạng thái | Số FR |
 |---|---|
 | Mock (đã có, dùng quy tắc thay LLM hoặc code thật cho phần không cần LLM) | 26 |
-| Một phần | 9 |
-| Chưa làm | 38 |
+| Một phần | 11 |
+| Chưa làm | 36 |
 | Ngoài phạm vi ai-service (FSD, DE) | 2 |
 | **Tổng** | **75** |
 
@@ -225,11 +225,11 @@ Theo giai đoạn (nhóm A đến I tính giai đoạn 1; FR nhiều giai đoạ
 
 | Giai đoạn | Số FR | Mock | Một phần | Chưa | Ngoài |
 |---|---|---|---|---|---|
-| 1 | 60 | 26 | 9 | 23 | 2 |
+| 1 | 60 | 26 | 11 | 21 | 2 |
 | 2 | 11 | 0 | 0 | 11 | 0 |
 | 3 | 4 | 0 | 0 | 4 | 0 |
 
-Số liệu đếm bằng script từ cột "Trạng thái". Khối lượng còn lại của **giai đoạn 1**: **LLM thật** cho 6 agent (FR-AI-013, 016, 020, 030, 037, 052), **hạ tầng RAG đường đọc** (FR-AI-022, 060, 061), **độ bền** (FR-AI-021, 054, 070 đến 072), **bộ đánh giá** (FR-AI-082), **giao diện phòng họp và consent** (nhóm J, K, phần lớn FSD). Giai đoạn 2 và 3 là bản nháp.
+Số liệu đếm bằng script từ cột "Trạng thái". Khối lượng còn lại của **giai đoạn 1**: **LLM thật** cho 6 agent (FR-AI-013, 016, 020, 030, 037, 052), **RAG đường đọc** (FR-AI-022 nối vào plan, FR-AI-061 đo recall; FR-AI-060 DDL nằm ở PR của DE), **độ bền** (FR-AI-021, 054, 070 đến 072), **bộ đánh giá** (FR-AI-082), **giao diện phòng họp và consent** (nhóm J, K, phần lớn FSD). Giai đoạn 2 và 3 là bản nháp.
 
 ## 15. Câu hỏi mở
 

@@ -92,19 +92,24 @@ Quy tắc chung:
 
 ## 6. Cấu trúc code trong `ai-service`
 
+**Đã cài (2026-10-22, Phase 03, đường đọc):**
+
 ```
 apps/ai-service/app/rag/
-├── embedder.py       # gọi OpenAI embeddings, batch + retry
-├── repository.py     # SQL: upsert theo content_hash, search cosine + filter, get theo qa_id
-├── retriever.py      # retrieve(query, filters, k) -> [{id, content, score, metadata}]
-└── chunking.py       # chunk_qa / chunk_textbook (dùng chung với pipeline)
+├── settings.py       # RAG_ENABLED (mặc định tắt), AI_DB_URL, tên embedding_model bỏ tiền tố provider
+├── difficulty.py     # độ khó 1–5 -> easy/medium/hard
+├── models.py         # Chunk, SearchFilters
+├── repository.py     # psycopg 3 async, phiên read-only: list_by_topic_id, search (cosine + filter), get_pair_by_qa_id
+├── retriever.py      # topic_id trước, < 2 thì vector fallback; dedup qa_id; ngân sách token; log id + điểm
+└── factory.py        # build_retriever(): None khi RAG tắt; embed truy vấn qua LlmGateway
+apps/ai-service/evals/ # rag_golden.json (bản nháp), rag_metrics.py, run_rag.py (recall@5 theo nhóm)
 ```
 
-`chunking.py` và `repository.py` là phần lõi mà pipeline index (DE) và tool của agent (AIE) cùng dùng, tránh viết hai lần.
+Khác thiết kế ban đầu: **không có `embedder.py`, `chunking.py` và upsert** trong ai-service, vì spec 005 giao toàn bộ đường ghi (chunk, embed, upsert) cho DE (`apps/data-pipeline`). Embed truy vấn dùng `LlmGateway.embed` (Phase 02). Hai bên dùng chung **contract** `specs/005-rag-knowledge-base-qa/contracts/knowledge-chunks-io.md` thay vì chung module. RAG lỗi (DB tắt, embedding lỗi) thì retriever ghi log và trả rỗng, phiên vẫn chạy chỉ với `key_points`.
 
 ## 7. Cách đánh giá (bắt đầu Sprint 1)
 
-1. **Golden set 20+ query** dạng `(query, filters, qa_id/chunk_id đúng)`, gồm cả query tiếng Việt và tiếng Anh. Ghi vào `apps/ai-service/tests/rag_golden.json`.
+1. **Golden set 20+ query** dạng `(query, filters, qa_id/chunk_id đúng)`, gồm cả query tiếng Việt và tiếng Anh. Ghi vào `apps/ai-service/evals/rag_golden.json` (bản nháp 24 query, 2026-10-22, nhãn trỏ vào `qa_id` của bộ canonical DE, chờ DE duyệt; nhóm Việt → tài liệu Anh để trống tới khi có textbook). Chạy `python -m evals.run_rag`. **Chưa có số đo.**
 2. Đo **recall@5** và xem tay top-3 (khớp quality gate "top-3 liên quan" trong data-pipeline.md). Mục tiêu đề xuất: recall@5 ≥ 0.8, cần nhóm xác nhận.
 3. So sánh trên cùng golden set: overlap 0 và 50; có và không có heading path.
 4. Nếu recall thấp ở truy vấn tiếng Việt: thử embedding model khác (ví dụ bge-m3) trước khi thêm hybrid hay rerank. Re-embed ~6000 chunk chỉ tốn vài cent và `embedding_model` đã có sẵn trong schema.

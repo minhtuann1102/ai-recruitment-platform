@@ -35,7 +35,7 @@ branch: tách từ main theo phase, dạng feat/ai-service/<mô-tả> (nhánh fe
 |---|---|---|---|---|---|
 | 01 | [Đồng bộ main, chốt quyết định](phase-01-sync-and-decisions.md) | W2 | **Gần xong**: 2 nhánh tài liệu + catalog xong, còn nhánh sửa biên độ khó; chờ owner xác nhận Q1–Q6 và quyền push | — | — |
 | 02 | [Nền tảng LLM](phase-02-llm-foundation.md) | W2–W3 | **Xong code, chờ review PR** (nhánh `thang/llm-foundation`); smoke test thật do owner chạy | S1-AIE-4 | FR-063, 070, 080, 081 |
-| 03 | [RAG đường đọc](phase-03-rag-read-path.md) | W2–W4 | Chưa bắt đầu | S1-AIE-2 | FR-022, 060, 061 · QUAL14 |
+| 03 | [RAG đường đọc](phase-03-rag-read-path.md) | W2–W4 | **Xong code đường đọc, chờ review PR** (nhánh `thang/rag-read-path`, xếp chồng trên Phase 02); recall@5 chưa đo (chờ dữ liệu DE + duyệt nhãn) | S1-AIE-2 | FR-022, 060, 061 · QUAL14 |
 | 04 | [CV, JD, Planner](phase-04-cv-jd-planner.md) | W3–W4 | Chưa bắt đầu | S1-AIE-3, S2-AIE-1, 3, 6 | FR-003, 013, 016, 017, 020–023 |
 | 05 | [Evaluator và golden set](phase-05-evaluator-golden-set.md) | W3–W5 | Chưa bắt đầu | S1-AIE-3, S3-AIE-4 | FR-030–032 · QUAL01–08 |
 | 06 | [Interviewer, Reporter, orchestrator](phase-06-interviewer-reporter-orchestrator.md) | W4–W6 | Chưa bắt đầu | S2-AIE-2, 4, S3-AIE-1, 2, 3, 6 | FR-035–039, 052–056, 070–072, 091 |
