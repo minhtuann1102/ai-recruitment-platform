@@ -7,6 +7,7 @@ from typing import Dict, List
 
 from .mock_evaluator import is_scored
 from .models_interview import FinalizeRequest, FinalizeTurn
+from .requirements_coverage import requirements_block
 
 PHASE_WEIGHTS = {
     "fresher": {"intro": 0.15, "technical": 0.60, "scenario": 0.25},
@@ -48,7 +49,12 @@ def _turn_comment(t: FinalizeTurn) -> str:
     return (got + miss).replace("Nêu được: Nêu được ", "Nêu được ")
 
 
+def scored_turns(req: FinalizeRequest) -> List[FinalizeTurn]:
+    return _scored(req.turns)
+
+
 def build_report(req: FinalizeRequest) -> Dict:
+    """Bao cao day du phan diem (code) + nhan xet mau. Reporter LLM thay phan nhan xet, khong dong vao diem."""
     started = time.perf_counter()
     scored = _scored(req.turns)
     topics = []
@@ -72,6 +78,7 @@ def build_report(req: FinalizeRequest) -> Dict:
     weak = sorted([t for t in topics if t["score"] < 5.0], key=lambda t: t["score"])
     kp = {t.id: t.key_points for ph in req.plan.phases for t in ph.topics}
     v = verdict(overall)
+    requirements = requirements_block(req.jd_profile, req.plan, scored, req.turns)
     return {
         "schema_version": 1, "status": "complete",
         "session": {"track": req.track, "level": req.level, "duration_s": req.duration_s,
@@ -87,6 +94,7 @@ def build_report(req: FinalizeRequest) -> Dict:
         "study_plan": [{"topic": t["title"], "priority": "high" if t["score"] < 3.5 else "medium",
                         "actions": [f"Ôn lại: {p}" for p in kp.get(t["topic_id"], [])[:3]], "resources": []}
                        for t in weak[:3]],
+        **({"requirements": requirements} if requirements else {}),
         "turns": [{"turn_number": t.turn_number, "topic_id": t.topic_id, "turn_kind": t.turn_kind,
                    "question": t.question, "scores": t.evaluation.scores_10.model_dump(),
                    "comment": _turn_comment(t)} for t in scored],

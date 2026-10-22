@@ -19,6 +19,8 @@ class Decision:
 
 
 def classify(ev: Evaluation) -> str:
+    if ev.degraded:  # FR-AI-072: Evaluator loi han -> coi nhu ok, khong thieu y (khong hoi sau dua tren diem doan)
+        return "ok_degraded"
     if ev.answer_type in ("manipulation", "off_topic", "asks_clarification", "dont_know"):
         return ev.answer_type
     s = turn_score(ev)
@@ -45,6 +47,8 @@ def decide(ev: Evaluation, state: CandidateState, level: str, is_scenario: bool,
         if not hinted and left > 0:
             return d("hint", -1, rule, focus)
         return d("next_topic", -1, rule + 1)
+    if kind == "ok_degraded":
+        return d("next_topic", 0, 9)
     if kind == "ok":
         if left > 0 and ev.missing_points:
             return d("follow_up", 0, 8, ev.missing_points[0].replace("Nêu được ", ""))

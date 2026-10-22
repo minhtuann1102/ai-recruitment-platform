@@ -178,3 +178,4 @@ class FinalizeRequest(BaseModel):
     end_reason: str
     duration_s: int = Field(ge=0)
     turns: List[FinalizeTurn] = Field(min_length=1)
+    jd_profile: Optional[JdProfile] = None  # FR-AI-056: co thi bao cao them khoi requirements

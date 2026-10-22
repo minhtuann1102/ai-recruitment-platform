@@ -88,11 +88,11 @@
 |---|---|---|---|---|---|---|
 | FR-AI-050 | **Điểm do code tổng hợp**: điểm lượt, điểm topic (trung bình lượt), điểm phase (trung bình topic), `overall` theo trọng số phase của level (chuẩn hóa lại nếu thiếu phase), trung bình từng tiêu chí. Không tính lượt wrap-up, degraded, clarify | Must | `overall` khớp phép tính tay trên fixture; trọng số chuẩn hóa tổng bằng 1 | D05 §6.3 | S3-AIE-1 | Mock (code thật) |
 | FR-AI-051 | Báo cáo có **verdict** (exceeds, meets, near, below theo ngưỡng 8.5, 7.0, 5.0) và **confidence** (low nếu < 6 lượt chấm, > 20% degraded hoặc thiếu phase; medium 6 đến 9; high ≥ 10) | Must | Ứng viên "không biết" mọi câu có verdict `below` | D05 §6.3 | S3-AIE-1 | Mock |
-| FR-AI-052 | **Reporter** (LLM) chỉ viết phần nhận xét: tóm tắt, điểm mạnh, cần cải thiện, nhận xét từng topic. Không được tính hoặc sửa điểm, không bịa bằng chứng. Mỗi nhận xét dẫn `evidence_turns`; code kiểm các lượt đó tồn tại. Reporter chỉ nhận kết quả đã qua Evaluator, không nhận nguyên văn câu trả lời | Must | 100% `evidence_turns` trỏ tới lượt có thật; điểm trong báo cáo bằng điểm code tính | D02 §3.3.5, D05 §6.4 | S3-AIE-1 | Mock (template, chưa có LLM) |
+| FR-AI-052 | **Reporter** (LLM) chỉ viết phần nhận xét: tóm tắt, điểm mạnh, cần cải thiện, nhận xét từng topic. Không được tính hoặc sửa điểm, không bịa bằng chứng. Mỗi nhận xét dẫn `evidence_turns`; code kiểm các lượt đó tồn tại. Reporter chỉ nhận kết quả đã qua Evaluator, không nhận nguyên văn câu trả lời | Must | 100% `evidence_turns` trỏ tới lượt có thật; điểm trong báo cáo bằng điểm code tính | D02 §3.3.5, D05 §6.4 | S3-AIE-1 | Một phần (Reporter LLM `app/agents/reporter.py`, prompt `reporter.v1`, bật bằng `AGENT_REPORTER_MODE=llm`; chỉ nhận kết quả đã chấm; code giữ nguyên điểm, bỏ mục có `evidence_turns` không tồn tại, bỏ điểm mạnh dựa trên lượt < 6.0, bỏ URL và chuỗi nghi injection; **chất lượng nhận xét chưa đo**) |
 | FR-AI-053 | **Lộ trình học** có link tài liệu do **code tra từ topic catalog** theo `resource_ids` Reporter chọn; Reporter không bao giờ tự viết URL | Should | Mọi URL trong báo cáo có trong catalog | D05 §6.4, D10 R8 | S3-AIE-1 | Chưa (catalog chưa có `resources`) |
-| FR-AI-054 | Khi Reporter lỗi sau retry (timeout 60 s), hệ thống trả báo cáo **chỉ có điểm** (code) cùng nhận xét mẫu, `status = "partial"`; ứng viên có thể yêu cầu tạo lại | Must | Chặn Reporter ném lỗi vẫn trả 200 với `status = partial` | D03 §4.6 | S3-AIE-3 | Chưa |
+| FR-AI-054 | Khi Reporter lỗi sau retry (timeout 60 s), hệ thống trả báo cáo **chỉ có điểm** (code) cùng nhận xét mẫu, `status = "partial"`; ứng viên có thể yêu cầu tạo lại | Must | Chặn Reporter ném lỗi vẫn trả 200 với `status = partial` | D03 §4.6 | S3-AIE-3 | Mock (code thật: Reporter lỗi sau retry → báo cáo chỉ có điểm và nhận xét mẫu, `status = partial`, HTTP 200, `meta.fallbacks = [reporter_partial]`) |
 | FR-AI-055 | Báo cáo gồm **điểm và nhận xét từng câu** (số lượt, topic, loại lượt, 4 điểm trên thang 0 đến 10, nhận xét), điểm theo phase, điểm theo tiêu chí, quỹ đạo độ khó và lời nhắc điểm do AI chấm | Must | Mỗi lượt được chấm có một mục trong `turns` của báo cáo | D05 §6.4 | S3-AIE-1 | Mock |
-| FR-AI-056 | Báo cáo có khối **`requirements`**: mỗi yêu cầu của JD có `status` (`assessed`, `not_assessed`, `out_of_catalog`), `band`, `evidence_turns`, `confidence`; hiển thị "đã đánh giá X/Y yêu cầu"; yêu cầu chưa hỏi **không** bị coi là yếu; không kết luận tuyển hay không tuyển | Must | Mọi yêu cầu của JD xuất hiện đúng một lần với một trong ba trạng thái; `evidence_turns` tồn tại | A11, S3-AIE-6 | S3-AIE-6 | Chưa |
+| FR-AI-056 | Báo cáo có khối **`requirements`**: mỗi yêu cầu của JD có `status` (`assessed`, `not_assessed`, `out_of_catalog`), `band`, `evidence_turns`, `confidence`; hiển thị "đã đánh giá X/Y yêu cầu"; yêu cầu chưa hỏi **không** bị coi là yếu; không kết luận tuyển hay không tuyển | Must | Mọi yêu cầu của JD xuất hiện đúng một lần với một trong ba trạng thái; `evidence_turns` tồn tại | A11, S3-AIE-6 | S3-AIE-6 | Mock (code thật `app/requirements_coverage.py`: `/api/finalize` nhận `jd_profile` tùy chọn; mỗi yêu cầu đúng một lần với `assessed`, `not_assessed`, `out_of_catalog`, kèm điểm, band, `evidence_turns`, độ tin cậy; câu "đã đánh giá X/Y") |
 
 ## 8. Nhóm F. Tri thức tham chiếu (RAG)
 
@@ -110,7 +110,7 @@
 |---|---|---|---|---|---|---|
 | FR-AI-070 | **Gọi LLM có chính sách chung**: structured output cho agent trả JSON; retry lỗi tạm thời (timeout, 429, 5xx, lỗi mạng) tối đa 2 lần, backoff 0.5 s rồi 1.5 s có jitter, tôn trọng `Retry-After`; không retry 400, 401, 403; repair retry 1 lần cho lỗi format; `finish_reason = length` thì retry 1 lần với `max_tokens × 1.5`; tổng retry Evaluator ≤ 10 s | Must | Test với fake LLM ném lỗi theo kịch bản: đúng số lần retry, đúng backoff | D03 §4.6 | S3-AIE-3 | Một phần (gateway có retry, repair, `length` ×1.5; chưa nối vào agent, chưa có fallback theo agent) |
 | FR-AI-071 | **Fallback theo từng agent** (bảng xử lý lỗi): Interviewer lỗi → `backup_question` hoặc câu từ `question_bank` (event `token` hoặc `replace`, `question_source = fallback`); Planner lỗi → plan dự phòng; CV Parser lỗi → không CV; Reporter lỗi → báo cáo partial. Mọi fallback ghi vào `ai_meta.fallbacks` | Must | Tỉ lệ fallback < 2% trong phiên giả lập; mỗi nhánh có test | D03 §4.6 | S3-AIE-3 | Một phần (Interviewer: lỗi trước token hoặc quá 5 s → câu dự phòng qua `token`, lỗi giữa stream → `replace`, `question_source = fallback`; Planner → plan dự phòng; CV/JD Parser → parser quy tắc; Evaluator → heuristic `degraded`; mọi fallback ghi `metadata.fallbacks`. Reporter `partial` ở nhánh `thang/reporter-llm`; chưa có `question_bank`) |
-| FR-AI-072 | **Evaluator lỗi hẳn** thì trả `Evaluation` degraded (không có band, `answer_type = unknown`); policy coi như `ok` không thiếu ý; lượt đó loại khỏi tính điểm và báo cáo ghi chú | Must | Report ghi `degraded_turns`; > 20% degraded → `confidence = low` | D03 §4.6, D05 §6.3 | S3-AIE-3 | Chưa |
+| FR-AI-072 | **Evaluator lỗi hẳn** thì trả `Evaluation` degraded (không có band, `answer_type = unknown`); policy coi như `ok` không thiếu ý; lượt đó loại khỏi tính điểm và báo cáo ghi chú | Must | Report ghi `degraded_turns`; > 20% degraded → `confidence = low` | D03 §4.6, D05 §6.3 | S3-AIE-3 | Một phần (Evaluator lỗi → heuristic đánh dấu `degraded`, không tính điểm, policy coi như `ok` không thiếu ý và sang topic; báo cáo có `degraded_turns`, > 20% degraded → `confidence = low`; chưa đổi `answer_type` thành `unknown` vì contract hiện chưa có giá trị đó) |
 | FR-AI-073 | Mọi lỗi trả theo **format thống nhất** `{error, message, details}` với mã HTTP đúng: 413 `cv_too_large`, 415 `cv_invalid_format`, 422 `cv_unreadable` hoặc `invalid_request` hoặc `invalid_state`, 409 `session_invalid_state` | Must | Test từng mã lỗi | D06 §7.4 | S2-AIE-4 | Mock |
 | FR-AI-074 | `GET /api/health` trả trạng thái dịch vụ, phiên bản và `model_loaded` | Must | 200 với `status = healthy`; gateway chỉ cho `/ai/api/health` ra ngoài | CON, D06 | S0-AIE-1 | Mock |
 
@@ -215,9 +215,9 @@ Cột **GĐ** là giai đoạn triển khai. **Owner đề xuất** nằm trong 
 
 | Trạng thái | Số FR |
 |---|---|
-| Mock (đã có, dùng quy tắc thay LLM hoặc code thật cho phần không cần LLM) | 24 |
-| Một phần | 18 |
-| Chưa làm | 31 |
+| Mock (đã có, dùng quy tắc thay LLM hoặc code thật cho phần không cần LLM) | 25 |
+| Một phần | 20 |
+| Chưa làm | 28 |
 | Ngoài phạm vi ai-service (FSD, DE) | 2 |
 | **Tổng** | **75** |
 
@@ -225,7 +225,7 @@ Theo giai đoạn (nhóm A đến I tính giai đoạn 1; FR nhiều giai đoạ
 
 | Giai đoạn | Số FR | Mock | Một phần | Chưa | Ngoài |
 |---|---|---|---|---|---|
-| 1 | 60 | 24 | 18 | 16 | 2 |
+| 1 | 60 | 25 | 20 | 13 | 2 |
 | 2 | 11 | 0 | 0 | 11 | 0 |
 | 3 | 4 | 0 | 0 | 4 | 0 |
 

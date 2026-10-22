@@ -18,7 +18,7 @@ from .mock_planner import load_track
 from .models_cv import CvParseResponse
 from .models_jd import JdParseRequest, JdParseResponse
 from .models_interview import FinalizeRequest, NextTurnRequest, StartRequest
-from .report_scoring import build_report
+from .agents.reporter import get_reporter
 from .agents.interviewer import get_interviewer
 from .question_stream import QuestionStream
 from .sse import SSE_HEADERS, event
@@ -109,5 +109,9 @@ async def next_turn_route(req: NextTurnRequest):
 
 
 @app.post("/api/finalize")
-def finalize(req: FinalizeRequest):
-    return build_report(req)
+async def finalize(req: FinalizeRequest):
+    """Code tinh diem -> Reporter viet nhan xet; Reporter loi thi status = partial (van 200, FR-AI-054)."""
+    collector = UsageCollector()
+    report = await get_reporter().report(req, collector)
+    report.setdefault("meta", {})["fallbacks"] = collector.to_metadata()["fallbacks"]
+    return report
