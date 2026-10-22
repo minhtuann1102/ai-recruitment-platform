@@ -67,11 +67,14 @@ Dự phòng nếu đo thực tế vượt mục tiêu (chưa làm, theo thứ t�
 
 ## 9.3 Chọn model cho từng agent
 
+> **Cài đặt (Phase 02):** bảng dưới là nguồn của `app/llm/settings.py`. Env `LLM_MODEL_<AGENT>` đổi model từng agent; thông số khác cố định theo bảng. Ngân sách retry của Evaluator 10 s. Test `tests/test_llm_settings.py` giữ bảng và code khớp.
+
 Tất cả qua cùng một endpoint OpenAI-compatible. Env riêng từng agent; không đặt thì dùng `LLM_MODEL` (mặc định
 `openai/gpt-4o-mini`, như `config.py` hiện có).
 
 | Agent | Env | Mặc định | `temperature` | `max_tokens` | Output | Timeout / lần | Ghi chú |
 |---|---|---|---|---|---|---|---|
+| JD Parser | `LLM_MODEL_JD_PARSER` | gpt-4o-mini | 0 | 1200 | JSON strict | 20 s | **Giả định** như CV Parser (S2-AIE-6) |
 | CV Parser | `LLM_MODEL_CV_PARSER` | gpt-4o-mini | 0 | 1200 | JSON strict | 20 s | Trích xuất, model nhỏ đủ |
 | Planner | `LLM_MODEL_PLANNER` | gpt-4o-mini | 0.4 | 2500 | JSON strict | 25 s | 1 lần/phiên: ứng viên dùng model mạnh hơn nếu eval cho thấy plan kém (chi phí tăng không đáng kể) |
 | **Evaluator** | `LLM_MODEL_EVALUATOR` | gpt-4o-mini | 0 (+ `seed` cố định) | 350 | JSON strict | 8 s, tổng ≤ 10 s | **Nhỏ, nhanh**, nằm trên đường nóng. Độ khắt khe đến từ rubric + luật code, không từ model to |

@@ -101,14 +101,14 @@
 | FR-AI-060 | Hệ thống lưu tri thức trong `ai_db.knowledge_chunks` (pgvector, 1536 chiều) với `content_hash` UNIQUE, `source_type` (`interview_qa` hoặc `textbook`), `category`, `difficulty`, `topic_id`, `language`, `metadata`. **Không bao giờ** lưu transcript, câu trả lời, `cv_profile` hay file CV | Must | DDL chạy trên DB sạch; upsert hai lần cùng nội dung không tạo bản ghi trùng | rag-design §3, D07 §8.7 | S0-AIE-2 | Chưa (DDL đã thiết kế, chưa chạy trên DB) |
 | FR-AI-061 | **Truy xuất**: với mỗi topic, lấy `interview_qa` theo `topic_id` trước (khớp chính xác); dưới 2 kết quả thì bổ sung bằng vector search (cosine) lọc `category` và `difficulty`. Top-5, khử trùng lặp, chèn tối đa khoảng 1.500 token. Ghi log điểm tương đồng và id | Should | recall@5 trên golden set RAG ≥ 0.8 (đề xuất); chạy được khi không có RAG | rag-design §4, D07 §8.7 | S1-AIE-2 | Chưa |
 | FR-AI-062 | **(DE sở hữu đường ghi theo spec 005; AIE chỉ dùng chung module)** **Nạp dữ liệu** dùng chung module chunking và repository giữa ai-service và data-pipeline: Q&A giữ nguyên cặp (2 bản ghi `question` và `qa_pair` cùng `qa_id`), textbook cắt theo heading (512 token, overlap 50). Pipeline idempotent, từ chối chunk có `topic_id` ngoài catalog | Should | Chạy lại pipeline không tạo chunk trùng; in thống kê số vào, số chunk, tỉ lệ dedup, số embedding lỗi | rag-design §2, CON V | S1-AIE-1 | Ngoài phạm vi ai-service (DE) |
-| FR-AI-063 | **Embedding và LLM** gọi qua một client OpenAI-compatible cấu hình bằng biến môi trường (`LLM_API_KEY`, `LLM_BASE_URL`, `LLM_MODEL`, `EMBEDDING_MODEL`, `EMBEDDING_DIMENSIONS`); đổi nhà cung cấp không sửa code | Must | `scripts/smoke_llm.py` chạy chat và embedding thành công, embedding đúng 1536 chiều, phát hiện output bị cắt (`finish_reason = length`) | CON IV, D08 §9.3 | S0-AIE-4 | Mock (chat và embedding đã thử với OpenRouter) |
+| FR-AI-063 | **Embedding và LLM** gọi qua một client OpenAI-compatible cấu hình bằng biến môi trường (`LLM_API_KEY`, `LLM_BASE_URL`, `LLM_MODEL`, `EMBEDDING_MODEL`, `EMBEDDING_DIMENSIONS`); đổi nhà cung cấp không sửa code | Must | `scripts/smoke_llm.py` chạy chat và embedding thành công, embedding đúng 1536 chiều, phát hiện output bị cắt (`finish_reason = length`) | CON IV, D08 §9.3 | S0-AIE-4 | Mock (gateway `app/llm/` đã cài đặt, test bằng LLM giả; chưa nối vào agent; smoke test thật do owner chạy) |
 | FR-AI-064 | Có **dữ liệu seed mock** để phát triển khi chưa có dữ liệu DE: Q&A và ghi chú công nghệ, gắn `synthetic: true` để lọc hoặc xóa sau | Should | 50 Q&A tiếng Việt đủ 5 category và 3 độ khó; không trùng câu hỏi | rag-design §9 | S0-AIE-3 | Mock (chưa có `topic_id`, `key_points`) |
 
 ## 9. Nhóm G. Xử lý lỗi và độ bền
 
 | ID | Yêu cầu | Ưu tiên | Tiêu chí chấp nhận | Nguồn | Task | Trạng thái |
 |---|---|---|---|---|---|---|
-| FR-AI-070 | **Gọi LLM có chính sách chung**: structured output cho agent trả JSON; retry lỗi tạm thời (timeout, 429, 5xx, lỗi mạng) tối đa 2 lần, backoff 0.5 s rồi 1.5 s có jitter, tôn trọng `Retry-After`; không retry 400, 401, 403; repair retry 1 lần cho lỗi format; `finish_reason = length` thì retry 1 lần với `max_tokens × 1.5`; tổng retry Evaluator ≤ 10 s | Must | Test với fake LLM ném lỗi theo kịch bản: đúng số lần retry, đúng backoff | D03 §4.6 | S3-AIE-3 | Chưa |
+| FR-AI-070 | **Gọi LLM có chính sách chung**: structured output cho agent trả JSON; retry lỗi tạm thời (timeout, 429, 5xx, lỗi mạng) tối đa 2 lần, backoff 0.5 s rồi 1.5 s có jitter, tôn trọng `Retry-After`; không retry 400, 401, 403; repair retry 1 lần cho lỗi format; `finish_reason = length` thì retry 1 lần với `max_tokens × 1.5`; tổng retry Evaluator ≤ 10 s | Must | Test với fake LLM ném lỗi theo kịch bản: đúng số lần retry, đúng backoff | D03 §4.6 | S3-AIE-3 | Một phần (gateway có retry, repair, `length` ×1.5; chưa nối vào agent, chưa có fallback theo agent) |
 | FR-AI-071 | **Fallback theo từng agent** (bảng xử lý lỗi): Interviewer lỗi → `backup_question` hoặc câu từ `question_bank` (event `token` hoặc `replace`, `question_source = fallback`); Planner lỗi → plan dự phòng; CV Parser lỗi → không CV; Reporter lỗi → báo cáo partial. Mọi fallback ghi vào `ai_meta.fallbacks` | Must | Tỉ lệ fallback < 2% trong phiên giả lập; mỗi nhánh có test | D03 §4.6 | S3-AIE-3 | Chưa |
 | FR-AI-072 | **Evaluator lỗi hẳn** thì trả `Evaluation` degraded (không có band, `answer_type = unknown`); policy coi như `ok` không thiếu ý; lượt đó loại khỏi tính điểm và báo cáo ghi chú | Must | Report ghi `degraded_turns`; > 20% degraded → `confidence = low` | D03 §4.6, D05 §6.3 | S3-AIE-3 | Chưa |
 | FR-AI-073 | Mọi lỗi trả theo **format thống nhất** `{error, message, details}` với mã HTTP đúng: 413 `cv_too_large`, 415 `cv_invalid_format`, 422 `cv_unreadable` hoặc `invalid_request` hoặc `invalid_state`, 409 `session_invalid_state` | Must | Test từng mã lỗi | D06 §7.4 | S2-AIE-4 | Mock |
@@ -118,8 +118,8 @@
 
 | ID | Yêu cầu | Ưu tiên | Tiêu chí chấp nhận | Nguồn | Task | Trạng thái |
 |---|---|---|---|---|---|---|
-| FR-AI-080 | Mỗi lời gọi LLM ghi **số token vào và ra, độ trễ, phiên bản prompt, fallback** vào `metadata` của response để interview-service lưu; tổng hợp chi phí mỗi phiên; cảnh báo khi vượt $0.10/phiên. Không log nội dung câu hỏi, câu trả lời hay CV (cờ `LOG_LLM_IO` mặc định tắt) | Should | Mỗi response `done` có `metadata.usage` và `latency_ms`; log chỉ có id và số đo | D08 §9.4, D07 | S3-AIE-5 | Một phần (khung `metadata`, chưa có số liệu thật) |
-| FR-AI-081 | **Cấu hình model theo từng agent** bằng biến môi trường (`LLM_MODEL_CV_PARSER`, `_PLANNER`, `_EVALUATOR`, `_INTERVIEWER`, `_REPORTER`), không đặt thì dùng `LLM_MODEL`; `temperature` và `max_tokens` theo bảng cấu hình | Should | Đổi model của một agent không ảnh hưởng agent khác | D08 §9.3 | S2-AIE-1 | Chưa (chỉ có `LLM_MODEL` chung) |
+| FR-AI-080 | Mỗi lời gọi LLM ghi **số token vào và ra, độ trễ, phiên bản prompt, fallback** vào `metadata` của response để interview-service lưu; tổng hợp chi phí mỗi phiên; cảnh báo khi vượt $0.10/phiên. Không log nội dung câu hỏi, câu trả lời hay CV (cờ `LOG_LLM_IO` mặc định tắt) | Should | Mỗi response `done` có `metadata.usage` và `latency_ms`; log chỉ có id và số đo | D08 §9.4, D07 | S3-AIE-5 | Một phần (`UsageCollector` tạo `metadata`; chưa nối vào response) |
+| FR-AI-081 | **Cấu hình model theo từng agent** bằng biến môi trường (`LLM_MODEL_CV_PARSER`, `_PLANNER`, `_EVALUATOR`, `_INTERVIEWER`, `_REPORTER`), không đặt thì dùng `LLM_MODEL`; `temperature` và `max_tokens` theo bảng cấu hình | Should | Đổi model của một agent không ảnh hưởng agent khác | D08 §9.3 | S2-AIE-1 | Mock (cấu hình model theo agent qua env; chưa nối vào agent) |
 | FR-AI-082 | **Bộ đánh giá chất lượng ba tầng**: (1) unit test không LLM chạy trong CI; (2) golden set Evaluator ~70 mẫu có nhãn người (+ adversarial); (3) 24 phiên ứng viên giả lập + 4 phiên adversarial. Tầng 2 và 3 không chạy trong CI. Mỗi thay đổi prompt hoặc model Evaluator phải chạy lại tầng 2 | Must | Có script `evals.run_evaluator` và harness simulator; kết quả lưu ở `plans/reports/eval-{ngày}.md` | D09 §10 | S3-AIE-4 | Chưa (tầng 1 có một phần) |
 | FR-AI-083 | Có **chế độ mock** để FSD và FE tích hợp độc lập: cùng contract, dùng quy tắc thay LLM, có thể mô phỏng độ trễ giữa các token (`MOCK_STREAM_DELAY_MS`) để thử streaming qua gateway | Must | Mock chạy được `cv/parse`, `start`, `next-turn`, `finalize` đúng schema; có test | CON III, D06 §7.4 | S2-AIE-5 | Mock |
 
@@ -215,9 +215,9 @@ Cột **GĐ** là giai đoạn triển khai. **Owner đề xuất** nằm trong 
 
 | Trạng thái | Số FR |
 |---|---|
-| Mock (đã có, dùng quy tắc thay LLM hoặc code thật cho phần không cần LLM) | 25 |
-| Một phần | 8 |
-| Chưa làm | 40 |
+| Mock (đã có, dùng quy tắc thay LLM hoặc code thật cho phần không cần LLM) | 26 |
+| Một phần | 9 |
+| Chưa làm | 38 |
 | Ngoài phạm vi ai-service (FSD, DE) | 2 |
 | **Tổng** | **75** |
 
@@ -225,7 +225,7 @@ Theo giai đoạn (nhóm A đến I tính giai đoạn 1; FR nhiều giai đoạ
 
 | Giai đoạn | Số FR | Mock | Một phần | Chưa | Ngoài |
 |---|---|---|---|---|---|
-| 1 | 60 | 25 | 8 | 25 | 2 |
+| 1 | 60 | 26 | 9 | 23 | 2 |
 | 2 | 11 | 0 | 0 | 11 | 0 |
 | 3 | 4 | 0 | 0 | 4 | 0 |
 

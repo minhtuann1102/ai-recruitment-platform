@@ -329,9 +329,10 @@ sequenceDiagram
 | Agent: Interviewer | Diễn đạt câu hỏi, stream | `mock_interviewer.py` |
 | Agent: Reporter + scoring | Tổng hợp điểm (code) + nhận xét | `report_scoring.py` |
 | Topic catalog loader | Đọc YAML, kiểm schema | `catalog/` |
-| LLM client | Client OpenAI-compatible, retry, repair, đo usage | `llm_client.py`, `config.py` (chưa có retry hay repair) |
+| LLM client | Client OpenAI-compatible, retry, repair, đo usage | `llm/gateway.py`, `llm/retry.py`, `llm/structured_output.py`, `llm/usage.py`, `llm/settings.py` (đã cài đặt, test bằng LLM giả; chưa nối vào agent) |
 | RAG module | Embedding, truy xuất, repository, chunking | **Chưa có** (`app/rag/` theo rag-design §6) |
-| Prompt store | Prompt có phiên bản | **Chưa có** (`app/prompts/`) |
+| Prompt store | Prompt có phiên bản | `prompts/store.py` (chưa có prompt agent thật, chỉ `smoke.v1.md`) |
+| Agent registry | Chọn `mock` hoặc `llm` theo từng agent | `agents/registry.py` (mặc định `mock`) |
 
 Hiện các file `mock_*` dùng quy tắc thay LLM; khi có LLM thật chỉ thay phần thân agent, giữ nguyên interface và orchestrator.
 
@@ -362,7 +363,7 @@ flowchart LR
 |---|---|---|
 | Đóng gói ai-service | `apps/ai-service/Dockerfile`, `python:3.12-slim`, `uvicorn app.main:app` cổng 8000, healthcheck `curl /api/health` | Catalog YAML nằm trong image; chưa build lại với thư viện CV mới |
 | Tên container, network | `nest_turbo_*`, `nest-turbo-network` trong nhánh này | Nhánh `chore/rename-project-scope` (DE) đổi sang `ai_recruit_*` và `ai-recruit-network`; khối `ai-service` phải đổi theo sau khi nhánh đó merge |
-| Biến môi trường ai-service | `LLM_API_KEY`, `LLM_BASE_URL`, `LLM_MODEL`, `EMBEDDING_MODEL`, `EMBEDDING_DIMENSIONS`, `LLM_TIMEOUT_SECONDS`, `MOCK_STREAM_DELAY_MS` | Cần thêm: `X-Internal-Token`, model theo từng agent, `LOG_LLM_IO`, kết nối `ai_db` |
+| Biến môi trường ai-service | `LLM_API_KEY`, `LLM_BASE_URL`, `LLM_MODEL`, `EMBEDDING_MODEL`, `EMBEDDING_DIMENSIONS`, `LLM_STRUCTURED_OUTPUTS`, `LOG_LLM_IO`, `LLM_MODEL_<AGENT>`, `AGENT_<AGENT>_MODE`, `MOCK_STREAM_DELAY_MS` | Cần thêm: `X-Internal-Token`, kết nối `ai_db` |
 | Gateway | Route `/ai/*` trong `config/apisix/conf/apisix-dev.yaml`; chỉ `/ai/api/health` công khai | Chưa kiểm chứng SSE qua gateway |
 | Scale | Thêm instance ai-service sau gateway hoặc load balancer; không cần sticky session vì stateless | Quy mô demo khoảng 20 phiên đồng thời |
 | Staging | Docker Compose trên VPS hoặc cloud có HTTPS | Thuộc DE (feature 014) |
