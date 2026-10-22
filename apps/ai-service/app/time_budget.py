@@ -46,13 +46,14 @@ def forced_transition(elapsed_s: int, state: CandidateState, plan: InterviewPlan
         return "end", "time_hard_limit"
     if elapsed_s >= total:
         return "wrap_up", "time_up"
-    if state.turn_count >= turn_cap(plan):
+    if state.turn_count >= turn_cap(plan) - 1:  # cau wrap-up cung la mot luot: tong luot khong vuot cap
         return "wrap_up", "turn_cap"
     last_phase = plan.phases[-1].phase
     if phase != last_phase and elapsed_s >= phase_deadline_s(plan, phase) + PHASE_GRACE_S:
         return "next_phase", "phase_time"
     if state.counters.consecutive_dont_know >= 2:
         return "next_topic", "two_dont_know"
-    if elapsed_s - state.topic_started_s >= TOPIC_OVERRUN * topic_budget_s(plan, phase):
+    started = state.topic_started_s if state.topic_started_s is not None else elapsed_s
+    if elapsed_s - started >= TOPIC_OVERRUN * topic_budget_s(plan, phase):
         return "next_topic", "topic_time"
     return None

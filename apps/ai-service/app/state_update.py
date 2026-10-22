@@ -69,5 +69,6 @@ def apply_action(state: CandidateState, topics: List[Tuple[str, PlanTopic]], pos
     state.topic_started_s = elapsed_s
     if changed:
         state.phase_started_s = elapsed_s
-    state.current_difficulty = _clamp(n_topic.start_difficulty + state.momentum, state)
+    # delta < 0 khi dong topic vi yeu (vd hai lan dont_know): topic sau mo de hon them mot muc
+    state.current_difficulty = _clamp(n_topic.start_difficulty + state.momentum + min(delta, 0), state)
     return "ask_main", changed, target

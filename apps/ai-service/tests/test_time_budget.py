@@ -31,8 +31,8 @@ def test_phase_deadlines_borrow_time():
     (1200 + 180, state(), "technical", ("end", "time_hard_limit")),
     (1200 + 179, state(), "technical", ("wrap_up", "time_up")),
     (1200, state(), "scenario", ("wrap_up", "time_up")),
-    (100, state(turn_count=16), "technical", ("wrap_up", "turn_cap")),
-    (100, state(turn_count=15), "intro", None),
+    (100, state(turn_count=15), "technical", ("wrap_up", "turn_cap")),  # luot 16 la wrap-up
+    (100, state(turn_count=14), "intro", None),
     (None, state(), "intro", ("next_phase", "phase_time")),  # elapsed = han intro + 60
     (None, state(), "scenario", None),  # phase cuoi khong chuyen phase, het gio thi wrap_up
     (100, state(counters={"consecutive_dont_know": 2}), "intro", ("next_topic", "two_dont_know")),
@@ -44,6 +44,10 @@ def test_forced_transition_priority(elapsed, st, phase, expected):
         if phase == "scenario":
             st.topic_started_s = elapsed
     assert forced_transition(elapsed, st, PLAN, phase) == expected
+
+
+def test_unknown_topic_start_never_forces_next_topic():
+    assert forced_transition(400, CandidateState(turn_count=2), PLAN, "technical") is None
 
 
 def test_topic_overrun_closes_topic():
@@ -81,6 +85,7 @@ def test_hard_limit_ends_immediately_but_still_scores(client):
     nd = _answer(client, _start(client), "Em làm backend Java Spring Boot cho hệ thống đơn hàng", 1200 + 180)
     assert nd["session_end"] and nd["question"] is None and nd["turn"] is None
     assert nd["state"]["end_reason"] == "time_hard_limit" and nd["evaluation"] is not None
+    assert all(t["status"] != "active" for t in nd["state"]["topics"])
 
 
 def test_two_dont_know_in_a_row_moves_to_next_topic(client):

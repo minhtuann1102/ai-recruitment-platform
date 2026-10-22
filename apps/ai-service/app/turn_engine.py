@@ -63,7 +63,7 @@ async def start_session(req: StartRequest, planner=None, collector: Optional[Usa
     state = CandidateState(
         phase=first_phase, topic_index=1, active_topic_id=first.id,
         current_difficulty=max(lo, min(hi, first.start_difficulty)), difficulty_bounds={"min": lo, "max": hi},
-        turn_count=1, topics=[TopicState(id=t.id, status="active" if i == 0 else "pending")
+        turn_count=1, phase_started_s=0, topic_started_s=0, topics=[TopicState(id=t.id, status="active" if i == 0 else "pending")
                               for i, (_, t) in enumerate(topics)])
     q = compose("ask_main", first, first_phase, None, "", True, False)
     state.asked_questions.append(_norm(q))
@@ -92,8 +92,11 @@ async def next_turn(req: NextTurnRequest, evaluator: Optional[Evaluator] = None,
         turn_number=req.turn_number, question=req.question, answer=req.answer, topic_turns=req.topic_turns),
         collector)
     record_evaluation(state, ev, req.turn_number)
+    if state.topic_started_s is None:  # state cu: chua biet topic bat dau luc nao
+        state.topic_started_s = state.phase_started_s = req.elapsed_seconds
     forced = forced_transition(req.elapsed_seconds, state, plan, phase)
     if forced and forced[0] == "end":  # qua han cung: ket thuc ngay, khong hoi them (FR-AI-035)
+        state.topics[pos].status = "done"
         state.phase, state.active_topic_id, state.end_reason = "done", None, forced[1]
         return TurnResult(None, None, state, plan, ev, True, {})
     if forced:
