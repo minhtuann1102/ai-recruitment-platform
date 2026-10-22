@@ -187,6 +187,8 @@ data: {"errorCode":"AI_SERVICE_ERROR","message":"AI tạm thời không phản h
 
 `error` với `retryable = true`: lượt chưa được ghi nhận, client cho gửi lại cùng `turnNumber`.
 
+*(Cài đặt 2026-10-22, ai-service.)* `replace` cũng được gửi khi câu Interviewer vừa stream bị code từ chối (lặp câu đã hỏi, lộ điểm hoặc đáp án, quá dài) hoặc đã được bỏ markdown. `done.question` luôn là câu cuối cùng (sau `replace` nếu có); `turn.question_source` là `ai` hoặc `fallback`. interview-service lưu `done.question`, không ghép lại từ các `token`.
+
 ### GET /sessions/:id
 
 ```jsonc

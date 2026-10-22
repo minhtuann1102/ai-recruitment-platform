@@ -11,7 +11,7 @@ from .agents.evaluator_provider import Evaluator, get_evaluator
 from .api_error import ApiError
 from .llm.usage import UsageCollector
 from .mock_evaluator import fold
-from .mock_interviewer import compose
+from .agents.interviewer import QuestionSpec, safe_focus
 from .agents.planner import get_planner
 from .mock_planner import load_track
 from .plan_snippets import attach_reference_snippets, get_retriever
@@ -20,7 +20,7 @@ from .models_interview import (CandidateState, Evaluation, InterviewPlan, NextTu
                                StartRequest, TopicState, TurnInfo)
 from .policy import Decision, decide
 from .state_update import apply_action, record_evaluation
-from .time_budget import forced_transition
+from .time_budget import forced_transition, phase_deadline_s
 
 _KIND = {"ask_main": "main", "follow_up": "follow_up", "hint": "hint", "clarify": "clarify",
          "wrap_up": "main", "end": "main"}  # next_topic / next_phase deu thanh ask_main sau apply_action
@@ -29,13 +29,22 @@ _AGENT = {"follow_up": "deepen", "hint": "keep_difficulty", "clarify": "keep_dif
 
 @dataclass
 class TurnResult:
-    question: Optional[str]
+    spec: Optional[QuestionSpec]  # None khi phien ket thuc (khong hoi them)
     turn: Optional[TurnInfo]
     state: CandidateState
     plan: InterviewPlan
     evaluation: Optional[Evaluation]
     session_end: bool
     meta: Dict
+    question: Optional[str] = None  # dien sau khi Interviewer stream xong (finish_turn)
+
+
+def finish_turn(result: TurnResult, question: str, source: str) -> None:
+    """Ghi cau hoi da gui vao state (chong lap, FR-AI-038) va nguon cau hoi (ai | fallback)."""
+    result.question = question
+    result.state.asked_questions = (result.state.asked_questions + [_norm(question)])[-30:]
+    if result.turn is not None:
+        result.turn.question_source = source
 
 
 def flat_topics(plan: InterviewPlan) -> List[Tuple[str, PlanTopic]]:
@@ -65,12 +74,11 @@ async def start_session(req: StartRequest, planner=None, collector: Optional[Usa
         current_difficulty=max(lo, min(hi, first.start_difficulty)), difficulty_bounds={"min": lo, "max": hi},
         turn_count=1, phase_started_s=0, topic_started_s=0, topics=[TopicState(id=t.id, status="active" if i == 0 else "pending")
                               for i, (_, t) in enumerate(topics)])
-    q = compose("ask_main", first, first_phase, None, "", True, False)
-    state.asked_questions.append(_norm(q))
+    spec = QuestionSpec("ask_main", first_phase, first, state.current_difficulty, first_turn=True)
     state.topics[0].turns.append(1)
     turn = TurnInfo(turn_number=1, phase=first_phase, topic_id=first.id, turn_kind="main", action="ask_main",
                     agent_decision="switch_topic", difficulty=state.current_difficulty)
-    return TurnResult(q, turn, state, plan, None, False, _meta(first_phase, 1, len(topics), "ask_main", 1))
+    return TurnResult(spec, turn, state, plan, None, False, _meta(first_phase, 1, len(topics), "ask_main", 1))
 
 
 async def next_turn(req: NextTurnRequest, evaluator: Optional[Evaluator] = None,
@@ -110,8 +118,10 @@ async def next_turn(req: NextTurnRequest, evaluator: Optional[Evaluator] = None,
     action, phase_changed, next_pos = apply_action(state, topics, pos, dec.action, dec.difficulty_delta,
                                                    req.elapsed_seconds)
     n_phase, n_topic = (topics[next_pos] if next_pos is not None else ("wrap_up", None))
-    question = compose(action, n_topic, n_phase, dec.focus, req.question, False, phase_changed)
-    state.asked_questions = (state.asked_questions + [_norm(question)])[-30:]
+    spec = QuestionSpec(action, n_phase, n_topic, state.current_difficulty, focus=safe_focus(dec.focus),
+                        last_question=req.question, last_answer=req.answer, phase_changed=phase_changed,
+                        asked_on_topic=[t.q for t in req.topic_turns] + [req.question] if action != "ask_main" else [],
+                        time_hint=_time_hint(req.elapsed_seconds, plan, n_phase))
     state.turn_count += 1
     if n_topic:
         next(t for t in state.topics if t.id == n_topic.id).turns.append(req.turn_number + 1)
@@ -119,4 +129,13 @@ async def next_turn(req: NextTurnRequest, evaluator: Optional[Evaluator] = None,
                     turn_kind=_KIND[action], action=action, agent_decision=_AGENT.get(action, "switch_topic"),
                     difficulty=state.current_difficulty, reasoning=dec.reasoning)
     meta = _meta(n_phase, (next_pos or 0) + 1 if n_topic else len(topics), len(topics), action, info.turn_number)
-    return TurnResult(question, info, state, plan, ev, False, meta)
+    return TurnResult(spec, info, state, plan, ev, False, meta)
+
+
+def _time_hint(elapsed_s: int, plan: InterviewPlan, phase: str) -> str:
+    """hurry khi con < 20% thoi gian phase (design 02 muc 3.3.4)."""
+    ph = next((p for p in plan.phases if p.phase == phase), None)
+    if ph is None:
+        return "normal"
+    left = phase_deadline_s(plan, phase) - elapsed_s
+    return "hurry" if left < 0.2 * ph.time_budget_min * 60 else "normal"

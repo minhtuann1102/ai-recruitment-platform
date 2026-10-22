@@ -37,7 +37,7 @@ finalize : code tính điểm → Reporter (JSON) → kiểm evidence_turns, tra
 
 ## Todo List
 - [x] time_budget + điều kiện chuyển phase, test biên (`tests/test_time_budget.py`)
-- [ ] Interviewer stream + fallback + replace + chống lặp
+- [x] Interviewer stream + fallback + replace + chống lặp (LLM giả; chất lượng câu hỏi đo ở Phase 07)
 - [ ] Reporter + partial + evidence kiểm
 - [ ] Khối `requirements`
 - [ ] Nhánh lỗi có test; token nội bộ
