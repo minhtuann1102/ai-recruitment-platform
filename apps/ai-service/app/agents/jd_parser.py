@@ -9,7 +9,7 @@ from typing import List, Literal, Optional
 import openai
 from pydantic import BaseModel
 
-from .. import cv_text, mock_jd_parser
+from .. import mock_jd_parser
 from ..catalog.models import TrackCatalog
 from ..llm.errors import ConfigError, LlmError
 from ..llm.gateway import LlmGateway
@@ -60,7 +60,7 @@ class LlmJdParser:
         reqs = mock_jd_parser.finalize_requirements([(r.text, r.kind, r.topic_ids) for r in out.requirements],
                                                     catalog)
         dropped = len(reqs) < min(len(out.requirements), 15)  # co yeu cau bi loai vi chua chi dan
-        title = "" if cv_text.has_injection(out.title) else out.title.strip()[:120]
+        title = "" if mock_jd_parser.has_jd_injection(out.title) else out.title.strip()[:120]
         profile = JdProfile(title=title, requirements=reqs,
                             flags=JdFlags(injection_suspected=injection or dropped, truncated=truncated))
         return JdParseResponse(jd_profile=profile, metadata=CvParseMetadata(

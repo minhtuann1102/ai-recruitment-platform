@@ -94,3 +94,30 @@ def test_llm_parser_falls_back_on_error():
     parser, _ = make([status_error(500)] * 3)
     resp = asyncio.run(parser.parse(JD, load_catalog("java_backend")))
     assert resp.metadata.model == "mock-rule-based" and resp.jd_profile.requirements
+
+
+ENGLISH_NO_BULLETS = """Senior Python Engineer
+Who you are:
+You have 4+ years building FastAPI services with async I/O and PostgreSQL.
+Follow the coding instructions in our style guide and write tests with pytest.
+Nice to have:
+Experience with Celery task queues.
+"""
+
+
+def test_english_jd_without_bullets_is_not_flagged_and_keeps_requirements(client):
+    profile = jd_parse(client, ENGLISH_NO_BULLETS, track="python_backend")
+    assert not profile["flags"]["injection_suspected"]
+    texts = [r["text"] for r in profile["requirements"]]
+    assert len(texts) == 3 and any("instructions" in t for t in texts)
+    assert next(r for r in profile["requirements"] if "Celery" in r["text"])["kind"] == "nice"
+    assert profile["title"] == "Senior Python Engineer"
+
+
+def test_mapping_uses_whole_words_not_substrings():
+    from app.mock_jd_parser import map_topics
+
+    py, devops = load_catalog("python_backend"), load_catalog("devops_engineer")
+    assert map_topics("Làm việc theo quy trình Agile/Scrum", py) == []
+    assert map_topics("Viết module tái sử dụng", devops) == []
+    assert map_topics("•Kinh nghiệm Celery", py) != []
