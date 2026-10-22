@@ -70,7 +70,11 @@ nguyên văn từ `interview_qa` đã index.
 | Evidence hợp lệ | % quote khớp câu trả lời trước hậu kiểm | ≥ 95% |
 | `answer_type` đúng | Accuracy so với nhãn | ≥ 90% |
 
-Script: `python -m evals.run_evaluator --prompt v3 --model openai/gpt-4o-mini` → in bảng chỉ số + file JSON kết quả
+**Đã cài (2026-10-22), bản v1 của golden set:** 48 mẫu trong `evals/evaluator_golden.jsonl`: 12 câu hỏi trải 6 track và 4 level (fresher 2, junior 4, middle 3, senior 3) × 3 mức (giỏi, trung bình, yếu), cộng 12 mẫu adversarial (injection trực tiếp, injection giả ghi chú hệ thống, injection tiếng Anh, 2 injection lời lẽ mềm mà regex không bắt để đo riêng khả năng của LLM, nhồi thuật ngữ, lan man, sai nhưng tự tin, đúng nhưng cực ngắn, trả lời câu khác, tiếng Anh, không dấu). Câu trả lời do AIE soạn với LLM hỗ trợ; **người gán nhãn sửa câu nào không tự nhiên trước khi chấm**. `intended_tier` là ý định của người soạn, **không phải nhãn**; nhãn chỉ đến từ người chấm. Mẫu injection có `expect.answer_type = manipulation` theo định nghĩa (BRU, FR-AI-032), không cần nhãn.
+
+**Quy trình gán nhãn:** `python -m evals.label_sheet export --out sheet_a.csv` (phiếu đã trộn thứ tự, id mờ dạng `s1a2b3c4d`, ẩn `intended_tier` và loại adversarial, bỏ 5 mẫu injection vì đã có kỳ vọng; mở được bằng Excel/Sheets) → mỗi người chấm độc lập 4 band + `answer_type` → `python -m evals.label_sheet import --rater rater_a sheet_a.csv` (tương tự `rater_b`) → ghi `evals/evaluator_labels/rater_*.json`. Mẫu lệch ≥ 2 band ở bất kỳ tiêu chí nào bị loại khỏi phép đo cho tới khi hai người họp và ghi nhãn chốt vào `final.json`; lệch ≤ 1 thì lấy trung bình.
+
+Script: `python -m evals.run_evaluator --runs 3 [--prompt v1]` (model chọn bằng `LLM_MODEL_EVALUATOR`). Lần chạy rơi về heuristic (`degraded`) bị loại khỏi mọi chỉ số; nhãn một người không dùng để đo; kappa LLM–người (trung bình với từng người chấm) và kappa người–người tính trên cùng tập mẫu, không làm tròn nhãn; tỉ lệ bắt manipulation báo riêng phần do LLM tự nhận ra → in bảng chỉ số + file JSON kết quả
 (lưu ở `plans/reports/`, không commit dữ liệu lớn). Chi phí một lần chạy: ~70 × 3 lần × ~2.7k token ≈ 0.6M token,
 dưới $0.15 với giá giả định §9.4.
 

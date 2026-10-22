@@ -33,8 +33,8 @@
 ## Todo List
 - [x] Hậu kiểm bằng code + test (`app/evaluation_checks.py`, `tests/test_evaluation_checks.py`)
 - [x] Prompt evaluator.v1 (rubric, kỳ vọng level, 10 luật, 5 mẫu neo); agent `app/agents/evaluator.py` nối vào `/api/next-turn` qua `AGENT_EVALUATOR_MODE`
-- [ ] Golden set v1 (≥ 40) có nhãn 2 người
-- [ ] `run_evaluator.py` + báo cáo đầu tiên
+- [ ] Golden set v1 (≥ 40) có nhãn 2 người: **48 mẫu đã soạn** (`evals/evaluator_golden.jsonl`), phiếu gán nhãn `evals/label_sheet.py`; chờ 2 người chấm
+- [ ] `run_evaluator.py` + báo cáo đầu tiên: script + chỉ số đã có (`evals/evaluator_metrics.py`, chạy thử bằng LLM giả); chờ khóa API và nhãn để có báo cáo
 - [ ] Qua mốc W5; mở rộng lên 70 mẫu
 
 ## Success Criteria
