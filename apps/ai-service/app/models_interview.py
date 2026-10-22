@@ -74,6 +74,8 @@ class CandidateState(BaseModel):
     gaps: List[Tagged] = Field(default_factory=list)
     asked_questions: List[str] = Field(default_factory=list)
     end_reason: Optional[str] = None
+    phase_started_s: int = 0  # elapsed_seconds luc bat dau phase / topic hien tai (ngan sach thoi gian)
+    topic_started_s: int = 0
 
 
 class TurnInfo(BaseModel):
