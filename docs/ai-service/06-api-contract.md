@@ -432,11 +432,12 @@ Event `done`:
   "turns": [
     { "turn_number": 4, "phase": "technical", "topic_id": "t2", "turn_kind": "main", "difficulty": 3,
       "question": "...", "answer": "...", "evaluation": { "...": "Evaluation đã lưu" } }
-  ]
+  ],
+  "jd_profile": { "...": "JdProfile đã lưu khi start, hoặc bỏ trống" }      // thêm 2026-10-22 (FR-AI-056)
 }
 ```
 
-Response 200: report theo §6.4 (snake_case) + `metadata` (usage, latency, prompt version của Reporter).
+Response 200: report theo §6.4 (snake_case) + `metadata` (usage, latency, prompt version của Reporter). Reporter lỗi vẫn trả 200 với `status = "partial"` (chỉ có điểm và nhận xét mẫu); `meta.fallbacks` ghi `reporter_partial`. Có `jd_profile` thì report có khối `requirements` (design 05 §6.4).
 
 ### Interface phía NestJS
 
