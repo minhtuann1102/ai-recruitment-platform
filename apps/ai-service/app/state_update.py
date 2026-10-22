@@ -29,12 +29,14 @@ def record_evaluation(state: CandidateState, ev: Evaluation, turn_no: int) -> No
         state.evaluated_turns += 1
     _tag(state.strengths, ev.strength_tags if ev.scores.completeness >= 2 else [], turn_no)
     _tag(state.gaps, ev.gap_tags if ev.scores.completeness < 2 else [], turn_no)
+    if is_scored(ev):
+        ts.covered = list(dict.fromkeys(ts.covered + [p[:150] for p in ev.covered_points]))[-10:]
     c = state.counters
     c.consecutive_dont_know = c.consecutive_dont_know + 1 if ev.answer_type == "dont_know" else 0
 
 
 def apply_action(state: CandidateState, topics: List[Tuple[str, PlanTopic]], pos: int, action: str,
-                 delta: int, elapsed_s: int) -> Tuple[str, bool, Optional[int]]:
+                 delta: int, elapsed_s: int, focus: Optional[str] = None) -> Tuple[str, bool, Optional[int]]:
     """Ap dung hanh dong vao state. -> (action thuc te, phase_changed, vi tri topic ke tiep hoac None).
 
     action: follow_up | hint | clarify (o lai topic) | next_topic | next_phase (bo topic con lai cua phase)
@@ -45,8 +47,11 @@ def apply_action(state: CandidateState, topics: List[Tuple[str, PlanTopic]], pos
         c.follow_ups += 1
         c.hints += action == "hint"
         c.clarifies += action == "clarify"
+        cur = next(t for t in state.topics if t.id == state.active_topic_id)
         if action == "hint":
-            next(t for t in state.topics if t.id == state.active_topic_id).hint_used = True
+            cur.hint_used = True
+        if focus:
+            cur.focus_used = (cur.focus_used + [focus[:150]])[-6:]
         state.current_difficulty = _clamp(state.current_difficulty + delta, state)
         return action, False, pos
     target = pos + 1

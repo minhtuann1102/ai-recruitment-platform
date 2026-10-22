@@ -15,6 +15,7 @@ from ..llm.usage import UsageCollector
 from ..models_interview import PlanTopic
 from ..prompts.store import UNTRUSTED_NOTICE, PromptStore, wrap_untrusted
 from ..sse import chunk_tokens
+from ..text_similarity import is_repeat
 from .registry import agent_mode, cached_llm_agent
 
 
@@ -32,6 +33,7 @@ class QuestionSpec:
     phase_changed: bool = False
     asked_on_topic: List[str] = field(default_factory=list)
     time_hint: str = "normal"  # normal | hurry
+    avoid: List[str] = field(default_factory=list)  # cau da hoi trong phien (da chuan hoa), cau du phong phai khac
 
 
 def safe_focus(focus: Optional[str]) -> Optional[str]:
@@ -43,9 +45,11 @@ def safe_focus(focus: Optional[str]) -> Optional[str]:
 
 
 def fallback_question(spec: QuestionSpec) -> str:
-    """Cau mau bang code: backup_question cua topic khi ask_main, mau co dinh cho cac hanh dong khac."""
-    return mock_interviewer.compose(spec.action, spec.topic, spec.phase, spec.focus, spec.last_question,
-                                    spec.first_turn, spec.phase_changed)
+    """Cau mau bang code (backup_question khi ask_main, mau cho hanh dong khac): lay cach dien dat dau tien
+    khong lap cau da hoi; neu cach nao cung lap thi dung cach dau (con hon khong co cau hoi)."""
+    options = mock_interviewer.candidates(spec.action, spec.topic, spec.phase, spec.focus, spec.last_question,
+                                          spec.first_turn, spec.phase_changed)
+    return next((q for q in options if not is_repeat(q, spec.avoid)), options[0])
 
 
 def build_messages(system: str, spec: QuestionSpec) -> List[dict]:

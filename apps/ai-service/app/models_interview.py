@@ -44,6 +44,8 @@ class TopicState(BaseModel):
     turns: List[int] = Field(default_factory=list)
     n_scored: int = 0
     score_sum: float = 0.0
+    focus_used: List[str] = Field(default_factory=list)  # focus da hoi (follow-up, hint) de khong hoi lai
+    covered: List[str] = Field(default_factory=list)  # y ung vien da neu trong topic (gop qua cac luot, <= 10)
 
 
 class Counters(BaseModel):

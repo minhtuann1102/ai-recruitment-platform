@@ -14,26 +14,13 @@ from .agents.interviewer import QuestionSpec, fallback_question
 from .llm.usage import CallRecord, UsageCollector
 from .mock_evaluator import fold
 from .sse import chunk_tokens
+from .text_similarity import is_repeat
 
 log = logging.getLogger("ai_service.interviewer")
 FIRST_TOKEN_TIMEOUT_S = 5.0
 MAX_WORDS = 120  # prompt yeu cau <= 80; de du phong cho cau dan
-REPEAT_JACCARD = 0.8
 _LEAK = re.compile(r"\d+([.,]\d+)?\s*/\s*10\b|\bband\s*\d|diem (cua ban|so)|dap an (la|dung)")
 _MARKDOWN = re.compile(r"[*_#`>]+")
-
-
-def _words(text: str) -> set:
-    return set(re.findall(r"[a-z0-9]+", fold(text)))
-
-
-def jaccard(a: str, b: str) -> float:
-    x, y = _words(a), _words(b)
-    return len(x & y) / len(x | y) if x and y else 0.0
-
-
-def is_repeat(question: str, asked: List[str]) -> bool:
-    return any(jaccard(question, q) >= REPEAT_JACCARD for q in asked)
 
 
 def clean_question(text: str) -> str:
@@ -93,7 +80,8 @@ class QuestionStream:
         self.question = clean_question(raw)
         problem = violation(self.question, self.asked)
         if problem and self.question == fallback_question(self.spec):
-            problem = None  # cau mau (mock) trung chinh no: thay bang no cung vo ich
+            # cau mau (mock) da la lua chon tot nhat (fallback_question da ne cau da hoi): thay bang no vo ich
+            problem = None
         if problem and not parts:
             for tok in chunk_tokens(self._fallback(problem)):
                 yield "token", {"t": tok}

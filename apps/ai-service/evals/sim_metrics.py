@@ -4,7 +4,7 @@ from typing import Dict, List, Optional
 
 from app.models_common import LEVEL_CONFIG
 from app.models_interview import InterviewPlan
-from app.question_stream import jaccard
+from app.text_similarity import jaccard
 from app.time_budget import turn_cap
 from evals.personas import Persona
 

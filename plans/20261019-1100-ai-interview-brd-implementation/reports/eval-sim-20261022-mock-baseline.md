@@ -40,6 +40,10 @@ LLM_MODEL_SIMULATOR=<model khác Evaluator> python -m evals.simulate --matrix fu
 
 TTFT phía client chỉ đúng khi gọi service thật (`--base-url http://localhost:8000` hoặc qua gateway `http://localhost:9080/ai`); khi chạy in-process, dùng `server_latency_ms` theo agent. Chi phí tính theo `evals/pricing.json` (**giá giả định** gpt-4o-mini $0.15 / $0.60 mỗi 1M token).
 
+## Sau khi sửa (nhánh `thang/question-variety`, 2026-10-22)
+
+Chạy lại cùng lệnh: câu lặp **34.2% → 0.6%** (2 lượt còn lại là `clarify`, vốn nhắc lại câu hỏi); các chỉ số khác không đổi. Sửa: policy chọn `focus` chưa hỏi theo topic (`app/focus.py`), câu dự phòng có nhiều cách diễn đạt và chọn cách chưa hỏi, áp dụng cả khi Interviewer LLM bị thay vì lặp.
+
 ## Chỉ số của design 09 chưa cài
 - LLM-as-judge chấm câu hỏi của Interviewer (Q5) và người đọc 5 transcript.
 - Người kiểm `evidence_turns` đúng nội dung (5 report mỗi lần).

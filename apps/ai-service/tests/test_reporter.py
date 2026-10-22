@@ -12,7 +12,7 @@ from app.agents.reporter import LlmReporter
 from app.llm.gateway import LlmGateway
 from app.llm.settings import load_llm_settings
 from app.llm.usage import UsageCollector
-from app.models_interview import CandidateState, Evaluation, FinalizeRequest
+from app.models_interview import CandidateState, Evaluation, FinalizeRequest, PlanTopic
 from app.models_jd import JdProfile, JdRequirement
 from app.policy import decide
 from app.report_scoring import build_report
@@ -106,5 +106,7 @@ def test_degraded_evaluation_moves_on_without_follow_up():
                     scores={"technical_accuracy": 1, "completeness": 1, "extensibility": 1, "relevance": 1},
                     scores_10={"technical_accuracy": 2.5, "completeness": 2.5, "extensibility": 2.5,
                                "relevance": 2.5}, turn_score_10=2.5)
-    dec = decide(ev, CandidateState(), "junior", False, "kp")
+    topic = PlanTopic(id="t1", title="T", source="catalog", objective="o", key_points=["a", "b", "c"],
+                      start_difficulty=2, opening_hint="h", backup_question="b?")
+    dec = decide(ev, CandidateState(), "junior", False, topic)
     assert dec.action == "next_topic" and "ok_degraded" in dec.reasoning
