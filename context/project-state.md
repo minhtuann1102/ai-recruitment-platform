@@ -1,7 +1,7 @@
 # Trạng thái dự án (cập nhật 2026-10-22)
 
 ## Kế hoạch
-`plans/20261019-1100-ai-interview-brd-implementation/` (9 phase, đã có trên `main`). Phase 01 **đã merge** (PR #9–#12, 2026-10-19). Phase 02 (`thang/llm-foundation`, PR #13) CI xanh, chờ review. Phase 03 **xong code đường đọc RAG** (`thang/rag-read-path`, xếp chồng trên #13, chờ review); đo recall@5 chờ DE nạp dữ liệu và duyệt golden set. Tiếp theo: Phase 05 Evaluator + golden set (mốc ±1 band tuần 5), Phase 04 Planner.
+`plans/20261019-1100-ai-interview-brd-implementation/` (9 phase, đã có trên `main`). Phase 01 **đã merge** (PR #9–#12, 2026-10-19). Phase 02 (`thang/llm-foundation`, PR #13) CI xanh, chờ review. Phase 03 **xong code đường đọc RAG** (`thang/rag-read-path`, xếp chồng trên #13, chờ review); đo recall@5 chờ DE nạp dữ liệu và duyệt golden set. Phase 05 đang làm: Evaluator LLM xong code (`thang/evaluator-llm`), golden set + công cụ đo ở `thang/evaluator-golden-set` (chờ 2 người gán nhãn). Sau đó Phase 04 Planner.
 
 ## Nhánh và PR
 | Nhánh | PR | Trạng thái |
@@ -11,7 +11,8 @@
 | `thang/difficulty-bounds-align` | #11 | **Đã merge** |
 | `thang/context-folder` | #12 | **Đã merge** |
 | `thang/llm-foundation` | #13 | Phase 02: gateway LLM, retry, structured output, prompt store, registry; 182 test |
-| `thang/rag-read-path` | (mới) | Phase 03: `app/rag/` đường đọc, golden set RAG bản nháp, `evals/run_rag.py`; 207 test + 5 test tích hợp |
+| `thang/rag-read-path` | #14 | Phase 03: `app/rag/` đường đọc, golden set RAG bản nháp, `evals/run_rag.py`; 207 test + 5 test tích hợp |
+| `thang/evaluator-llm` | (mới) | Phase 05 phần 1: Evaluator LLM, hậu kiểm bằng code, prompt v1 có mẫu neo; 248 test; xếp chồng trên #14 |
 
 Quy ước merge của owner: merge commit (không squash). Tiêu đề PR dạng `[scope] type: mô tả`.
 

@@ -4,7 +4,7 @@
 - [plan.md](plan.md) · [design 05](../../docs/ai-service/05-rubric-and-final-report.md) (rubric) · [design 09 §10.2](../../docs/ai-service/09-agent-quality-evaluation.md) (tầng 2) · FR-AI-030–032 · NFR QUAL01–08
 
 ## Overview
-- **Priority:** P1 (rủi ro lớn nhất của dự án) · **Status:** chưa bắt đầu · **Tuần:** W3–W5
+- **Priority:** P1 (rủi ro lớn nhất của dự án) · **Status:** Evaluator LLM + hậu kiểm + prompt v1 (có mẫu neo) xong code (2026-10-22, `thang/evaluator-llm`); golden set và công cụ đo ở nhánh `thang/evaluator-golden-set` · **Tuần:** W3–W5
 - Evaluator LLM chấm mỗi câu trả lời theo rubric 4 tiêu chí, band 0–4, có trích dẫn; hậu kiểm bằng code; đo bằng golden set có nhãn người.
 
 ## Key Insights
@@ -31,8 +31,8 @@
 5. Lặp prompt tới khi qua mốc W5 (≥ 80% ±1 band, độ lệch khoan dung trong ngưỡng); mỗi lần đổi prompt hoặc model chạy lại.
 
 ## Todo List
-- [ ] Hậu kiểm bằng code + test
-- [ ] Prompt evaluator.v1
+- [x] Hậu kiểm bằng code + test (`app/evaluation_checks.py`, `tests/test_evaluation_checks.py`)
+- [x] Prompt evaluator.v1 (rubric, kỳ vọng level, 10 luật, 5 mẫu neo); agent `app/agents/evaluator.py` nối vào `/api/next-turn` qua `AGENT_EVALUATOR_MODE`
 - [ ] Golden set v1 (≥ 40) có nhãn 2 người
 - [ ] `run_evaluator.py` + báo cáo đầu tiên
 - [ ] Qua mốc W5; mở rộng lên 70 mẫu

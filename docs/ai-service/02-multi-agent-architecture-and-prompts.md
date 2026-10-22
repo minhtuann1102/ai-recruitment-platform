@@ -300,6 +300,8 @@ dùng lại ở các lượt sau, **không phải gọi RAG mỗi lượt** (§9
 }
 ```
 
+**Đã cài (2026-10-22):** output LLM thực tế gộp ý và bằng chứng thành `covered: [{point, quote}]` để code xóa đúng ý có quote không khớp, rồi code dựng lại `covered_points` và `evidence` như trên (`app/agents/evaluator.py`, schema `EvaluatorOutput`). Prompt `app/prompts/evaluator.v1.md` có thêm **5 mẫu neo** (yếu, đạt chuẩn, vượt chuẩn, nhồi thuật ngữ, cùng câu nhưng level senior) theo gợi ý ở báo cáo nghiên cứu 22/10; band của mẫu neo là đề xuất của AIE, cần hiệu chỉnh bằng golden set. Hậu kiểm siết thêm so với thiết kế: quote phải có ≥ 3 từ và có từ nội dung chung với ý nó chứng minh; quote < 5 từ phải có đủ mọi từ trong câu trả lời (chặn "read committed" khớp nhầm "read uncommitted"); chỉ xét tối đa 4 ý; `off_topic` thì `relevance = 0`; `dont_know` chỉ khi câu trả lời **chỉ** gồm cụm "không biết" và từ đệm; thiếu khóa API thì lượt chạy heuristic và đánh dấu `degraded` thay vì lỗi 500.
+
 Code hậu kiểm (§4.6, §11): mọi `quote` phải xuất hiện trong `answer` (so khớp sau chuẩn hóa, fuzzy ≥ 0.9);
 `answer_type = dont_know` thì mọi band = 0; band `completeness` bị chặn trên theo tỉ lệ key point có bằng
 chứng (§6.3). Band lưu DB được quy đổi `× 2.5` sang thang 0–10 của `interview_turns.scores`.
