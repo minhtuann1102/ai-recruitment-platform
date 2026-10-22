@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 
 from .models_common import Action, AgentDecision, AnswerType, Level, Phase, TurnKind
 from .models_cv import CvProfile
+from .models_jd import JdProfile
 
 
 # --- Plan (Planner, 1 lan dau buoi) ---
@@ -94,6 +95,7 @@ class StartRequest(BaseModel):
     level: Level
     duration_minutes: int = Field(default=30, ge=15, le=45)
     cv_profile: Optional[CvProfile] = None
+    jd_profile: Optional[JdProfile] = None  # FR-AI-017: khong co thi luyen theo track + level
 
 
 class TopicTurn(BaseModel):

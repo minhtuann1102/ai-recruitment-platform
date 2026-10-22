@@ -52,7 +52,7 @@ def _meta(phase: str, topic_pos: int, total: int, action: str, turn_number: int)
 
 
 def start_session(req: StartRequest) -> TurnResult:
-    plan = build_plan(req.track, req.level, req.duration_minutes, req.cv_profile)
+    plan = build_plan(req.track, req.level, req.duration_minutes, req.cv_profile, req.jd_profile)
     topics = flat_topics(plan)
     lo, hi = LEVEL_CONFIG[req.level]["bounds"]
     first_phase, first = topics[0]

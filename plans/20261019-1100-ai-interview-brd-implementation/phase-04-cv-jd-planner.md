@@ -38,9 +38,9 @@ Số topic technical = `max(2, round(gốc × thời lượng / 30))`; turn cap 
 6. Kiểm với 10 CV mẫu (PDF, DOCX), 3 CV và 2 JD chứa injection.
 
 ## Todo List
-- [ ] Contract JD cập nhật (docs + mock)
+- [x] Contract JD cập nhật (docs + mock): `/api/jd/parse`, `jd_profile` trong `/api/start`
 - [x] CV Parser LLM + test (LLM giả); 10 CV mẫu + `evals/run_cv_samples.py` (parser quy tắc qua kiểm cứng; LLM thật chưa chạy)
-- [ ] JD Parser LLM + test injection
+- [x] JD Parser LLM + test injection (LLM giả; parser quy tắc làm mặc định và dự phòng; LLM thật chưa chạy)
 - [ ] Planner LLM + validator + fallback + công thức 15–20
 - [ ] 10 CV mẫu ra profile hợp lệ; 3 CV injection không lọt
 
