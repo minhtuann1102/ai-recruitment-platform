@@ -8,7 +8,7 @@ import asyncio
 import json
 import logging
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 import openai
 from pydantic import BaseModel
@@ -108,9 +108,14 @@ class LlmEvaluator:
         return self._prompt.version
 
     async def evaluate(self, inp: EvaluationInput, collector: Optional[UsageCollector] = None) -> Evaluation:
+        return (await self.evaluate_with_raw(inp, collector))[1]
+
+    async def evaluate_with_raw(self, inp: EvaluationInput, collector: Optional[UsageCollector] = None
+                                ) -> Tuple[Optional[EvaluatorOutput], Evaluation]:
+        """Tra ca output LLM truoc hau kiem (None neu khong goi LLM) de evals do ti le evidence hop le."""
         code_type = precheck_answer(inp.answer)
         if code_type:  # FR-AI-032: khong goi LLM
-            return zero_evaluation(inp.turn_number, code_type)
+            return None, zero_evaluation(inp.turn_number, code_type)
         try:
             result = await self._gateway.complete(self.agent, build_messages(self._prompt.text, inp),
                                                   EvaluatorOutput, prompt_version=self._prompt.version,
@@ -121,5 +126,5 @@ class LlmEvaluator:
                 collector.add(CallRecord(self.agent, "mock-heuristic", prompt_version=self._prompt.version,
                                          fallback="evaluator_mock_heuristic"))
             fallback = mock_evaluator.evaluate(inp.answer, inp.question, inp.topic, inp.turn_kind, inp.turn_number)
-            return fallback.model_copy(update={"degraded": True})
-        return await asyncio.to_thread(postcheck, result.data, inp)
+            return None, fallback.model_copy(update={"degraded": True})
+        return result.data, await asyncio.to_thread(postcheck, result.data, inp)

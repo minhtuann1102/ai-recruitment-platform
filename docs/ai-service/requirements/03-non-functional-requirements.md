@@ -79,7 +79,7 @@ Các chỉ tiêu này là bằng chứng chính cho báo cáo đồ án. Toàn b
 
 | ID | Yêu cầu | Chỉ tiêu | Kiểm chứng |
 |---|---|---|---|
-| NFR-AI-QUAL01 | Evaluator **khớp người chấm** | ±1 band ≥ 90% (mốc trung gian tuần 2: ≥ 80%) | T2 |
+| NFR-AI-QUAL01 | Evaluator **khớp người chấm** | ±1 band ≥ 90% (mốc trung gian tuần 2: ≥ 80%) | T2 (`python -m evals.run_evaluator`; đo cả QUAL02–08 và kappa LLM–người so với người–người. Golden set 48 mẫu đã có, **chưa có nhãn người, chưa đo**, 2026-10-22) |
 | NFR-AI-QUAL02 | Sai số tuyệt đối trung bình | MAE band ≤ 0.6 | T2 |
 | NFR-AI-QUAL03 | **Không chấm dễ dãi** | Độ lệch khoan dung (LLM trừ người) trong [−0.3, +0.3]; là điều kiện merge | T2 |
 | NFR-AI-QUAL04 | Thứ tự đúng: giỏi > trung bình > yếu | ≥ 95% câu hỏi | T2 |
