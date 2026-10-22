@@ -8,7 +8,7 @@ import logging
 import random
 import time
 from dataclasses import dataclass
-from typing import List, Mapping, Optional, Type, Union
+from typing import AsyncIterator, List, Mapping, Optional, Type, Union
 
 from openai import AsyncOpenAI
 from pydantic import BaseModel
@@ -89,6 +89,34 @@ class LlmGateway:
         if collector is not None:
             collector.add(rec)
         return LlmResult(data, rec)
+
+    async def stream(self, agent: str, messages: List[dict], *, prompt_version: str = "",
+                     collector: Optional[UsageCollector] = None) -> AsyncIterator[str]:
+        """Stream text (Interviewer). Chi retry luc mo stream; loi giua stream nem ra de orchestrator gui `replace`.
+        Usage lay tu chunk cuoi (stream_options.include_usage), ghi vao collector ca khi stream dut giua chung."""
+        cfg = agent_settings(agent, self.llm, self._env)
+        params = {"model": cfg.model, "temperature": cfg.temperature, "max_tokens": cfg.max_tokens,
+                  "timeout": cfg.timeout_s, "messages": messages, "stream": True,
+                  "stream_options": {"include_usage": True}}
+        rec, started = CallRecord(agent, cfg.model, prompt_version=prompt_version), time.perf_counter()
+        try:
+            resp, rec.attempts = await self._retry(lambda: self.client.chat.completions.create(**params),
+                                                   cfg.retry_budget_s)
+            async for chunk in resp:
+                usage = getattr(chunk, "usage", None)
+                if usage:
+                    rec.input_tokens = getattr(usage, "prompt_tokens", 0) or 0
+                    rec.output_tokens = getattr(usage, "completion_tokens", 0) or 0
+                choices = getattr(chunk, "choices", None) or []
+                text = choices[0].delta.content if choices and getattr(choices[0], "delta", None) else None
+                if text:
+                    yield text
+        finally:
+            rec.latency_ms = int((time.perf_counter() - started) * 1000)
+            log.info("llm_stream agent=%s model=%s in=%d out=%d ms=%d", agent, cfg.model, rec.input_tokens,
+                     rec.output_tokens, rec.latency_ms)
+            if collector is not None:
+                collector.add(rec)
 
     async def embed(self, texts: List[str], *, collector: Optional[UsageCollector] = None) -> List[List[float]]:
         started = time.perf_counter()

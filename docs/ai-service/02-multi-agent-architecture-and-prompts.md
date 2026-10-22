@@ -333,6 +333,8 @@ chứng (§6.3). Band lưu DB được quy đổi `× 2.5` sang thang 0–10 c�
 ≤ 80 từ. Ví dụ: *"Mình muốn đào sâu chỗ này một chút. Spring áp dụng @Transactional qua proxy — vậy khi A gọi
 B trong cùng một class, lời gọi đó có đi qua proxy không, và điều đó ảnh hưởng gì tới REQUIRES_NEW?"*
 
+**Đã cài (2026-10-22):** `app/agents/interviewer.py` (`QuestionSpec`, LLM stream qua `LlmGateway.stream`) và `app/question_stream.py` (fallback, `replace`, kiểm câu). Đầu vào thêm `opening_hint`, `first_turn`; `asked_questions_on_topic` lấy từ `topic_turns` interview-service gửi. Câu dự phòng là `backup_question` (ask_main) hoặc mẫu cố định của `mock_interviewer`.
+
 ### 3.3.5 Reporter
 
 **Input** (điểm đã được code tính, §6.3)

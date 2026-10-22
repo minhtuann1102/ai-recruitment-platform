@@ -88,7 +88,7 @@ class TurnInfo(BaseModel):
     action: Action
     agent_decision: AgentDecision
     difficulty: int
-    question_source: Literal["ai", "bank"] = "ai"
+    question_source: Literal["ai", "bank", "fallback"] = "ai"  # fallback: cau du phong khi Interviewer loi
     reasoning: Optional[str] = None
 
 

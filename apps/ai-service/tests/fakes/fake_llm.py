@@ -51,3 +51,23 @@ class FakeOpenAI:
         self.script, self.calls = list(script), []
         self.chat = SimpleNamespace(completions=_Endpoint(self, "chat"))
         self.embeddings = _Endpoint(self, "embedding")
+
+
+class FakeStream:
+    """Stream gia: tra lan luot cac manh text, chunk cuoi co usage; fail_after=n thi nem loi sau n manh."""
+
+    def __init__(self, parts: List[str], fail_after: int = None, delay: float = 0.0):
+        self.parts, self.fail_after, self.delay = parts, fail_after, delay
+
+    def __aiter__(self):
+        return self._gen()
+
+    async def _gen(self):
+        import asyncio
+        for i, part in enumerate(self.parts):
+            if self.fail_after is not None and i >= self.fail_after:
+                raise timeout_error()
+            if self.delay:
+                await asyncio.sleep(self.delay)
+            yield SimpleNamespace(choices=[SimpleNamespace(delta=SimpleNamespace(content=part))], usage=None)
+        yield SimpleNamespace(choices=[], usage=SimpleNamespace(prompt_tokens=20, completion_tokens=len(self.parts)))
