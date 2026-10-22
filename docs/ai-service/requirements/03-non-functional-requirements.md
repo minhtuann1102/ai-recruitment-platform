@@ -24,7 +24,7 @@
 
 | ID | Yêu cầu | Chỉ tiêu | Căn cứ | Kiểm chứng | Nguồn |
 |---|---|---|---|---|---|
-| NFR-AI-PERF01 | Thời gian từ lúc ứng viên gửi câu trả lời tới **token đầu tiên** của câu hỏi tiếp theo (TTFT). **Giai đoạn 1 (chat); mục tiêu theo dõi, cải thiện dần (D4)** | P50 ≤ 3.5 s; P95 ≤ 6 s | Giả định (ước tính ≈ 3.6 s) | T3 + log `latency_ms` trên staging | D08 §9.1 |
+| NFR-AI-PERF01 | Thời gian từ lúc ứng viên gửi câu trả lời tới **token đầu tiên** của câu hỏi tiếp theo (TTFT). **Giai đoạn 1 (chat); mục tiêu theo dõi, cải thiện dần (D4)** | P50 ≤ 3.5 s; P95 ≤ 6 s | **Đã đo 2026-10-22: P50 6.0 s, P95 9.7 s, không đạt** (9 phiên, 94 lượt, in-process, gpt-4o-mini; Evaluator P50 4.8 s, Interviewer P50 2.0 s; [eval-sim-20261022-llm-quick](../../../plans/20261019-1100-ai-interview-brd-implementation/reports/eval-sim-20261022-llm-quick.md)) | T3 + log `latency_ms` trên staging | D08 §9.1 |
 | NFR-AI-PERF02 | Câu hỏi **hoàn chỉnh** hiển thị xong | P95 ≤ 7 s | Giả định | T3 | D08 §9.1 |
 | NFR-AI-PERF03 | Lượt `dont_know` (bỏ qua Evaluator) | ≈ 1 s | Giả định | T1 + T3 | D08 §9.1 |
 | NFR-AI-PERF04 | `/api/start` (Planner, RAG, Interviewer): event đầu và tổng | Event đầu ≤ 25 s; timeout 40 s | Ràng buộc (timeout), giả định (15 đến 25 s) | T3 | D06 §7.4, D08 §9.1 |
@@ -64,7 +64,7 @@ Hai mẫu đo chưa đủ để kết luận, nhưng cho thấy **NFR-AI-PERF01 
 | NFR-AI-REL01 | **Không phiên nào chết** vì lỗi LLM: retry giới hạn rồi fallback theo từng agent | Mọi nhánh lỗi trong bảng xử lý lỗi có test; không còn lỗi 5xx do LLM làm dừng phiên | Ràng buộc | T1 (fake LLM) | CON IV, D03 §4.6 |
 | NFR-AI-REL02 | Retry lỗi tạm thời | ≤ 2 lần, backoff 0.5 s rồi 1.5 s + jitter; không retry 400, 401, 403 | Ràng buộc | T1 | D03 §4.6 |
 | NFR-AI-REL03 | Lỗi định dạng JSON sau repair | < 1% tổng số lời gọi | Đề xuất | T3 | D09 §10.2 |
-| NFR-AI-REL04 | Tỉ lệ dùng fallback | < 2% | Đề xuất | T3 + log | D09 §10.2 |
+| NFR-AI-REL04 | Tỉ lệ dùng fallback | < 2% | Đề xuất; **đo 2026-10-22: 2.7% call, không đạt** (Planner quá hạn 2/9 phiên; [eval-sim-20261022-llm-quick](../../../plans/20261019-1100-ai-interview-brd-implementation/reports/eval-sim-20261022-llm-quick.md)) | T3 + log | D09 §10.2 |
 | NFR-AI-REL05 | Khởi động lại hoặc mở rộng ai-service **không mất dữ liệu** phiên | 0 dữ liệu phiên trong ai-service | Ràng buộc | Rev | CON IV |
 | NFR-AI-REL06 | Client ngắt kết nối giữa stream: interview-service vẫn đọc hết và lưu câu hỏi cùng state | Vào lại phiên thấy câu hỏi hiện tại | Ràng buộc (hành vi phía FSD) | T3 | D03 §4.6 |
 | NFR-AI-REL07 | Gửi trùng câu trả lời không làm hỏi trùng | Trả lại câu hỏi đã lưu (FSD) | Ràng buộc | T1 (FSD) | D03 §4.6 |
@@ -145,7 +145,7 @@ Lưu ý phương pháp:
 
 | ID | Yêu cầu | Chỉ tiêu | Căn cứ | Kiểm chứng | Nguồn |
 |---|---|---|---|---|---|
-| NFR-AI-COST01 | Chi phí LLM của một **phiên chuẩn** (**15 đến 20 phút**, ≈ 10 lượt) | ≈ $0.01 đến $0.015 (ước thô: tỉ lệ theo số lượt từ ≈ $0.015 của phiên 30 phút, giá `gpt-4o-mini` giả định; **chưa tính STT, TTS**) | Giả định | T3 + log usage | D08 §9.4, BRD A-3 |
+| NFR-AI-COST01 | Chi phí LLM của một **phiên chuẩn** (**15 đến 20 phút**, ≈ 10 lượt) | ≈ $0.01 đến $0.015 (ước thô: tỉ lệ theo số lượt từ ≈ $0.015 của phiên 30 phút, giá `gpt-4o-mini` giả định; **chưa tính STT, TTS**) | **Đã đo token 2026-10-22: trung bình $0.0073, tối đa $0.0098 mỗi phiên** (10.4 lượt, chưa có CV Parser, RAG; giá vẫn giả định; [eval-sim-20261022-llm-quick](../../../plans/20261019-1100-ai-interview-brd-implementation/reports/eval-sim-20261022-llm-quick.md)) | T3 + log usage | D08 §9.4, BRD A-3 |
 | NFR-AI-COST02 | Phiên dài nhất (turn cap đề xuất 16 lượt, thêm 20% retry) | ≈ $0.02 (ước thô theo tỉ lệ từ ≈ $0.027 của 24 lượt) | Giả định | T3 | D08 §9.4 |
 | NFR-AI-COST03 | **Cảnh báo** khi một phiên vượt ngưỡng | > $0.10/phiên | Ràng buộc | Log + Rev | sprint S3-AIE-5 |
 | NFR-AI-COST04 | Mỗi lời gọi LLM ghi token vào/ra để tính chi phí | 100% lời gọi có `usage` | Ràng buộc | T1 | D08 §9.4 |

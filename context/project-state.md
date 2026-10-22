@@ -22,7 +22,8 @@
 | `thang/reporter-llm` | #22 | Phase 06: Reporter, `partial`, khối `requirements` |
 | `thang/internal-token-auth` | #23 | Phase 06: `X-Internal-Token`; 358 test |
 | `thang/simulator-harness` | #24 | Phase 07: simulator, harness tầng 3, độ trễ và chi phí; 363 test |
-| `thang/question-variety` | (mới) | Chống câu hỏi lặp: focus chưa hỏi, câu dự phòng đa dạng; câu lặp mock 34.2% → 0.6%; 369 test |
+| `thang/question-variety` | #25 | Chống câu hỏi lặp: focus chưa hỏi, câu dự phòng đa dạng; câu lặp mock 34.2% → 0.6%; 372 test |
+| `thang/llm-baseline-measurement` | (mới) | Số đo đầu với LLM thật (9 phiên): TTFT P50 6.0 s, $0.0073/phiên, fallback 2.7% |
 
 Quy ước merge của owner: merge commit (không squash). Tiêu đề PR dạng `[scope] type: mô tả`.
 
@@ -37,3 +38,5 @@ FSD: `interview-service`, TCP `getCvFile`/`getJobDescription`, giao diện. DE: 
 Chờ owner xác nhận D7–D12 (đặc biệt D8 voice, D12 thời lượng); `gh` đã đăng nhập (tài khoản `thangp97`, quyền WRITE).
 
 Nghiên cứu thị trường và gợi ý cải thiện (2026-10-22): `plans/20261019-1100-ai-interview-brd-implementation/reports/researcher-20261022-ai-mock-interview-market.md`.
+
+Số đo LLM thật đầu tiên (2026-10-22): `plans/20261019-1100-ai-interview-brd-implementation/reports/eval-sim-20261022-llm-quick.md`. Khóa OpenRouter ở `apps/ai-service/.env` (owner giữ, smoke test OK).
