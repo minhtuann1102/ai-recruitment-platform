@@ -12,8 +12,10 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from .api_error import ApiError
 from .llm.usage import UsageCollector
 from .agents.cv_parser import get_cv_parser
+from .agents.jd_parser import get_jd_parser
 from .mock_planner import load_track
 from .models_cv import CvParseResponse
+from .models_jd import JdParseRequest, JdParseResponse
 from .models_interview import FinalizeRequest, NextTurnRequest, StartRequest
 from .report_scoring import build_report
 from .sse import SSE_HEADERS, stream_events
@@ -47,6 +49,12 @@ def health():
 async def cv_parse(file: UploadFile = File(...), track: str = Form(...)):
     load_track(track)  # 422 neu track khong co trong catalog
     return await get_cv_parser().parse(await file.read(), track)
+
+
+@app.post("/api/jd/parse", response_model=JdParseResponse)
+async def jd_parse(req: JdParseRequest):
+    """FR-AI-017: JD cua job trong application -> jd_profile cho Planner (JD khong vao RAG)."""
+    return await get_jd_parser().parse(req.jd_text, load_track(req.track))
 
 
 def _usage_meta(started: float, collector: Optional[UsageCollector] = None) -> dict:

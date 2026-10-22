@@ -54,8 +54,8 @@
 | FR-AI-013 | **CV Parser** (LLM, `temperature = 0`, structured output) trích `CvProfile`: headline, skills (≤ 25), experiences (≤ 8), projects (≤ 6), education, `track_relevance`; **không** có tên, liên hệ, tên công ty. Chỉ CV Parser được thấy CV thô | Must | Output qua schema; 10 CV mẫu ra `cv_profile` hợp lệ; 3 CV chứa injection không lọt chỉ dẫn vào profile | D02 §3.3.1, D01 §2.4 | S1-AIE-3 | Một phần (CV Parser LLM `app/agents/cv_parser.py`, prompt `cv_parser.v1`; bật bằng `AGENT_CV_PARSER_MODE=llm`; hậu kiểm bỏ chuỗi injection, ngày sai định dạng thành null; LLM lỗi thì dùng parser quy tắc; 10 CV mẫu ở `evals/cv_samples/`, **chưa chạy với LLM thật**) |
 | FR-AI-014 | **Số năm kinh nghiệm** do code tính: gộp khoảng chồng nhau, làm tròn 0.5 năm; `end = null` nghĩa là hiện tại | Must | Hai kinh nghiệm chồng thời gian không cộng đôi | D01 §2.3 | S1-AIE-3 | Mock (code thật) |
 | FR-AI-015 | Khi **không có CV**, CV không liên quan IT (`track_relevance = low`) hoặc CV Parser lỗi, buổi phỏng vấn **tiếp tục không CV**: intro dùng câu hỏi chung, Planner chọn topic từ catalog | Must | `/api/start` với `cv_profile = null` trả plan có topic intro `source = generic` | D01 §2.3, D03 §4.6 | S1-AIE-3 | Mock |
-| FR-AI-016 | **JD Parser** (LLM, `temperature = 0`, structured output) trích `jd_profile` từ JD của job trong application mà ứng viên chọn: yêu cầu bắt buộc (`must`) và ưu tiên (`nice`), mỗi yêu cầu ánh xạ về `topic_id` trong catalog hoặc đánh dấu `out_of_catalog`. JD thô chỉ JD Parser thấy; JD đi qua chuẩn hóa, redact thông tin liên hệ và quét injection như CV | Must | 2 JD mẫu ra `jd_profile` hợp lệ; JD chứa chỉ dẫn độc hại không làm đổi plan; yêu cầu ngoài catalog ra `out_of_catalog` | A11, BRD BR-23 | S2-AIE-6 | Chưa |
-| FR-AI-017 | `POST /api/jd/parse` (JSON, timeout 30 s, đề xuất) và trường tùy chọn `jd_profile` trong request `POST /api/start`; thiếu `jd_profile` thì phiên chạy theo track + level | Must | `/api/start` có và không có `jd_profile` đều trả plan hợp lệ | A11, D06 §7.4 | S2-AIE-6 | Chưa |
+| FR-AI-016 | **JD Parser** (LLM, `temperature = 0`, structured output) trích `jd_profile` từ JD của job trong application mà ứng viên chọn: yêu cầu bắt buộc (`must`) và ưu tiên (`nice`), mỗi yêu cầu ánh xạ về `topic_id` trong catalog hoặc đánh dấu `out_of_catalog`. JD thô chỉ JD Parser thấy; JD đi qua chuẩn hóa, redact thông tin liên hệ và quét injection như CV | Must | 2 JD mẫu ra `jd_profile` hợp lệ; JD chứa chỉ dẫn độc hại không làm đổi plan; yêu cầu ngoài catalog ra `out_of_catalog` | A11, BRD BR-23 | S2-AIE-6 | Một phần (`app/agents/jd_parser.py` + prompt `jd_parser.v1`, bật bằng `AGENT_JD_PARSER_MODE=llm`; parser quy tắc theo từ khóa catalog làm mặc định và dự phòng; `topic_id` ngoài catalog bị loại thành `out_of_catalog`; **chưa chạy với LLM thật**) |
+| FR-AI-017 | `POST /api/jd/parse` (JSON, timeout 30 s, đề xuất) và trường tùy chọn `jd_profile` trong request `POST /api/start`; thiếu `jd_profile` thì phiên chạy theo track + level | Must | `/api/start` có và không có `jd_profile` đều trả plan hợp lệ | A11, D06 §7.4 | S2-AIE-6 | Một phần (`POST /api/jd/parse` và `jd_profile` trong `/api/start` đã có ở ai-service; phía interview-service chờ FSD) |
 
 ## 5. Nhóm C. Lập kế hoạch phỏng vấn
 
@@ -64,7 +64,7 @@
 | FR-AI-020 | **Planner** chạy một lần đầu buổi, sinh `InterviewPlan` gồm các phase intro, technical, scenario; mỗi topic có `id`, `title`, `source` (cv, catalog, scenario, generic), `key_points` (3 đến 6), `start_difficulty`, `opening_hint`, `backup_question`. Chỉ chọn topic có trong catalog (trừ topic intro từ CV). Có CV thì topic intro lấy từ dự án trong CV | Must | Plan có đúng số topic mỗi phase theo level; mỗi topic có `backup_question`; `catalog_ref` tồn tại; có CV liên quan thì intro `source = cv` | D02 §3.3.2 | S2-AIE-1 | Mock (quy tắc, chưa có LLM) |
 | FR-AI-021 | Code **kiểm tra plan** (số topic đúng template, `catalog_ref` và `cv_ref` tồn tại, không trùng, độ khó trong khoảng). Sai thì repair retry một lần; vẫn sai thì dùng **plan dự phòng** chọn từ catalog theo level | Must | Plan không hợp lệ không bao giờ đến Interviewer; có test cho đường fallback | D02 §3.3.2, D03 §4.6 | S2-AIE-1 | Chưa |
 | FR-AI-022 | Sau khi plan hợp lệ, orchestrator lấy tối đa 3 chunk RAG cho mỗi topic (`interview_qa` và `textbook`), lưu `reference_snippets` (≤ 600 token mỗi topic) vào plan để Evaluator dùng lại. Không gọi RAG mỗi lượt. **Phase scenario không lấy `interview_qa`** (scenario không có `topic_id`), chỉ `key_points` và `textbook` theo category của track | Should | Plan có `reference_snippets`; không có RAG thì Evaluator vẫn chạy chỉ dựa vào `key_points` | D02 §3.3.2, D07 §8.7 | S1-AIE-2 | Một phần (`Retriever.plan_snippets` trong `app/rag/` đã có: ≤ 3 chunk, ≤ 600 token, chế độ scenario chỉ textbook; chưa nối vào plan, làm cùng Planner ở Phase 04) |
-| FR-AI-023 | Planner **tăng trọng số topic theo `jd_profile`** khi có (ưu tiên topic ánh xạ từ yêu cầu `must`), vẫn chỉ chọn topic trong catalog và giữ cấu trúc phase | Must | Với JD yêu cầu Spring, ≥ 1 topic technical thuộc nhóm Spring; plan hợp lệ | A11 | S2-AIE-6 | Chưa |
+| FR-AI-023 | Planner **tăng trọng số topic theo `jd_profile`** khi có (ưu tiên topic ánh xạ từ yêu cầu `must`), vẫn chỉ chọn topic trong catalog và giữ cấu trúc phase | Must | Với JD yêu cầu Spring, ≥ 1 topic technical thuộc nhóm Spring; plan hợp lệ | A11 | S2-AIE-6 | Một phần (Planner mock đưa topic từ yêu cầu `must` rồi `nice` lên đầu; Planner LLM ở nhánh `thang/planner-llm`) |
 
 ## 6. Nhóm D. Xử lý một lượt trả lời
 
@@ -216,8 +216,8 @@ Cột **GĐ** là giai đoạn triển khai. **Owner đề xuất** nằm trong 
 | Trạng thái | Số FR |
 |---|---|
 | Mock (đã có, dùng quy tắc thay LLM hoặc code thật cho phần không cần LLM) | 23 |
-| Một phần | 14 |
-| Chưa làm | 36 |
+| Một phần | 17 |
+| Chưa làm | 33 |
 | Ngoài phạm vi ai-service (FSD, DE) | 2 |
 | **Tổng** | **75** |
 
@@ -225,7 +225,7 @@ Theo giai đoạn (nhóm A đến I tính giai đoạn 1; FR nhiều giai đoạ
 
 | Giai đoạn | Số FR | Mock | Một phần | Chưa | Ngoài |
 |---|---|---|---|---|---|
-| 1 | 60 | 23 | 14 | 21 | 2 |
+| 1 | 60 | 23 | 17 | 18 | 2 |
 | 2 | 11 | 0 | 0 | 11 | 0 |
 | 3 | 4 | 0 | 0 | 4 | 0 |
 

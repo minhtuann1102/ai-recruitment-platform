@@ -1108,5 +1108,5 @@ async createJob(@AuthUser() user: AuthUserPayload, @Body() dto: CreateJobRequest
 
 | Người C (infra + AI mock + frontend) | Cần từ người khác |
 |---|---|
-| ai-service mock | REST contract `/api/start`, `/api/next-turn`, `/api/finalize` — implement theo contract này |
+| ai-service mock | REST contract `/api/start`, `/api/next-turn`, `/api/finalize` — implement theo contract này. Bản hiện hành (gồm `/api/cv/parse`, `/api/jd/parse`, `jd_profile`): [docs/ai-service/06-api-contract.md](../ai-service/06-api-contract.md) §7.4 |
 | frontend | HTTP API contracts của tất cả services — call theo contract này |

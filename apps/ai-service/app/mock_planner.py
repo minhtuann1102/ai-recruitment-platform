@@ -9,6 +9,7 @@ from .catalog.loader import CatalogError, load_catalog
 from .catalog.models import Scenario, Topic
 from .models_common import LEVEL_CONFIG
 from .models_cv import CvProfile
+from .models_jd import JdProfile
 from .models_interview import InterviewPlan, PlanPhase, PlanTopic
 
 
@@ -76,7 +77,17 @@ def _intro_topic(tid: str, level: str, cv: Optional[CvProfile]) -> PlanTopic:
         backup_question="Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?")
 
 
-def build_plan(track: str, level: str, duration_minutes: int, cv: Optional[CvProfile]) -> InterviewPlan:
+def _rank_with_jd(topics: List[Topic], skills: List[str], jd: Optional[JdProfile]) -> List[Topic]:
+    """FR-AI-023: topic map tu yeu cau JD (must truoc) len dau, con lai xep theo do trung CV."""
+    ranked = _rank(topics, lambda t: t.title + " " + " ".join(t.key_concepts), skills)
+    if not jd:
+        return ranked
+    order = {tid: i for i, tid in enumerate(jd.priority_topic_ids())}
+    return sorted(ranked, key=lambda t: order.get(t.id, len(order)))
+
+
+def build_plan(track: str, level: str, duration_minutes: int, cv: Optional[CvProfile],
+               jd: Optional[JdProfile] = None) -> InterviewPlan:
     catalog = load_track(track)
     cfg = LEVEL_CONFIG[level]
     skills = [s.name for s in cv.skills] if cv else []
@@ -84,7 +95,7 @@ def build_plan(track: str, level: str, duration_minutes: int, cv: Optional[CvPro
     m_intro, m_tech, m_scn = (max(1, round(m * scale)) for m in cfg["minutes"])
     n_tech = cfg["technical"] - (1 if duration_minutes <= 15 else 0)
 
-    topics = _rank(catalog.topics_for(level), lambda t: t.title + " " + " ".join(t.key_concepts), skills)[:n_tech]
+    topics = _rank_with_jd(catalog.topics_for(level), skills, jd)[:n_tech]
     scenarios = _rank(catalog.scenarios_for(level), lambda s: s.title, skills)
     if len(topics) < n_tech or not scenarios:
         raise ApiError(422, "invalid_request", f"catalog {track} khong du topic cho level {level}")
