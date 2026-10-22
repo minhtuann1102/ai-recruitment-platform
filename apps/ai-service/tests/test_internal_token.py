@@ -27,3 +27,11 @@ def test_unconfigured_token_allows_requests_for_dev(client, monkeypatch):
     monkeypatch.delenv("AI_SERVICE_INTERNAL_TOKEN", raising=False)
     assert client.post("/api/start", json={"session_id": "s", "track": "java_backend",
                                            "level": "junior"}).status_code == 200
+
+
+def test_strict_env_without_token_fails_closed(client, monkeypatch):
+    monkeypatch.delenv("AI_SERVICE_INTERNAL_TOKEN", raising=False)
+    monkeypatch.setenv("APP_ENV", "staging")
+    r = client.post("/api/start", json={"session_id": "s", "track": "java_backend", "level": "junior"})
+    assert r.status_code == 503 and r.json()["error"] == "misconfigured"
+    assert client.get("/api/health").status_code == 200
