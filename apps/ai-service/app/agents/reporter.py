@@ -92,7 +92,9 @@ def merge_comments(report: Dict, out: ReporterOutput) -> Dict:
     turn_c = {c.id: _text(c.comment, 300) for c in out.turn_comments}
     merged = dict(report)
     merged["overall"] = {**report["overall"], "summary": _text(out.summary, 600) or report["overall"]["summary"]}
-    merged.update(strengths=strengths, improvements=improvements, study_plan=study or report["study_plan"])
+    # muc LLM bi loai het (evidence sai) thi giu ban do code dung, khong de bao cao trong
+    merged.update(strengths=strengths or report["strengths"], improvements=improvements or report["improvements"],
+                  study_plan=study or report["study_plan"])
     merged["topics"] = [{**t, "comment": topic_c.get(t["topic_id"]) or t["comment"]} for t in report["topics"]]
     merged["turns"] = [{**t, "comment": turn_c.get(str(t["turn_number"])) or t["comment"]} for t in report["turns"]]
     return merged

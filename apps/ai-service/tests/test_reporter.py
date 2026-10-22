@@ -75,7 +75,8 @@ def test_strength_on_low_score_turn_is_dropped(session):
     first.evaluation = first.evaluation.model_copy(update={"scores_10": first.evaluation.scores_10.model_copy(
         update={"technical_accuracy": 2.5, "completeness": 2.5, "extensibility": 0.0, "relevance": 5.0})})
     rep = asyncio.run(make([output(low)])[0].report(low))
-    assert rep["strengths"] == []
+    assert rep["strengths"] == build_report(low)["strengths"]  # LLM bi loai het -> giu ban do code dung
+    assert all(s["point"] != "Nắm chắc REST" for s in rep["strengths"])
 
 
 def test_reporter_error_returns_partial_with_same_scores(session, client):
