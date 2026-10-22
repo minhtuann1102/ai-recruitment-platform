@@ -23,7 +23,8 @@
 | `thang/internal-token-auth` | #23 | Phase 06: `X-Internal-Token`; 358 test |
 | `thang/simulator-harness` | #24 | Phase 07: simulator, harness tầng 3, độ trễ và chi phí; 363 test |
 | `thang/question-variety` | #25 | Chống câu hỏi lặp: focus chưa hỏi, câu dự phòng đa dạng; câu lặp mock 34.2% → 0.6%; 372 test |
-| `thang/llm-baseline-measurement` | (mới) | Số đo đầu với LLM thật (9 phiên): TTFT P50 6.0 s, $0.0073/phiên, fallback 2.7% |
+| `thang/llm-baseline-measurement` | #26 | Số đo đầu với LLM thật (9 phiên): TTFT P50 6.0 s, $0.0073/phiên, fallback 2.7% |
+| `thang/latency-reduction` | (mới) | Evaluator v2, Planner v2: P50 6.0 → 5.0 s, Planner 13 → 8.2 s, fallback 0% |
 
 Quy ước merge của owner: merge commit (không squash). Tiêu đề PR dạng `[scope] type: mô tả`.
 

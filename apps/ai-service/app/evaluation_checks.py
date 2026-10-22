@@ -7,7 +7,7 @@ dont_know / manipulation -> moi band = 0, off_topic -> relevance = 0.
 import math
 import re
 from difflib import SequenceMatcher
-from typing import Dict, List, Optional, Sequence
+from typing import Dict, Iterable, List, Optional, Sequence
 
 from . import cv_text
 from .mock_evaluator import MANIPULATION_RE, fold
@@ -137,6 +137,17 @@ def build_evaluation(*, turn_number: int, answer_type: str, bands: Dict[str, int
         turn_score_10=round(sum(bands.values()) / 4 * 2.5, 1), degraded=degraded,
         strength_tags=list(strength_tags)[:3], gap_tags=list(gap_tags)[:3],
         follow_up_focus=(follow_up_focus or None) and follow_up_focus[:150])
+
+
+def slug_tags(points: Iterable[str], limit: int = 3) -> List[str]:
+    """Tag dang slug tu cau mo ta y ("Self-invocation khong qua proxy" -> "self-invocation-khong-qua"),
+    dung cho strengths/gaps trong state; toi da 4 tu dau, bo trung."""
+    tags: List[str] = []
+    for p in points:
+        slug = "-".join(_words(p)[:4])
+        if slug and slug not in tags:
+            tags.append(slug)
+    return tags[:limit]
 
 
 def zero_evaluation(turn_number: int, answer_type: str, gap_tags: List[str] = ()) -> Evaluation:

@@ -34,8 +34,6 @@ class LlmPlanTopic(BaseModel):
     objective: str
     key_points: List[str]
     start_difficulty: int
-    opening_hint: str
-    backup_question: str
 
 
 class LlmPlanPhase(BaseModel):
@@ -48,17 +46,26 @@ class PlannerOutput(BaseModel):
     phases: List[LlmPlanPhase]
 
 
-def to_plan(out: PlannerOutput, tpl: PlanTemplate) -> Tuple[Optional[InterviewPlan], List[str]]:
-    """Code gan id t1.., thoi gian theo khung, cat do dai; loi schema (vd < 3 key_points) tra ve nhu loi plan."""
+def to_plan(out: PlannerOutput, tpl: PlanTemplate, cv: Optional[CvProfile] = None, catalog=None
+            ) -> Tuple[Optional[InterviewPlan], List[str]]:
+    """Code gan id t1.., thoi gian theo khung, opening_hint/backup_question theo mau, cat do dai; loi schema
+    (vd < 3 key_points) tra ve nhu loi plan."""
+    projects = {p.id: p.name for p in cv.projects} if cv else {}
     try:
         n, phases = 0, []
         for ph in out.phases:
             topics = []
             for t in ph.topics:
                 n += 1
+                hint, backup = mock_planner.default_hints(t.source, t.title[:120], projects.get(t.cv_ref or ""))
+                points = [k[:120] for k in t.key_points if k.strip()][:6]
+                if len(points) < 3 and catalog is not None:  # LLM bo trong (do 22/10: 5/9 phien) -> code bu, khong goi lai
+                    extra = mock_planner.default_key_points(t.source, t.catalog_ref, catalog)
+                    points = (points + [p for p in extra if p not in points])[:6]
                 topics.append(PlanTopic(id=f"t{n}", **{**t.model_dump(), "title": t.title[:120],
-                                                       "key_points": [k[:120] for k in t.key_points][:6],
-                                                       "objective": t.objective[:300]}))
+                                                       "key_points": points,
+                                                       "objective": t.objective[:300], "opening_hint": hint,
+                                                       "backup_question": backup}))
             phases.append(PlanPhase(phase=ph.phase, time_budget_min=tpl.minutes.get(ph.phase, 1), topics=topics))
         return InterviewPlan(level_note=(out.level_note or None) and out.level_note[:200], phases=phases), []
     except ValidationError as err:
@@ -102,7 +109,7 @@ class LlmPlanner:
             for attempt in range(2):  # lan 2 = repair voi danh sach loi (FR-AI-021)
                 result = await self._gateway.complete(self.agent, messages, PlannerOutput,
                                                       prompt_version=self._prompt.version, collector=collector)
-                plan, errors = to_plan(result.data, tpl)
+                plan, errors = to_plan(result.data, tpl, cv, catalog)
                 errors = errors or validate_plan(plan, tpl, **check)
                 if not errors:
                     return plan

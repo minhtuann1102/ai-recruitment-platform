@@ -100,7 +100,10 @@ def test_valid_llm_plan_used_with_code_ids_and_budget():
     assert plan.phases[1].time_budget_min == build_template("junior", 20).minutes["technical"]
     user = client.calls[0]["messages"][1]["content"]
     assert '<untrusted label="cv_profile">' in user and '"jd_priority": ["java.spring.transaction"]' in user
-    assert col.to_metadata()["prompt_versions"] == {"planner": "v1"}
+    assert col.to_metadata()["prompt_versions"] == {"planner": "v2"}
+    tech = plan.phases[1].topics[0]
+    assert tech.backup_question == f"{tech.title}: bạn hiểu như thế nào và đã áp dụng ra sao?"  # sinh theo title LLM
+    assert plan.phases[0].topics[0].opening_hint == "Hỏi ứng viên kể về dự án Order service"  # cv_ref -> ten du an
 
 
 def test_invalid_plan_repaired_once():
@@ -113,8 +116,8 @@ def test_invalid_plan_repaired_once():
 
 @pytest.mark.parametrize("script", [
     [reply(json.dumps({**GOOD, "phases": GOOD["phases"][:2]}))] * 2,  # sai 2 lan
-    [reply(json.dumps({**GOOD, "phases": [{**GOOD["phases"][0], "topics": [
-        {**GOOD["phases"][0]["topics"][0], "key_points": ["chi mot y"]}]}] + GOOD["phases"][1:]}))] * 2,
+    [reply(json.dumps({**GOOD, "phases": [GOOD["phases"][0], {**GOOD["phases"][1], "topics": [
+        {**t, "catalog_ref": "java.bogus"} for t in GOOD["phases"][1]["topics"]]}, GOOD["phases"][2]]}))] * 2,
     [status_error(500)] * 3,
 ])
 def test_fallback_plan_when_llm_keeps_failing(script):
@@ -171,3 +174,14 @@ def test_planner_deadline_falls_back(monkeypatch):
     col = UsageCollector()
     plan = asyncio.run(planner.plan("java_backend", "junior", 20, CV, JD, col))
     assert check(plan, cv=CV, jd=JD) == [] and col.to_metadata()["fallbacks"] == ["planner_fallback_plan"]
+
+
+def test_empty_key_points_filled_by_code_without_retry():
+    out = json.loads(json.dumps(GOOD))
+    for ph in out["phases"]:
+        for t in ph["topics"]:
+            t["key_points"] = []
+    plan, client, col = plan_with([reply(json.dumps(out, ensure_ascii=False))])
+    assert len(client.calls) == 1 and col.to_metadata()["fallbacks"] == []
+    assert all(len(t.key_points) >= 3 for ph in plan.phases for t in ph.topics)
+    assert plan.phases[1].topics[0].key_points[0].startswith("Nêu được")

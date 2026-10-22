@@ -38,7 +38,7 @@ def test_structured_success_uses_strict_schema_and_agent_params():
     assert res.data == Out(answer="ok") and res.record.prompt_version == "v3"
     call = client.calls[0]
     assert call["response_format"]["type"] == "json_schema" and call["response_format"]["json_schema"]["strict"]
-    assert (call["temperature"], call["max_tokens"], call["seed"]) == (0.0, 350, 7)
+    assert (call["temperature"], call["max_tokens"], call["seed"]) == (0.0, 300, 7)
     assert res.record.input_tokens == 10 and res.record.output_tokens == 5 and res.record.attempts == 1
 
 
@@ -88,7 +88,7 @@ def test_length_retries_once_with_1_5x_max_tokens():
     gw, client, _ = make([reply('{"answer": "cut', finish_reason="length"), reply('{"answer": "ok"}')])
     res = run(gw.complete("evaluator", MSGS, Out))
     assert res.data.answer == "ok"
-    assert [c["max_tokens"] for c in client.calls] == [350, 525]
+    assert [c["max_tokens"] for c in client.calls] == [300, 450]
 
 
 def test_length_twice_raises():

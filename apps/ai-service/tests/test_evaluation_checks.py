@@ -110,3 +110,11 @@ def test_off_topic_forces_relevance_zero():
     out = apply_caps(FULL, answer_type="off_topic", verified_key_points=4, total_key_points=4,
                      has_misconception=False, turn_kind="main")
     assert out["relevance"] == 0 and out["technical_accuracy"] == 4
+
+
+def test_slug_tags_from_points():
+    from app.evaluation_checks import slug_tags
+
+    assert slug_tags(["Self-invocation không qua proxy nên lỗi", "self-invocation không qua proxy", "B-tree index"]) \
+        == ["self-invocation-khong-qua-proxy", "b-tree-index"]
+    assert slug_tags([]) == [] and len(slug_tags([f"y {i} khac nhau" for i in range(5)])) == 3

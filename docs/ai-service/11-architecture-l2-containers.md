@@ -373,7 +373,7 @@ flowchart LR
 
 | Thuộc tính | Chiến thuật | NFR |
 |---|---|---|
-| Hiệu năng | Evaluator output gọn (`max_tokens` 350), RAG lấy trước một lần lúc plan, bỏ qua Evaluator khi `dont_know`, client HTTP dùng chung, stream câu hỏi, bất đồng bộ I/O | PERF01..09 |
+| Hiệu năng | Evaluator output gọn (`max_tokens` 300, prompt v2), RAG lấy trước một lần lúc plan, bỏ qua Evaluator khi `dont_know`, client HTTP dùng chung, stream câu hỏi, bất đồng bộ I/O | PERF01..09 |
 | Khả năng mở rộng | Stateless, thêm process ngang, catalog dạng dữ liệu | SCAL01..04 |
 | Độ tin cậy | Retry giới hạn, repair, fallback theo agent, bảng xử lý lỗi, giới hạn cứng bằng code, interview-service đọc hết stream | REL01..09 |
 | Độ chính xác chấm | Rubric theo level, luật khắt khe áp bằng prompt **và** code, hậu kiểm quote, điểm do code tổng hợp, tách Evaluator khỏi Interviewer | QUAL01..15 |
