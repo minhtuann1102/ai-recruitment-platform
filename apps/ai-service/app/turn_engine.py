@@ -12,7 +12,9 @@ from .api_error import ApiError
 from .llm.usage import UsageCollector
 from .mock_evaluator import fold, is_scored, turn_score
 from .mock_interviewer import compose
-from .mock_planner import build_plan
+from .agents.planner import get_planner
+from .mock_planner import load_track
+from .plan_snippets import attach_reference_snippets, get_retriever
 from .models_common import LEVEL_CONFIG, TURN_CAP
 from .models_interview import (CandidateState, Evaluation, InterviewPlan, NextTurnRequest, PlanTopic,
                                StartRequest, Tagged, TopicState, TurnInfo)
@@ -51,8 +53,12 @@ def _meta(phase: str, topic_pos: int, total: int, action: str, turn_number: int)
             "action": action}
 
 
-def start_session(req: StartRequest) -> TurnResult:
-    plan = build_plan(req.track, req.level, req.duration_minutes, req.cv_profile, req.jd_profile)
+async def start_session(req: StartRequest, planner=None, collector: Optional[UsageCollector] = None,
+                        retriever=None) -> TurnResult:
+    """Planner (LLM hoac mock, co plan du phong) -> gan reference_snippets (RAG, neu bat) -> cau hoi dau."""
+    planner = planner or get_planner()
+    plan = await planner.plan(req.track, req.level, req.duration_minutes, req.cv_profile, req.jd_profile, collector)
+    plan = await attach_reference_snippets(plan, load_track(req.track), retriever or get_retriever())
     topics = flat_topics(plan)
     lo, hi = LEVEL_CONFIG[req.level]["bounds"]
     first_phase, first = topics[0]

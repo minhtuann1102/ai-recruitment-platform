@@ -72,11 +72,11 @@ def _stream(result: TurnResult, done: dict):
 
 
 @app.post("/api/start")
-def start(req: StartRequest):
-    started = time.perf_counter()
-    r = start_session(req)
+async def start(req: StartRequest):
+    started, collector = time.perf_counter(), UsageCollector()
+    r = await start_session(req, collector=collector)
     done = {"question": r.question, "turn": r.turn.model_dump(), "plan": r.plan.model_dump(),
-            "state": r.state.model_dump(), "metadata": _usage_meta(started)}
+            "state": r.state.model_dump(), "metadata": _usage_meta(started, collector)}
     return _stream(r, done)
 
 
