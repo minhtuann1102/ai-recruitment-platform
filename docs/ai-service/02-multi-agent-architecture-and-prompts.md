@@ -161,6 +161,8 @@ ghi trong comment là ràng buộc `max_length` / `max_items` thật.
 Không có field tên, email, SĐT, tên công ty (chỉ `company_type`). LLM trả mọi field trừ
 `total_years_experience` và `flags` (code điền).
 
+**Đã cài (2026-10-22):** `app/agents/cv_parser.py`. LLM cũng không trả `projects[].id` (code gán `p1`…`p6`). Dòng CV nghi injection bị bỏ **trước** khi gửi LLM; chuỗi output có dấu hiệu injection bị bỏ và bật `flags.injection_suspected`; `start`/`end` sai dạng `YYYY-MM` thành `null`; số năm kinh nghiệm tính lại bằng code từ `experiences`. Kiểm bằng `python -m evals.run_cv_samples` (10 CV tổng hợp, 3 CV injection, PII giả): thoát 1 nếu lộ liên hệ, lộ tên hoặc lọt chỉ dẫn.
+
 ### 3.3.2 Planner
 
 **Input**

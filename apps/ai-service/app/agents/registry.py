@@ -2,8 +2,9 @@
 
 Mock giu lam fallback va cho CI khong can khoa API.
 """
+import logging
 import os
-from typing import Any, Dict, Mapping, Optional
+from typing import Any, Callable, Dict, Mapping, Optional
 
 from ..llm.errors import ConfigError
 from ..llm.settings import AGENTS
@@ -39,3 +40,20 @@ class AgentRegistry:
         if impls[mode] is None:
             raise ConfigError(f"agent '{agent}' chua co cai dat che do '{mode}'")
         return impls[mode]
+
+
+_llm_agents: Dict[str, Any] = {}
+log = logging.getLogger("ai_service.agents")
+
+
+def cached_llm_agent(agent: str, build: Callable[[Any], Any]) -> Optional[Any]:
+    """Tao agent LLM mot lan voi gateway dung chung; loi cau hinh (vd thieu LLM_API_KEY) thi tra None de
+    noi goi tu ve mock thay vi tra 500."""
+    if agent not in _llm_agents:
+        from ..llm.gateway import get_gateway  # import muon: registry khong phu thuoc gateway khi chi dung mock
+        try:
+            _llm_agents[agent] = build(get_gateway())
+        except ConfigError as err:
+            log.error("agent_config_error agent=%s error=%s", agent, err)
+            return None
+    return _llm_agents[agent]

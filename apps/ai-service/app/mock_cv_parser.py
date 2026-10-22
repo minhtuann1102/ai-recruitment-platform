@@ -83,6 +83,21 @@ def _years(spans: List[Tuple[int, Optional[int]]]) -> float:
     return round(months / 12 * 2) / 2
 
 
+def years_from_experiences(experiences: List[CvExperience]) -> float:
+    """FR-AI-014: so nam kinh nghiem do code tinh tu start/end (YYYY-MM) da trich, khong tin con so cua LLM."""
+    spans = []
+    for e in experiences:
+        if not e.start:
+            continue
+        s_year, s_month = (int(x) for x in e.start.split("-"))
+        end = None
+        if e.end:
+            e_year, e_month = (int(x) for x in e.end.split("-"))
+            end = _month_index(e_year, e_month)
+        spans.append((_month_index(s_year, s_month), end))
+    return _years(spans)
+
+
 def _today() -> Tuple[int, int]:
     t = time.localtime()
     return t.tm_year, t.tm_mon

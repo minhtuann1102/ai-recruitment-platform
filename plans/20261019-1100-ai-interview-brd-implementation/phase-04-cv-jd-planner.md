@@ -4,7 +4,7 @@
 - [plan.md](plan.md) · [design 01](../../docs/ai-service/01-input-schema-and-cv-processing.md) · [design 02 §3.3.1–3.3.2](../../docs/ai-service/02-multi-agent-architecture-and-prompts.md) · quyết định A11 (JD) trong [docs/ai-service/README.md](../../docs/ai-service/README.md) · FR-AI-003, 013–017, 020–023
 
 ## Overview
-- **Priority:** P1 · **Status:** chưa bắt đầu · **Tuần:** W3–W4
+- **Priority:** P1 · **Status:** đang làm (2026-10-22): CV Parser LLM (`thang/cv-parser-llm`), JD Parser (`thang/jd-parser`), Planner LLM (`thang/planner-llm`) · **Tuần:** W3–W4
 - Thay ba agent mock bằng LLM thật: CV Parser, **JD Parser (mới, S2-AIE-6)** và Planner; áp cấu hình thời lượng 15–20 phút.
 
 ## Key Insights
@@ -39,7 +39,7 @@ Số topic technical = `max(2, round(gốc × thời lượng / 30))`; turn cap 
 
 ## Todo List
 - [ ] Contract JD cập nhật (docs + mock)
-- [ ] CV Parser LLM + test
+- [x] CV Parser LLM + test (LLM giả); 10 CV mẫu + `evals/run_cv_samples.py` (parser quy tắc qua kiểm cứng; LLM thật chưa chạy)
 - [ ] JD Parser LLM + test injection
 - [ ] Planner LLM + validator + fallback + công thức 15–20
 - [ ] 10 CV mẫu ra profile hợp lệ; 3 CV injection không lọt

@@ -1,0 +1,12 @@
+Trần Minh Khoa
+Email: khoa.tran@example.com | SĐT: 0900 000 001 | github.com/khoa-example
+Backend Developer
+Kinh nghiệm
+Backend Developer tại công ty thương mại điện tử (03/2022 - nay)
+Phát triển API đơn hàng bằng Java 17, Spring Boot, PostgreSQL, Kafka, Redis.
+Junior Java Developer tại công ty outsource (07/2020 - 02/2022)
+Bảo trì hệ thống quản lý kho dùng Spring, Hibernate, MySQL.
+Dự án: Order service
+Xử lý 50.000 đơn mỗi ngày, publish event sang kho qua Kafka.
+- Giảm thời gian xử lý đơn từ 2s xuống 300ms nhờ cache Redis
+Học vấn: Kỹ sư Công nghệ thông tin 2020

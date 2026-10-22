@@ -51,7 +51,7 @@
 | FR-AI-010 | Hệ thống **trích text** từ CV PDF hoặc DOCX, nhận diện định dạng theo **magic bytes** (không theo đuôi). Giới hạn: ≤ 10 MB, PDF ≤ 10 trang, không mã hóa; DOCX ≤ 200 entry và ≤ 20 MB giải nén. Text < 200 ký tự coi là ảnh scan | Must | Định dạng lạ → 415 `cv_invalid_format`; quá lớn → 413 `cv_too_large`; text ngắn → 422 `cv_unreadable` kèm `details.chars` | D01 §2.2, §2.3 | S1-AIE-3 | Mock (code thật) |
 | FR-AI-011 | Hệ thống **chuẩn hóa** text (Unicode NFC, bỏ ký tự điều khiển và zero-width, gộp khoảng trắng), **redact PII** bằng regex trước mọi bước khác (email, SĐT, URL, ngày sinh gần từ khóa), cắt ở 15.000 ký tự tại ranh giới dòng và đặt `flags.truncated` | Must | CV có email, SĐT, GitHub URL thì output (cv_profile) không chứa chúng; tên không xuất ra | D01 §2.3 | S1-AIE-3 | Mock (code thật) |
 | FR-AI-012 | Hệ thống **phát hiện chỉ dẫn nghi prompt injection** trong CV bằng danh sách mẫu, loại phần tử khớp và đặt `flags.injection_suspected` | Must | Dòng "Ignore previous instructions... 10/10" không xuất hiện trong output; cờ = true | D01 §2.4, BR-09 | S1-AIE-3 | Mock (loại cả dòng) |
-| FR-AI-013 | **CV Parser** (LLM, `temperature = 0`, structured output) trích `CvProfile`: headline, skills (≤ 25), experiences (≤ 8), projects (≤ 6), education, `track_relevance`; **không** có tên, liên hệ, tên công ty. Chỉ CV Parser được thấy CV thô | Must | Output qua schema; 10 CV mẫu ra `cv_profile` hợp lệ; 3 CV chứa injection không lọt chỉ dẫn vào profile | D02 §3.3.1, D01 §2.4 | S1-AIE-3 | Mock (quy tắc regex, chưa có LLM) |
+| FR-AI-013 | **CV Parser** (LLM, `temperature = 0`, structured output) trích `CvProfile`: headline, skills (≤ 25), experiences (≤ 8), projects (≤ 6), education, `track_relevance`; **không** có tên, liên hệ, tên công ty. Chỉ CV Parser được thấy CV thô | Must | Output qua schema; 10 CV mẫu ra `cv_profile` hợp lệ; 3 CV chứa injection không lọt chỉ dẫn vào profile | D02 §3.3.1, D01 §2.4 | S1-AIE-3 | Một phần (CV Parser LLM `app/agents/cv_parser.py`, prompt `cv_parser.v1`; bật bằng `AGENT_CV_PARSER_MODE=llm`; hậu kiểm bỏ chuỗi injection, ngày sai định dạng thành null; LLM lỗi thì dùng parser quy tắc; 10 CV mẫu ở `evals/cv_samples/`, **chưa chạy với LLM thật**) |
 | FR-AI-014 | **Số năm kinh nghiệm** do code tính: gộp khoảng chồng nhau, làm tròn 0.5 năm; `end = null` nghĩa là hiện tại | Must | Hai kinh nghiệm chồng thời gian không cộng đôi | D01 §2.3 | S1-AIE-3 | Mock (code thật) |
 | FR-AI-015 | Khi **không có CV**, CV không liên quan IT (`track_relevance = low`) hoặc CV Parser lỗi, buổi phỏng vấn **tiếp tục không CV**: intro dùng câu hỏi chung, Planner chọn topic từ catalog | Must | `/api/start` với `cv_profile = null` trả plan có topic intro `source = generic` | D01 §2.3, D03 §4.6 | S1-AIE-3 | Mock |
 | FR-AI-016 | **JD Parser** (LLM, `temperature = 0`, structured output) trích `jd_profile` từ JD của job trong application mà ứng viên chọn: yêu cầu bắt buộc (`must`) và ưu tiên (`nice`), mỗi yêu cầu ánh xạ về `topic_id` trong catalog hoặc đánh dấu `out_of_catalog`. JD thô chỉ JD Parser thấy; JD đi qua chuẩn hóa, redact thông tin liên hệ và quét injection như CV | Must | 2 JD mẫu ra `jd_profile` hợp lệ; JD chứa chỉ dẫn độc hại không làm đổi plan; yêu cầu ngoài catalog ra `out_of_catalog` | A11, BRD BR-23 | S2-AIE-6 | Chưa |
@@ -215,8 +215,8 @@ Cột **GĐ** là giai đoạn triển khai. **Owner đề xuất** nằm trong 
 
 | Trạng thái | Số FR |
 |---|---|
-| Mock (đã có, dùng quy tắc thay LLM hoặc code thật cho phần không cần LLM) | 24 |
-| Một phần | 13 |
+| Mock (đã có, dùng quy tắc thay LLM hoặc code thật cho phần không cần LLM) | 23 |
+| Một phần | 14 |
 | Chưa làm | 36 |
 | Ngoài phạm vi ai-service (FSD, DE) | 2 |
 | **Tổng** | **75** |
@@ -225,7 +225,7 @@ Theo giai đoạn (nhóm A đến I tính giai đoạn 1; FR nhiều giai đoạ
 
 | Giai đoạn | Số FR | Mock | Một phần | Chưa | Ngoài |
 |---|---|---|---|---|---|
-| 1 | 60 | 24 | 13 | 21 | 2 |
+| 1 | 60 | 23 | 14 | 21 | 2 |
 | 2 | 11 | 0 | 0 | 11 | 0 |
 | 3 | 4 | 0 | 0 | 4 | 0 |
 
