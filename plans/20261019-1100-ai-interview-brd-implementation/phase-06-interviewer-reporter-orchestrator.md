@@ -4,7 +4,7 @@
 - [plan.md](plan.md) · [design 03](../../docs/ai-service/03-orchestrator-state-machine.md) · [design 04](../../docs/ai-service/04-adaptive-loop-and-candidate-state.md) · [design 05 §6.3–6.4](../../docs/ai-service/05-rubric-and-final-report.md) · FR-AI-035–039, 052–056, 070–072, 091
 
 ## Overview
-- **Priority:** P1 · **Status:** chưa bắt đầu · **Tuần:** W4–W6
+- **Priority:** P1 · **Status:** đang làm (2026-10-22): `thang/orchestrator-limits` → `thang/interviewer-llm` → `thang/reporter-llm` → `thang/internal-token-auth` · **Tuần:** W4–W6
 - Interviewer LLM stream, Reporter LLM, hoàn thiện luật orchestrator và toàn bộ nhánh lỗi/fallback.
 
 ## Key Insights
@@ -36,7 +36,7 @@ finalize : code tính điểm → Reporter (JSON) → kiểm evidence_turns, tra
 6. Middleware `X-Internal-Token` (trừ `/api/health`).
 
 ## Todo List
-- [ ] time_budget + điều kiện chuyển phase, test biên
+- [x] time_budget + điều kiện chuyển phase, test biên (`tests/test_time_budget.py`)
 - [ ] Interviewer stream + fallback + replace + chống lặp
 - [ ] Reporter + partial + evidence kiểm
 - [ ] Khối `requirements`

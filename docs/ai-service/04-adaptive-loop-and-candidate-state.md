@@ -25,6 +25,8 @@ deterministic, cùng input luôn ra cùng quyết định.
 
 ## 5.2 Candidate state
 
+> **Thêm 2026-10-22:** `phase_started_s`, `topic_started_s` (giây kể từ đầu phiên khi phase và topic hiện tại bắt đầu), dùng cho ngân sách thời gian (design 03 §4.4). interview-service chỉ lưu và gửi lại state, không cần hiểu các trường này.
+
 JSON do ai-service trả trong event `done`, interview-service lưu ở `interview_sessions.candidate_state` và gửi lại
 nguyên văn ở lượt sau. Kích thước điển hình 2–4 KB.
 
