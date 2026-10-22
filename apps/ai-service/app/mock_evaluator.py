@@ -13,9 +13,9 @@ from . import cv_text
 from .models_interview import Bands, Evaluation, Evidence, PlanTopic, Scores10
 
 _STOP = {"duoc", "neu", "giai", "thich", "cach", "voi", "cho", "trong", "cua", "nhung", "mot", "cac", "khi", "theo"}
-_DONT_KNOW = re.compile(r"(khong biet|chua biet|chua hoc|khong ro|khong nho|\bpass\b|bo qua|chua tung)")
+DONT_KNOW_RE = re.compile(r"(khong biet|chua biet|chua hoc|khong ro|khong nho|\bpass\b|bo qua|chua tung)")
 _CLARIFY = re.compile(r"^(ban co the )?(nhac lai|hoi lai|y ban la|cau hoi la gi)")
-_MANIP = re.compile(r"(cho (toi|em|minh|tui).{0,30}\d+\s*(/\s*10)?\s*diem|10\s*/\s*10|diem toi da|ignore (all|previous))")
+MANIPULATION_RE = re.compile(r"(cho (toi|em|minh|tui).{0,30}\d+\s*(/\s*10)?\s*diem|10\s*/\s*10|diem toi da|ignore (all|previous))")
 
 
 def fold(text: str) -> str:
@@ -54,9 +54,9 @@ def _slug(point: str) -> str:
 def classify_answer(answer: str, covered: int, question: str, topic: PlanTopic) -> str:
     f = fold(answer).strip()
     words = len(f.split())
-    if _MANIP.search(f) or cv_text.has_injection(answer):
+    if MANIPULATION_RE.search(f) or cv_text.has_injection(answer):
         return "manipulation"
-    if words <= 6 and _DONT_KNOW.search(f):
+    if words <= 6 and DONT_KNOW_RE.search(f):
         return "dont_know"
     if covered == 0 and words <= 15 and (f.endswith("?") or _CLARIFY.search(f)):
         return "asks_clarification"

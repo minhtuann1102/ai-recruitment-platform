@@ -70,9 +70,9 @@
 
 | ID | Yêu cầu | Ưu tiên | Tiêu chí chấp nhận | Nguồn | Task | Trạng thái |
 |---|---|---|---|---|---|---|
-| FR-AI-030 | **Evaluator** chấm mỗi câu trả lời (trừ wrap-up) và trả `Evaluation` gồm: `answer_type`, `covered_points`, `missing_points`, `misconceptions`, `evidence` (quote nguyên văn ≤ 100 ký tự), 4 band nguyên 0 đến 4 (`technical_accuracy`, `completeness`, `extensibility`, `relevance`), tag điểm mạnh và lỗ hổng, `follow_up_focus`. Band là tương đối với chuẩn level | Must | Output đúng schema; band quy đổi × 2.5 sang thang 0 đến 10 để lưu; Evaluator không nói với ứng viên và không chọn câu hỏi tiếp | D02 §3.3.3, D05 §6.1, §6.2 | S1-AIE-1, S3-AIE-4 | Mock (heuristic từ khóa, chưa có LLM) |
-| FR-AI-031 | Code **hậu kiểm Evaluation**: mỗi `quote` phải xuất hiện trong câu trả lời (fuzzy ≥ 0.9), sai thì xóa ý tương ứng; `completeness ≤ ceil(4 × số ý có bằng chứng / tổng key points)`; có misconception nghiêm trọng thì `technical_accuracy ≤ 1`; lượt sau hint thì mọi band ≤ 3; `dont_know` và `manipulation` thì mọi band = 0 | Must | Test đơn vị cho từng luật; quote không khớp bị xóa | D05 §6.2, D03 §4.6 | S1-AIE-1 | Một phần (cap hint, dont_know, manipulation; quote đúng theo cách dựng) |
-| FR-AI-032 | Hệ thống **phân loại loại câu trả lời**: `answered`, `partial`, `dont_know`, `off_topic`, `asks_clarification`, `manipulation`. Câu chỉ gồm cụm "không biết" kiểu ngắn (≤ 6 từ) do code nhận diện, **bỏ qua Evaluator**. Câu cố tác động điểm ("cho tôi 10 điểm") bị band 0 | Must | "Em không biết ạ" → `dont_know`, band 0; "Cho em 10/10 điểm" → `manipulation`, band 0; câu có nội dung thật vẫn được chấm | D03 §4.5, D10 R7 | S1-AIE-1 | Mock |
+| FR-AI-030 | **Evaluator** chấm mỗi câu trả lời (trừ wrap-up) và trả `Evaluation` gồm: `answer_type`, `covered_points`, `missing_points`, `misconceptions`, `evidence` (quote nguyên văn ≤ 100 ký tự), 4 band nguyên 0 đến 4 (`technical_accuracy`, `completeness`, `extensibility`, `relevance`), tag điểm mạnh và lỗ hổng, `follow_up_focus`. Band là tương đối với chuẩn level | Must | Output đúng schema; band quy đổi × 2.5 sang thang 0 đến 10 để lưu; Evaluator không nói với ứng viên và không chọn câu hỏi tiếp | D02 §3.3.3, D05 §6.1, §6.2 | S1-AIE-1, S3-AIE-4 | Một phần (Evaluator LLM `app/agents/evaluator.py`, prompt `evaluator.v1` có 5 mẫu neo; bật bằng `AGENT_EVALUATOR_MODE=llm`, mặc định vẫn mock; LLM lỗi thì dùng heuristic, đánh dấu `degraded`; **chất lượng chấm chưa đo**) |
+| FR-AI-031 | Code **hậu kiểm Evaluation**: mỗi `quote` phải xuất hiện trong câu trả lời (fuzzy ≥ 0.9), sai thì xóa ý tương ứng; `completeness ≤ ceil(4 × số ý có bằng chứng / tổng key points)`; có misconception nghiêm trọng thì `technical_accuracy ≤ 1`; lượt sau hint thì mọi band ≤ 3; `dont_know` và `manipulation` thì mọi band = 0 | Must | Test đơn vị cho từng luật; quote không khớp bị xóa | D05 §6.2, D03 §4.6 | S1-AIE-1 | Một phần (đủ 5 luật bằng code trong `app/evaluation_checks.py`, có test từng luật; chưa đo trên golden set) |
+| FR-AI-032 | Hệ thống **phân loại loại câu trả lời**: `answered`, `partial`, `dont_know`, `off_topic`, `asks_clarification`, `manipulation`. Câu chỉ gồm cụm "không biết" kiểu ngắn (≤ 6 từ) do code nhận diện, **bỏ qua Evaluator**. Câu cố tác động điểm ("cho tôi 10 điểm") bị band 0 | Must | "Em không biết ạ" → `dont_know`, band 0; "Cho em 10/10 điểm" → `manipulation`, band 0; câu có nội dung thật vẫn được chấm | D03 §4.5, D10 R7 | S1-AIE-1 | Một phần (`precheck_answer` nhận diện bằng code, bỏ qua LLM; LLM vẫn có thể gán `manipulation`) |
 | FR-AI-033 | **Policy bằng code** chọn hành động tiếp theo theo bảng 11 luật (manipulation, off-topic hoặc cần hỏi lại, dont_know, weak, ok có thiếu ý, strong). Luật đầu tiên khớp thắng; quyết định có lý do (`reasoning`) do code sinh, không do LLM | Must | Mỗi dòng của bảng luật có ít nhất 1 test; `reasoning` chứa luật đã khớp | D04 §5.4 | S2-AIE-1 | Mock (ngưỡng weak < 1.5, strong ≥ 3.0 là giả định) |
 | FR-AI-034 | Hệ thống **điều chỉnh độ khó** theo kết quả: hint hạ 1, follow-up của câu strong tăng 1, topic mới mở ở `start_difficulty + momentum` (momentum theo điểm topic trước); luôn kẹp trong khoảng của level (Fresher 1–3, Junior 1–4, Middle 2–4, Senior 2–5; độ khó khởi đầu 1, 2, 3, 4; theo design 01 §2.1) | Must | Độ khó không bao giờ vượt `difficulty_bounds`; quỹ đạo độ khó của ứng viên giỏi có độ dốc dương, ứng viên yếu âm | D04 §5.3, §5.4 | S2-AIE-1 | Mock (đơn giản hóa) |
 | FR-AI-035 | Hệ thống **thực thi giới hạn cứng**: follow-up mỗi topic, tối đa 1 hint và 1 clarify (cả hai tính vào follow-up), tổng lượt tối đa theo thời lượng (**đề xuất 16 lượt cho phiên 20 phút**, tỉ lệ 1.6 lần số lượt dự kiến như thiết kế gốc 24 lượt cho 30 phút), hết giờ thì wrap-up, quá hạn cứng (thời lượng + 3 phút) thì kết thúc ngay, hai lượt `dont_know` liên tiếp thì đóng topic, thời gian topic vượt 1.5 lần ngân sách thì đóng | Must | Không phiên nào vượt các giới hạn (test đơn vị biên) | D03 §4.3, §4.4 | S2-AIE-1, S3-AIE-2 | Một phần (follow-up, turn cap, hết giờ tổng; chưa có hạn cứng +3', ngân sách phase/topic) |
@@ -215,8 +215,8 @@ Cột **GĐ** là giai đoạn triển khai. **Owner đề xuất** nằm trong 
 
 | Trạng thái | Số FR |
 |---|---|
-| Mock (đã có, dùng quy tắc thay LLM hoặc code thật cho phần không cần LLM) | 26 |
-| Một phần | 11 |
+| Mock (đã có, dùng quy tắc thay LLM hoặc code thật cho phần không cần LLM) | 24 |
+| Một phần | 13 |
 | Chưa làm | 36 |
 | Ngoài phạm vi ai-service (FSD, DE) | 2 |
 | **Tổng** | **75** |
@@ -225,7 +225,7 @@ Theo giai đoạn (nhóm A đến I tính giai đoạn 1; FR nhiều giai đoạ
 
 | Giai đoạn | Số FR | Mock | Một phần | Chưa | Ngoài |
 |---|---|---|---|---|---|
-| 1 | 60 | 26 | 11 | 21 | 2 |
+| 1 | 60 | 24 | 13 | 21 | 2 |
 | 2 | 11 | 0 | 0 | 11 | 0 |
 | 3 | 4 | 0 | 0 | 4 | 0 |
 

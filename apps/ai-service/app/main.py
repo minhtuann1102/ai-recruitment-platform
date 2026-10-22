@@ -3,12 +3,14 @@
 Mock dung quy tac thay cho LLM de FSD tich hop truoc; hinh dang request/response/SSE la that.
 """
 import time
+from typing import Optional
 
 from fastapi import FastAPI, File, Form, Request, UploadFile
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, StreamingResponse
 
 from .api_error import ApiError
+from .llm.usage import UsageCollector
 from .mock_cv_parser import parse_cv_bytes
 from .mock_planner import load_track
 from .models_cv import CvParseResponse
@@ -47,9 +49,13 @@ async def cv_parse(file: UploadFile = File(...), track: str = Form(...)):
     return parse_cv_bytes(await file.read(), track)
 
 
-def _usage_meta(started: float) -> dict:
+def _usage_meta(started: float, collector: Optional[UsageCollector] = None) -> dict:
     total = int((time.perf_counter() - started) * 1000)
-    return {"usage": {}, "latency_ms": {"total": total}, "prompt_versions": {"mock": MODEL}, "fallbacks": []}
+    if collector is None or not collector.records:
+        return {"usage": {}, "latency_ms": {"total": total}, "prompt_versions": {"mock": MODEL}, "fallbacks": []}
+    meta = collector.to_metadata()
+    meta["latency_ms"]["total"] = total  # tong thoi gian request, khong chi thoi gian goi LLM
+    return meta
 
 
 def _stream(result: TurnResult, done: dict):
@@ -67,12 +73,12 @@ def start(req: StartRequest):
 
 
 @app.post("/api/next-turn")
-def next_turn_route(req: NextTurnRequest):
-    started = time.perf_counter()
-    r = next_turn(req)
+async def next_turn_route(req: NextTurnRequest):
+    started, collector = time.perf_counter(), UsageCollector()
+    r = await next_turn(req, collector=collector)
     done = {"evaluation": r.evaluation.model_dump() if r.evaluation else None, "question": r.question,
             "turn": r.turn.model_dump() if r.turn else None, "state": r.state.model_dump(),
-            "session_end": r.session_end, "metadata": _usage_meta(started)}
+            "session_end": r.session_end, "metadata": _usage_meta(started, collector)}
     return _stream(r, done)
 
 

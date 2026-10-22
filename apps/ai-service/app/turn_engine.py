@@ -6,8 +6,11 @@ import re
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
+from .agents.evaluator import EvaluationInput
+from .agents.evaluator_provider import Evaluator, get_evaluator
 from .api_error import ApiError
-from .mock_evaluator import evaluate, fold, is_scored, turn_score
+from .llm.usage import UsageCollector
+from .mock_evaluator import fold, is_scored, turn_score
 from .mock_interviewer import compose
 from .mock_planner import build_plan
 from .models_common import LEVEL_CONFIG, TURN_CAP
@@ -93,7 +96,8 @@ def _end_reason(req: NextTurnRequest, state: CandidateState, plan: InterviewPlan
     return "turn_cap" if state.turn_count >= TURN_CAP else None
 
 
-def next_turn(req: NextTurnRequest) -> TurnResult:
+async def next_turn(req: NextTurnRequest, evaluator: Optional[Evaluator] = None,
+                    collector: Optional[UsageCollector] = None) -> TurnResult:
     plan, state = req.plan, req.state.model_copy(deep=True)
     topics = flat_topics(plan)
     if state.phase == "done":
@@ -106,7 +110,10 @@ def next_turn(req: NextTurnRequest) -> TurnResult:
         raise ApiError(422, "invalid_request", "active_topic_id khong co trong plan")
     phase, topic = topics[pos]
 
-    ev = evaluate(req.answer, req.question, topic, req.turn_kind, req.turn_number)
+    ev = await (evaluator or get_evaluator()).evaluate(EvaluationInput(
+        level=req.level, phase=phase, topic=topic, difficulty=state.current_difficulty, turn_kind=req.turn_kind,
+        turn_number=req.turn_number, question=req.question, answer=req.answer, topic_turns=req.topic_turns),
+        collector)
     _record(state, ev, req.turn_number)
     forced = _end_reason(req, state, plan)
     dec = decide(ev, state, req.level, phase == "scenario", topic.key_points[0])
