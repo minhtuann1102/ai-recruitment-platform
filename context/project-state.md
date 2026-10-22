@@ -21,7 +21,8 @@
 | `thang/interviewer-llm` | #21 | Phase 06: Interviewer stream, fallback, `replace`, chống lặp |
 | `thang/reporter-llm` | #22 | Phase 06: Reporter, `partial`, khối `requirements` |
 | `thang/internal-token-auth` | #23 | Phase 06: `X-Internal-Token`; 358 test |
-| `thang/simulator-harness` | (mới) | Phase 07: simulator, harness tầng 3, độ trễ và chi phí; 363 test |
+| `thang/simulator-harness` | #24 | Phase 07: simulator, harness tầng 3, độ trễ và chi phí; 363 test |
+| `thang/question-variety` | (mới) | Chống câu hỏi lặp: focus chưa hỏi, câu dự phòng đa dạng; câu lặp mock 34.2% → 0.6%; 369 test |
 
 Quy ước merge của owner: merge commit (không squash). Tiêu đề PR dạng `[scope] type: mô tả`.
 

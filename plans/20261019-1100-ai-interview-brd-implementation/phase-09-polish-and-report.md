@@ -30,6 +30,7 @@ Không đổi. Chỉ tối ưu prompt, cache và cấu hình.
 6. Viết chương AI cho báo cáo (kiến trúc agent, RAG, đánh giá, riêng tư và pháp lý) và slide.
 
 ## Todo List
+- [x] Tinh chỉnh policy chống câu lặp (`app/focus.py`, 2026-10-22; số đo mock trong báo cáo eval-sim)
 - [ ] Chạy đánh giá cuối + báo cáo
 - [ ] Đạt hoặc giải trình cổng cuối
 - [ ] Rà soát bảo mật AI

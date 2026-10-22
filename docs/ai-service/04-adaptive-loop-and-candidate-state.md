@@ -90,6 +90,8 @@ Sau mỗi `Evaluation` hợp lệ (không degraded):
 
 ## 5.4 Policy chọn hành động tiếp
 
+> **Cập nhật 2026-10-22 (`app/focus.py`):** `focus` không còn cố định. Luật 8 và `hint` chọn ý còn thiếu **chưa hỏi** trong topic (theo `missing_points`, gợi ý của Evaluator, rồi key point chưa nêu); luật 10 chọn key point chưa nêu, rồi các hướng đào sâu gắn tên topic (trade-off, edge case, cơ chế bên trong, khi scale). Hết ý mới thì `next_topic`. Focus đã hỏi lưu ở `topics[].focus_used` (tối đa 6, chỉ focus đã qua kiểm injection), hai focus coi là trùng khi Jaccard ≥ 0.8. Ý ứng viên đã nêu được gộp theo cả topic ở `topics[].covered` (tối đa 10) để không hỏi lại ý đã trả lời ở lượt trước; một ý coi là đã nêu khi chứa ≥ 50% từ nội dung của key point.
+
 Chạy sau khi các điều kiện ưu tiên 1–5 ở §4.4 (hết giờ, hết phase, đóng topic) không khớp. Đọc từ trên
 xuống, luật đầu tiên khớp thắng. `F` = follow-up còn lại của topic (`max_follow_up − counters.follow_ups`).
 

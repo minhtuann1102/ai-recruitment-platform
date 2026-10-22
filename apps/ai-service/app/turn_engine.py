@@ -52,7 +52,8 @@ def flat_topics(plan: InterviewPlan) -> List[Tuple[str, PlanTopic]]:
 
 
 def _norm(q: str) -> str:
-    return re.sub(r"\s+", " ", fold(q)).strip()[:160]
+    # 400 ky tu: cat ngan qua lam Jaccard voi cau day du tut duoi 0.8, bo sot cau lap dai
+    return re.sub(r"\s+", " ", fold(q)).strip()[:400]
 
 
 def _meta(phase: str, topic_pos: int, total: int, action: str, turn_number: int) -> Dict:
@@ -113,15 +114,18 @@ async def next_turn(req: NextTurnRequest, evaluator: Optional[Evaluator] = None,
         dec = Decision(forced[0], -1 if forced[1] == "two_dont_know" else 0, None,
                        f"{forced[1]} -> {forced[0]} (điều kiện ưu tiên, design 03 §4.4)")
     else:
-        dec = decide(ev, state, req.level, phase == "scenario", topic.key_points[0])
+        # covered: y da neu trong ca topic (record_evaluation da gop ca luot nay), de khong hoi lai y da tra loi
+        ts = next(t for t in state.topics if t.id == topic.id)
+        dec = decide(ev, state, req.level, phase == "scenario", topic, ts.focus_used, ts.covered)
 
+    focus = safe_focus(dec.focus)  # chi luu va dung focus da qua kiem (khong giu chuoi nghi injection trong state)
     action, phase_changed, next_pos = apply_action(state, topics, pos, dec.action, dec.difficulty_delta,
-                                                   req.elapsed_seconds)
+                                                   req.elapsed_seconds, focus)
     n_phase, n_topic = (topics[next_pos] if next_pos is not None else ("wrap_up", None))
-    spec = QuestionSpec(action, n_phase, n_topic, state.current_difficulty, focus=safe_focus(dec.focus),
+    spec = QuestionSpec(action, n_phase, n_topic, state.current_difficulty, focus=focus,
                         last_question=req.question, last_answer=req.answer, phase_changed=phase_changed,
                         asked_on_topic=[t.q for t in req.topic_turns] + [req.question] if action != "ask_main" else [],
-                        time_hint=_time_hint(req.elapsed_seconds, plan, n_phase))
+                        time_hint=_time_hint(req.elapsed_seconds, plan, n_phase), avoid=list(state.asked_questions))
     state.turn_count += 1
     if n_topic:
         next(t for t in state.topics if t.id == n_topic.id).turns.append(req.turn_number + 1)
