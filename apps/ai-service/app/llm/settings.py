@@ -18,8 +18,8 @@ EVAL_AGENTS = ("simulator",)
 _DEFAULTS = {
     "cv_parser": (0.0, 1200, 20.0, None, None),
     "jd_parser": (0.0, 1200, 20.0, None, None),
-    "planner": (0.4, 2500, 25.0, None, None),
-    "evaluator": (0.0, 350, 8.0, 7, 10.0),
+    "planner": (0.4, 1500, 25.0, None, None),  # 1500: planner.v2 khong viet hint/backup (do 22/10: P50 13 s)
+    "evaluator": (0.0, 300, 8.0, 7, 10.0),  # v2 do 22/10: output P95 172, max 219 token; 300 de khong bi cat
     "interviewer": (0.7, 200, 5.0, None, None),
     "reporter": (0.3, 2000, 60.0, None, None),
     "simulator": (0.8, 350, 20.0, None, None),

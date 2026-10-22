@@ -15,7 +15,7 @@ from pydantic import BaseModel
 
 from .. import mock_evaluator
 from ..evaluation_checks import (MAX_COVERED, apply_caps, build_evaluation, matched_key_points, precheck_answer,
-                                 quote_in_answer, supports_point, zero_evaluation)
+                                 quote_in_answer, slug_tags, supports_point, zero_evaluation)
 from ..llm.errors import ConfigError, LlmError
 from ..llm.gateway import LlmGateway
 from ..llm.usage import CallRecord, UsageCollector
@@ -45,8 +45,6 @@ class EvaluatorOutput(BaseModel):
     missing_points: List[str]
     misconceptions: List[str]
     scores: RawBands
-    strength_tags: List[str]
-    gap_tags: List[str]
     follow_up_focus: Optional[str]
 
 
@@ -93,7 +91,9 @@ def postcheck(out: EvaluatorOutput, inp: EvaluationInput) -> Evaluation:
         covered_points=[c.point for c in verified], missing_points=out.missing_points,
         misconceptions=[m for m in out.misconceptions if m.strip()],
         evidence=[Evidence(claim=c.point[:150], quote=c.quote[:100]) for c in verified],
-        strength_tags=out.strength_tags, gap_tags=out.gap_tags, follow_up_focus=out.follow_up_focus)
+        # tag do code sinh tu y da kiem chung (v2 khong bat LLM viet tag: bot token o duong nong)
+        strength_tags=slug_tags(c.point for c in verified), gap_tags=slug_tags(out.missing_points),
+        follow_up_focus=out.follow_up_focus)
 
 
 class LlmEvaluator:

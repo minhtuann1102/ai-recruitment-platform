@@ -7,6 +7,8 @@ Nguồn chi tiết: `docs/ai-service/requirements/01-brd.md` §0.2 (D1–D12), �
 - **Xử lý mâu thuẫn constitution (2026-10-19):** giữ ai-service stateless và REST/SSE; voice (nếu có) nằm ngoài ai-service; framework chỉ cho lớp giọng nói qua ADR, orchestrator/policy/tính điểm là code của nhóm; dữ liệu huấn luyện đi đường riêng, không vào `knowledge_chunks`; gộp sửa đổi vào PR ratify constitution.
 - Phân kỳ: **chat trước**, voice sau nếu ổn (D1, D2). Phải xin ứng viên đồng ý trước khi bật camera/micro (D3). Độ trễ cải thiện dần (D4). Dùng hạ tầng voice-agent có sẵn (D6).
 
+- **Độ trễ giai đoạn 1 (2026-10-22):** chấp nhận P50 ~5 s một lượt (đo: P50 5.0 s, P95 7.7 s sau Evaluator/Planner v2) theo D4 "cải thiện dần". Chưa làm Interviewer song song Evaluator; xem lại khi có golden set và trước gate voice.
+
 ## Mặc định của kế hoạch, chờ owner xác nhận
 - D7 JD vào Planner (không vào RAG); D8 voice tùy chọn A (theo `main`, DE sở hữu, TTS + STT bấm-để-nói); D9 phiên riêng tư; D10 6 track; D11 DE sở hữu đường ghi RAG, AIE đường đọc; D12 thời lượng 15–20 phút, mặc định 20, turn cap 16.
 

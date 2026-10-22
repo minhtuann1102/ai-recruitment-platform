@@ -2,7 +2,7 @@
 
 Ket qua cung hinh dang InterviewPlan that (docs/ai-service/02 3.3.2) de interview-service tich hop som.
 """
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from .api_error import ApiError
 from .catalog.loader import CatalogError, load_catalog
@@ -36,25 +36,54 @@ def _clamp(value: int, level: str) -> int:
     return max(lo, min(hi, value))
 
 
+def default_hints(source: str, title: str, project_name: Optional[str] = None) -> Tuple[str, str]:
+    """(opening_hint, backup_question) mau cho moi loai topic. Dung cho plan du phong va cho Planner LLM v2
+    (LLM khong viet hai truong nay de bot token: do 22/10 Planner P50 13 s)."""
+    if source == "cv":
+        return (f"Hỏi ứng viên kể về dự án {project_name or title}",
+                "Bạn hãy kể về dự án gần nhất và phần việc chính của bạn?")
+    if source == "generic":
+        return ("Mời ứng viên giới thiệu bản thân và dự án gần nhất",
+                "Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?")
+    if source == "scenario":
+        return f"Đưa tình huống: {title}", f"Tình huống: {title}. Bạn sẽ tiếp cận thế nào?"
+    return f"Bắt đầu bằng câu hỏi tổng quan về {title}", f"{title}: bạn hiểu như thế nào và đã áp dụng ra sao?"
+
+
+INTRO_CV_POINTS = ["Mô tả rõ phần việc của mình", "Giải thích lý do chọn công nghệ đã dùng",
+                   "Nêu khó khăn gặp phải và cách xử lý"]
+INTRO_GENERIC_POINTS = ["Giới thiệu ngắn gọn về nền tảng", "Mô tả một dự án và vai trò của mình",
+                        "Nêu công nghệ đã dùng"]
+SCENARIO_POINTS = ["Làm rõ yêu cầu và giả định", "Đề xuất thiết kế hoặc hướng giải quyết cụ thể",
+                   "Nêu trade-off và rủi ro"]
+
+
+def default_key_points(source: str, catalog_ref: Optional[str], catalog) -> List[str]:
+    """key_points mau theo loai topic (dung khi Planner LLM bo trong hoac thieu, khong phai goi lai LLM)."""
+    if source == "catalog":
+        t = next((x for x in catalog.topics if x.id == catalog_ref), None)
+        return [f"Nêu được {c}" for c in t.key_concepts[:4]] if t else []
+    if source == "scenario":
+        return list(SCENARIO_POINTS)
+    return list(INTRO_CV_POINTS if source == "cv" else INTRO_GENERIC_POINTS)
+
+
 def _catalog_topic(tid: str, t: Topic, level: str) -> PlanTopic:
     return PlanTopic(
         id=tid, title=t.title, source="catalog", catalog_ref=t.id,
         objective=f"Đánh giá hiểu biết về {t.title} ở mức {level}",
         key_points=[f"Nêu được {c}" for c in t.key_concepts[:4]],
         start_difficulty=_clamp(LEVEL_CONFIG[level]["start"], level),
-        opening_hint=f"Bắt đầu bằng câu hỏi tổng quan về {t.title}",
-        backup_question=f"{t.title}: bạn hiểu như thế nào và đã áp dụng ra sao?")
+        **dict(zip(("opening_hint", "backup_question"), default_hints("catalog", t.title))))
 
 
 def _scenario_topic(tid: str, s: Scenario, level: str) -> PlanTopic:
     return PlanTopic(
         id=tid, title=s.title, source="scenario", catalog_ref=s.id,
         objective="Đánh giá cách tiếp cận một tình huống thực tế",
-        key_points=["Làm rõ yêu cầu và giả định", "Đề xuất thiết kế hoặc hướng giải quyết cụ thể",
-                    "Nêu trade-off và rủi ro"],
+        key_points=list(SCENARIO_POINTS),
         start_difficulty=_clamp(LEVEL_CONFIG[level]["start"], level),
-        opening_hint=f"Đưa tình huống: {s.title}",
-        backup_question=f"Tình huống: {s.title}. Bạn sẽ tiếp cận thế nào?")
+        **dict(zip(("opening_hint", "backup_question"), default_hints("scenario", s.title))))
 
 
 def _intro_topic(tid: str, level: str, cv: Optional[CvProfile]) -> PlanTopic:
