@@ -21,7 +21,7 @@ Mỗi file là một mảng JSON; loader gộp mọi file theo thứ tự tên. 
 | `license` | string | có | thuộc danh sách cho phép (research R6). Cặp ngoài: giấy phép của nguồn; cặp `self`: giấy phép của bộ seed (khai trong `NOTICE`) |
 | `attribution` | string | khi `source ≠ "self"` | tác giả / dự án gốc, vd `"sudheerj/reactjs-interview-questions contributors"` |
 | `synthetic` | bool | có | `true` khi đáp án tự soạn (kể cả câu hỏi lấy từ nguồn công khai); `false` chỉ khi cả hỏi lẫn đáp lấy/chuyển thể từ nguồn có giấy phép. Quota 50% chỉ đếm `false` |
-| `reviewed_by` | string | có (mọi cặp) | người đã đọc đáp án; cặp dịch/chuyển thể phải được đối chiếu bản gốc. Chỉ điền sau khi đọc thật — bản nháp để trống nên `validate` thất bại cho tới khi duyệt |
+| `reviewed_by` | string | có (mọi cặp) | người đã đọc đáp án; cặp dịch/chuyển thể phải được đối chiếu bản gốc. Chỉ điền sau khi đọc thật — bản nháp để trống nên `validate` thất bại cho tới khi duyệt. Ngoại lệ: cặp hard tự viết duyệt theo spec Clarification Session 2026-10-23 (đọc nhóm phải đọc + mẫu, phần còn lại chấp nhận theo báo cáo duyệt có bằng chứng) |
 
 `category` **không** có trong seed: suy ra từ catalog theo `topic_id`.
 
