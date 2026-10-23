@@ -1156,9 +1156,9 @@
   },
   {
     "qa_id": "de-qa-1112",
-    "verdict": "fix",
+    "verdict": "ok",
     "confidence": "low",
-    "summary_vi": "Phần validate JWT khớp tài liệu Spring Security và yêu cầu RFC 9700 về refresh token cho public client có trích dẫn. Cần fix vì câu hỏi có 3 ý hỏi lớn; chi tiết reuse detection của rotation và phần lưu trữ trên trình duyệt chưa kiểm chứng được (không đọc được mục 4.14 của RFC 9700). (Rubric v2: không còn tính là quá rộng; vẫn cần sửa vì factual.)",
+    "summary_vi": "Đạt: claim từng chưa có nguồn đã được xác minh tại máy bằng câu trích từ RFC/OWASP; các ý chính đều có trích dẫn. (Trước đó gợi ý Cần sửa vì thiếu trích dẫn.)",
     "claims": [
       {
         "claim": "Resource server dùng issuer-uri để tìm public key (JWK Set) và validate chữ ký",
@@ -1190,17 +1190,24 @@
       },
       {
         "claim": "Rotation: refresh token cũ bị dùng lại thì server thu hồi refresh token đang hoạt động của chuỗi",
-        "status": "unverified",
-        "source_url": "",
-        "quote": "",
-        "note": "WebFetch không trả về nội dung mục 4.14 của RFC 9700 (thử 3 lần với offset khác nhau). Đúng theo hiểu biết chung nhưng chưa có câu trích."
+        "status": "supported",
+        "source_url": "https://www.rfc-editor.org/rfc/rfc9700.txt",
+        "quote": "The authorization server cannot determine which party submitted the invalid refresh token, but it will revoke the active refresh token.",
+        "note": "Kiểm lại tại máy 2026-10-23: phiên cloud không đọc được trang, tải trực tiếp thì thấy câu này."
       },
       {
-        "claim": "localStorage dễ bị đọc khi có XSS; cookie HttpOnly/SameSite cần chống CSRF",
-        "status": "unverified",
-        "source_url": "",
-        "quote": "",
-        "note": "Hết ngân sách fetch cho cặp này; nên kiểm bằng OWASP HTML5 Security / Session Management Cheat Sheet."
+        "claim": "localStorage dễ bị đọc khi có XSS",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/OWASP/CheatSheetSeries/master/cheatsheets/HTML5_Security_Cheat_Sheet.md",
+        "quote": "Do not store session identifiers in local storage as the data is always accessible by JavaScript.",
+        "note": "Kiểm lại tại máy 2026-10-23: phiên cloud không đọc được trang, tải trực tiếp thì thấy câu này."
+      },
+      {
+        "claim": "Cookie được trình duyệt tự gửi kèm nên cần chống CSRF",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/OWASP/CheatSheetSeries/master/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.md",
+        "quote": "Since browser requests automatically include all cookies including session cookies, this attack works unless proper authorization is used, which means that the target site's challenge-response mechanism does not verify the identity and authority of the requester.",
+        "note": "Kiểm lại tại máy 2026-10-23: phiên cloud không đọc được trang, tải trực tiếp thì thấy câu này."
       }
     ],
     "issues": [
@@ -1211,9 +1218,9 @@
         "fix": "Hỏi 2 ý: 'Vì sao JWT khó thu hồi, và bạn thiết kế access/refresh token thế nào để logout/khóa tài khoản có hiệu lực nhanh?'; phần validate JWT thành follow-up."
       },
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "factual",
-        "detail": "Hai ý thuộc thiết kế (reuse detection của rotation, lưu trữ trên trình duyệt) chưa kiểm chứng được bằng trích dẫn.",
+        "detail": "Đã xác minh tại máy 2026-10-23 (xem quote của claim). Hai ý thuộc thiết kế (reuse detection của rotation, lưu trữ trên trình duyệt) chưa kiểm chứng được bằng trích dẫn.",
         "fix": "Người duyệt đối chiếu RFC 9700 §4.14 và OWASP; nếu đúng thì giữ nguyên, nên dẫn §4.14 trong grounding_urls kèm anchor."
       },
       {
@@ -1250,10 +1257,7 @@
       ],
       "follow_up": "Admin khóa tài khoản lúc 10:00; access token 15 phút. Làm sao chặn ngay các request sau 10:00?"
     },
-    "proposed_fix": {
-      "question": "Bạn thiết kế xác thực cho SPA và mobile app gọi Spring Boot API bằng JWT access token, với yêu cầu: logout hoặc khóa tài khoản phải có hiệu lực nhanh, token bị đánh cắp phải hạn chế được thiệt hại. Vì sao JWT khó thu hồi, và bạn thiết kế access/refresh token thế nào?",
-      "answer_change": "Rút phần validate JWT còn 1–2 câu làm nền; giữ ý 1–4; rút ý lưu trữ còn 1 câu và đưa 'Trade-off cốt lõi' lên trước điểm cắt."
-    }
+    "proposed_fix": null
   },
   {
     "qa_id": "de-qa-1113",
@@ -1953,9 +1957,9 @@
   },
   {
     "qa_id": "de-qa-1120",
-    "verdict": "fix",
+    "verdict": "ok",
     "confidence": "medium",
-    "summary_vi": "Thiết kế idempotency key và status code khớp draft IETF (400/409/422, trả lại kết quả cũ, UUID, công bố thời hạn). Cần fix vì câu hỏi liệt kê 3 phần (lưu trữ, status code, trade-off) và câu trích RFC 9110 về retry chưa kiểm chứng trực tiếp được (trang bị cắt), chỉ có nguồn thứ cấp MDN. (Rubric v2: không còn tính là quá rộng; vẫn cần sửa vì factual.)",
+    "summary_vi": "Đạt: claim từng chưa có nguồn đã được xác minh tại máy bằng câu trích từ RFC/OWASP; các ý chính đều có trích dẫn. (Trước đó gợi ý Cần sửa vì thiếu trích dẫn.)",
     "claims": [
       {
         "claim": "PUT, DELETE và các method an toàn là idempotent; POST không",
@@ -1966,10 +1970,10 @@
       },
       {
         "claim": "Idempotent có thể tự lặp lại khi lỗi kết nối; client không nên tự retry POST trừ khi biết request idempotent",
-        "status": "unverified",
-        "source_url": "",
-        "quote": "",
-        "note": "Chỉ đọc được câu ở RFC 9110 §2.4: \"Some requests can be automatically retried by a client in the event of an underlying connection failure, as described in Section 9.2.2\"; phần SHOULD NOT retry của §9.2.2 không đọc được."
+        "status": "supported",
+        "source_url": "https://www.rfc-editor.org/rfc/rfc9110.txt",
+        "quote": "A client SHOULD NOT automatically retry a request with a non-idempotent method unless it has some means to know that the request semantics are actually idempotent, regardless of the method, or some means to detect that the original request was never applied.",
+        "note": "Kiểm lại tại máy 2026-10-23: phiên cloud không đọc được trang, tải trực tiếp thì thấy câu này."
       },
       {
         "claim": "Key nên là UUID hoặc định danh ngẫu nhiên tương tự",
@@ -2008,9 +2012,9 @@
         "fix": "Hỏi: 'Thiết kế cơ chế chống trùng bằng idempotency key thế nào, và xử lý request trùng đến khi bản gốc còn đang chạy ra sao?'; status code chi tiết và trade-off làm follow-up."
       },
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "factual",
-        "detail": "Câu dẫn RFC 9110 về việc client không nên tự retry method không idempotent chưa có trích dẫn trực tiếp (trang RFC bị cắt khi fetch); chỉ có nguồn thứ cấp MDN cho phần định nghĩa.",
+        "detail": "Đã xác minh tại máy 2026-10-23 (xem quote của claim). Câu dẫn RFC 9110 về việc client không nên tự retry method không idempotent chưa có trích dẫn trực tiếp (trang RFC bị cắt khi fetch); chỉ có nguồn thứ cấp MDN cho phần định nghĩa.",
         "fix": "Người duyệt đối chiếu RFC 9110 §9.2.2; nếu đúng thì giữ nguyên."
       },
       {
@@ -2047,10 +2051,7 @@
       ],
       "follow_up": "Server crash sau khi gọi cổng thanh toán nhưng trước khi lưu response; request retry tới thì xử lý thế nào?"
     },
-    "proposed_fix": {
-      "question": "API POST /payments tạo giao dịch; mobile client tự retry khi timeout nên thỉnh thoảng khách bị trừ tiền hai lần. Thiết kế cơ chế chống trùng bằng idempotency key thế nào, và xử lý request trùng đến khi bản gốc còn đang chạy ra sao?",
-      "answer_change": "Giữ phần ngữ nghĩa HTTP và thiết kế 1–3; rút trade-off còn 2 ý (chi phí lưu trữ, side effect bên ngoài); bỏ ý ETag."
-    }
+    "proposed_fix": null
   },
   {
     "qa_id": "de-qa-1121",
