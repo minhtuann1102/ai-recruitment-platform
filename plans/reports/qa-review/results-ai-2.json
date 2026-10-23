@@ -1,0 +1,2169 @@
+[
+  {
+    "qa_id": "de-qa-1174",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Nội dung khớp paper 'Calibrate Before Use' (3 loại bias, contextual calibration với input 'N/A'). Chỉ cần sửa vì câu hỏi có 3 ý (nguồn gốc thiên lệch, thiết kế, đánh giá) và vượt 600 token một chút.",
+    "claims": [
+      {
+        "claim": "Định dạng prompt, chọn ví dụ, thứ tự ví dụ có thể đẩy accuracy từ gần ngẫu nhiên lên gần SOTA.",
+        "status": "supported",
+        "source_url": "https://arxiv.org/abs/2102.09690",
+        "quote": "We show that this type of few-shot learning can be unstable: the choice of prompt format, training examples, and even the order of the training examples can cause accuracy to vary from near chance to near state-of-the-art.",
+        "note": ""
+      },
+      {
+        "claim": "Ba nguồn thiên lệch: majority label, recency, common token.",
+        "status": "supported",
+        "source_url": "https://ar5iv.labs.arxiv.org/html/2102.09690",
+        "quote": "Concretely, we show that the variance arises because LMs are biased towards outputting answers that are (1) frequent in the prompt (majority label bias), (2) towards the end of the prompt (recency bias), and (3) common in the pre-training data (common token bias).",
+        "note": ""
+      },
+      {
+        "claim": "Prompt mất cân bằng nhãn hoặc kết thúc bằng một lớp làm model nghiêng về lớp đó.",
+        "status": "supported",
+        "source_url": "https://ar5iv.labs.arxiv.org/html/2102.09690",
+        "quote": "The majority label and recency biases lead the model to predict training answers that appear frequently or near the end of the prompt.",
+        "note": ""
+      },
+      {
+        "claim": "Contextual calibration: input không nội dung như 'N/A' để đo bias, hiệu chỉnh cho phân phối đều.",
+        "status": "supported",
+        "source_url": "https://arxiv.org/abs/2102.09690",
+        "quote": "To mitigate this, we first estimate the model's bias towards each answer by asking for its prediction when given the training prompt and a content-free test input such as \"N/A\". We then fit calibration parameters that cause the prediction for this input to be uniform across answers.",
+        "note": "Cần xác suất nhãn (logprobs) — đáp án đã nêu."
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi có 3 ý (giải thích nguồn gốc thiên lệch, cách thiết kế, cách đánh giá), vượt ngưỡng 2 của rubric.",
+        "fix": "Giữ 'nguồn gốc thiên lệch + cách thiết kế cho ổn định'; đánh giá làm follow-up."
+      },
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "622 token, vượt 600; phần bị cắt là dòng 'Khi vẫn không đạt', không phải ý bắt buộc.",
+        "fix": "Bỏ dòng ví dụ thực tế (3 tốt + 1 kém) vì trùng ý majority/recency."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Debug hành vi không ổn định của few-shot, cần biết cơ chế bias."
+    },
+    "interview_fit": {
+      "minutes": 5,
+      "sub_questions": 3,
+      "gradeable": true,
+      "note": "Điểm chấm rõ; 3 ý nên hơi rộng theo rubric."
+    },
+    "junior_guide": {
+      "tests": "Hiểu vì sao few-shot prompt không ổn định và cách làm nó ổn định.",
+      "must_have": [
+        "Thứ tự, tập ví dụ, định dạng có thể làm accuracy dao động rất mạnh",
+        "Majority label bias, recency bias, common token bias",
+        "Cân bằng nhãn, ngẫu nhiên hóa thứ tự, rubric tường minh, temperature thấp, output enum",
+        "Contextual calibration bằng input 'N/A' (cần logprobs)",
+        "Đánh giá theo lớp (precision/recall/F1) và đo phương sai qua nhiều hoán vị"
+      ],
+      "red_flags": [
+        "Chỉ thử một thứ tự ví dụ rồi kết luận",
+        "Chỉ báo accuracy tổng",
+        "Cho rằng thêm ví dụ luôn ổn định hơn"
+      ],
+      "follow_up": "Không có logprobs từ API, bạn hiệu chỉnh thiên lệch nhãn thế nào?"
+    },
+    "proposed_fix": {
+      "question": "Bạn dùng few-shot prompting để phân loại câu trả lời ứng viên thành tốt/trung bình/kém, nhưng kết quả đổi mạnh khi đổi thứ tự hoặc tập ví dụ. Giải thích nguồn gốc thiên lệch và cách thiết kế prompt cho ổn định.",
+      "answer_change": "Rút mục 'Đánh giá' còn 1 dòng (đo phương sai qua hoán vị) và bỏ dòng ví dụ thực tế để dưới 600 token."
+    }
+  },
+  {
+    "qa_id": "de-qa-1175",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Nội dung đúng theo docs SBERT và Elastic (lexical không nhận đồng nghĩa/viết tắt, RRF k mặc định 60, RRF không cần tune, retrieve ~100 rồi cross-encoder rerank). Cần sửa vì câu hỏi có 5 ý và vượt 600 token.",
+    "claims": [
+      {
+        "claim": "Lexical khớp nghĩa đen, không nhận đồng nghĩa, viết tắt, biến thể chính tả; semantic search khắc phục được.",
+        "status": "supported",
+        "source_url": "https://sbert.net/examples/sentence_transformer/applications/retrieve_rerank/README.html",
+        "quote": "Lexical search looks for literal matches of the query words in your document collection. It will not recognize synonyms, acronyms or spelling variations.",
+        "note": "Ý 'token hiếm như mã lỗi thì khớp nguyên văn mạnh hơn' là lập luận, không có câu trích trực tiếp."
+      },
+      {
+        "claim": "RRF: k mặc định 60 (Elastic); k lớn thì tài liệu hạng thấp ảnh hưởng nhiều hơn.",
+        "status": "supported",
+        "source_url": "https://www.elastic.co/guide/en/elasticsearch/reference/current/rrf.html",
+        "quote": "A higher value indicates that lower ranked documents have more influence. This value must be greater than or equal to 1. Defaults to 60.",
+        "note": "Redirect tới elastic.co/docs/reference/elasticsearch/rest-apis/reciprocal-rank-fusion."
+      },
+      {
+        "claim": "RRF chỉ dùng thứ hạng, gần như không cần tune.",
+        "status": "supported",
+        "source_url": "https://www.elastic.co/guide/en/elasticsearch/reference/current/rrf.html",
+        "quote": "RRF requires no tuning, and the different relevance indicators do not have to be related to each other to achieve high-quality results.",
+        "note": ""
+      },
+      {
+        "claim": "Pipeline: retrieve ~100 ứng viên, cross-encoder rerank.",
+        "status": "supported",
+        "source_url": "https://sbert.net/examples/sentence_transformer/applications/retrieve_rerank/README.html",
+        "quote": "Given a search query, we first use a retrieval system that retrieves a large list of e.g. 100 possible hits which are potentially relevant for the query.",
+        "note": ""
+      },
+      {
+        "claim": "Bi-encoder đủ nhanh cho hàng triệu mục; cross-encoder đọc query+tài liệu cùng lúc nên chính xác hơn.",
+        "status": "supported",
+        "source_url": "https://sbert.net/examples/sentence_transformer/applications/retrieve_rerank/README.html",
+        "quote": "The retriever has to be efficient for large document collections with millions of entries. However, it might return irrelevant candidates. A re-ranker based on a Cross-Encoder can substantially improve the final results for the user.",
+        "note": "Cùng trang: 'The query and a possible document is passed simultaneously to transformer network'."
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi có 5 ý (thiết kế hybrid, hợp nhất kết quả, reranking, chi phí, cách tune).",
+        "fix": "Giữ 'hybrid + hợp nhất kết quả (RRF) + đo recall theo tầng'; rerank và chi phí làm follow-up."
+      },
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "661 token, vượt 600; phần bị cắt là phần lớn mục 'Chi phí', không phải ý cốt lõi.",
+        "fix": "Rút mục 'Rerank' còn 2 dòng."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Thiết kế retrieval có trade-off và đo theo tầng."
+    },
+    "interview_fit": {
+      "minutes": 7,
+      "sub_questions": 5,
+      "gradeable": true,
+      "note": "Điểm chấm rõ nhưng quá nhiều ý."
+    },
+    "junior_guide": {
+      "tests": "Hiểu vì sao dense retrieval bỏ sót truy vấn có định danh chính xác và cách kết hợp với BM25.",
+      "must_have": [
+        "Lexical khớp nguyên văn (mạnh với mã lỗi, tên hàm); dense hiểu nghĩa; hai bên bổ sung nhau",
+        "Chạy song song BM25 và vector, hợp nhất bằng RRF (chỉ dùng thứ hạng, không cần chuẩn hóa điểm)",
+        "Rerank bằng cross-encoder trên top ứng viên, đổi lại latency",
+        "Đo recall@k ở từng tầng và theo loại truy vấn",
+        "Tiếng Việt: tách từ và xử lý dấu cho BM25"
+      ],
+      "red_flags": [
+        "Cộng thẳng điểm BM25 với cosine",
+        "Cross-encoder trên toàn bộ kho",
+        "Không đo tầng nào làm rơi tài liệu"
+      ],
+      "follow_up": "Sau khi thêm BM25, recall truy vấn câu tự nhiên giảm: bạn kiểm tra gì?"
+    },
+    "proposed_fix": {
+      "question": "Hệ RAG chỉ dùng dense retrieval hay bỏ sót truy vấn chứa mã lỗi, tên hàm, từ viết tắt. Thiết kế lại retrieval với hybrid search (BM25 + vector) và cách hợp nhất kết quả thế nào?",
+      "answer_change": "Rút mục 'Rerank' và 'Chi phí' còn 1–2 dòng mỗi mục để dưới 600 token."
+    }
+  },
+  {
+    "qa_id": "de-qa-1176",
+    "verdict": "ok",
+    "confidence": "high",
+    "summary_vi": "Đạt: các kỹ thuật tầng generation (cho phép nói không biết, chỉ dùng tài liệu, trích nguyên văn trước, cite và rút claim không có quote, best-of-N) khớp docs Anthropic; tầng hệ thống và tiêu chí từ chối hợp lý, chấm được.",
+    "claims": [
+      {
+        "claim": "Cho phép model nói 'không đủ thông tin' giảm mạnh thông tin sai.",
+        "status": "supported",
+        "source_url": "https://platform.claude.com/docs/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations",
+        "quote": "Explicitly give Claude permission to admit uncertainty. This technique can drastically reduce false information.",
+        "note": ""
+      },
+      {
+        "claim": "Context dài: trích nguyên văn đoạn liên quan trước rồi trả lời.",
+        "status": "supported",
+        "source_url": "https://platform.claude.com/docs/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations",
+        "quote": "For tasks involving long documents (>20k tokens), ask Claude to extract word-for-word quotes first before performing its task.",
+        "note": ""
+      },
+      {
+        "claim": "Mỗi khẳng định gắn nguồn; kiểm tra sau khi sinh, không có quote thì rút lại.",
+        "status": "supported",
+        "source_url": "https://platform.claude.com/docs/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations",
+        "quote": "You can also have Claude verify each claim by finding a supporting quote after it generates a response. If it can't find a quote, it must retract the claim.",
+        "note": ""
+      },
+      {
+        "claim": "Chỉ dùng tài liệu được cung cấp, không dùng kiến thức chung.",
+        "status": "supported",
+        "source_url": "https://platform.claude.com/docs/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations",
+        "quote": "External knowledge restriction: Explicitly instruct Claude to only use information from provided documents and not its general knowledge.",
+        "note": ""
+      },
+      {
+        "claim": "Best-of-N: sinh nhiều lần, không nhất quán là dấu hiệu hallucination.",
+        "status": "supported",
+        "source_url": "https://platform.claude.com/docs/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations",
+        "quote": "Best-of-N verification: Run Claude through the same prompt multiple times and compare the outputs. Inconsistencies across outputs could indicate hallucinations.",
+        "note": ""
+      },
+      {
+        "claim": "Không kỹ thuật nào loại bỏ hoàn toàn hallucination; quyết định quan trọng cần kiểm chứng.",
+        "status": "supported",
+        "source_url": "https://platform.claude.com/docs/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations",
+        "quote": "Remember, although these techniques significantly reduce hallucinations, they don't eliminate them entirely.",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "648 token, vượt 600; phần bị cắt là mục 'Đánh đổi', không phải ý bắt buộc.",
+        "fix": "Rút mục 'Xác định lỗi ở đâu' còn 1 dòng."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Phân biệt lỗi retrieval vs generation và thiết kế abstention có trade-off."
+    },
+    "interview_fit": {
+      "minutes": 5,
+      "sub_questions": 2,
+      "gradeable": true,
+      "note": "Kỹ thuật chống hallucination + khi nào từ chối; điểm chấm rõ."
+    },
+    "junior_guide": {
+      "tests": "Biết chống hallucination trong RAG ở cả tầng prompt lẫn tầng hệ thống, và khi nào nên từ chối.",
+      "must_have": [
+        "Tách lỗi retrieval miss khỏi lỗi generation trước khi sửa",
+        "Cho phép 'không đủ thông tin', chỉ dùng tài liệu được cung cấp",
+        "Trích nguyên văn trước, cite nguồn mỗi claim, rút claim không có quote",
+        "Abstention theo ngưỡng điểm retrieval/rerank, calibrate trên câu ngoài phạm vi",
+        "Đo cả từ chối đúng lẫn từ chối thừa"
+      ],
+      "red_flags": [
+        "Sửa prompt khi lỗi thật ở retrieval",
+        "Để LLM tự trả lời khi không có chunk nào",
+        "Nghĩ có kỹ thuật loại bỏ hoàn toàn hallucination"
+      ],
+      "follow_up": "Bạn chọn ngưỡng điểm reranker để từ chối thế nào cho cân bằng giữa từ chối thừa và trả lời sai?"
+    },
+    "proposed_fix": null
+  },
+  {
+    "qa_id": "de-qa-1177",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Các chi tiết vendor đều đúng và đã ghi tên vendor (Anthropic: budget là mục tiêu, model mới dùng adaptive thinking + effort, đổi budget làm mất cache; OpenAI: reasoning token tính như output, incomplete có thể vẫn tính tiền). Cần sửa vì câu hỏi có 5 ý và 687 token làm mục 'Bẫy vận hành' bị cắt.",
+    "claims": [
+      {
+        "claim": "Reasoning token không hiển thị nhưng tính phí như output và chiếm context window (OpenAI).",
+        "status": "supported",
+        "source_url": "https://developers.openai.com/api/docs/guides/reasoning",
+        "quote": "While reasoning tokens are not visible via the API, they still occupy space in the model’s context window and are billed as output tokens.",
+        "note": ""
+      },
+      {
+        "claim": "Chạm giới hạn thì response incomplete, có thể vẫn tính tiền input và reasoning mà không có output.",
+        "status": "supported",
+        "source_url": "https://developers.openai.com/api/docs/guides/reasoning",
+        "quote": "This might occur before any visible output tokens are produced, meaning you could incur costs for input and reasoning tokens without receiving a visible response.",
+        "note": ""
+      },
+      {
+        "claim": "Anthropic: budget_tokens là mục tiêu, không phải trần cứng.",
+        "status": "supported",
+        "source_url": "https://platform.claude.com/docs/en/docs/build-with-claude/extended-thinking",
+        "quote": "The budget is a target rather than a strict cap.",
+        "note": "Câu sau: 'max_tokens remains the hard ceiling on total output'."
+      },
+      {
+        "claim": "Model Anthropic mới thay budget bằng adaptive thinking điều chỉnh qua effort.",
+        "status": "supported",
+        "source_url": "https://platform.claude.com/docs/en/docs/build-with-claude/extended-thinking",
+        "quote": "The mapping is small: remove budget_tokens, set thinking: {type: \"adaptive\"}, and control reasoning depth with output_config: {effort: ...} instead of a token budget.",
+        "note": "Đáp án đã dặn kiểm tài liệu đúng model — phù hợp."
+      },
+      {
+        "claim": "Đổi cấu hình thinking giữa các request làm mất prompt cache.",
+        "status": "supported",
+        "source_url": "https://platform.claude.com/docs/en/docs/build-with-claude/extended-thinking",
+        "quote": "changing budget_tokens between requests invalidates cache breakpoints, just as switching thinking modes does, because the budget value is rendered into the prompt.",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi có 5 ý (khi nào dùng, chi phí, độ trễ, cách đặt budget, bẫy vận hành).",
+        "fix": "Giữ 'khi nào dùng + đánh đổi chi phí/độ trễ'; đặt budget và bẫy vận hành làm follow-up."
+      },
+      {
+        "severity": "major",
+        "type": "length",
+        "detail": "687 token, vượt 600; phần bị cắt là phần lớn mục 'Bẫy vận hành' và 'Quyết định' — câu hỏi hỏi trực tiếp về bẫy.",
+        "fix": "Rút mục 'Đặt budget' còn 2 dòng trung lập vendor, bỏ mục 'Prompt'."
+      },
+      {
+        "severity": "minor",
+        "type": "interview_fit",
+        "detail": "Tên tham số vendor (budget_tokens, effort, incomplete) dễ thành trivia khi chấm.",
+        "fix": "Chấm theo khái niệm (budget/effort, reasoning token tính phí), không theo tên tham số."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Quyết định có trade-off chi phí/latency/chất lượng và failure mode vận hành."
+    },
+    "interview_fit": {
+      "minutes": 7,
+      "sub_questions": 5,
+      "gradeable": true,
+      "note": "Điểm chấm rõ nhưng quá nhiều ý."
+    },
+    "junior_guide": {
+      "tests": "Biết khi nào reasoning model đáng tiền và các bẫy chi phí/độ trễ khi vận hành.",
+      "must_have": [
+        "Hợp bài nhiều bước (toán, lập kế hoạch, debug, chấm nhiều tiêu chí); không cần cho trích xuất/phân loại/latency thấp",
+        "Reasoning token ẩn nhưng tính phí như output và chiếm context",
+        "Chi phí/latency khó đoán, phụ thuộc độ khó từng câu",
+        "Đặt budget/effort thấp rồi tăng dần, đo chất lượng mỗi mức",
+        "Chừa đủ max tokens; đổi cấu hình thinking có thể làm mất cache"
+      ],
+      "red_flags": [
+        "Dùng effort cao cho mọi request",
+        "Không chừa chỗ cho reasoning nên nhận response rỗng mà vẫn tốn tiền",
+        "Nghĩ reasoning token miễn phí vì không hiển thị"
+      ],
+      "follow_up": "Bạn chọn mức effort cho endpoint chấm điểm thế nào nếu p95 latency phải dưới 10 giây?"
+    },
+    "proposed_fix": {
+      "question": "Khi nào nên dùng reasoning model (có reasoning effort hoặc thinking budget) thay cho model thường? Phân tích đánh đổi chi phí và độ trễ.",
+      "answer_change": "Rút 'Đặt budget' còn 2 dòng, bỏ mục 'Prompt', giữ 2–3 bẫy vận hành chính để dưới 600 token."
+    }
+  },
+  {
+    "qa_id": "de-qa-1178",
+    "verdict": "ok",
+    "confidence": "high",
+    "summary_vi": "Đạt: self-consistency (lấy mẫu nhiều chuỗi, chọn đáp án nhất quán, +17,9% GSM8K) và process supervision (vượt outcome trên MATH, PRM800K 800 nghìn nhãn) khớp paper gốc; phần đánh giá bài nhiều bước hợp lý.",
+    "claims": [
+      {
+        "claim": "Self-consistency thay greedy bằng lấy mẫu nhiều chuỗi suy luận, chọn đáp án nhất quán nhất.",
+        "status": "supported",
+        "source_url": "https://arxiv.org/abs/2203.11171",
+        "quote": "It first samples a diverse set of reasoning paths instead of only taking the greedy one, and then selects the most consistent answer by marginalizing out the sampled reasoning paths.",
+        "note": ""
+      },
+      {
+        "claim": "Trực giác: bài khó có nhiều cách nghĩ cùng dẫn tới một đáp án đúng.",
+        "status": "supported",
+        "source_url": "https://arxiv.org/abs/2203.11171",
+        "quote": "Self-consistency leverages the intuition that a complex reasoning problem typically admits multiple different ways of thinking leading to its unique correct answer.",
+        "note": ""
+      },
+      {
+        "claim": "Cải thiện +17,9% trên GSM8K so với CoT.",
+        "status": "supported",
+        "source_url": "https://arxiv.org/abs/2203.11171",
+        "quote": "including GSM8K (+17.9%), SVAMP (+11.0%), AQuA (+12.2%), StrategyQA (+6.4%) and ARC-challenge (+3.9%).",
+        "note": ""
+      },
+      {
+        "claim": "Process supervision vượt outcome supervision trên MATH.",
+        "status": "supported",
+        "source_url": "https://arxiv.org/abs/2305.20050",
+        "quote": "We conduct our own investigation, finding that process supervision significantly outperforms outcome supervision for training models to solve problems from the challenging MATH dataset.",
+        "note": ""
+      },
+      {
+        "claim": "PRM800K gồm 800 nghìn nhãn mức bước.",
+        "status": "supported",
+        "source_url": "https://arxiv.org/abs/2305.20050",
+        "quote": "To support related research, we also release PRM800K, the complete dataset of 800,000 step-level human feedback labels used to train our best reward model.",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "644 token, vượt 600; phần bị cắt là cuối mục 'Cách đánh giá' và câu đánh đổi; câu trả lời 'chỉ chấm kết quả cuối có đủ không' vẫn nằm trong 600 token.",
+        "fix": "Rút mục Chain-of-thought và Best-of-N mỗi mục 1 dòng."
+      },
+      {
+        "severity": "minor",
+        "type": "factual",
+        "detail": "Ý 'N càng lớn càng dễ chọn trúng lời giải khai thác điểm yếu verifier' hợp lý nhưng không có câu trích trong nguồn đã kiểm.",
+        "fix": "Có thể giữ, không đưa vào điểm chấm bắt buộc."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Cần hiểu cơ chế và giới hạn của test-time compute, không chỉ liệt kê."
+    },
+    "interview_fit": {
+      "minutes": 5,
+      "sub_questions": 2,
+      "gradeable": true,
+      "note": "Các kỹ thuật (liệt kê ví dụ) + câu hỏi về chấm kết quả cuối."
+    },
+    "junior_guide": {
+      "tests": "Biết các kỹ thuật dùng thêm compute lúc suy luận và vì sao chấm bài nhiều bước cần nhìn cả quá trình.",
+      "must_have": [
+        "CoT: viết bước trung gian, tốn thêm token",
+        "Self-consistency: lấy mẫu nhiều chuỗi, chọn đáp án đa số; cần đáp án so sánh được",
+        "Best-of-N + verifier: chọn lời giải tốt nhất; test case là verifier tốt cho code",
+        "Process supervision chấm từng bước, vượt outcome trên MATH",
+        "Chỉ chấm kết quả cuối không đủ: đúng nhờ may mắn, không biết hỏng ở đâu"
+      ],
+      "red_flags": [
+        "Cho rằng self-consistency dùng được cho văn bản tự do không so sánh được",
+        "Tin verifier học được là hoàn hảo",
+        "Chỉ chấm đáp án cuối cho agent"
+      ],
+      "follow_up": "Bạn có 5 mẫu self-consistency chia 2-2-1 giữa ba đáp án: xử lý thế nào?"
+    },
+    "proposed_fix": null
+  },
+  {
+    "qa_id": "de-qa-1179",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Nội dung đúng và có nguồn (OTel GenAI semantic conventions, best practices eval của OpenAI: log để khai thác eval case, continuous evaluation, anti-pattern). Cần sửa vì câu hỏi có 3 ý (giám sát, phát hiện sớm, thu thập dữ liệu) và vượt 600 token.",
+    "claims": [
+      {
+        "claim": "OTel có semantic conventions GenAI gồm spans, metrics, events cho GenAI client và MCP.",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/open-telemetry/semantic-conventions-genai/main/README.md",
+        "quote": "Semantic Conventions for Generative AI (GenAI), including spans, metrics, and events for GenAI clients, MCP (Model Context Protocol), and provider-specific conventions (OpenAI, etc.).",
+        "note": "github.com bị chặn trong session; đọc README qua raw.githubusercontent."
+      },
+      {
+        "claim": "Judge tự động phải được calibrate với nhãn người.",
+        "status": "supported",
+        "source_url": "https://developers.openai.com/api/docs/guides/evaluation-best-practices",
+        "quote": "Maintain agreement: Use human feedback to calibrate automated scoring.",
+        "note": ""
+      },
+      {
+        "claim": "Log đầy đủ để khai thác ca hay cho eval set.",
+        "status": "supported",
+        "source_url": "https://developers.openai.com/api/docs/guides/evaluation-best-practices",
+        "quote": "Log everything: Log as you develop so you can mine your logs for good eval cases.",
+        "note": ""
+      },
+      {
+        "claim": "Continuous evaluation: chạy eval mỗi thay đổi, mở rộng eval set theo thời gian.",
+        "status": "supported",
+        "source_url": "https://developers.openai.com/api/docs/guides/evaluation-best-practices",
+        "quote": "Set up continuous evaluation (CE) to run evals on every change, monitor your app to identify new cases of nondeterminism, and grow the eval set over time.",
+        "note": ""
+      },
+      {
+        "claim": "Anti-pattern: eval theo cảm giác, metric học thuật chung chung, bỏ qua phản hồi người.",
+        "status": "supported",
+        "source_url": "https://developers.openai.com/api/docs/guides/evaluation-best-practices",
+        "quote": "Vibe-based evals: Using “it seems like it’s working” as an evaluation strategy, or waiting until you ship before implementing any evals.",
+        "note": "Cùng mục: 'Overly generic metrics', 'Ignoring human feedback'."
+      },
+      {
+        "claim": "Judge có thiên lệch nên phải lấy mẫu và theo dõi.",
+        "status": "supported",
+        "source_url": "https://ar5iv.labs.arxiv.org/html/2306.05685",
+        "quote": "We examine several potential limitations of the LLM-as-a-judge approach including position bias, verbosity bias, self-enhancement bias, and limited reasoning ability.",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi có 3 ý (giám sát chất lượng online, phát hiện sớm khi giảm, thu thập dữ liệu để cải thiện), vượt ngưỡng 2.",
+        "fix": "Gộp 'giám sát + phát hiện sớm' thành một ý; giữ 'thu thập dữ liệu để cải thiện'."
+      },
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "646 token, vượt 600; phần bị cắt là mục 'Đánh đổi' cuối, không phải ý bắt buộc.",
+        "fix": "Rút mục 'Tín hiệu' 4–5 còn 1 dòng chung."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Giám sát khi không có nhãn đòi chọn tín hiệu proxy có trade-off."
+    },
+    "interview_fit": {
+      "minutes": 6,
+      "sub_questions": 3,
+      "gradeable": true,
+      "note": "Điểm chấm rõ; 3 ý nên hơi rộng theo rubric."
+    },
+    "junior_guide": {
+      "tests": "Giám sát chất lượng LLM trong production khi không có nhãn đúng.",
+      "must_have": [
+        "Tracing mỗi phiên/lời gọi có phiên bản prompt, model, token, latency, lỗi; che PII",
+        "Tín hiệu không nhãn: vận hành, judge lấy mẫu đã calibrate, feedback tường minh/ngầm, drift đầu vào",
+        "Baseline theo phiên bản, alert sau deploy, dashboard theo lát",
+        "Ca bị phàn nàn/sửa điểm vào golden set, chạy continuous eval"
+      ],
+      "red_flags": [
+        "Chỉ theo dõi latency/lỗi mà không có tín hiệu chất lượng",
+        "Log toàn bộ dữ liệu ứng viên không che",
+        "Tin judge mà chưa calibrate"
+      ],
+      "follow_up": "Sau một lần đổi model, tỷ lệ recruiter sửa điểm tăng từ 5% lên 12%: bạn truy nguyên nhân thế nào?"
+    },
+    "proposed_fix": {
+      "question": "AI interviewer đã chạy production và không có nhãn đúng cho từng phiên. Làm sao giám sát chất lượng và phát hiện sớm khi chất lượng giảm?",
+      "answer_change": "Rút 'Vòng cải thiện' còn 1 dòng (hoặc làm follow-up) và gộp tín hiệu 4–5 để dưới 600 token."
+    }
+  },
+  {
+    "qa_id": "de-qa-1180",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Quy trình rollout hợp lý và các ý về eval có nguồn (OpenAI eval best practices: pairwise/pass-fail ổn định hơn; MT-Bench: verbosity bias, đổi vị trí). Cần sửa vì câu hỏi có 4 ý (cổng chặn, đơn vị ngẫu nhiên hóa, metric, bẫy riêng của LLM).",
+    "claims": [
+      {
+        "claim": "Ưu tiên so sánh cặp hoặc pass/fail theo tiêu chí vì ổn định hơn chấm mở.",
+        "status": "supported",
+        "source_url": "https://developers.openai.com/api/docs/guides/evaluation-best-practices",
+        "quote": "Therefore, evaluations should focus on tasks like pairwise comparisons, classification, or scoring against specific criteria instead of open-ended generation.",
+        "note": "Cùng trang: 'Use pairwise comparison or pass/fail for more reliability'."
+      },
+      {
+        "claim": "Judge pairwise phải đổi vị trí A/B.",
+        "status": "supported",
+        "source_url": "https://ar5iv.labs.arxiv.org/html/2306.05685",
+        "quote": "A conservative approach is to call a judge twice by swapping the order of two answers and only declare a win when an answer is preferred in both orders.",
+        "note": ""
+      },
+      {
+        "claim": "Verbosity bias: câu dài hơn có thể được chấm cao hơn mà không tốt hơn.",
+        "status": "supported",
+        "source_url": "https://ar5iv.labs.arxiv.org/html/2306.05685",
+        "quote": "Verbosity bias is when an LLM judge favors longer, verbose responses, even if they are not as clear, high-quality, or accurate as shorter alternatives.",
+        "note": ""
+      },
+      {
+        "claim": "Sau rollout tiếp tục continuous eval, ca lỗi mới đưa vào eval set.",
+        "status": "supported",
+        "source_url": "https://developers.openai.com/api/docs/guides/evaluation-best-practices",
+        "quote": "Set up continuous evaluation (CE) to run evals on every change, monitor your app to identify new cases of nondeterminism, and grow the eval set over time.",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi có 4 ý (các cổng chặn, đơn vị ngẫu nhiên hóa, metric, bẫy riêng của LLM).",
+        "fix": "Giữ 'các cổng từ offline tới A/B + bẫy riêng của LLM'; đơn vị ngẫu nhiên hóa và metric làm follow-up."
+      },
+      {
+        "severity": "minor",
+        "type": "factual",
+        "detail": "Ý 'provider cập nhật model sau alias nên phải pin phiên bản' và 'không peeking' hợp lý nhưng không có câu trích trong nguồn đã kiểm.",
+        "fix": "Có thể giữ; grader không nên bắt buộc."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Thiết kế thử nghiệm online có bẫy riêng của hệ không tất định."
+    },
+    "interview_fit": {
+      "minutes": 6,
+      "sub_questions": 4,
+      "gradeable": true,
+      "note": "Điểm chấm rõ nhưng nhiều ý."
+    },
+    "junior_guide": {
+      "tests": "Thiết kế rollout an toàn cho thay đổi prompt/model từ offline eval tới A/B online.",
+      "must_have": [
+        "Offline eval trên golden set + ca production, so sánh cặp/pass-fail, ngưỡng theo lát",
+        "Shadow trên traffic thật, rồi canary tăng dần",
+        "Ngẫu nhiên hóa theo phiên/ứng viên, không theo request",
+        "Metric chính + guardrail (latency, chi phí, refusal, parse fail); định trước cỡ mẫu",
+        "Bẫy LLM: không tất định, judge thiên lệch (verbosity), cache miss, model alias thay đổi"
+      ],
+      "red_flags": [
+        "Ngẫu nhiên hóa theo request làm một buổi phỏng vấn lẫn hai phiên bản",
+        "Dừng A/B sớm khi thấy số đẹp",
+        "Tin judge cho điểm cao hơn vì câu dài hơn"
+      ],
+      "follow_up": "Phiên bản mới có điểm judge cao hơn nhưng recruiter đồng ý ít hơn: bạn tin tín hiệu nào và vì sao?"
+    },
+    "proposed_fix": {
+      "question": "Bạn muốn đổi prompt hoặc model cho tính năng chấm điểm. Thiết kế quy trình rollout từ offline eval tới A/B test online, và những bẫy riêng của hệ dựa trên LLM là gì?",
+      "answer_change": "Giữ nguyên nội dung; chỉ đổi câu hỏi (đơn vị ngẫu nhiên hóa và metric vẫn có thể nằm trong đáp án như chi tiết của cổng 3)."
+    }
+  },
+  {
+    "qa_id": "de-qa-1181",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Mọi chi tiết khớp docs scikit-learn (ngưỡng ~0,02 trong ví dụ bảo hiểm, balanced accuracy mặc định, không dùng chung dữ liệu train và tune ngưỡng, isotonic cần >~1000 mẫu và tạo ties, Brier score không đủ). Cần sửa vì câu hỏi có 4 ý và 670 token làm mất mục 'Bẫy khác'.",
+    "claims": [
+      {
+        "claim": "Ví dụ scikit-learn: ngưỡng tối ưu theo utility khoảng 0,02.",
+        "status": "supported",
+        "source_url": "https://scikit-learn.org/stable/modules/classification_threshold.html",
+        "quote": "The vanilla classifier predicts the class of interest for a conditional probability greater than 0.5 while the tuned classifier predicts the class of interest for a very low probability (around 0.02).",
+        "note": ""
+      },
+      {
+        "claim": "TunedThresholdClassifierCV mặc định dùng balanced accuracy, cần đổi metric.",
+        "status": "supported",
+        "source_url": "https://scikit-learn.org/stable/modules/classification_threshold.html",
+        "quote": "By default, the balanced accuracy is the metric used but be aware that one should choose a meaningful metric for their use case.",
+        "note": ""
+      },
+      {
+        "claim": "Không dùng cùng dữ liệu để train và chọn ngưỡng; cv='prefit' chỉ khi có tập validation mới.",
+        "status": "supported",
+        "source_url": "https://scikit-learn.org/stable/modules/classification_threshold.html",
+        "quote": "You should never use the same data for training the classifier and tuning the decision threshold due to the risk of overfitting.",
+        "note": "Cùng trang: 'The option cv=\"prefit\" should only be used when ... using a new validation set.'"
+      },
+      {
+        "claim": "Calibrate tốt: nhóm dự đoán ~0,8 thì ~80% thật sự dương.",
+        "status": "supported",
+        "source_url": "https://scikit-learn.org/stable/modules/calibration.html",
+        "quote": "a well calibrated (binary) classifier should classify the samples such that among the samples to which it gave a predict_proba value close to, say, 0.8, approximately 80% actually belong to the positive class.",
+        "note": ""
+      },
+      {
+        "claim": "Logistic regression thường ổn; Naive Bayes đẩy về 0/1; random forest ngược lại.",
+        "status": "supported",
+        "source_url": "https://scikit-learn.org/stable/modules/calibration.html",
+        "quote": "GaussianNB (Naive Bayes) tends to push probabilities to 0 or 1 (note the counts in the histograms).",
+        "note": "Cùng trang: 'RandomForestClassifier shows the opposite behavior'; 'LogisticRegression is more likely to return well calibrated predictions by itself'."
+      },
+      {
+        "claim": "Brier score và log loss trộn calibration với khả năng phân biệt nên không đủ đánh giá riêng calibration.",
+        "status": "supported",
+        "source_url": "https://scikit-learn.org/stable/modules/calibration.html",
+        "quote": "As it is not clear which term dominates, the score is of limited use for assessing calibration alone",
+        "note": ""
+      },
+      {
+        "claim": "Isotonic tốt khi >~1000 mẫu, dễ overfit khi ít; tạo ties có thể đổi ROC AUC.",
+        "status": "supported",
+        "source_url": "https://scikit-learn.org/stable/modules/calibration.html",
+        "quote": "Overall, 'isotonic' will perform as well as or better than 'sigmoid' when there is enough data (greater than ~ 1000 samples) to avoid overfitting",
+        "note": "Cùng trang: AUC 'might differ after calibration when using method=\"isotonic\" since isotonic regression introduces ties'; dữ liệu calibrate phải 'disjoint' với dữ liệu train."
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi có 4 ý (chọn ngưỡng theo chi phí, vì sao kiểm calibration, quy trình, bẫy thường gặp).",
+        "fix": "Giữ 'chọn ngưỡng theo chi phí + vì sao kiểm calibration'; quy trình và bẫy nằm trong 2 ý đó."
+      },
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "670 token, vượt 600; phần bị cắt là mục 'Bẫy khác' (oversampling làm lệch xác suất, prevalence trôi); vẫn còn một bẫy ở mục ngưỡng.",
+        "fix": "Rút chi tiết tham số sklearn (cv='prefit', TunedThresholdClassifierCV) để mục 'Bẫy khác' lọt vào 600 token."
+      },
+      {
+        "severity": "minor",
+        "type": "interview_fit",
+        "detail": "Tên class/tham số scikit-learn là chi tiết thư viện; không nên là điểm chấm.",
+        "fix": "Chấm theo khái niệm (tune ngưỡng bằng CV, calibrate trên dữ liệu độc lập)."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Gắn ngưỡng với chi phí nghiệp vụ và hiểu calibration là reasoning, không phải định nghĩa."
+    },
+    "interview_fit": {
+      "minutes": 6,
+      "sub_questions": 4,
+      "gradeable": true,
+      "note": "Điểm chấm rõ nhưng nhiều ý."
+    },
+    "junior_guide": {
+      "tests": "Chọn ngưỡng quyết định theo chi phí nghiệp vụ và hiểu khi nào xác suất của model đáng tin.",
+      "must_have": [
+        "0,5 không có ý nghĩa nghiệp vụ; FP và FN có chi phí khác nhau",
+        "Chọn ngưỡng tối đa utility trên validation/CV, không trên dữ liệu train",
+        "Calibration: dự đoán 0,8 thì ~80% đúng; cần khi dùng xác suất trực tiếp",
+        "Kiểm bằng reliability diagram; hiệu chỉnh sigmoid (ít dữ liệu) hoặc isotonic (nhiều dữ liệu) trên dữ liệu độc lập",
+        "Oversampling/class weight làm lệch xác suất; prevalence production đổi thì tune lại"
+      ],
+      "red_flags": [
+        "Giữ ngưỡng 0,5 mặc định",
+        "Chọn ngưỡng trên chính dữ liệu train",
+        "Dùng Brier score làm thước đo calibration duy nhất"
+      ],
+      "follow_up": "Chỉ cần xếp hạng top 50 hồ sơ mỗi ngày: bạn có còn cần calibration không?"
+    },
+    "proposed_fix": {
+      "question": "Mô hình phân loại nhị phân (ví dụ dự đoán ứng viên phù hợp để mời phỏng vấn) trả về xác suất. Làm sao chọn ngưỡng quyết định theo chi phí nghiệp vụ, và vì sao phải kiểm tra calibration trước khi dùng xác suất?",
+      "answer_change": "Bỏ tên tham số sklearn chi tiết (cv='prefit', TunedThresholdClassifierCV, CalibratedClassifierCV) hoặc rút còn 1 lần nhắc để mục 'Bẫy khác' nằm trong 600 token."
+    }
+  },
+  {
+    "qa_id": "de-qa-1182",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Lập luận và phép tính đúng (tự tính lại: π = 0,5 → precision ≈ 0,98; π = 0,001 → ≈ 0,043), khớp Saito & Rehmsmeier (baseline của PR thay đổi theo tỷ lệ lớp, ROC thì cố định) và docs scikit-learn. Cần sửa vì câu hỏi có 3 ý.",
+    "claims": [
+      {
+        "claim": "ROC (TPR, FPR) không phụ thuộc tỷ lệ lớp; precision và PR phụ thuộc mạnh.",
+        "status": "supported",
+        "source_url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0118432",
+        "quote": "While the baseline is fixed with ROC, the baseline of PRC is determined by the ratio of positives (P) and negatives (N) as y = P / (P + N).",
+        "note": "Phép tính precision = TPR·π / (TPR·π + FPR·(1 − π)) tự kiểm: 0,0009 / 0,02088 ≈ 0,043."
+      },
+      {
+        "claim": "Với dữ liệu lệch, PR curve giàu thông tin hơn ROC.",
+        "status": "supported",
+        "source_url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0118432",
+        "quote": "We show here that the visual interpretability of ROC plots in the context of imbalanced datasets can be deceptive with respect to conclusions about the reliability of classification performance",
+        "note": "Tiêu đề paper: 'The Precision-Recall Plot Is More Informative than the ROC Plot When Evaluating Binary Classifiers on Imbalanced Datasets'."
+      },
+      {
+        "claim": "Chỉ đoạn đầu ROC (FPR thấp) có ý nghĩa vận hành khi chỉ kiểm được top cảnh báo.",
+        "status": "supported",
+        "source_url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0118432",
+        "quote": "Hence, it is practical to check the performance of the early retrievals, which only examines a limited number of top-scoring instances.",
+        "note": ""
+      },
+      {
+        "claim": "Tập test nên phản ánh phân phối thật.",
+        "status": "supported",
+        "source_url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0118432",
+        "quote": "Ideally, the test data of this phase reflects the class distributions of the original population even though such distributions are usually unknown.",
+        "note": ""
+      },
+      {
+        "claim": "Chọn ngưỡng bằng cross-validation, không trên dữ liệu train.",
+        "status": "supported",
+        "source_url": "https://scikit-learn.org/stable/modules/classification_threshold.html",
+        "quote": "You should never use the same data for training the classifier and tuning the decision threshold due to the risk of overfitting.",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi có 3 ý (giải thích vì sao, cách đánh giá, chọn điểm vận hành), vượt ngưỡng 2.",
+        "fix": "Gộp 'đánh giá và chọn điểm vận hành' thành một ý."
+      },
+      {
+        "severity": "minor",
+        "type": "factual",
+        "detail": "Grounding URL thứ nhất là repo câu hỏi phỏng vấn trên GitHub (nguồn phụ); claim cốt lõi đã kiểm bằng paper Saito & Rehmsmeier.",
+        "fix": "Thay grounding bằng paper PLOS ONE hoặc docs scikit-learn."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Cần tính precision theo prevalence và hiểu vì sao AUC đánh lừa."
+    },
+    "interview_fit": {
+      "minutes": 5,
+      "sub_questions": 3,
+      "gradeable": true,
+      "note": "Có phép tính kiểm chứng được; 3 ý nên hơi rộng theo rubric."
+    },
+    "junior_guide": {
+      "tests": "Hiểu vì sao ROC AUC cao trên tập cân bằng vẫn cho rất nhiều cảnh báo sai khi lớp dương cực hiếm.",
+      "must_have": [
+        "TPR, FPR chuẩn hóa trong từng lớp nên ROC không đổi theo prevalence; precision thì đổi",
+        "Tính được: FPR 2% trên 99,9% âm áp đảo số dương thật (precision ≈ 4%)",
+        "Đánh giá trên phân phối thật; dùng PR curve, precision/recall tại ngưỡng, TPR tại FPR cố định",
+        "Chọn điểm vận hành theo năng lực xử lý (precision@k) hoặc chi phí",
+        "Model train cân bằng cần calibrate lại theo prevalence thật"
+      ],
+      "red_flags": [
+        "Tin AUC 0,98 nghĩa là model dùng tốt",
+        "Đánh giá trên tập test cân bằng 50/50",
+        "Không tính precision theo tỷ lệ gian lận thật"
+      ],
+      "follow_up": "Nhãn gian lận về trễ 30 ngày: bạn giám sát precision thế nào trong thời gian đó?"
+    },
+    "proposed_fix": {
+      "question": "Mô hình phát hiện gian lận đạt ROC AUC 0,98 trên tập test cân bằng 50/50, nhưng khi chạy thật (tỷ lệ gian lận ~0,1%) đội vận hành bị ngập cảnh báo sai. Vì sao, và nên đánh giá để chọn điểm vận hành thế nào?",
+      "answer_change": "Giữ nguyên đáp án; chỉ gộp ý trong câu hỏi. Cân nhắc thay grounding URL GitHub bằng paper PLOS ONE."
+    }
+  },
+  {
+    "qa_id": "de-qa-1183",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Nội dung khớp docs scikit-learn (định nghĩa leakage, ví dụ 10.000 feature ngẫu nhiên cho 0,76 thay vì ~0,5, quy tắc không fit trên test, TargetEncoder cross fitting). Cần sửa vì câu hỏi liệt kê 4 dạng leakage, mỗi dạng hỏi cả phát hiện lẫn phòng tránh, và vượt 600 token. Có golden label g06.",
+    "claims": [
+      {
+        "claim": "Leakage là dùng thông tin không có lúc dự đoán; ước lượng CV quá lạc quan.",
+        "status": "supported",
+        "source_url": "https://scikit-learn.org/stable/common_pitfalls.html",
+        "quote": "Data leakage occurs when information that would not be available at prediction time is used when building the model. This results in overly optimistic performance estimates, for example from cross-validation , and thus poorer performance when the model is used on actually novel data",
+        "note": ""
+      },
+      {
+        "claim": "Ví dụ: 10.000 feature ngẫu nhiên, chọn feature trên toàn bộ dữ liệu cho accuracy 0,76 thay vì ~0,5.",
+        "status": "supported",
+        "source_url": "https://scikit-learn.org/stable/common_pitfalls.html",
+        "quote": "This randomness means that our X and y are independent and we thus expect the accuracy to be around 0.5.",
+        "note": "Cùng trang: '10,000 randomly generated features'; kết quả cách làm sai: accuracy_score 0.76."
+      },
+      {
+        "claim": "Không bao giờ fit trên test; chia dữ liệu trước khi tiền xử lý.",
+        "status": "supported",
+        "source_url": "https://scikit-learn.org/stable/common_pitfalls.html",
+        "quote": "Always split the data into train and test subsets first, particularly before any preprocessing steps. Never include test data when using the fit and fit_transform methods.",
+        "note": ""
+      },
+      {
+        "claim": "TargetEncoder.fit_transform dùng cross fitting; fit(X, y).transform(X) không tương đương và có thể gây leakage.",
+        "status": "supported",
+        "source_url": "https://scikit-learn.org/stable/modules/preprocessing.html",
+        "quote": "In TargetEncoder , fit(X, y).transform(X) does not equal fit_transform(X, y) . fit_transform internally relies on a cross fitting scheme to prevent target information from leaking into the train-time representation",
+        "note": ""
+      },
+      {
+        "claim": "Mẫu của cùng người ở cả train và test làm đánh giá lạc quan; chia theo nhóm.",
+        "status": "supported",
+        "source_url": "https://scikit-learn.org/stable/modules/cross_validation.html",
+        "quote": "GroupKFold is a variation of K-fold which ensures that the same group is not represented in both testing and training sets.",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi liệt kê 4 dạng leakage và đòi cả cách phát hiện lẫn phòng tránh cho từng dạng — ít nhất 4 ý.",
+        "fix": "Hỏi 2 dạng (preprocessing trên toàn bộ dữ liệu và target leakage qua feature), các dạng còn lại làm follow-up."
+      },
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "693 token, vượt 600; phần bị cắt là mục 'Kiểm tra nhanh' (xáo nhãn, so với dữ liệu giai đoạn sau); 4 dạng được hỏi vẫn nằm trong 600 token.",
+        "fix": "Rút ví dụ 10.000 feature còn nửa dòng."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Debug tình huống CV cao bất thường, nhận diện nhiều cơ chế rò."
+    },
+    "interview_fit": {
+      "minutes": 7,
+      "sub_questions": 4,
+      "gradeable": true,
+      "note": "Điểm chấm rõ nhưng nhiều ý. Golden label g06: đổi wording phải kiểm lại golden set."
+    },
+    "junior_guide": {
+      "tests": "Nhận diện và phòng tránh các dạng data leakage làm điểm offline cao giả.",
+      "must_have": [
+        "Leakage = dùng thông tin không có lúc dự đoán",
+        "Target leakage qua feature: hỏi 'lúc dự đoán đã có chưa?', kiểm timestamp",
+        "Preprocessing/feature selection fit trước khi chia → chia trước, gói trong Pipeline",
+        "Target encoding cần cross fitting",
+        "Không tune trên test; chia theo nhóm/thời gian khi mẫu phụ thuộc"
+      ],
+      "red_flags": [
+        "Fit scaler trên toàn bộ dữ liệu rồi mới chia",
+        "Chọn hyperparameter bằng tập test",
+        "Random split khi một ứng viên có nhiều bản ghi"
+      ],
+      "follow_up": "Xáo trộn nhãn mà điểm CV vẫn 0,7: bạn tìm chỗ rò ở đâu trước?"
+    },
+    "proposed_fix": {
+      "question": "Mô hình đạt điểm cross-validation cao bất thường nhưng sụp khi lên production. Hai dạng data leakage thường gặp là target leakage qua feature và preprocessing trên toàn bộ dữ liệu: phát hiện và phòng tránh thế nào?",
+      "answer_change": "Rút mục 3–5 còn 1 dòng mỗi mục (giữ làm điểm cộng), giữ 'Kiểm tra nhanh' trong 600 token. Golden label g06: kiểm lại golden set nếu đổi câu hỏi."
+    }
+  },
+  {
+    "qa_id": "de-qa-1184",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Nội dung khớp docs scikit-learn (GroupKFold, KFold giả định i.i.d.) và Feast (point-in-time join quét ngược tới TTL, filter_by_created_timestamp). Cần sửa vì câu hỏi liệt kê 3 kỹ thuật cần trình bày và vượt 600 token một chút.",
+    "claims": [
+      {
+        "claim": "GroupKFold bảo đảm một nhóm không ở cả train và test; phát hiện overfit theo người.",
+        "status": "supported",
+        "source_url": "https://scikit-learn.org/stable/modules/cross_validation.html",
+        "quote": "if the model is flexible enough to learn from highly person specific features it could fail to generalize to new subjects. GroupKFold makes it possible to detect this kind of overfitting situations.",
+        "note": ""
+      },
+      {
+        "claim": "KFold và ShuffleSplit giả định i.i.d. nên tạo tương quan bất hợp lý giữa train và test với dữ liệu thời gian.",
+        "status": "supported",
+        "source_url": "https://scikit-learn.org/stable/modules/cross_validation.html",
+        "quote": "However, classical cross-validation techniques such as KFold and ShuffleSplit assume the samples are independent and identically distributed, and would result in unreasonable correlation between training and testing instances",
+        "note": ""
+      },
+      {
+        "claim": "Feast point-in-time join quét ngược từ timestamp của từng dòng tới TTL.",
+        "status": "supported",
+        "source_url": "https://docs.feast.dev/getting-started/concepts/point-in-time-joins",
+        "quote": "Feast will scan backward in time from the entity dataframe timestamp up to a maximum of the TTL time specified.",
+        "note": ""
+      },
+      {
+        "claim": "Lọc created_timestamp ≤ timestamp của dòng để giá trị backfill/sửa sau không rò vào train.",
+        "status": "supported",
+        "source_url": "https://docs.feast.dev/getting-started/concepts/point-in-time-joins",
+        "quote": "This adds a created_timestamp <= entity_timestamp condition to the join, so each entity dataframe row only sees feature values whose created timestamp is at or before its own timestamp.",
+        "note": "Tùy chọn filter_by_created_timestamp=True; mặc định không lọc."
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi đòi trình bày 3 kỹ thuật (GroupKFold, TimeSeriesSplit, point-in-time correctness) cho cả chia dữ liệu lẫn tạo feature.",
+        "fix": "Bỏ danh sách tên kỹ thuật khỏi câu hỏi, để ứng viên tự nêu; chấm theo 2 ý: chia dữ liệu (nhóm + thời gian) và feature đúng thời điểm."
+      },
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "654 token, vượt 600; phần bị cắt là mục 'Kiểm chứng' và câu đánh đổi.",
+        "fix": "Rút đoạn Feast còn 1 dòng."
+      },
+      {
+        "severity": "minor",
+        "type": "interview_fit",
+        "detail": "Chi tiết Feast (TTL, created_timestamp) là trivia công cụ.",
+        "fix": "Giữ khái niệm as-of join; Feast chỉ là ví dụ."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Thiết kế split theo kịch bản production, cần hiểu phụ thuộc nhóm/thời gian."
+    },
+    "interview_fit": {
+      "minutes": 6,
+      "sub_questions": 3,
+      "gradeable": true,
+      "note": "Điểm chấm rõ; câu hỏi gợi sẵn đáp án bằng tên kỹ thuật."
+    },
+    "junior_guide": {
+      "tests": "Chia dữ liệu và tạo feature không rò rỉ khi mẫu phụ thuộc theo người và theo thời gian.",
+      "must_have": [
+        "Cùng ứng viên không được ở cả train và test (GroupKFold theo candidate_id)",
+        "Dữ liệu thời gian: train quá khứ, test tương lai (TimeSeriesSplit)",
+        "Kết hợp cả hai theo kịch bản production (ứng viên mới, tương lai)",
+        "Feature tính as-of thời điểm dự đoán, không lấy giá trị mới nhất",
+        "Khoảng đệm cho nhãn đến trễ; so random split với group/time split"
+      ],
+      "red_flags": [
+        "Random split khi một người có nhiều lần nộp",
+        "Join feature theo giá trị mới nhất",
+        "Không để ý nhãn đến trễ"
+      ],
+      "follow_up": "Feature 'điểm trung bình các vòng trước' được tính lại hằng đêm: làm sao bảo đảm training dùng đúng giá trị tại thời điểm dự đoán?"
+    },
+    "proposed_fix": {
+      "question": "Bạn xây model dự đoán khả năng ứng viên vượt vòng phỏng vấn từ dữ liệu nhiều năm, một ứng viên có thể nộp nhiều lần. Thiết kế cách chia dữ liệu và tạo feature để không rò rỉ.",
+      "answer_change": "Rút đoạn Feast còn 1 dòng (as-of join, ví dụ Feast) để mục 'Kiểm chứng' nằm trong 600 token."
+    }
+  },
+  {
+    "qa_id": "de-qa-1185",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Khái niệm và số liệu khớp docs Google (JS divergence cho feature số, L-infinity cho phân loại, ngưỡng mặc định 0,3; feature store chống skew; 4 trigger retrain). Cần sửa vì câu hỏi có 4 ý; tên sản phẩm 'Vertex AI' đã được docs đổi sang Gemini Enterprise Agent Platform (Model Monitoring v1).",
+    "claims": [
+      {
+        "claim": "Training-serving skew: phân phối feature production lệch so với dữ liệu train; inference drift: phân phối thay đổi theo thời gian.",
+        "status": "supported",
+        "source_url": "https://docs.cloud.google.com/vertex-ai/docs/model-monitoring/overview",
+        "quote": "Training-serving skew occurs when the feature data distribution in production deviates from the feature data distribution used to train the model.",
+        "note": "Cùng trang: 'Inference drift occurs when feature data distribution in production changes significantly over time.'"
+      },
+      {
+        "claim": "JS divergence cho feature số, L-infinity cho feature phân loại.",
+        "status": "supported",
+        "source_url": "https://docs.cloud.google.com/vertex-ai/docs/model-monitoring/overview",
+        "quote": "For categorical features, the distance score is calculated using the L-infinity distance . For numerical features, the distance score is calculated using the Jensen-Shannon divergence .",
+        "note": "URL redirect tới docs.cloud.google.com/gemini-enterprise-agent-platform/...; trang là 'Model Monitoring v1'."
+      },
+      {
+        "claim": "Ngưỡng mặc định 0,3 mỗi feature.",
+        "status": "supported",
+        "source_url": "https://docs.cloud.google.com/vertex-ai/docs/model-monitoring/overview",
+        "quote": "By default, every categorical and numerical feature is monitored, with threshold values of 0.3.",
+        "note": ""
+      },
+      {
+        "claim": "Lấy feature store làm nguồn dữ liệu cho train và serve để tránh skew.",
+        "status": "supported",
+        "source_url": "https://docs.cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning",
+        "quote": "Avoid training-serving skew by using the feature store as the data source for experimentation, continuous training, and online serving.",
+        "note": ""
+      },
+      {
+        "claim": "Trigger retrain: theo lịch, khi có dữ liệu mới, khi hiệu năng giảm, khi phân phối dữ liệu đổi đáng kể.",
+        "status": "supported",
+        "source_url": "https://docs.cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning",
+        "quote": "On model performance degradation: The model is retrained when there is noticeable performance degradation. On significant changes in the data distributions ( concept drift ).",
+        "note": "Cùng đoạn: 'On a schedule', 'On availability of new training data'. Google dùng nhãn 'concept drift' cho thay đổi phân phối dữ liệu, khác định nghĩa trong đáp án (quan hệ feature–nhãn) — đáp án dùng định nghĩa phổ biến hơn."
+      },
+      {
+        "claim": "Pipeline tự động cần data validation trước train và model validation sau train.",
+        "status": "supported",
+        "source_url": "https://docs.cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning",
+        "quote": "Therefore, automated data validation and model validation steps are required in the production pipeline to ensure the following expected behavior:",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi có 4 ý (phân biệt skew/data drift/concept drift, chỉ số, ngưỡng, khi nào retrain).",
+        "fix": "Giữ 'phân biệt 3 loại + giám sát khi nhãn về trễ'; ngưỡng và retrain làm follow-up."
+      },
+      {
+        "severity": "minor",
+        "type": "outdated",
+        "detail": "Docs Google hiện đặt Model Monitoring dưới tên Gemini Enterprise Agent Platform (URL vertex-ai redirect), trang là 'Model Monitoring v1'.",
+        "fix": "Viết 'Model Monitoring của Google Cloud (trước là Vertex AI)' hoặc trung lập vendor."
+      },
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "649 token, vượt 600; phần bị cắt là cuối mục retrain và câu đánh đổi.",
+        "fix": "Rút mục 'Ngưỡng và cảnh báo' còn 2 dòng."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Giám sát khi nhãn về trễ đòi chọn tín hiệu proxy và phân biệt loại drift."
+    },
+    "interview_fit": {
+      "minutes": 6,
+      "sub_questions": 4,
+      "gradeable": true,
+      "note": "Điểm chấm rõ nhưng nhiều ý."
+    },
+    "junior_guide": {
+      "tests": "Giám sát model production khi nhãn thật về trễ và phân biệt các loại lệch dữ liệu.",
+      "must_have": [
+        "Skew: production lệch so với train (thường do pipeline khác nhau); data drift: phân phối đổi theo thời gian; concept drift: quan hệ feature–nhãn đổi",
+        "Chưa có nhãn: giám sát input/output bằng khoảng cách phân phối (JS, L-infinity), missing, schema",
+        "Nhãn về: metric theo cohort ngày dự đoán",
+        "Chặn skew từ gốc bằng code/feature store dùng chung",
+        "Drift không đồng nghĩa giảm hiệu năng; ngưỡng theo mức quan trọng feature và biến động lịch sử"
+      ],
+      "red_flags": [
+        "Alert mọi feature với cùng ngưỡng mà không xét mức quan trọng",
+        "Nhầm data drift với concept drift",
+        "Retrain mỗi khi có drift mà không validation"
+      ],
+      "follow_up": "Một feature quan trọng drift mạnh nhưng phân phối điểm dự đoán không đổi: bạn hiểu và xử lý thế nào?"
+    },
+    "proposed_fix": {
+      "question": "Mô hình phân loại đang chạy production nhưng nhãn thật chỉ có sau vài tuần. Phân biệt training-serving skew, data drift và concept drift, và bạn giám sát chúng thế nào khi chưa có nhãn?",
+      "answer_change": "Đổi 'Vertex AI Model Monitoring' thành 'Model Monitoring của Google Cloud (trước là Vertex AI)'; rút mục 'Ngưỡng' để dưới 600 token."
+    }
+  },
+  {
+    "qa_id": "de-qa-1186",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Quy trình đúng và khớp kiến trúc MLOps của Google (data/model validation, online validation qua canary hoặc A/B, metadata). Cần sửa vì câu hỏi có 6 bước + 1 ý, và 670 token làm mất mục Rollback mà câu hỏi hỏi trực tiếp.",
+    "claims": [
+      {
+        "claim": "Data validation trước train quyết định có retrain hay dừng pipeline.",
+        "status": "supported",
+        "source_url": "https://docs.cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning",
+        "quote": "Data validation: This step is required before model training to decide whether you should retrain the model or stop the execution of the pipeline.",
+        "note": ""
+      },
+      {
+        "claim": "Model mới qua online validation bằng canary hoặc A/B trước khi phục vụ toàn bộ traffic.",
+        "status": "supported",
+        "source_url": "https://docs.cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning",
+        "quote": "In addition to offline model validation, a newly deployed model undergoes online model validation —in a canary deployment or an A/B testing setup—before it serves prediction for the online traffic.",
+        "note": ""
+      },
+      {
+        "claim": "Kiểm tra tương thích serving: hạ tầng, API, chống training-serving skew.",
+        "status": "supported",
+        "source_url": "https://docs.cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning",
+        "quote": "Then engineers who deploy the model need to make the required features available in production for low-latency serving, which can lead to training-serving skew .",
+        "note": "Cùng trang: validation 'including infrastructure compatibility and consistency with the prediction service API'."
+      },
+      {
+        "claim": "Triển khai thường qua A/B hoặc online experiment trước khi phục vụ toàn bộ.",
+        "status": "supported",
+        "source_url": "https://docs.cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning",
+        "quote": "In addition, production deployment of a new version of an ML model usually goes through A/B testing or online experiments before the model is promoted to serve all the prediction request traffic.",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi liệt kê 6 bước (versioning/registry, validation offline, shadow, canary, A/B, rollback) và hỏi thêm mỗi bước bắt lỗi gì.",
+        "fix": "Hỏi: 'Shadow, canary và A/B test mỗi cái bắt được loại lỗi nào mà cái khác bỏ sót?' — các bước khác làm follow-up."
+      },
+      {
+        "severity": "major",
+        "type": "length",
+        "detail": "670 token, vượt 600; phần bị cắt là mục Rollback, 'Sau rollout' và câu đánh đổi — rollback là bước câu hỏi hỏi trực tiếp.",
+        "fix": "Thu hẹp câu hỏi như trên hoặc rút mục Versioning và Data validation mỗi mục còn 1 dòng."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Phân tích từng cổng bắt lỗi gì là reasoning, không chỉ liệt kê."
+    },
+    "interview_fit": {
+      "minutes": 8,
+      "sub_questions": 7,
+      "gradeable": true,
+      "note": "Điểm chấm rõ nhưng quá rộng."
+    },
+    "junior_guide": {
+      "tests": "Hiểu quy trình rollout model an toàn và vai trò riêng của từng cổng.",
+      "must_have": [
+        "Versioning + registry (data, code, hyperparameter, metric) để tái lập và rollback",
+        "Validation offline theo lát; kiểm tương thích serving (skew, latency, contract)",
+        "Shadow: lỗi với dữ liệu thật, không đo tác động người dùng",
+        "Canary: sự cố vận hành ở phạm vi nhỏ, rollback tự động; A/B: tác động nghiệp vụ thật",
+        "Rollback bằng cấu hình, giữ model cũ sẵn sàng"
+      ],
+      "red_flags": [
+        "Nghĩ shadow đo được tác động nghiệp vụ",
+        "A/B mà không định trước cỡ mẫu",
+        "Không giữ được model cũ để rollback nhanh"
+      ],
+      "follow_up": "Model mới tốt hơn offline nhưng A/B không cải thiện metric nghiệp vụ: bạn điều tra những gì?"
+    },
+    "proposed_fix": {
+      "question": "Trong quy trình đưa model mới ra production, shadow deployment, canary và A/B test mỗi bước bắt được loại lỗi nào mà bước khác bỏ sót, và bạn rollback thế nào?",
+      "answer_change": "Rút mục Versioning, Data validation, Model validation còn 1 dòng mỗi mục để Rollback nằm trong 600 token."
+    }
+  },
+  {
+    "qa_id": "de-qa-1187",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "So sánh chained vs speech-to-speech, ngân sách độ trễ và kỹ thuật streaming khớp docs OpenAI (voice agents, VAD, latency). Cần sửa vì câu hỏi có 3 ý (so sánh kiến trúc, ngân sách từng chặng, kỹ thuật giảm độ trễ) và vượt 600 token.",
+    "claims": [
+      {
+        "claim": "Chained: ứng dụng quản lý ba chặng speech-to-text, agent workflow, text-to-speech; xem/biến đổi được text trung gian.",
+        "status": "supported",
+        "source_url": "https://developers.openai.com/api/docs/guides/voice-agents",
+        "quote": "Use the chained path when you want to inspect or transform text between speech recognition, your agent, and speech generation.",
+        "note": "Cùng trang: 'Your application manages three stages: Speech-to-text The agent workflow itself Text-to-speech'."
+      },
+      {
+        "claim": "Speech-to-speech: một model hiểu audio, quyết định, trả lời bằng giọng trong một session.",
+        "status": "supported",
+        "source_url": "https://developers.openai.com/api/docs/guides/voice-agents",
+        "quote": "Use one model to interpret audio, decide what to do, and respond in speech.",
+        "note": "Docs hiện còn nhắc full-duplex (GPT-Live); đáp án không đề cập nhưng không sai."
+      },
+      {
+        "claim": "Phát hiện kết thúc lượt dựa vào khoảng lặng; khoảng lặng ngắn thì phát hiện nhanh hơn.",
+        "status": "supported",
+        "source_url": "https://developers.openai.com/api/docs/guides/realtime-vad",
+        "quote": "silence_duration_ms : Duration of silence (in milliseconds) to detect speech stop. With shorter values turns will be detected more quickly.",
+        "note": ""
+      },
+      {
+        "claim": "Câu trả lời ngắn vì output token chi phối latency.",
+        "status": "supported",
+        "source_url": "https://developers.openai.com/api/docs/guides/latency-optimization",
+        "quote": "Generating tokens is almost always the highest latency step when using an LLM: as a general heuristic, cutting 50% of your output tokens may cut ~50% of your latency.",
+        "note": ""
+      },
+      {
+        "claim": "Streaming giảm thời gian chờ cảm nhận.",
+        "status": "supported",
+        "source_url": "https://developers.openai.com/api/docs/guides/latency-optimization",
+        "quote": "Streaming : The single most effective approach, as it cuts the waiting time to a second or less.",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi có 3 ý (so sánh 2 kiến trúc, ngân sách độ trễ từng chặng, kỹ thuật giảm độ trễ cảm nhận).",
+        "fix": "Giữ 'so sánh kiến trúc + ngân sách độ trễ'; kỹ thuật giảm độ trễ làm follow-up."
+      },
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "634 token, vượt 600; phần bị cắt là mục 'Chọn' cuối (kết luận cho bài toán phỏng vấn).",
+        "fix": "Rút mục 'Đánh đổi' còn 1 dòng để giữ kết luận."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Quyết định kiến trúc có trade-off kiểm soát vs độ trễ, cần phân rã latency."
+    },
+    "interview_fit": {
+      "minutes": 6,
+      "sub_questions": 3,
+      "gradeable": true,
+      "note": "Điểm chấm rõ; 3 ý nên hơi rộng theo rubric."
+    },
+    "junior_guide": {
+      "tests": "So sánh kiến trúc voice agent và phân rã độ trễ để giảm thời gian chờ.",
+      "must_have": [
+        "Chained: kiểm soát từng chặng, có text để guardrail/chấm điểm, thay ASR/TTS riêng; độ trễ cộng dồn, mất ngữ điệu",
+        "Speech-to-speech: ít chặng, tự nhiên hơn; khó can thiệp, phụ thuộc một provider",
+        "Tổng độ trễ = phát hiện hết lượt + ASR + TTFT LLM + audio đầu TTS + mạng",
+        "Streaming mọi chặng, câu trả lời ngắn, việc nặng chạy bất đồng bộ",
+        "Khoảng lặng ngắn nhanh nhưng dễ cắt lời"
+      ],
+      "red_flags": [
+        "Chỉ đo tổng latency, không phân rã theo chặng",
+        "Chọn speech-to-speech mà không xét nhu cầu transcript để chấm",
+        "Giảm khoảng lặng mà không đo tỷ lệ ngắt lời"
+      ],
+      "follow_up": "Ứng viên hay dừng 2–3 giây để nghĩ: bạn cấu hình phát hiện hết lượt thế nào?"
+    },
+    "proposed_fix": {
+      "question": "Thiết kế voice agent cho phỏng vấn bằng giọng nói: so sánh kiến trúc chained (ASR, LLM, TTS) với speech-to-speech, và phân tích ngân sách độ trễ của từng chặng.",
+      "answer_change": "Rút mục 'Giảm độ trễ cảm nhận' còn 2 dòng để mục 'Chọn' nằm trong 600 token."
+    }
+  },
+  {
+    "qa_id": "de-qa-1188",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Các tham số và luồng barge-in khớp docs OpenAI Realtime (threshold, prefix_padding_ms, silence_duration_ms, semantic_vad + eagerness, speech_started → response.cancelled → conversation.item.truncate). Cần sửa vì đáp án mô tả tham số/sự kiện riêng của OpenAI Realtime như chuẩn chung, và câu hỏi có 4 ý.",
+    "claims": [
+      {
+        "claim": "threshold cao cần âm to hơn, hợp môi trường ồn.",
+        "status": "supported",
+        "source_url": "https://developers.openai.com/api/docs/guides/realtime-vad",
+        "quote": "A higher threshold will require louder audio to activate the model, and thus might perform better in noisy environments.",
+        "note": "OpenAI Realtime-specific."
+      },
+      {
+        "claim": "prefix_padding_ms giữ audio trước điểm phát hiện; silence_duration_ms ngắn thì phát hiện hết lượt nhanh hơn.",
+        "status": "supported",
+        "source_url": "https://developers.openai.com/api/docs/guides/realtime-vad",
+        "quote": "prefix_padding_ms : Amount of audio (in milliseconds) to include before the VAD detected speech.",
+        "note": "Cùng trang: 'With shorter values turns will be detected more quickly.'"
+      },
+      {
+        "claim": "Semantic VAD dùng classifier xét từ ngữ để đoán người dùng đã nói xong; ít ngắt lời hơn.",
+        "status": "supported",
+        "source_url": "https://developers.openai.com/api/docs/guides/realtime-vad",
+        "quote": "With this mode, the model is less likely to interrupt the user during a speech-to-speech conversation, or chunk a transcript before the user is done speaking.",
+        "note": ""
+      },
+      {
+        "claim": "eagerness: low/medium/high/auto, auto tương đương medium.",
+        "status": "supported",
+        "source_url": "https://developers.openai.com/api/docs/guides/realtime-vad",
+        "quote": "auto is the default value, and is equivalent to medium .",
+        "note": ""
+      },
+      {
+        "claim": "Barge-in: speech_started → server tự hủy response (response.cancelled); WebSocket client dừng phát và gửi conversation.item.truncate.",
+        "status": "supported",
+        "source_url": "https://developers.openai.com/api/docs/guides/realtime-conversations",
+        "quote": "The server will automatically cancel any in-progress model response and a response.cancelled event will be emitted.",
+        "note": "Cùng trang: 'With a WebSocket connection the client manages audio playback, and thus must stop playback and handle truncation.'"
+      },
+      {
+        "claim": "Truncate xóa phần chưa phát nhưng không tạo transcript đã cắt.",
+        "status": "supported",
+        "source_url": "https://developers.openai.com/api/docs/guides/realtime-conversations",
+        "quote": "This solves the problem of removing unplayed audio but doesn’t provide a truncated transcript.",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "outdated",
+        "detail": "threshold/prefix_padding_ms/silence_duration_ms, semantic_vad/eagerness và tên sự kiện (input_audio_buffer.speech_started, conversation.item.truncate) là API của OpenAI Realtime nhưng đáp án viết như chuẩn chung; domain pitfalls yêu cầu ghi vendor hoặc viết trung lập.",
+        "fix": "Ghi 'Với OpenAI Realtime API: ...' trước tham số và sự kiện, hoặc mô tả trung lập (ngưỡng năng lượng, đệm trước, độ dài khoảng lặng; hủy response, cắt phần chưa phát khỏi context)."
+      },
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi có 4 ý (turn-taking/barge-in, VAD khoảng lặng vs semantic, ý nghĩa tham số, đồng bộ context khi ngắt lời).",
+        "fix": "Giữ 'VAD khoảng lặng vs semantic' + 'đồng bộ context khi ngắt lời'; tham số làm follow-up."
+      },
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "662 token, vượt 600; phần bị cắt là mục 'Đo lường'.",
+        "fix": "Rút mục 'Vấn đề thực tế' còn 1 dòng."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Hiểu vì sao phải truncate để context khớp những gì người dùng đã nghe là reasoning tốt."
+    },
+    "interview_fit": {
+      "minutes": 6,
+      "sub_questions": 4,
+      "gradeable": true,
+      "note": "Điểm chấm rõ nhưng nặng tên tham số một vendor."
+    },
+    "junior_guide": {
+      "tests": "Xử lý lượt nói và ngắt lời trong voice agent realtime, giữ context khớp với những gì người dùng thật sự nghe.",
+      "must_have": [
+        "VAD khoảng lặng: ngưỡng năng lượng, đệm trước, độ dài khoảng lặng (ngắn = nhanh nhưng dễ cắt lời)",
+        "Semantic VAD: đoán đã nói xong ý dựa trên từ ngữ, ít ngắt lời hơn",
+        "Barge-in: phát hiện người dùng nói, hủy response, dừng phát audio",
+        "Cắt phần chưa phát khỏi context để model không tưởng người dùng đã nghe hết",
+        "Transcript/log phải tự đánh dấu phần đã phát; khử vọng loa"
+      ],
+      "red_flags": [
+        "Không truncate context sau khi bị ngắt lời",
+        "Coi 'vâng, ừ' là ngắt lời",
+        "Đặt khoảng lặng rất ngắn cho phỏng vấn kỹ thuật"
+      ],
+      "follow_up": "Agent tự ngắt chính mình khi người dùng dùng loa ngoài: nguyên nhân và cách xử lý?"
+    },
+    "proposed_fix": {
+      "question": "Trong voice agent realtime, VAD dựa trên khoảng lặng khác semantic VAD thế nào, và khi người dùng ngắt lời giữa chừng câu trả lời, bạn đồng bộ context ra sao?",
+      "answer_change": "Thêm 'Với OpenAI Realtime API' trước các tham số và sự kiện, hoặc mô tả trung lập; rút mục 'Vấn đề thực tế' để dưới 600 token."
+    }
+  },
+  {
+    "qa_id": "de-qa-1189",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Chi phí token khớp docs Anthropic hiện tại (patch 28×28, ảnh 1000×1000 = 1.296 token, PDF 1.500–3.000 token text/trang cộng token ảnh) và giới hạn VLM (ảnh <200 px, xoay). Cần sửa vì câu hỏi có 3 ý (so sánh, ước lượng chi phí, đề xuất kiến trúc).",
+    "claims": [
+      {
+        "claim": "Ảnh tính theo patch 28×28: ⌈rộng/28⌉ × ⌈cao/28⌉ token.",
+        "status": "supported",
+        "source_url": "https://platform.claude.com/docs/en/docs/build-with-claude/vision",
+        "quote": "Each patch is a 28×28-pixel block of the image, referred to as a visual token. An image, therefore, costs ⌈width / 28⌉ × ⌈height / 28⌉ visual tokens.",
+        "note": "Công thức cũ (w×h/750) không còn trên trang; đáp án dùng công thức hiện hành."
+      },
+      {
+        "claim": "Ảnh 1000×1000 khoảng 1.296 token.",
+        "status": "supported",
+        "source_url": "https://platform.claude.com/docs/en/docs/build-with-claude/vision",
+        "quote": "1000x1000 px (1 megapixel) Not resized 1,296 Not resized 1,296",
+        "note": "Dòng trong bảng ví dụ."
+      },
+      {
+        "claim": "Ảnh vượt giới hạn cạnh dài hoặc số token bị thu nhỏ.",
+        "status": "supported",
+        "source_url": "https://platform.claude.com/docs/en/docs/build-with-claude/vision",
+        "quote": "Each model has a maximum native image resolution, expressed as a long-edge limit and a visual-token limit. Images larger than either limit are downscaled before processing",
+        "note": ""
+      },
+      {
+        "claim": "Có thể hallucinate với ảnh chất lượng thấp, bị xoay, rất nhỏ dưới 200 px; định vị chỉ xấp xỉ.",
+        "status": "supported",
+        "source_url": "https://platform.claude.com/docs/en/docs/build-with-claude/vision",
+        "quote": "Accuracy: Claude might hallucinate or make mistakes when interpreting low-quality, rotated, or very small images under 200 pixels.",
+        "note": "Cùng trang: 'Claude's coordinate and localization outputs are approximate.'"
+      },
+      {
+        "claim": "PDF: mỗi trang tốn 1.500–3.000 token text cộng token ảnh.",
+        "status": "supported",
+        "source_url": "https://platform.claude.com/docs/en/docs/build-with-claude/pdf-support",
+        "quote": "Text token costs: Each page typically uses 1,500–3,000 tokens per page depending on content density.",
+        "note": "Câu kế: 'Because each page is converted into an image, the same image-based...' cost applies."
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi có 3 ý (so sánh OCR với VLM, ước lượng chi phí token, đề xuất kiến trúc).",
+        "fix": "Giữ 'so sánh + đề xuất kiến trúc'; chi phí token làm follow-up."
+      },
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "631 token, vượt 600; phần bị cắt là dòng 'Lưu ý' về PII.",
+        "fix": "Rút mục 'Tiền xử lý' còn nửa dòng."
+      },
+      {
+        "severity": "minor",
+        "type": "interview_fit",
+        "detail": "Công thức token ảnh là chi tiết riêng của Anthropic và có thể đổi; không nên là điểm chấm bắt buộc.",
+        "fix": "Chấm theo ý 'ảnh lớn tốn nhiều token, bị downscale; PDF tốn cả text lẫn ảnh'."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Thiết kế pipeline hybrid có định tuyến và đo đạc."
+    },
+    "interview_fit": {
+      "minutes": 6,
+      "sub_questions": 3,
+      "gradeable": true,
+      "note": "Điểm chấm rõ; 3 ý nên hơi rộng theo rubric."
+    },
+    "junior_guide": {
+      "tests": "Chọn giữa OCR và VLM để trích xuất CV, hiểu chi phí và thiết kế pipeline kết hợp.",
+      "must_have": [
+        "OCR: rẻ, nhanh, tất định, có tọa độ; yếu với bố cục phức tạp, cần thêm bước map field",
+        "VLM: hiểu bố cục + ngữ nghĩa, ra JSON một bước; có thể bịa với ảnh xấu/nhỏ/xoay",
+        "Ảnh tốn token theo kích thước, bị downscale; PDF tốn cả text lẫn ảnh mỗi trang",
+        "Định tuyến: PDF có text → trích text + LLM; scan đơn giản → OCR + LLM; bố cục phức tạp → VLM",
+        "Mọi nhánh validate cùng schema; quyết định bằng đo độ chính xác từng field"
+      ],
+      "red_flags": [
+        "Dùng VLM cho mọi PDF kể cả PDF có sẵn text",
+        "Tin VLM không bao giờ bịa",
+        "Không ước lượng chi phí trước khi chạy hàng nghìn CV"
+      ],
+      "follow_up": "CV 4 trang scan 300 dpi: bạn ước lượng chi phí mỗi CV thế nào và giảm ra sao?"
+    },
+    "proposed_fix": {
+      "question": "Cần trích xuất dữ liệu có cấu trúc từ CV dạng PDF và ảnh chụp (nhiều cột, bảng, có khi chụp nghiêng). So sánh pipeline OCR truyền thống với vision-language model và đề xuất kiến trúc.",
+      "answer_change": "Rút mục 'Chi phí token' còn 2 dòng (ghi rõ theo docs Anthropic) để dòng PII nằm trong 600 token."
+    }
+  },
+  {
+    "qa_id": "de-qa-1190",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Nội dung đúng và có nguồn (docs vision Anthropic, Structured Outputs của OpenAI, OWASP LLM01 có cả kịch bản resume chứa prompt độc hại). Cần sửa vì câu hỏi có 4 ý (đánh giá offline, validate từng bản ghi, khi nào chuyển người, rủi ro bảo mật).",
+    "claims": [
+      {
+        "claim": "Đúng schema không có nghĩa là đúng giá trị.",
+        "status": "supported",
+        "source_url": "https://developers.openai.com/api/docs/guides/structured-outputs",
+        "quote": "Structured Outputs can still contain mistakes.",
+        "note": ""
+      },
+      {
+        "claim": "Ảnh nhỏ, mờ, bị xoay là tín hiệu rủi ro nên chuyển người duyệt.",
+        "status": "supported",
+        "source_url": "https://platform.claude.com/docs/en/docs/build-with-claude/vision",
+        "quote": "Accuracy: Claude might hallucinate or make mistakes when interpreting low-quality, rotated, or very small images under 200 pixels.",
+        "note": ""
+      },
+      {
+        "claim": "Nội dung tài liệu là input không tin cậy; CV chứa prompt độc hại là indirect prompt injection.",
+        "status": "supported",
+        "source_url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
+        "quote": "An attacker uploads a resume with split malicious prompts. When an LLM is used to evaluate the candidate, the combined prompts manipulate the model’s response, resulting in a positive recommendation despite the actual resume contents.",
+        "note": "Scenario #6 (Payload Splitting); Scenario #7 là multimodal injection qua ảnh."
+      },
+      {
+        "claim": "OWASP thừa nhận chưa có cách phòng chống tuyệt đối.",
+        "status": "supported",
+        "source_url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
+        "quote": "Given the stochastic influence at the heart of the way models work, it is unclear if there are fool-proof methods of prevention for prompt injection.",
+        "note": ""
+      },
+      {
+        "claim": "Validate output, phân định nội dung không tin cậy.",
+        "status": "supported",
+        "source_url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
+        "quote": "Specify clear output formats, request detailed reasoning and source citations, and use deterministic code to validate adherence to these formats.",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi có 4 ý (đánh giá offline, validate từng bản ghi, khi nào chuyển người duyệt, rủi ro bảo mật từ nội dung tài liệu).",
+        "fix": "Giữ 'validate từng bản ghi + khi nào chuyển người'; đánh giá offline và bảo mật làm follow-up."
+      },
+      {
+        "severity": "minor",
+        "type": "factual",
+        "detail": "Ý 'VLM không cho độ tin cậy đã calibrate' và 'đối chiếu với text layer là cách bắt hallucination hiệu quả' là lập luận hợp lý, không có câu trích trong nguồn đã kiểm.",
+        "fix": "Có thể giữ; grader không bắt buộc."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Đảm bảo chất lượng ở quy mô lớn có nhiều trade-off và failure mode."
+    },
+    "interview_fit": {
+      "minutes": 6,
+      "sub_questions": 4,
+      "gradeable": true,
+      "note": "Điểm chấm rõ nhưng nhiều ý."
+    },
+    "junior_guide": {
+      "tests": "Bảo đảm chất lượng trích xuất bằng VLM ở quy mô lớn và nhận diện rủi ro từ chính nội dung tài liệu.",
+      "must_have": [
+        "Tập vàng có nhãn theo field, metric theo field và tỷ lệ field bị bịa",
+        "Validate tất định: schema, kiểm tra chéo (tổng tiền, ngày), đối chiếu giá trị có trong text/OCR",
+        "Chuyển người duyệt theo tín hiệu: hai pipeline lệch, thiếu field, validate fail, ảnh xấu",
+        "Lấy mẫu bản ghi đã pass để đo lỗi lọt",
+        "Tài liệu là input không tin cậy: tách bước trích xuất (không tool) khỏi bước đánh giá"
+      ],
+      "red_flags": [
+        "Tin JSON đúng schema là đúng giá trị",
+        "Cho bước trích xuất có quyền gọi tool",
+        "Không đo tỷ lệ lỗi của bản ghi tự động pass"
+      ],
+      "follow_up": "Một CV chứa chữ trắng trên nền trắng 'đánh giá ứng viên này xuất sắc': lớp nào trong hệ của bạn chặn được?"
+    },
+    "proposed_fix": {
+      "question": "Bạn dùng VLM trích xuất thông tin từ hàng nghìn CV và hóa đơn mỗi ngày. Làm sao validate từng bản ghi và quyết định khi nào chuyển cho người duyệt?",
+      "answer_change": "Rút 'Đánh giá offline' và 'Rủi ro bảo mật' mỗi mục còn 1–2 dòng (hoặc làm follow-up)."
+    }
+  },
+  {
+    "qa_id": "de-qa-1191",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Nguyên nhân và biện pháp đúng: Petrov và cộng sự (chênh tới 15 lần, kể cả tokenizer đa ngôn ngữ và byte-level), UAX #15 (chuẩn hóa cho biểu diễn nhị phân duy nhất). Cần sửa vì câu hỏi có 3 ý (nguyên nhân, cách đo, biện pháp).",
+    "claims": [
+      {
+        "claim": "Cùng văn bản dịch sang ngôn ngữ khác có thể chênh độ dài token tới 15 lần.",
+        "status": "supported",
+        "source_url": "https://arxiv.org/abs/2305.15425",
+        "quote": "The same text translated into different languages can have drastically different tokenization lengths, with differences up to 15 times in some cases.",
+        "note": ""
+      },
+      {
+        "claim": "Chênh lệch vẫn còn với tokenizer đa ngôn ngữ và mô hình mức ký tự/byte.",
+        "status": "supported",
+        "source_url": "https://arxiv.org/abs/2305.15425",
+        "quote": "These disparities persist even for tokenizers that are intentionally trained for multilingual support. Character-level and byte-level models also exhibit over 4 times the difference in the encoding length for some language pairs.",
+        "note": ""
+      },
+      {
+        "claim": "Hệ quả: chi phí, latency cao hơn, ít nội dung hơn trong context.",
+        "status": "supported",
+        "source_url": "https://arxiv.org/abs/2305.15425",
+        "quote": "This induces unfair treatment for some language communities in regard to the cost of accessing commercial language services, the processing time and latency, as well as the amount of content that can be provided as context to the models.",
+        "note": ""
+      },
+      {
+        "claim": "Chuẩn hóa về một dạng thì chuỗi tương đương có biểu diễn nhị phân duy nhất.",
+        "status": "supported",
+        "source_url": "https://unicode.org/reports/tr15/",
+        "quote": "When implementations keep strings in a normalized form, they can be assured that equivalent strings have a unique binary representation.",
+        "note": "UAX #15 Revision 58."
+      },
+      {
+        "claim": "Còn khác biệt kiểu đặt dấu thanh (hòa/hoà) cần thống nhất.",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/VinAIResearch/PhoBERT/master/README.md",
+        "quote": "As PhoBERT employed the [RDRSegmenter](https://github.com/datquocnguyen/RDRsegmenter) from [VnCoreNLP](https://github.com/vncorenlp/VnCoreNLP) to pre-process the pre-training data (including [Vietnamese tone normalization]",
+        "note": "Nguồn gián tiếp: PhoBERT áp dụng chuẩn hóa dấu thanh khi pre-train, xác nhận vấn đề tồn tại."
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi có 3 ý (giải thích nguyên nhân từ tokenization và Unicode, cách đo, biện pháp).",
+        "fix": "Gộp 'cách đo' vào 'biện pháp' hoặc làm follow-up."
+      },
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "609 token, vượt 600 rất ít; phần bị cắt là câu cuối về chọn model chuyên tiếng Việt.",
+        "fix": "Bỏ dòng 'Hệ quả' trùng ý với câu hỏi."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Chẩn đoán hai nguyên nhân khác nhau (tokenization, Unicode) từ triệu chứng."
+    },
+    "interview_fit": {
+      "minutes": 5,
+      "sub_questions": 3,
+      "gradeable": true,
+      "note": "Điểm chấm rõ; 3 ý nên hơi rộng theo rubric."
+    },
+    "junior_guide": {
+      "tests": "Hiểu vì sao tiếng Việt tốn token hơn và vì sao chuỗi trông giống nhau vẫn không khớp.",
+      "must_have": [
+        "Tokenizer chia tiếng Việt thành nhiều token hơn tiếng Anh → tốn tiền, chậm, ít chỗ trong context",
+        "Đo bằng đúng tokenizer của model trên corpus thật/song song",
+        "NFC vs NFD: cùng chữ, khác byte → so khớp, BM25, cache, dedup lệch",
+        "Hai kiểu đặt dấu thanh (hòa/hoà) cũng gây lệch",
+        "Chuẩn hóa NFC + thống nhất kiểu dấu ở mọi điểm vào"
+      ],
+      "red_flags": [
+        "Ước lượng chi phí bằng số ký tự hoặc tokenizer của model khác",
+        "Chỉ chuẩn hóa dữ liệu index mà quên truy vấn",
+        "Không biết NFC/NFD"
+      ],
+      "follow_up": "Cache theo hash prompt có tỷ lệ hit thấp bất thường với người dùng iOS: bạn nghi điều gì?"
+    },
+    "proposed_fix": {
+      "question": "Ứng dụng LLM tiếng Việt có chi phí token cao hơn hẳn bản tiếng Anh, và một số truy vấn không khớp dữ liệu dù chữ trông giống hệt nhau. Giải thích nguyên nhân từ tokenization và Unicode, và cách khắc phục.",
+      "answer_change": "Gộp mục 'Đo' vào 'Biện pháp' (1 dòng); bỏ dòng 'Hệ quả' để dưới 600 token."
+    }
+  },
+  {
+    "qa_id": "de-qa-1192",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Thiết kế đúng và có nguồn (PhoBERT cần tách từ bằng RDRSegmenter, max length 256; multilingual-e5 hỗ trợ 100 ngôn ngữ, prefix query:/passage:; RRF không cần tune). Cần sửa vì câu hỏi liệt kê 4 ý (lexical, embedding, khôi phục dấu, đánh giá).",
+    "claims": [
+      {
+        "claim": "PhoBERT: input phải tách từ bằng RDRSegmenter của VnCoreNLP như khi pre-train.",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/VinAIResearch/PhoBERT/master/README.md",
+        "quote": "In case the input texts are `raw`, i.e. without word segmentation, a word segmenter must be applied to produce word-segmented texts before feeding to PhoBERT.",
+        "note": "github.com bị chặn; đọc README qua raw.githubusercontent."
+      },
+      {
+        "claim": "PhoBERT độ dài tối đa 256 token.",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/VinAIResearch/PhoBERT/master/README.md",
+        "quote": "[`vinai/phobert-base-v2`](https://huggingface.co/vinai/phobert-base-v2) | 135M | base | 256 |",
+        "note": "Cột Max length trong bảng model. Lưu ý: PhoBERT v2 có giấy phép AGPL v3."
+      },
+      {
+        "claim": "multilingual-e5 hỗ trợ khoảng 100 ngôn ngữ, cần prefix query:/passage:.",
+        "status": "supported",
+        "source_url": "https://huggingface.co/intfloat/multilingual-e5-large",
+        "quote": "It supports 100 languages from xlm-roberta, but low-resource languages may see performance degradation.",
+        "note": "Cùng trang: 'Each input text should start with \"query: \" or \"passage: \"'."
+      },
+      {
+        "claim": "RRF chỉ dùng thứ hạng, không cần chuẩn hóa điểm.",
+        "status": "supported",
+        "source_url": "https://www.elastic.co/guide/en/elasticsearch/reference/current/rrf.html",
+        "quote": "RRF requires no tuning, and the different relevance indicators do not have to be related to each other to achieve high-quality results.",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi liệt kê 4 ý (xử lý lexical, embedding đa ngôn ngữ, khôi phục dấu, đánh giá).",
+        "fix": "Bỏ danh sách trong câu hỏi; chấm theo 2 ý: thiết kế retrieval chịu biến thể + cách đánh giá theo lát."
+      },
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "647 token, vượt 600; phần bị cắt là cuối mục 'Đánh giá' và câu đánh đổi.",
+        "fix": "Rút mục 'Vấn đề' còn 1 dòng."
+      },
+      {
+        "severity": "minor",
+        "type": "factual",
+        "detail": "Ý 'e5 xử lý trộn Anh–Việt khá tốt, không dấu khó đoán' là nhận định chưa có nguồn; đáp án đã nói phải đo nên không sai.",
+        "fix": "Giữ nguyên, không đưa vào điểm chấm bắt buộc."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Thiết kế retrieval cho đặc thù tiếng Việt, kết hợp nhiều nhánh có đo đạc."
+    },
+    "interview_fit": {
+      "minutes": 6,
+      "sub_questions": 4,
+      "gradeable": true,
+      "note": "Điểm chấm rõ nhưng câu hỏi gợi sẵn đáp án."
+    },
+    "junior_guide": {
+      "tests": "Thiết kế tìm kiếm tiếng Việt chịu được truy vấn không dấu và trộn Anh–Việt.",
+      "must_have": [
+        "Bỏ dấu làm mất nghĩa (ban: bàn/bán/bạn) và làm chuỗi khác hẳn với tokenizer/embedding",
+        "Index hai trường: có dấu (NFC) và bỏ dấu (đ→d); xử lý âm tiết/tách từ",
+        "Embedding đa ngôn ngữ cho trộn Anh–Việt; không dấu phải đo",
+        "Khôi phục dấu chạy song song, không thay truy vấn gốc; hợp nhất bằng RRF",
+        "Đo recall@k theo từng nhóm truy vấn, nhất là nhóm không dấu"
+      ],
+      "red_flags": [
+        "Chỉ index bản có dấu",
+        "Thay truy vấn gốc bằng bản khôi phục dấu",
+        "Chỉ báo recall trung bình"
+      ],
+      "follow_up": "Khôi phục dấu biến 'ban hang' thành 'bàn hàng': hệ của bạn giảm thiệt hại thế nào?"
+    },
+    "proposed_fix": {
+      "question": "Người dùng gõ truy vấn tiếng Việt không dấu hoặc trộn Anh–Việt, trong khi knowledge base viết có dấu. Thiết kế retrieval chịu được các biến thể này và đánh giá nó thế nào?",
+      "answer_change": "Rút mục 'Vấn đề' và 'Khôi phục dấu' mỗi mục 1 dòng để dưới 600 token."
+    }
+  },
+  {
+    "qa_id": "de-qa-1193",
+    "verdict": "fix",
+    "confidence": "medium",
+    "summary_vi": "Số liệu contextual retrieval (35%/49%/67% giảm lỗi top-20), HyDE (dense bottleneck lọc chi tiết sai, vượt Contriever) và ngưỡng ~200 nghìn token khớp nguồn. Cần sửa vì câu hỏi đòi 5 kỹ thuật + chi phí + cách đo, và 683 token làm mất mục 'Đo'. Confidence medium vì số liệu chính là bài blog của Anthropic.",
+    "claims": [
+      {
+        "claim": "RAG truyền thống làm mất ngữ cảnh khi encode chunk riêng lẻ.",
+        "status": "supported",
+        "source_url": "https://www.anthropic.com/news/contextual-retrieval",
+        "quote": "The problem is that traditional RAG solutions remove context when encoding information, which often results in the system failing to retrieve the relevant information from the knowledge base.",
+        "note": ""
+      },
+      {
+        "claim": "Contextual embeddings giảm 35% lỗi top-20; kết hợp BM25 theo ngữ cảnh 49%; thêm rerank 67%.",
+        "status": "supported",
+        "source_url": "https://www.anthropic.com/news/contextual-retrieval",
+        "quote": "Contextual Embeddings reduced the top-20-chunk retrieval failure rate by 35% (5.7% → 3.7%). Combining Contextual Embeddings and Contextual BM25 reduced the top-20-chunk retrieval failure rate by 49% (5.7% → 2.9%).",
+        "note": "Cùng trang: rerank → 67% (5.7% → 1.9%)."
+      },
+      {
+        "claim": "Knowledge base dưới ~200 nghìn token có thể đưa toàn bộ vào prompt.",
+        "status": "supported",
+        "source_url": "https://www.anthropic.com/news/contextual-retrieval",
+        "quote": "If your knowledge base is smaller than 200,000 tokens (about 500 pages of material), you can just include the entire knowledge base in the prompt that you give the model, with no need for RAG or similar methods.",
+        "note": ""
+      },
+      {
+        "claim": "HyDE: tài liệu giả định có thể sai chi tiết, dense bottleneck lọc bớt; vượt Contriever, zero-shot.",
+        "status": "supported",
+        "source_url": "https://arxiv.org/abs/2212.10496",
+        "quote": "This second step ground the generated document to the actual corpus, with the encoder's dense bottleneck filtering out the incorrect details. Our experiments show that HyDE significantly outperforms the state-of-the-art unsupervised dense retriever Contriever",
+        "note": ""
+      },
+      {
+        "claim": "Multi-query hợp nhất bằng RRF.",
+        "status": "supported",
+        "source_url": "https://www.elastic.co/guide/en/elasticsearch/reference/current/rrf.html",
+        "quote": "Reciprocal rank fusion (RRF) is a method for combining multiple result sets with different relevance indicators into a single result set.",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi đòi chọn và giải thích 5 kỹ thuật (contextual chunking, parent-document, query rewriting, multi-query, HyDE) kèm chi phí và cách đo.",
+        "fix": "Để ứng viên tự chọn kỹ thuật cho 2 lỗi đã nêu; bỏ danh sách tên trong câu hỏi; hỏi thêm 'đo thế nào' là đủ."
+      },
+      {
+        "severity": "major",
+        "type": "length",
+        "detail": "683 token, vượt 600; phần bị cắt là mục 'Đo' (recall@k theo lát, thêm từng kỹ thuật một) — câu hỏi hỏi trực tiếp.",
+        "fix": "Rút đoạn HyDE và số liệu contextual retrieval mỗi phần còn 1 dòng."
+      },
+      {
+        "severity": "minor",
+        "type": "interview_fit",
+        "detail": "Số liệu 35%/49%/67% là kết quả benchmark của một vendor; không nên là điểm chấm.",
+        "fix": "Ghi rõ là ví dụ minh họa."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Chẩn đoán theo loại lỗi và chọn kỹ thuật phù hợp."
+    },
+    "interview_fit": {
+      "minutes": 8,
+      "sub_questions": 6,
+      "gradeable": true,
+      "note": "Điểm chấm rõ nhưng quá rộng và gợi sẵn đáp án."
+    },
+    "junior_guide": {
+      "tests": "Chọn kỹ thuật RAG nâng cao đúng với loại lỗi đã phân tích.",
+      "must_have": [
+        "Chunk mất ngữ cảnh → contextual chunking (chèn ngữ cảnh trước khi embed/BM25) hoặc parent-document; rẻ nhất là chèn metadata",
+        "Truy vấn mơ hồ → query rewriting, multi-query (+RRF), HyDE",
+        "Mỗi kỹ thuật truy vấn thêm ít nhất một lời gọi LLM; contextual chunking tốn một lần lúc index",
+        "KB nhỏ (<~200k token) có thể bỏ retrieval",
+        "Đo recall@k theo lát lỗi, thêm từng kỹ thuật một"
+      ],
+      "red_flags": [
+        "Áp hết mọi kỹ thuật cùng lúc rồi không biết cái nào có tác dụng",
+        "Dùng HyDE cho miền LLM không biết",
+        "Không tách chi phí index khỏi chi phí truy vấn"
+      ],
+      "follow_up": "Sau khi thêm HyDE, latency p95 tăng gấp đôi mà recall chỉ tăng 1%: bạn làm gì?"
+    },
+    "proposed_fix": {
+      "question": "Phân tích lỗi cho thấy hệ RAG trượt vì chunk mất ngữ cảnh và vì truy vấn người dùng ngắn, mơ hồ. Bạn chọn kỹ thuật nào cho từng lỗi, và đo hiệu quả ra sao?",
+      "answer_change": "Rút đoạn HyDE và số liệu contextual retrieval để mục 'Đo' nằm trong 600 token."
+    }
+  },
+  {
+    "qa_id": "de-qa-1194",
+    "verdict": "fix",
+    "confidence": "medium",
+    "summary_vi": "Mô tả GraphRAG khớp paper (câu hỏi toàn cục là bài toán QFS, đồ thị thực thể + tóm tắt cộng đồng, cải thiện độ toàn diện/đa dạng trên dataset ~1M token); phần agentic RAG và đánh giá tách riêng hợp lý. Cần sửa vì câu hỏi có 3 ý. Confidence medium vì phần agentic dựa vào bài blog Anthropic.",
+    "claims": [
+      {
+        "claim": "RAG thường thất bại với câu hỏi toàn cục vì đó là bài toán tóm tắt theo truy vấn.",
+        "status": "supported",
+        "source_url": "https://arxiv.org/abs/2404.16130",
+        "quote": "However, RAG fails on global questions directed at an entire text corpus, such as \"What are the main themes in the dataset?\", since this is inherently a query-focused summarization (QFS) task, rather than an explicit retrieval task.",
+        "note": ""
+      },
+      {
+        "claim": "GraphRAG: LLM trích đồ thị thực thể, sinh trước tóm tắt cộng đồng, mỗi tóm tắt cho câu trả lời bộ phận rồi tổng hợp.",
+        "status": "supported",
+        "source_url": "https://arxiv.org/abs/2404.16130",
+        "quote": "Our approach uses an LLM to build a graph index in two stages: first, to derive an entity knowledge graph from the source documents, then to pregenerate community summaries for all groups of closely related entities.",
+        "note": ""
+      },
+      {
+        "claim": "Trên dataset ~1 triệu token, cải thiện rõ độ toàn diện và đa dạng.",
+        "status": "supported",
+        "source_url": "https://arxiv.org/abs/2404.16130",
+        "quote": "For a class of global sensemaking questions over datasets in the 1 million token range, we show that GraphRAG leads to substantial improvements over a conventional RAG baseline for both the comprehensiveness and diversity of generated answers.",
+        "note": ""
+      },
+      {
+        "claim": "Agent hợp bài toán mở, không đoán trước số bước; nên bắt đầu đơn giản.",
+        "status": "supported",
+        "source_url": "https://www.anthropic.com/research/building-effective-agents",
+        "quote": "When building applications with LLMs, we recommend finding the simplest solution possible, and only increasing complexity when needed.",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi có 3 ý (loại câu hỏi phù hợp, chi phí xây dựng và truy vấn, đánh giá tách riêng retrieval/generation).",
+        "fix": "Giữ 'khi nào cần + chi phí'; đánh giá tách riêng làm follow-up (đã có ở các cặp RAG khác)."
+      },
+      {
+        "severity": "minor",
+        "type": "factual",
+        "detail": "Ý 'GraphRAG khó bù chi phí cho ngân hàng Q&A độc lập' là nhận định hợp lý nhưng gắn với sản phẩm cụ thể.",
+        "fix": "Có thể giữ làm ví dụ áp dụng."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Quyết định kiến trúc dựa trên loại câu hỏi và chi phí."
+    },
+    "interview_fit": {
+      "minutes": 5,
+      "sub_questions": 3,
+      "gradeable": true,
+      "note": "Điểm chấm rõ; 3 ý nên hơi rộng theo rubric."
+    },
+    "junior_guide": {
+      "tests": "Biết khi nào vector RAG không đủ và cần GraphRAG hoặc agentic RAG.",
+      "must_have": [
+        "Vector RAG hợp câu hỏi cục bộ (đáp án trong vài đoạn)",
+        "Câu hỏi toàn cục (chủ đề chính của corpus) là bài toán tóm tắt → GraphRAG (đồ thị thực thể + tóm tắt cộng đồng)",
+        "GraphRAG tốn LLM khi index toàn corpus, phải cập nhật khi dữ liệu đổi",
+        "Agentic RAG cho câu multi-hop, nhiều nguồn; tốn nhiều lời gọi, cần giới hạn bước",
+        "Đánh giá retrieval (recall@k, MRR) riêng; generation với context oracle"
+      ],
+      "red_flags": [
+        "Dùng GraphRAG cho ngân hàng Q&A độc lập",
+        "Chuyển sang agent mà không đo",
+        "Chỉ đo end-to-end"
+      ],
+      "follow_up": "Corpus đổi 10% mỗi tuần: GraphRAG còn hợp không, và cập nhật đồ thị thế nào?"
+    },
+    "proposed_fix": {
+      "question": "Khi nào cần GraphRAG hoặc agentic RAG thay cho vector RAG thông thường? Phân tích loại câu hỏi phù hợp và chi phí xây dựng, truy vấn.",
+      "answer_change": "Rút mục 'Đánh giá tách riêng' còn 1–2 dòng (hoặc làm follow-up)."
+    }
+  },
+  {
+    "qa_id": "de-qa-1195",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Kịch bản và phòng thủ khớp Greshake và cộng sự cùng OWASP (LLM01 chưa có cách chống tuyệt đối; LLM06 tool tối thiểu, tránh tool mở, người duyệt hành động tác động cao; LLM05 encode output). Cần sửa vì câu hỏi có 3 ý. Có golden label g23.",
+    "claims": [
+      {
+        "claim": "Ứng dụng tích hợp LLM xóa nhòa ranh giới dữ liệu và chỉ dẫn; kẻ tấn công cài chỉ dẫn vào dữ liệu có khả năng bị truy hồi.",
+        "status": "supported",
+        "source_url": "https://arxiv.org/abs/2302.12173",
+        "quote": "We argue that LLM-Integrated Applications blur the line between data and instructions.",
+        "note": "Câu sau: 'by strategically injecting prompts into data likely to be retrieved'."
+      },
+      {
+        "claim": "OWASP thừa nhận chưa rõ có cách phòng chống tuyệt đối.",
+        "status": "supported",
+        "source_url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
+        "quote": "Given the stochastic influence at the heart of the way models work, it is unclear if there are fool-proof methods of prevention for prompt injection.",
+        "note": ""
+      },
+      {
+        "claim": "Chỉ cấp tool cần thiết; tool đọc email không nên có chức năng gửi.",
+        "status": "supported",
+        "source_url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/",
+        "quote": "For example, an extension that accesses a user’s mailbox to summarise emails may only require the ability to read emails, so the extension should not contain other functionality such as deleting or sending messages.",
+        "note": "OWASP LLM06:2025."
+      },
+      {
+        "claim": "Tránh tool mở (shell, fetch URL tùy ý).",
+        "status": "supported",
+        "source_url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/",
+        "quote": "Avoid the use of open-ended extensions where possible (e.g., run a shell command, fetch a URL, etc.) and use extensions with more granular functionality.",
+        "note": ""
+      },
+      {
+        "claim": "Người duyệt cho hành động tác động cao.",
+        "status": "supported",
+        "source_url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/",
+        "quote": "Utilise human-in-the-loop control to require a human to approve high-impact actions before they are taken.",
+        "note": ""
+      },
+      {
+        "claim": "Xử lý output: encode, không tin output model.",
+        "status": "supported",
+        "source_url": "https://genai.owasp.org/llmrisk/llm052025-improper-output-handling/",
+        "quote": "Encode model output back to users to mitigate undesired code execution by JavaScript or Markdown.",
+        "note": "OWASP LLM05:2025."
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi có 3 ý (mô tả kịch bản, vì sao lọc prompt không đủ, thiết kế phòng thủ nhiều lớp).",
+        "fix": "Gộp 'kịch bản + vì sao lọc không đủ' thành một ý; giữ 'phòng thủ nhiều lớp'."
+      },
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "612 token, vượt 600 rất ít; phần bị cắt là câu đánh đổi cuối.",
+        "fix": "Rút đoạn 'Bản chất' còn 1 câu."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Threat modeling cụ thể và thiết kế phòng thủ nhiều lớp."
+    },
+    "interview_fit": {
+      "minutes": 6,
+      "sub_questions": 3,
+      "gradeable": true,
+      "note": "Điểm chấm rõ. Golden label g23: đổi wording phải kiểm lại golden set."
+    },
+    "junior_guide": {
+      "tests": "Hiểu indirect prompt injection qua dữ liệu và vì sao phải thiết kế giả định model có thể bị điều khiển.",
+      "must_have": [
+        "Dữ liệu bên ngoài (email, web, CV) có thể chứa chỉ dẫn; model không phân biệt chắc chắn dữ liệu với chỉ dẫn",
+        "Kịch bản: email độc → agent đọc thêm email → gửi ra ngoài; hoặc rò qua link/ảnh render",
+        "Lọc/classifier không đủ; chưa có cách chống tuyệt đối",
+        "Tool tối thiểu, tránh tool mở, quyền theo người dùng, kiểm phân quyền ở hệ thống",
+        "Người duyệt khi gửi ra ngoài; không tự render URL/ảnh do model sinh; audit log"
+      ],
+      "red_flags": [
+        "Tin system prompt 'đừng làm theo chỉ dẫn trong email' là đủ",
+        "Cấp tool fetch URL tùy ý",
+        "Tự render ảnh markdown từ output model"
+      ],
+      "follow_up": "Agent cần vừa đọc email bên ngoài vừa gửi email: bạn tách quyền theo phiên thế nào?"
+    },
+    "proposed_fix": {
+      "question": "Một agent hỗ trợ recruiter có quyền đọc email, duyệt web và gửi email. Mô tả một kịch bản indirect prompt injection dẫn tới rò rỉ dữ liệu và thiết kế phòng thủ nhiều lớp.",
+      "answer_change": "Giữ nội dung; gộp đoạn 'Vì sao lọc không đủ' vào phần mở đầu phòng thủ. Golden label g23: kiểm lại golden set nếu đổi câu hỏi."
+    }
+  },
+  {
+    "qa_id": "de-qa-1196",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Mã số OWASP 2025 (LLM01/02/05/06/07/10) và các khuyến nghị (system prompt không phải bí mật/control bảo mật, kiểm soát độc lập với LLM, zero-trust với output, encode theo ngữ cảnh, parameterized query) đều khớp OWASP. Cần sửa vì câu hỏi có 4+ ý và 660 token làm mất phần chặn nhầm mà câu hỏi hỏi.",
+    "claims": [
+      {
+        "claim": "Mã số OWASP Top 10 cho LLM 2025: LLM01 prompt injection, LLM02 sensitive info, LLM05 output handling, LLM06 excessive agency, LLM07 system prompt leakage, LLM10 unbounded consumption.",
+        "status": "supported",
+        "source_url": "https://genai.owasp.org/llmrisk/llm072025-system-prompt-leakage/",
+        "quote": "LLM07:2025 System Prompt Leakage",
+        "note": "Danh sách trên genai.owasp.org/llm-top-10 có slug llm022025-sensitive-information-disclosure, llm052025-improper-output-handling, llm062025-excessive-agency, llm102025-unbounded-consumption."
+      },
+      {
+        "claim": "System prompt không phải bí mật, không phải control bảo mật, không chứa credential.",
+        "status": "supported",
+        "source_url": "https://genai.owasp.org/llmrisk/llm072025-system-prompt-leakage/",
+        "quote": "It’s important to understand that the system prompt should not be considered a secret, nor should it be used as a security control. Accordingly, sensitive data such as credentials, connection strings, etc. should not be contained within the system prompt language.",
+        "note": ""
+      },
+      {
+        "claim": "Authorization kiểm tra tất định, độc lập với LLM.",
+        "status": "supported",
+        "source_url": "https://genai.owasp.org/llmrisk/llm072025-system-prompt-leakage/",
+        "quote": "Critical controls such as privilege separation, authorization bounds checks, and similar must not be delegated to the LLM",
+        "note": ""
+      },
+      {
+        "claim": "Coi model như người dùng không tin cậy (zero-trust), validate output.",
+        "status": "supported",
+        "source_url": "https://genai.owasp.org/llmrisk/llm052025-improper-output-handling/",
+        "quote": "Treat the model as any other user, adopting a zero-trust approach, and apply proper input validation on responses coming from the model to backend functions.",
+        "note": ""
+      },
+      {
+        "claim": "Encode theo ngữ cảnh (HTML, SQL); parameterized query; CSP.",
+        "status": "supported",
+        "source_url": "https://genai.owasp.org/llmrisk/llm052025-improper-output-handling/",
+        "quote": "Use parameterized queries or prepared statements for all database operations involving LLM output.",
+        "note": "Cùng trang: 'Implement context-aware output encoding...'; 'Employ strict Content Security Policies (CSP)'."
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi có 4+ ý (guardrail 3 lớp, những gì không dựa vào system prompt, xử lý output trước khi chuyển hệ khác, đánh đổi an toàn–độ trễ–chặn nhầm).",
+        "fix": "Giữ 'không dựa vào system prompt + xử lý output'; 3 lớp và đánh đổi làm follow-up."
+      },
+      {
+        "severity": "major",
+        "type": "length",
+        "detail": "660 token, vượt 600; phần bị cắt là cuối mục Đánh đổi (chặn nhầm, đo precision/recall guardrail) — câu hỏi hỏi trực tiếp về tỷ lệ chặn nhầm.",
+        "fix": "Rút mục 'Mô hình mối đe dọa' còn 1 dòng (bỏ liệt kê mã số)."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Thiết kế guardrail có trade-off, áp vào sản phẩm cụ thể (tách module chấm điểm)."
+    },
+    "interview_fit": {
+      "minutes": 7,
+      "sub_questions": 4,
+      "gradeable": true,
+      "note": "Điểm chấm rõ nhưng nhiều ý."
+    },
+    "junior_guide": {
+      "tests": "Thiết kế guardrails nhiều lớp cho AI interviewer và biết giới hạn của system prompt.",
+      "must_have": [
+        "System prompt không phải bí mật cũng không phải control bảo mật; không chứa credential",
+        "Phân quyền kiểm tất định, độc lập với LLM; tách module chấm điểm (giữ đáp án) khỏi module hội thoại",
+        "Output là không tin cậy: validate schema/miền giá trị, encode theo ngữ cảnh, parameterized query",
+        "Kiểm rò rỉ đáp án mẫu/dữ liệu ứng viên khác; chặn câu hỏi phân biệt đối xử",
+        "Đánh đổi: latency (classifier nhỏ chạy song song) và chặn nhầm (đo precision/recall trên bộ test khó)"
+      ],
+      "red_flags": [
+        "Đặt đáp án mẫu trong system prompt của module hội thoại",
+        "Render HTML từ output model không encode",
+        "Không đo tỷ lệ chặn nhầm"
+      ],
+      "follow_up": "Ứng viên giải thích SQL injection trong câu trả lời và bị guardrail chặn: bạn sửa thế nào mà không mở lỗ hổng?"
+    },
+    "proposed_fix": {
+      "question": "Thiết kế guardrails cho AI interviewer: những gì không nên dựa vào system prompt, và xử lý output thế nào trước khi chuyển sang hệ thống khác?",
+      "answer_change": "Bỏ liệt kê mã số OWASP ở đầu (giữ tên rủi ro); rút mục Input để phần Đánh đổi nằm trong 600 token."
+    }
+  },
+  {
+    "qa_id": "de-qa-1197",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Sai ở ý chính: đáp án nói LoRA 'cập nhật toàn bộ trọng số gốc với learning rate rất nhỏ', trong khi paper LoRA và docs PEFT nói trọng số gốc bị đóng băng, chỉ ma trận hạng thấp được train. Các phần QLoRA, merge, multi-LoRA đúng. drop_breaks_sc001 = true nên đề xuất sửa thay vì loại; sửa được bằng một câu.",
+    "claims": [
+      {
+        "claim": "LoRA cập nhật toàn bộ trọng số gốc với learning rate rất nhỏ, kèm ma trận hạng thấp A·B.",
+        "status": "contradicted",
+        "source_url": "https://arxiv.org/abs/2106.09685",
+        "quote": "We propose Low-Rank Adaptation, or LoRA, which freezes the pre-trained model weights and injects trainable rank decomposition matrices into each layer of the Transformer architecture, greatly reducing the number of trainable parameters for downstream tasks.",
+        "note": "PEFT docs: 'The original weight matrix remains frozen and doesn’t receive any further adjustments.'"
+      },
+      {
+        "claim": "Adapter nhỏ, nhiều adapter dùng chung một base model đóng băng.",
+        "status": "supported",
+        "source_url": "https://huggingface.co/docs/peft/main/en/conceptual_guides/lora",
+        "quote": "The original pre-trained weights are kept frozen, which means you can have multiple lightweight and portable LoRA models for various downstream tasks built on top of them.",
+        "note": ""
+      },
+      {
+        "claim": "QLoRA: base 4-bit đóng băng, gradient lan vào adapter LoRA; NF4, double quantization, paged optimizer.",
+        "status": "supported",
+        "source_url": "https://arxiv.org/abs/2305.14314",
+        "quote": "QLoRA backpropagates gradients through a frozen, 4-bit quantized pretrained language model into Low Rank Adapters~(LoRA).",
+        "note": ""
+      },
+      {
+        "claim": "QLoRA cho phép fine-tune model 8B trên một GPU 24 GB.",
+        "status": "unverified",
+        "source_url": "",
+        "quote": "",
+        "note": "Abstract chỉ nêu 65B trên một GPU 48GB; 8B trên 24GB là suy ra hợp lý nhưng không có câu trích trực tiếp."
+      },
+      {
+        "claim": "merge_and_unload để không thêm độ trễ suy luận.",
+        "status": "supported",
+        "source_url": "https://huggingface.co/docs/peft/main/en/conceptual_guides/lora",
+        "quote": "To eliminate latency, use the merge_and_unload() function to merge the adapter weights with the base model which allows you to effectively use the newly merged model as a standalone model.",
+        "note": ""
+      },
+      {
+        "claim": "vLLM phục vụ nhiều adapter trên một base.",
+        "status": "supported",
+        "source_url": "https://docs.vllm.ai/en/latest/features/lora.html",
+        "quote": "Adapters can be efficiently served on a per-request basis with minimal overhead.",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "critical",
+        "type": "factual",
+        "detail": "'LoRA cập nhật toàn bộ trọng số gốc nhưng với learning rate rất nhỏ ... nhờ learning rate nhỏ nên ít quên' là sai cơ chế: LoRA đóng băng W0 và chỉ train A, B. Evaluator sẽ phạt ứng viên trả lời đúng; cũng mâu thuẫn với chính câu 'adapter chỉ vài chục MB'.",
+        "fix": "Thay bằng: 'LoRA đóng băng trọng số gốc, chỉ train hai ma trận hạng thấp A, B (ΔW = BA); vì chỉ adapter có gradient và optimizer state nên tốn ít bộ nhớ, và vì W0 không đổi nên thường ít quên hơn full fine-tuning.'"
+      },
+      {
+        "severity": "major",
+        "type": "factual",
+        "detail": "Claim 'QLoRA fine-tune 8B trên GPU 24 GB' là trọng tâm của câu hỏi nhưng chưa có câu trích trực tiếp.",
+        "fix": "Ghi là ước lượng (4-bit: ~4–5 GB trọng số + adapter + activation), khuyên kiểm bằng chạy thử với độ dài chuỗi và batch thật."
+      },
+      {
+        "severity": "minor",
+        "type": "factual",
+        "detail": "Con số 'hơn 100 GB' cho full fine-tune 8B là ước lượng (trọng số + gradient + 2 moment Adam), không có nguồn trích.",
+        "fix": "Ghi rõ cách tính: ~16 byte/tham số với mixed precision + Adam → ~128 GB."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Ràng buộc phần cứng cụ thể buộc so sánh có tính toán."
+    },
+    "interview_fit": {
+      "minutes": 5,
+      "sub_questions": 2,
+      "gradeable": false,
+      "note": "Đáp án mẫu sai ở cơ chế LoRA nên chưa dùng chấm được cho tới khi sửa."
+    },
+    "junior_guide": {
+      "tests": "So sánh full fine-tuning, LoRA, QLoRA khi bị giới hạn GPU và cách deploy adapter.",
+      "must_have": [
+        "Full FT 8B cần trọng số + gradient + trạng thái Adam ≫ 24 GB",
+        "LoRA đóng băng trọng số gốc, chỉ train ma trận hạng thấp; adapter nhỏ",
+        "QLoRA: base 4-bit đóng băng, train adapter; vừa GPU nhỏ, chậm hơn do dequantize",
+        "Deploy: merge để không thêm latency, hoặc giữ tách để phục vụ nhiều adapter (vLLM multi-LoRA)",
+        "So với baseline prompt/RAG và kiểm hồi quy năng lực chung"
+      ],
+      "red_flags": [
+        "Nói LoRA cập nhật trọng số gốc",
+        "Nghĩ QLoRA train trọng số 4-bit",
+        "Không tính bộ nhớ optimizer khi ước lượng"
+      ],
+      "follow_up": "Bạn ước lượng bộ nhớ cần cho QLoRA 8B với chuỗi 4.096 token thế nào?"
+    },
+    "proposed_fix": {
+      "question": "",
+      "answer_change": "Thay gạch đầu tiên của mục LoRA bằng: 'LoRA đóng băng trọng số gốc, chỉ train hai ma trận hạng thấp A, B (ΔW = BA); chỉ adapter có gradient và optimizer state nên tốn ít bộ nhớ, W0 không đổi nên thường ít quên hơn full fine-tuning.' Ghi '8B trên 24 GB' và 'hơn 100 GB' là ước lượng kèm cách tính."
+    }
+  }
+]

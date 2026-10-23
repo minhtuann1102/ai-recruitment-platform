@@ -1,0 +1,1403 @@
+{
+  "generated_at": "2026-10-22T15:59:32+00:00",
+  "selection": "frontend",
+  "crawl_counts_included": true,
+  "pairs": [
+    {
+      "qa_id": "de-qa-1250",
+      "file": "hard-frontend.json",
+      "topic_id": "fe.js.async-event-loop",
+      "topic": {
+        "title": "Bất đồng bộ trong trình duyệt",
+        "levels": ["fresher", "junior", "middle"],
+        "key_concepts": [
+          "event loop trình duyệt",
+          "microtask vs macrotask",
+          "Promise và async/await",
+          "fetch và AbortController",
+          "debounce vs throttle"
+        ],
+        "category": "Frontend",
+        "track": "frontend_react"
+      },
+      "difficulty": "hard",
+      "question": "Một dashboard bị đơ hoàn toàn (không vẽ lại, không nhận click) khi xử lý mảng 200.000 phần tử, dù developer đã \"chia nhỏ\" bằng cách xử lý từng lô trong chuỗi `Promise.resolve().then(...)`. Vì sao cách này không giúp gì, và bạn sẽ chia nhỏ công việc thế nào để trang vẫn phản hồi?",
+      "answer": "**Nguyên nhân: microtask không nhường main thread.** Mỗi vòng event loop chạy tối đa một task, sau đó chạy toàn bộ microtask queue, rồi mới tới bước rendering. Microtask queue được xả tới khi rỗng, kể cả microtask mới sinh ra trong lúc xả. Chuỗi `.then` tự lên lịch lô kế tiếp nên cả 200.000 phần tử vẫn chạy trong cùng một lượt, trước khi trình duyệt kịp render hay xử lý input. Về bản chất đó vẫn là một long task (>50 ms) chặn main thread. Phần tiếp theo sau `await` cũng là microtask, nên `await` một promise đã resolve không phải là yield.\n\n**Cách đúng: yield sang task mới.**\n- `setTimeout(fn, 0)`: phần còn lại thành task mới, trình duyệt có cơ hội render và xử lý click. Nhược điểm: task mới xếp cuối hàng đợi, và timeout lồng nhau sau vài cấp bị kẹp độ trễ tối thiểu.\n- `scheduler.yield()`: tiếp tục trong task mới nhưng được ưu tiên chạy trước các task cùng loại khác. Chưa có trên mọi trình duyệt, nên cần feature-detect và fallback về `setTimeout`.\n- Yield theo deadline thay vì sau từng phần tử, vì mỗi lần yield có overhead:\n\n```js\nconst yieldToMain = () => globalThis.scheduler?.yield\n  ? scheduler.yield() : new Promise(r => setTimeout(r, 0));\nlet deadline = performance.now() + 50;\nfor (const item of items) {\n  process(item);\n  if (performance.now() > deadline) {\n    await yieldToMain();\n    deadline = performance.now() + 50;\n  }\n}\n```\n\n**Khi nào dùng Web Worker:** tính toán thuần, không đụng DOM và đủ nặng thì chuyển hẳn sang Worker để main thread rảnh. Đổi lại phải trả chi phí sao chép dữ liệu qua `postMessage`, và Worker không truy cập được DOM.\n\n**Đánh đổi khi chia lô:** tổng thời gian hoàn thành dài hơn một chút. Ngoài ra cần xử lý trạng thái trung gian: dữ liệu có thể đổi giữa các lô, người dùng có thể thao tác giữa chừng, nên cần cơ chế hủy hoặc bỏ kết quả cũ.",
+      "tags": ["event-loop", "microtask", "long-task", "scheduler-yield", "main-thread"],
+      "grounding_urls": [
+        "https://web.dev/articles/optimize-long-tasks",
+        "https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide/In_depth"
+      ],
+      "checks": {
+        "chunk_tokens_est": 692,
+        "over_plan_budget": true,
+        "over_retrieve_budget": false,
+        "topic_in_catalog": true,
+        "topic_levels_ok": true,
+        "topic_hard_total": 2,
+        "topic_hard_curated": 2,
+        "drop_breaks_sc001": true,
+        "golden_labels": [],
+        "sub_questions_hint": 1,
+        "already_reviewed_by": "",
+        "urls": [
+          {
+            "url": "https://web.dev/articles/optimize-long-tasks",
+            "status": 200,
+            "final_url": "https://web.dev/articles/optimize-long-tasks",
+            "title": "Optimize long tasks  |  web.dev",
+            "terms_found": [
+              "microtask",
+              "long task",
+              "main thread",
+              ".then",
+              "await",
+              "scheduler.yield()",
+              "setTimeout"
+            ],
+            "terms_missing": [
+              "event loop",
+              "scheduler yield",
+              "setTimeout(fn, 0)",
+              "postMessage"
+            ]
+          },
+          {
+            "url": "https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide/In_depth",
+            "status": 200,
+            "final_url": "https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide/In_depth",
+            "title": "In depth: Microtasks and the JavaScript runtime environment - Web APIs | MDN",
+            "terms_found": ["event loop", "microtask", "main thread", "setTimeout"],
+            "terms_missing": [
+              "long task",
+              "scheduler yield",
+              ".then",
+              "await",
+              "setTimeout(fn, 0)",
+              "scheduler.yield()",
+              "postMessage"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "qa_id": "de-qa-1251",
+      "file": "hard-frontend.json",
+      "topic_id": "fe.js.async-event-loop",
+      "topic": {
+        "title": "Bất đồng bộ trong trình duyệt",
+        "levels": ["fresher", "junior", "middle"],
+        "key_concepts": [
+          "event loop trình duyệt",
+          "microtask vs macrotask",
+          "Promise và async/await",
+          "fetch và AbortController",
+          "debounce vs throttle"
+        ],
+        "category": "Frontend",
+        "track": "frontend_react"
+      },
+      "difficulty": "hard",
+      "question": "Ô tìm kiếm typeahead thỉnh thoảng hiển thị kết quả của từ khóa cũ (gõ \"react\" nhưng thấy kết quả của \"rea\"), còn khi API chậm thì spinner quay mãi không dừng. Hãy phân tích nguyên nhân và thiết kế lại lớp gọi API: hủy request, timeout và phân loại lỗi.",
+      "answer": "**Nguyên nhân**\n- **Race condition:** request gửi đi theo thứ tự, nhưng response có thể về không theo thứ tự (mạng, cache, tải server). Với code kiểu `fetch(q).then(setResults)`, response về sau cùng sẽ thắng (\"last response wins\"), trong khi đúng ra phải là \"last request wins\". Debounce chỉ giảm số request chứ không loại bỏ race.\n- **Spinner quay mãi:** `fetch` không có timeout mặc định. Nó chỉ reject khi lỗi mạng; HTTP 4xx/5xx vẫn resolve với `res.ok === false`, nên code chỉ có `catch` sẽ bỏ sót.\n\n**Thiết kế lại**\n1. **Hủy request cũ:** giữ `AbortController` của request hiện tại và gọi `abort()` trước khi gửi request mới. Khi đó `fetch` reject với `DOMException` tên `AbortError`. Trong React, abort trong cleanup của effect.\n2. **Timeout:** `AbortSignal.timeout(ms)` làm fetch reject với `TimeoutError`, phân biệt được với việc người dùng hủy. Nếu gộp cả hai bằng `AbortSignal.any([ctrl.signal, AbortSignal.timeout(5000)])` thì không còn phân biệt bằng tên lỗi được nữa. Lúc đó phải kiểm tra signal nào đã aborted hoặc đọc `signal.reason`.\n3. **Chốt chặn thứ hai:** trước khi set state, so request id hoặc query hiện tại với query đã gửi. Cách này phòng trường hợp response đã về và parse xong trước khi kịp hủy.\n4. **Phân loại lỗi:**\n   - `AbortError`: bỏ qua im lặng, không hiện lỗi và không tắt spinner của request mới.\n   - `TimeoutError`: báo người dùng và cho thử lại.\n   - `!res.ok`: chỉ retry kèm backoff với 5xx/429, không retry 4xx.\n   - `TypeError` từ fetch (lỗi mạng): hiện trạng thái offline.\n\n```js\nlet ctrl;\nasync function search(q) {\n  ctrl?.abort();\n  ctrl = new AbortController();\n  const signal = AbortSignal.any([ctrl.signal, AbortSignal.timeout(5000)]);\n  const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`, { signal });\n  if (!res.ok) throw new HttpError(res.status);\n  return res.json();\n}\n```\n\n**Lưu ý:** hủy phía client không đảm bảo server ngừng xử lý. Với GET thì không sao. Với mutation (POST), không được coi \"đã hủy\" là \"chưa xảy ra\"; hãy dùng idempotency key và đồng bộ lại trạng thái từ server.",
+      "tags": ["abortcontroller", "race-condition", "fetch", "timeout", "error-handling"],
+      "grounding_urls": [
+        "https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal",
+        "https://react.dev/learn/you-might-not-need-an-effect"
+      ],
+      "checks": {
+        "chunk_tokens_est": 769,
+        "over_plan_budget": true,
+        "over_retrieve_budget": false,
+        "topic_in_catalog": true,
+        "topic_levels_ok": true,
+        "topic_hard_total": 2,
+        "topic_hard_curated": 2,
+        "drop_breaks_sc001": true,
+        "golden_labels": [],
+        "sub_questions_hint": 3,
+        "already_reviewed_by": "",
+        "urls": [
+          {
+            "url": "https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal",
+            "status": 200,
+            "final_url": "https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal",
+            "title": "AbortSignal - Web APIs | MDN",
+            "terms_found": [
+              "abortcontroller",
+              "fetch",
+              "timeout",
+              "error handling",
+              "catch",
+              "abort()",
+              "DOMException",
+              "AbortError",
+              "TimeoutError",
+              "signal.reason"
+            ],
+            "terms_missing": [
+              "race condition",
+              "fetch(q).then(setResults)",
+              "res.ok === false",
+              "AbortSignal.timeout(ms)",
+              "!res.ok"
+            ]
+          },
+          {
+            "url": "https://react.dev/learn/you-might-not-need-an-effect",
+            "status": 200,
+            "final_url": "https://react.dev/learn/you-might-not-need-an-effect",
+            "title": "You Might Not Need an Effect – React",
+            "terms_found": ["race condition", "fetch", "timeout", "error handling"],
+            "terms_missing": [
+              "abortcontroller",
+              "fetch(q).then(setResults)",
+              "res.ok === false",
+              "catch",
+              "abort()",
+              "DOMException",
+              "AbortError",
+              "AbortSignal.timeout(ms)",
+              "TimeoutError",
+              "signal.reason",
+              "!res.ok"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "qa_id": "de-qa-1252",
+      "file": "hard-frontend.json",
+      "topic_id": "fe.next.ssr-rsc",
+      "topic": {
+        "title": "Next.js: SSR, SSG và Server Components",
+        "levels": ["junior", "middle", "senior"],
+        "key_concepts": [
+          "CSR vs SSR vs SSG vs ISR",
+          "Server Components vs Client Components",
+          "hydration",
+          "data fetching và cache",
+          "SEO"
+        ],
+        "category": "Frontend",
+        "track": "frontend_react"
+      },
+      "difficulty": "hard",
+      "question": "Sau khi deploy, trang sản phẩm Next.js báo lỗi hydration (\"Text content does not match server-rendered HTML\") ở một số người dùng, và có lúc nút bấm phản hồi sai. Bạn chẩn đoán và xử lý thế nào? Khi nào dùng `suppressHydrationWarning`, khi nào cần render hai lượt?",
+      "answer": "**Bản chất:** hydration là bước React gắn event handler vào HTML đã prerender. React kỳ vọng lần render đầu trên client giống hệt server. Mismatch là bug thật: trường hợp nhẹ thì chậm hơn vì React phải phục hồi, trường hợp nặng thì event handler bị gắn nhầm phần tử, khớp với triệu chứng nút bấm sai. React cũng không đảm bảo sẽ vá các thuộc tính bị lệch.\n\n**\"Chỉ một số người dùng\" gợi ý nguyên nhân phụ thuộc môi trường:**\n- Dữ liệu phụ thuộc thời gian, múi giờ, locale: `new Date()`, `toLocaleString()` (server chạy UTC, client ở giờ Việt Nam).\n- Nhánh `typeof window !== 'undefined'`, hoặc đọc `localStorage`/`matchMedia` ngay trong render.\n- Browser extension sửa DOM; iOS tự biến số điện thoại thành link (tắt bằng meta `format-detection`).\n- CDN/edge sửa HTML (ví dụ auto minify), hoặc thư viện CSS-in-JS cấu hình sai.\n- HTML lồng sai (`<div>` trong `<p>`, `<a>` trong `<a>`): parser trình duyệt tự sửa DOM nên lệch với cây React. Lỗi này thường gặp ở mọi người dùng.\n\n**Chẩn đoán:** đọc diff trong dev overlay, tái hiện với timezone/locale khác, thử trình duyệt không có extension, theo dõi lỗi client trong production.\n\n**Cách xử lý, theo thứ tự ưu tiên:**\n1. **Loại bỏ nguồn không xác định:** format ngày ở server với timezone cố định, hoặc truyền sẵn chuỗi đã format.\n2. **Render hai lượt:** state `isClient` được set trong `useEffect`. Lượt đầu giống server, lượt sau mới hiện giá trị phía client. Cái giá là component render hai lần và UI có thể \"nhảy\" sau hydrate.\n3. **Bỏ SSR cho component chỉ chạy ở trình duyệt:** dùng `next/dynamic` với `ssr: false`, gọi từ một Client Component (App Router). Phần đó mất HTML prerender (ảnh hưởng SEO và hiển thị ban đầu).\n4. **`suppressHydrationWarning`:** chỉ dành cho một phần tử chắc chắn khác nhau (như timestamp). Nó chỉ có tác dụng một cấp, và React không vá text, nên nội dung của server vẫn hiển thị tới lần render sau. Đây là lối thoát hiểm, không phải cách che bug.",
+      "tags": ["hydration", "ssr", "nextjs", "suppresshydrationwarning", "debugging"],
+      "grounding_urls": [
+        "https://react.dev/reference/react-dom/client/hydrateRoot",
+        "https://nextjs.org/docs/messages/react-hydration-error"
+      ],
+      "checks": {
+        "chunk_tokens_est": 732,
+        "over_plan_budget": true,
+        "over_retrieve_budget": false,
+        "topic_in_catalog": true,
+        "topic_levels_ok": true,
+        "topic_hard_total": 2,
+        "topic_hard_curated": 2,
+        "drop_breaks_sc001": true,
+        "golden_labels": ["g11"],
+        "sub_questions_hint": 2,
+        "already_reviewed_by": "",
+        "urls": [
+          {
+            "url": "https://react.dev/reference/react-dom/client/hydrateRoot",
+            "status": 200,
+            "final_url": "https://react.dev/reference/react-dom/client/hydrateRoot",
+            "title": "hydrateRoot – React",
+            "terms_found": [
+              "hydration",
+              "suppresshydrationwarning",
+              "typeof window !== 'undefined'",
+              "matchMedia",
+              "<div>",
+              "isClient"
+            ],
+            "terms_missing": [
+              "ssr",
+              "nextjs",
+              "debugging",
+              "new Date()",
+              "toLocaleString()",
+              "localStorage",
+              "format-detection",
+              "<p>",
+              "<a>"
+            ]
+          },
+          {
+            "url": "https://nextjs.org/docs/messages/react-hydration-error",
+            "status": 200,
+            "final_url": "https://nextjs.org/docs/messages/react-hydration-error",
+            "title": "Text content does not match server-rendered HTML | Next.js",
+            "terms_found": [
+              "hydration",
+              "ssr",
+              "suppresshydrationwarning",
+              "debugging",
+              "typeof window !== 'undefined'",
+              "localStorage",
+              "format-detection",
+              "<div>",
+              "<p>",
+              "<a>",
+              "isClient"
+            ],
+            "terms_missing": ["nextjs", "new Date()", "toLocaleString()", "matchMedia"]
+          }
+        ]
+      }
+    },
+    {
+      "qa_id": "de-qa-1253",
+      "file": "hard-frontend.json",
+      "topic_id": "fe.next.ssr-rsc",
+      "topic": {
+        "title": "Next.js: SSR, SSG và Server Components",
+        "levels": ["junior", "middle", "senior"],
+        "key_concepts": [
+          "CSR vs SSR vs SSG vs ISR",
+          "Server Components vs Client Components",
+          "hydration",
+          "data fetching và cache",
+          "SEO"
+        ],
+        "category": "Frontend",
+        "track": "frontend_react"
+      },
+      "difficulty": "hard",
+      "question": "Trong Next.js App Router, một developer thêm `'use client'` vào layout gốc để dùng context theme, còn developer khác import hàm `getData()` (đọc `process.env.API_KEY`) vào một Client Component. Phân tích hệ quả của từng việc dựa trên cách ranh giới Server/Client hoạt động, và nêu cách tổ chức đúng.",
+      "answer": "**Cơ chế:** `'use client'` đánh dấu một module **cùng toàn bộ dependency bắc cầu** của nó là code client. Ranh giới nằm trên module graph, không nằm trên cây component: mọi module được import từ file client đều vào bundle client, dù file đó không có directive.\n\nLuồng render như sau:\n- Server Components render thành RSC Payload, gồm kết quả render, placeholder kèm reference tới JS của Client Components, và các props truyền sang client.\n- HTML được prerender từ đó.\n- Trên client, payload dùng để reconcile, còn JS dùng để hydrate Client Components.\n\n**Hệ quả 1, `'use client'` ở layout gốc:** layout và mọi thứ nó import trở thành client, mất lợi ích RSC (fetch gần dữ liệu, giữ secret ở server, giảm JS). Riêng `children` truyền vào vẫn có thể là Server Component, vì chúng không thuộc module graph của component client mà được render trên server rồi truyền xuống dưới dạng output.\n\nCách đúng là tách một `ThemeProvider` client nhỏ nhận `children`, đặt càng sâu càng tốt, và đẩy `'use client'` xuống các lá cần tương tác (nút Like, ô Search).\n\n**Hệ quả 2, import `getData()` vào client:** module bị bundle cho client. Next.js chỉ đưa vào bundle biến có tiền tố `NEXT_PUBLIC_`, biến khác bị thay bằng chuỗi rỗng: key không lộ nhưng code chạy sai im lặng (authorization rỗng). Rủi ro thật là ai đó đổi thành `NEXT_PUBLIC_API_KEY` cho \"chạy được\" và lộ secret. Chặn từ gốc bằng `import 'server-only'`: import nhầm vào client sẽ lỗi build.\n\n**Props qua ranh giới phải serializable:**\n- Được phép: primitive, plain object, Array, Map, Set, Date, Promise, JSX và Server Function.\n- Không được phép: hàm thường, instance của class, Symbol chưa đăng ký.\n\nMuốn có hành vi thì truyền Server Function (`'use server'`) thay vì callback.\n\n**Đánh đổi khi đặt ranh giới:**\n- Đặt quá cao: nhiều JS và mất khả năng fetch phía server.\n- Đặt quá vụn: phải truyền nhiều props, mà props nằm trong RSC Payload nên truyền object lớn sẽ làm payload và HTML nặng thêm.",
+      "tags": [
+        "react-server-components",
+        "use-client",
+        "server-only",
+        "nextjs",
+        "bundle-size"
+      ],
+      "grounding_urls": [
+        "https://react.dev/reference/rsc/use-client",
+        "https://nextjs.org/docs/app/getting-started/server-and-client-components"
+      ],
+      "checks": {
+        "chunk_tokens_est": 750,
+        "over_plan_budget": true,
+        "over_retrieve_budget": false,
+        "topic_in_catalog": true,
+        "topic_levels_ok": true,
+        "topic_hard_total": 2,
+        "topic_hard_curated": 2,
+        "drop_breaks_sc001": true,
+        "golden_labels": [],
+        "sub_questions_hint": 1,
+        "already_reviewed_by": "",
+        "urls": [
+          {
+            "url": "https://react.dev/reference/rsc/use-client",
+            "status": 200,
+            "final_url": "https://react.dev/reference/rsc/use-client",
+            "title": "'use client' directive – React",
+            "terms_found": [
+              "react server components",
+              "use client",
+              "'use client'",
+              "children",
+              "'use server'"
+            ],
+            "terms_missing": [
+              "server only",
+              "nextjs",
+              "bundle size",
+              "ThemeProvider",
+              "getData()",
+              "NEXT_PUBLIC_",
+              "NEXT_PUBLIC_API_KEY",
+              "import 'server-only'"
+            ]
+          },
+          {
+            "url": "https://nextjs.org/docs/app/getting-started/server-and-client-components",
+            "status": 200,
+            "final_url": "https://nextjs.org/docs/app/getting-started/server-and-client-components",
+            "title": "Server and Client Components",
+            "terms_found": [
+              "react server components",
+              "use client",
+              "bundle size",
+              "'use client'",
+              "children",
+              "ThemeProvider",
+              "getData()",
+              "NEXT_PUBLIC_"
+            ],
+            "terms_missing": [
+              "server only",
+              "nextjs",
+              "NEXT_PUBLIC_API_KEY",
+              "import 'server-only'",
+              "'use server'"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "qa_id": "de-qa-1254",
+      "file": "hard-frontend.json",
+      "topic_id": "fe.react.components-hooks",
+      "topic": {
+        "title": "React component và hooks",
+        "levels": ["fresher", "junior", "middle"],
+        "key_concepts": [
+          "props vs state",
+          "useState và useEffect",
+          "dependency array và cleanup",
+          "controlled vs uncontrolled input",
+          "custom hook"
+        ],
+        "category": "Frontend",
+        "track": "frontend_react"
+      },
+      "difficulty": "hard",
+      "question": "Khi review code, bạn thấy một component có bốn `useEffect`: một tính `fullName` từ props, một reset `selection` khi prop `items` đổi, một gọi `showNotification` khi `product.isInCart` thành true, và một gọi `onChange` của component cha mỗi khi state nội bộ đổi. Đánh giá từng effect, đề xuất cách viết lại, và cho biết khi nào effect mới là công cụ đúng.",
+      "answer": "**Nguyên tắc:** effect dùng để đồng bộ với hệ thống bên ngoài React (network, DOM ngoài React, widget, subscription). Effect chạy sau commit. Nếu effect lại set state ngay lập tức, React phải render lại từ đầu: tốn thêm một lượt render, và lượt đầu hiển thị dữ liệu cũ (gây nháy UI).\n\n**1. `fullName`:** đây là derived state. Tính thẳng trong render: `const fullName = first + ' ' + last`. Nếu phép tính tốn kém thì dùng `useMemo`, nhưng chỉ sau khi đã đo.\n\n**2. Reset `selection` khi `items` đổi:**\n- Muốn reset toàn bộ state: đổi `key` của component để React coi đó là component mới.\n- Chỉ cần chỉnh một phần: set state ngay trong render với biến `prevItems` (vẫn hiệu quả hơn effect).\n- Tốt nhất: lưu `selectedId` rồi suy ra `items.find(i => i.id === selectedId) ?? null`, khi đó không cần reset gì cả.\n\n**3. Thông báo khi `isInCart`:** đây là logic của **sự kiện**, không phải của việc hiển thị. Đặt trong effect thì thông báo sẽ bắn lại khi reload hoặc remount (vì `isInCart` đã true sẵn). Chuyển vào event handler, ví dụ hàm `buyProduct()` dùng chung cho các nút.\n\n**4. Gọi `onChange` của cha trong effect:** cha cập nhật trễ một lượt và các lượt render nối đuôi nhau. Có hai cách sửa:\n- Gọi `setIsOn(next)` và `onChange(next)` trong cùng handler; React gộp thành một lượt render.\n- Lift state lên để cha điều khiển (controlled component). Hai state cần đồng bộ là dấu hiệu nên lift.\n\n**Khi nào effect là đúng:**\n- Kết nối hoặc ngắt kết nối (WebSocket, chat room).\n- Đồng bộ với widget ngoài React.\n- Fetch dữ liệu, kèm cleanup chống race (cờ `ignore` hoặc `AbortController`).\n- Subscribe external store: ưu tiên `useSyncExternalStore`.\n\nNếu trong effect có đoạn cần đọc giá trị mới nhất mà không được kích hoạt kết nối lại (ví dụ đọc `theme` khi báo \"connected\"), React 19.2 có `useEffectEvent` để tách phần \"sự kiện\" ra. Không dùng nó để lách dependency array.",
+      "tags": [
+        "useeffect",
+        "derived-state",
+        "event-handlers",
+        "useeffectevent",
+        "react-hooks"
+      ],
+      "grounding_urls": [
+        "https://react.dev/learn/you-might-not-need-an-effect",
+        "https://react.dev/reference/react/useEffectEvent",
+        "https://react.dev/blog/2025/10/01/react-19-2"
+      ],
+      "checks": {
+        "chunk_tokens_est": 742,
+        "over_plan_budget": true,
+        "over_retrieve_budget": false,
+        "topic_in_catalog": true,
+        "topic_levels_ok": true,
+        "topic_hard_total": 2,
+        "topic_hard_curated": 1,
+        "drop_breaks_sc001": true,
+        "golden_labels": [],
+        "sub_questions_hint": 8,
+        "already_reviewed_by": "",
+        "urls": [
+          {
+            "url": "https://react.dev/learn/you-might-not-need-an-effect",
+            "status": 200,
+            "final_url": "https://react.dev/learn/you-might-not-need-an-effect",
+            "title": "You Might Not Need an Effect – React",
+            "terms_found": [
+              "useeffect",
+              "event handlers",
+              "fullName",
+              "useMemo",
+              "selection",
+              "items",
+              "key",
+              "prevItems",
+              "selectedId",
+              "isInCart"
+            ],
+            "terms_missing": [
+              "derived state",
+              "useeffectevent",
+              "react hooks",
+              "const fullName = first + ' ' + last",
+              "buyProduct()"
+            ]
+          },
+          {
+            "url": "https://react.dev/reference/react/useEffectEvent",
+            "status": 200,
+            "final_url": "https://react.dev/reference/react/useEffectEvent",
+            "title": "useEffectEvent – React",
+            "terms_found": ["useeffect", "event handlers", "useeffectevent", "useMemo"],
+            "terms_missing": [
+              "derived state",
+              "react hooks",
+              "fullName",
+              "const fullName = first + ' ' + last",
+              "selection",
+              "items",
+              "key",
+              "prevItems",
+              "selectedId",
+              "isInCart",
+              "buyProduct()"
+            ]
+          },
+          {
+            "url": "https://react.dev/blog/2025/10/01/react-19-2",
+            "status": 200,
+            "final_url": "https://react.dev/blog/2025/10/01/react-19-2",
+            "title": "React 19.2 – React",
+            "terms_found": ["useeffect", "useeffectevent"],
+            "terms_missing": [
+              "derived state",
+              "event handlers",
+              "react hooks",
+              "fullName",
+              "const fullName = first + ' ' + last",
+              "useMemo",
+              "selection",
+              "items",
+              "key",
+              "prevItems",
+              "selectedId",
+              "isInCart",
+              "buyProduct()"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "qa_id": "de-qa-1255",
+      "file": "hard-frontend.json",
+      "topic_id": "fe.react.state-management",
+      "topic": {
+        "title": "Quản lý state trong ứng dụng React",
+        "levels": ["junior", "middle", "senior"],
+        "key_concepts": [
+          "local vs global state",
+          "Context và prop drilling",
+          "store như Redux hoặc Zustand",
+          "server state với React Query",
+          "cache và invalidation"
+        ],
+        "category": "Frontend",
+        "track": "frontend_react"
+      },
+      "difficulty": "hard",
+      "question": "Danh sách todo dùng TanStack Query với optimistic update (snapshot + rollback trong `onMutate`/`onError`) khi toggle. Khi người dùng bấm toggle liên tục nhiều item, UI thỉnh thoảng \"nhảy ngược\" về trạng thái cũ rồi mới đúng; và khi một request lỗi, rollback xóa luôn thay đổi của request khác đã thành công. Giải thích nguyên nhân và thiết kế lại.",
+      "answer": "**Mô hình chuẩn (optimistic qua cache):**\n- `onMutate`: gọi `cancelQueries` để refetch đang bay không ghi đè optimistic update, chụp snapshot bằng `getQueryData`, ghi giá trị mới bằng `setQueryData`, rồi trả snapshot làm context.\n- `onError`: rollback bằng snapshot.\n- `onSettled`: `invalidateQueries` để đồng bộ lại với server.\n\n**Nguyên nhân \"nhảy ngược\":**\n- Quên `cancelQueries`, nên refetch nền (window focus, interval, invalidate của mutation trước) trả dữ liệu cũ và ghi đè giá trị optimistic.\n- Dù đã cancel, mỗi mutation lại invalidate trong `onSettled`. Refetch đó chạy trong lúc các mutation khác vẫn đang bay; server chưa phản ánh hết, nên dữ liệu trung gian ghi đè optimistic của những mutation còn chờ.\n\n**Nguyên nhân rollback sai:** mặc định TanStack Query chạy mọi mutation song song. Snapshot là **toàn bộ list** tại thời điểm `onMutate`. Mutation B chụp snapshot sau A nên đã chứa thay đổi của A. Nhưng khi A lỗi và rollback bằng snapshot của chính nó (chụp trước B), list bị đưa về trạng thái trước cả B, xóa mất thay đổi hợp lệ của B. Snapshot toàn cục không kết hợp được khi có nhiều mutation đồng thời.\n\n**Thiết kế lại:**\n1. **Rollback cục bộ:** chỉ hoàn tác đúng field của item bị lỗi, không ghi đè cả list.\n2. **Gom invalidate:** gắn `mutationKey` chung và chỉ invalidate khi không còn mutation *khác* cùng key đang bay (đếm bằng `queryClient.isMutating({ mutationKey })`). Tránh refetch xen giữa.\n3. **Tuần tự hóa khi cần:** mutation cùng `scope: { id }` chạy nối tiếp; đổi lại độ trễ cộng dồn.\n4. **Optimistic qua UI:** nếu chỉ một chỗ hiển thị, render tạm từ `variables` + `isPending`, hoặc `useMutationState` lọc theo `mutationKey` khi có nhiều mutation. Cách này không đụng cache nên không cần rollback.\n5. **Phía server:** API nên idempotent theo giá trị đích (`PATCH {done: true}`) thay vì \"đảo trạng thái\", để thứ tự request về server không làm sai kết quả cuối.\n\n**Chọn cách:** hiển thị ở nhiều nơi thì cache-based kèm rollback cục bộ; một nơi thì UI-based.",
+      "tags": [
+        "tanstack-query",
+        "optimistic-update",
+        "server-state",
+        "race-condition",
+        "cache-invalidation"
+      ],
+      "grounding_urls": [
+        "https://tanstack.com/query/latest/docs/framework/react/guides/optimistic-updates",
+        "https://tanstack.com/query/latest/docs/framework/react/guides/mutations"
+      ],
+      "checks": {
+        "chunk_tokens_est": 780,
+        "over_plan_budget": true,
+        "over_retrieve_budget": false,
+        "topic_in_catalog": true,
+        "topic_levels_ok": true,
+        "topic_hard_total": 2,
+        "topic_hard_curated": 1,
+        "drop_breaks_sc001": true,
+        "golden_labels": [],
+        "sub_questions_hint": 1,
+        "already_reviewed_by": "",
+        "urls": [
+          {
+            "url": "https://tanstack.com/query/latest/docs/framework/react/guides/optimistic-updates",
+            "status": 200,
+            "final_url": "https://tanstack.com/query/latest/docs/framework/react/guides/optimistic-updates",
+            "title": "Optimistic Updates | TanStack Query React Docs",
+            "terms_found": [
+              "tanstack query",
+              "optimistic update",
+              "server state",
+              "onMutate",
+              "cancelQueries",
+              "getQueryData",
+              "setQueryData",
+              "onError",
+              "onSettled",
+              "invalidateQueries",
+              "mutationKey"
+            ],
+            "terms_missing": [
+              "race condition",
+              "cache invalidation",
+              "queryClient.isMutating({ mutationKey })",
+              "scope: { id }"
+            ]
+          },
+          {
+            "url": "https://tanstack.com/query/latest/docs/framework/react/guides/mutations",
+            "status": 200,
+            "final_url": "https://tanstack.com/query/latest/docs/framework/react/guides/mutations",
+            "title": "Mutations | TanStack Query React Docs",
+            "terms_found": [
+              "tanstack query",
+              "optimistic update",
+              "onMutate",
+              "cancelQueries",
+              "setQueryData",
+              "onError",
+              "onSettled",
+              "invalidateQueries",
+              "mutationKey"
+            ],
+            "terms_missing": [
+              "server state",
+              "race condition",
+              "cache invalidation",
+              "getQueryData",
+              "queryClient.isMutating({ mutationKey })",
+              "scope: { id }"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "qa_id": "de-qa-1256",
+      "file": "hard-frontend.json",
+      "topic_id": "fe.test.component-e2e",
+      "topic": {
+        "title": "Kiểm thử frontend",
+        "levels": ["fresher", "junior", "middle"],
+        "key_concepts": [
+          "unit vs component vs E2E",
+          "Testing Library và query theo vai trò",
+          "mock API",
+          "E2E với Playwright",
+          "test flaky"
+        ],
+        "category": "Frontend",
+        "track": "frontend_react"
+      },
+      "difficulty": "hard",
+      "question": "Bộ test E2E Playwright của team fail ngẫu nhiên trên CI nhưng chạy local thì pass. Team đang xử lý bằng cách thêm `page.waitForTimeout(...)` và tăng số lần retry. Bạn chẩn đoán và khắc phục test flaky như thế nào?",
+      "answer": "**Vì sao cách hiện tại sai:**\n- Retry không sửa được gì. Playwright xếp test fail lần đầu nhưng pass khi retry vào nhóm **flaky**. Đó là tín hiệu để đo và ưu tiên sửa, không phải để che giấu.\n- `waitForTimeout` là ngủ cố định: chậm vô ích khi máy nhanh, vẫn fail khi CI chậm hơn dự tính.\n\n**Chẩn đoán:**\n- Bật trace cho lần retry đầu trên CI và mở bằng trace viewer (thay vì video/screenshot) để xem DOM snapshot, network và console ở từng bước.\n- Chạy lặp (`--repeat-each`) với số worker giống CI để làm lộ lỗi phụ thuộc thứ tự và concurrency.\n\n**Nguyên nhân thường gặp và cách sửa:**\n1. **Assertion không chờ:** `expect(await locator.isVisible()).toBe(true)` trả kết quả ngay. Dùng web-first assertion `await expect(locator).toBeVisible()`, vốn tự retry tới timeout.\n2. **Selector giòn:** CSS/XPath bám vào cấu trúc DOM hoặc `nth-child`. Chuyển sang locator hướng người dùng như `getByRole('button', { name: 'Thanh toán' })`.\n3. **Lạm dụng `force: true`:** trước khi click, Playwright tự chờ phần tử visible, stable (bounding box giữ nguyên qua hai animation frame), nhận được event và enabled. Dùng `force` để vượt qua thường là che một bug thật, ví dụ overlay hay spinner đang che nút.\n4. **Thiếu cô lập:** test dựa vào dữ liệu hay session do test trước để lại, hoặc chạy song song tranh chấp cùng account/record. Mỗi test phải tự tạo dữ liệu riêng và có browser context riêng. Khi một test fail, Playwright bỏ cả worker và khởi động worker mới, nên test phụ thuộc thứ tự càng dễ vỡ.\n5. **Phụ thuộc bên thứ ba:** chỉ test những gì mình kiểm soát. Mock dịch vụ ngoài (payment, analytics) bằng network API (`page.route`).\n6. **Môi trường CI khác local:** CPU yếu hơn, timezone/locale khác, animation. Cố định cấu hình trong `playwright.config` và dùng cùng image cho local lẫn CI.\n\n**Quy trình:** quarantine test flaky có owner và hạn sửa, theo dõi tỉ lệ flaky theo thời gian, và chỉ giữ một mức retry nhỏ để giảm nhiễu chứ không coi đó là giải pháp.",
+      "tags": ["playwright", "flaky-test", "e2e", "test-isolation", "auto-waiting"],
+      "grounding_urls": [
+        "https://playwright.dev/docs/best-practices",
+        "https://playwright.dev/docs/test-retries",
+        "https://playwright.dev/docs/actionability"
+      ],
+      "checks": {
+        "chunk_tokens_est": 723,
+        "over_plan_budget": true,
+        "over_retrieve_budget": false,
+        "topic_in_catalog": true,
+        "topic_levels_ok": true,
+        "topic_hard_total": 2,
+        "topic_hard_curated": 2,
+        "drop_breaks_sc001": true,
+        "golden_labels": ["g24"],
+        "sub_questions_hint": 1,
+        "already_reviewed_by": "",
+        "urls": [
+          {
+            "url": "https://playwright.dev/docs/best-practices",
+            "status": 200,
+            "final_url": "https://playwright.dev/docs/best-practices",
+            "title": "Best Practices | Playwright",
+            "terms_found": [
+              "playwright",
+              "test isolation",
+              "auto waiting",
+              "playwright.config"
+            ],
+            "terms_missing": [
+              "flaky test",
+              "e2e",
+              "waitForTimeout",
+              "--repeat-each",
+              "await expect(locator).toBeVisible()",
+              "nth-child",
+              "force: true",
+              "force",
+              "page.route"
+            ]
+          },
+          {
+            "url": "https://playwright.dev/docs/test-retries",
+            "status": 200,
+            "final_url": "https://playwright.dev/docs/test-retries",
+            "title": "Retries | Playwright",
+            "terms_found": ["playwright", "playwright.config"],
+            "terms_missing": [
+              "flaky test",
+              "e2e",
+              "test isolation",
+              "auto waiting",
+              "waitForTimeout",
+              "--repeat-each",
+              "await expect(locator).toBeVisible()",
+              "nth-child",
+              "force: true",
+              "force",
+              "page.route"
+            ]
+          },
+          {
+            "url": "https://playwright.dev/docs/actionability",
+            "status": 200,
+            "final_url": "https://playwright.dev/docs/actionability",
+            "title": "Auto-waiting | Playwright",
+            "terms_found": ["playwright", "force"],
+            "terms_missing": [
+              "flaky test",
+              "e2e",
+              "test isolation",
+              "auto waiting",
+              "waitForTimeout",
+              "--repeat-each",
+              "await expect(locator).toBeVisible()",
+              "nth-child",
+              "force: true",
+              "page.route",
+              "playwright.config"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "qa_id": "de-qa-1257",
+      "file": "hard-frontend.json",
+      "topic_id": "fe.test.component-e2e",
+      "topic": {
+        "title": "Kiểm thử frontend",
+        "levels": ["fresher", "junior", "middle"],
+        "key_concepts": [
+          "unit vs component vs E2E",
+          "Testing Library và query theo vai trò",
+          "mock API",
+          "E2E với Playwright",
+          "test flaky"
+        ],
+        "category": "Frontend",
+        "track": "frontend_react"
+      },
+      "difficulty": "hard",
+      "question": "Test component của form checkout đang mock trực tiếp module `api.ts` bằng `jest.mock` và tìm phần tử bằng `container.querySelector('.btn-submit')`. Sau một lần refactor (chuyển sang React Query, đổi class CSS), hàng loạt test vỡ dù tính năng vẫn đúng, còn một bug thật khi API trả 500 thì không test nào bắt được. Bạn thiết kế lại chiến lược test thế nào?",
+      "answer": "**Chẩn đoán:** test đang gắn chặt vào implementation detail ở cả hai đầu.\n- **Đầu DOM:** selector theo class hoặc cấu trúc, nên refactor giao diện là vỡ, dù người dùng không thấy khác biệt gì.\n- **Đầu mạng:** mock module `api.ts` nghĩa là test kiểm \"hàm nào được gọi\" thay vì kiểm hành vi. Đổi cách gọi API (React Query, đổi HTTP client) là phá mock. Mock lại chỉ trả happy path, nên lỗi 500 không bao giờ được kiểm.\n\n**Thiết kế lại:**\n1. **Query như người dùng (Testing Library):**\n   - Ưu tiên `getByRole` kèm `name`, rồi `getByLabelText` cho field, `getByText` cho nội dung không tương tác.\n   - `getByTestId` là lựa chọn cuối cùng.\n   - Query theo role còn buộc markup có semantic đúng, gián tiếp kiểm luôn accessibility.\n2. **Xử lý bất đồng bộ đúng cách:**\n   - `findBy*` trả Promise và retry tới timeout; dùng thay cho việc chờ cố định.\n   - `queryBy*` dùng để khẳng định phần tử không tồn tại.\n3. **Mock ở tầng network (ví dụ MSW):**\n   - Request bị chặn ở mức mạng nên ứng dụng không biết có mock. Đổi fetch sang axios hay thêm React Query không làm vỡ test.\n   - Cùng một bộ handler dùng được cho test lẫn môi trường dev.\n   - Viết handler cho cả nhánh lỗi: 500, 401, timeout, response chậm. Từ đó test được error state, nút submit bị disable khi đang gửi, và chống double submit.\n4. **Phân tầng rõ ràng:**\n   - Unit test cho logic thuần (tính giá, validate).\n   - Component/integration test với mạng giả lập cho phần lớn hành vi UI.\n   - Một số ít E2E (Playwright) cho luồng quan trọng, chạy với backend thật hoặc staging.\n\n**Rủi ro của mock mạng:** handler có thể lệch dần khỏi contract API thật (contract drift). Giảm rủi ro bằng cách sinh type/handler từ OpenAPI schema hoặc contract test, và dựa vào lớp E2E để bắt lỗi tích hợp.\n\n**Đánh đổi:** test hướng hành vi chậm hơn unit test thuần một chút, nhưng sống sót qua refactor, và đó mới là mục tiêu.",
+      "tags": [
+        "testing-library",
+        "msw",
+        "api-mocking",
+        "component-testing",
+        "test-strategy"
+      ],
+      "grounding_urls": [
+        "https://testing-library.com/docs/queries/about/",
+        "https://mswjs.io/docs/philosophy"
+      ],
+      "checks": {
+        "chunk_tokens_est": 740,
+        "over_plan_budget": true,
+        "over_retrieve_budget": false,
+        "topic_in_catalog": true,
+        "topic_levels_ok": true,
+        "topic_hard_total": 2,
+        "topic_hard_curated": 2,
+        "drop_breaks_sc001": true,
+        "golden_labels": [],
+        "sub_questions_hint": 1,
+        "already_reviewed_by": "",
+        "urls": [
+          {
+            "url": "https://testing-library.com/docs/queries/about/",
+            "status": 200,
+            "final_url": "https://testing-library.com/docs/queries/about/",
+            "title": "About Queries | Testing Library",
+            "terms_found": [
+              "testing library",
+              "getByRole",
+              "name",
+              "getByLabelText",
+              "getByText",
+              "getByTestId"
+            ],
+            "terms_missing": [
+              "msw",
+              "api mocking",
+              "component testing",
+              "test strategy",
+              "api.ts",
+              "findBy*",
+              "queryBy*"
+            ]
+          },
+          {
+            "url": "https://mswjs.io/docs/philosophy",
+            "status": 200,
+            "final_url": "https://mswjs.io/docs/philosophy",
+            "title": "Philosophy - Mock Service Worker",
+            "terms_found": ["msw", "api mocking"],
+            "terms_missing": [
+              "testing library",
+              "component testing",
+              "test strategy",
+              "api.ts",
+              "getByRole",
+              "name",
+              "getByLabelText",
+              "getByText",
+              "getByTestId",
+              "findBy*",
+              "queryBy*"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "qa_id": "de-qa-1258",
+      "file": "hard-frontend.json",
+      "topic_id": "fe.ts.typescript-frontend",
+      "topic": {
+        "title": "TypeScript cho frontend",
+        "levels": ["fresher", "junior", "middle"],
+        "key_concepts": [
+          "type vs interface",
+          "generics",
+          "union và type narrowing",
+          "utility types",
+          "typing props và event"
+        ],
+        "category": "Frontend",
+        "track": "frontend_react"
+      },
+      "difficulty": "hard",
+      "question": "Frontend gọi API bằng `const user = (await res.json()) as User` và dùng type guard tự viết `isUser(x): x is User` chỉ kiểm tra `'id' in x`. Production gặp lỗi `Cannot read properties of undefined` dù TypeScript không báo lỗi nào. Giải thích vì sao type system không bảo vệ được ở đây và thiết kế lớp biên (boundary) an toàn kiểu.",
+      "answer": "**Vì sao TypeScript \"im lặng\":**\n- Type chỉ tồn tại lúc compile. Type annotation và type assertion đều bị xóa khi build, nên `as User` không sinh ra bất kỳ kiểm tra runtime nào: sai cũng không ném lỗi.\n- `res.json()` trả `any`, và `any` tắt toàn bộ type checking phía sau.\n- Backend đổi field, trả `null` hoặc `{ error }` với status 200: dữ liệu sai lan sâu và nổ ở chỗ xa nguyên nhân.\n- Type predicate `x is User` cũng chỉ là lời hứa. Compiler narrow theo kết quả boolean mà không kiểm chứng thân hàm có kiểm tra đủ hay không. Guard sơ sài thực chất là một phép cast trá hình.\n\n**Thiết kế lớp biên:**\n1. **Coi mọi dữ liệu từ ngoài là `unknown`, không phải `any`:** response API, `localStorage`, `postMessage`, query string. `unknown` buộc phải narrow trước khi dùng.\n2. **Validate tại biên bằng schema runtime** (zod, valibot...) và suy type từ schema (ví dụ `z.infer<typeof UserSchema>`). Một nguồn sự thật duy nhất nên type và phép kiểm không thể lệch nhau. Parse một lần trong lớp API client; phần còn lại của app làm việc với dữ liệu đã được đảm bảo (\"parse, don't validate\").\n3. **Kiểm `res.ok` trước khi parse**, và trả kết quả dạng discriminated union `{ ok: true; data: User } | { ok: false; error: ApiError }` để caller buộc phải xử lý nhánh lỗi.\n4. **Nếu có OpenAPI:** generate type và client, nhưng vẫn validate runtime ở các endpoint quan trọng. Type sinh ra chỉ mô tả contract, không đảm bảo server tuân thủ nó lúc chạy.\n\n```ts\nconst UserSchema = z.object({ id: z.string(), name: z.string() });\ntype User = z.infer<typeof UserSchema>;\nconst data: unknown = await res.json();\nconst user = UserSchema.parse(data); // ném lỗi ngay tại biên nếu sai\n```\n\n**Đánh đổi:** validate tốn CPU và bundle size, nên chỉ đặt ở biên. Cần chọn chính sách khi schema fail: fail cứng (error state) cho dữ liệu cốt lõi; degrade (log + giá trị mặc định) cho field phụ, tránh sập cả trang.",
+      "tags": [
+        "typescript",
+        "runtime-validation",
+        "type-guard",
+        "unknown",
+        "api-boundary"
+      ],
+      "grounding_urls": [
+        "https://www.typescriptlang.org/docs/handbook/2/everyday-types.html",
+        "https://www.typescriptlang.org/docs/handbook/2/narrowing.html"
+      ],
+      "checks": {
+        "chunk_tokens_est": 737,
+        "over_plan_budget": true,
+        "over_retrieve_budget": false,
+        "topic_in_catalog": true,
+        "topic_levels_ok": true,
+        "topic_hard_total": 2,
+        "topic_hard_curated": 2,
+        "drop_breaks_sc001": true,
+        "golden_labels": [],
+        "sub_questions_hint": 2,
+        "already_reviewed_by": "",
+        "urls": [
+          {
+            "url": "https://www.typescriptlang.org/docs/handbook/2/everyday-types.html",
+            "status": 200,
+            "final_url": "https://www.typescriptlang.org/docs/handbook/2/everyday-types.html",
+            "title": "TypeScript: Documentation - Everyday Types",
+            "terms_found": ["typescript", "unknown", "any", "null"],
+            "terms_missing": [
+              "runtime validation",
+              "type guard",
+              "api boundary",
+              "as User",
+              "res.json()",
+              "{ error }",
+              "x is User",
+              "localStorage",
+              "postMessage",
+              "z.infer<typeof UserSchema>",
+              "res.ok"
+            ]
+          },
+          {
+            "url": "https://www.typescriptlang.org/docs/handbook/2/narrowing.html",
+            "status": 200,
+            "final_url": "https://www.typescriptlang.org/docs/handbook/2/narrowing.html",
+            "title": "TypeScript: Documentation - Narrowing",
+            "terms_found": ["typescript", "type guard", "any", "null"],
+            "terms_missing": [
+              "runtime validation",
+              "unknown",
+              "api boundary",
+              "as User",
+              "res.json()",
+              "{ error }",
+              "x is User",
+              "localStorage",
+              "postMessage",
+              "z.infer<typeof UserSchema>",
+              "res.ok"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "qa_id": "de-qa-1259",
+      "file": "hard-frontend.json",
+      "topic_id": "fe.ts.typescript-frontend",
+      "topic": {
+        "title": "TypeScript cho frontend",
+        "levels": ["fresher", "junior", "middle"],
+        "key_concepts": [
+          "type vs interface",
+          "generics",
+          "union và type narrowing",
+          "utility types",
+          "typing props và event"
+        ],
+        "category": "Frontend",
+        "track": "frontend_react"
+      },
+      "difficulty": "hard",
+      "question": "Bạn thiết kế component `<Notification>` với ba biến thể: `kind: 'toast'` (bắt buộc `duration`), `kind: 'banner'` (bắt buộc `action`), `kind: 'modal'` (bắt buộc `onConfirm`). Bản đầu khai báo mọi thứ là optional props và bug liên tục. Hãy thiết kế type cho props, rồi giải thích vì sao bọc lại bằng `Omit<NotificationProps, 'id'>` làm hỏng thiết kế đó và cách sửa.",
+      "answer": "**Vấn đề của optional props:** `{ kind; duration?; action?; onConfirm? }` cho phép những trạng thái vô nghĩa, như toast có `onConfirm` hay modal thiếu `onConfirm`. Mọi chỗ dùng đều phải kiểm `undefined`, và compiler không giúp được gì.\n\n**Dùng discriminated union:** mọi thành viên có chung một thuộc tính mang literal type (`kind`), nên TypeScript tự narrow khi kiểm tra `kind`.\n\n```ts\ntype Base = { id: string; message: string };\ntype NotificationProps = Base & (\n  | { kind: 'toast'; duration: number }\n  | { kind: 'banner'; action: { label: string; href: string } }\n  | { kind: 'modal'; onConfirm: () => void }\n);\n```\n\n**Exhaustiveness check:** trong `switch (props.kind)`, nhánh `default` gán `const _exhaustive: never = props`. Khi thêm biến thể mới mà quên xử lý, compiler báo lỗi vì kiểu mới không gán được cho `never`.\n\n**Vì sao `Omit` làm hỏng:**\n- `Omit<T, K>` được định nghĩa là `Pick<T, Exclude<keyof T, K>>`.\n- Với T là union, `keyof T` chỉ gồm các key **chung** của mọi thành viên (`id | message | kind`).\n- Kết quả là một object type duy nhất, khoảng `{ message: string; kind: 'toast' | 'banner' | 'modal' }`. Các field riêng (`duration`, `action`, `onConfirm`) biến mất, `kind` không còn gắn với field tương ứng, và tính discriminated union cũng mất theo.\n- Lỗi này hay gặp khi viết wrapper component với `Omit<ComponentProps<typeof X>, ...>`.\n\n**Cách sửa:** tận dụng conditional type phân phối qua union. Khi conditional type nhận một type parameter là union, nó áp dụng cho từng thành viên rồi hợp kết quả lại.\n\n```ts\ntype DistributiveOmit<T, K extends PropertyKey> =\n  T extends unknown ? Omit<T, K> : never;\n```\n\nTương tự, có thể viết `DistributivePick` hay `DistributivePartial` cho props dạng union.\n\n**Đánh đổi:**\n- Union lớn làm thông báo lỗi khó đọc và type-check chậm hơn.\n- Nếu các biến thể khác nhau quá nhiều (markup, hành vi), tách hẳn thành nhiều component thường rõ ràng hơn là nhồi vào một union.\n- Vẫn nên giữ union cho phần API thực sự chung.",
+      "tags": [
+        "typescript",
+        "discriminated-union",
+        "utility-types",
+        "conditional-types",
+        "react-props"
+      ],
+      "grounding_urls": [
+        "https://www.typescriptlang.org/docs/handbook/2/narrowing.html",
+        "https://www.typescriptlang.org/docs/handbook/2/conditional-types.html",
+        "https://www.typescriptlang.org/docs/handbook/utility-types.html"
+      ],
+      "checks": {
+        "chunk_tokens_est": 781,
+        "over_plan_budget": true,
+        "over_retrieve_budget": false,
+        "topic_in_catalog": true,
+        "topic_levels_ok": true,
+        "topic_hard_total": 2,
+        "topic_hard_curated": 2,
+        "drop_breaks_sc001": true,
+        "golden_labels": [],
+        "sub_questions_hint": 5,
+        "already_reviewed_by": "",
+        "urls": [
+          {
+            "url": "https://www.typescriptlang.org/docs/handbook/2/narrowing.html",
+            "status": 200,
+            "final_url": "https://www.typescriptlang.org/docs/handbook/2/narrowing.html",
+            "title": "TypeScript: Documentation - Narrowing",
+            "terms_found": [
+              "typescript",
+              "discriminated union",
+              "utility types",
+              "conditional types",
+              "undefined",
+              "kind",
+              "default",
+              "never"
+            ],
+            "terms_missing": [
+              "react props",
+              "{ kind; duration?; action?; onConfirm? }",
+              "onConfirm",
+              "switch (props.kind)",
+              "const _exhaustive: never = props",
+              "Omit",
+              "Omit<T, K>"
+            ]
+          },
+          {
+            "url": "https://www.typescriptlang.org/docs/handbook/2/conditional-types.html",
+            "status": 200,
+            "final_url": "https://www.typescriptlang.org/docs/handbook/2/conditional-types.html",
+            "title": "TypeScript: Documentation - Conditional Types",
+            "terms_found": [
+              "typescript",
+              "utility types",
+              "conditional types",
+              "default",
+              "never"
+            ],
+            "terms_missing": [
+              "discriminated union",
+              "react props",
+              "{ kind; duration?; action?; onConfirm? }",
+              "onConfirm",
+              "undefined",
+              "kind",
+              "switch (props.kind)",
+              "const _exhaustive: never = props",
+              "Omit",
+              "Omit<T, K>"
+            ]
+          },
+          {
+            "url": "https://www.typescriptlang.org/docs/handbook/utility-types.html",
+            "status": 200,
+            "final_url": "https://www.typescriptlang.org/docs/handbook/utility-types.html",
+            "title": "TypeScript: Documentation - Utility Types",
+            "terms_found": [
+              "typescript",
+              "utility types",
+              "conditional types",
+              "undefined",
+              "kind",
+              "default",
+              "never",
+              "Omit"
+            ],
+            "terms_missing": [
+              "discriminated union",
+              "react props",
+              "{ kind; duration?; action?; onConfirm? }",
+              "onConfirm",
+              "switch (props.kind)",
+              "const _exhaustive: never = props",
+              "Omit<T, K>"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "qa_id": "de-qa-1260",
+      "file": "hard-frontend.json",
+      "topic_id": "fe.web.accessibility",
+      "topic": {
+        "title": "Accessibility (a11y)",
+        "levels": ["fresher", "junior", "middle"],
+        "key_concepts": [
+          "HTML semantic cho screen reader",
+          "ARIA",
+          "điều hướng bàn phím và focus",
+          "độ tương phản màu",
+          "kiểm tra a11y tự động"
+        ],
+        "category": "Frontend",
+        "track": "frontend_react"
+      },
+      "difficulty": "hard",
+      "question": "Team tự viết component Modal bằng `<div>` với `position: fixed`. Audit accessibility phát hiện: người dùng bàn phím Tab ra được nội dung phía sau, screen reader vẫn đọc trang nền, và đóng modal xong thì focus rơi về đầu trang. Bạn sửa thế nào? Nên tự xây theo WAI-ARIA hay dùng `<dialog>` native, và modal cần đảm bảo những hành vi gì?",
+      "answer": "**Hành vi bắt buộc (WAI-ARIA APG, mẫu dialog modal):**\n- **Khi mở:** focus vào trong dialog, thường là phần tử focus được đầu tiên. Ngoại lệ:\n  - Nội dung dài: focus tiêu đề hoặc phần tử tĩnh ở đầu.\n  - Xác nhận hành động không hoàn tác: focus nút ít phá hủy hơn (Hủy).\n- **Trong lúc mở:** Tab/Shift+Tab chỉ vòng trong dialog; Escape đóng dialog.\n- **Khi đóng:** trả focus về phần tử đã mở dialog. Nếu phần tử đó không còn (ví dụ vừa xóa item), focus phần tử hợp lý kế tiếp.\n- **Semantic:** `role=\"dialog\"`, `aria-modal=\"true\"`, `aria-labelledby` trỏ tới tiêu đề hiển thị.\n- **Nội dung phía sau phải inert:** không chỉ chặn chuột bằng overlay, mà phải ra khỏi tab order và accessibility tree.\n\n**Cách 1 (nên ưu tiên): `<dialog>` với `showModal()`.** Trình duyệt lo sẵn:\n- phần còn lại của trang inert;\n- Esc đóng dialog mở sau cùng;\n- `::backdrop`;\n- ngầm định `aria-modal=\"true\"`;\n- focus phần tử focus được đầu tiên (chọn chủ động bằng `autofocus`).\n\nVẫn phải tự lo nhãn và chủ động trả focus khi đóng: lưu `document.activeElement` trước khi mở, đừng mặc định trình duyệt sẽ làm. Lưu ý `show()` hoặc thuộc tính `open` tạo dialog non-modal, không có các hành vi trên.\n\n**Cách 2: tự xây trên `<div>`.** Phải tự viết role/aria, focus trap, handler Esc, đặt `inert` lên phần còn lại của app (không chỉ `aria-hidden`), và khóa scroll nền. Có nhiều chỗ dễ sai, nên chỉ chọn khi có ràng buộc đặc biệt; nếu không thì dùng native hoặc thư viện headless đã kiểm chứng.\n\n**Nguyên tắc:** chỉ khai báo `aria-modal` khi ứng dụng thật sự chặn mọi tương tác bên ngoài.\n\n**Kiểm thử:**\n- Dùng thử chỉ bằng bàn phím.\n- Kiểm với screen reader thật (NVDA, VoiceOver).\n- Viết test `getByRole('dialog', { name })`.\n- Công cụ quét tự động không kiểm được thứ tự focus, nên vẫn cần kiểm thủ công.",
+      "tags": [
+        "accessibility",
+        "modal-dialog",
+        "focus-management",
+        "aria",
+        "keyboard-navigation"
+      ],
+      "grounding_urls": [
+        "https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/",
+        "https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dialog"
+      ],
+      "checks": {
+        "chunk_tokens_est": 704,
+        "over_plan_budget": true,
+        "over_retrieve_budget": false,
+        "topic_in_catalog": true,
+        "topic_levels_ok": true,
+        "topic_hard_total": 2,
+        "topic_hard_curated": 2,
+        "drop_breaks_sc001": true,
+        "golden_labels": [],
+        "sub_questions_hint": 6,
+        "already_reviewed_by": "",
+        "urls": [
+          {
+            "url": "https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/",
+            "status": 200,
+            "final_url": "https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/",
+            "title": "Dialog (Modal) Pattern | APG | WAI | W3C",
+            "terms_found": [
+              "accessibility",
+              "modal dialog",
+              "aria",
+              "aria-labelledby",
+              "open"
+            ],
+            "terms_missing": [
+              "focus management",
+              "keyboard navigation",
+              "role=\"dialog\"",
+              "aria-modal=\"true\"",
+              "<dialog>",
+              "showModal()",
+              "::backdrop",
+              "autofocus",
+              "document.activeElement",
+              "show()"
+            ]
+          },
+          {
+            "url": "https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dialog",
+            "status": 200,
+            "final_url": "https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dialog",
+            "title": "<dialog> HTML dialog element - HTML | MDN",
+            "terms_found": [
+              "accessibility",
+              "modal dialog",
+              "aria",
+              "role=\"dialog\"",
+              "aria-modal=\"true\"",
+              "<dialog>",
+              "showModal()",
+              "::backdrop",
+              "autofocus",
+              "show()",
+              "open"
+            ],
+            "terms_missing": [
+              "focus management",
+              "keyboard navigation",
+              "aria-labelledby",
+              "document.activeElement"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "qa_id": "de-qa-1261",
+      "file": "hard-frontend.json",
+      "topic_id": "fe.web.accessibility",
+      "topic": {
+        "title": "Accessibility (a11y)",
+        "levels": ["fresher", "junior", "middle"],
+        "key_concepts": [
+          "HTML semantic cho screen reader",
+          "ARIA",
+          "điều hướng bàn phím và focus",
+          "độ tương phản màu",
+          "kiểm tra a11y tự động"
+        ],
+        "category": "Frontend",
+        "track": "frontend_react"
+      },
+      "difficulty": "hard",
+      "question": "Trong một SPA, người dùng screen reader phản ánh ba vấn đề: bấm link chuyển trang thì \"không có gì xảy ra\", toast \"Đã lưu\" không được đọc, và khi lọc danh sách thì không biết kết quả đã thay đổi. Vì sao các vấn đề này đặc trưng cho SPA, và bạn xử lý từng vấn đề thế nào?",
+      "answer": "**Vì sao đặc trưng cho SPA:** với điều hướng truyền thống, trình duyệt tải trang mới và công nghệ hỗ trợ (AT) đọc title trang. SPA thay DOM bằng JavaScript nên không có page load để AT nhận biết. Focus nằm lại ở link cũ, và nếu link bị gỡ khỏi DOM thì focus rơi về `body`. Nội dung động thay đổi cũng không được thông báo nếu không có live region.\n\n**1. Chuyển route**\n- **Next.js** có sẵn route announcer, lấy tên trang theo thứ tự `document.title`, rồi `<h1>`, rồi pathname. Mỗi trang cần title riêng và mô tả rõ.\n- **Router khác** thì tự làm:\n  - cập nhật `document.title`;\n  - thông báo qua một live region polite có sẵn trong DOM;\n  - có thể chuyển focus tới `<h1 tabindex=\"-1\">` hoặc vùng `main`.\n\n  Chuyển focus giúp người dùng bàn phím bắt đầu ngay ở nội dung mới, nhưng gây mất định hướng nếu chỉ một phần trang đổi (tab, filter). Trường hợp đó không nên chuyển.\n\n**2. Toast \"Đã lưu\"**\n- Dùng `role=\"status\"` (polite).\n- Live region phải tồn tại **trước** khi nội dung đổi. Chèn một phần tử mới đã có sẵn text thường không được đọc. Đáng tin nhất là đặt region rỗng trong markup ban đầu rồi cập nhật text.\n- `aria-live=\"assertive\"`/`role=\"alert\"` chỉ dành cho lỗi khẩn cấp, vì chúng ngắt lời đang được đọc.\n\n**3. Kết quả lọc**\n- Thông báo tóm tắt, ví dụ \"Hiển thị 24 kết quả\", qua status region kèm `aria-atomic=\"true\"`.\n- Không biến cả danh sách thành live region, vì sẽ bị đọc tràn lan.\n\n**Giới hạn:**\n- Live region được đọc như plain text.\n- Hành vi khác nhau giữa các tổ hợp trình duyệt và AT, nên phải kiểm bằng NVDA/VoiceOver thật.\n- Công cụ tự động (axe, `eslint-plugin-jsx-a11y`) bắt được lỗi tĩnh (aria sai, thiếu alt), nhưng không kiểm được thông báo có xảy ra đúng lúc hay không.",
+      "tags": [
+        "accessibility",
+        "spa",
+        "aria-live",
+        "screen-reader",
+        "route-announcement"
+      ],
+      "grounding_urls": [
+        "https://nextjs.org/docs/architecture/accessibility",
+        "https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Guides/Live_regions"
+      ],
+      "checks": {
+        "chunk_tokens_est": 657,
+        "over_plan_budget": true,
+        "over_retrieve_budget": false,
+        "topic_in_catalog": true,
+        "topic_levels_ok": true,
+        "topic_hard_total": 2,
+        "topic_hard_curated": 2,
+        "drop_breaks_sc001": true,
+        "golden_labels": [],
+        "sub_questions_hint": 6,
+        "already_reviewed_by": "",
+        "urls": [
+          {
+            "url": "https://nextjs.org/docs/architecture/accessibility",
+            "status": 200,
+            "final_url": "https://nextjs.org/docs/architecture/accessibility",
+            "title": "Accessibility",
+            "terms_found": [
+              "accessibility",
+              "spa",
+              "screen reader",
+              "route announcement",
+              "document.title",
+              "<h1>",
+              "eslint-plugin-jsx-a11y"
+            ],
+            "terms_missing": [
+              "aria live",
+              "body",
+              "<h1 tabindex=\"-1\">",
+              "main",
+              "role=\"status\"",
+              "aria-live=\"assertive\"",
+              "role=\"alert\"",
+              "aria-atomic=\"true\""
+            ]
+          },
+          {
+            "url": "https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Guides/Live_regions",
+            "status": 200,
+            "final_url": "https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Guides/Live_regions",
+            "title": "ARIA live regions - ARIA | MDN",
+            "terms_found": [
+              "accessibility",
+              "spa",
+              "aria live",
+              "screen reader",
+              "main",
+              "aria-live=\"assertive\"",
+              "role=\"alert\"",
+              "aria-atomic=\"true\""
+            ],
+            "terms_missing": [
+              "route announcement",
+              "body",
+              "document.title",
+              "<h1>",
+              "<h1 tabindex=\"-1\">",
+              "role=\"status\"",
+              "eslint-plugin-jsx-a11y"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "qa_id": "de-qa-1262",
+      "file": "hard-frontend.json",
+      "topic_id": "fe.web.performance-web-vitals",
+      "topic": {
+        "title": "Hiệu năng web và Core Web Vitals",
+        "levels": ["middle", "senior"],
+        "key_concepts": [
+          "critical rendering path",
+          "LCP INP CLS",
+          "code splitting và lazy loading",
+          "tối ưu ảnh và font",
+          "bundle analysis"
+        ],
+        "category": "Frontend",
+        "track": "frontend_react"
+      },
+      "difficulty": "hard",
+      "question": "Trang danh sách sản phẩm có INP ở p75 trên mobile khoảng 600 ms theo dữ liệu field, nhưng chạy Lighthouse trên máy dev thì điểm vẫn đẹp. Bạn chẩn đoán và tối ưu INP thế nào, theo từng thành phần của độ trễ tương tác?",
+      "answer": "**INP đo gì:** độ trễ của mọi tương tác click, tap, bàn phím. Giá trị báo cáo là tương tác chậm nhất, sau khi bỏ outlier (một tương tác cao nhất cho mỗi 50). INP đánh giá ở p75 dữ liệu field, tách mobile và desktop: ≤200 ms là tốt, >500 ms là kém. Vậy 600 ms là **kém**.\n\n**Vì sao lab vẫn đẹp:**\n- Báo cáo tải trang của Lighthouse không có tương tác người dùng, nên không phản ánh INP.\n- Máy dev mạnh, trong khi tương tác chậm thường đến từ thiết bị yếu, dữ liệu thật, và lúc main thread đang bận khi load.\n\n**Chẩn đoán:**\n- Bắt đầu từ RUM có attribution: tương tác nào, phần tử nào, phase nào chậm. CrUX thường thiếu ngữ cảnh này.\n- Tái hiện trong lab: bật CPU throttling, tự thao tác (cả lúc đang load), ghi bằng Performance panel.\n\n**Tối ưu theo ba phần của một tương tác:**\n\n1. **Input delay** (main thread bận trước khi handler chạy)\n   - Nguyên nhân: long task lúc load (hydration, script bên thứ ba), tương tác chồng nhau.\n   - Cách sửa: chia nhỏ long task, trì hoãn script không thiết yếu, code splitting.\n\n2. **Processing duration** (handler chạy lâu)\n   - Làm ít nhất có thể. Chỉ chạy phần cần cho frame kế tiếp (trạng thái nút, loading); analytics và tính toán phụ thì yield sang task sau.\n   - Trong React, đưa cập nhật nặng vào `useTransition`/`useDeferredValue`.\n   - Tránh layout thrashing.\n\n3. **Presentation delay** (render sau handler)\n   - DOM lớn làm style/layout/paint đắt.\n   - Virtualize danh sách, dùng `content-visibility` cho phần ngoài viewport, tránh render khối HTML lớn phía client.\n\n**Quy trình:** RUM, tái hiện lab, sửa, rồi xác nhận lại bằng field data. Điểm lab tăng chưa chắc INP đã cải thiện.\n\n**Đánh đổi:**\n- Yield làm tổng thời gian dài hơn chút, nhưng phản hồi thị giác đến sớm.\n- Virtualization làm phức tạp tìm kiếm trên trang và accessibility.",
+      "tags": ["inp", "core-web-vitals", "rum", "long-task", "rendering-performance"],
+      "grounding_urls": [
+        "https://web.dev/articles/inp",
+        "https://web.dev/articles/optimize-inp",
+        "https://web.dev/articles/optimize-long-tasks"
+      ],
+      "checks": {
+        "chunk_tokens_est": 668,
+        "over_plan_budget": true,
+        "over_retrieve_budget": false,
+        "topic_in_catalog": true,
+        "topic_levels_ok": true,
+        "topic_hard_total": 2,
+        "topic_hard_curated": 1,
+        "drop_breaks_sc001": true,
+        "golden_labels": [],
+        "sub_questions_hint": 1,
+        "already_reviewed_by": "",
+        "urls": [
+          {
+            "url": "https://web.dev/articles/inp",
+            "status": 200,
+            "final_url": "https://web.dev/articles/inp",
+            "title": "Interaction to Next Paint (INP)  |  web.dev",
+            "terms_found": ["inp", "core web vitals", "rum", "long task"],
+            "terms_missing": [
+              "rendering performance",
+              "useTransition",
+              "useDeferredValue",
+              "content-visibility"
+            ]
+          },
+          {
+            "url": "https://web.dev/articles/optimize-inp",
+            "status": 200,
+            "final_url": "https://web.dev/articles/optimize-inp",
+            "title": "Optimize Interaction to Next Paint  |  web.dev",
+            "terms_found": [
+              "inp",
+              "core web vitals",
+              "rum",
+              "long task",
+              "rendering performance",
+              "content-visibility"
+            ],
+            "terms_missing": ["useTransition", "useDeferredValue"]
+          },
+          {
+            "url": "https://web.dev/articles/optimize-long-tasks",
+            "status": 200,
+            "final_url": "https://web.dev/articles/optimize-long-tasks",
+            "title": "Optimize long tasks  |  web.dev",
+            "terms_found": ["inp", "core web vitals", "long task"],
+            "terms_missing": [
+              "rum",
+              "rendering performance",
+              "useTransition",
+              "useDeferredValue",
+              "content-visibility"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "qa_id": "de-qa-1263",
+      "file": "hard-frontend.json",
+      "topic_id": "fe.react.rendering-performance",
+      "topic": {
+        "title": "Rendering và tối ưu hiệu năng React",
+        "levels": ["junior", "middle", "senior"],
+        "key_concepts": [
+          "khi nào component re-render",
+          "reconciliation và key",
+          "React.memo",
+          "useMemo vs useCallback",
+          "list virtualization"
+        ],
+        "category": "Frontend",
+        "track": "frontend_react"
+      },
+      "difficulty": "hard",
+      "question": "Một màn hình chạy React 18 (đã dùng `createRoot`) gọi `setLoading(false)`, `setItems(data)` và `setError(null)` liên tiếp trong callback `fetch(...).then(...)`. Profiler cho thấy component render 3 lần cho một lần tải. Giải thích nguyên nhân và cách giảm số lần render.",
+      "answer": "**Nguyên nhân: batching chỉ áp dụng trong event handler.** Ở React 18, automatic batching chỉ gộp các lần `setState` xảy ra bên trong event handler của React (onClick, onChange...). Cập nhật nằm trong callback của Promise, `setTimeout` hay native event listener chạy ngoài phạm vi đó nên mỗi `setState` kích hoạt một lần render riêng, vì vậy profiler thấy 3 lần render.\n\n**Cách giảm số lần render**\n- Gộp các state liên quan thành một object hoặc dùng `useReducer`, dispatch một action `LOADED` chứa cả `items`, `loading`, `error`: một lần cập nhật, một lần render.\n- Bọc các lần gọi trong `unstable_batchedUpdates` từ `react-dom` để ép React gộp lại.\n- Với dữ liệu server, dùng thư viện như TanStack Query để trạng thái loading/data/error được quản lý chung.\n\n**Vì sao state rời rạc dễ sinh lỗi**\n- Giữa các lần render trung gian, UI có thể hiện trạng thái không nhất quán: `loading = false` nhưng `items` vẫn rỗng, gây nhấp nháy \"không có dữ liệu\".\n- Effect phụ thuộc vào từng state riêng (`useEffect(..., [items])`) có thể chạy nhiều lần hơn dự kiến.\n- `useReducer` giúp mô hình hóa trạng thái tải dưới dạng một máy trạng thái (`idle → loading → success | error`), loại bỏ tổ hợp vô nghĩa.\n\n**Kiểm chứng**\n- Dùng React DevTools Profiler, bật \"Record why each component rendered\".\n- Đếm số commit cho một lần tải trước và sau khi sửa.\n\n**Lưu ý**\n- `flushSync` làm điều ngược lại: buộc React render ngay, không gộp.\n- Render nhiều lần không phải lúc nào cũng là vấn đề; chỉ tối ưu khi đo thấy chậm.",
+      "tags": ["automatic-batching", "react-18", "re-render", "createRoot"],
+      "grounding_urls": [
+        "https://react.dev/blog/2022/03/29/react-v18",
+        "https://react.dev/learn/queueing-a-series-of-state-updates"
+      ],
+      "checks": {
+        "chunk_tokens_est": 590,
+        "over_plan_budget": false,
+        "over_retrieve_budget": false,
+        "topic_in_catalog": true,
+        "topic_levels_ok": true,
+        "topic_hard_total": 2,
+        "topic_hard_curated": 0,
+        "drop_breaks_sc001": true,
+        "golden_labels": [],
+        "sub_questions_hint": 1,
+        "already_reviewed_by": "",
+        "urls": [
+          {
+            "url": "https://react.dev/blog/2022/03/29/react-v18",
+            "status": 200,
+            "final_url": "https://react.dev/blog/2022/03/29/react-v18",
+            "title": "React v18.0 – React",
+            "terms_found": [
+              "automatic batching",
+              "react 18",
+              "re render",
+              "createRoot",
+              "setState",
+              "setTimeout",
+              "useReducer",
+              "LOADED",
+              "loading",
+              "error",
+              "react-dom"
+            ],
+            "terms_missing": [
+              "items",
+              "unstable_batchedUpdates",
+              "loading = false",
+              "useEffect(..., [items])"
+            ]
+          },
+          {
+            "url": "https://react.dev/learn/queueing-a-series-of-state-updates",
+            "status": 200,
+            "final_url": "https://react.dev/learn/queueing-a-series-of-state-updates",
+            "title": "Queueing a Series of State Updates – React",
+            "terms_found": ["setState", "setTimeout"],
+            "terms_missing": [
+              "automatic batching",
+              "react 18",
+              "re render",
+              "createRoot",
+              "useReducer",
+              "LOADED",
+              "items",
+              "loading",
+              "error",
+              "unstable_batchedUpdates",
+              "react-dom",
+              "loading = false",
+              "useEffect(..., [items])"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "qa_id": "de-qa-1264",
+      "file": "hard-frontend.json",
+      "topic_id": "fe.web.performance-web-vitals",
+      "topic": {
+        "title": "Hiệu năng web và Core Web Vitals",
+        "levels": ["middle", "senior"],
+        "key_concepts": [
+          "critical rendering path",
+          "LCP INP CLS",
+          "code splitting và lazy loading",
+          "tối ưu ảnh và font",
+          "bundle analysis"
+        ],
+        "category": "Frontend",
+        "track": "frontend_react"
+      },
+      "difficulty": "hard",
+      "question": "Trang danh sách sản phẩm có INP ở p75 là 350 ms trên mobile theo dữ liệu CrUX, nhưng đo bằng Lighthouse trên máy dev lại không thấy vấn đề. Bạn đánh giá con số này thế nào và điều tra ra sao?",
+      "answer": "**Đánh giá con số.** INP (Interaction to Next Paint) đo độ trễ từ lúc người dùng tương tác tới khi khung hình tiếp theo được vẽ, lấy gần như tương tác chậm nhất trong phiên. Theo ngưỡng của Core Web Vitals, INP ≤ 500 ms được xếp \"tốt\", nên 350 ms ở p75 vẫn đạt; chỉ cần ưu tiên tối ưu khi vượt 500 ms. Tuy vậy 350 ms vẫn cảm nhận được trên máy yếu nên đáng theo dõi.\n\n**Vì sao Lighthouse không thấy.** Lighthouse là lab data, chạy một lần tải trang, không có tương tác thật của người dùng nên không đo được INP (chỉ có Total Blocking Time làm chỉ số thay thế). CrUX là field data từ thiết bị thật, thường yếu hơn máy dev.\n\n**Điều tra**\n- Thu field data có attribution bằng thư viện `web-vitals` (bản attribution): biết phần tử nào, loại tương tác nào chậm, và chia ra input delay, processing time, presentation delay.\n- Tái hiện trong DevTools Performance panel với CPU throttling 4x–6x, ghi lại đúng tương tác đó.\n- Tìm long task (> 50 ms) trong lúc tương tác: handler nặng, re-render lớn, layout thrashing.\n\n**Đọc ba thành phần của một tương tác**\n- *Input delay* lớn: main thread đang bận việc khác khi người dùng bấm (script bên thứ ba, hydration, timer).\n- *Processing time* lớn: chính event handler chạy lâu.\n- *Presentation delay* lớn: sau handler, trình duyệt tốn nhiều thời gian style, layout, paint (DOM quá lớn, CSS phức tạp).\nBiết phần nào chiếm ưu thế mới chọn đúng cách sửa.\n\n**Hướng sửa**\n- Chia nhỏ việc trong handler, nhường main thread (`scheduler.yield()` hoặc `setTimeout`) để trình duyệt vẽ phản hồi trước.\n- Giảm DOM size, tránh đọc layout ngay sau khi ghi style.\n- Với React: `startTransition` cho cập nhật không khẩn cấp, ảo hóa danh sách dài.",
+      "tags": ["inp", "core-web-vitals", "long-task", "field-data"],
+      "grounding_urls": [
+        "https://web.dev/articles/inp",
+        "https://web.dev/articles/optimize-inp"
+      ],
+      "checks": {
+        "chunk_tokens_est": 620,
+        "over_plan_budget": true,
+        "over_retrieve_budget": false,
+        "topic_in_catalog": true,
+        "topic_levels_ok": true,
+        "topic_hard_total": 2,
+        "topic_hard_curated": 1,
+        "drop_breaks_sc001": true,
+        "golden_labels": [],
+        "sub_questions_hint": 1,
+        "already_reviewed_by": "",
+        "urls": [
+          {
+            "url": "https://web.dev/articles/inp",
+            "status": 200,
+            "final_url": "https://web.dev/articles/inp",
+            "title": "Interaction to Next Paint (INP)  |  web.dev",
+            "terms_found": [
+              "inp",
+              "core web vitals",
+              "long task",
+              "field data",
+              "web-vitals"
+            ],
+            "terms_missing": ["scheduler.yield()", "setTimeout", "startTransition"]
+          },
+          {
+            "url": "https://web.dev/articles/optimize-inp",
+            "status": 200,
+            "final_url": "https://web.dev/articles/optimize-inp",
+            "title": "Optimize Interaction to Next Paint  |  web.dev",
+            "terms_found": [
+              "inp",
+              "core web vitals",
+              "long task",
+              "field data",
+              "web-vitals",
+              "setTimeout"
+            ],
+            "terms_missing": ["scheduler.yield()", "startTransition"]
+          }
+        ]
+      }
+    }
+  ]
+}

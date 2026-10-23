@@ -1,0 +1,2216 @@
+[
+  {
+    "qa_id": "de-qa-1000",
+    "verdict": "ok",
+    "confidence": "high",
+    "summary_vi": "Đúng và bám tài liệu Node/libuv: phân biệt threadpool bão hòa với event loop bị block, liệt kê đúng API dùng threadpool và cách khắc phục. Chỉ thiếu sót nhỏ: phần cuối (rate limit) bị cắt ở 600 token; pair có golden label g21 nên giữ nguyên wording.",
+    "claims": [
+      {
+        "claim": "fs (trừ bản sync và FSWatcher) chạy trên libuv threadpool",
+        "status": "supported",
+        "source_url": "https://nodejs.org/en/learn/asynchronous-work/dont-block-the-event-loop",
+        "quote": "All file system APIs except `fs.FSWatcher()` and those that are explicitly synchronous use libuv's threadpool.",
+        "note": ""
+      },
+      {
+        "claim": "crypto.pbkdf2/scrypt/randomBytes/generateKeyPair và zlib async dùng threadpool",
+        "status": "supported",
+        "source_url": "https://nodejs.org/en/learn/asynchronous-work/dont-block-the-event-loop",
+        "quote": "`crypto.pbkdf2()`, `crypto.scrypt()`, `crypto.randomBytes()`, `crypto.randomFill()`, `crypto.generateKeyPair()`.",
+        "note": "Cùng trang: \"All zlib APIs except those that are explicitly synchronous use libuv's threadpool.\""
+      },
+      {
+        "claim": "dns.lookup() gọi getaddrinfo đồng bộ trên threadpool",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/nodejs/node/main/doc/api/dns.md",
+        "quote": "it is implemented as a synchronous call to getaddrinfo(3) that runs on libuv's threadpool.",
+        "note": "Mục Implementation considerations của dns.md"
+      },
+      {
+        "claim": "dns.resolve*() luôn query qua mạng, không dùng threadpool, không dùng /etc/hosts",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/nodejs/node/main/doc/api/dns.md",
+        "quote": "This network communication is always done asynchronously and does not use libuv's threadpool.",
+        "note": "nodejs.org/api/dns.html: \"These functions do not use the same set of configuration files used by dns.lookup() (e.g. /etc/hosts).\""
+      },
+      {
+        "claim": "Threadpool mặc định 4 thread, đổi bằng UV_THREADPOOL_SIZE lúc khởi động",
+        "status": "supported",
+        "source_url": "https://docs.libuv.org/en/v1.x/threadpool.html",
+        "quote": "it can be changed at startup time by setting the UV_THREADPOOL_SIZE environment variable to any value",
+        "note": "Cùng câu bắt đầu bằng \"Its default size is 4\". Mục UV_THREADPOOL_SIZE trong cli.md không đọc được do trang bị cắt khi fetch."
+      },
+      {
+        "claim": "Tác vụ dài chiếm trọn một thread, làm pool nhỏ lại",
+        "status": "supported",
+        "source_url": "https://nodejs.org/en/learn/asynchronous-work/dont-block-the-event-loop",
+        "quote": "each relatively long Task effectively decreases the size of the Worker Pool by one until it is completed",
+        "note": ""
+      },
+      {
+        "claim": "monitorEventLoopDelay đo độ trễ event loop",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/nodejs/node/main/doc/api/perf_hooks.md",
+        "quote": "Creates a histogram object that samples and reports the event loop delay over time. The delays will be reported in nanoseconds.",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "639 token; phần bị cắt ở 600 token chỉ là ý chia nhỏ tác vụ và rate limit endpoint login, các ý bắt buộc (cơ chế, chẩn đoán, UV_THREADPOOL_SIZE, DNS) vẫn còn.",
+        "fix": "Rút gọn câu về dns.resolve và bỏ ý rate limit để dưới 600 token."
+      },
+      {
+        "severity": "minor",
+        "type": "factual",
+        "detail": "Câu 'gán process.env trong code không đảm bảo có hiệu lực' đúng hướng nhưng libuv nói pool được cấp phát khi lần đầu cần dùng, nên gán sớm ở dòng đầu entrypoint thường vẫn có tác dụng.",
+        "fix": "Giữ khuyến nghị đặt qua biến môi trường, nói rõ 'gán trong code chỉ có tác dụng nếu chạy trước mọi thao tác dùng threadpool'."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Phải suy luận từ triệu chứng (cache nhanh, fs/crypto/dns chậm) ra threadpool bão hòa, không phải câu hỏi định nghĩa."
+    },
+    "interview_fit": {
+      "minutes": 4,
+      "sub_questions": 2,
+      "gradeable": true,
+      "note": "Hai yêu cầu: chẩn đoán và khắc phục; có 4-5 ý chấm được."
+    },
+    "junior_guide": {
+      "tests": "Hiểu sự khác nhau giữa event loop và libuv threadpool, biết API 'async' nào thực ra chạy trên threadpool.",
+      "must_have": [
+        "Request đọc cache vẫn nhanh nên event loop không bị block; nghi threadpool bão hòa",
+        "fs, crypto.pbkdf2/scrypt, zlib async và dns.lookup chạy trên threadpool; socket mạng thì không",
+        "Threadpool mặc định 4 thread, đổi bằng UV_THREADPOOL_SIZE trước khi process khởi động",
+        "Đo event loop delay (monitorEventLoopDelay) để phân biệt hai trường hợp",
+        "Giảm tải: keep-alive/cache DNS hoặc dns.resolve, đưa việc CPU nặng sang worker_threads"
+      ],
+      "red_flags": [
+        "Nói event loop bị block mà không giải thích vì sao request cache vẫn nhanh",
+        "Cho rằng mọi I/O mạng đều đi qua threadpool",
+        "Tăng UV_THREADPOOL_SIZE thật lớn như cách chữa duy nhất, bỏ qua chi phí"
+      ],
+      "follow_up": "Vì sao dns.resolve4() không dùng threadpool nhưng lại có thể trả kết quả khác dns.lookup() cho cùng hostname?"
+    },
+    "proposed_fix": null
+  },
+  {
+    "qa_id": "de-qa-1001",
+    "verdict": "ok",
+    "confidence": "high",
+    "summary_vi": "Phân tích đúng: Promise.all không giới hạn concurrency, không hủy promise còn lại; unhandled rejection mặc định throw từ Node 15. Thiết kế lại hợp lý. Chỉ phần đánh đổi cuối bị cắt ở 600 token.",
+    "claims": [
+      {
+        "claim": "Promise.all reject ngay ở lỗi đầu tiên",
+        "status": "supported",
+        "source_url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/all",
+        "quote": "It rejects when any of the input's promises rejects, with this first rejection reason.",
+        "note": ""
+      },
+      {
+        "claim": "Promise.all reject không hủy các thao tác còn lại",
+        "status": "supported",
+        "source_url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/all",
+        "quote": "Rejecting the returned promise does not cancel the remaining operations or unsubscribe the handlers attached to their promises.",
+        "note": ""
+      },
+      {
+        "claim": "Mặc định --unhandled-rejections=throw; không có hook unhandledRejection thì ném như uncaught exception",
+        "status": "supported",
+        "source_url": "https://nodejs.org/en/blog/release/v15.0.0",
+        "quote": "In `throw` mode, if an `unhandledRejection` hook is not set, the `unhandledRejection` is raised as an uncaught exception.",
+        "note": "Mặc định đổi từ warn sang throw kể từ Node 15. Mục --unhandled-rejections trong cli.md không đọc được do trang bị cắt khi fetch."
+      },
+      {
+        "claim": "AbortSignal.timeout(ms) tạo signal tự abort sau ms",
+        "status": "supported",
+        "source_url": "https://nodejs.org/api/globals.html",
+        "quote": "Returns a new `AbortSignal` which will be aborted in `delay` milliseconds.",
+        "note": ""
+      },
+      {
+        "claim": "AbortSignal.any gộp nhiều signal",
+        "status": "supported",
+        "source_url": "https://nodejs.org/api/globals.html",
+        "quote": "Returns a new `AbortSignal` which will be aborted if any of the provided signals are aborted.",
+        "note": ""
+      },
+      {
+        "claim": "Promise reject mà không có handler sẽ phát sự kiện unhandledRejection",
+        "status": "supported",
+        "source_url": "https://nodejs.org/api/process.html",
+        "quote": "The `'unhandledRejection'` event is emitted whenever a `Promise` is rejected and no error handler is attached to the promise within a turn of the event loop.",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "655 token; bị cắt mất ý checkpoint và đoạn đánh đổi chọn N. Các ý bắt buộc (không giới hạn concurrency, không hủy, giới hạn N, AbortController, allSettled) vẫn còn.",
+        "fix": "Gộp bước 4 và 5, rút gọn đoạn đánh đổi để dưới 600 token."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Cần hiểu ngữ nghĩa Promise (eager, không hủy) và thiết kế điều phối có giới hạn; junior thường chỉ biết Promise.all."
+    },
+    "interview_fit": {
+      "minutes": 4,
+      "sub_questions": 2,
+      "gradeable": true,
+      "note": "Phân tích + thiết kế lại; 5 ý chấm được."
+    },
+    "junior_guide": {
+      "tests": "Hiểu Promise chạy ngay khi tạo, Promise.all không giới hạn và không hủy, và cách điều phối concurrency có hủy.",
+      "must_have": [
+        "map tạo 50.000 promise cùng lúc; Promise.all chỉ chờ, không giới hạn concurrency",
+        "Promise.all fail-fast nhưng không hủy các request còn lại",
+        "Giới hạn N worker/p-limit theo quota đối tác, xử lý 429 bằng backoff và Retry-After",
+        "Hủy bằng AbortController chung, timeout từng request bằng AbortSignal.timeout + AbortSignal.any",
+        "Dùng allSettled theo batch nếu muốn giữ phần thành công"
+      ],
+      "red_flags": [
+        "Nghĩ Promise.all chạy tuần tự hoặc tự giới hạn số request",
+        "Nghĩ khi Promise.all reject thì các request khác tự dừng",
+        "Dùng listener unhandledRejection để nuốt lỗi thay cho xử lý đúng chỗ"
+      ],
+      "follow_up": "Nếu đối tác giới hạn 100 request mỗi giây chứ không theo số request đồng thời, bạn đổi bộ điều phối thế nào?"
+    },
+    "proposed_fix": null
+  },
+  {
+    "qa_id": "de-qa-1002",
+    "verdict": "ok",
+    "confidence": "high",
+    "summary_vi": "Đúng và bám tài liệu stream của Node: thiếu backpressure khi bỏ qua giá trị trả về của write(), pipeline() tự destroy stream và nhận AbortSignal. Chỉ có vấn đề nhỏ về độ dài.",
+    "claims": [
+      {
+        "claim": "write() trả false thì phải dừng tới khi có 'drain'",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/nodejs/node/main/doc/api/stream.md",
+        "quote": "If `false` is returned, further attempts to write data to the stream should stop until the [`'drain'`][] event is emitted.",
+        "note": ""
+      },
+      {
+        "claim": "Thiếu backpressure làm bộ nhớ phình và GC quá tải",
+        "status": "supported",
+        "source_url": "https://nodejs.org/en/learn/modules/backpressuring-in-streams",
+        "quote": "If a backpressure system was not present, the process would use up your system's memory, effectively slowing down other processes, and monopolizing a large part of your system until completion.",
+        "note": "Cùng trang liệt kê \"A very overworked garbage collector\"."
+      },
+      {
+        "claim": "pipeline() chuyển tiếp lỗi và gọi destroy() trên các stream",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/nodejs/node/main/doc/api/stream.md",
+        "quote": "`stream.pipeline()` will call `stream.destroy(err)` on all streams except:",
+        "note": "Cùng trang: \"`stream.pipeline()` closes all the streams when an error is raised.\""
+      },
+      {
+        "claim": "Truyền AbortSignal vào pipeline; async generator phải xử lý signal nếu không pipeline không kết thúc",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/nodejs/node/main/doc/api/stream.md",
+        "quote": "Remember to handle the `signal` argument passed into the async generator.",
+        "note": "Câu tiếp theo kết thúc bằng \"or the pipeline will never complete.\" Trang cũng ghi: \"To use an `AbortSignal`, pass it inside an options object, as the last argument.\""
+      },
+      {
+        "claim": ".pipe() không tự đóng đích khi nguồn lỗi",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/nodejs/node/main/doc/api/stream.md",
+        "quote": "One important caveat is that if the `Readable` stream emits an error during processing, the `Writable` destination _is not closed_ automatically.",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "639 token; phần bị cắt chỉ là ý timeout query và giới hạn số export đồng thời, các ý bắt buộc vẫn còn.",
+        "fix": "Rút gọn đoạn highWaterMark để dưới 600 token."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Cần hiểu backpressure và vòng đời stream khi client hủy; không phải câu định nghĩa."
+    },
+    "interview_fit": {
+      "minutes": 4,
+      "sub_questions": 2,
+      "gradeable": true,
+      "note": "Giải thích nguyên nhân + viết lại; 4-5 ý chấm được."
+    },
+    "junior_guide": {
+      "tests": "Hiểu backpressure của Writable stream và cách dọn tài nguyên khi đích đóng sớm.",
+      "must_have": [
+        "Bỏ qua write() trả false nên dữ liệu dồn vào buffer của res, RSS tăng",
+        "Client ngắt nhưng nguồn DB không bị destroy nên query chạy tiếp",
+        "Dùng stream nguồn + pipeline() (Transform/async generator) để có backpressure và tự destroy",
+        "Truyền AbortSignal, hủy khi request đóng sớm",
+        "Nếu tự ghi: write() false thì chờ 'drain'"
+      ],
+      "red_flags": [
+        "Tăng highWaterMark hoặc RAM để 'chữa' việc RSS tăng",
+        "Dùng .pipe() trần mà không xử lý lỗi",
+        "Nghĩ client đóng kết nối thì query tự dừng"
+      ],
+      "follow_up": "Nếu driver DB không có stream mà chỉ có phân trang theo cursor, bạn tự tạo nguồn có backpressure thế nào?"
+    },
+    "proposed_fix": null
+  },
+  {
+    "qa_id": "de-qa-1003",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Nội dung đúng và bám tài liệu Buffer/StringDecoder, nhưng câu hỏi liệt kê 4 bẫy riêng (chunk UTF-8, subarray, allocUnsafe, pool) nên quá rộng cho 3-5 phút và dễ thành câu hỏi kể tên. Nên thu hẹp câu hỏi.",
+    "claims": [
+      {
+        "claim": "StringDecoder giữ byte dở dang của ký tự nhiều byte tới lần write()/end() tiếp",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/nodejs/node/main/doc/api/string_decoder.md",
+        "quote": "These are held in the buffer until the next call to `stringDecoder.write()` or until `stringDecoder.end()` is called.",
+        "note": ""
+      },
+      {
+        "claim": "subarray tạo view trên cùng vùng nhớ, sửa view là sửa bản gốc",
+        "status": "supported",
+        "source_url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/subarray",
+        "quote": "Also note that this is creating a new view on the existing buffer; changes to the new object's contents will impact the original object and vice versa.",
+        "note": "Buffer là Uint8Array; mục buf.subarray trong buffer.md không đọc được do trang bị cắt khi fetch."
+      },
+      {
+        "claim": "allocUnsafe không khởi tạo bộ nhớ, có thể chứa dữ liệu nhạy cảm",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/nodejs/node/main/doc/api/buffer.md",
+        "quote": "The contents of the newly created `Buffer` are unknown and _may contain sensitive data_.",
+        "note": ""
+      },
+      {
+        "claim": "Buffer nhỏ có thể cắt từ pool chung; giữ lâu thì dùng allocUnsafeSlow rồi copy",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/nodejs/node/main/doc/api/buffer.md",
+        "quote": "it may be appropriate to create an un-pooled `Buffer` instance using `Buffer.allocUnsafeSlow()` and",
+        "note": "Ngữ cảnh: \"retain a small chunk of memory from a pool for an indeterminate amount of time\"; pool dùng cho allocUnsafe, Buffer.from(array|string), concat."
+      },
+      {
+        "claim": "Buffer.alloc zero-fill, chậm hơn nhưng không lộ dữ liệu cũ",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/nodejs/node/main/doc/api/buffer.md",
+        "quote": "Calling [`Buffer.alloc()`][] can be measurably slower than the alternative",
+        "note": ""
+      },
+      {
+        "claim": "Buffer tính vào external và arrayBuffers của process.memoryUsage()",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/nodejs/node/main/doc/api/process.md",
+        "quote": "This is also included in the `external` value.",
+        "note": "Câu trước: arrayBuffers \"including all Node.js Buffers\"."
+      },
+      {
+        "claim": "--max-old-space-size không giới hạn bộ nhớ Buffer",
+        "status": "unverified",
+        "source_url": "",
+        "quote": "",
+        "note": "Không đọc được mục --max-old-space-size trong cli.md (trang bị cắt). Suy luận từ việc Buffer nằm ngoài V8 heap là hợp lý nhưng chưa có câu trích."
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi liệt kê 4 bẫy trong ngoặc cộng 'tránh thế nào', thực tế là 4-5 yêu cầu; ứng viên dễ trả lời kiểu kể tên và không đủ thời gian đi sâu.",
+        "fix": "Thu hẹp còn 2 bẫy có tình huống, ví dụ chỉ chunk UTF-8 bị cắt và rò bộ nhớ do giữ subarray/pool."
+      },
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "608 token; chỉ câu cuối của ý 5 bị cắt.",
+        "fix": "Bỏ đoạn 'Nguyên tắc' vì lặp lại các ý trên."
+      },
+      {
+        "severity": "minor",
+        "type": "factual",
+        "detail": "'Buffer.from có thể cắt từ pool' đúng với Buffer.from(array/string) nhưng không với Buffer.from(arrayBuffer); ý --max-old-space-size chưa kiểm chứng được.",
+        "fix": "Ghi 'Buffer.from(string|array)' thay cho 'Buffer.from'."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Có chiều sâu (pool, view giữ sống vùng nhớ lớn), nhưng dạng liệt kê kéo nó về phía nhớ kiến thức."
+    },
+    "interview_fit": {
+      "minutes": 6,
+      "sub_questions": 4,
+      "gradeable": true,
+      "note": "4 bẫy được nêu sẵn trong câu hỏi, đáp án có 5 ý; quá rộng cho một câu."
+    },
+    "junior_guide": {
+      "tests": "Hiểu Buffer là vùng nhớ nhị phân ngoài V8 heap, các API chia sẻ vùng nhớ và giải mã UTF-8 qua nhiều chunk.",
+      "must_have": [
+        "toString() từng chunk làm vỡ ký tự nhiều byte; dùng setEncoding hoặc StringDecoder",
+        "subarray/slice không copy; giữ view nhỏ giữ sống vùng nhớ lớn",
+        "allocUnsafe không zero-fill, có thể lộ dữ liệu cũ; dùng alloc khi dữ liệu có thể ra ngoài",
+        "Buffer nhỏ có thể lấy từ pool chung; cần giữ lâu thì copy ra (allocUnsafeSlow)",
+        "Rò Buffer thể hiện ở external/arrayBuffers và RSS, không ở heapUsed"
+      ],
+      "red_flags": [
+        "Nghĩ slice() của Buffer tạo bản sao như Array.prototype.slice",
+        "Dùng allocUnsafe cho buffer gửi ra ngoài mà không ghi đè hết",
+        "Tìm rò Buffer bằng heapUsed"
+      ],
+      "follow_up": "Một service giữ hàng nghìn ID 16 byte cắt bằng subarray từ payload 1 MB; vì sao RSS cao và sửa thế nào?"
+    },
+    "proposed_fix": {
+      "question": "Service đọc file văn bản UTF-8 lớn theo stream và giữ lại một số đoạn nhỏ trong cache. Bạn thấy chữ tiếng Việt thỉnh thoảng thành ký tự '�' và RSS tăng dần dù heapUsed ổn định. Giải thích hai hiện tượng và cách sửa.",
+      "answer_change": "Giữ ý 1 (chunk UTF-8, StringDecoder/setEncoding) và ý 2 (subarray/pool giữ sống vùng nhớ, copy khi giữ lâu) cùng ý 5 (đo external/arrayBuffers); chuyển allocUnsafe thành ghi chú ngắn hoặc follow-up; bỏ đoạn 'Nguyên tắc'; ghi rõ Buffer.from(string|array) mới dùng pool."
+    }
+  },
+  {
+    "qa_id": "de-qa-1004",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Các ý kỹ thuật đều khớp tài liệu worker_threads, nhưng câu hỏi gộp 4 yêu cầu (pool hay tạo mới, 3 cách truyền dữ liệu, xử lý lỗi, giới hạn tài nguyên) nên quá rộng. Nên thu hẹp; lưu ý trùng một phần với de-qa-1022.",
+    "claims": [
+      {
+        "claim": "Worker hữu ích cho việc CPU-bound, ít giúp cho I/O",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/nodejs/node/main/doc/api/worker_threads.md",
+        "quote": "They do not help much with I/O-intensive work.",
+        "note": "Câu trước: \"Workers (threads) are useful for performing CPU-intensive JavaScript operations.\""
+      },
+      {
+        "claim": "Nên dùng pool; tự viết pool thì dùng AsyncResource",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/nodejs/node/main/doc/api/worker_threads.md",
+        "quote": "In practice, use a pool of Workers for these kinds of tasks.",
+        "note": "Cùng trang: \"When implementing a worker pool, use the AsyncResource API to inform\" (diagnostic tools)."
+      },
+      {
+        "claim": "postMessage dùng structured clone; instance class mất prototype",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/nodejs/node/main/doc/api/worker_threads.md",
+        "quote": "instances of JavaScript classes will be cloned as plain JavaScript objects.",
+        "note": ""
+      },
+      {
+        "claim": "transferList chuyển quyền sở hữu, bên gửi không dùng được nữa",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/nodejs/node/main/doc/api/worker_threads.md",
+        "quote": "After transferring, they are not usable on the sending side of the channel",
+        "note": ""
+      },
+      {
+        "claim": "Buffer cắt từ pool nội bộ không transfer được, luôn bị clone",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/nodejs/node/main/doc/api/worker_threads.md",
+        "quote": "transferring them is not possible and they are always cloned,",
+        "note": ""
+      },
+      {
+        "claim": "Uncaught exception trong worker phát 'error' và worker bị terminate",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/nodejs/node/main/doc/api/worker_threads.md",
+        "quote": "exception. In that case, the worker is terminated.",
+        "note": "Câu đầy đủ bắt đầu: \"The 'error' event is emitted if the worker thread throws an uncaught\"."
+      },
+      {
+        "claim": "resourceLimits không tính ArrayBuffer",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/nodejs/node/main/doc/api/worker_threads.md",
+        "quote": "These limits only affect the JS engine, and no external data, including no `ArrayBuffer`s.",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi có 4 yêu cầu (pool/tạo mới, structured clone vs transferList vs SharedArrayBuffer, xử lý lỗi, giới hạn tài nguyên); không trả lời đủ trong 3-5 phút.",
+        "fix": "Giữ trọng tâm pool + cách truyền dữ liệu; chuyển xử lý lỗi/resourceLimits thành follow-up."
+      },
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "656 token; bị cắt đoạn đánh đổi cuối (lỗi native, tách service), các ý chính còn.",
+        "fix": "Rút gọn đoạn Lỗi và tài nguyên."
+      },
+      {
+        "severity": "minor",
+        "type": "topic",
+        "detail": "Trùng nhiều ý (pool, transferList, structured clone) với de-qa-1022 cùng topic.",
+        "fix": "Khi sửa de-qa-1022, để cặp đó tập trung vào việc parse vẫn chạy trên main thread và chi phí clone, tránh lặp."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Thiết kế offload có đánh đổi rõ (chi phí clone, pool, cô lập lỗi)."
+    },
+    "interview_fit": {
+      "minutes": 6,
+      "sub_questions": 4,
+      "gradeable": true,
+      "note": "Đáp án chấm được nhưng câu hỏi quá rộng."
+    },
+    "junior_guide": {
+      "tests": "Biết khi nào worker_threads giúp được và cách truyền dữ liệu giữa các thread với chi phí thấp.",
+      "must_have": [
+        "Worker chỉ giúp việc CPU-bound, không giúp I/O",
+        "Dùng pool cố định + hàng đợi có giới hạn thay vì tạo worker mỗi request",
+        "postMessage clone dữ liệu; transferList chuyển ArrayBuffer không copy; SharedArrayBuffer cần tự đồng bộ",
+        "Worker lỗi phát 'error' và bị terminate: pool phải thay worker và reject task",
+        "resourceLimits giới hạn heap nhưng không tính ArrayBuffer"
+      ],
+      "red_flags": [
+        "Tạo Worker mới cho mỗi request",
+        "Cho rằng postMessage chỉ truyền tham chiếu",
+        "Đưa I/O (query DB) vào worker để 'chạy nhanh hơn'"
+      ],
+      "follow_up": "Worker trong pool bị treo vì input độc hại; bạn phát hiện và phục hồi thế nào mà không làm mất các task khác?"
+    },
+    "proposed_fix": {
+      "question": "API Node.js phải tạo thumbnail (CPU-bound) cho mỗi upload. Bạn offload sang worker_threads thế nào: tạo worker mỗi request hay dùng pool, và truyền ảnh sang worker bằng cách nào để không tốn CPU/bộ nhớ?",
+      "answer_change": "Giữ phần Pool hay tạo mới và Truyền dữ liệu; rút phần Lỗi và tài nguyên còn 1-2 câu hoặc chuyển sang follow-up; bỏ đoạn đánh đổi cuối nếu cần dưới 600 token."
+    }
+  },
+  {
+    "qa_id": "de-qa-1005",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Các ý về cluster và graceful shutdown khớp tài liệu, nhưng câu hỏi gộp 5 yêu cầu (lựa chọn kiến trúc, phân phối kết nối, state, WebSocket, graceful shutdown) nên quá rộng. Ý 'process thấy số core của host' chưa kiểm chứng và phụ thuộc phiên bản.",
+    "claims": [
+      {
+        "claim": "Round-robin là mặc định trên mọi nền tảng trừ Windows",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/nodejs/node/main/doc/api/cluster.md",
+        "quote": "the default one on all platforms except Windows.",
+        "note": "Ngữ cảnh: mô tả cách 1 (round-robin)."
+      },
+      {
+        "claim": "Cách worker tự accept về lý thuyết nhanh hơn nhưng phân phối rất lệch",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/nodejs/node/main/doc/api/cluster.md",
+        "quote": "The second approach should, in theory, give the best performance. In practice however, distribution tends to be very unbalanced due to operating system scheduler vagaries.",
+        "note": ""
+      },
+      {
+        "claim": "Node không có routing theo session; không dựa vào object trong bộ nhớ cho session",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/nodejs/node/main/doc/api/cluster.md",
+        "quote": "Node.js does not provide routing logic.",
+        "note": "Tài liệu khuyên không \"rely too heavily on in-memory data objects for things like sessions and login.\""
+      },
+      {
+        "claim": "K8s gửi SIGTERM rồi chờ grace period (mặc định 30s) trước khi KILL",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/kubernetes/website/main/content/en/docs/concepts/workloads/pods/pod-lifecycle.md",
+        "quote": "The default `terminationGracePeriodSeconds` setting is 30 seconds.",
+        "note": "Cùng trang: \"by first sending a TERM (aka. SIGTERM) signal, with a grace period timeout, to the main process in each container.\""
+      },
+      {
+        "claim": "server.close() ngừng nhận kết nối mới, giữ kết nối đang có",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/nodejs/node/main/doc/api/net.md",
+        "quote": "Stops the server from accepting new connections and keeps existing connections.",
+        "note": ""
+      },
+      {
+        "claim": "Trong container, số core process nhìn thấy thường là của host chứ không phải CPU limit",
+        "status": "unverified",
+        "source_url": "",
+        "quote": "",
+        "note": "Phụ thuộc API (os.cpus() vs os.availableParallelism()) và phiên bản libuv; không tìm được câu trích chính thức trong số lần fetch cho phép."
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi có 5 yêu cầu: chọn cluster hay 1 process/pod, cách cluster phân phối kết nối, state, WebSocket, graceful shutdown.",
+        "fix": "Giữ câu hỏi chính (cluster trong pod hay 1 process/pod) kèm state; đưa WebSocket và graceful shutdown thành follow-up."
+      },
+      {
+        "severity": "minor",
+        "type": "factual",
+        "detail": "Ý 'số core process nhìn thấy là của host' chưa kiểm chứng và có thể sai với os.availableParallelism() trên bản Node mới.",
+        "fix": "Viết lại: 'os.cpus() trả về CPU của node chứ không phản ánh CPU limit của container, nên đừng dùng nó để chọn số worker'."
+      },
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "667 token; bị cắt nửa sau của graceful shutdown (chờ request, đóng pool, đóng WebSocket); bước đầu (SIGTERM, readiness, server.close) vẫn còn.",
+        "fix": "Rút gọn phần lý do chọn 1 process/pod."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Câu hỏi kiến trúc có đánh đổi giữa process model của Node và Kubernetes."
+    },
+    "interview_fit": {
+      "minutes": 6,
+      "sub_questions": 5,
+      "gradeable": true,
+      "note": "Nhiều ý chấm được nhưng quá rộng cho một câu."
+    },
+    "junior_guide": {
+      "tests": "Hiểu cluster module chia kết nối thế nào và vì sao trên Kubernetes thường chạy 1 process mỗi container.",
+      "must_have": [
+        "Primary chia kết nối round-robin (trừ Windows); worker là process riêng, không chia sẻ bộ nhớ",
+        "Trên k8s thường 1 process/container, scale bằng replica vì probe, restart, limit tính theo container",
+        "App phải stateless: session, rate limit, cache ở Redis/DB",
+        "WebSocket cần sticky session nếu có long-polling và adapter pub/sub để broadcast",
+        "Graceful shutdown: bắt SIGTERM, readiness fail, server.close(), chờ request xong trong grace period"
+      ],
+      "red_flags": [
+        "Lưu session trong bộ nhớ process khi chạy nhiều worker/replica",
+        "Chọn số worker theo os.cpus() trong container có CPU limit nhỏ",
+        "Thoát ngay khi nhận SIGTERM"
+      ],
+      "follow_up": "Pod nhận SIGTERM nhưng load balancer vẫn gửi request thêm vài giây; bạn xử lý khoảng trễ này thế nào?"
+    },
+    "proposed_fix": {
+      "question": "Service Node.js đang chạy bằng cluster module (hoặc PM2 cluster mode) trên VM, nay chuyển lên Kubernetes. Nên giữ nhiều worker process trong một container hay chạy một process mỗi pod, và việc chuyển đổi ảnh hưởng gì tới state trong bộ nhớ?",
+      "answer_change": "Giữ phần cách cluster hoạt động, lý do chọn 1 process/pod và ý stateless; rút WebSocket và graceful shutdown còn 1 câu mỗi ý hoặc chuyển sang follow-up; sửa câu về số core theo issue factual."
+    }
+  },
+  {
+    "qa_id": "de-qa-1006",
+    "verdict": "ok",
+    "confidence": "high",
+    "summary_vi": "Đúng và bám tài liệu BullMQ: lock/stalled đưa job về waiting, jobId trùng bị bỏ qua nhưng dùng lại được khi job đã xóa, cần idempotency và noeviction. Chỉ có vấn đề nhỏ về độ dài.",
+    "claims": [
+      {
+        "claim": "Worker đặt lock lên job và phải gia hạn; CPU bận làm không kịp gia hạn và job bị stalled",
+        "status": "supported",
+        "source_url": "https://docs.bullmq.io/guide/workers/stalled-jobs",
+        "quote": "if the CPU is very busy (due to the process being very CPU intensive), the worker may not have time to renew the lock",
+        "note": "Cùng trang: lock \"to protect the job from being modified by any other client or worker\"."
+      },
+      {
+        "claim": "Job stalled về waiting để worker khác chạy lại; vượt số lần stall tối đa thì vào failed",
+        "status": "supported",
+        "source_url": "https://docs.bullmq.io/guide/workers/stalled-jobs",
+        "quote": "A stalled job is moved back to the waiting status and will be processed again by another worker.",
+        "note": "Tiếp theo: \"or if it has reached its maximum number of stalls, it will be moved to the failed set.\""
+      },
+      {
+        "claim": "Worker bị kill khi deploy (không close được) thì job thành stalled và chạy lại",
+        "status": "supported",
+        "source_url": "https://docs.bullmq.io/guide/workers/graceful-shutdown",
+        "quote": "the pending jobs will be marked as stalled and processed by other workers.",
+        "note": ""
+      },
+      {
+        "claim": "Job phải idempotent, atomic; tách job phức tạp bằng flow",
+        "status": "supported",
+        "source_url": "https://docs.bullmq.io/patterns/idempotent-jobs",
+        "quote": "To achieve this behaviour, your jobs should be as atomic and simple as possible.",
+        "note": "Cùng trang: \"If necessary, split complex jobs as described in the flow pattern.\""
+      },
+      {
+        "claim": "Thêm job với jobId đã tồn tại sẽ bị bỏ qua; id dùng lại được khi job cũ đã bị xóa",
+        "status": "supported",
+        "source_url": "https://docs.bullmq.io/guide/jobs/job-ids",
+        "quote": "if you add a job with an existing id then that job will just be ignored and not added to the queue at all.",
+        "note": "Cùng trang: \"you can add the same job id many times over as long as the previous job has already been removed from the queue.\""
+      },
+      {
+        "claim": "Redis cho BullMQ phải dùng maxmemory-policy noeviction, nên bật AOF",
+        "status": "supported",
+        "source_url": "https://docs.bullmq.io/guide/going-to-production",
+        "quote": "Therefore is very important to configure the `maxmemory-policy` setting to `noeviction`.",
+        "note": "Cùng trang: \"We recommend enabling AOF (Append Only File), which provides a robust and fast solution.\""
+      },
+      {
+        "claim": "Graceful shutdown: nghe SIGINT/SIGTERM rồi await worker.close()",
+        "status": "supported",
+        "source_url": "https://docs.bullmq.io/guide/going-to-production",
+        "quote": "it is considered good practice to listen for both `SIGINT` and `SIGTERM` signals to close gracefully.",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "667 token; bị cắt ý noeviction/AOF và đoạn đánh đổi exactly-once, các ý bắt buộc (cơ chế stalled, idempotency, jobId) vẫn còn.",
+        "fix": "Rút gọn ý 2 và 3 để dưới 600 token."
+      },
+      {
+        "severity": "minor",
+        "type": "factual",
+        "detail": "Đề xuất 'sandboxed processor' để tránh stalled không có trong trang stalled-jobs (trang chỉ khuyên trả quyền cho event loop thường xuyên).",
+        "fix": "Có thể giữ, nhưng ưu tiên câu 'chia nhỏ việc CPU để worker kịp gia hạn lock'."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Phải suy luận từ sự cố trừ tiền hai lần ra ngữ nghĩa at-least-once và thiết kế idempotency."
+    },
+    "interview_fit": {
+      "minutes": 4,
+      "sub_questions": 2,
+      "gradeable": true,
+      "note": "Giải thích cơ chế + thiết kế an toàn; 5 ý chấm được."
+    },
+    "junior_guide": {
+      "tests": "Hiểu hàng đợi chỉ đảm bảo at-least-once và cách làm job idempotent.",
+      "must_have": [
+        "Worker giữ lock và phải gia hạn; worker chết hoặc event loop bị chặn thì job bị stalled và chạy lại",
+        "attempts > 1 cũng chạy lại job từ đầu: thực tế là at-least-once",
+        "Idempotency theo khóa nghiệp vụ (unique constraint, idempotency key của cổng thanh toán)",
+        "Tách job thành bước nhỏ atomic, kiểm tra trạng thái trước mỗi bước",
+        "Graceful shutdown bằng worker.close(); Redis noeviction"
+      ],
+      "red_flags": [
+        "Tin rằng BullMQ đảm bảo exactly-once",
+        "Chỉ dùng jobId để chống trừ tiền hai lần",
+        "Tăng lockDuration là cách sửa duy nhất"
+      ],
+      "follow_up": "Nếu cổng thanh toán không hỗ trợ idempotency key, bạn làm sao biết lần charge trước đã thành công hay chưa?"
+    },
+    "proposed_fix": null
+  },
+  {
+    "qa_id": "de-qa-1007",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Các ý về backoff, UnrecoverableError, RateLimitError và limiter global đều khớp tài liệu BullMQ, nhưng câu hỏi gộp 4 mảng (retry/backoff, rate limit, dead letter, giám sát) nên quá rộng. Nên thu hẹp.",
+    "claims": [
+      {
+        "claim": "Backoff exponential: trễ 2^(attempts-1) × delay; jitter trong khoảng 0..1",
+        "status": "supported",
+        "source_url": "https://docs.bullmq.io/guide/retrying-failing-jobs",
+        "quote": "With exponential backoff, it will retry after `2 ^ (attempts - 1) * delay` milliseconds.",
+        "note": "Cùng trang: \"Jitter percentage option value must be between 0 and 1.\""
+      },
+      {
+        "claim": "UnrecoverableError đưa job vào failed ngay, không retry",
+        "status": "supported",
+        "source_url": "https://docs.bullmq.io/patterns/stop-retrying-jobs",
+        "quote": "BullMQ will just move the job to the failed set without performing any retries",
+        "note": ""
+      },
+      {
+        "claim": "Rate limit thủ công: worker.rateLimit(duration) rồi ném Worker.RateLimitError; worker phải có limiter",
+        "status": "supported",
+        "source_url": "https://docs.bullmq.io/guide/rate-limiting",
+        "quote": "Don't forget to pass limiter options into your worker's options",
+        "note": "Ví dụ trên trang: \"await worker.rateLimit(duration);\" và \"throw Worker.RateLimitError();\". Job bị rate limit \"will actually stay in the waiting state.\""
+      },
+      {
+        "claim": "Job bị rate limit không tiêu attempts; dùng attemptsStarted để tự giới hạn",
+        "status": "supported",
+        "source_url": "https://docs.bullmq.io/patterns/stop-retrying-jobs",
+        "quote": "the `attempts` check is ignored, as rate limiting is not considered a real error",
+        "note": "Cùng trang: \"`job.attemptsStarted` is increased every time that a job is moved to active\". Trang này gọi queue.rateLimit, trang rate-limiting gọi worker.rateLimit."
+      },
+      {
+        "claim": "limiter global cho mọi worker; concurrency chỉ là số job song song trong một worker",
+        "status": "supported",
+        "source_url": "https://docs.bullmq.io/guide/rate-limiting",
+        "quote": "The rate limiter is global",
+        "note": "docs.bullmq.io/guide/workers/concurrency: \"The local concurrency factor is a worker option that determines how many jobs are allowed to be processed concurrently\"."
+      },
+      {
+        "claim": "Không có DLQ riêng; job hết retry nằm trong failed, có thể giữ để retry thủ công",
+        "status": "supported",
+        "source_url": "https://docs.bullmq.io/guide/going-to-production",
+        "quote": "you can keep either all of the failed jobs or a very large number in case you want to manually retry them",
+        "note": "Trang retrying: \"When a processor throws an exception, the worker will catch it and move the job to the failed set.\""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi có 4 yêu cầu (retry/backoff, rate limit, dead letter, giám sát), mỗi mảng đủ cho một câu riêng.",
+        "fix": "Tập trung vào phân loại lỗi để retry/backoff/rate limit; dead letter và giám sát thành follow-up."
+      },
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "666 token; bị cắt ý noeviction và đoạn đánh đổi, phần retry/rate limit/dead letter vẫn còn.",
+        "fix": "Rút gọn phần giám sát còn 2 gạch."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Phải phân loại lỗi và chọn cơ chế BullMQ phù hợp cho từng loại."
+    },
+    "interview_fit": {
+      "minutes": 6,
+      "sub_questions": 4,
+      "gradeable": true,
+      "note": "Đáp án nhiều ý chấm được nhưng câu hỏi quá rộng."
+    },
+    "junior_guide": {
+      "tests": "Biết phân loại lỗi (tạm thời, vĩnh viễn, rate limit) và dùng đúng cơ chế retry của BullMQ.",
+      "must_have": [
+        "Lỗi tạm thời: attempts + backoff exponential có jitter",
+        "Lỗi vĩnh viễn (400): ném UnrecoverableError, không retry",
+        "429: worker.rateLimit theo Retry-After + RateLimitError; không tiêu attempts nên cần trần bằng attemptsStarted",
+        "limiter là global cho queue, concurrency là theo worker",
+        "Job hết retry nằm ở failed; giữ đủ lâu hoặc chuyển sang bảng dead letter để replay"
+      ],
+      "red_flags": [
+        "Retry mọi lỗi kể cả 400",
+        "Coi 429 là lỗi thường, tiêu hết attempts",
+        "Nghĩ concurrency giới hạn tổng request lên đối tác"
+      ],
+      "follow_up": "Đối tác sập 2 giờ; làm sao để job không hết attempts và không dồn tải khi đối tác vừa hồi phục?"
+    },
+    "proposed_fix": {
+      "question": "Hàng đợi BullMQ của bạn gọi API bên thứ ba thường xuyên trả 429 hoặc 5xx, đôi khi trả 400 do dữ liệu sai. Bạn xử lý từng loại lỗi này thế nào (retry, backoff, rate limit)?",
+      "answer_change": "Giữ phần Phân loại lỗi và Giới hạn chủ động; rút Dead letter và Giám sát còn 1-2 câu hoặc chuyển sang follow-up."
+    }
+  },
+  {
+    "qa_id": "de-qa-1008",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Các ý kỹ thuật về INCR/EXPIRE, Lua nguyên tử và KEYS khớp tài liệu Redis, nhưng câu hỏi có 3 yêu cầu lớn (so sánh 3 thuật toán, tính nguyên tử, hành vi khi Redis lỗi) nên quá rộng. Pair có golden label g16: chỉ sửa câu hỏi khi đã cập nhật golden set.",
+    "claims": [
+      {
+        "claim": "INCR rồi EXPIRE có race: client chết giữa hai lệnh thì key không có TTL",
+        "status": "supported",
+        "source_url": "https://redis.io/docs/latest/commands/incr/",
+        "quote": "If for some reason the client performs the `INCR` command but does not perform the EXPIRE the key will be leaked until we'll see the same IP address again.",
+        "note": "Tài liệu sửa bằng Lua: incr, nếu current == 1 thì expire; pattern 1 dùng MULTI/EXEC."
+      },
+      {
+        "claim": "Lua script chạy nguyên tử và chặn mọi hoạt động khác khi chạy",
+        "status": "supported",
+        "source_url": "https://redis.io/docs/latest/develop/programmability/eval-intro/",
+        "quote": "Redis guarantees the script's atomic execution. While executing the script, all server activities are blocked during its entire runtime.",
+        "note": ""
+      },
+      {
+        "claim": "Mọi tên key phải truyền qua KEYS để chạy đúng trên Cluster",
+        "status": "supported",
+        "source_url": "https://redis.io/docs/latest/develop/programmability/eval-intro/",
+        "quote": "all names of keys that a script accesses must be explicitly provided as input key arguments.",
+        "note": "Câu bắt đầu: \"Important: to ensure the correct execution of scripts, both in standalone and clustered deployments,\"."
+      },
+      {
+        "claim": "Các key của một thao tác nhiều key phải cùng hash slot; dùng hash tag",
+        "status": "supported",
+        "source_url": "https://redis.io/docs/latest/operate/oss_and_stack/reference/cluster-spec/",
+        "quote": "Redis Cluster implements a concept called **hash tags** that can be used to force certain keys to be stored in the same hash slot.",
+        "note": ""
+      },
+      {
+        "claim": "Fixed window cho phép burst gần gấp đôi limit quanh biên cửa sổ; sliding log tốn bộ nhớ theo số request",
+        "status": "unverified",
+        "source_url": "",
+        "quote": "",
+        "note": "Suy luận thuật toán phổ biến, không có trong tài liệu Redis đã fetch. Hợp lý nhưng chưa có trích dẫn."
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "3 yêu cầu lớn: so sánh fixed/sliding/token bucket, tính nguyên tử trên nhiều instance, hành vi khi Redis lỗi.",
+        "fix": "Giữ so sánh thuật toán + tính nguyên tử; chuyển 'khi Redis lỗi' thành follow-up."
+      },
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "624 token; chỉ câu về 429 + Retry-After bị cắt.",
+        "fix": "Không cần cắt thêm nếu bỏ phần Redis lỗi."
+      },
+      {
+        "severity": "minor",
+        "type": "factual",
+        "detail": "Nhận định về burst ở biên fixed window và chi phí sliding log là kiến thức thuật toán, chưa có nguồn chính thức trích được.",
+        "fix": "Không cần sửa nội dung; người duyệt xác nhận bằng kinh nghiệm."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Thiết kế phân tán có đánh đổi độ chính xác, bộ nhớ, nguyên tử."
+    },
+    "interview_fit": {
+      "minutes": 6,
+      "sub_questions": 3,
+      "gradeable": true,
+      "note": "Đáp án có 5 ý chấm được, câu hỏi hơi rộng."
+    },
+    "junior_guide": {
+      "tests": "Thiết kế rate limiter dùng chung nhiều instance và giữ tính nguyên tử trên Redis.",
+      "must_have": [
+        "Fixed window: INCR + EXPIRE, rẻ nhưng burst ở biên; INCR/EXPIRE phải nguyên tử",
+        "Sliding log chính xác nhưng tốn bộ nhớ; sliding counter là xấp xỉ rẻ",
+        "Token bucket cho burst có kiểm soát; đọc-tính-ghi trong một Lua script",
+        "Lua chạy nguyên tử nhưng chặn server nên phải ngắn; key qua KEYS, cùng hash slot",
+        "Chọn fail-open hay fail-closed khi Redis lỗi tùy endpoint"
+      ],
+      "red_flags": [
+        "GET rồi SET từ Node (không nguyên tử)",
+        "INCR rồi EXPIRE ở hai lệnh rời mà không bàn race",
+        "Mỗi instance giữ bộ đếm riêng trong bộ nhớ"
+      ],
+      "follow_up": "Redis timeout 2 giây trong lúc sự cố; endpoint login và endpoint đọc sản phẩm nên hành xử khác nhau thế nào?"
+    },
+    "proposed_fix": {
+      "question": "Thiết kế rate limiter phân tán bằng Redis cho API Node.js chạy nhiều instance (100 request mỗi phút cho mỗi API key). So sánh fixed window, sliding window và token bucket, và cách đảm bảo tính nguyên tử.",
+      "answer_change": "Chuyển đoạn 'Khi Redis lỗi' thành follow-up hoặc một câu ngắn. Vì có golden label g16, cập nhật rag_golden.json cùng lúc nếu đổi wording."
+    }
+  },
+  {
+    "qa_id": "de-qa-1009",
+    "verdict": "ok",
+    "confidence": "medium",
+    "summary_vi": "Đúng: race 'stale set' của cache-aside và các maxmemory-policy đều khớp nguồn. Race condition dựa trên paper Memcache của Facebook (nguồn thứ cấp) nên confidence medium.",
+    "claims": [
+      {
+        "claim": "Cache-aside có race: lần đọc chậm SET giá trị cũ sau khi đã DEL",
+        "status": "supported",
+        "source_url": "https://www.usenix.org/system/files/conference/nsdi13/nsdi13-final170_update.pdf",
+        "quote": "A stale set occurs when a web server sets a value in memcache that does not reflect the latest value that should be cached. This can occur when concurrent updates to memcache get reordered.",
+        "note": "Paper NSDI 2013 'Scaling Memcache at Facebook', nguồn thứ cấp so với tài liệu Redis."
+      },
+      {
+        "claim": "noeviction: không xóa key, lệnh ghi dữ liệu mới bị lỗi",
+        "status": "supported",
+        "source_url": "https://redis.io/docs/latest/develop/reference/eviction/",
+        "quote": "`noeviction`: Keys are not evicted but the server will return an error when you try to execute commands that cache new data.",
+        "note": ""
+      },
+      {
+        "claim": "allkeys-lru là mặc định hợp lý khi một phần nhỏ key được truy cập nhiều",
+        "status": "supported",
+        "source_url": "https://redis.io/docs/latest/develop/reference/eviction/",
+        "quote": "Use `allkeys-lru` when you expect that a subset of elements will be accessed far more often than the rest.",
+        "note": ""
+      },
+      {
+        "claim": "volatile-* hành xử như noeviction nếu không key nào có TTL",
+        "status": "supported",
+        "source_url": "https://redis.io/docs/latest/develop/reference/eviction/",
+        "quote": "The `volatile-xxx` policies behave like `noeviction` if no keys have an associated expiration.",
+        "note": ""
+      },
+      {
+        "claim": "LRU/LFU là xấp xỉ bằng lấy mẫu (maxmemory-samples)",
+        "status": "supported",
+        "source_url": "https://redis.io/docs/latest/develop/reference/eviction/",
+        "quote": "The Redis LRU algorithm uses an approximation of the least recently used keys rather than calculating them exactly.",
+        "note": ""
+      },
+      {
+        "claim": "Buffer replication/persistence không tính vào maxmemory",
+        "status": "supported",
+        "source_url": "https://redis.io/docs/latest/develop/reference/eviction/",
+        "quote": "The memory used by this buffer is not included in the total that is compared to `maxmemory` to see if eviction is required.",
+        "note": ""
+      },
+      {
+        "claim": "BullMQ yêu cầu noeviction",
+        "status": "supported",
+        "source_url": "https://docs.bullmq.io/guide/going-to-production",
+        "quote": "Therefore is very important to configure the `maxmemory-policy` setting to `noeviction`.",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "681 token; bị cắt ý LRU xấp xỉ và đoạn theo dõi metrics, các ý bắt buộc (2 race, giảm thiểu, 3 nhóm policy) vẫn còn.",
+        "fix": "Bỏ ý 'CDC/outbox' và rút gọn phần volatile-* để dưới 600 token."
+      },
+      {
+        "severity": "minor",
+        "type": "factual",
+        "detail": "Các biện pháp double delete, versioning là thực hành phổ biến, không có nguồn chính thức; paper Facebook dùng lease thay vì double delete.",
+        "fix": "Có thể thêm 'lease' như một lựa chọn bên cạnh versioning."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Phải dựng được kịch bản race theo thời gian và chọn policy theo vai trò của Redis."
+    },
+    "interview_fit": {
+      "minutes": 4,
+      "sub_questions": 2,
+      "gradeable": true,
+      "note": "Race condition + chọn maxmemory-policy; 4-5 ý chấm được."
+    },
+    "junior_guide": {
+      "tests": "Hiểu vì sao cache-aside vẫn có dữ liệu cũ và chọn eviction policy theo mục đích dùng Redis.",
+      "must_have": [
+        "Race: request đọc DB cũ, request khác cập nhật + DEL, rồi request đầu SET giá trị cũ",
+        "DEL sau commit, luôn có TTL làm lưới an toàn; versioning/lease để chặn ghi đè cũ",
+        "noeviction làm lệnh ghi lỗi khi đầy: đúng cho queue (BullMQ), sai cho cache thuần",
+        "allkeys-lru/lfu cho cache; volatile-* như noeviction nếu không key nào có TTL"
+      ],
+      "red_flags": [
+        "Nghĩ DEL sau khi cập nhật DB là đủ để luôn nhất quán",
+        "Dùng chung một Redis noeviction cho cả cache và queue rồi đổi sang allkeys-lru",
+        "Không đặt TTL cho key cache"
+      ],
+      "follow_up": "Bạn kiểm chứng race 1 đang xảy ra trên production bằng metric hay log nào?"
+    },
+    "proposed_fix": null
+  },
+  {
+    "qa_id": "de-qa-1010",
+    "verdict": "ok",
+    "confidence": "high",
+    "summary_vi": "Đúng và bám tài liệu NestJS: 3 scope, REQUEST scope lan ngược, Passport/cron phải là singleton, durable provider và AsyncLocalStorage. Chỉ có vấn đề nhỏ về độ dài; lưu ý topic không có level senior.",
+    "claims": [
+      {
+        "claim": "DEFAULT là một instance dùng chung cả ứng dụng",
+        "status": "supported",
+        "source_url": "https://docs.nestjs.com/fundamentals/injection-scopes",
+        "quote": "A single instance of the provider is shared across the entire application.",
+        "note": ""
+      },
+      {
+        "claim": "REQUEST scope lan ngược lên chuỗi injection",
+        "status": "supported",
+        "source_url": "https://docs.nestjs.com/fundamentals/injection-scopes",
+        "quote": "The `REQUEST` scope bubbles up the injection chain.",
+        "note": "Cùng trang: \"A controller that depends on a request-scoped provider is itself request-scoped.\""
+      },
+      {
+        "claim": "TRANSIENT không lan như vậy",
+        "status": "supported",
+        "source_url": "https://docs.nestjs.com/fundamentals/injection-scopes",
+        "quote": "Transient-scoped dependencies don't follow that pattern.",
+        "note": ""
+      },
+      {
+        "claim": "Request-scoped ảnh hưởng hiệu năng",
+        "status": "supported",
+        "source_url": "https://docs.nestjs.com/fundamentals/injection-scopes",
+        "quote": "Request-scoped providers affect application performance.",
+        "note": ""
+      },
+      {
+        "claim": "Passport strategy và cron phải là singleton, không dùng provider request-scoped",
+        "status": "supported",
+        "source_url": "https://docs.nestjs.com/fundamentals/injection-scopes",
+        "quote": "Some providers must act as singletons and should not use request-scoped providers, like *Passport strategies* or *Cron controllers*.",
+        "note": ""
+      },
+      {
+        "claim": "Durable provider + ContextIdStrategy cho multi-tenant, không hợp khi rất nhiều tenant",
+        "status": "supported",
+        "source_url": "https://docs.nestjs.com/fundamentals/injection-scopes",
+        "quote": "This strategy is not ideal for applications with a large number of tenants.",
+        "note": ""
+      },
+      {
+        "claim": "AsyncLocalStorage giữ mọi provider là singleton cho dữ liệu theo request",
+        "status": "supported",
+        "source_url": "https://docs.nestjs.com/fundamentals/injection-scopes",
+        "quote": "For that, a per-request store based on AsyncLocalStorage keeps every provider a singleton",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "679 token; bị cắt nửa cuối ý durable provider và đoạn kết luận, các ý bắt buộc vẫn còn.",
+        "fix": "Rút gọn mô tả 3 scope (junior đã biết) để dưới 600 token."
+      },
+      {
+        "severity": "minor",
+        "type": "topic",
+        "detail": "Topic node.web.nestjs-di có levels fresher/junior/middle, không có senior; câu này hợp middle-senior.",
+        "fix": "Giữ ở middle; không cần sửa pair."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Cần hiểu cơ chế DI bên trong và chi phí, không chỉ định nghĩa scope."
+    },
+    "interview_fit": {
+      "minutes": 4,
+      "sub_questions": 2,
+      "gradeable": true,
+      "note": "Giải thích scope/bubble up + phương án thay thế; 5 ý chấm được."
+    },
+    "junior_guide": {
+      "tests": "Hiểu injection scope của NestJS và cái giá của REQUEST scope.",
+      "must_have": [
+        "DEFAULT singleton, REQUEST mỗi request một instance, TRANSIENT mỗi consumer một instance",
+        "REQUEST scope lan ngược: ai phụ thuộc cũng thành request-scoped, tốn CPU/GC mỗi request",
+        "Passport strategy và cron phải là singleton nên không dùng được provider request-scoped",
+        "Thay thế: AsyncLocalStorage (nestjs-cls) giữ tenant theo ngữ cảnh async",
+        "Durable provider khi thật sự cần cây DI riêng theo tenant"
+      ],
+      "red_flags": [
+        "Nghĩ chỉ service đánh dấu REQUEST mới bị ảnh hưởng",
+        "Lưu tenant vào biến của singleton",
+        "Dùng TRANSIENT để giữ state theo request"
+      ],
+      "follow_up": "Với AsyncLocalStorage, tenant có còn đúng khi bạn đẩy job vào queue và xử lý ở worker không? Vì sao?"
+    },
+    "proposed_fix": null
+  },
+  {
+    "qa_id": "de-qa-1011",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Thứ tự lifecycle và các bẫy đều khớp tài liệu NestJS, nhưng câu hỏi gộp 3 yêu cầu (đặt 5 việc vào đâu, giải thích thứ tự lifecycle, các bẫy) và đáp án dài, phần bẫy bị cắt ở 600 token. Nên thu hẹp.",
+    "claims": [
+      {
+        "claim": "Guard chạy sau mọi middleware, trước interceptor và pipe",
+        "status": "supported",
+        "source_url": "https://docs.nestjs.com/guards",
+        "quote": "Guards are executed after all middleware, but before any interceptor or pipe.",
+        "note": ""
+      },
+      {
+        "claim": "Middleware không biết handler nào chạy sau next(); guard có ExecutionContext",
+        "status": "supported",
+        "source_url": "https://docs.nestjs.com/guards",
+        "quote": "Middleware, however, is context-blind by nature: it doesn't know which handler will be executed after it calls next().",
+        "note": ""
+      },
+      {
+        "claim": "Guard trả false thì Nest ném ForbiddenException",
+        "status": "supported",
+        "source_url": "https://docs.nestjs.com/guards",
+        "quote": "Behind the scenes, when a guard returns false, the framework throws a ForbiddenException.",
+        "note": ""
+      },
+      {
+        "claim": "Guard global đăng ký ngoài module không inject được dependency; dùng APP_GUARD",
+        "status": "supported",
+        "source_url": "https://docs.nestjs.com/guards",
+        "quote": "a global guard registered outside of any module cannot inject dependencies, because the registration happens outside the context of any module.",
+        "note": ""
+      },
+      {
+        "claim": "Guard: global → controller → route",
+        "status": "supported",
+        "source_url": "https://docs.nestjs.com/faq/request-lifecycle",
+        "quote": "Guard execution starts with global guards, proceeds to controller guards, and ends with route guards.",
+        "note": ""
+      },
+      {
+        "claim": "Interceptor phần sau chạy ngược route → controller → global",
+        "status": "supported",
+        "source_url": "https://docs.nestjs.com/faq/request-lifecycle",
+        "quote": "the response side (i.e., after the route handler returns) is resolved from route to controller to global.",
+        "note": ""
+      },
+      {
+        "claim": "Filter: route → controller → global; mỗi exception chỉ một filter xử lý",
+        "status": "supported",
+        "source_url": "https://docs.nestjs.com/faq/request-lifecycle",
+        "quote": "Nest checks route-bound filters first, then controller-level filters, and finally global filters.",
+        "note": "Cùng trang: \"Exceptions can't be passed from filter to filter\"."
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi có 3 yêu cầu (đặt 5 việc vào 5 lớp, giải thích thứ tự lifecycle, bẫy thường gặp); đáp án 7 ý, khó nói hết trong 3-5 phút.",
+        "fix": "Hỏi đặt 5 việc vào đâu và vì sao; thứ tự lifecycle là must-have, bẫy là follow-up."
+      },
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "696 token; bị cắt 2 trong 3 bẫy (guard từ chối không tới interceptor, nhồi logic nghiệp vụ). Bẫy APP_GUARD vẫn còn.",
+        "fix": "Rút phần thứ tự lifecycle thành một dòng ngắn."
+      },
+      {
+        "severity": "minor",
+        "type": "topic",
+        "detail": "Topic có levels fresher/junior/middle, không có senior.",
+        "fix": "Giữ ở middle."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle"],
+      "note": "Phần lớn là hiểu đúng vai trò từng lớp; độ khó middle hơn là senior."
+    },
+    "interview_fit": {
+      "minutes": 6,
+      "sub_questions": 3,
+      "gradeable": true,
+      "note": "Chấm được theo từng việc, nhưng câu quá rộng."
+    },
+    "junior_guide": {
+      "tests": "Hiểu vai trò và thứ tự chạy của middleware, guard, interceptor, pipe, exception filter trong NestJS.",
+      "must_have": [
+        "Thứ tự: middleware → guard → interceptor (trước) → pipe → handler → interceptor (sau) → filter",
+        "JWT và role ở guard (có ExecutionContext, đọc metadata bằng Reflector)",
+        "Validate DTO bằng ValidationPipe; đo thời gian bằng interceptor; format lỗi bằng exception filter global",
+        "Đăng ký global qua APP_GUARD/APP_PIPE... để có DI"
+      ],
+      "red_flags": [
+        "Validate DTO trong guard hoặc controller",
+        "Nghĩ interceptor thấy được mọi request, kể cả request bị guard chặn",
+        "Dùng useGlobalGuards(new X()) rồi thắc mắc vì sao X không inject được service"
+      ],
+      "follow_up": "Bạn muốn log mọi request kể cả bị guard từ chối, kèm thời gian xử lý; đặt logic đó ở đâu?"
+    },
+    "proposed_fix": {
+      "question": "Trong NestJS bạn cần thêm xác thực JWT, kiểm tra quyền theo role, validate DTO, đo thời gian xử lý và chuẩn hóa định dạng lỗi. Mỗi việc nên đặt ở middleware, guard, interceptor, pipe hay exception filter, và vì sao?",
+      "answer_change": "Giữ phần Đặt từng việc và một dòng thứ tự lifecycle; giữ bẫy APP_GUARD, chuyển 2 bẫy còn lại sang follow-up."
+    }
+  },
+  {
+    "qa_id": "de-qa-1012",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Phân tích đúng theo tài liệu PostgreSQL (Read Committed, UPDATE đánh giá lại WHERE, serialization failure 40001), nhưng phần sửa lỗi pool cạn bị cắt ở 600 token và câu hỏi có 2 vấn đề lớn với nhiều cách sửa. Pair có golden label g05.",
+    "claims": [
+      {
+        "claim": "PostgreSQL mặc định Read Committed; SELECT chỉ thấy dữ liệu commit trước khi câu bắt đầu",
+        "status": "supported",
+        "source_url": "https://www.postgresql.org/docs/current/transaction-iso.html",
+        "quote": "*Read Committed* is the default isolation level in PostgreSQL. When a transaction uses this isolation level, a `SELECT` query (without a `FOR UPDATE/SHARE` clause) sees only data committed before the query began",
+        "note": ""
+      },
+      {
+        "claim": "UPDATE ở Read Committed chờ transaction kia rồi đánh giá lại WHERE trên phiên bản mới",
+        "status": "supported",
+        "source_url": "https://www.postgresql.org/docs/current/transaction-iso.html",
+        "quote": "The search condition of the command (the `WHERE` clause) is re-evaluated to see if the updated version of the row still matches the search condition.",
+        "note": ""
+      },
+      {
+        "claim": "Repeatable Read/Serializable có thể lỗi serialization (40001), ứng dụng phải retry cả transaction",
+        "status": "supported",
+        "source_url": "https://www.postgresql.org/docs/current/transaction-iso.html",
+        "quote": "When an application receives this error message, it should abort the current transaction and retry the whole transaction from the beginning.",
+        "note": "SQLSTATE '40001' được nêu ở mục Serializable."
+      },
+      {
+        "claim": "ORM không tự retry lỗi serialization",
+        "status": "supported",
+        "source_url": "https://www.prisma.io/docs/orm/fundamentals/transactions",
+        "quote": "Prisma ORM does not retry write conflicts for you, so write the retry yourself around the `db.transaction(...)` call.",
+        "note": "Đúng với Prisma; 'ORM thường không tự retry' là khái quát."
+      },
+      {
+        "claim": "Trong callback transaction dùng client gốc thì query chạy trên connection khác, ngoài transaction",
+        "status": "supported",
+        "source_url": "https://www.prisma.io/docs/orm/fundamentals/transactions",
+        "quote": "Use `tx` for every query inside the callback.",
+        "note": "Trang giải thích query trên `db` chạy trên connection riêng, ngoài transaction đang mở."
+      },
+      {
+        "claim": "Transaction giữ connection suốt thời gian callback chạy",
+        "status": "supported",
+        "source_url": "https://www.prisma.io/docs/orm/fundamentals/transactions",
+        "quote": "There is no transaction timeout either, so a transaction stays open for as long as your callback runs.",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "length",
+        "detail": "711 token; bị cắt câu 'Sửa: transaction ngắn, side effect sau commit, statement/lock timeout, tính pool theo max_connections' — đây là phần trả lời vế 'pool cạn' của câu hỏi.",
+        "fix": "Rút gọn 4 cách sửa oversell còn 1 dòng mỗi cách để câu 'Sửa' nằm trong 600 token."
+      },
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi hỏi 2 sự cố (oversell và pool cạn), đáp án có 4 cách sửa oversell + 2 nguyên nhân + nhiều cách sửa pool; dày cho 3-5 phút.",
+        "fix": "Giữ cả hai sự cố nhưng chỉ yêu cầu 1-2 cách sửa mỗi sự cố."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Cần hiểu isolation level và hành vi UPDATE đồng thời của PostgreSQL."
+    },
+    "interview_fit": {
+      "minutes": 5,
+      "sub_questions": 2,
+      "gradeable": true,
+      "note": "Hai sự cố, nhiều điểm chấm được nhưng đáp án quá dày."
+    },
+    "junior_guide": {
+      "tests": "Hiểu vì sao bọc transaction không đủ chống oversell ở Read Committed và vì sao transaction dài làm cạn pool.",
+      "must_have": [
+        "Read Committed: hai transaction cùng đọc 'còn 1 ghế' rồi cùng ghi (check-then-act)",
+        "UPDATE ... WHERE remaining > 0 rồi kiểm tra số dòng: UPDATE chờ và đánh giá lại WHERE",
+        "Hoặc SELECT ... FOR UPDATE; hoặc Serializable + retry khi lỗi 40001",
+        "Transaction giữ connection: không gọi HTTP/email trong transaction",
+        "Dùng client của transaction (tx), không dùng client gốc trong callback"
+      ],
+      "red_flags": [
+        "Nghĩ có transaction là đủ chống oversell",
+        "Tăng pool size là cách chữa duy nhất",
+        "Gọi cổng thanh toán bên trong transaction DB"
+      ],
+      "follow_up": "Nếu dùng Serializable thay cho UPDATE có điều kiện, bạn viết retry thế nào để không gửi email hai lần?"
+    },
+    "proposed_fix": {
+      "question": "",
+      "answer_change": "Rút phần 'Cách sửa' oversell: giữ cách 1 (UPDATE có điều kiện) và cách 2 (FOR UPDATE) chi tiết, gộp cách 3-4 và CHECK constraint vào một dòng. Đưa câu 'Sửa: transaction ngắn, side effect sau commit, timeout, tính pool theo max_connections' lên trước để nằm trong 600 token. Golden label g05: kiểm tra lại recall sau khi sửa."
+    }
+  },
+  {
+    "qa_id": "de-qa-1013",
+    "verdict": "ok",
+    "confidence": "high",
+    "summary_vi": "Đúng và bám tài liệu PostgreSQL: ACCESS EXCLUSIVE lock, ADD COLUMN default không volatile không rewrite, NOT VALID + VALIDATE, SET NOT NULL bỏ scan khi có CHECK hợp lệ, CREATE INDEX CONCURRENTLY. Chỉ đoạn nguyên tắc cuối bị cắt.",
+    "claims": [
+      {
+        "claim": "Phần lớn ALTER TABLE lấy ACCESS EXCLUSIVE lock",
+        "status": "supported",
+        "source_url": "https://www.postgresql.org/docs/current/sql-altertable.html",
+        "quote": "An `ACCESS EXCLUSIVE` lock is acquired unless explicitly noted.",
+        "note": ""
+      },
+      {
+        "claim": "ADD COLUMN với DEFAULT không volatile lưu vào metadata, không rewrite bảng",
+        "status": "supported",
+        "source_url": "https://www.postgresql.org/docs/current/sql-altertable.html",
+        "quote": "The value will be only applied when the table is rewritten, making the `ALTER TABLE` very fast even on large tables.",
+        "note": "Câu trước: default \"stored in the table's metadata\"."
+      },
+      {
+        "claim": "DEFAULT volatile (clock_timestamp()) rewrite cả bảng và index",
+        "status": "supported",
+        "source_url": "https://www.postgresql.org/docs/current/sql-altertable.html",
+        "quote": "Adding a column with a volatile `DEFAULT` (e.g., `clock_timestamp()`), a stored generated column, an identity column, or a column with a domain data type that has constraints will cause the entire table and its indexes to be rewritten.",
+        "note": ""
+      },
+      {
+        "claim": "NOT VALID bỏ qua scan; VALIDATE CONSTRAINT chỉ lấy SHARE UPDATE EXCLUSIVE",
+        "status": "supported",
+        "source_url": "https://www.postgresql.org/docs/current/sql-altertable.html",
+        "quote": "Hence, validation acquires only a `SHARE UPDATE EXCLUSIVE` lock on the table being altered.",
+        "note": "Cùng trang: \"But if the `NOT VALID` option is used, this potentially-lengthy scan is skipped.\""
+      },
+      {
+        "claim": "SET NOT NULL bỏ scan khi có CHECK hợp lệ chứng minh không có NULL",
+        "status": "supported",
+        "source_url": "https://www.postgresql.org/docs/current/sql-altertable.html",
+        "quote": "if a valid `CHECK` constraint exists (and is not dropped in the same command) which proves no `NULL` can exist, then the table scan is skipped.",
+        "note": ""
+      },
+      {
+        "claim": "CREATE INDEX thường chặn ghi; CONCURRENTLY không chặn ghi nhưng hai lần scan, lâu hơn",
+        "status": "supported",
+        "source_url": "https://www.postgresql.org/docs/current/sql-createindex.html",
+        "quote": "When this option is used, PostgreSQL must perform two scans of the table, and in addition it must wait for all existing transactions that could potentially modify or use the index to terminate.",
+        "note": "Cùng trang: index thường \"will block until the index build is finished\" với insert/update/delete."
+      },
+      {
+        "claim": "CONCURRENTLY không chạy trong transaction block; thất bại để lại index INVALID vẫn tốn chi phí cập nhật",
+        "status": "supported",
+        "source_url": "https://www.postgresql.org/docs/current/sql-createindex.html",
+        "quote": "Another difference is that a regular `CREATE INDEX` command can be performed within a transaction block, but `CREATE INDEX CONCURRENTLY` cannot.",
+        "note": "Cùng trang: index invalid \"will still consume update overhead\"; khuyến nghị drop rồi tạo lại."
+      }
+    ],
+    "issues": [
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "684 token; bị cắt nửa cuối bước đổi tên cột và đoạn nguyên tắc; các bước 1-4 còn đủ.",
+        "fix": "Rút gọn đoạn 'Vì sao từng bị đứng' để bước 5 nằm trong 600 token."
+      },
+      {
+        "severity": "minor",
+        "type": "factual",
+        "detail": "Ý 'ALTER chờ lock xếp hàng và chặn query đến sau' là hành vi lock queue của PostgreSQL, đúng nhưng không có câu trích trong 2 trang đã fetch.",
+        "fix": "Không cần sửa."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Cần hiểu lock level của DDL và quy trình expand/contract."
+    },
+    "interview_fit": {
+      "minutes": 5,
+      "sub_questions": 1,
+      "gradeable": true,
+      "note": "Một yêu cầu thiết kế, nhưng bao 3 thay đổi schema; 5 bước chấm được."
+    },
+    "junior_guide": {
+      "tests": "Biết DDL nào khóa bảng lâu trên PostgreSQL và cách migration không downtime.",
+      "must_have": [
+        "Phần lớn ALTER TABLE lấy ACCESS EXCLUSIVE; chờ lock là chặn cả query đến sau",
+        "ADD COLUMN default hằng số không rewrite; đặt lock_timeout ngắn + retry",
+        "NOT NULL: CHECK ... NOT VALID rồi VALIDATE, sau đó SET NOT NULL bỏ scan",
+        "CREATE INDEX CONCURRENTLY, ngoài transaction; thất bại thì drop index INVALID",
+        "Đổi tên cột bằng expand/contract qua nhiều release"
+      ],
+      "red_flags": [
+        "Chạy RENAME COLUMN trực tiếp khi code cũ còn chạy",
+        "Tạo index thường trên bảng lớn giờ cao điểm",
+        "Backfill cả bảng trong một transaction"
+      ],
+      "follow_up": "Migration đang chờ ACCESS EXCLUSIVE lock 30 giây thì traffic đứng; bạn tìm transaction nào đang giữ lock bằng cách nào?"
+    },
+    "proposed_fix": null
+  },
+  {
+    "qa_id": "de-qa-1014",
+    "verdict": "ok",
+    "confidence": "high",
+    "summary_vi": "Đúng và bám tài liệu TypeScript/Zod: type assertion bị xóa khi biên dịch, không kiểm tra runtime; validate ở biên bằng schema, z.infer, safeParse, discriminated union + never. Chỉ có vấn đề nhỏ về độ dài.",
+    "claims": [
+      {
+        "claim": "Type annotation không thay đổi hành vi lúc chạy",
+        "status": "supported",
+        "source_url": "https://www.typescriptlang.org/docs/handbook/2/basic-types.html",
+        "quote": "Type annotations never change the runtime behavior of your program.",
+        "note": ""
+      },
+      {
+        "claim": "Type assertion không sinh kiểm tra runtime",
+        "status": "supported",
+        "source_url": "https://www.typescriptlang.org/docs/handbook/2/everyday-types.html",
+        "quote": "Reminder: Because type assertions are removed at compile-time, there is no runtime checking associated with a type assertion. There won’t be an exception or `null` generated if the type assertion is wrong.",
+        "note": ""
+      },
+      {
+        "claim": "Suy ra type từ schema bằng z.infer",
+        "status": "supported",
+        "source_url": "https://zod.dev/basics",
+        "quote": "You can extract this type with the `z.infer<>` utility",
+        "note": ""
+      },
+      {
+        "claim": "parse() ném ZodError; safeParse trả discriminated union",
+        "status": "supported",
+        "source_url": "https://zod.dev/basics",
+        "quote": "The result type is a discriminated union",
+        "note": "Cùng trang: \"the `.parse()` method will throw a `ZodError` instance\"."
+      },
+      {
+        "claim": "Discriminated union theo trường literal",
+        "status": "supported",
+        "source_url": "https://www.typescriptlang.org/docs/handbook/2/narrowing.html",
+        "quote": "When every type in a union contains a common property with literal types, TypeScript considers that to be a *discriminated union*, and can narrow out the members of the union.",
+        "note": ""
+      },
+      {
+        "claim": "Kiểm tra exhaustive bằng never ở nhánh default",
+        "status": "supported",
+        "source_url": "https://www.typescriptlang.org/docs/handbook/2/narrowing.html",
+        "quote": "This means you can use narrowing and rely on `never` turning up to do exhaustive checking in a `switch` statement.",
+        "note": ""
+      },
+      {
+        "claim": "z.input/z.output khác nhau khi có transform; z.infer tương đương z.output",
+        "status": "supported",
+        "source_url": "https://zod.dev/basics",
+        "quote": "equivalent to z.infer<typeof mySchema>",
+        "note": "Code comment trên dòng z.output trong trang."
+      }
+    ],
+    "issues": [
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "664 token; bị cắt nửa cuối đoạn đánh đổi (contract nội bộ), các ý bắt buộc còn đủ.",
+        "fix": "Bỏ ý 6 (z.input/z.output) nếu cần dưới 600 token."
+      },
+      {
+        "severity": "minor",
+        "type": "factual",
+        "detail": "Ý 'type predicate tự viết không được compiler kiểm chứng' đúng theo hành vi TypeScript nhưng handbook không nói thẳng.",
+        "fix": "Không cần sửa."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Phải phân biệt compile-time và runtime và thiết kế validate ở biên; vượt mức định nghĩa."
+    },
+    "interview_fit": {
+      "minutes": 4,
+      "sub_questions": 2,
+      "gradeable": true,
+      "note": "Giải thích + thiết kế; 4-5 ý chấm được."
+    },
+    "junior_guide": {
+      "tests": "Hiểu type của TypeScript bị xóa lúc chạy và cách validate dữ liệu ngoài mà vẫn giữ type safety.",
+      "must_have": [
+        "`as OrderEvent` là type assertion, không có kiểm tra runtime; type bị xóa khi biên dịch",
+        "req.body thực chất là any: dữ liệu qua ranh giới chưa được xác minh",
+        "Validate ở biên bằng schema runtime (Zod...) và suy ra type từ schema (z.infer)",
+        "safeParse trả 400/dead letter thay vì để undefined nổ sâu; nhận dữ liệu ngoài là unknown",
+        "Discriminated union + never để bắt thiếu case lúc compile"
+      ],
+      "red_flags": [
+        "Nghĩ strict mode sẽ kiểm tra req.body lúc chạy",
+        "Viết interface và schema riêng rẽ, để chúng lệch nhau",
+        "Dùng type predicate viết tay thay cho validate thật"
+      ],
+      "follow_up": "Payload webhook có thêm trường lạ không có trong schema; Zod mặc định xử lý thế nào và bạn muốn chặn hay cho qua?"
+    },
+    "proposed_fix": null
+  },
+  {
+    "qa_id": "de-qa-1015",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Kỹ thuật đúng theo handbook TypeScript (keyof/indexed access, mapped type, infer, distributive, [T] extends [any]), nhưng câu hỏi gộp 3 yêu cầu (thiết kế EventBus, trình bày 4 tính năng type, khi nào thành gánh nặng) nên quá rộng và nặng về kể tính năng.",
+    "claims": [
+      {
+        "claim": "Mapped type duyệt qua keyof để tạo type mới",
+        "status": "supported",
+        "source_url": "https://www.typescriptlang.org/docs/handbook/2/mapped-types.html",
+        "quote": "A mapped type is a generic type which uses a union of `PropertyKey`s (frequently created via a `keyof`) to iterate through keys to create a type:",
+        "note": "Đã bỏ link markdown trong câu."
+      },
+      {
+        "claim": "infer khai báo biến type trong nhánh true của conditional type",
+        "status": "supported",
+        "source_url": "https://www.typescriptlang.org/docs/handbook/2/conditional-types.html",
+        "quote": "Conditional types provide us with a way to infer from types we compare against in the true branch using the `infer` keyword.",
+        "note": ""
+      },
+      {
+        "claim": "Conditional type trên generic trần phân phối qua union: ToArray<string | number> thành string[] | number[]",
+        "status": "supported",
+        "source_url": "https://www.typescriptlang.org/docs/handbook/2/conditional-types.html",
+        "quote": "When conditional types act on a generic type, they become *distributive* when given a union type.",
+        "note": "Ví dụ trên trang: ToArray<string | number> // string[] | number[]."
+      },
+      {
+        "claim": "Bọc hai vế extends trong ngoặc vuông để tránh phân phối",
+        "status": "supported",
+        "source_url": "https://www.typescriptlang.org/docs/handbook/2/conditional-types.html",
+        "quote": "To avoid that behavior, you can surround each side of the `extends` keyword with square brackets.",
+        "note": ""
+      },
+      {
+        "claim": "Type bị xóa lúc chạy nên vẫn cần validate runtime",
+        "status": "supported",
+        "source_url": "https://www.typescriptlang.org/docs/handbook/2/basic-types.html",
+        "quote": "Type annotations never change the runtime behavior of your program.",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi có 3 yêu cầu và liệt kê 4 tính năng phải trình bày (generics/keyof, mapped, conditional/infer, distributive); dễ thành bài kể tính năng, khó nói trong 3-5 phút, và đáp án có code block.",
+        "fix": "Giữ thiết kế EventBus + một bẫy (distributive); đưa 'khi nào thành gánh nặng' sang follow-up."
+      },
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "650 token; chỉ câu cuối về nguyên tắc dùng type phức tạp bị cắt.",
+        "fix": "Bỏ ví dụ Array<infer U> trùng với PayloadOf."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Generics nâng cao và distributive conditional type là phần khó; phần còn lại là áp dụng."
+    },
+    "interview_fit": {
+      "minutes": 6,
+      "sub_questions": 3,
+      "gradeable": true,
+      "note": "Chấm được nhưng quá rộng; có code nên phù hợp vòng có màn hình hơn vòng nói."
+    },
+    "junior_guide": {
+      "tests": "Dùng generics của TypeScript để ràng buộc payload theo tên event và hiểu bẫy distributive conditional type.",
+      "must_have": [
+        "Interface ánh xạ tên event sang payload; emit<K extends keyof E>(name: K, payload: E[K])",
+        "K suy ra từ literal, E[K] cho đúng kiểu payload nên sai là lỗi compile",
+        "Mapped type { [K in keyof E]: handler } buộc đăng ký đủ handler",
+        "Conditional type trên generic trần phân phối qua union; bọc [T] extends [any] để tránh",
+        "Type phức tạp làm chậm tsc và khó đọc; vẫn cần validate runtime"
+      ],
+      "red_flags": [
+        "Dùng string và any cho tên event/payload",
+        "Không hiểu vì sao ToArray<string | number> ra string[] | number[]",
+        "Nghĩ type an toàn thì dữ liệu từ queue cũng an toàn"
+      ],
+      "follow_up": "Làm sao viết test khẳng định emit('order.created', { userId }) phải lỗi compile?"
+    },
+    "proposed_fix": {
+      "question": "Thiết kế một EventBus type-safe cho backend TypeScript sao cho `emit('order.created', payload)` báo lỗi compile nếu payload sai kiểu theo tên event. Bạn dùng generics và keyof thế nào, và gặp bẫy gì với conditional type trên union?",
+      "answer_change": "Giữ code EventBus, mapped type Handlers, phần distributive; rút phần 'Khi nào thành gánh nặng' còn 1 câu hoặc chuyển sang follow-up; bỏ ví dụ Array<infer U>."
+    }
+  },
+  {
+    "qa_id": "de-qa-1016",
+    "verdict": "ok",
+    "confidence": "high",
+    "summary_vi": "Đúng và bám tài liệu Node: đọc đúng các trường process.memoryUsage(), phân biệt rò ngoài heap với rò heap JS, quy trình so sánh heap snapshot và rủi ro khi chụp trên production. Chỉ đoạn cuối bị cắt.",
+    "claims": [
+      {
+        "claim": "external là bộ nhớ của object C++ gắn với object JS",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/nodejs/node/main/doc/api/process.md",
+        "quote": "`external` refers to the memory usage of C++ objects bound to JavaScript objects managed by V8.",
+        "note": ""
+      },
+      {
+        "claim": "arrayBuffers gồm mọi Buffer và cũng được tính trong external",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/nodejs/node/main/doc/api/process.md",
+        "quote": "This is also included in the `external` value.",
+        "note": "Câu trước: arrayBuffers \"including all Node.js Buffers\"."
+      },
+      {
+        "claim": "memoryUsage() duyệt từng page nên tốn; process.memoryUsage.rss() nhanh hơn",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/nodejs/node/main/doc/api/process.md",
+        "quote": "The `process.memoryUsage()` method iterates over each page to gather information about memory usage",
+        "note": "Cùng trang: \"but `process.memoryUsage.rss()` is faster.\""
+      },
+      {
+        "claim": "So sánh hai snapshot ở chế độ Comparison, tìm delta dương lớn rồi xem retainer",
+        "status": "supported",
+        "source_url": "https://nodejs.org/en/learn/diagnostics/memory/using-heap-snapshot",
+        "quote": "Look for large positive deltas and explore the references that caused them in the bottom panel.",
+        "note": ""
+      },
+      {
+        "claim": "Chụp snapshot dừng main thread, có thể hơn một phút",
+        "status": "supported",
+        "source_url": "https://nodejs.org/en/learn/diagnostics/memory/using-heap-snapshot",
+        "quote": "Depending on the heap contents it could even take more than a minute.",
+        "note": "Câu trước: \"When creating a snapshot, all other work in your main thread is stopped.\""
+      },
+      {
+        "claim": "Snapshot có thể làm heap gấp đôi và làm process chết",
+        "status": "supported",
+        "source_url": "https://nodejs.org/en/learn/diagnostics/memory/using-heap-snapshot",
+        "quote": "The snapshot is built in memory, so it can double the heap size, resulting in filling up entire memory and then crashing the app.",
+        "note": ""
+      },
+      {
+        "claim": "--heapsnapshot-signal chụp snapshot khi nhận signal",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/nodejs/node/main/doc/api/cli.md",
+        "quote": "Enables a signal handler that causes the Node.js process to write a heap dump when the specified signal is received.",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "671 token; bị cắt nửa cuối lưu ý production (--max-old-space-size thấp hơn limit, cảnh báo theo xu hướng); các ý bắt buộc còn đủ.",
+        "fix": "Rút gọn đoạn đọc process.memoryUsage()."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["senior"],
+      "note": "Chẩn đoán rò bộ nhớ theo chỉ số và quy trình snapshot trên production."
+    },
+    "interview_fit": {
+      "minutes": 5,
+      "sub_questions": 2,
+      "gradeable": true,
+      "note": "Hai nhánh điều tra (ngoài heap, trong heap); 5 ý chấm được."
+    },
+    "junior_guide": {
+      "tests": "Đọc đúng các chỉ số bộ nhớ của Node và biết quy trình tìm rò bộ nhớ.",
+      "must_have": [
+        "rss là toàn bộ process; heapUsed là heap V8; external/arrayBuffers là ngoài heap (Buffer)",
+        "RSS tăng mà heapUsed ổn định: nghi Buffer, native addon, worker",
+        "heapUsed tăng sau GC: so sánh 2 heap snapshot (Comparison), xem retainers",
+        "Thủ phạm quen: cache không giới hạn, listener không gỡ, closure, setInterval",
+        "Snapshot dừng main thread và tốn thêm bộ nhớ: chụp trên instance đã rút khỏi LB"
+      ],
+      "red_flags": [
+        "Chụp heap snapshot để tìm rò Buffer",
+        "Chụp snapshot trên instance đang nhận traffic",
+        "Tăng memory limit là cách chữa"
+      ],
+      "follow_up": "Đặt --max-old-space-size bằng đúng memory limit của container thì có vấn đề gì?"
+    },
+    "proposed_fix": null
+  },
+  {
+    "qa_id": "de-qa-1017",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Nội dung đúng theo tài liệu Node (monitorEventLoopDelay, --cpu-prof, flame graph với perf, JSON lớn, ReDoS), nhưng câu hỏi có 3 yêu cầu (đo lag, profile CPU, nguyên nhân hay gặp). Nên thu hẹp, đưa nguyên nhân thành follow-up.",
+    "claims": [
+      {
+        "claim": "monitorEventLoopDelay tạo histogram độ trễ event loop, đơn vị nanosecond",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/nodejs/node/main/doc/api/perf_hooks.md",
+        "quote": "Creates a histogram object that samples and reports the event loop delay over time. The delays will be reported in nanoseconds.",
+        "note": ""
+      },
+      {
+        "claim": "eventLoopUtilization cho biết thời gian loop bận/rảnh",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/nodejs/node/main/doc/api/perf_hooks.md",
+        "quote": "The `eventLoopUtilization()` function returns an object that contains the cumulative duration of time the event loop has been both idle and active",
+        "note": ""
+      },
+      {
+        "claim": "--cpu-prof ghi CPU profile ra file khi thoát",
+        "status": "supported",
+        "source_url": "https://nodejs.org/api/cli.html",
+        "quote": "Starts the V8 CPU profiler on start up, and writes the CPU profile to disk before exit.",
+        "note": ""
+      },
+      {
+        "claim": "Flame graph: 0x hoặc perf với --perf-basic-prof và --interpreted-frames-native-stack",
+        "status": "supported",
+        "source_url": "https://nodejs.org/en/learn/diagnostics/flame-graphs",
+        "quote": "Run `node --interpreted-frames-native-stack --perf-basic-prof-only-functions` to get function names in the flame graph regardless of which pipeline V8 used to compile your JavaScript.",
+        "note": "Trang cũng giới thiệu 0x."
+      },
+      {
+        "claim": "JSON.parse/stringify là O(n) nhưng chậm với input lớn",
+        "status": "supported",
+        "source_url": "https://nodejs.org/en/learn/asynchronous-work/dont-block-the-event-loop",
+        "quote": "While these are `O(n)` in the length of the input, for large `n` they can take surprisingly long.",
+        "note": ""
+      },
+      {
+        "claim": "Regex có nested quantifier như (a+)* có thể chặn event loop (ReDoS)",
+        "status": "supported",
+        "source_url": "https://nodejs.org/en/learn/asynchronous-work/dont-block-the-event-loop",
+        "quote": "Avoid nested quantifiers like `(a+)*`. V8's regexp engine can handle some of these quickly, but others are vulnerable.",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "3 yêu cầu: đo event loop lag, profile CPU tìm code, liệt kê nguyên nhân hay gặp; đáp án có 4 phần.",
+        "fix": "Giữ đo lag + profile; nguyên nhân hay gặp làm follow-up."
+      },
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "640 token; chỉ câu cuối phần khắc phục bị cắt.",
+        "fix": "Bỏ ý clinic để dưới 600 token."
+      },
+      {
+        "severity": "minor",
+        "type": "factual",
+        "detail": "Lời khuyên 'xem các khối rộng ở đỉnh stack' không có trong trang flame-graphs (trang nói xem thanh màu cam đậm nhất trước); vẫn là cách đọc flame graph phổ biến.",
+        "fix": "Không bắt buộc sửa."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Debug một sự cố cụ thể bằng công cụ đo và profile."
+    },
+    "interview_fit": {
+      "minutes": 6,
+      "sub_questions": 3,
+      "gradeable": true,
+      "note": "Chấm được nhưng hơi rộng."
+    },
+    "junior_guide": {
+      "tests": "Biết cách xác nhận event loop bị chặn và tìm đoạn code gây chặn.",
+      "must_have": [
+        "Đo event loop delay (monitorEventLoopDelay) và ELU; delay tăng cùng latency = có việc đồng bộ dài",
+        "Delay thấp mà latency cao thì nhìn sang threadpool/DB/downstream",
+        "Profile CPU: --cpu-prof hoặc --inspect, flame graph (0x, perf)",
+        "Nguyên nhân hay gặp: JSON lớn, ReDoS, API sync, thuật toán O(n²)"
+      ],
+      "red_flags": [
+        "Tăng số instance mà không tìm nguyên nhân",
+        "Chỉ nhìn log vì log không có lỗi",
+        "Nhầm event loop lag với latency của DB"
+      ],
+      "follow_up": "Profile chỉ ra một regex validate email chiếm 90% CPU; bạn sửa và phòng tái diễn thế nào?"
+    },
+    "proposed_fix": {
+      "question": "Sau một release, API Node.js có p99 latency tăng từ khoảng 50ms lên vài giây theo từng đợt, trong lúc đó một core CPU chạm 100% và log không có lỗi. Bạn xác nhận event loop bị chặn và tìm ra đoạn code gây chặn thế nào?",
+      "answer_change": "Giữ phần 1 và 2; rút phần 3 (nguyên nhân) còn một dòng liệt kê hoặc chuyển sang follow-up; giữ một câu khắc phục."
+    }
+  },
+  {
+    "qa_id": "de-qa-1018",
+    "verdict": "ok",
+    "confidence": "high",
+    "summary_vi": "Đúng và bám tài liệu Jest: worker song song (cores - 1), khác nhau giữa clearMocks/resetMocks/restoreMocks, isolateModules, hoist jest.mock, --detectOpenHandles, --forceExit, --randomize/--seed. Chỉ có vấn đề nhỏ về độ dài.",
+    "claims": [
+      {
+        "claim": "Single run mặc định số worker = số core trừ một",
+        "status": "supported",
+        "source_url": "https://jestjs.io/docs/cli",
+        "quote": "In single run mode, this defaults to the number of the cores available on your machine minus one for the main thread.",
+        "note": ""
+      },
+      {
+        "claim": "clearMocks chỉ xóa lịch sử gọi, không xóa implementation",
+        "status": "supported",
+        "source_url": "https://jestjs.io/docs/configuration",
+        "quote": "This does not remove any mock implementation that may have been provided.",
+        "note": ""
+      },
+      {
+        "claim": "resetMocks xóa implementation giả nhưng không khôi phục bản gốc",
+        "status": "supported",
+        "source_url": "https://jestjs.io/docs/configuration",
+        "quote": "This will lead to any mocks having their fake implementations removed but does not restore their initial implementation.",
+        "note": ""
+      },
+      {
+        "claim": "Khôi phục bản gốc chỉ áp dụng cho mock tạo bằng jest.spyOn; jest.fn() phải tự xử lý",
+        "status": "supported",
+        "source_url": "https://jestjs.io/docs/mock-function-api",
+        "quote": "`mockFn.mockRestore()` only works when the mock was created with `jest.spyOn()`. Thus you have to take care of restoration yourself when manually assigning `jest.fn()`.",
+        "note": "Với replaceProperty: \"replacedProperty.restore() only works when the property value was replaced with jest.replaceProperty()\"."
+      },
+      {
+        "claim": "jest.isolateModules tạo sandbox registry, resetModules xóa cache module",
+        "status": "supported",
+        "source_url": "https://jestjs.io/docs/jest-object",
+        "quote": "`jest.isolateModules(fn)` goes a step further than `jest.resetModules()` and creates a sandbox registry for the modules that are loaded inside the callback function.",
+        "note": ""
+      },
+      {
+        "claim": "jest.mock được hoist nên factory không được tham chiếu biến khai báo phía dưới",
+        "status": "supported",
+        "source_url": "https://jestjs.io/docs/es6-class-mocks",
+        "quote": "Since calls to `jest.mock()` are hoisted to the top of the file, Jest prevents access to out-of-scope variables.",
+        "note": "Ngoại lệ: biến bắt đầu bằng 'mock'."
+      },
+      {
+        "claim": "--detectOpenHandles ép chạy tuần tự, chậm, chỉ để debug; --forceExit là lối thoát tạm",
+        "status": "supported",
+        "source_url": "https://jestjs.io/docs/cli",
+        "quote": "This implies `--runInBand`, making tests run serially.",
+        "note": "Cùng trang: \"This option has a significant performance penalty and should only be used for debugging.\" và --forceExit \"This feature is an escape-hatch.\""
+      },
+      {
+        "claim": "--randomize xáo thứ tự test trong file theo seed",
+        "status": "supported",
+        "source_url": "https://jestjs.io/docs/cli",
+        "quote": "Shuffle the order of the tests within a file. The shuffling is based on the seed.",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "673 token; bị cắt 2 gạch cuối (randomize/seed, fake timers), các nguyên nhân và cách sửa chính còn đủ.",
+        "fix": "Rút gọn ý 3 (trạng thái module)."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle"],
+      "note": "Debug test flaky đòi hiểu mô hình worker và mock của Jest; mức middle hơn senior."
+    },
+    "interview_fit": {
+      "minutes": 4,
+      "sub_questions": 2,
+      "gradeable": true,
+      "note": "Phân tích + làm cho ổn định; 5 ý chấm được."
+    },
+    "junior_guide": {
+      "tests": "Hiểu vì sao test Jest flaky trên CI: chạy song song, mock rò, state module, handle không đóng.",
+      "must_have": [
+        "Jest chạy các file song song trên nhiều worker: DB/port/thư mục dùng chung đạp lên nhau",
+        "clearMocks chỉ xóa lịch sử; resetMocks xóa implementation; restoreMocks khôi phục gốc (chỉ với spyOn)",
+        "Cô lập dữ liệu theo JEST_WORKER_ID hoặc transaction rollback",
+        "Đóng server/pool/timer trong afterAll; --detectOpenHandles để tìm, --forceExit chỉ là tạm"
+      ],
+      "red_flags": [
+        "Thêm --runInBand vĩnh viễn để 'hết flaky'",
+        "Dùng --forceExit như cách sửa",
+        "Nghĩ restoreMocks khôi phục cả jest.fn()"
+      ],
+      "follow_up": "Test chỉ fail khi chạy chung với một file khác; bạn dùng --randomize/--seed và --runInBand thế nào để khoanh vùng?"
+    },
+    "proposed_fix": null
+  },
+  {
+    "qa_id": "de-qa-1019",
+    "verdict": "ok",
+    "confidence": "high",
+    "summary_vi": "Đúng và bám tài liệu Jest: advanceTimersByTime đồng bộ không cho microtask chạy, dùng advanceTimersByTimeAsync/runAllTimersAsync (không có ở legacy), runOnlyPendingTimers cho timer tự đặt lại. Chỉ đoạn thiết kế cho testability bị cắt.",
+    "claims": [
+      {
+        "claim": "advanceTimersByTimeAsync cho promise callback chạy trước khi chạy timer",
+        "status": "supported",
+        "source_url": "https://jestjs.io/docs/jest-object",
+        "quote": "Asynchronous equivalent of `jest.advanceTimersByTime(msToRun)`. It allows any scheduled promise callbacks to execute *before* running the timers.",
+        "note": ""
+      },
+      {
+        "claim": "Các API async này không có ở legacy fake timers",
+        "status": "supported",
+        "source_url": "https://jestjs.io/docs/jest-object",
+        "quote": "This function is not available when using legacy fake timers implementation.",
+        "note": ""
+      },
+      {
+        "claim": "runAllTimers có giới hạn số timer đệ quy",
+        "status": "supported",
+        "source_url": "https://jestjs.io/docs/jest-object",
+        "quote": "The maximum number of recursive timers that will be run when calling `jest.runAllTimers()`. The default is `100_000` timers.",
+        "note": ""
+      },
+      {
+        "claim": "runOnlyPendingTimers chỉ chạy timer đang chờ, hợp với timer tự đặt lại",
+        "status": "supported",
+        "source_url": "https://jestjs.io/docs/jest-object",
+        "quote": "If any of the currently pending macro-tasks schedule new macro-tasks, those new tasks will not be executed by this call.",
+        "note": ""
+      },
+      {
+        "claim": "doNotFake giữ API thật",
+        "status": "supported",
+        "source_url": "https://jestjs.io/docs/jest-object",
+        "quote": "List of names of APIs that should not be faked. The default is `[]`, meaning all APIs are faked.",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "688 token; bị cắt đoạn 'Thiết kế cho testability' (inject sleep/clock) và một phần ý 5; các ý bắt buộc (nguyên nhân, API async, không await trước) còn đủ.",
+        "fix": "Rút gọn ý 3-4 để đoạn inject sleep nằm trong 600 token vì đó là ý thiết kế quan trọng."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle"],
+      "note": "Cần hiểu tương tác microtask với fake timers; khó với middle, quen với senior."
+    },
+    "interview_fit": {
+      "minutes": 4,
+      "sub_questions": 2,
+      "gradeable": true,
+      "note": "Giải thích + cách viết đúng; 4 ý chấm được."
+    },
+    "junior_guide": {
+      "tests": "Hiểu vì sao fake timers đồng bộ không tương thích với chuỗi await và cách test code có retry/backoff.",
+      "must_have": [
+        "Giữa các sleep có await (microtask); advanceTimersByTime chạy đồng bộ nên timer kế tiếp chưa được đăng ký",
+        "Dùng await jest.advanceTimersByTimeAsync / runAllTimersAsync",
+        "Khởi động promise, gắn expectation trước, tiến thời gian rồi mới await",
+        "Inject hàm sleep/clock để unit test không phụ thuộc timer"
+      ],
+      "red_flags": [
+        "Tăng timeout của test để chờ timer thật",
+        "Await hàm cần test trước khi tiến đồng hồ",
+        "Dùng runAllTimers với retry vô hạn"
+      ],
+      "follow_up": "Làm sao kiểm tra hàm không gọi lại API nếu chỉ tiến thiếu 1ms so với backoff?"
+    },
+    "proposed_fix": null
+  },
+  {
+    "qa_id": "de-qa-1020",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Nội dung đúng theo RFC 9700 (rotation, reuse detection, hết hạn khi không hoạt động), nhưng câu hỏi gộp 4 yêu cầu và phần lưu access token ở client bị cắt ở 600 token. Pair có golden label g22.",
+    "claims": [
+      {
+        "claim": "Public client phải dùng sender-constrained refresh token hoặc rotation",
+        "status": "supported",
+        "source_url": "https://www.rfc-editor.org/rfc/rfc9700.txt",
+        "quote": "Authorization servers MUST utilize one of these methods to detect refresh token replay by malicious actors for public clients",
+        "note": "Hai phương pháp: sender-constrained refresh token và refresh token rotation (mục 4.14.2)."
+      },
+      {
+        "claim": "Rotation: mỗi lần refresh cấp refresh token mới",
+        "status": "supported",
+        "source_url": "https://www.rfc-editor.org/rfc/rfc9700.txt",
+        "quote": "the authorization server issues a new refresh token with every access token refresh response.",
+        "note": ""
+      },
+      {
+        "claim": "Reuse detection: server không biết bên nào hợp lệ nên thu hồi refresh token đang hoạt động",
+        "status": "supported",
+        "source_url": "https://www.rfc-editor.org/rfc/rfc9700.txt",
+        "quote": "The authorization server cannot determine which party submitted the invalid refresh token",
+        "note": "Câu tiếp: \"but it will revoke the active refresh token.\""
+      },
+      {
+        "claim": "Refresh token nên hết hạn khi client không hoạt động một thời gian",
+        "status": "supported",
+        "source_url": "https://www.rfc-editor.org/rfc/rfc9700.txt",
+        "quote": "Refresh tokens SHOULD expire if the client has been inactive for some time",
+        "note": ""
+      },
+      {
+        "claim": "Cookie HttpOnly không đọc được bằng JavaScript, giảm rủi ro XSS, nhưng vẫn tự gửi kèm request",
+        "status": "supported",
+        "source_url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie",
+        "quote": "Forbids JavaScript from accessing the cookie, for example, through the `Document.cookie` property.",
+        "note": "Cùng trang: cookie HttpOnly \"will still be sent with JavaScript-initiated requests\" và \"This mitigates attacks against cross-site scripting (XSS).\""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "4 yêu cầu: rotation, reuse detection, nơi lưu token, đánh đổi; đáp án dài 687 token.",
+        "fix": "Giữ rotation + reuse detection (cốt lõi); nơi lưu token thành follow-up."
+      },
+      {
+        "severity": "major",
+        "type": "length",
+        "detail": "Phần cắt ở 600 token rơi vào mục 'Lưu ở client': mất ý chống CSRF cho endpoint refresh và ý giữ access token trong bộ nhớ thay vì localStorage, trong khi câu hỏi hỏi trực tiếp nơi lưu token.",
+        "fix": "Nếu giữ nguyên câu hỏi, rút phần 'Chi tiết triển khai' để mục lưu token nằm trong 600 token."
+      },
+      {
+        "severity": "minor",
+        "type": "factual",
+        "detail": "Viết 'RFC 9700 yêu cầu refresh token của public client phải sender-constrained hoặc dùng rotation' là đúng ý, nhưng RFC nói server phải dùng một trong hai cách để phát hiện replay.",
+        "fix": "Viết: 'RFC 9700 yêu cầu authorization server dùng sender-constraint hoặc rotation để phát hiện replay refresh token của public client'."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Thiết kế bảo mật có đánh đổi (stateless vs thu hồi, XSS vs CSRF)."
+    },
+    "interview_fit": {
+      "minutes": 6,
+      "sub_questions": 4,
+      "gradeable": true,
+      "note": "Nhiều ý chấm được, câu hỏi quá rộng."
+    },
+    "junior_guide": {
+      "tests": "Hiểu vai trò access/refresh token và cách rotation + reuse detection phát hiện token bị đánh cắp.",
+      "must_have": [
+        "Access token sống ngắn, xác minh stateless; refresh token opaque, lưu hash, thu hồi được",
+        "Rotation: mỗi lần refresh cấp token mới, vô hiệu token cũ trong cùng family",
+        "Token cũ bị dùng lại = có hai bên giữ: thu hồi cả family",
+        "Bước kiểm tra-đánh dấu-phát mới phải nguyên tử để refresh song song không tự kích hoạt reuse",
+        "Refresh token trong cookie HttpOnly/Secure/SameSite, endpoint refresh chống CSRF"
+      ],
+      "red_flags": [
+        "Lưu refresh token trong localStorage",
+        "Access token sống nhiều ngày rồi dựa vào denylist",
+        "Nghĩ HttpOnly chống được XSS hoàn toàn"
+      ],
+      "follow_up": "Hai tab cùng gọi refresh gần như đồng thời; thiết kế của bạn có tự đăng xuất người dùng không, và bạn xử lý thế nào?"
+    },
+    "proposed_fix": {
+      "question": "Thiết kế cơ chế access token và refresh token cho SPA cùng API Node.js sao cho có thể thu hồi phiên và phát hiện refresh token bị đánh cắp. Trình bày refresh token rotation và reuse detection.",
+      "answer_change": "Giữ Phân vai, Rotation, Reuse detection, Chi tiết triển khai; rút 'Lưu ở client' còn 1-2 câu hoặc chuyển sang follow-up; sửa câu RFC 9700 theo issue factual. Golden label g22: kiểm tra lại recall sau khi sửa."
+    }
+  },
+  {
+    "qa_id": "de-qa-1021",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Các ý bảo mật đều khớp RFC 8725, nhưng câu hỏi yêu cầu giải thích 5 chủ đề (alg none, RS256/HS256, iss/aud, cross-JWT, JWKS) nên quá rộng cho 3-5 phút.",
+    "claims": [
+      {
+        "claim": "Thư viện phải cho caller chỉ định tập thuật toán; không suy ra từ header",
+        "status": "supported",
+        "source_url": "https://datatracker.ietf.org/doc/html/rfc8725",
+        "quote": "Libraries MUST enable the caller to specify a supported set of algorithms",
+        "note": ""
+      },
+      {
+        "claim": "Không dùng 'none' trừ khi được yêu cầu tường minh",
+        "status": "supported",
+        "source_url": "https://datatracker.ietf.org/doc/html/rfc8725",
+        "quote": "JWT libraries SHOULD NOT generate JWTs using \"none\" unless explicitly requested to do so by the caller.",
+        "note": ""
+      },
+      {
+        "claim": "Tấn công đổi RS256 sang HS256, dùng public key làm secret HMAC; mỗi khóa chỉ một thuật toán",
+        "status": "supported",
+        "source_url": "https://datatracker.ietf.org/doc/html/rfc8725",
+        "quote": "would try to validate the signature using HMAC-SHA256 and using the RSA public key as the HMAC shared secret",
+        "note": "Cùng RFC: \"Moreover, each key MUST be used with exactly one algorithm,\""
+      },
+      {
+        "claim": "Kiểm tra iss và khóa thuộc issuer; kiểm tra aud",
+        "status": "supported",
+        "source_url": "https://datatracker.ietf.org/doc/html/rfc8725",
+        "quote": "the relying party or application MUST validate the audience value,",
+        "note": "Cùng RFC: \"the cryptographic keys used for the cryptographic operations in the JWT belong to the issuer.\""
+      },
+      {
+        "claim": "Cross-JWT confusion: quy tắc xác minh các loại JWT phải loại trừ nhau; dùng typ tường minh",
+        "status": "supported",
+        "source_url": "https://datatracker.ietf.org/doc/html/rfc8725",
+        "quote": "the validation rules for those JWTs MUST be written such that they are mutually exclusive,",
+        "note": "Cùng RFC: \"Explicit typing is RECOMMENDED for new uses of JWTs.\""
+      },
+      {
+        "claim": "JWKS: chỉ lấy khóa từ URL cấu hình sẵn, cache, giới hạn refetch khi gặp kid lạ",
+        "status": "unverified",
+        "source_url": "",
+        "quote": "",
+        "note": "RFC 8725 không có phần vận hành JWKS; là thực hành phổ biến, chưa tìm được nguồn chính thức trong số lần fetch cho phép."
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi nêu 5 chủ đề phải giải thích (alg none, RS256/HS256, iss/aud, cross-JWT confusion, xoay khóa JWKS); thành bài kể checklist.",
+        "fix": "Hỏi 'review jwt.verify(token, key) bạn thấy lỗ hổng gì' và để ứng viên tự nêu; chỉ yêu cầu đi sâu 2 lỗ hổng (algorithm confusion, aud)."
+      },
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "658 token; chỉ ý 6 (payload không mã hóa, secret đủ dài) bị cắt.",
+        "fix": "Bỏ ý 6 hoặc gộp vào ý 3."
+      },
+      {
+        "severity": "minor",
+        "type": "factual",
+        "detail": "Phần vận hành JWKS (cache, giới hạn refetch) chưa có nguồn chính thức trích được.",
+        "fix": "Không bắt buộc sửa."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Cần hiểu cơ chế tấn công, không chỉ thuộc khuyến nghị."
+    },
+    "interview_fit": {
+      "minutes": 6,
+      "sub_questions": 5,
+      "gradeable": true,
+      "note": "Chấm được theo checklist nhưng quá rộng."
+    },
+    "junior_guide": {
+      "tests": "Biết các lỗ hổng xác minh JWT phổ biến và cách cấu hình verify đúng.",
+      "must_have": [
+        "Luôn truyền danh sách algorithms tường minh; không chấp nhận 'none' hay thuật toán theo header",
+        "Algorithm confusion RS256 → HS256 dùng public key làm secret; mỗi khóa một thuật toán",
+        "Kiểm tra exp/nbf, iss, aud: thiếu aud thì token của service A dùng được ở B",
+        "Nhiều loại JWT cùng issuer: dùng typ/aud/khóa riêng để quy tắc loại trừ nhau",
+        "JWKS: chọn khóa theo kid trong JWKS tin cậy, cache và giới hạn refetch"
+      ],
+      "red_flags": [
+        "Nghĩ chữ ký đúng là đủ",
+        "Tin URL khóa (jku) trong header token",
+        "Lưu dữ liệu nhạy cảm trong payload vì nghĩ JWT được mã hóa"
+      ],
+      "follow_up": "Issuer vừa xoay khóa và nhiều request báo kid lạ; service của bạn nên làm gì để không thành DoS lên endpoint JWKS?"
+    },
+    "proposed_fix": {
+      "question": "Khi review đoạn code xác minh JWT trong một API Node.js chỉ gọi `jwt.verify(token, key)`, bạn kiểm tra những lỗ hổng nào? Giải thích kỹ tấn công nhầm lẫn thuật toán RS256/HS256 và hậu quả của việc thiếu kiểm tra aud.",
+      "answer_change": "Giữ ý 1-3 chi tiết; rút ý 4 (cross-JWT) và 5 (JWKS) còn 1 câu mỗi ý hoặc chuyển sang follow-up; bỏ ý 6."
+    }
+  },
+  {
+    "qa_id": "de-qa-1022",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Có lỗi nghiêm trọng: đáp án nói worker dùng chung V8 isolate và heap với main thread nên postMessage chỉ truyền tham chiếu. Sai: Worker là môi trường JS độc lập và postMessage clone dữ liệu bằng structured clone, đây chính là lý do bộ nhớ tăng. Phần thiết kế lại đúng nên sửa thay vì drop (drop làm topic dưới 2 cặp hard).",
+    "claims": [
+      {
+        "claim": "Worker dùng chung V8 isolate và heap với main thread",
+        "status": "contradicted",
+        "source_url": "https://raw.githubusercontent.com/nodejs/node/main/doc/api/worker_threads.md",
+        "quote": "The `Worker` class represents an independent JavaScript execution thread.",
+        "note": "resourceLimits cũng mô tả \"An optional set of resource limits for the new JS engine instance.\": mỗi worker có JS engine instance riêng."
+      },
+      {
+        "claim": "postMessage(obj) chỉ truyền tham chiếu, không sao chép",
+        "status": "contradicted",
+        "source_url": "https://raw.githubusercontent.com/nodejs/node/main/doc/api/worker_threads.md",
+        "quote": "`value` is transferred in a way which is compatible with",
+        "note": "Câu tiếp: \"the HTML structured clone algorithm.\" Class instance \"will be cloned as plain JavaScript objects\". Clone 50 MB object tốn CPU trên main thread và nhân đôi bộ nhớ."
+      },
+      {
+        "claim": "JSON.parse 50 MB tốn thời gian đáng kể trên event loop",
+        "status": "supported",
+        "source_url": "https://nodejs.org/en/learn/asynchronous-work/dont-block-the-event-loop",
+        "quote": "It takes 0.7 seconds to stringify the object, 0.03 seconds to indexOf on the 50MB string, and 1.3 seconds to parse the string.",
+        "note": ""
+      },
+      {
+        "claim": "transferList chuyển ArrayBuffer không copy, bên gửi không dùng được nữa",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/nodejs/node/main/doc/api/worker_threads.md",
+        "quote": "After transferring, they are not usable on the sending side of the channel",
+        "note": "Lưu ý: Buffer cắt từ pool nội bộ \"transferring them is not possible and they are always cloned,\""
+      },
+      {
+        "claim": "Nên dùng pool worker thay vì tạo mới mỗi request",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/nodejs/node/main/doc/api/worker_threads.md",
+        "quote": "In practice, use a pool of Workers for these kinds of tasks.",
+        "note": ""
+      },
+      {
+        "claim": "Worker không giúp cho I/O",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/nodejs/node/main/doc/api/worker_threads.md",
+        "quote": "They do not help much with I/O-intensive work.",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "critical",
+        "type": "factual",
+        "detail": "Đáp án khẳng định worker dùng chung isolate/heap và postMessage chỉ truyền tham chiếu. Thực tế mỗi Worker là một JS engine instance độc lập, postMessage clone dữ liệu bằng structured clone. Evaluator sẽ chấm sai ứng viên nói đúng ('clone tốn CPU và bộ nhớ').",
+        "fix": "Thay mục 'Worker threads hoạt động thế nào' bằng: mỗi worker có V8 isolate, heap và event loop riêng; postMessage(obj) clone object bằng structured clone, nên main thread vừa parse 50 MB vừa tốn thêm CPU để serialize, và worker giữ một bản sao thứ hai: đó là lý do độ trễ giảm ít và bộ nhớ tăng."
+      },
+      {
+        "severity": "minor",
+        "type": "topic",
+        "detail": "Trùng nhiều ý với de-qa-1004 (pool, transferList, offload CPU-bound) cùng topic node.core.worker-cluster.",
+        "fix": "Khi sửa, tập trung vào chẩn đoán (parse vẫn ở main thread, chi phí clone) để khác với de-qa-1004."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Chẩn đoán vì sao offload không hiệu quả đòi hiểu mô hình bộ nhớ của worker."
+    },
+    "interview_fit": {
+      "minutes": 4,
+      "sub_questions": 2,
+      "gradeable": true,
+      "note": "Giải thích + đề xuất; 4-5 ý chấm được sau khi sửa lỗi."
+    },
+    "junior_guide": {
+      "tests": "Hiểu worker_threads có heap riêng và chi phí truyền dữ liệu qua postMessage.",
+      "must_have": [
+        "Parse + tính toán 3 giây CPU trên main thread chặn mọi request",
+        "Đồng nghiệp vẫn JSON.parse 50 MB trên main thread nên phần nặng nhất chưa được chuyển đi",
+        "postMessage clone object (structured clone): tốn CPU serialize trên main thread và tạo bản sao thứ hai nên bộ nhớ tăng",
+        "Gửi Buffer/ArrayBuffer thô bằng transferList, để worker tự parse",
+        "Dùng pool cố định có hàng đợi giới hạn, trả 503 khi quá tải"
+      ],
+      "red_flags": [
+        "Nói worker dùng chung heap nên postMessage miễn phí",
+        "Đưa I/O vào worker cho nhanh",
+        "Tạo worker mới cho mỗi request"
+      ],
+      "follow_up": "Nếu worker trả về kết quả là object thống kê lớn, chi phí đó nằm ở đâu và bạn giảm thế nào?"
+    },
+    "proposed_fix": {
+      "question": "",
+      "answer_change": "Viết lại mục 'Worker threads hoạt động thế nào': (1) Mỗi worker có V8 isolate, heap và event loop riêng; postMessage(obj) clone object bằng structured clone, không truyền tham chiếu. (2) Vì vậy độ trễ giảm ít: JSON.parse 50 MB vẫn chạy trên main thread, cộng thêm chi phí serialize để clone; bộ nhớ tăng vì worker giữ thêm một bản sao của cây object. Giữ nguyên phần Thiết kế lại, Khi nào không cần worker và Kiểm chứng."
+    }
+  }
+]

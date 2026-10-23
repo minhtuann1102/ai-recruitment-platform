@@ -1,0 +1,2268 @@
+[
+  {
+    "qa_id": "de-qa-1100",
+    "verdict": "ok",
+    "confidence": "high",
+    "summary_vi": "Đúng và bám sát mã nguồn OpenJDK: hash spreading, resize, ngưỡng treeify 8/6/64 và vai trò của Comparable đều có trích dẫn. Chỉ còn vấn đề nhỏ về độ dài và cách diễn đạt ngưỡng treeify.",
+    "claims": [
+      {
+        "claim": "hash() trộn bit cao xuống bằng h ^ (h >>> 16)",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/openjdk/jdk/master/src/java.base/share/classes/java/util/HashMap.java",
+        "quote": "return (key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16);",
+        "note": "Comment: \"So we apply a transform that spreads the impact of higher bits downward.\""
+      },
+      {
+        "claim": "Capacity mặc định 16 (lũy thừa của 2), load factor mặc định 0.75",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/openjdk/jdk/master/src/java.base/share/classes/java/util/HashMap.java",
+        "quote": "static final int DEFAULT_INITIAL_CAPACITY = 1 << 4; // aka 16",
+        "note": "Cùng file: \"static final float DEFAULT_LOAD_FACTOR = 0.75f;\" và \"The default initial capacity - MUST be a power of two.\""
+      },
+      {
+        "claim": "Vượt capacity × load factor thì rehash sang bảng khoảng gấp đôi; entry giữ index hoặc dịch một offset lũy thừa 2",
+        "status": "supported",
+        "source_url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/HashMap.html",
+        "quote": "When the number of entries in the hash table exceeds the product of the load factor and the current capacity, the hash table is rehashed (that is, internal data structures are rebuilt) so that the hash table has approximately twice the number of buckets.",
+        "note": "Mã nguồn resize(): \"elements from each bin must either stay at same index, or move with a power of two offset in the new table.\""
+      },
+      {
+        "claim": "TREEIFY_THRESHOLD = 8; bảng dưới 64 bucket thì resize thay vì treeify",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/openjdk/jdk/master/src/java.base/share/classes/java/util/HashMap.java",
+        "quote": "Replaces all linked nodes in bin at index for given hash unless table is too small, in which case resizes instead.",
+        "note": "Cùng file: \"static final int TREEIFY_THRESHOLD = 8;\", \"static final int MIN_TREEIFY_CAPACITY = 64;\" và \"Bins are converted to trees when adding an element to a bin with at least this many nodes.\""
+      },
+      {
+        "claim": "Cây bị tách khi resize mà còn ≤ 6 node thì trở lại danh sách (UNTREEIFY_THRESHOLD = 6)",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/openjdk/jdk/master/src/java.base/share/classes/java/util/HashMap.java",
+        "quote": "The bin count threshold for untreeifying a (split) bin during a resize operation.",
+        "note": "static final int UNTREEIFY_THRESHOLD = 6;"
+      },
+      {
+        "claim": "Cây sắp theo hashCode; khi trùng hash chỉ dùng compareTo nếu key Comparable, nếu không thì mất lợi ích",
+        "status": "supported",
+        "source_url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/HashMap.html",
+        "quote": "To ameliorate impact, when keys are Comparable, this class may use comparison order among keys to help break ties.",
+        "note": "Mã nguồn: \"ordered primarily by hashCode, but in the case of ties, if two elements are of the same \"class C implements Comparable<C>\", type then their compareTo method is used for ordering.\""
+      },
+      {
+        "claim": "Duyệt map tốn thời gian tỉ lệ capacity + size, nên không đặt capacity quá lớn",
+        "status": "supported",
+        "source_url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/HashMap.html",
+        "quote": "Iteration over collection views requires time proportional to the \"capacity\" of the HashMap instance (the number of buckets) plus its size (the number of key-value mappings).",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "Chunk ~690 token, vượt budget 600. Điểm cắt rơi giữa ý khắc phục 3; mất phần capacity = expected / 0.75 và ý 4 (Comparable). Các ý bắt buộc (hashCode kém, cơ chế treeify, viết lại hashCode) vẫn nằm trước điểm cắt.",
+        "fix": "Gộp phần 'Chẩn đoán' vào một câu và rút ý 3 thành 'dùng HashMap.newHashMap(expected) (JDK 19+) hoặc capacity ≈ expected/0.75'."
+      },
+      {
+        "severity": "minor",
+        "type": "factual",
+        "detail": "'Bucket đạt 8 node thì thành cây' hơi lệch: mã nguồn treeify khi thêm phần tử vào bin đã có ít nhất 8 node (tức bin có 9 node sau khi thêm).",
+        "fix": "Viết 'khi thêm vào bin đã có từ 8 node (TREEIFY_THRESHOLD)'."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Đòi hỏi chẩn đoán từ triệu chứng và hiểu internals (spreading, treeify, Comparable), không chỉ định nghĩa."
+    },
+    "interview_fit": {
+      "minutes": 4,
+      "sub_questions": 2,
+      "gradeable": true,
+      "note": "Hai ý hỏi (vì sao chậm, cách sửa) với khoảng 5 điểm chấm rõ ràng."
+    },
+    "junior_guide": {
+      "tests": "Hiểu cách HashMap chọn bucket và chuyện gì xảy ra khi hashCode phân bố kém.",
+      "must_have": [
+        "hashCode chỉ dựa trên trường ít giá trị nên nhiều key dồn vào cùng bucket, get/put thoái hóa",
+        "index = hash & (n-1); hash() trộn bit cao xuống nhưng không cứu được khi hashCode trùng hẳn",
+        "Bin dài thì treeify (ngưỡng 8, bảng ≥ 64 bucket), nhưng cây chỉ giúp nhiều khi key Comparable",
+        "Sửa: hashCode dùng đủ các trường của equals, key immutable",
+        "Khai báo capacity trước khi biết số lượng để tránh resize liên tục"
+      ],
+      "red_flags": [
+        "Nói tăng load factor hay capacity sẽ giải quyết được hashCode trùng",
+        "Sửa hashCode nhưng không giữ contract với equals",
+        "Cho rằng treeify luôn làm thao tác O(log n) bất kể key có Comparable hay không"
+      ],
+      "follow_up": "Nếu key do client bên ngoài gửi lên (có thể cố tình tạo va chạm), bạn phòng thủ thế nào?"
+    },
+    "proposed_fix": null
+  },
+  {
+    "qa_id": "de-qa-1101",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Nội dung đúng và khớp javadoc ConcurrentHashMap (atomic từng thao tác, computeIfAbsent, merge/LongAdder, recursive update). Cần fix vì câu hỏi gồm 3 ý hỏi, quá rộng cho 3–5 phút; các ý phụ 4–5 bị cắt khỏi snippet.",
+    "claims": [
+      {
+        "claim": "computeIfAbsent thực hiện atomic; hàm mapping được gọi đúng một lần nếu key vắng, không gọi nếu đã có",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/openjdk/jdk/master/src/java.base/share/classes/java/util/concurrent/ConcurrentHashMap.java",
+        "quote": "The entire method invocation is performed atomically. The supplied function is invoked exactly once per invocation of this method if the key is absent, else not at all.",
+        "note": "Javadoc bản HTML trên docs.oracle.com bị cắt trước phần method detail, nên trích từ javadoc trong mã nguồn JDK."
+      },
+      {
+        "claim": "Trong lúc hàm mapping chạy, một số cập nhật của thread khác có thể bị chặn, nên hàm phải ngắn",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/openjdk/jdk/master/src/java.base/share/classes/java/util/concurrent/ConcurrentHashMap.java",
+        "quote": "Some attempted update operations on this map by other threads may be blocked while computation is in progress",
+        "note": "Câu đầy đủ dài hơn giới hạn trích của công cụ; đây là đoạn nguyên văn đầu câu."
+      },
+      {
+        "claim": "Hàm mapping không được sửa chính map; recursive update có thể ném IllegalStateException",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/openjdk/jdk/master/src/java.base/share/classes/java/util/concurrent/ConcurrentHashMap.java",
+        "quote": "The mapping function must not modify this map during computation.",
+        "note": "@throws: \"IllegalStateException if the computation detectably attempts a recursive update to this map that would otherwise never complete\""
+      },
+      {
+        "claim": "Mẫu bộ đếm: ConcurrentHashMap<String, LongAdder> với computeIfAbsent(...).increment()",
+        "status": "supported",
+        "source_url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ConcurrentHashMap.html",
+        "quote": "A ConcurrentHashMap can be used as a scalable frequency map (a form of histogram or multiset) by using LongAdder values and initializing via computeIfAbsent.",
+        "note": ""
+      },
+      {
+        "claim": "Không cho phép null làm key hoặc value",
+        "status": "supported",
+        "source_url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ConcurrentHashMap.html",
+        "quote": "Like Hashtable but unlike HashMap, this class does not allow null to be used as a key or value.",
+        "note": ""
+      },
+      {
+        "claim": "size/isEmpty/containsValue chỉ là trạng thái tạm thời khi có cập nhật đồng thời, dùng để giám sát chứ không điều khiển logic",
+        "status": "supported",
+        "source_url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ConcurrentHashMap.html",
+        "quote": "Otherwise the results of these methods reflect transient states that may be adequate for monitoring or estimation purposes, but not for program control.",
+        "note": "Về mappingCount, mã nguồn: \"This method should be used instead of {@link #size} because a ConcurrentHashMap may...\" (câu bị cắt khi trích)."
+      },
+      {
+        "claim": "Đọc không chặn; cập nhật một key happens-before lần đọc thấy giá trị đó",
+        "status": "supported",
+        "source_url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ConcurrentHashMap.html",
+        "quote": "(More formally, an update operation for a given key bears a happens-before relation with any (non-null) retrieval for that key reporting the updated value.)",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi có 3 ý hỏi (vì sao sai, sửa thế nào, lưu ý khi dùng computeIfAbsent) và đáp án có 5 lưu ý phụ, khó trả lời gọn trong 3–5 phút và khó chấm theo ưu tiên.",
+        "fix": "Giữ 2 ý: 'Vì sao vẫn sai và sửa thế nào?'; chuyển phần lưu ý computeIfAbsent thành follow-up."
+      },
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "Chunk ~740 token; điểm cắt 600 token rơi giữa lưu ý 4, mất lưu ý 4–5 (size/mappingCount, happens-before). Ý bắt buộc (check-then-act không atomic, computeIfAbsent, merge/LongAdder, hàm mapping ngắn) vẫn nằm trước điểm cắt.",
+        "fix": "Bỏ lưu ý 4–5 hoặc gộp thành một câu."
+      },
+      {
+        "severity": "minor",
+        "type": "factual",
+        "detail": "Gợi ý lưu CompletableFuture<V> làm value là pattern phổ biến nhưng không có trong javadoc; không nên là điểm chấm bắt buộc.",
+        "fix": "Ghi rõ đây là một lựa chọn (ví dụ Caffeine/AsyncCache) chứ không phải yêu cầu."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Phân biệt thread-safe từng thao tác với atomic chuỗi thao tác, cộng các bẫy của compute*: lý luận chứ không chỉ nhớ."
+    },
+    "interview_fit": {
+      "minutes": 5,
+      "sub_questions": 3,
+      "gradeable": true,
+      "note": "Có điểm chấm rõ nhưng 3 ý hỏi, vượt mức 2 của rubric."
+    },
+    "junior_guide": {
+      "tests": "Hiểu rằng 'thread-safe' của ConcurrentHashMap chỉ áp dụng cho từng lời gọi, không cho chuỗi lời gọi.",
+      "must_have": [
+        "containsKey rồi put, hay get rồi put là check-then-act/read-modify-write, không atomic",
+        "Sửa cache bằng computeIfAbsent (atomic, hàm gọi đúng một lần khi key vắng)",
+        "Sửa bộ đếm bằng merge(k, 1L, Long::sum) hoặc LongAdder qua computeIfAbsent",
+        "Hàm mapping phải ngắn, không gọi I/O chậm, không sửa chính map"
+      ],
+      "red_flags": [
+        "Bọc bằng synchronized quanh từng lời gọi riêng lẻ mà vẫn tách check và act",
+        "Cho rằng ConcurrentHashMap làm mọi đoạn code dùng nó trở nên an toàn",
+        "Gọi computeIfAbsent lồng nhau trên cùng map"
+      ],
+      "follow_up": "loadExpensive mất 2 giây; gọi nó trong computeIfAbsent trên map nóng thì có vấn đề gì và bạn thiết kế lại ra sao?"
+    },
+    "proposed_fix": {
+      "question": "Code cache dùng ConcurrentHashMap viết `if (!map.containsKey(k)) map.put(k, loadExpensive(k));` và bộ đếm viết `counts.put(k, counts.get(k) + 1)`. Dưới tải cao, loadExpensive bị gọi trùng và số đếm bị thiếu. Vì sao ConcurrentHashMap \"thread-safe\" mà vẫn sai, và sửa thế nào?",
+      "answer_change": "Giữ phần nguyên nhân và cách sửa; rút 'Lưu ý' còn 2 ý (hàm mapping ngắn, không sửa chính map). Bỏ lưu ý 3–5 khỏi đáp án hoặc gộp thành một câu; chuyển phần computeIfAbsent nâng cao sang follow-up."
+    }
+  },
+  {
+    "qa_id": "de-qa-1102",
+    "verdict": "ok",
+    "confidence": "high",
+    "summary_vi": "Giải thích DCL bằng happens-before chính xác theo JLS §17.4.5, các cách sửa (volatile, holder idiom, enum/eager) đều có cơ sở trong JLS. Chỉ có vấn đề nhỏ về độ dài.",
+    "claims": [
+      {
+        "claim": "Unlock monitor happens-before mọi lần lock sau đó trên cùng monitor",
+        "status": "supported",
+        "source_url": "https://docs.oracle.com/javase/specs/jls/se21/html/jls-17.html",
+        "quote": "An unlock on a monitor happens-before every subsequent lock on that monitor.",
+        "note": ""
+      },
+      {
+        "claim": "Ghi volatile happens-before mọi lần đọc sau của biến đó (cơ sở của cách sửa 1)",
+        "status": "supported",
+        "source_url": "https://docs.oracle.com/javase/specs/jls/se21/html/jls-17.html",
+        "quote": "A write to a volatile field (§8.3.1.4) happens-before every subsequent read of that field.",
+        "note": "Cùng mục: start() và join() cũng tạo cạnh happens-before."
+      },
+      {
+        "claim": "Đọc instance ngoài lock không có cạnh happens-before nên là data race",
+        "status": "supported",
+        "source_url": "https://docs.oracle.com/javase/specs/jls/se21/html/jls-17.html",
+        "quote": "When a program contains two conflicting accesses (§17.4.1) that are not ordered by a happens-before relationship, it is said to contain a data race.",
+        "note": ""
+      },
+      {
+        "claim": "Holder idiom: class được khởi tạo lazy ở lần truy cập static field đầu tiên, JVM đồng bộ việc khởi tạo",
+        "status": "supported",
+        "source_url": "https://docs.oracle.com/javase/specs/jls/se21/html/jls-12.html",
+        "quote": "Because the Java programming language is multithreaded, initialization of a class or interface requires careful synchronization, since some other thread may be trying to initialize the same class or interface at the same time.",
+        "note": "§12.4.1: \"A class or interface T will be initialized immediately before the first occurrence of any one of the following\" ... \"A static field declared by T is used and the field is not a constant variable\"."
+      },
+      {
+        "claim": "Final field: thread thấy reference sau khi constructor xong sẽ thấy đúng giá trị các trường final",
+        "status": "supported",
+        "source_url": "https://docs.oracle.com/javase/specs/jls/se21/html/jls-17.html",
+        "quote": "A thread that can only see a reference to an object after that object has been completely initialized is guaranteed to see the correctly initialized values for that object's final fields.",
+        "note": ""
+      },
+      {
+        "claim": "Lớp java.util.concurrent mở rộng bảo đảm happens-before",
+        "status": "supported",
+        "source_url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/package-summary.html",
+        "quote": "The methods of all classes in java.util.concurrent and its subpackages extend these guarantees to higher-level synchronization.",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "Chunk ~710 token; điểm cắt 600 token rơi vào cách sửa 4 (final field) và mất đoạn 'Bài học'. Các ý bắt buộc (data race, cách sửa volatile/holder/enum) nằm trước điểm cắt.",
+        "fix": "Bỏ cách sửa 4 hoặc rút đoạn 'Bài học' thành một câu."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Phải lý luận bằng JMM (happens-before, reordering), không chỉ nhớ 'thêm volatile'."
+    },
+    "interview_fit": {
+      "minutes": 4,
+      "sub_questions": 2,
+      "gradeable": true,
+      "note": "Hai ý hỏi (vì sao sai, cách sửa + trade-off), 4–5 điểm chấm rõ."
+    },
+    "junior_guide": {
+      "tests": "Hiểu visibility và happens-before trong Java Memory Model, không chỉ mutual exclusion.",
+      "must_have": [
+        "Lần đọc đầu tiên nằm ngoài synchronized nên không có cạnh happens-before tới các lệnh ghi trong constructor",
+        "Đó là data race: reference có thể được thấy trước khi các trường ghi xong, thread khác thấy object chưa khởi tạo đủ",
+        "Sửa 1: khai báo volatile (ghi volatile happens-before đọc volatile)",
+        "Sửa 2: holder idiom dựa vào khởi tạo class lazy và được JVM đồng bộ",
+        "Sửa 3: enum hoặc eager nếu tạo object rẻ"
+      ],
+      "red_flags": [
+        "Nói synchronized bên trong là đủ vì đã khóa",
+        "Nghĩ volatile chỉ để 'không cache biến' mà không nhắc thứ tự/happens-before",
+        "Cho rằng lỗi không xảy ra trên x86 nên không cần sửa"
+      ],
+      "follow_up": "Nếu mọi trường của Config đều là final thì DCL không volatile có an toàn không? Vì sao vẫn không nên dựa vào đó?"
+    },
+    "proposed_fix": null
+  },
+  {
+    "qa_id": "de-qa-1103",
+    "verdict": "ok",
+    "confidence": "high",
+    "summary_vi": "Phân tích đúng: supplyAsync không truyền Executor chạy trên commonPool dùng chung với parallel stream, blocking I/O làm cạn worker. Quy tắc ThreadPoolExecutor, rejection policy, timeout đều khớp javadoc. Chỉ có vấn đề nhỏ về độ dài và số ý.",
+    "claims": [
+      {
+        "claim": "Method *Async không truyền Executor chạy trên ForkJoinPool.commonPool() (trừ khi parallelism < 2 thì tạo Thread mới)",
+        "status": "supported",
+        "source_url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/CompletableFuture.html",
+        "quote": "All async methods without an explicit Executor argument are performed using the ForkJoinPool.commonPool() (unless it does not support a parallelism level of at least two, in which case, a new Thread is created to run each task).",
+        "note": ""
+      },
+      {
+        "claim": "Common pool dùng chung cho mọi ForkJoinTask không submit vào pool cụ thể (gồm parallel stream)",
+        "status": "supported",
+        "source_url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ForkJoinPool.html",
+        "quote": "The common pool is used by any ForkJoinTask that is not explicitly submitted to a specified pool.",
+        "note": "Việc parallel stream dùng common pool là chi tiết cài đặt, không nêu trong trang này."
+      },
+      {
+        "claim": "ForkJoinPool không bảo đảm bù thread khi gặp blocking I/O",
+        "status": "supported",
+        "source_url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ForkJoinPool.html",
+        "quote": "However, no such adjustments are guaranteed in the face of blocked I/O or other unmanaged synchronization.",
+        "note": ""
+      },
+      {
+        "claim": "ThreadPoolExecutor: đủ core thì ưu tiên queue; queue đầy mới tạo thêm tới max, vượt thì reject; queue không giới hạn làm max vô tác dụng",
+        "status": "supported",
+        "source_url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ThreadPoolExecutor.html",
+        "quote": "If a request cannot be queued, a new thread is created unless this would exceed maximumPoolSize, in which case, the task will be rejected.",
+        "note": "Về queue không giới hạn: \"(And the value of the maximumPoolSize therefore doesn't have any effect.)\""
+      },
+      {
+        "claim": "AbortPolicy mặc định ném RejectedExecutionException; CallerRunsPolicy cho thread gọi tự chạy task, tạo backpressure",
+        "status": "supported",
+        "source_url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ThreadPoolExecutor.html",
+        "quote": "In ThreadPoolExecutor.CallerRunsPolicy, the thread that invokes execute itself runs the task. This provides a simple feedback control mechanism that will slow down the rate that new tasks are submitted.",
+        "note": "\"In the default ThreadPoolExecutor.AbortPolicy, the handler throws a runtime RejectedExecutionException upon rejection.\""
+      },
+      {
+        "claim": "orTimeout/completeOnTimeout; timeout của future không hủy được I/O đang chạy nên cần timeout ở HTTP client",
+        "status": "supported",
+        "source_url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/CompletableFuture.html",
+        "quote": "Since (unlike FutureTask) this class has no direct control over the computation that causes it to be completed, cancellation is treated as just another form of exceptional completion.",
+        "note": "orTimeout: \"Exceptionally completes this CompletableFuture with a TimeoutException if not otherwise completed before the given timeout.\""
+      },
+      {
+        "claim": "join() ném CompletionException, get() ném ExecutionException; callback không async có thể chạy trên thread hoàn tất future",
+        "status": "supported",
+        "source_url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/CompletableFuture.html",
+        "quote": "Actions supplied for dependent completions of non-async methods may be performed by the thread that completes the current CompletableFuture, or by any other caller of a completion method.",
+        "note": "\"this class also defines methods join() and getNow(T) that instead throw the CompletionException directly in these cases.\""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "Chunk ~788 token; điểm cắt 600 token rơi vào ý 4 (bulkhead), mất ý 5–6 và đoạn virtual thread. Các ý bắt buộc (commonPool, executor riêng có queue giới hạn, rejection, timeout) nằm trước điểm cắt.",
+        "fix": "Bỏ ý 5–6 (xử lý lỗi, callback) hoặc chuyển sang follow-up; rút đoạn virtual thread còn một câu."
+      },
+      {
+        "severity": "minor",
+        "type": "interview_fit",
+        "detail": "Đáp án có 6 ý thiết kế cộng virtual thread, hơi dài cho một câu 4–5 phút; người chấm nên ưu tiên 3–4 ý đầu.",
+        "fix": "Đánh dấu ý 1–3 là bắt buộc, phần còn lại là điểm cộng."
+      },
+      {
+        "severity": "minor",
+        "type": "factual",
+        "detail": "Ý virtual thread (JDK 21) chưa được kiểm chứng trong lần duyệt này, nhưng không phải ý chấm chính.",
+        "fix": "Giữ ngắn và ghi rõ JDK 21+."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Chẩn đoán từ triệu chứng (latency lan sang parallel stream) và thiết kế executor/bulkhead/timeout: lý luận về thread pool."
+    },
+    "interview_fit": {
+      "minutes": 5,
+      "sub_questions": 2,
+      "gradeable": true,
+      "note": "Hai ý hỏi; điểm chấm rõ nhưng nhiều, cần ưu tiên."
+    },
+    "junior_guide": {
+      "tests": "Hiểu async mặc định chạy trên thread pool nào và vì sao blocking I/O trên pool dùng chung gây nghẽn lan rộng.",
+      "must_have": [
+        "supplyAsync không truyền Executor chạy trên ForkJoinPool.commonPool(), pool dùng chung với parallel stream",
+        "Common pool ít thread và không bù thread khi task block I/O, nên một downstream chậm làm mọi việc khác xếp hàng",
+        "Dùng executor riêng cho I/O, truyền tường minh, queue có giới hạn và rejection policy rõ ràng",
+        "Timeout từng nhánh (orTimeout/completeOnTimeout) kèm timeout ở HTTP client",
+        "Bulkhead: tách pool hoặc giới hạn đồng thời theo downstream"
+      ],
+      "red_flags": [
+        "Tăng parallelism của common pool là đủ",
+        "Dùng LinkedBlockingQueue không giới hạn rồi tin maximumPoolSize sẽ tăng thread",
+        "Nghĩ orTimeout hủy được lời gọi HTTP đang block"
+      ],
+      "follow_up": "Nếu chuyển sang virtual thread thì còn cần bulkhead không, và giới hạn đồng thời đặt ở đâu?"
+    },
+    "proposed_fix": null
+  },
+  {
+    "qa_id": "de-qa-1104",
+    "verdict": "ok",
+    "confidence": "high",
+    "summary_vi": "Đúng theo Troubleshooting Guide JDK 21: phân biệt leak và heap nhỏ, HeapDumpOnOutOfMemoryError, histogram định kỳ, JFR OldObjectSample. Còn một sắc thái nhỏ: dump với path-to-gc-roots=true có overhead cỡ một full GC, không 'thấp' như ghi.",
+    "claims": [
+      {
+        "claim": "'Java heap space' chỉ nói không cấp phát được object, không tự chứng minh leak; có thể chỉ là heap quá nhỏ",
+        "status": "supported",
+        "source_url": "https://docs.oracle.com/en/java/javase/21/troubleshoot/troubleshooting-memory-leaks.html",
+        "quote": "This error does not necessarily imply a memory leak. The problem can be as simple as a configuration issue, where the specified heap size (or the default size, if it is not specified) is insufficient for the application.",
+        "note": ""
+      },
+      {
+        "claim": "Leak kiểu Java là vô tình giữ reference khiến object không được thu hồi",
+        "status": "supported",
+        "source_url": "https://docs.oracle.com/en/java/javase/21/troubleshoot/troubleshooting-memory-leaks.html",
+        "quote": "the message might indicate that the application is unintentionally holding references to objects, which prevents the objects from being garbage collected. This is the Java language equivalent of a memory leak.",
+        "note": ""
+      },
+      {
+        "claim": "-XX:+HeapDumpOnOutOfMemoryError lấy heap dump đúng lúc lỗi",
+        "status": "supported",
+        "source_url": "https://docs.oracle.com/en/java/javase/21/troubleshoot/troubleshooting-memory-leaks.html",
+        "quote": "You can use the -XX:+HeapDumpOnOutOfMemoryError Java option to dump the Java heap of a process when it fails with a java.lang.OutOfMemoryError error.",
+        "note": ""
+      },
+      {
+        "claim": "jcmd GC.class_histogram lấy định kỳ để thấy class nào tăng đều",
+        "status": "supported",
+        "source_url": "https://docs.oracle.com/en/java/javase/21/troubleshoot/troubleshooting-memory-leaks.html",
+        "quote": "If a sequence of histograms is obtained (for example, every two minutes), then you might be able to see a trend that can lead to further analysis.",
+        "note": ""
+      },
+      {
+        "claim": "JFR OldObjectSample cho thời điểm cấp phát, stack trace và đường tới GC root",
+        "status": "supported",
+        "source_url": "https://docs.oracle.com/en/java/javase/21/troubleshoot/troubleshooting-memory-leaks.html",
+        "quote": "This event contains the time of allocation, the allocation stack trace, and the path back to the GC root.",
+        "note": "Cùng trang: \"Setting path-to-gc-roots=true creates overhead, similar to a full garbage collection\"."
+      },
+      {
+        "claim": "Classloader leak thường cho OOM Metaspace",
+        "status": "supported",
+        "source_url": "https://docs.oracle.com/en/java/javase/21/troubleshoot/troubleshooting-memory-leaks.html",
+        "quote": "If the Metaspace for class metadata is exhausted, a java.lang.OutOfMemoryError error with a detail message Metaspace is thrown.",
+        "note": "\"Information about class loaders and the number of classes loaded by them can be very helpful in diagnosing memory leaks related to Metaspace\""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "minor",
+        "type": "factual",
+        "detail": "Ghi JFR 'overhead thấp nên dùng được trên production' đúng cho việc ghi recording, nhưng tài liệu nói dump với path-to-gc-roots=true tốn overhead cỡ một full GC.",
+        "fix": "Thêm: 'dump với path-to-gc-roots=true tốn cỡ một full GC, nên chọn thời điểm'."
+      },
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "Chunk ~692 token; điểm cắt 600 token rơi vào cuối danh sách nguyên nhân, mất đoạn 'Khắc phục'. Hai ý được hỏi (phân biệt leak/heap nhỏ và quy trình thu thập/phân tích) nằm trước điểm cắt.",
+        "fix": "Rút đoạn 'Khắc phục' còn một câu hoặc rút danh sách nguyên nhân hay gặp còn 3 mục."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Chẩn đoán trên production bằng dữ liệu (live set sau GC, histogram, dump), không chỉ định nghĩa OOM."
+    },
+    "interview_fit": {
+      "minutes": 4,
+      "sub_questions": 2,
+      "gradeable": true,
+      "note": "Hai ý hỏi, 4–5 điểm chấm rõ."
+    },
+    "junior_guide": {
+      "tests": "Biết phân biệt leak với heap quá nhỏ bằng bằng chứng, và biết thu bằng chứng an toàn trên production.",
+      "must_have": [
+        "OOM Java heap space không tự chứng minh leak",
+        "Nhìn heap sau GC theo thời gian: mức đáy tăng dần là leak, phẳng là thiếu heap hoặc spike",
+        "Bật HeapDumpOnOutOfMemoryError và GC log từ trước",
+        "Histogram định kỳ hoặc JFR OldObjectSample để thấy object sống lâu",
+        "Phân tích dump bằng dominator tree / retained size và đường tới GC root"
+      ],
+      "red_flags": [
+        "Tăng -Xmx là xong",
+        "Chụp heap dump liên tục trên production mà không nghĩ tới pause và disk",
+        "Nhầm OOM Metaspace với leak heap"
+      ],
+      "follow_up": "Heap dump cho thấy một HashMap static giữ 2 GB; bạn tìm ai đang thêm vào nó và sửa thế nào?"
+    },
+    "proposed_fix": null
+  },
+  {
+    "qa_id": "de-qa-1105",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Các fact về G1 và ZGC đều đúng và có version (IHOP 45%, MaxGCPauseMillis 200 ms, humongous, JEP 439/474). Cần fix vì câu hỏi có 4 ý hỏi và phần trade-off được hỏi trực tiếp lại nằm sau điểm cắt 600 token.",
+    "claims": [
+      {
+        "claim": "G1 là collector mặc định",
+        "status": "supported",
+        "source_url": "https://docs.oracle.com/en/java/javase/21/gctuning/garbage-first-g1-garbage-collector1.html",
+        "quote": "G1 is the default collector.",
+        "note": ""
+      },
+      {
+        "claim": "IHOP mặc định 45%, có cơ chế adaptive",
+        "status": "supported",
+        "source_url": "https://docs.oracle.com/en/java/javase/21/docs/specs/man/java.html",
+        "quote": "By default, the initiating value is set to 45%.",
+        "note": "GC tuning guide: \"G1 by default automatically determines an optimal IHOP ... This feature is called Adaptive IHOP.\""
+      },
+      {
+        "claim": "MaxGCPauseMillis là mục tiêu mềm, mặc định 200 ms; G1 không phải real-time",
+        "status": "supported",
+        "source_url": "https://docs.oracle.com/en/java/javase/21/docs/specs/man/java.html",
+        "quote": "This is a soft goal, and the JVM will make its best effort to achieve it. The specified value doesn't adapt to your heap size. By default, for G1 the maximum pause time target is 200 milliseconds.",
+        "note": "Tuning guide: \"The Garbage-First collector is not a real-time collector.\""
+      },
+      {
+        "claim": "Evacuation failure có thể dẫn tới Full GC compact toàn heap tại chỗ, rất chậm",
+        "status": "supported",
+        "source_url": "https://docs.oracle.com/en/java/javase/21/gctuning/garbage-first-g1-garbage-collector1.html",
+        "quote": "If this assumption doesn't hold, then G1 will eventually schedule a Full GC. This type of collection performs in-place compaction of the entire heap. This might be very slow.",
+        "note": "\"When the application keeps alive so much memory so that an evacuation can't find enough space to copy to, an evacuation failure occurs.\""
+      },
+      {
+        "claim": "Humongous: object ≥ nửa region, cấp phát thành chuỗi region liền ở old gen, thường chỉ thu hồi ở Cleanup hoặc Full GC",
+        "status": "supported",
+        "source_url": "https://docs.oracle.com/en/java/javase/21/gctuning/garbage-first-g1-garbage-collector1.html",
+        "quote": "Generally, humongous objects can be reclaimed only at the end of marking during the Cleanup pause, or during Full GC if they became unreachable.",
+        "note": "\"Humongous objects are objects larger or equal the size of half a region.\" Ngoại lệ: eager reclaim cho mảng primitive (G1EagerReclaimHumongousObjects, mặc định bật)."
+      },
+      {
+        "claim": "G1HeapRegionSize là lũy thừa 2 từ 1 đến 32 MB",
+        "status": "supported",
+        "source_url": "https://docs.oracle.com/en/java/javase/21/docs/specs/man/java.html",
+        "quote": "The value is a power of 2 and can range from 1 MB to 32 MB.",
+        "note": "Theo man page JDK 21."
+      },
+      {
+        "claim": "JEP 439 (JDK 21): mục tiêu pause không quá 1 ms, bật bằng -XX:+UseZGC -XX:+ZGenerational",
+        "status": "supported",
+        "source_url": "https://openjdk.org/jeps/439",
+        "quote": "Pause times should not exceed 1 millisecond,",
+        "note": "Cùng trang: \"$ java -XX:+UseZGC -XX:+ZGenerational ...\"; Release 21."
+      },
+      {
+        "claim": "Generational là chế độ mặc định của -XX:+UseZGC từ JDK 23",
+        "status": "supported",
+        "source_url": "https://openjdk.org/jeps/474",
+        "quote": "Make Generational ZGC the default mode of ZGC by changing the default value of the ZGenerational option from false to true.",
+        "note": "Release 23. JEP cũng deprecate option ZGenerational."
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi có 4 ý hỏi (đọc log, tune G1, khi nào chuyển ZGC, trade-off), quá rộng cho 3–5 phút.",
+        "fix": "Thu hẹp còn 2 ý: 'Đọc log tìm nguyên nhân pause dài/Full GC thế nào, và khi nào bạn chuyển sang ZGC (trade-off)?'; chuyển phần tune G1 sang follow-up."
+      },
+      {
+        "severity": "major",
+        "type": "length",
+        "detail": "Chunk ~680 token; điểm cắt 600 token rơi ngay trước 'Trade-off' của ZGC, trong khi câu hỏi yêu cầu nêu trade-off. Snippet của Planner mất đúng ý được hỏi.",
+        "fix": "Rút đoạn 'Cách G1 làm việc' còn 2 câu và đưa trade-off (CPU, headroom, allocation stall) lên ngay sau 'Khi nào chọn ZGC'."
+      },
+      {
+        "severity": "minor",
+        "type": "outdated",
+        "detail": "Cờ -XX:+ZGenerational đã bị deprecate ở JDK 23 (JEP 474); ở các bản mới hơn chế độ non-generational có thể đã bị bỏ hẳn (chưa fetch kiểm chứng JEP tương ứng). Đáp án nêu đúng version nhưng nên nói rõ cờ chỉ cần trên JDK 21–22.",
+        "fix": "Viết: 'JDK 21–22 cần thêm -XX:+ZGenerational; từ JDK 23 chỉ cần -XX:+UseZGC.'"
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["senior"],
+      "note": "Đọc GC log, chọn tham số và so sánh collector theo SLO: kiến thức vận hành sâu, thiên senior."
+    },
+    "interview_fit": {
+      "minutes": 6,
+      "sub_questions": 4,
+      "gradeable": true,
+      "note": "Điểm chấm rõ nhưng 4 ý hỏi, vượt 2."
+    },
+    "junior_guide": {
+      "tests": "Hiểu cơ chế G1 đủ để giải thích pause dài/Full GC và biết khi nào cần collector pause thấp như ZGC.",
+      "must_have": [
+        "Mixed pause dài do sơ tán region old chứa nhiều object sống",
+        "Full GC thường do evacuation failure hoặc marking bắt đầu muộn; Full GC của G1 compact cả heap, rất chậm",
+        "Humongous object (≥ nửa region) gây lãng phí và Full GC; tăng region size hoặc giảm buffer lớn",
+        "MaxGCPauseMillis là mục tiêu mềm (mặc định 200 ms), không bảo đảm",
+        "ZGC khi cần pause rất thấp không phụ thuộc heap; trả giá bằng CPU, headroom, có thể allocation stall"
+      ],
+      "red_flags": [
+        "Đặt MaxGCPauseMillis=10 rồi tin G1 sẽ đạt",
+        "Nghĩ ZGC không bao giờ làm tăng latency",
+        "Tăng heap mà không xem live set và tốc độ cấp phát"
+      ],
+      "follow_up": "Sau khi chuyển ZGC, p99 vẫn vượt SLO và log có 'Allocation Stall'. Bạn làm gì tiếp?"
+    },
+    "proposed_fix": {
+      "question": "Service có heap 24 GB, SLO p99 latency 50 ms; GC log của G1 cho thấy pause 150–300 ms ở các mixed collection và thỉnh thoảng có Full GC. Bạn đọc log để tìm nguyên nhân thế nào, và khi nào bạn chuyển sang ZGC thay vì tune tiếp G1 (nêu trade-off)?",
+      "answer_change": "Rút 'Cách G1 làm việc' còn 2 câu; giữ phần đọc log; gộp 'Tune G1' thành một câu; đưa trade-off ZGC lên trước điểm cắt; ghi 'JDK 21–22 cần -XX:+ZGenerational, từ JDK 23 là mặc định'."
+    }
+  },
+  {
+    "qa_id": "de-qa-1106",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Nội dung đúng theo tài liệu Hibernate 6.6 (N+1, phân trang in-memory khi join fetch collection, batch/subselect fetching, lazy mặc định). Cần fix vì câu hỏi gồm 3 ý hỏi lớn, quá rộng cho 3–5 phút.",
+    "claims": [
+      {
+        "claim": "N+1 là nguyên nhân phổ biến nhất khiến code truy cập dữ liệu chậm",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/hibernate/hibernate-orm/6.6/documentation/src/main/asciidoc/introduction/Tuning.adoc",
+        "quote": "Without question, the most common cause of poorly-performing data access code in Java programs",
+        "note": "Bản HTML html_single bị cắt trước chương 7 khi fetch; trích từ file nguồn asciidoc chính thức nhánh 6.6."
+      },
+      {
+        "claim": "Join fetch collection kèm phân trang khiến limit áp dụng trong bộ nhớ; FAIL_ON_PAGINATION_OVER_COLLECTION_FETCH biến thành exception",
+        "status": "supported",
+        "source_url": "https://docs.hibernate.org/orm/6.6/javadocs/org/hibernate/cfg/QuerySettings.html",
+        "quote": "When pagination is used in combination with a fetch join applied to a collection or many-valued association, the limit must be applied in-memory instead of on the database.",
+        "note": "\"When enabled, this setting specifies that an exception should be thrown for any query which would result in the limit being applied in-memory.\""
+      },
+      {
+        "claim": "Join fetch hai collection cùng lúc tạo tích Descartes",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/hibernate/hibernate-orm/6.6/documentation/src/main/asciidoc/introduction/Tuning.adoc",
+        "quote": "Joining both collections in a single query would result in a cartesian product of tables",
+        "note": ""
+      },
+      {
+        "claim": "Hầu hết association nên LAZY; EAGER không phải cách chữa",
+        "status": "supported",
+        "source_url": "https://docs.hibernate.org/orm/6.6/introduction/html_single/Hibernate_Introduction.html",
+        "quote": "Almost all associations should be lazy.",
+        "note": "Trang gọi eager mặc định của @ManyToOne trong JPA là misfeature."
+      },
+      {
+        "claim": "Batch fetching giảm nhẹ chứ không giải quyết triệt để N+1",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/hibernate/hibernate-orm/6.6/documentation/src/main/asciidoc/introduction/Tuning.adoc",
+        "quote": "While batch fetching might _mitigate_ problems involving N+1 selects, it won't solve them.",
+        "note": ""
+      },
+      {
+        "claim": "Subselect fetching nạp association bằng một câu select kèm khóa truy vấn lại trong subselect",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/hibernate/hibernate-orm/6.6/documentation/src/main/asciidoc/introduction/Tuning.adoc",
+        "quote": "where an association is fetched using a subsequent `select` with keys re-queried in a subselect",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi có 3 ý hỏi (giải thích N+1, vì sao cách sửa sai, các chiến lược đúng kèm trade-off) và đáp án liệt kê 6 chiến lược, khó trả lời gọn và khó chấm theo ưu tiên.",
+        "fix": "Hỏi 2 ý: 'Vì sao JOIN FETCH items kèm phân trang làm chậm và tốn RAM, và bạn sửa thế nào?'; phần giải thích N+1 coi như nền, các chiến lược phụ (subselect, DTO) thành follow-up."
+      },
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "Chunk ~732 token; điểm cắt 600 token rơi ở cuối chiến lược 4 (batch fetching), mất subselect, DTO projection và phần phòng ngừa. Ý bắt buộc (N+1, phân trang in-memory, truy vấn hai bước, to-one join fetch) nằm trước điểm cắt.",
+        "fix": "Bỏ chiến lược 5–6 và phần phòng ngừa hoặc gộp thành một câu."
+      },
+      {
+        "severity": "minor",
+        "type": "factual",
+        "detail": "Ý 'viết test khẳng định số câu SQL' là thực hành tốt nhưng tài liệu Hibernate không nêu; tài liệu chỉ nhắc statistics/log slow query.",
+        "fix": "Viết 'bật hibernate.generate_statistics hoặc log SQL trong test để đếm số câu'."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Phải hiểu vì sao join fetch collection phá phân trang và chọn chiến lược fetch theo use case."
+    },
+    "interview_fit": {
+      "minutes": 5,
+      "sub_questions": 3,
+      "gradeable": true,
+      "note": "Có điểm chấm rõ nhưng 3 ý hỏi, vượt 2."
+    },
+    "junior_guide": {
+      "tests": "Hiểu N+1 và cách chọn chiến lược fetch trong Hibernate/JPA cho danh sách có phân trang.",
+      "must_have": [
+        "N+1: 1 câu lấy cha + mỗi association lazy bị chạm lại thêm 1 câu; vấn đề là số round trip",
+        "Join fetch collection nhân dòng nên Hibernate phải phân trang trong bộ nhớ",
+        "To-one (customer) join fetch an toàn với phân trang",
+        "Collection + phân trang: truy vấn hai bước (trang ID rồi join fetch theo ID) hoặc batch fetching",
+        "Association để LAZY, chọn fetch theo use case; EAGER không chữa N+1"
+      ],
+      "red_flags": [
+        "Đổi sang FetchType.EAGER để hết N+1",
+        "Join fetch nhiều collection trong một query",
+        "Cho rằng batch fetching xóa hẳn N+1"
+      ],
+      "follow_up": "Màn hình chỉ đọc cần 3 cột từ order và tổng số item; bạn có cần load entity không?"
+    },
+    "proposed_fix": {
+      "question": "Endpoint liệt kê 20 đơn hàng kèm danh sách item và tên khách hàng sinh ra 41 câu SQL. Một dev sửa bằng `JOIN FETCH o.items` kèm phân trang thì số câu giảm nhưng memory và thời gian tăng khi bảng lớn. Vì sao cách sửa đó sai, và bạn sẽ fetch thế nào cho đúng?",
+      "answer_change": "Giữ đoạn N+1 thành một câu nền; giữ phần 'vì sao sai' và chiến lược 1–4; bỏ chiến lược 5–6 và phần phòng ngừa (hoặc chuyển thành follow-up)."
+    }
+  },
+  {
+    "qa_id": "de-qa-1107",
+    "verdict": "ok",
+    "confidence": "high",
+    "summary_vi": "Phân tích đúng theo User Guide Hibernate 6.6: persistence context giữ mọi entity, cần flush()/clear() theo chunk, JDBC batching bị tắt với IDENTITY, StatelessSession. Chỉ còn vấn đề nhỏ về độ dài và hai ý phụ chưa kiểm chứng.",
+    "claims": [
+      {
+        "claim": "Mọi entity nằm trong session-level cache (first-level cache), loop lớn có thể OOM",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/hibernate/hibernate-orm/6.6/documentation/src/main/asciidoc/userguide/chapters/batch/Batching.adoc",
+        "quote": "Hibernate caches all the newly inserted Person instances in the session-level cache",
+        "note": "Ví dụ trong tài liệu dẫn tới OutOfMemoryException; tài liệu nói về insert, cùng cơ chế áp dụng cho entity được load."
+      },
+      {
+        "claim": "Gọi flush() rồi clear() định kỳ để giới hạn first-level cache",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/hibernate/hibernate-orm/6.6/documentation/src/main/asciidoc/userguide/chapters/batch/Batching.adoc",
+        "quote": "employ methods flush() and clear() to the session regularly, to control the size of the first-level cache.",
+        "note": ""
+      },
+      {
+        "claim": "Flush mode AUTO flush trước query JPQL/HQL chồng lấn với thay đổi chưa ghi",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/hibernate/hibernate-orm/6.6/documentation/src/main/asciidoc/userguide/chapters/flushing/Flushing.adoc",
+        "quote": "prior to executing a JPQL/HQL query that overlaps with the queued entity actions",
+        "note": "Dirty checking: \"The dirty checking mechanism is responsible for determining if a managed entity has been modified since it was first loaded.\""
+      },
+      {
+        "claim": "hibernate.jdbc.batch_size bật JDBC batching",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/hibernate/hibernate-orm/6.6/documentation/src/main/asciidoc/userguide/chapters/batch/Batching.adoc",
+        "quote": "Controls the maximum number of statements Hibernate will batch together before asking the driver to execute the batch.",
+        "note": ""
+      },
+      {
+        "claim": "Hibernate âm thầm tắt insert batching khi dùng IDENTITY generator",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/hibernate/hibernate-orm/6.6/documentation/src/main/asciidoc/userguide/chapters/batch/Batching.adoc",
+        "quote": "Hibernate disables insert batching at the JDBC level transparently if you use an identity identifier generator.",
+        "note": ""
+      },
+      {
+        "claim": "StatelessSession: không persistence context, không dirty checking, collection bị bỏ qua, dễ data aliasing",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/hibernate/hibernate-orm/6.6/documentation/src/main/asciidoc/userguide/chapters/batch/Batching.adoc",
+        "quote": "there's no transactional write-behind or automatic dirty checking.",
+        "note": "Cùng trang: \"collections are ignored by a stateless session,\" và \"stateless sessions are vulnerable to data aliasing effects.\""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "Chunk ~727 token; điểm cắt 600 token rơi vào ý 6 (StatelessSession), mất ý 6–7. Nguyên nhân và các ý viết lại chính (chunk + flush/clear, JDBC batching, đọc theo khóa, transaction ngắn) nằm trước điểm cắt.",
+        "fix": "Gộp ý 5–7 thành một dòng 'lựa chọn khác: read-only, StatelessSession, bulk UPDATE'."
+      },
+      {
+        "severity": "minor",
+        "type": "factual",
+        "detail": "Hai ý phụ chưa kiểm chứng trong lần duyệt: read-only bỏ dirty checking (ý 5) và bulk UPDATE đi vòng qua persistence context (ý 7); trang Batching.adoc không nói rõ ý 7. Cả hai đúng theo hiểu biết chung nhưng không nên là điểm chấm bắt buộc.",
+        "fix": "Giữ là điểm cộng; nếu giữ ý 7, dẫn tài liệu HQL bulk operations."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Phải nối triệu chứng (chậm dần rồi OOM) với persistence context và dirty checking, rồi thiết kế lại batch."
+    },
+    "interview_fit": {
+      "minutes": 4,
+      "sub_questions": 2,
+      "gradeable": true,
+      "note": "Hai ý hỏi (nguyên nhân, viết lại), điểm chấm rõ."
+    },
+    "junior_guide": {
+      "tests": "Hiểu persistence context giữ entity tới khi clear và hệ quả với job batch lớn.",
+      "must_have": [
+        "Mọi entity load trong transaction nằm trong first-level cache tới khi clear, nên heap tăng tuyến tính",
+        "Mỗi lần flush phải dirty-check toàn bộ entity managed nên càng chạy càng chậm",
+        "Chia chunk, flush() + clear() sau mỗi chunk",
+        "Bật hibernate.jdbc.batch_size; IDENTITY tắt insert batching",
+        "Đọc theo khóa hoặc stream, mỗi chunk một transaction ngắn"
+      ],
+      "red_flags": [
+        "Tăng -Xmx là giải pháp",
+        "Gọi save() từng entity là đủ để giải phóng bộ nhớ",
+        "Dùng OFFSET sâu để phân trang 1 triệu bản ghi"
+      ],
+      "follow_up": "Job chết ở bản ghi 600 nghìn; làm sao chạy lại mà không xử lý trùng?"
+    },
+    "proposed_fix": null
+  },
+  {
+    "qa_id": "de-qa-1108",
+    "verdict": "ok",
+    "confidence": "high",
+    "summary_vi": "Đọc plan và chẩn đoán underestimate do giả định độc lập giữa các cột là chính xác theo tài liệu PostgreSQL; cách sửa bằng extended statistics, statistics target, BEGIN/ROLLBACK đều có trích dẫn. Chỉ có vấn đề nhỏ về độ dài.",
+    "claims": [
+      {
+        "claim": "EXPLAIN ANALYZE chạy thật và in số dòng, thời gian thực cạnh ước lượng",
+        "status": "supported",
+        "source_url": "https://www.postgresql.org/docs/current/using-explain.html",
+        "quote": "With this option, EXPLAIN actually executes the query, and then displays the true row counts and true run time accumulated within each plan node, along with the same estimates that a plain EXPLAIN shows.",
+        "note": ""
+      },
+      {
+        "claim": "Node chạy nhiều lần: actual time/rows là trung bình mỗi lần, nhân loops để ra tổng",
+        "status": "supported",
+        "source_url": "https://www.postgresql.org/docs/current/using-explain.html",
+        "quote": "In such cases, the loops value reports the total number of executions of the node, and the actual time and rows values shown are averages per-execution.",
+        "note": "\"Multiply by the loops value to get the total time actually spent in the node.\""
+      },
+      {
+        "claim": "Nested Loop quét phía trong mỗi dòng phía ngoài; tốt khi phía trong có index trên khóa join",
+        "status": "supported",
+        "source_url": "https://www.postgresql.org/docs/current/planner-optimizer.html",
+        "quote": "The right relation is scanned once for every row found in the left relation. This strategy is easy to implement but can be very time consuming. (However, if the right relation can be scanned with an index scan, this can be a good strategy.",
+        "note": "Cùng trang mô tả hash join và merge join khớp với đáp án."
+      },
+      {
+        "claim": "Planner mặc định coi các điều kiện độc lập, gây underestimate khi cột phụ thuộc nhau",
+        "status": "supported",
+        "source_url": "https://www.postgresql.org/docs/current/planner-stats.html",
+        "quote": "without knowledge of the functional dependency, the query planner will assume that the conditions are independent, resulting in underestimating the result size.",
+        "note": ""
+      },
+      {
+        "claim": "Extended statistics loại dependencies chỉ áp dụng cho điều kiện bằng hoặc IN với hằng số",
+        "status": "supported",
+        "source_url": "https://www.postgresql.org/docs/current/planner-stats.html",
+        "quote": "Functional dependencies are currently only applied when considering simple equality conditions that compare columns to constant values, and IN clauses with constant values.",
+        "note": "Trang cũng mô tả ndistinct và MCV cho tổ hợp cột."
+      },
+      {
+        "claim": "ALTER TABLE ... SET STATISTICS tăng số most-common values lưu cho cột",
+        "status": "supported",
+        "source_url": "https://www.postgresql.org/docs/current/planner-stats.html",
+        "quote": "can be set on a column-by-column basis using the ALTER TABLE SET STATISTICS command, or globally by setting the default_statistics_target configuration variable.",
+        "note": ""
+      },
+      {
+        "claim": "EXPLAIN ANALYZE cho UPDATE/DELETE nên bọc BEGIN ... ROLLBACK",
+        "status": "supported",
+        "source_url": "https://www.postgresql.org/docs/current/using-explain.html",
+        "quote": "If you want to analyze a data-modifying query without changing your tables, you can roll the command back afterwards, for example:",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "Chunk ~711 token; điểm cắt 600 token rơi vào cuối ý xử lý 3, mất ý 4–5 và câu về BEGIN/ROLLBACK. Ý bắt buộc (so estimate/actual, nhân loops, giả định độc lập, ANALYZE và CREATE STATISTICS) nằm trước điểm cắt.",
+        "fix": "Rút phần 'Ba chiến lược join' còn một câu (chỉ cần Nested Loop) để giữ ý 4–5."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Đọc plan thật, tìm gốc ước lượng sai và chọn cách sửa phù hợp: debugging cụ thể, không phải định nghĩa."
+    },
+    "interview_fit": {
+      "minutes": 4,
+      "sub_questions": 2,
+      "gradeable": true,
+      "note": "Hai ý hỏi (đọc plan, xử lý), 4–5 điểm chấm rõ."
+    },
+    "junior_guide": {
+      "tests": "Biết đọc EXPLAIN ANALYZE và nhận ra planner chọn sai plan vì ước lượng số dòng sai.",
+      "must_have": [
+        "So estimated rows với actual rows là bước quan trọng nhất; node trong loop phải nhân loops",
+        "Planner tin phía ngoài 12 dòng nên chọn Nested Loop, thực tế 180000 lần quét phía trong",
+        "Ước lượng sai vì coi country và city độc lập trong khi city gần như quyết định country",
+        "Sửa: ANALYZE, CREATE STATISTICS (dependencies) ON country, city, rồi ANALYZE",
+        "Xác nhận lại estimate sát actual sau khi sửa"
+      ],
+      "red_flags": [
+        "Tắt enable_nestloop toàn cục để 'chữa'",
+        "Chỉ thêm index mà không nhìn vào estimate",
+        "Chạy EXPLAIN ANALYZE cho DELETE trên production mà không ROLLBACK"
+      ],
+      "follow_up": "Nếu điều kiện là city IN (SELECT ...) thay vì hằng số thì extended statistics còn giúp không?"
+    },
+    "proposed_fix": null
+  },
+  {
+    "qa_id": "de-qa-1109",
+    "verdict": "ok",
+    "confidence": "high",
+    "summary_vi": "Đúng và đủ: OFFSET phải tính rồi bỏ các dòng bị skip, ORDER BY phải duy nhất, keyset bằng row comparison, index (account_id, created_at, id) đều khớp tài liệu PostgreSQL. Chỉ có vấn đề nhỏ về độ dài.",
+    "claims": [
+      {
+        "claim": "Các dòng bị OFFSET bỏ qua vẫn phải được tính trong server nên OFFSET lớn chậm",
+        "status": "supported",
+        "source_url": "https://www.postgresql.org/docs/current/queries-limit.html",
+        "quote": "The rows skipped by an OFFSET clause still have to be computed inside the server; therefore a large OFFSET might be inefficient.",
+        "note": ""
+      },
+      {
+        "claim": "ORDER BY phải tạo thứ tự duy nhất, nếu không tập con trả về không dự đoán được (cần tie-breaker id)",
+        "status": "supported",
+        "source_url": "https://www.postgresql.org/docs/current/queries-limit.html",
+        "quote": "When using LIMIT, it is important to use an ORDER BY clause that constrains the result rows into a unique order. Otherwise you will get an unpredictable subset of the query's rows.",
+        "note": ""
+      },
+      {
+        "claim": "So sánh row constructor xét từ trái sang phải, dừng ở cặp khác nhau đầu tiên",
+        "status": "supported",
+        "source_url": "https://www.postgresql.org/docs/current/functions-comparisons.html",
+        "quote": "For the <, <=, > and >= cases, the row elements are compared left-to-right, stopping as soon as an unequal or null pair of elements is found.",
+        "note": ""
+      },
+      {
+        "claim": "Index nhiều cột: cột so sánh bằng đứng đầu rồi tới cột range/sắp xếp",
+        "status": "supported",
+        "source_url": "https://www.postgresql.org/docs/current/indexes-multicolumn.html",
+        "quote": "The exact rule is that equality constraints on leading columns, plus any inequality constraints on the first column that does not have an equality constraint, will always be used to limit the portion of the index that is scanned.",
+        "note": ""
+      },
+      {
+        "claim": "ORDER BY + LIMIT n với index khớp thì lấy thẳng n dòng đầu, không sort toàn bộ; index quét ngược phục vụ DESC",
+        "status": "supported",
+        "source_url": "https://www.postgresql.org/docs/current/indexes-ordering.html",
+        "quote": "if there is an index matching the ORDER BY, the first n rows can be retrieved directly, without scanning the remainder at all.",
+        "note": "\"The index can also be scanned backward, producing output satisfying ORDER BY x DESC\""
+      },
+      {
+        "claim": "ORDER BY trộn ASC/DESC cần index khai báo chiều tương ứng",
+        "status": "supported",
+        "source_url": "https://www.postgresql.org/docs/current/indexes-ordering.html",
+        "quote": "There is no way to get that ordering from a plain index, but it is possible if the index is defined as (x ASC, y DESC) or (x DESC, y ASC).",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "Chunk ~663 token; điểm cắt 600 token rơi vào trade-off thứ 2, mất 3 trade-off cuối (đảo chiều cho trang trước, index theo kiểu sort, bản ghi mới trước cursor). Nguyên nhân, query keyset, index và trade-off chính (không nhảy trang) vẫn nằm trước điểm cắt.",
+        "fix": "Rút đoạn giải thích row constructor còn một câu để giữ đủ trade-off."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Cần hiểu vì sao OFFSET chậm và sai, thiết kế cursor có tie-breaker và index đúng thứ tự."
+    },
+    "interview_fit": {
+      "minutes": 4,
+      "sub_questions": 2,
+      "gradeable": true,
+      "note": "Hai ý hỏi (nguyên nhân, thiết kế keyset kèm index/trade-off), điểm chấm rõ."
+    },
+    "junior_guide": {
+      "tests": "Hiểu giới hạn của OFFSET pagination và cách thiết kế keyset pagination đúng.",
+      "must_have": [
+        "OFFSET vẫn phải đọc rồi bỏ các dòng phía trước, trang càng sâu càng chậm",
+        "OFFSET đếm theo vị trí nên dữ liệu chèn/xóa làm lặp hoặc mất bản ghi",
+        "created_at không duy nhất, cần thêm id làm tie-breaker",
+        "Keyset: WHERE (created_at, id) < (:lastCreatedAt, :lastId) ORDER BY created_at DESC, id DESC LIMIT 20",
+        "Index (account_id, created_at, id); trade-off: không nhảy tới trang tùy ý"
+      ],
+      "red_flags": [
+        "Chỉ dùng WHERE created_at < :last mà không có tie-breaker",
+        "Index (created_at) mà quên account_id đứng đầu",
+        "Cho rằng tăng LIMIT hoặc cache sẽ giải quyết trang sâu"
+      ],
+      "follow_up": "Màn hình cần nút 'trang trước'; bạn viết query thế nào với cùng index?"
+    },
+    "proposed_fix": null
+  },
+  {
+    "qa_id": "de-qa-1110",
+    "verdict": "ok",
+    "confidence": "high",
+    "summary_vi": "Giải thích đúng cả hai hiện tượng (self-invocation bỏ qua proxy; REQUIRED dùng chung transaction vật lý nên rollback-only dẫn tới UnexpectedRollbackException), khớp tài liệu Spring. Chỉ có vấn đề nhỏ về độ dài.",
+    "claims": [
+      {
+        "claim": "Ở proxy mode chỉ lời gọi từ ngoài qua proxy được chặn; self-invocation không có transaction",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/annotations.html",
+        "quote": "This means that self-invocation (in effect, a method within the target object calling another method of the target object) does not lead to an actual transaction at runtime even if the invoked method is marked with @Transactional.",
+        "note": ""
+      },
+      {
+        "claim": "Dùng AspectJ mode nếu cần self-invocation có transaction",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/annotations.html",
+        "quote": "Consider using AspectJ mode (see the mode attribute in the following table) if you expect self-invocations to be wrapped with transactions as well.",
+        "note": ""
+      },
+      {
+        "claim": "REQUIRED: mỗi method một logical scope nhưng chung physical transaction; rollback-only ở scope trong ảnh hưởng scope ngoài, dẫn tới UnexpectedRollbackException",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/tx-propagation.html",
+        "quote": "So a rollback-only marker set in the inner transaction scope does affect the outer transaction’s chance to actually commit.",
+        "note": "\"A corresponding UnexpectedRollbackException is thrown at that point.\""
+      },
+      {
+        "claim": "REQUIRES_NEW dùng transaction vật lý độc lập; NESTED dùng savepoint, chỉ với JDBC resource transaction",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/tx-propagation.html",
+        "quote": "This setting is typically mapped onto JDBC savepoints, so it works only with JDBC resource transactions.",
+        "note": "REQUIRES_NEW: \"always uses an independent physical transaction for each affected transaction scope\""
+      },
+      {
+        "claim": "REQUIRES_NEW có thể làm cạn connection pool và deadlock; pool lớn hơn số thread đồng thời ít nhất 1",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/tx-propagation.html",
+        "quote": "Do not use PROPAGATION_REQUIRES_NEW unless your connection pool is appropriately sized, exceeding the number of concurrent threads by at least 1.",
+        "note": ""
+      },
+      {
+        "claim": "Mặc định chỉ RuntimeException và Error gây rollback; checked exception không",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/rolling-back.html",
+        "quote": "Checked exceptions that are thrown from a transactional method do not result in a rollback in the default configuration.",
+        "note": ""
+      },
+      {
+        "claim": "Từ Spring 6.0, method protected/package-private cũng được áp transaction với class-based proxy",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/annotations.html",
+        "quote": "As of 6.0, protected or package-visible methods can also be made transactional for class-based proxies by default.",
+        "note": "Trang không nói rõ private bị loại trừ; đó là suy ra."
+      }
+    ],
+    "issues": [
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "Chunk ~790 token; điểm cắt 600 token rơi cuối cách sửa (c) của hiện tượng 2, mất phần 'Lưu ý thêm'. Hai hiện tượng và cách sửa nằm trước điểm cắt.",
+        "fix": "Bỏ hoặc rút phần 'Lưu ý thêm' còn một câu (rollback rule mặc định)."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Debug hai hiện tượng cụ thể dựa trên cơ chế proxy và propagation, không chỉ định nghĩa."
+    },
+    "interview_fit": {
+      "minutes": 5,
+      "sub_questions": 2,
+      "gradeable": true,
+      "note": "Hai ý hỏi (giải thích, sửa) cho hai hiện tượng; 4–5 điểm chấm rõ."
+    },
+    "junior_guide": {
+      "tests": "Hiểu @Transactional hoạt động qua proxy và cách propagation REQUIRED/REQUIRES_NEW chia sẻ transaction.",
+      "must_have": [
+        "this.writeAudit() là self-invocation, không qua proxy nên REQUIRES_NEW bị bỏ qua",
+        "Sửa: tách sang bean khác, TransactionTemplate, hoặc AspectJ mode",
+        "charge() REQUIRED dùng chung transaction vật lý; exception ném ra khỏi proxy đánh dấu rollback-only",
+        "placeOrder nuốt exception rồi commit nên Spring rollback và ném UnexpectedRollbackException",
+        "Sửa tùy nghiệp vụ: không nuốt lỗi, hoặc REQUIRES_NEW/NESTED cho charge, hoặc trả kết quả thay vì exception"
+      ],
+      "red_flags": [
+        "Nói REQUIRES_NEW trên method cùng class vẫn có tác dụng",
+        "Đề xuất bắt exception kỹ hơn để tránh UnexpectedRollbackException mà không hiểu rollback-only",
+        "Cho rằng checked exception cũng rollback mặc định"
+      ],
+      "follow_up": "Nếu đổi charge() sang REQUIRES_NEW, khi tải cao có rủi ro gì với connection pool?"
+    },
+    "proposed_fix": null
+  },
+  {
+    "qa_id": "de-qa-1111",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Các fact đều đúng theo tài liệu PostgreSQL, Spring và Hibernate (Read Committed mặc định, UPDATE đánh giá lại WHERE, lỗi serialization phải retry, @Version, @Lock). Cần fix vì câu hỏi liệt kê 4 cách cần so sánh cộng phần phân tích, quá rộng theo rubric.",
+    "claims": [
+      {
+        "claim": "Read Committed là isolation mặc định của PostgreSQL",
+        "status": "supported",
+        "source_url": "https://www.postgresql.org/docs/current/transaction-iso.html",
+        "quote": "Read Committed is the default isolation level in PostgreSQL.",
+        "note": ""
+      },
+      {
+        "claim": "Ở Read Committed, UPDATE chờ transaction đang sửa dòng kết thúc rồi đánh giá lại WHERE trên phiên bản mới, nên atomic conditional update không bán vượt",
+        "status": "supported",
+        "source_url": "https://www.postgresql.org/docs/current/transaction-iso.html",
+        "quote": "The search condition of the command (the WHERE clause) is re-evaluated to see if the updated version of the row still matches the search condition.",
+        "note": "Câu trước: \"the would-be updater will wait for the first updating transaction to commit or roll back (if it is still in progress).\""
+      },
+      {
+        "claim": "REPEATABLE READ/SERIALIZABLE làm transaction sau thất bại với lỗi serialization (40001), ứng dụng phải retry",
+        "status": "supported",
+        "source_url": "https://www.postgresql.org/docs/current/transaction-iso.html",
+        "quote": "Applications using this level must be prepared to retry transactions due to serialization failures.",
+        "note": "Repeatable Read: \"ERROR: could not serialize access due to concurrent update\"; Serializable: \"which always return with an SQLSTATE value of '40001'\"."
+      },
+      {
+        "claim": "Spring Data JPA dùng @Lock trên query method để chọn lock mode",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-data/jpa/reference/jpa/locking.html",
+        "quote": "To specify the lock mode to be used, you can use the @Lock annotation on query methods, as shown in the following example:",
+        "note": "Ví dụ trên trang dùng LockModeType.READ; PESSIMISTIC_WRITE là giá trị chuẩn của JPA, trang không nêu riêng."
+      },
+      {
+        "claim": "@Version: Hibernate tăng version mỗi lần cập nhật và phát hiện cập nhật xung đột, transaction thua bị rollback",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/hibernate/hibernate-orm/6.6/documentation/src/main/asciidoc/userguide/chapters/locking/Locking.adoc",
+        "quote": "Here, the version property is mapped to the version column, and the entity manager uses it to detect conflicting updates",
+        "note": "\"If the check reveals conflicting modifications, the committing transaction rolls back.\" Phù hợp tình huống \"read-often-write-sometimes\"."
+      },
+      {
+        "claim": "Isolation trong @Transactional bị âm thầm bỏ qua khi tham gia transaction ngoài (trừ khi validateExistingTransaction)",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/tx-propagation.html",
+        "quote": "By default, a participating transaction joins the characteristics of the outer scope, silently ignoring the local isolation level, timeout value, or read-only flag (if any).",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi yêu cầu phân tích lost update và so sánh 4 cách (atomic update, pessimistic, optimistic, nâng isolation): tính theo rubric là 5 ý hỏi, quá nhiều cho 3–5 phút.",
+        "fix": "Bỏ danh sách 4 cách khỏi câu hỏi: 'Phân tích lost update và bạn chọn cách khắc phục nào cho flash sale, vì sao?'; các cách còn lại làm follow-up."
+      },
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "Chunk ~746 token; điểm cắt 600 token rơi cuối cách 4, mất câu về isolation bị bỏ qua khi REQUIRED và đoạn 'Lựa chọn' (kết luận so sánh).",
+        "fix": "Rút mô tả từng cách còn 1–2 câu và đưa đoạn 'Lựa chọn' lên trước điểm cắt."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Phải hiểu hành vi isolation thực tế của PostgreSQL và trade-off các cơ chế lock."
+    },
+    "interview_fit": {
+      "minutes": 5,
+      "sub_questions": 5,
+      "gradeable": true,
+      "note": "Điểm chấm rõ nhưng quá nhiều ý được liệt kê sẵn trong câu hỏi."
+    },
+    "junior_guide": {
+      "tests": "Hiểu lost update ở tầng ứng dụng và các cách chống bán vượt tồn kho.",
+      "must_have": [
+        "Read Committed mặc định; hai transaction đọc cùng giá trị rồi ghi đè nhau (lost update)",
+        "@Transactional không chặn được read-modify-write ở Java",
+        "Atomic UPDATE ... SET stock = stock - :qty WHERE stock >= :qty và kiểm tra số dòng bị ảnh hưởng",
+        "Pessimistic lock (FOR UPDATE) cho xung đột cao, optimistic (@Version) cho xung đột thấp",
+        "Nâng isolation thì phải retry khi lỗi serialization"
+      ],
+      "red_flags": [
+        "Nói @Transactional hay synchronized trong Java là đủ",
+        "Optimistic lock là lựa chọn tốt nhất cho flash sale",
+        "Nâng isolation mà không chuẩn bị retry"
+      ],
+      "follow_up": "Với atomic update, nếu cần ghi thêm bảng order_items trong cùng transaction thì có rủi ro gì?"
+    },
+    "proposed_fix": {
+      "question": "Endpoint trừ tồn kho làm `Product p = repo.findById(id); p.setStock(p.getStock() - qty);` trong một @Transactional trên PostgreSQL. Khi flash sale, hệ thống bán vượt số lượng tồn. Vì sao, và bạn chọn cách khắc phục nào, vì sao?",
+      "answer_change": "Giữ phần nguyên nhân; đặt atomic update làm đáp án chính; rút pessimistic/optimistic/isolation thành mỗi cách 1 câu trade-off; đưa đoạn 'Lựa chọn' lên trước."
+    }
+  },
+  {
+    "qa_id": "de-qa-1112",
+    "verdict": "fix",
+    "confidence": "low",
+    "summary_vi": "Phần validate JWT khớp tài liệu Spring Security và yêu cầu RFC 9700 về refresh token cho public client có trích dẫn. Cần fix vì câu hỏi có 3 ý hỏi lớn; chi tiết reuse detection của rotation và phần lưu trữ trên trình duyệt chưa kiểm chứng được (không đọc được mục 4.14 của RFC 9700).",
+    "claims": [
+      {
+        "claim": "Resource server dùng issuer-uri để tìm public key (JWK Set) và validate chữ ký",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/jwt.html",
+        "quote": "Resource Server will use this property to further self-configure, discover the authorization server’s public keys, and subsequently validate incoming JWTs.",
+        "note": ""
+      },
+      {
+        "claim": "Mặc định kiểm iss, exp, nbf với clock skew 60 giây",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/jwt.html",
+        "quote": "By default, Resource Server configures a clock skew of 60 seconds.",
+        "note": "\"Resource Server will default to verifying the iss claim as well as the exp and nbf timestamp claims.\""
+      },
+      {
+        "claim": "Scope được map thành authority tiền tố SCOPE_, tùy biến bằng JwtAuthenticationConverter",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/jwt.html",
+        "quote": "Map each scope to an authority with the prefix SCOPE_.",
+        "note": "\"Spring Security ships with JwtAuthenticationConverter, which is responsible for converting a Jwt into an Authentication.\""
+      },
+      {
+        "claim": "RFC 9700: refresh token của public client phải sender-constrained hoặc dùng rotation",
+        "status": "supported",
+        "source_url": "https://www.rfc-editor.org/rfc/rfc9700.html",
+        "quote": "Refresh tokens for public clients MUST be sender-constrained or use refresh token rotation as described in Section 4.14.",
+        "note": ""
+      },
+      {
+        "claim": "Rotation: refresh token cũ bị dùng lại thì server thu hồi refresh token đang hoạt động của chuỗi",
+        "status": "unverified",
+        "source_url": "",
+        "quote": "",
+        "note": "WebFetch không trả về nội dung mục 4.14 của RFC 9700 (thử 3 lần với offset khác nhau). Đúng theo hiểu biết chung nhưng chưa có câu trích."
+      },
+      {
+        "claim": "localStorage dễ bị đọc khi có XSS; cookie HttpOnly/SameSite cần chống CSRF",
+        "status": "unverified",
+        "source_url": "",
+        "quote": "",
+        "note": "Hết ngân sách fetch cho cặp này; nên kiểm bằng OWASP HTML5 Security / Session Management Cheat Sheet."
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi có 3 ý hỏi lớn (cách validate JWT, vì sao khó thu hồi, thiết kế access/refresh gồm thời hạn, rotation, lưu trữ và trade-off), quá rộng cho 3–5 phút.",
+        "fix": "Hỏi 2 ý: 'Vì sao JWT khó thu hồi, và bạn thiết kế access/refresh token thế nào để logout/khóa tài khoản có hiệu lực nhanh?'; phần validate JWT thành follow-up."
+      },
+      {
+        "severity": "major",
+        "type": "factual",
+        "detail": "Hai ý thuộc thiết kế (reuse detection của rotation, lưu trữ trên trình duyệt) chưa kiểm chứng được bằng trích dẫn.",
+        "fix": "Người duyệt đối chiếu RFC 9700 §4.14 và OWASP; nếu đúng thì giữ nguyên, nên dẫn §4.14 trong grounding_urls kèm anchor."
+      },
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "Chunk ~733 token; điểm cắt 600 token rơi đầu ý 5 (lưu trữ), mất phần lưu trữ và đoạn 'Trade-off cốt lõi' dù câu hỏi yêu cầu cả hai.",
+        "fix": "Rút đoạn 'Validate JWT' còn 2 câu để phần lưu trữ và trade-off nằm trước điểm cắt."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Thiết kế có trade-off giữa stateless và thu hồi tức thì, cộng bảo mật lưu trữ."
+    },
+    "interview_fit": {
+      "minutes": 6,
+      "sub_questions": 3,
+      "gradeable": true,
+      "note": "Điểm chấm rõ nhưng 3 ý hỏi lớn."
+    },
+    "junior_guide": {
+      "tests": "Hiểu JWT được kiểm cục bộ nên khó thu hồi, và cách dùng access/refresh token để cân bằng.",
+      "must_have": [
+        "Resource server kiểm chữ ký bằng public key của issuer và kiểm exp/nbf/iss cục bộ",
+        "Vì kiểm cục bộ, token hợp lệ tới khi hết hạn dù đã logout",
+        "Access token ngắn hạn, scope/audience hẹp là cơ chế giới hạn thiệt hại chính",
+        "Refresh token lưu phía server để thu hồi được; public client dùng rotation hoặc sender-constrained",
+        "Thu hồi tức thì cần denylist hoặc introspection, đổi lại mất một phần stateless"
+      ],
+      "red_flags": [
+        "Access token sống nhiều ngày cho tiện",
+        "Nghĩ logout phía client là đủ để vô hiệu token",
+        "Lưu refresh token trong localStorage mà không nhắc rủi ro XSS"
+      ],
+      "follow_up": "Admin khóa tài khoản lúc 10:00; access token 15 phút. Làm sao chặn ngay các request sau 10:00?"
+    },
+    "proposed_fix": {
+      "question": "Bạn thiết kế xác thực cho SPA và mobile app gọi Spring Boot API bằng JWT access token, với yêu cầu: logout hoặc khóa tài khoản phải có hiệu lực nhanh, token bị đánh cắp phải hạn chế được thiệt hại. Vì sao JWT khó thu hồi, và bạn thiết kế access/refresh token thế nào?",
+      "answer_change": "Rút phần validate JWT còn 1–2 câu làm nền; giữ ý 1–4; rút ý lưu trữ còn 1 câu và đưa 'Trade-off cốt lõi' lên trước điểm cắt."
+    }
+  },
+  {
+    "qa_id": "de-qa-1113",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Nội dung đúng theo tài liệu Spring Security (DelegatingFilterProxy, FilterChainProxy, chain đầu tiên khớp, ExceptionTranslationFilter, khuyến nghị CSRF). Cần fix vì có 3 ý hỏi và toàn bộ phần 'khi nào tắt CSRF an toàn' nằm sau điểm cắt 600 token.",
+    "claims": [
+      {
+        "claim": "Servlet container không biết bean Spring; DelegatingFilterProxy ủy quyền cho bean Filter, lookup lazy",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-security/reference/servlet/architecture.html",
+        "quote": "You can register DelegatingFilterProxy through the standard Servlet container mechanisms but delegate all the work to a Spring Bean that implements Filter.",
+        "note": "\"Another benefit of DelegatingFilterProxy is that it allows delaying looking up Filter bean instances.\""
+      },
+      {
+        "claim": "FilterChainProxy ủy quyền qua SecurityFilterChain, xóa SecurityContext tránh leak, áp HttpFirewall",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-security/reference/servlet/architecture.html",
+        "quote": "For example, it clears out the SecurityContext to avoid memory leaks.",
+        "note": "\"It also applies Spring Security's HttpFirewall to protect applications against certain types of attacks.\""
+      },
+      {
+        "claim": "Chỉ SecurityFilterChain đầu tiên khớp được gọi",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-security/reference/servlet/architecture.html",
+        "quote": "Only the first SecurityFilterChain that matches is invoked.",
+        "note": ""
+      },
+      {
+        "claim": "ExceptionTranslationFilter: AuthenticationException tới AuthenticationEntryPoint (redirect login hoặc WWW-Authenticate), AccessDeniedException tới AccessDeniedHandler",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-security/reference/servlet/architecture.html",
+        "quote": "The AuthenticationEntryPoint is used to request credentials from the client. For example, it might redirect to a log in page or send a WWW-Authenticate header.",
+        "note": "\"Otherwise, if it is an AccessDeniedException, then Access Denied. The AccessDeniedHandler is invoked to handle access denied.\""
+      },
+      {
+        "claim": "Bật logging org.springframework.security=TRACE để chẩn đoán 401/403",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-security/reference/servlet/architecture.html",
+        "quote": "If you come across a 401 or 403 error, it is very likely that you will find a log message that will help you understand what is going on.",
+        "note": ""
+      },
+      {
+        "claim": "Spring khuyến nghị bật CSRF cho mọi request trình duyệt có thể xử lý; chỉ tắt khi chỉ phục vụ client không phải trình duyệt",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-security/reference/features/exploits/csrf.html",
+        "quote": "Our recommendation is to use CSRF protection for any request that could be processed by a browser by normal users. If you are creating a service that is used only by non-browser clients, you likely want to disable CSRF protection.",
+        "note": ""
+      },
+      {
+        "claim": "Stateless không đồng nghĩa an toàn: credential trong cookie hoặc basic auth vẫn bị CSRF; method an toàn phải chỉ đọc",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-security/reference/features/exploits/csrf.html",
+        "quote": "What if my application is stateless? That does not necessarily mean you are protected.",
+        "note": "\"Applications that use basic authentication are also vulnerable to CSRF attacks.\" Trang không nhắc JWT theo tên; ví dụ là cookie tự chứa toàn bộ trạng thái xác thực."
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi có 3 ý hỏi (luồng qua DelegatingFilterProxy/FilterChainProxy/SecurityFilterChain, cách tách hai chain, khi nào tắt CSRF an toàn), quá rộng cho 3–5 phút.",
+        "fix": "Hỏi 2 ý: 'Vì sao API trả 401/403 và bạn tách hai chain thế nào? Có nên tắt CSRF toàn cục không?'; phần luồng DelegatingFilterProxy làm follow-up."
+      },
+      {
+        "severity": "major",
+        "type": "length",
+        "detail": "Chunk ~802 token; điểm cắt 600 token rơi đúng đầu đoạn 'Khi nào tắt CSRF an toàn', nên snippet mất hẳn một ý được hỏi trực tiếp.",
+        "fix": "Rút đoạn luồng request và thứ tự filter còn 2–3 câu, đưa kết luận CSRF (chỉ tắt trên chain API dùng bearer header) lên trước."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Debug cấu hình nhiều chain và lý luận CSRF theo cách trình duyệt gửi credential."
+    },
+    "interview_fit": {
+      "minutes": 6,
+      "sub_questions": 3,
+      "gradeable": true,
+      "note": "Điểm chấm rõ nhưng 3 ý hỏi."
+    },
+    "junior_guide": {
+      "tests": "Hiểu cách Spring Security chọn filter chain và vì sao CSRF phụ thuộc vào việc trình duyệt tự gửi credential.",
+      "must_have": [
+        "DelegatingFilterProxy nối servlet container với bean FilterChainProxy",
+        "Chỉ SecurityFilterChain đầu tiên khớp được chạy, nên thứ tự @Order quan trọng",
+        "Chain API: securityMatcher(\"/api/**\"), order nhỏ hơn, JWT resource server, STATELESS, tắt CSRF chỉ ở đây",
+        "Chain web: formLogin, session, giữ CSRF",
+        "Chỉ tắt CSRF khi credential nằm trong header do code tự gắn, không phải cookie"
+      ],
+      "red_flags": [
+        "Tắt CSRF toàn cục vì 'API stateless'",
+        "Đặt chain web không securityMatcher trước chain API",
+        "Nhầm 401 (chưa xác thực) với 403 (thiếu quyền)"
+      ],
+      "follow_up": "Nếu SPA lưu JWT trong cookie HttpOnly thay vì header thì chain API cần thay đổi gì?"
+    },
+    "proposed_fix": {
+      "question": "Một ứng dụng Spring Boot vừa có trang admin đăng nhập bằng form (session cookie) vừa có REST API /api/** dùng JWT bearer token. Sau khi thêm cấu hình, API trả 401/403 bất ngờ và có người đề xuất tắt CSRF toàn cục. Vì sao lỗi, bạn tách cấu hình thế nào, và có nên tắt CSRF toàn cục không?",
+      "answer_change": "Rút đoạn luồng request và thứ tự filter còn 2–3 câu; giữ phần tách hai chain; đưa phần CSRF (rút còn 3 câu) lên trước điểm cắt."
+    }
+  },
+  {
+    "qa_id": "de-qa-1114",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Mọi fact về auto-configuration đều khớp tài liệu Spring Boot (file imports, không component scan, điều kiện bean, ordering, đặt tên starter). Cần fix vì câu hỏi có 3 ý hỏi lớn và phần debug (được hỏi trực tiếp) nằm sau điểm cắt 600 token.",
+    "claims": [
+      {
+        "claim": "Boot đọc file META-INF/spring/...AutoConfiguration.imports, mỗi dòng một class",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-boot/reference/features/developing-auto-configuration.html",
+        "quote": "Spring Boot checks for the presence of a META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports file within your published jar.",
+        "note": ""
+      },
+      {
+        "claim": "Auto-configuration chỉ nạp qua file imports, package riêng, không bị component scan, không tự bật component scan",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-boot/reference/features/developing-auto-configuration.html",
+        "quote": "Auto-configurations must be loaded only by being named in the imports file. Make sure that they are defined in a specific package space and that they are never the target of component scanning.",
+        "note": ""
+      },
+      {
+        "claim": "@ConditionalOnBean/OnMissingBean đánh giá theo những gì đã xử lý; chỉ dùng trên auto-configuration (được nạp sau bean người dùng)",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-boot/reference/features/developing-auto-configuration.html",
+        "quote": "we recommend using only @ConditionalOnBean and @ConditionalOnMissingBean annotations on auto-configuration classes (since these are guaranteed to load after any user-defined bean definitions have been added).",
+        "note": "\"these conditions are evaluated based on what has been processed so far.\""
+      },
+      {
+        "claim": "Kiểu trả về @Bean nên cụ thể nhất có thể; gom @Bean phụ thuộc thư viện vào nested @Configuration có @ConditionalOnClass",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-boot/reference/features/developing-auto-configuration.html",
+        "quote": "When declaring a @Bean method, provide as much type information as possible in the method’s return type.",
+        "note": "Trang có ví dụ nested @Configuration với @ConditionalOnClass(SomeService.class)."
+      },
+      {
+        "claim": "Thứ tự before/after chỉ ảnh hưởng thứ tự định nghĩa bean, không phải thứ tự tạo bean",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-boot/reference/features/developing-auto-configuration.html",
+        "quote": "the order in which auto-configuration classes are applied only affects the order in which their beans are defined.",
+        "note": ""
+      },
+      {
+        "claim": "Tên module không bắt đầu bằng spring-boot; không dùng namespace server, management, spring",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-boot/reference/features/developing-auto-configuration.html",
+        "quote": "Do not start your module names with spring-boot, even if you use a different Maven groupId.",
+        "note": "\"do not include your keys in the namespaces that Spring Boot uses (such as server, management, spring, and so on).\""
+      },
+      {
+        "claim": "--debug in conditions report; exclude bằng @SpringBootApplication(exclude) hoặc spring.autoconfigure.exclude",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-boot/reference/using/auto-configuration.html",
+        "quote": "Doing so enables debug logs for a selection of core loggers and logs a conditions report to the console.",
+        "note": "\"you can also control the list of auto-configuration classes to exclude by using the spring.autoconfigure.exclude property.\""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi có 3 ý hỏi lớn (cơ chế gồm tìm, điều kiện, thứ tự; cách viết đúng; cách debug), quá rộng cho 3–5 phút.",
+        "fix": "Hỏi 2 ý: 'Vì sao các lỗi này xảy ra và bạn sửa starter thế nào?'; cách debug làm follow-up."
+      },
+      {
+        "severity": "major",
+        "type": "length",
+        "detail": "Chunk ~837 token; điểm cắt 600 token rơi ở ý 4 (ordering), mất phần thiết kế starter và toàn bộ phần debug được hỏi trực tiếp.",
+        "fix": "Rút ý 3–4 còn một câu, bỏ phần đặt tên module; giữ 1 câu debug (--debug conditions report, ApplicationContextRunner) trước điểm cắt."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Phải hiểu thứ tự đánh giá điều kiện và vì sao component scan làm hỏng auto-configuration."
+    },
+    "interview_fit": {
+      "minutes": 6,
+      "sub_questions": 3,
+      "gradeable": true,
+      "note": "Điểm chấm rõ nhưng 3 ý hỏi lớn."
+    },
+    "junior_guide": {
+      "tests": "Hiểu cách Spring Boot nạp và đánh giá auto-configuration, đủ để viết starter không đè bean của người dùng.",
+      "must_have": [
+        "Auto-configuration được liệt kê trong file AutoConfiguration.imports và chạy sau bean người dùng",
+        "Bean bị trùng/bỏ qua do thiếu @ConditionalOnMissingBean hoặc class bị component scan quét trúng",
+        "Lỗi thiếu thư viện: dùng @ConditionalOnClass, gom @Bean vào nested @Configuration",
+        "@ConditionalOnBean/OnMissingBean chỉ dùng trên auto-configuration, kiểu trả về cụ thể",
+        "Debug bằng --debug (conditions report), test bằng ApplicationContextRunner"
+      ],
+      "red_flags": [
+        "Đặt auto-configuration dưới package gốc của ứng dụng cho tiện",
+        "Dùng @ConditionalOnMissingBean trong @Configuration thường của người dùng",
+        "Nghĩ @AutoConfigureAfter quyết định thứ tự tạo bean"
+      ],
+      "follow_up": "Viết test nào để chứng minh AcmeClient của người dùng thắng bean mặc định của starter?"
+    },
+    "proposed_fix": {
+      "question": "Bạn viết starter nội bộ acme-spring-boot-starter tự cấu hình một AcmeClient. Vài service báo bean AcmeClient tự khai báo của họ bị trùng hoặc bị bỏ qua, service khác lỗi khởi động vì không có thư viện Acme trên classpath. Vì sao, và bạn sửa starter thế nào?",
+      "answer_change": "Giữ phần cơ chế (rút gọn) và nguyên nhân 1–2; gộp ý 3–4 thành một câu; rút phần thiết kế starter và debug còn 2 câu, đặt trước điểm cắt."
+    }
+  },
+  {
+    "qa_id": "de-qa-1115",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Thứ tự ưu tiên property source, thứ tự config data, quy tắc profile đều khớp tài liệu Spring Boot. Cần fix vì câu hỏi có 4 ý hỏi và phần chẩn đoán/tổ chức config, secret nằm sau điểm cắt 600 token.",
+    "claims": [
+      {
+        "claim": "Thứ tự ưu tiên: default < @PropertySource < config data < OS env < system properties < SPRING_APPLICATION_JSON < command line < test properties",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-boot/reference/features/external-config.html",
+        "quote": "Config data (such as application.properties files).",
+        "note": "Danh sách 15 mục trên trang: mục 3 là config data, mục 5 \"OS environment variables.\", mục 11 \"Command line arguments.\" Nguồn sau ghi đè nguồn trước."
+      },
+      {
+        "claim": "Config data: application.* trong jar < application-{profile}.* trong jar < application.* ngoài jar < application-{profile}.* ngoài jar",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-boot/reference/features/external-config.html",
+        "quote": "Profile-specific application properties outside of your packaged jar (application-{profile}.properties and YAML variants).",
+        "note": "Đây là mục 4 (cao nhất) của danh sách thứ tự config data."
+      },
+      {
+        "claim": "spring.profiles.active theo cùng thứ tự, nguồn cao nhất thắng và thay thế; spring.profiles.include để cộng thêm",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-boot/reference/features/profiles.html",
+        "quote": "This means that you can specify active profiles in application.properties and then replace them by using the command line switch.",
+        "note": "\"The spring.profiles.include property can be used to add active profiles on top of those activated by the spring.profiles.active property.\""
+      },
+      {
+        "claim": "spring.profiles.active không hợp lệ trong file theo profile hoặc document on-profile",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-boot/reference/features/profiles.html",
+        "quote": "This means they cannot be included in profile specific files or documents activated by spring.config.activate.on-profile.",
+        "note": ""
+      },
+      {
+        "claim": "@PropertySource được nạp lúc context refresh, quá muộn cho logging.* và spring.main.*",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-boot/reference/features/external-config.html",
+        "quote": "This is too late to configure certain properties such as logging.* and spring.main.* which are read before refresh begins.",
+        "note": ""
+      },
+      {
+        "claim": "configtree: đọc Secret mount thành file; profile group (production gồm proddb, prodmq)",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-boot/reference/features/external-config.html",
+        "quote": "you need to use the configtree: prefix so that Spring Boot knows it needs to expose all the files as properties.",
+        "note": "Profile group: \"we can create a production group that consists of our proddb and prodmq profiles.\" (profiles.html)"
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi có 4 ý hỏi (thứ tự ưu tiên, nguyên nhân, chẩn đoán, tổ chức config/secret), quá rộng cho 3–5 phút.",
+        "fix": "Hỏi 2 ý: 'Nguyên nhân khả dĩ là gì và bạn chẩn đoán thế nào?'; thứ tự ưu tiên là kiến thức nền trong đáp án, phần tổ chức config/secret làm follow-up."
+      },
+      {
+        "severity": "major",
+        "type": "length",
+        "detail": "Chunk ~819 token; điểm cắt 600 token rơi giữa phần chẩn đoán, mất cách dùng Actuator env và toàn bộ phần tổ chức config/secret được hỏi trực tiếp.",
+        "fix": "Rút đoạn thứ tự ưu tiên còn các mục liên quan (config data < env var < command line) và nguyên nhân 4–5 còn một câu, để phần chẩn đoán nằm trước điểm cắt."
+      },
+      {
+        "severity": "minor",
+        "type": "factual",
+        "detail": "Ý relaxed binding (SPRING_DATASOURCE_URL ứng với spring.datasource.url) và endpoint env của Actuator chưa có câu trích trong lần duyệt (trang external-config bị cắt trước mục relaxed binding).",
+        "fix": "Giữ nguyên; người duyệt có thể đối chiếu mục 'Binding From Environment Variables'."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Debug cấu hình thật trên Kubernetes dựa trên thứ tự ưu tiên, không chỉ nhớ danh sách."
+    },
+    "interview_fit": {
+      "minutes": 6,
+      "sub_questions": 4,
+      "gradeable": true,
+      "note": "Điểm chấm rõ nhưng 4 ý hỏi."
+    },
+    "junior_guide": {
+      "tests": "Hiểu thứ tự ưu tiên externalized configuration để tìm vì sao giá trị trong application-prod.yml bị ghi đè.",
+      "must_have": [
+        "Biến môi trường và command line thắng mọi file application*.yml, kể cả file theo profile",
+        "File ngoài jar thắng file cùng loại trong jar",
+        "Nguyên nhân hay gặp: env var SPRING_DATASOURCE_URL còn sót, ConfigMap mount application.yml, entrypoint đặt lại profile",
+        "spring.profiles.active nguồn cao nhất thay thế chứ không cộng; không dùng trong file theo profile",
+        "Chẩn đoán: log profile active, Actuator env để xem property lấy từ nguồn nào"
+      ],
+      "red_flags": [
+        "Nghĩ file application-prod.yml luôn thắng vì profile prod đang active",
+        "Đóng gói secret production vào jar",
+        "Mở Actuator env công khai không che giá trị"
+      ],
+      "follow_up": "Bạn tổ chức secret DB cho prod thế nào để không nằm trong image và vẫn đổi được không cần build lại?"
+    },
+    "proposed_fix": {
+      "question": "Sau khi deploy lên Kubernetes, service vẫn kết nối DB staging dù image có application-prod.yml và pod đặt SPRING_PROFILES_ACTIVE=prod. Nguyên nhân khả dĩ là gì, và bạn chẩn đoán thế nào?",
+      "answer_change": "Rút thứ tự ưu tiên còn các nguồn liên quan; giữ nguyên nhân 1–3, gộp 4–5; giữ phần chẩn đoán; chuyển phần 'Tổ chức' sang follow-up hoặc rút còn 1 câu."
+    }
+  },
+  {
+    "qa_id": "de-qa-1116",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Đúng theo tài liệu Spring Framework và release notes Boot 2.6 (circular reference bị cấm mặc định, constructor injection không phá được vòng, cờ allow-circular-references). Cần fix vì câu hỏi có 3 ý hỏi, vượt mức 2 của rubric.",
+    "claims": [
+      {
+        "claim": "Từ Spring Boot 2.6, circular reference bị cấm mặc định",
+        "status": "supported",
+        "source_url": "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-2.6-Release-Notes",
+        "quote": "Circular references between beans are now prohibited by default.",
+        "note": ""
+      },
+      {
+        "claim": "spring.main.allow-circular-references=true khôi phục hành vi 2.5, chỉ là giải pháp cuối",
+        "status": "supported",
+        "source_url": "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-2.6-Release-Notes",
+        "quote": "circular references can be allowed again by setting spring.main.allow-circular-references to true",
+        "note": "Release notes: \"you are strongly encouraged to update your configuration to break the dependency cycle.\""
+      },
+      {
+        "claim": "Constructor injection hai chiều tạo vòng không giải được, container ném BeanCurrentlyInCreationException",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-framework/reference/core/beans/dependencies/factory-collaborators.html",
+        "quote": "the Spring IoC container detects this circular reference at runtime, and throws a BeanCurrentlyInCreationException.",
+        "note": ""
+      },
+      {
+        "claim": "Setter/field injection phá vòng bằng cách inject một bean chưa khởi tạo xong (con gà quả trứng)",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-framework/reference/core/beans/dependencies/factory-collaborators.html",
+        "quote": "a circular dependency between bean A and bean B forces one of the beans to be injected into the other prior to being fully initialized itself (a classic chicken-and-egg scenario).",
+        "note": ""
+      },
+      {
+        "claim": "Spring khuyến nghị constructor injection: immutable, dependency không null, bean trả về đã khởi tạo đầy đủ",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-framework/reference/core/beans/dependencies/factory-collaborators.html",
+        "quote": "The Spring team generally advocates constructor injection, as it lets you implement application components as immutable objects and ensures that required dependencies are not null.",
+        "note": "\"a large number of constructor arguments is a bad code smell, implying that the class likely has too many responsibilities\""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi có 3 ý hỏi (vì sao trước chạy được, vì sao constructor injection không giải, xử lý từ tạm thời tới đúng thiết kế).",
+        "fix": "Gộp thành 2 ý: 'Vì sao bản nâng cấp làm lộ lỗi này, và bạn xử lý thế nào từ tạm thời tới đúng thiết kế?'; ý constructor injection làm follow-up."
+      },
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "Chunk ~743 token; điểm cắt 600 token rơi ở cách sửa 3(b), mất (c) và đoạn khuyến nghị constructor injection. Ý bắt buộc (Boot 2.6 cấm vòng, cờ tạm thời, tách service thứ ba) nằm trước điểm cắt.",
+        "fix": "Rút đoạn 'Rủi ro của việc phá vòng' còn một câu."
+      },
+      {
+        "severity": "minor",
+        "type": "factual",
+        "detail": "Ý @Lazy/ObjectProvider che vòng phụ thuộc và rủi ro B giữ bản thô thay vì proxy chưa được kiểm chứng bằng trích dẫn trong lần duyệt; đúng theo hiểu biết chung, không phải điểm chấm chính.",
+        "fix": "Giữ là điểm cộng."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Phải hiểu cơ chế early reference của container và lý do thiết kế; topic chỉ tới middle nhưng có middle nên vẫn hợp lệ."
+    },
+    "interview_fit": {
+      "minutes": 5,
+      "sub_questions": 3,
+      "gradeable": true,
+      "note": "Điểm chấm rõ nhưng 3 ý hỏi."
+    },
+    "junior_guide": {
+      "tests": "Hiểu vòng phụ thuộc giữa bean và vì sao Spring Boot 2.6 bắt đầu chặn nó.",
+      "must_have": [
+        "Field/setter injection cho phép container inject một bean chưa khởi tạo xong để phá vòng",
+        "Từ Boot 2.6 circular reference bị cấm mặc định nên lỗi lộ ra khi nâng cấp",
+        "Constructor injection không có tham chiếu sớm nên container ném BeanCurrentlyInCreationException",
+        "Tạm thời: allow-circular-references=true hoặc @Lazy, kèm kế hoạch sửa",
+        "Đúng thiết kế: tách service thứ ba, dùng event, hoặc gộp class"
+      ],
+      "red_flags": [
+        "Coi allow-circular-references=true là cách sửa lâu dài",
+        "Chuyển hết sang field injection để 'hết lỗi'",
+        "Không nhận ra vòng phụ thuộc là lỗi thiết kế"
+      ],
+      "follow_up": "Nếu dùng event để đảo chiều, PaymentService xử lý lỗi thanh toán thế nào khi OrderService đã commit?"
+    },
+    "proposed_fix": {
+      "question": "Sau khi nâng Spring Boot từ 2.5 lên bản mới, ứng dụng không khởi động được vì BeanCurrentlyInCreationException giữa OrderService và PaymentService (inject chéo bằng field @Autowired). Vì sao bản nâng cấp làm lộ lỗi này, và bạn xử lý thế nào từ tạm thời tới đúng về thiết kế?",
+      "answer_change": "Giữ đáp án, gộp đoạn 'Vì sao constructor injection không giải được' vào phần cách xử lý thành 1–2 câu; rút đoạn 'Rủi ro' còn một câu."
+    }
+  },
+  {
+    "qa_id": "de-qa-1117",
+    "verdict": "ok",
+    "confidence": "high",
+    "summary_vi": "Giải thích đúng cả hai lỗi theo tài liệu Spring (prototype chỉ được inject một lần vào singleton; request scope cần scoped proxy và thread phải gắn request). Các cách sửa ObjectProvider, @Lookup, truyền tham số đều có trích dẫn. Chỉ có vấn đề nhỏ về độ dài và một chi tiết CGLIB.",
+    "claims": [
+      {
+        "claim": "Prototype inject vào singleton chỉ được tạo một lần, là instance duy nhất singleton nhận",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-framework/reference/core/beans/factory-scopes.html",
+        "quote": "The prototype instance is the sole instance that is ever supplied to the singleton-scoped bean.",
+        "note": ""
+      },
+      {
+        "claim": "Inject ObjectFactory/ObjectProvider và gọi getObject() mỗi lần cần",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-framework/reference/core/beans/factory-scopes.html",
+        "quote": "allowing for a getObject() call to retrieve the current instance on demand every time it is needed — without holding on to the instance or storing it separately.",
+        "note": ""
+      },
+      {
+        "claim": "@Lookup: Spring sinh subclass CGLIB; class/method không final; không dùng được với @Bean factory method",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-framework/reference/core/beans/dependencies/factory-method-injection.html",
+        "quote": "A further key limitation is that lookup methods do not work with factory methods and in particular not with @Bean methods in configuration classes",
+        "note": "\"the class that the Spring bean container subclasses cannot be final, and the method to be overridden cannot be final, either.\""
+      },
+      {
+        "claim": "Spring không gọi destroy callback cho prototype; client tự giải phóng",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-framework/reference/core/beans/factory-scopes.html",
+        "quote": "in the case of prototypes, configured destruction lifecycle callbacks are not called.",
+        "note": ""
+      },
+      {
+        "claim": "Scoped proxy có cùng public interface, lấy target thật từ scope hiện tại rồi ủy quyền",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-framework/reference/core/beans/factory-scopes.html",
+        "quote": "you need to inject a proxy object that exposes the same public interface as the scoped object but that can also retrieve the real target object from the relevant scope (such as an HTTP request) and delegate method calls onto the real object.",
+        "note": "CGLIB: \"CGLIB proxies do not intercept private methods.\" @SessionScope: \"Defaults to {@link ScopedProxyMode#TARGET_CLASS}.\""
+      },
+      {
+        "claim": "Thread không gắn request (job @Scheduled) thì proxy không lấy được target và ném exception",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/context/request/RequestContextHolder.html",
+        "quote": "IllegalStateException - if no RequestAttributes object is bound to the current thread",
+        "note": "Lớp này \"expose the web request in the form of a thread-bound RequestAttributes object\"; request scope dựa vào nó."
+      }
+    ],
+    "issues": [
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "Chunk ~793 token; điểm cắt 600 token rơi ở cách sửa thứ nhất của lỗi 2, mất cách sửa sao chép context và đoạn 'Nguyên tắc chung'. Hai nguyên nhân và cách sửa lỗi 1 nằm trước điểm cắt; cách sửa lỗi 2 chỉ còn một phần.",
+        "fix": "Rút phần @Lookup còn một câu và bỏ ý 'new trong method' để cách sửa lỗi 2 nằm trước điểm cắt."
+      },
+      {
+        "severity": "minor",
+        "type": "factual",
+        "detail": "Trang Spring chỉ khẳng định @SessionScope mặc định TARGET_CLASS; với @RequestScope chưa có câu trích trong lần duyệt (thực tế cũng TARGET_CLASS).",
+        "fix": "Viết '@RequestScope/@SessionScope dùng proxy CGLIB (TARGET_CLASS) mặc định' là chấp nhận được; không biến thành điểm chấm."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Nối triệu chứng production với vòng đời và scope của bean; topic chỉ tới middle nhưng hợp lệ."
+    },
+    "interview_fit": {
+      "minutes": 4,
+      "sub_questions": 2,
+      "gradeable": true,
+      "note": "Hai ý hỏi (nguyên nhân, cách sửa) cho hai lỗi, điểm chấm rõ."
+    },
+    "junior_guide": {
+      "tests": "Hiểu bean scope và chuyện gì xảy ra khi bean scope ngắn được inject vào singleton.",
+      "must_have": [
+        "Prototype inject vào singleton chỉ tạo một lần, nên mọi request dùng chung builder có state",
+        "Sửa: ObjectProvider.getObject() mỗi lần, @Lookup, hoặc new trực tiếp",
+        "Request scope trong singleton cần scoped proxy lấy target theo request của thread hiện tại",
+        "Job @Scheduled không có request gắn thread nên proxy ném exception",
+        "Sửa: truyền tenantId tường minh hoặc nguồn tenant riêng cho job"
+      ],
+      "red_flags": [
+        "Đổi ReportService thành prototype để hết trộn dữ liệu",
+        "Nghĩ prototype tự tạo mới mỗi lần gọi method",
+        "Truyền chính proxy request-scope sang thread @Async"
+      ],
+      "follow_up": "Nếu ReportBuilder giữ connection hay file handle, ai đóng nó khi dùng prototype?"
+    },
+    "proposed_fix": null
+  },
+  {
+    "qa_id": "de-qa-1118",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Cơ chế context caching, cache key, @DirtiesContext, slice test, cảnh báo Testcontainers đều khớp tài liệu Spring. Cần fix vì có 3 ý hỏi và phần Testcontainers (được hỏi trực tiếp) nằm sau điểm cắt 600 token.",
+    "claims": [
+      {
+        "claim": "Cache key gồm classes/locations, initializers, context customizers (@DynamicPropertySource, @MockitoBean, @MockitoSpyBean), profiles, @TestPropertySource",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-framework/reference/testing/testcontext-framework/ctx-management/caching.html",
+        "quote": "contextCustomizers (from ContextCustomizerFactory) – this includes @DynamicPropertySource methods, bean overrides (such as @TestBean, @MockitoBean, @MockitoSpyBean etc.), as well as various features from Spring Boot's testing support.",
+        "note": ""
+      },
+      {
+        "claim": "Cache là static; test chạy ở process riêng (fork từng class) làm mất tác dụng cache",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-framework/reference/testing/testcontext-framework/ctx-management/caching.html",
+        "quote": "if tests run in separate processes, the static cache is cleared between each test execution, which effectively disables the caching mechanism.",
+        "note": ""
+      },
+      {
+        "claim": "Mặc định tối đa 32 context, loại theo LRU",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-framework/reference/testing/testcontext-framework/ctx-management/caching.html",
+        "quote": "The size of the context cache is bounded with a default maximum size of 32. Whenever the maximum size is reached, a least recently used (LRU) eviction policy is used to evict and close stale contexts.",
+        "note": ""
+      },
+      {
+        "claim": "@DirtiesContext xóa context khỏi cache, test sau phải dựng lại; log DEBUG org.springframework.test.context.cache để xem thống kê",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-framework/reference/testing/testcontext-framework/ctx-management/caching.html",
+        "quote": "This instructs Spring to remove the context from the cache and rebuild the application context before running the next test that requires the same application context.",
+        "note": "\"you can set the log level for the org.springframework.test.context.cache logging category to DEBUG.\""
+      },
+      {
+        "claim": "@WebMvcTest chỉ nạp hạ tầng MVC và bean web, không quét @Component thường",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-boot/reference/testing/spring-boot-applications.html",
+        "quote": "Regular @Component and @ConfigurationProperties beans are not scanned when the @WebMvcTest annotation is used.",
+        "note": ""
+      },
+      {
+        "claim": "RANDOM_PORT: client và server ở transaction khác nhau nên @Transactional trên test không rollback dữ liệu server",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-boot/reference/testing/spring-boot-applications.html",
+        "quote": "the HTTP client and server run in separate threads and, thus, in separate transactions. Any transaction initiated on the server does not roll back in this case.",
+        "note": ""
+      },
+      {
+        "claim": "Container static của JUnit extension bị dừng sau test class trong khi context cache còn dùng lại; nên quản lý container như Spring bean. @ServiceConnection ghi đè property kết nối",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-boot/reference/testing/testcontainers.html",
+        "quote": "For this reason, you should prefer managing containers as Spring beans or importing container declarations when the application context should remain usable for as long as it is cached.",
+        "note": "\"the connection details take precedence over any connection-related configuration properties.\""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi có 3 ý hỏi (cơ chế caching, nguyên nhân chậm, tổ chức lại gồm slice, Testcontainers, trade-off), quá rộng cho 3–5 phút.",
+        "fix": "Hỏi 2 ý: 'Vì sao context bị dựng lại nhiều lần, và bạn tổ chức lại bộ test thế nào?'; phần H2 vs Testcontainers làm follow-up."
+      },
+      {
+        "severity": "major",
+        "type": "length",
+        "detail": "Chunk ~818 token; điểm cắt 600 token rơi đúng đầu ý 'Database thật thay H2', mất toàn bộ phần Testcontainers mà câu hỏi nêu tên, cùng trade-off.",
+        "fix": "Rút đoạn cơ chế còn 2 câu (cache key gồm bean override; tối đa 32, LRU) và đưa ý H2 → Testcontainers lên trước."
+      },
+      {
+        "severity": "minor",
+        "type": "factual",
+        "detail": "Ý @DataJpaTest mặc định transactional và rollback chưa có câu trích (trang bị cắt trước mục đó); đúng theo hiểu biết chung.",
+        "fix": "Giữ nguyên."
+      },
+      {
+        "severity": "minor",
+        "type": "outdated",
+        "detail": "@MockitoBean/@MockitoSpyBean có từ Spring Framework 6.2 (Boot 3.4) thay cho @MockBean cũ; đáp án không nêu version, codebase cũ vẫn dùng @MockBean với cùng vấn đề cache key.",
+        "fix": "Thêm '(Boot 3.4+, trước đó là @MockBean)'."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Chẩn đoán test chậm theo cơ chế cache key và tổ chức lại test pyramid; topic chỉ tới middle nhưng hợp lệ."
+    },
+    "interview_fit": {
+      "minutes": 6,
+      "sub_questions": 3,
+      "gradeable": true,
+      "note": "Điểm chấm rõ nhưng 3 ý hỏi lớn."
+    },
+    "junior_guide": {
+      "tests": "Hiểu vì sao test Spring Boot chậm khi context không được dùng lại, và cách tổ chức test hợp lý.",
+      "must_have": [
+        "Spring cache ApplicationContext theo cache key; khác bean override hay profile là dựng context mới",
+        "@MockitoBean khác nhau giữa các class và @DirtiesContext làm mất cache hit",
+        "Dùng slice test (@WebMvcTest, @DataJpaTest) thay @SpringBootTest khi chỉ cần một lớp",
+        "Chuẩn hóa base class có cùng tập mock để tăng cache hit",
+        "H2 khác PostgreSQL; dùng Testcontainers với @ServiceConnection cho test repository"
+      ],
+      "red_flags": [
+        "Thêm @DirtiesContext để 'test sạch hơn'",
+        "Chạy fork mỗi test class một JVM cho nhanh",
+        "Tin test xanh trên H2 là đủ cho PostgreSQL"
+      ],
+      "follow_up": "Bạn đo cache hit/miss của context thế nào để biết thay đổi có hiệu quả?"
+    },
+    "proposed_fix": {
+      "question": "Bộ test Spring Boot của team chạy 25 phút; log cho thấy ApplicationContext bị khởi tạo lại hàng chục lần. Các test class dùng @SpringBootTest với tổ hợp @MockitoBean khác nhau, vài class có @DirtiesContext, còn test repository chạy trên H2. Vì sao context bị dựng lại nhiều lần, và bạn tổ chức lại bộ test thế nào?",
+      "answer_change": "Rút đoạn cơ chế còn 2 câu; giữ nguyên nhân 1–3; trong phần tổ chức lại, đưa ý Testcontainers lên ngay sau slice test và bỏ ý RANDOM_PORT hoặc chuyển sang follow-up."
+    }
+  },
+  {
+    "qa_id": "de-qa-1119",
+    "verdict": "fix",
+    "confidence": "medium",
+    "summary_vi": "Phân biệt mock/stub/spy và pitfall when(spy...) đúng theo Mockito javadoc và định nghĩa Meszaros. Cần fix vì có 3 ý hỏi, phần 'khi nào thay bằng test tích hợp' nằm sau điểm cắt, và câu 'Mockito mặc định loose' dễ gây hiểu nhầm khi dùng MockitoExtension.",
+    "claims": [
+      {
+        "claim": "Stub trả câu trả lời dựng sẵn; mock kiểm tra tương tác (behavior verification)",
+        "status": "supported",
+        "source_url": "https://martinfowler.com/articles/mocksArentStubs.html",
+        "quote": "Of these kinds of doubles, only mocks insist upon behavior verification.",
+        "note": "\"Stubs provide canned answers to calls made during the test\". Nguồn thứ cấp (bài viết của Martin Fowler trích Meszaros)."
+      },
+      {
+        "claim": "Spy nên dùng cẩn thận và thỉnh thoảng, ví dụ với code legacy; không dùng partial mock cho code mới thiết kế tốt",
+        "status": "supported",
+        "source_url": "https://javadoc.io/static/org.mockito/mockito-core/5.14.2/org/mockito/Mockito.html",
+        "quote": "Real spies should be used carefully and occasionally, for example when dealing with legacy code.",
+        "note": "Cùng trang: \"I wouldn't use partial mocks for new, test-driven and well-designed code.\""
+      },
+      {
+        "claim": "when(spy...) có thể không dùng được; dùng họ doReturn/doThrow/doAnswer",
+        "status": "supported",
+        "source_url": "https://javadoc.io/static/org.mockito/mockito-core/5.14.2/org/mockito/Mockito.html",
+        "quote": "Sometimes it's impossible or impractical to use when(Object) for stubbing spies.",
+        "note": "Trang khuyên dùng doReturn|Answer|Throw() thay thế."
+      },
+      {
+        "claim": "Method final trên spy gây rắc rối và không verify được",
+        "status": "supported",
+        "source_url": "https://javadoc.io/static/org.mockito/mockito-core/5.14.2/org/mockito/Mockito.html",
+        "quote": "Watch out for final methods.",
+        "note": "Trang giải thích Mockito không mock method final nên stub/verify trên spy gặp vấn đề."
+      },
+      {
+        "claim": "Strict stubbing báo stub thừa và argument mismatch; tích hợp qua MockitoExtension",
+        "status": "supported",
+        "source_url": "https://javadoc.io/static/org.mockito/mockito-core/5.14.2/org/mockito/Mockito.html",
+        "quote": "Strict stubbing reports unnecessary stubs, detects stubbing argument mismatch and makes the tests more DRY",
+        "note": "Mục 40: \"Strict stubbing with JUnit5 Extension - org.mockito.junit.jupiter.MockitoExtension\"."
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi có 3 ý hỏi (phân biệt mock/stub/spy, pitfall Mockito, khi nào thay bằng test tích hợp).",
+        "fix": "Hỏi 2 ý: 'Vì sao unit test xanh mà production vẫn lỗi, và khi nào bạn thay mock bằng test tích hợp?'; phân biệt mock/stub/spy và pitfall spy làm follow-up."
+      },
+      {
+        "severity": "major",
+        "type": "length",
+        "detail": "Chunk ~743 token; điểm cắt 600 token rơi ngay sau tiêu đề 'Khi nào thay bằng test tích hợp', mất toàn bộ ý được hỏi trực tiếp này.",
+        "fix": "Rút phần phân biệt còn 3 dòng ngắn và pitfall còn 2–3 ý để phần test tích hợp nằm trước điểm cắt."
+      },
+      {
+        "severity": "minor",
+        "type": "factual",
+        "detail": "'Mockito mặc định loose' dễ gây hiểu nhầm: khi dùng MockitoExtension, strict stubs là mặc định (chưa có câu trích trong lần duyệt), nên stub thừa sẽ làm test lỗi chứ không im lặng.",
+        "fix": "Viết: 'Với mock() thuần thì stub thừa không bị báo; MockitoExtension mặc định dùng strict stubs nên báo UnnecessaryStubbingException.'"
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Nối triệu chứng production với giới hạn của mock; định nghĩa thì dễ nhưng phần chẩn đoán là lý luận."
+    },
+    "interview_fit": {
+      "minutes": 5,
+      "sub_questions": 3,
+      "gradeable": true,
+      "note": "Điểm chấm rõ nhưng 3 ý hỏi."
+    },
+    "junior_guide": {
+      "tests": "Hiểu test double nào dùng khi nào và giới hạn của unit test dùng mock.",
+      "must_have": [
+        "Stub trả kết quả dựng sẵn (kiểm trạng thái); mock để verify tương tác",
+        "Spy gọi method thật; when(spy.x()) gọi method thật lúc stub, dùng doReturn().when(spy)",
+        "Mock thứ mình không kiểm soát (repository, gateway) chỉ phản ánh giả định nên không bắt được JPQL sai hay lỗi gateway thật",
+        "Thay bằng @DataJpaTest + Testcontainers cho query, WireMock/contract test cho HTTP client",
+        "Strict stubbing để bắt stub thừa và argument lệch"
+      ],
+      "red_flags": [
+        "Mock repository JPA rồi tin query đúng",
+        "Verify từng lời gọi nội bộ",
+        "Dùng spy cho code mới thay vì tách dependency"
+      ],
+      "follow_up": "Bạn viết test nào để chắc OrderService xử lý đúng khi gateway trả 502 hoặc timeout?"
+    },
+    "proposed_fix": {
+      "question": "Unit test Mockito của OrderService đều xanh, nhưng production lỗi vì câu query JPA sai và vì cổng thanh toán trả lỗi khác với mô phỏng. Vì sao test không bắt được, và khi nào bạn thay mock bằng test tích hợp?",
+      "answer_change": "Rút phần phân biệt mock/stub/spy còn 3 dòng; giữ pitfall 4 (mock thứ mình không kiểm soát) làm ý chính, gộp pitfall 1–3 thành 1–2 câu; đưa phần test tích hợp lên trước điểm cắt; sửa câu 'mặc định loose'."
+    }
+  },
+  {
+    "qa_id": "de-qa-1120",
+    "verdict": "fix",
+    "confidence": "medium",
+    "summary_vi": "Thiết kế idempotency key và status code khớp draft IETF (400/409/422, trả lại kết quả cũ, UUID, công bố thời hạn). Cần fix vì câu hỏi liệt kê 3 phần (lưu trữ, status code, trade-off) và câu trích RFC 9110 về retry chưa kiểm chứng trực tiếp được (trang bị cắt), chỉ có nguồn thứ cấp MDN.",
+    "claims": [
+      {
+        "claim": "PUT, DELETE và các method an toàn là idempotent; POST không",
+        "status": "supported",
+        "source_url": "https://developer.mozilla.org/en-US/docs/Glossary/Idempotent",
+        "quote": "All safe methods are idempotent, as well as PUT and DELETE.",
+        "note": "Nguồn thứ cấp. MDN: \"The POST and PATCH methods are not guaranteed to be idempotent.\" Bản rfc-editor.org và httpwg.org của RFC 9110 đều bị cắt trước §9.2.2 khi fetch."
+      },
+      {
+        "claim": "Idempotent có thể tự lặp lại khi lỗi kết nối; client không nên tự retry POST trừ khi biết request idempotent",
+        "status": "unverified",
+        "source_url": "",
+        "quote": "",
+        "note": "Chỉ đọc được câu ở RFC 9110 §2.4: \"Some requests can be automatically retried by a client in the event of an underlying connection failure, as described in Section 9.2.2\"; phần SHOULD NOT retry của §9.2.2 không đọc được."
+      },
+      {
+        "claim": "Key nên là UUID hoặc định danh ngẫu nhiên tương tự",
+        "status": "supported",
+        "source_url": "https://www.ietf.org/archive/id/draft-ietf-httpapi-idempotency-key-header-07.html",
+        "quote": "It is RECOMMENDED that a UUID [RFC4122] or a similar random identifier be used as an idempotency key.",
+        "note": "Draft hết hạn 18 April 2026, khớp với ghi chú 'đã hết hạn' trong đáp án."
+      },
+      {
+        "claim": "Lặp lại sau khi hoàn tất: trả kết quả lần trước, kể cả lỗi; có thể dùng fingerprint payload",
+        "status": "supported",
+        "source_url": "https://www.ietf.org/archive/id/draft-ietf-httpapi-idempotency-key-header-07.html",
+        "quote": "The resource SHOULD respond with the result of the previously completed operation, success or an error.",
+        "note": "\"An idempotency fingerprint MAY be used in conjunction with an idempotency key to determine the uniqueness of a request.\""
+      },
+      {
+        "claim": "Thiếu key: 400; cùng key payload khác: 422; request gốc đang xử lý: 409",
+        "status": "supported",
+        "source_url": "https://www.ietf.org/archive/id/draft-ietf-httpapi-idempotency-key-header-07.html",
+        "quote": "the resource SHOULD reply with an HTTP 409 status code with body containing problem description.",
+        "note": "400: \"the resource SHOULD reply with an HTTP 400 status code with body containing a link pointing to relevant documentation.\" 422: \"the resource SHOULD reply with a HTTP 422 status code\"."
+      },
+      {
+        "claim": "Thời hạn lưu key công bố trong tài liệu API",
+        "status": "supported",
+        "source_url": "https://www.ietf.org/archive/id/draft-ietf-httpapi-idempotency-key-header-07.html",
+        "quote": "The resource SHOULD define such expiration policy and publish it in the documentation.",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "interview_fit",
+        "detail": "Câu hỏi yêu cầu thiết kế kèm 3 phần liệt kê (lưu trữ, status code từng tình huống, trade-off); tính theo rubric là 3 ý hỏi, vượt mức 2.",
+        "fix": "Hỏi: 'Thiết kế cơ chế chống trùng bằng idempotency key thế nào, và xử lý request trùng đến khi bản gốc còn đang chạy ra sao?'; status code chi tiết và trade-off làm follow-up."
+      },
+      {
+        "severity": "major",
+        "type": "factual",
+        "detail": "Câu dẫn RFC 9110 về việc client không nên tự retry method không idempotent chưa có trích dẫn trực tiếp (trang RFC bị cắt khi fetch); chỉ có nguồn thứ cấp MDN cho phần định nghĩa.",
+        "fix": "Người duyệt đối chiếu RFC 9110 §9.2.2; nếu đúng thì giữ nguyên."
+      },
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "Chunk ~693 token; điểm cắt 600 token rơi trong trade-off thứ 2, mất phương án PUT /payments/{id} và ghi chú ETag/If-Match. Các ý bắt buộc (ngữ nghĩa POST, lưu key với UNIQUE, status code) nằm trước điểm cắt.",
+        "fix": "Bỏ ý ETag (thuộc chủ đề kiểm soát đồng thời) để giữ phương án PUT trước điểm cắt."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Thiết kế có xử lý đồng thời (unique constraint, trạng thái đang xử lý) và side effect bên ngoài, không chỉ định nghĩa idempotent."
+    },
+    "interview_fit": {
+      "minutes": 5,
+      "sub_questions": 3,
+      "gradeable": true,
+      "note": "Điểm chấm rõ nhưng 3 phần liệt kê."
+    },
+    "junior_guide": {
+      "tests": "Hiểu vì sao retry POST gây trùng và cách dùng idempotency key để chống trùng an toàn.",
+      "must_have": [
+        "POST không idempotent; timeout không cho biết server đã xử lý chưa",
+        "Client sinh key ngẫu nhiên (UUID) cho mỗi thao tác, dùng lại khi retry",
+        "Server lưu (client, key, fingerprint, trạng thái, response) với UNIQUE, ghi 'đang xử lý' trước",
+        "Trùng sau khi xong: trả lại kết quả cũ; đang xử lý: 409; payload khác: 422; thiếu key: 400",
+        "Gọi cổng thanh toán cũng phải idempotent hoặc có đối soát"
+      ],
+      "red_flags": [
+        "Chỉ kiểm tra key bằng SELECT rồi INSERT mà không có unique constraint",
+        "Trả lỗi khi gặp key trùng đã hoàn tất thay vì trả lại kết quả",
+        "Nghĩ lưu key trong Redis là đủ an toàn tuyệt đối"
+      ],
+      "follow_up": "Server crash sau khi gọi cổng thanh toán nhưng trước khi lưu response; request retry tới thì xử lý thế nào?"
+    },
+    "proposed_fix": {
+      "question": "API POST /payments tạo giao dịch; mobile client tự retry khi timeout nên thỉnh thoảng khách bị trừ tiền hai lần. Thiết kế cơ chế chống trùng bằng idempotency key thế nào, và xử lý request trùng đến khi bản gốc còn đang chạy ra sao?",
+      "answer_change": "Giữ phần ngữ nghĩa HTTP và thiết kế 1–3; rút trade-off còn 2 ý (chi phí lưu trữ, side effect bên ngoài); bỏ ý ETag."
+    }
+  },
+  {
+    "qa_id": "de-qa-1121",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Nội dung đúng theo RFC 9457, tài liệu Spring MVC (ProblemDetail, ErrorResponse, ResponseEntityExceptionHandler, spring.mvc.problemdetails.enabled) và OWASP về mass assignment. Cần fix vì toàn bộ phần 'vì sao tách DTO' (ý hỏi thứ hai) nằm sau điểm cắt 600 token.",
+    "claims": [
+      {
+        "claim": "Problem Details (RFC 9457) gồm type, title, status, detail, instance, cho phép trường mở rộng",
+        "status": "supported",
+        "source_url": "https://www.rfc-editor.org/rfc/rfc9457.html",
+        "quote": "The \"type\" member is a JSON string containing a URI reference that identifies the problem type.",
+        "note": "Cùng mục 3.1 định nghĩa title, status, detail, instance; mục 3.2: \"Problem type definitions MAY extend the problem details object with additional members\"."
+      },
+      {
+        "claim": "ProblemDetail chứa cả trường chuẩn và không chuẩn; mọi exception Spring MVC implement ErrorResponse",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-ann-rest-exceptions.html",
+        "quote": "this allows exceptions to encapsulate and expose the details of how they map to an HTTP response. All Spring MVC exceptions implement this.",
+        "note": "\"ProblemDetail — representation for an RFC 9457 problem detail; a simple container for both standard fields defined in the spec, and for non-standard ones.\""
+      },
+      {
+        "claim": "@ControllerAdvice kế thừa ResponseEntityExceptionHandler xử lý mọi exception Spring MVC thành ProblemDetail",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-ann-rest-exceptions.html",
+        "quote": "ResponseEntityExceptionHandler — convenient base class for an @ControllerAdvice that handles all Spring MVC exceptions, and any ErrorResponseException, and renders an error response with a body.",
+        "note": ""
+      },
+      {
+        "claim": "spring.mvc.problemdetails.enabled; advice tự viết phải xếp trước handler của Boot",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-ann-rest-exceptions.html",
+        "quote": "You'll need to ensure your handler is ordered ahead of the one configured by Spring Boot whose order is 0.",
+        "note": "\"In Spring Boot, the spring.mvc.problemdetails.enabled property autoconfigures a ResponseEntityExceptionHandler\""
+      },
+      {
+        "claim": "Trường mở rộng qua map properties (Jackson trải thành thuộc tính cấp cao nhất) hoặc subclass; tùy biến để không lộ chi tiết cài đặt",
+        "status": "supported",
+        "source_url": "https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-ann-rest-exceptions.html",
+        "quote": "It is also good practice to customize the problem details for Spring MVC exceptions to avoid revealing implementation details.",
+        "note": "Properties map: \"ensures this \"properties\" Map is unwrapped and rendered as top level JSON properties in the response\"."
+      },
+      {
+        "claim": "Bind request thẳng vào entity gây mass assignment; dùng DTO",
+        "status": "supported",
+        "source_url": "https://cheatsheetseries.owasp.org/cheatsheets/Mass_Assignment_Cheat_Sheet.html",
+        "quote": "An architectural approach is to create Data Transfer Objects and avoid binding input directly to domain objects.",
+        "note": ""
+      }
+    ],
+    "issues": [
+      {
+        "severity": "major",
+        "type": "length",
+        "detail": "Chunk ~782 token; điểm cắt 600 token rơi ngay đầu phần 'Vì sao tách DTO khỏi entity', nên snippet mất hẳn ý hỏi thứ hai.",
+        "fix": "Rút phần cơ chế Spring MVC còn 3 gạch (ProblemDetail/ErrorResponse, advice kế thừa ResponseEntityExceptionHandler + handler cuối cho Exception, không lộ chi tiết) và đưa 2–3 lý do tách DTO quan trọng nhất (mass assignment, lộ cột nội bộ, lazy loading khi serialize) lên trước điểm cắt."
+      },
+      {
+        "severity": "minor",
+        "type": "factual",
+        "detail": "Ý serialize entity JPA gây LazyInitializationException/N+1 và đệ quy vô hạn chưa có câu trích trong lần duyệt; đúng theo hiểu biết chung.",
+        "fix": "Giữ nguyên."
+      },
+      {
+        "severity": "minor",
+        "type": "interview_fit",
+        "detail": "Phần Spring Boot property và thư viện dùng chung là chi tiết phụ, làm đáp án dài.",
+        "fix": "Chuyển thành điểm cộng."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Thiết kế contract dùng chung cho nhiều service và lý do kiến trúc tách DTO; topic chỉ tới middle nhưng hợp lệ."
+    },
+    "interview_fit": {
+      "minutes": 5,
+      "sub_questions": 2,
+      "gradeable": true,
+      "note": "Hai ý hỏi, điểm chấm rõ."
+    },
+    "junior_guide": {
+      "tests": "Biết thiết kế error response nhất quán cho REST API và hiểu vì sao không trả/nhận entity trực tiếp.",
+      "must_have": [
+        "Dùng Problem Details (RFC 9457): type, title, status, detail, instance + errorCode, lỗi theo field",
+        "Status code đúng ngữ nghĩa, không trả 200 kèm body lỗi",
+        "Một @RestControllerAdvice kế thừa ResponseEntityExceptionHandler, thêm handler cho exception nghiệp vụ và handler cuối cho Exception",
+        "Không lộ stack trace/tên cột; log đầy đủ kèm trace id",
+        "Tách DTO: chống mass assignment, không lộ cột nội bộ, contract ổn định khi đổi schema"
+      ],
+      "red_flags": [
+        "Mỗi controller tự try/catch",
+        "Trả exception.getMessage() thẳng cho client",
+        "Bind @RequestBody vào entity JPA"
+      ],
+      "follow_up": "Client cần hiển thị lỗi validation theo từng field bằng nhiều ngôn ngữ; bạn mở rộng ProblemDetail thế nào?"
+    },
+    "proposed_fix": {
+      "question": "",
+      "answer_change": "Rút phần 'Cơ chế trong Spring MVC' còn 3 gạch; bỏ ý thư viện dùng chung và chi tiết spring.mvc.problemdetails.enabled (hoặc gộp 1 câu); đưa phần 'Vì sao tách DTO' (3 lý do chính) lên trước điểm cắt 600 token."
+    }
+  },
+  {
+    "qa_id": "de-qa-1122",
+    "verdict": "fix",
+    "confidence": "high",
+    "summary_vi": "Sai một ý then chốt: đáp án nói ConcurrentHashMap chấp nhận value null giống HashMap, trong khi javadoc nói rõ không cho phép null và put ném NullPointerException. Evaluator sẽ chấm sai ứng viên trả lời đúng. Phần cache stampede và computeIfAbsent đúng; sửa ý 1 là dùng được.",
+    "claims": [
+      {
+        "claim": "ConcurrentHashMap chấp nhận value null giống HashMap, nên put(id, null) chạy được",
+        "status": "contradicted",
+        "source_url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ConcurrentHashMap.html",
+        "quote": "Like Hashtable but unlike HashMap, this class does not allow null to be used as a key or value.",
+        "note": "put(): \"Neither the key nor the value can be null.\" Throws \"NullPointerException - if the specified key or value is null\"."
+      },
+      {
+        "claim": "get rồi put là hai bước rời; computeIfAbsent atomic, hàm load chạy đúng một lần cho key vắng",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/openjdk/jdk/master/src/java.base/share/classes/java/util/concurrent/ConcurrentHashMap.java",
+        "quote": "The entire method invocation is performed atomically. The supplied function is invoked exactly once per invocation of this method if the key is absent, else not at all.",
+        "note": "Trích từ javadoc trong mã nguồn JDK (đã fetch khi duyệt de-qa-1101)."
+      },
+      {
+        "claim": "Trong lúc hàm load chạy, cập nhật của thread khác có thể bị chặn; hàm load không được sửa chính map",
+        "status": "supported",
+        "source_url": "https://raw.githubusercontent.com/openjdk/jdk/master/src/java.base/share/classes/java/util/concurrent/ConcurrentHashMap.java",
+        "quote": "Some attempted update operations on this map by other threads may be blocked while computation is in progress",
+        "note": "\"The mapping function must not modify this map during computation.\" Chi tiết 'khóa theo bin' là cài đặt, javadoc chỉ nói 'some ... update operations'."
+      },
+      {
+        "claim": "ConcurrentHashMap không có giới hạn kích thước, TTL, thống kê; Caffeine có size eviction, expiration, refresh, statistics, loading async",
+        "status": "supported",
+        "source_url": "https://github.com/ben-manes/caffeine/wiki",
+        "quote": "size-based eviction when a maximum is exceeded based on frequency and recency",
+        "note": "Cùng trang: \"time-based expiration of entries, measured since last access or last write\", \"asynchronously refresh when the first stale request for an entry occurs\", \"accumulation of cache access statistics\"."
+      },
+      {
+        "claim": "AsyncLoadingCache gộp sẵn các request cùng key",
+        "status": "unverified",
+        "source_url": "",
+        "quote": "",
+        "note": "Trang wiki chính của Caffeine không có câu nói rõ; cần đối chiếu trang Population/javadoc AsyncLoadingCache."
+      }
+    ],
+    "issues": [
+      {
+        "severity": "critical",
+        "type": "factual",
+        "detail": "Ý 1 khẳng định ConcurrentHashMap nhận value null 'giống HashMap'. Thực tế put(id, null) ném NullPointerException. Đây là điểm chấm chính của câu hỏi (đánh giá đề xuất put(id, null)); Evaluator sẽ phạt ứng viên trả lời đúng.",
+        "fix": "Viết lại ý 1: 'ConcurrentHashMap không cho phép null làm key hay value: put(id, null) ném NullPointerException. Lý do thiết kế: get() trả null phải luôn nghĩa là không có mapping, nếu không sẽ không phân biệt được trong môi trường đồng thời. Dùng sentinel (Optional.empty() hoặc hằng MISSING) với TTL ngắn.'"
+      },
+      {
+        "severity": "minor",
+        "type": "topic",
+        "detail": "Phần computeIfAbsent và lưu CompletableFuture làm value trùng nhiều với de-qa-1101 (topic HashMap). Không phải duplicate hoàn toàn vì trọng tâm là thiết kế cache, nhưng hai cặp dễ được truy hồi cùng nhau.",
+        "fix": "Giữ trọng tâm vào negative caching và stampede; rút phần cảnh báo computeIfAbsent còn một câu."
+      },
+      {
+        "severity": "minor",
+        "type": "length",
+        "detail": "Chunk ~659 token; điểm cắt 600 token rơi vào phần 'Kiểm chứng', chỉ mất ý load test và giám sát. Các ý bắt buộc nằm trước điểm cắt.",
+        "fix": "Không bắt buộc; có thể bỏ mục 4."
+      },
+      {
+        "severity": "minor",
+        "type": "factual",
+        "detail": "Ý AsyncLoadingCache gộp request cùng key chưa có câu trích.",
+        "fix": "Dẫn javadoc AsyncLoadingCache/Caffeine Population trong grounding_urls."
+      }
+    ],
+    "difficulty": {
+      "is_hard": true,
+      "levels": ["middle", "senior"],
+      "note": "Đánh giá một đề xuất cụ thể và thiết kế lại cache: negative caching, stampede, eviction."
+    },
+    "interview_fit": {
+      "minutes": 4,
+      "sub_questions": 2,
+      "gradeable": true,
+      "note": "Hai ý (đánh giá, thiết kế lại), điểm chấm rõ sau khi sửa ý 1."
+    },
+    "junior_guide": {
+      "tests": "Hiểu giới hạn của ConcurrentHashMap khi dùng làm cache: null, stampede, không có eviction.",
+      "must_have": [
+        "ConcurrentHashMap không cho phép null: put(id, null) ném NullPointerException",
+        "Dùng sentinel (Optional.empty() hoặc hằng MISSING) cho 'không tồn tại', TTL ngắn hơn",
+        "get rồi put không atomic nên nhiều thread cùng query DB; dùng computeIfAbsent",
+        "Hàm load trong computeIfAbsent phải ngắn; tải cao thì lưu CompletableFuture",
+        "ConcurrentHashMap không có giới hạn kích thước hay TTL; dùng thư viện cache như Caffeine"
+      ],
+      "red_flags": [
+        "Nói put(id, null) chạy được như HashMap",
+        "Cache vô hạn không eviction",
+        "Gọi DB chậm trong computeIfAbsent trên map nóng mà không nghĩ tới chặn cập nhật"
+      ],
+      "follow_up": "Kẻ tấn công dò hàng triệu id ngẫu nhiên không tồn tại; negative cache của bạn chịu được không?"
+    },
+    "proposed_fix": {
+      "question": "",
+      "answer_change": "Thay toàn bộ gạch đầu dòng đầu của mục 1 bằng: 'ConcurrentHashMap không cho phép null làm key hay value (khác HashMap): put(id, null) ném NullPointerException. Lý do: get() trả null luôn có nghĩa là không có mapping, nếu cho phép null thì không phân biệt được trong môi trường đồng thời.' Giữ ý sentinel. Rút phần lưu ý computeIfAbsent còn một câu để bớt trùng với de-qa-1101."
+    }
+  }
+]
