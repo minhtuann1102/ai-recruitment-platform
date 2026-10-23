@@ -14,7 +14,8 @@
       "https://docs.celeryq.dev/en/stable/userguide/tasks.html",
       "https://docs.celeryq.dev/en/stable/getting-started/backends-and-brokers/redis.html",
       "https://docs.celeryq.dev/en/stable/userguide/optimizing.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1051",
@@ -31,7 +32,8 @@
       "https://docs.celeryq.dev/en/stable/userguide/optimizing.html",
       "https://docs.celeryq.dev/en/stable/userguide/tasks.html",
       "https://docs.celeryq.dev/en/stable/getting-started/backends-and-brokers/redis.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1052",
@@ -48,7 +50,8 @@
       "https://docs.python.org/3/library/asyncio-dev.html",
       "https://docs.python.org/3/library/asyncio-task.html",
       "https://docs.python.org/3/howto/free-threading-python.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1053",
@@ -65,7 +68,8 @@
       "https://fastapi.tiangolo.com/async/",
       "https://anyio.readthedocs.io/en/stable/threads.html",
       "https://docs.python.org/3/library/asyncio-dev.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1054",
@@ -87,7 +91,8 @@
     "grounding_urls": [
       "https://fastapi.tiangolo.com/advanced/events/",
       "https://fastapi.tiangolo.com/tutorial/dependencies/dependencies-with-yield/"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1055",
@@ -110,7 +115,8 @@
       "https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html",
       "https://docs.sqlalchemy.org/en/20/orm/session_basics.html",
       "https://docs.sqlalchemy.org/en/20/orm/queryguide/relationships.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1056",
@@ -126,7 +132,8 @@
     "grounding_urls": [
       "https://docs.sqlalchemy.org/en/20/orm/queryguide/relationships.html",
       "https://docs.sqlalchemy.org/en/20/core/pooling.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1057",
@@ -150,7 +157,8 @@
       "https://docs.djangoproject.com/en/5.2/topics/db/transactions/",
       "https://docs.djangoproject.com/en/5.2/ref/models/querysets/",
       "https://docs.djangoproject.com/en/5.2/ref/models/expressions/"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1058",
@@ -170,7 +178,8 @@
     "source": "self",
     "license": "CC-BY-4.0",
     "synthetic": true,
-    "grounding_urls": ["https://docs.djangoproject.com/en/5.2/ref/models/querysets/"]
+    "grounding_urls": ["https://docs.djangoproject.com/en/5.2/ref/models/querysets/"],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1059",
@@ -187,7 +196,8 @@
       "https://docs.python.org/3/library/functools.html",
       "https://docs.python.org/3/library/inspect.html",
       "https://fastapi.tiangolo.com/async/"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1060",
@@ -206,7 +216,8 @@
     "source": "self",
     "license": "CC-BY-4.0",
     "synthetic": true,
-    "grounding_urls": ["https://docs.python.org/3/library/contextlib.html"]
+    "grounding_urls": ["https://docs.python.org/3/library/contextlib.html"],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1061",
@@ -229,7 +240,8 @@
       "https://docs.python.org/3/reference/expressions.html",
       "https://docs.python.org/3/library/contextlib.html",
       "https://docs.python.org/3/library/itertools.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1062",
@@ -245,7 +257,8 @@
     "grounding_urls": [
       "https://docs.python.org/3/library/itertools.html",
       "https://docs.python.org/3/reference/expressions.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1063",
@@ -262,7 +275,8 @@
       "https://pydantic.dev/docs/validation/latest/concepts/strict_mode/",
       "https://pydantic.dev/docs/validation/latest/concepts/validators/",
       "https://pydantic.dev/docs/validation/latest/concepts/models/"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1064",
@@ -279,7 +293,8 @@
       "https://typing.python.org/en/latest/spec/protocol.html",
       "https://mypy.readthedocs.io/en/stable/generics.html",
       "https://docs.python.org/3/library/typing.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1065",
@@ -303,7 +318,8 @@
       "https://gunicorn.org/design/",
       "https://gunicorn.org/reference/settings/",
       "https://uvicorn.dev/deployment/"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1066",
@@ -326,7 +342,8 @@
       "https://pip.pypa.io/en/stable/topics/repeatable-installs/",
       "https://pip.pypa.io/en/stable/topics/secure-installs/",
       "https://docs.docker.com/build/building/multi-stage/"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1067",
@@ -342,7 +359,8 @@
     "grounding_urls": [
       "https://docs.pytest.org/en/stable/how-to/fixtures.html",
       "https://pytest-xdist.readthedocs.io/en/stable/how-to.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1068",
@@ -355,7 +373,8 @@
     "source": "self",
     "license": "CC-BY-4.0",
     "synthetic": true,
-    "grounding_urls": ["https://docs.python.org/3/library/unittest.mock.html"]
+    "grounding_urls": ["https://docs.python.org/3/library/unittest.mock.html"],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1069",
@@ -377,7 +396,8 @@
     "grounding_urls": [
       "https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html",
       "https://docs.python.org/3/library/hmac.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1070",
@@ -393,7 +413,8 @@
     "grounding_urls": [
       "https://www.django-rest-framework.org/api-guide/permissions/",
       "https://api-security.owasp.org/editions/2023/en/0xa1-broken-object-level-authorization"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1071",
@@ -412,6 +433,7 @@
       "https://docs.python.org/3/library/multiprocessing.shared_memory.html",
       "https://peps.python.org/pep-0703/",
       "https://docs.python.org/3/howto/free-threading-python.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   }
 ]

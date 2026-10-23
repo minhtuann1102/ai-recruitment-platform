@@ -15,7 +15,8 @@
       "https://docs.docker.com/engine/network/firewall-iptables/",
       "https://docs.docker.com/engine/network/port-publishing/",
       "https://docs.docker.com/compose/how-tos/networking/"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1201",
@@ -33,7 +34,8 @@
       "https://docs.docker.com/engine/network/",
       "https://nginx.org/en/docs/http/ngx_http_proxy_module.html",
       "https://nginx.org/en/docs/http/ngx_http_upstream_module.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1202",
@@ -46,7 +48,8 @@
     "source": "self",
     "license": "CC-BY-4.0",
     "synthetic": true,
-    "grounding_urls": ["https://kubernetes.io/docs/concepts/configuration/configmap/"]
+    "grounding_urls": ["https://kubernetes.io/docs/concepts/configuration/configmap/"],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1203",
@@ -69,7 +72,8 @@
       "https://kubernetes.io/docs/tasks/debug/debug-application/debug-service/",
       "https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/",
       "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1204",
@@ -91,7 +95,8 @@
     "grounding_urls": [
       "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/",
       "https://kubernetes.io/docs/concepts/workloads/pods/disruptions/"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1205",
@@ -107,7 +112,8 @@
     "grounding_urls": [
       "https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
       "https://kubernetes.io/docs/concepts/workloads/autoscaling/horizontal-pod-autoscale/"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1206",
@@ -130,7 +136,8 @@
       "https://developer.hashicorp.com/terraform/cli/commands/plan",
       "https://developer.hashicorp.com/terraform/language/modules/develop/refactoring",
       "https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1207",
@@ -147,7 +154,8 @@
       "https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle",
       "https://developer.hashicorp.com/terraform/language/modules/develop/refactoring",
       "https://developer.hashicorp.com/terraform/cli/commands/plan"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1208",
@@ -165,7 +173,8 @@
       "https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateways-regional.html",
       "https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-pricing.html",
       "https://docs.aws.amazon.com/vpc/latest/privatelink/gateway-endpoints.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1209",
@@ -182,7 +191,8 @@
       "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html",
       "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic_policy-eval-denyallow.html",
       "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic-cross-account.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1210",
@@ -204,7 +214,8 @@
     "grounding_urls": [
       "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/x-forwarded-headers.html",
       "https://nginx.org/en/docs/http/ngx_http_realip_module.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1211",
@@ -221,7 +232,8 @@
       "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-health-checks.html",
       "https://nginx.org/en/docs/http/ngx_http_upstream_module.html",
       "https://nginx.org/en/docs/http/ngx_http_proxy_module.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1212",
@@ -234,7 +246,8 @@
     "source": "self",
     "license": "CC-BY-4.0",
     "synthetic": true,
-    "grounding_urls": ["https://sre.google/workbook/alerting-on-slos/"]
+    "grounding_urls": ["https://sre.google/workbook/alerting-on-slos/"],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1213",
@@ -251,7 +264,8 @@
       "https://prometheus.io/docs/practices/naming/",
       "https://prometheus.io/docs/practices/instrumentation/",
       "https://prometheus.io/docs/practices/histograms/"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1214",
@@ -274,7 +288,8 @@
       "https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository",
       "https://docs.github.com/en/actions/concepts/security/openid-connect",
       "https://docs.github.com/en/code-security/secret-scanning/introduction/about-push-protection"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1215",
@@ -296,7 +311,8 @@
     "grounding_urls": [
       "https://docs.docker.com/build/building/best-practices/",
       "https://github.com/bregman-arie/devops-exercises/blob/HEAD/topics/security/README.md"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1216",
@@ -317,7 +333,8 @@
     "synthetic": true,
     "grounding_urls": [
       "https://github.com/bregman-arie/devops-exercises/blob/HEAD/topics/kubernetes/README.md"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1217",
@@ -334,6 +351,7 @@
       "https://docs.docker.com/build/cache/",
       "https://docs.docker.com/build/cache/backends/",
       "https://docs.github.com/en/actions/reference/workflows-and-actions/dependency-caching"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   }
 ]

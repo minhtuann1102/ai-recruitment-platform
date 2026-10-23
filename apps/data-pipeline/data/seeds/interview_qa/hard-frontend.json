@@ -13,7 +13,8 @@
     "grounding_urls": [
       "https://web.dev/articles/optimize-long-tasks",
       "https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide/In_depth"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1251",
@@ -29,7 +30,8 @@
     "grounding_urls": [
       "https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal",
       "https://react.dev/learn/you-might-not-need-an-effect"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1252",
@@ -45,7 +47,8 @@
     "grounding_urls": [
       "https://react.dev/reference/react-dom/client/hydrateRoot",
       "https://nextjs.org/docs/messages/react-hydration-error"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1253",
@@ -67,7 +70,8 @@
     "grounding_urls": [
       "https://react.dev/reference/rsc/use-client",
       "https://nextjs.org/docs/app/getting-started/server-and-client-components"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1254",
@@ -90,7 +94,8 @@
       "https://react.dev/learn/you-might-not-need-an-effect",
       "https://react.dev/reference/react/useEffectEvent",
       "https://react.dev/blog/2025/10/01/react-19-2"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1255",
@@ -112,7 +117,8 @@
     "grounding_urls": [
       "https://tanstack.com/query/latest/docs/framework/react/guides/optimistic-updates",
       "https://tanstack.com/query/latest/docs/framework/react/guides/mutations"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1256",
@@ -129,7 +135,8 @@
       "https://playwright.dev/docs/best-practices",
       "https://playwright.dev/docs/test-retries",
       "https://playwright.dev/docs/actionability"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1257",
@@ -151,7 +158,8 @@
     "grounding_urls": [
       "https://testing-library.com/docs/queries/about/",
       "https://mswjs.io/docs/philosophy"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1258",
@@ -167,7 +175,8 @@
     "grounding_urls": [
       "https://www.typescriptlang.org/docs/handbook/2/everyday-types.html",
       "https://www.typescriptlang.org/docs/handbook/2/narrowing.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1259",
@@ -190,7 +199,8 @@
       "https://www.typescriptlang.org/docs/handbook/2/narrowing.html",
       "https://www.typescriptlang.org/docs/handbook/2/conditional-types.html",
       "https://www.typescriptlang.org/docs/handbook/utility-types.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1260",
@@ -212,7 +222,8 @@
     "grounding_urls": [
       "https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/",
       "https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dialog"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1261",
@@ -228,7 +239,8 @@
     "grounding_urls": [
       "https://nextjs.org/docs/architecture/accessibility",
       "https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Guides/Live_regions"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1262",
@@ -245,6 +257,7 @@
       "https://web.dev/articles/inp",
       "https://web.dev/articles/optimize-inp",
       "https://web.dev/articles/optimize-long-tasks"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   }
 ]

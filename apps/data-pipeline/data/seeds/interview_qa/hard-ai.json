@@ -21,7 +21,8 @@
       "https://modelcontextprotocol.io/specification/2025-06-18/server/tools",
       "https://modelcontextprotocol.io/specification/2025-06-18/basic/security_best_practices",
       "https://modelcontextprotocol.io/specification/2025-06-18/basic/transports"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1151",
@@ -37,7 +38,8 @@
     "grounding_urls": [
       "https://modelcontextprotocol.io/specification/2025-06-18/basic/transports",
       "https://modelcontextprotocol.io/specification/2025-06-18/basic/security_best_practices"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1152",
@@ -53,7 +55,8 @@
     "grounding_urls": [
       "https://www.anthropic.com/research/building-effective-agents",
       "https://www.anthropic.com/engineering/multi-agent-research-system"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1153",
@@ -76,7 +79,8 @@
     "grounding_urls": [
       "https://www.anthropic.com/engineering/multi-agent-research-system",
       "https://www.anthropic.com/research/building-effective-agents"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1154",
@@ -100,7 +104,8 @@
       "https://docs.pytorch.org/docs/2.14/amp.html",
       "https://docs.pytorch.org/docs/2.14/notes/amp_examples.html",
       "https://arxiv.org/abs/1706.02677"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1155",
@@ -124,7 +129,8 @@
       "https://arxiv.org/abs/1706.02677",
       "https://docs.pytorch.org/docs/2.14/generated/torch.nn.SyncBatchNorm.html",
       "https://docs.pytorch.org/docs/2.14/notes/amp_examples.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1156",
@@ -148,7 +154,8 @@
       "https://arxiv.org/abs/2309.06180",
       "https://ar5iv.labs.arxiv.org/html/2309.06180",
       "https://arxiv.org/abs/2305.13245"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1157",
@@ -170,7 +177,8 @@
     "grounding_urls": [
       "https://arxiv.org/abs/2211.17192",
       "https://ar5iv.labs.arxiv.org/html/2211.17192"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1158",
@@ -193,7 +201,8 @@
     "grounding_urls": [
       "https://www.anthropic.com/research/building-effective-agents",
       "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1159",
@@ -217,7 +226,8 @@
       "https://developers.openai.com/api/docs/guides/function-calling",
       "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
       "https://www.anthropic.com/research/building-effective-agents"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1160",
@@ -241,7 +251,8 @@
       "https://arxiv.org/abs/2307.03172",
       "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents",
       "https://platform.claude.com/docs/en/docs/build-with-claude/prompt-engineering/long-context-tips"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1161",
@@ -257,7 +268,8 @@
     "grounding_urls": [
       "https://platform.claude.com/docs/en/docs/build-with-claude/prompt-caching",
       "https://developers.openai.com/api/docs/guides/prompt-caching"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1162",
@@ -281,7 +293,8 @@
       "https://developers.openai.com/api/docs/guides/latency-optimization",
       "https://developers.openai.com/api/docs/guides/batch",
       "https://platform.claude.com/docs/en/docs/build-with-claude/prompt-caching"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1163",
@@ -294,7 +307,8 @@
     "source": "self",
     "license": "CC-BY-4.0",
     "synthetic": true,
-    "grounding_urls": ["https://github.com/pgvector/pgvector"]
+    "grounding_urls": ["https://github.com/pgvector/pgvector"],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1164",
@@ -318,7 +332,8 @@
       "https://huggingface.co/intfloat/multilingual-e5-large",
       "https://github.com/pgvector/pgvector",
       "https://arxiv.org/abs/2205.13147"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1165",
@@ -338,7 +353,8 @@
     "source": "self",
     "license": "CC-BY-4.0",
     "synthetic": true,
-    "grounding_urls": ["https://ar5iv.labs.arxiv.org/html/2306.05685"]
+    "grounding_urls": ["https://ar5iv.labs.arxiv.org/html/2306.05685"],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1166",
@@ -361,7 +377,8 @@
     "grounding_urls": [
       "https://docs.ragas.io/en/stable/concepts/metrics/available_metrics/faithfulness/",
       "https://ar5iv.labs.arxiv.org/html/2306.05685"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1167",
@@ -378,7 +395,8 @@
       "https://ar5iv.labs.arxiv.org/html/2106.09685",
       "https://arxiv.org/abs/2305.14314",
       "https://arxiv.org/abs/2405.09673"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1168",
@@ -402,7 +420,8 @@
       "https://developers.openai.com/api/docs/guides/model-optimization",
       "https://arxiv.org/abs/2312.05934",
       "https://arxiv.org/abs/2405.09673"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1169",
@@ -425,7 +444,8 @@
     "grounding_urls": [
       "https://arxiv.org/abs/2406.18665",
       "https://arxiv.org/abs/2305.05176"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1170",
@@ -448,7 +468,8 @@
     "grounding_urls": [
       "https://github.com/meta-llama/llama-models/blob/main/models/llama3_1/LICENSE",
       "https://developers.openai.com/api/docs/guides/model-optimization"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1171",
@@ -464,7 +485,8 @@
     "grounding_urls": [
       "https://ar5iv.labs.arxiv.org/html/2203.02155",
       "https://arxiv.org/abs/2305.18290"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1172",
@@ -488,7 +510,8 @@
       "https://arxiv.org/abs/2210.10760",
       "https://ar5iv.labs.arxiv.org/html/2210.10760",
       "https://ar5iv.labs.arxiv.org/html/2203.02155"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1173",
@@ -511,7 +534,8 @@
     "grounding_urls": [
       "https://developers.openai.com/api/docs/guides/structured-outputs",
       "https://developers.openai.com/api/docs/guides/function-calling"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1174",
@@ -534,7 +558,8 @@
     "grounding_urls": [
       "https://arxiv.org/abs/2102.09690",
       "https://ar5iv.labs.arxiv.org/html/2102.09690"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1175",
@@ -550,7 +575,8 @@
     "grounding_urls": [
       "https://sbert.net/examples/sentence_transformer/applications/retrieve_rerank/README.html",
       "https://www.elastic.co/guide/en/elasticsearch/reference/current/rrf.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1176",
@@ -573,7 +599,8 @@
     "grounding_urls": [
       "https://platform.claude.com/docs/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations",
       "https://platform.claude.com/docs/en/docs/build-with-claude/prompt-engineering/long-context-tips"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1177",
@@ -596,7 +623,8 @@
     "grounding_urls": [
       "https://developers.openai.com/api/docs/guides/reasoning",
       "https://platform.claude.com/docs/en/docs/build-with-claude/extended-thinking"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1178",
@@ -618,7 +646,8 @@
     "grounding_urls": [
       "https://arxiv.org/abs/2203.11171",
       "https://arxiv.org/abs/2305.20050"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1179",
@@ -642,7 +671,8 @@
       "https://github.com/open-telemetry/semantic-conventions-genai",
       "https://developers.openai.com/api/docs/guides/evaluation-best-practices",
       "https://ar5iv.labs.arxiv.org/html/2306.05685"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1180",
@@ -665,7 +695,8 @@
     "grounding_urls": [
       "https://developers.openai.com/api/docs/guides/evaluation-best-practices",
       "https://ar5iv.labs.arxiv.org/html/2306.05685"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1181",
@@ -687,7 +718,8 @@
     "grounding_urls": [
       "https://scikit-learn.org/stable/modules/classification_threshold.html",
       "https://scikit-learn.org/stable/modules/calibration.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1182",
@@ -710,7 +742,8 @@
     "grounding_urls": [
       "https://github.com/alexeygrigorev/data-science-interviews/blob/HEAD/theory.md",
       "https://scikit-learn.org/stable/modules/classification_threshold.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1183",
@@ -732,7 +765,8 @@
     "grounding_urls": [
       "https://scikit-learn.org/stable/common_pitfalls.html",
       "https://scikit-learn.org/stable/modules/preprocessing.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1184",
@@ -754,7 +788,8 @@
     "grounding_urls": [
       "https://scikit-learn.org/stable/modules/cross_validation.html",
       "https://docs.feast.dev/getting-started/concepts/point-in-time-joins"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1185",
@@ -776,7 +811,8 @@
     "grounding_urls": [
       "https://docs.cloud.google.com/vertex-ai/docs/model-monitoring/overview",
       "https://docs.cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1186",
@@ -798,7 +834,8 @@
     "synthetic": true,
     "grounding_urls": [
       "https://docs.cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1187",
@@ -822,7 +859,8 @@
       "https://developers.openai.com/api/docs/guides/voice-agents",
       "https://developers.openai.com/api/docs/guides/realtime-vad",
       "https://developers.openai.com/api/docs/guides/latency-optimization"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1188",
@@ -838,7 +876,8 @@
     "grounding_urls": [
       "https://developers.openai.com/api/docs/guides/realtime-vad",
       "https://developers.openai.com/api/docs/guides/realtime-conversations"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1189",
@@ -861,7 +900,8 @@
     "grounding_urls": [
       "https://platform.claude.com/docs/en/docs/build-with-claude/vision",
       "https://platform.claude.com/docs/en/docs/build-with-claude/pdf-support"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1190",
@@ -885,7 +925,8 @@
       "https://platform.claude.com/docs/en/docs/build-with-claude/vision",
       "https://developers.openai.com/api/docs/guides/structured-outputs",
       "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1191",
@@ -908,7 +949,8 @@
       "https://arxiv.org/abs/2305.15425",
       "https://unicode.org/reports/tr15/",
       "https://platform.claude.com/docs/en/docs/build-with-claude/prompt-caching"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1192",
@@ -932,7 +974,8 @@
       "https://github.com/VinAIResearch/PhoBERT",
       "https://huggingface.co/intfloat/multilingual-e5-large",
       "https://www.elastic.co/guide/en/elasticsearch/reference/current/rrf.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1193",
@@ -956,7 +999,8 @@
       "https://www.anthropic.com/news/contextual-retrieval",
       "https://arxiv.org/abs/2212.10496",
       "https://www.elastic.co/guide/en/elasticsearch/reference/current/rrf.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1194",
@@ -978,7 +1022,8 @@
     "grounding_urls": [
       "https://arxiv.org/abs/2404.16130",
       "https://www.anthropic.com/research/building-effective-agents"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1195",
@@ -1003,7 +1048,8 @@
       "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
       "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/",
       "https://genai.owasp.org/llmrisk/llm052025-improper-output-handling/"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1196",
@@ -1028,6 +1074,7 @@
       "https://genai.owasp.org/llmrisk/llm072025-system-prompt-leakage/",
       "https://genai.owasp.org/llmrisk/llm052025-improper-output-handling/",
       "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   }
 ]

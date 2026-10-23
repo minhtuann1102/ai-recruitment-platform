@@ -14,7 +14,8 @@
       "https://nodejs.org/en/learn/asynchronous-work/dont-block-the-event-loop",
       "https://nodejs.org/api/dns.html",
       "https://nodejs.org/api/cli.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1001",
@@ -37,7 +38,8 @@
       "https://nodejs.org/api/globals.html",
       "https://nodejs.org/api/cli.html",
       "https://nodejs.org/api/process.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1002",
@@ -53,7 +55,8 @@
     "grounding_urls": [
       "https://nodejs.org/en/learn/modules/backpressuring-in-streams",
       "https://nodejs.org/api/stream.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1003",
@@ -71,7 +74,8 @@
       "https://nodejs.org/api/string_decoder.html",
       "https://nodejs.org/api/stream.html",
       "https://nodejs.org/api/process.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1004",
@@ -93,7 +97,8 @@
     "grounding_urls": [
       "https://nodejs.org/api/worker_threads.html",
       "https://nodejs.org/en/learn/asynchronous-work/dont-block-the-event-loop"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1005",
@@ -106,7 +111,8 @@
     "source": "self",
     "license": "CC-BY-4.0",
     "synthetic": true,
-    "grounding_urls": ["https://nodejs.org/api/cluster.html"]
+    "grounding_urls": ["https://nodejs.org/api/cluster.html"],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1006",
@@ -130,7 +136,8 @@
       "https://docs.bullmq.io/patterns/idempotent-jobs",
       "https://docs.bullmq.io/guide/jobs/job-ids",
       "https://docs.bullmq.io/guide/going-to-production"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1007",
@@ -148,7 +155,8 @@
       "https://docs.bullmq.io/patterns/stop-retrying-jobs",
       "https://docs.bullmq.io/guide/rate-limiting",
       "https://docs.bullmq.io/guide/going-to-production"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1008",
@@ -164,7 +172,8 @@
     "grounding_urls": [
       "https://redis.io/docs/latest/commands/incr/",
       "https://redis.io/docs/latest/develop/programmability/eval-intro/"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1009",
@@ -180,7 +189,8 @@
     "grounding_urls": [
       "https://redis.io/docs/latest/develop/reference/eviction/",
       "https://docs.bullmq.io/guide/going-to-production"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1010",
@@ -199,7 +209,8 @@
     "source": "self",
     "license": "CC-BY-4.0",
     "synthetic": true,
-    "grounding_urls": ["https://docs.nestjs.com/fundamentals/injection-scopes"]
+    "grounding_urls": ["https://docs.nestjs.com/fundamentals/injection-scopes"],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1011",
@@ -222,7 +233,8 @@
     "grounding_urls": [
       "https://docs.nestjs.com/faq/request-lifecycle",
       "https://docs.nestjs.com/guards"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1012",
@@ -244,7 +256,8 @@
     "grounding_urls": [
       "https://www.postgresql.org/docs/current/transaction-iso.html",
       "https://www.prisma.io/docs/orm/prisma-client/queries/transactions"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1013",
@@ -260,7 +273,8 @@
     "grounding_urls": [
       "https://www.postgresql.org/docs/current/sql-altertable.html",
       "https://www.postgresql.org/docs/current/sql-createindex.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1014",
@@ -283,7 +297,8 @@
       "https://www.typescriptlang.org/docs/handbook/2/basic-types.html",
       "https://www.typescriptlang.org/docs/handbook/2/narrowing.html",
       "https://zod.dev/basics"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1015",
@@ -305,7 +320,8 @@
     "grounding_urls": [
       "https://www.typescriptlang.org/docs/handbook/2/conditional-types.html",
       "https://www.typescriptlang.org/docs/handbook/2/basic-types.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1016",
@@ -322,7 +338,8 @@
       "https://nodejs.org/api/process.html",
       "https://nodejs.org/en/learn/diagnostics/memory/using-heap-snapshot",
       "https://nodejs.org/api/cli.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1017",
@@ -340,7 +357,8 @@
       "https://nodejs.org/en/learn/diagnostics/flame-graphs",
       "https://nodejs.org/api/cli.html",
       "https://nodejs.org/en/learn/asynchronous-work/dont-block-the-event-loop"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1018",
@@ -357,7 +375,8 @@
       "https://jestjs.io/docs/configuration",
       "https://jestjs.io/docs/jest-object",
       "https://jestjs.io/docs/cli"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1019",
@@ -373,7 +392,8 @@
     "grounding_urls": [
       "https://jestjs.io/docs/jest-object",
       "https://jestjs.io/docs/timer-mocks"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1020",
@@ -389,7 +409,8 @@
     "grounding_urls": [
       "https://datatracker.ietf.org/doc/html/rfc9700",
       "https://datatracker.ietf.org/doc/html/rfc8725"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1021",
@@ -402,6 +423,7 @@
     "source": "self",
     "license": "CC-BY-4.0",
     "synthetic": true,
-    "grounding_urls": ["https://datatracker.ietf.org/doc/html/rfc8725"]
+    "grounding_urls": ["https://datatracker.ietf.org/doc/html/rfc8725"],
+    "reviewed_by": "minhtuann1102"
   }
 ]

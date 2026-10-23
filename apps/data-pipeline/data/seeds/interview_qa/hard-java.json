@@ -13,7 +13,8 @@
     "grounding_urls": [
       "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/HashMap.html",
       "https://raw.githubusercontent.com/openjdk/jdk/master/src/java.base/share/classes/java/util/HashMap.java"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1101",
@@ -34,7 +35,8 @@
     "synthetic": true,
     "grounding_urls": [
       "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ConcurrentHashMap.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1102",
@@ -56,7 +58,8 @@
     "grounding_urls": [
       "https://docs.oracle.com/javase/specs/jls/se21/html/jls-17.html",
       "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/package-summary.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1103",
@@ -79,7 +82,8 @@
       "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/CompletableFuture.html",
       "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ForkJoinPool.html",
       "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ThreadPoolExecutor.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1104",
@@ -95,7 +99,8 @@
     "grounding_urls": [
       "https://docs.oracle.com/en/java/javase/21/troubleshoot/troubleshooting-memory-leaks.html",
       "https://docs.oracle.com/en/java/javase/21/docs/specs/man/java.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1105",
@@ -113,7 +118,8 @@
       "https://docs.oracle.com/en/java/javase/21/docs/specs/man/java.html",
       "https://openjdk.org/jeps/439",
       "https://openjdk.org/jeps/474"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1106",
@@ -129,7 +135,8 @@
     "grounding_urls": [
       "https://docs.hibernate.org/orm/6.6/introduction/html_single/Hibernate_Introduction.html",
       "https://docs.hibernate.org/orm/6.6/javadocs/org/hibernate/cfg/QuerySettings.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1107",
@@ -152,7 +159,8 @@
       "https://raw.githubusercontent.com/hibernate/hibernate-orm/6.6/documentation/src/main/asciidoc/userguide/chapters/batch/Batching.adoc",
       "https://raw.githubusercontent.com/hibernate/hibernate-orm/6.6/documentation/src/main/asciidoc/userguide/chapters/flushing/Flushing.adoc",
       "https://docs.hibernate.org/orm/6.6/introduction/html_single/Hibernate_Introduction.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1108",
@@ -175,7 +183,8 @@
       "https://www.postgresql.org/docs/current/using-explain.html",
       "https://www.postgresql.org/docs/current/planner-optimizer.html",
       "https://www.postgresql.org/docs/current/planner-stats.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1109",
@@ -193,7 +202,8 @@
       "https://www.postgresql.org/docs/current/indexes-ordering.html",
       "https://www.postgresql.org/docs/current/indexes-multicolumn.html",
       "https://www.postgresql.org/docs/current/functions-comparisons.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1110",
@@ -210,7 +220,8 @@
       "https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/annotations.html",
       "https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/tx-propagation.html",
       "https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/rolling-back.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1111",
@@ -234,7 +245,8 @@
       "https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/tx-propagation.html",
       "https://docs.spring.io/spring-data/jpa/reference/jpa/locking.html",
       "https://raw.githubusercontent.com/hibernate/hibernate-orm/6.6/documentation/src/main/asciidoc/userguide/chapters/locking/Locking.adoc"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1112",
@@ -256,7 +268,8 @@
     "grounding_urls": [
       "https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/jwt.html",
       "https://www.rfc-editor.org/rfc/rfc9700.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1113",
@@ -279,7 +292,8 @@
       "https://docs.spring.io/spring-security/reference/servlet/architecture.html",
       "https://docs.spring.io/spring-security/reference/features/exploits/csrf.html",
       "https://docs.spring.io/spring-security/reference/servlet/exploits/csrf.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1114",
@@ -301,7 +315,8 @@
     "grounding_urls": [
       "https://docs.spring.io/spring-boot/reference/features/developing-auto-configuration.html",
       "https://docs.spring.io/spring-boot/reference/using/auto-configuration.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1115",
@@ -323,7 +338,8 @@
     "grounding_urls": [
       "https://docs.spring.io/spring-boot/reference/features/external-config.html",
       "https://docs.spring.io/spring-boot/reference/features/profiles.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1116",
@@ -346,7 +362,8 @@
       "https://docs.spring.io/spring-framework/reference/core/beans/dependencies/factory-collaborators.html",
       "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-2.6-Release-Notes",
       "https://docs.spring.io/spring-framework/reference/core/beans/factory-scopes.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1117",
@@ -369,7 +386,8 @@
       "https://docs.spring.io/spring-framework/reference/core/beans/factory-scopes.html",
       "https://docs.spring.io/spring-framework/reference/core/beans/dependencies/factory-method-injection.html",
       "https://docs.spring.io/spring-framework/reference/core/beans/classpath-scanning.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1118",
@@ -393,7 +411,8 @@
       "https://docs.spring.io/spring-framework/reference/testing/annotations/integration-spring/annotation-mockitobean.html",
       "https://docs.spring.io/spring-boot/reference/testing/spring-boot-applications.html",
       "https://docs.spring.io/spring-boot/reference/testing/testcontainers.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1119",
@@ -410,7 +429,8 @@
       "https://javadoc.io/static/org.mockito/mockito-core/5.14.2/org/mockito/Mockito.html",
       "https://docs.spring.io/spring-boot/reference/testing/spring-boot-applications.html",
       "https://docs.spring.io/spring-boot/reference/testing/testcontainers.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1120",
@@ -426,7 +446,8 @@
     "grounding_urls": [
       "https://www.rfc-editor.org/rfc/rfc9110.html",
       "https://www.ietf.org/archive/id/draft-ietf-httpapi-idempotency-key-header-07.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1121",
@@ -448,6 +469,7 @@
     "grounding_urls": [
       "https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-ann-rest-exceptions.html",
       "https://docs.hibernate.org/orm/6.6/introduction/html_single/Hibernate_Introduction.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   }
 ]
