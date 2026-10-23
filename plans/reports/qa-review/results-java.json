@@ -1157,7 +1157,7 @@
   {
     "qa_id": "de-qa-1112",
     "verdict": "ok",
-    "confidence": "low",
+    "confidence": "medium",
     "summary_vi": "Đạt: claim từng chưa có nguồn đã được xác minh tại máy bằng câu trích từ RFC/OWASP; các ý chính đều có trích dẫn. (Trước đó gợi ý Cần sửa vì thiếu trích dẫn.)",
     "claims": [
       {
