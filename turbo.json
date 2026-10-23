@@ -91,6 +91,7 @@
     "MAIL_PASSWORD",
     "MAIL_SENDER",
     "MAIL_SECURE",
-    "RABBITMQ_URLS"
+    "RABBITMQ_URLS",
+    "AI_SERVICE_MOCK"
   ]
 }

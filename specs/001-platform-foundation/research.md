@@ -26,7 +26,11 @@ Mỗi mục: Decision / Rationale / Alternatives. Mục đánh dấu **VERIFY** 
 - **Decision**: `scripts/init-databases.sh` mount vào `/docker-entrypoint-initdb.d/`, dùng
   `SELECT 'CREATE DATABASE x' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname='x')\gexec` cho từng DB,
   rồi `\c ai_db` + `CREATE EXTENSION IF NOT EXISTS vector`. Thêm `make db-ensure` chạy lại cùng script qua
-  `docker compose exec db bash /docker-entrypoint-initdb.d/init-databases.sh` cho máy đã có volume.
+  `docker compose exec db bash -c 'bash /docker-entrypoint-initdb.d/init-databases.sh'` cho máy đã có volume
+  (bọc trong `bash -c` vì Git Bash trên Windows tự đổi đối số bắt đầu bằng `/` thành `C:/Program Files/Git/...`).
+- **Kết quả T022 (2026-10-19)**: healthcheck `db` MUST dùng `pg_isready -h 127.0.0.1`: server tạm của initdb chỉ nghe
+  unix socket, nên kiểm qua socket báo `healthy` khi init script chưa chạy xong (thấy trên volume sạch, bind mount
+  Windows chậm ~40 s). DDL `knowledge_chunks` chép nguyên văn rag-design §3, thêm `IF NOT EXISTS` để chạy lại được.
 - **Rationale**: entrypoint chỉ chạy init khi data dir rỗng → máy cũ thiếu DB (edge case 1). Script idempotent
   cho phép chạy lại an toàn mà không cần reset. AIE nối DDL `knowledge_chunks` (dùng `IF NOT EXISTS`) vào cuối
   cùng file theo thỏa thuận trong kickoff.
@@ -70,6 +74,8 @@ Mỗi mục: Decision / Rationale / Alternatives. Mục đánh dấu **VERIFY** 
 - **VERIFY lúc implement**: image Chainguard là distroless (không shell/curl/`mc`) → healthcheck trong container có thể
   không chạy được; khi đó dùng `latest-dev` (có shell) cho local, hoặc bỏ healthcheck của `minio` và để `storage-init`
   retry. Console bản community chỉ còn object browser (tính năng admin bị lược từ 05/2025).
+  - **Kết quả T018 (2026-10-19)**: digest trên vẫn pull được; image có `bash` (không có `curl`/`wget`) → healthcheck
+    `bash -c '</dev/tcp/127.0.0.1/9000'` (cùng kiểu với `apisix`). Không cần `latest-dev`.
 
 ## R7. Route APISIX
 
