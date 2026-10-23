@@ -179,6 +179,7 @@ không commit vì repo public — spec Clarifications)
 - [ ] T047 [P] Cập nhật `docs/architecture/data-pipeline.md` §3, §7, §8: thay phác thảo lỗi thời bằng cấu trúc thật + lệnh `python -m pipeline`, link `specs/005-rag-knowledge-base-qa/contracts/`
 - [ ] T048 [P] Cập nhật `specs/README.md` (Trạng thái 005) và `spec.md` (Status) khi PR merge
 - [ ] T049 Nhờ AIE chạy quickstart §0–§5 trên máy họ chỉ theo hướng dẫn, ≤ 5 lệnh (SC-007); sửa hướng dẫn nếu phải hỏi DE
+- [ ] T058 (2026-10-23: project Singapore; `index` 9.006 bản ghi, 0 lỗi embed, ~14 phút; lần 2 `embedded = 0`; `PgKnowledgeRepository` qua pooler bằng `aie_reader` PASS topic / search / `qa_id`; INSERT, DELETE bị từ chối; `anon` không đọc được; pooler bỏ qua startup `options` → read-only đặt ở cấp role; mở kết nối ~0,4 s, quét ấm ~0,12 s; `evals.run_rag` golden set AIE 24 truy vấn bằng `aie_reader`: recall@5 0,875 — en 1,0, mixed 1,0, không dấu 0,8, vi 0,667; chờ AIE xác nhận dùng được) Kho dùng chung trên Supabase cho AIE (quickstart §4b): `scripts/supabase-setup-ai-db.sh` dựng pgvector + DDL lấy nguyên từ `init-databases.sh` + `scripts/supabase-ai-db-access.sql` (RLS chặn Data API, role chỉ đọc `aie_reader`); `index` vào Supabase; kiểm `PgKnowledgeRepository` của ai-service đọc được qua pooler bằng `aie_reader`, ghi bằng `aie_reader` bị từ chối; gửi riêng URI đọc cho AIE
 
 ---
 
