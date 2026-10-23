@@ -75,6 +75,7 @@ dõi tỉ lệ công khai trong báo cáo `validate` sau mỗi lô.
 
 **Review thật**: chỉ điền `reviewed_by` sau khi người review đã đọc đáp án; cặp `synthetic=false` dịch từ tiếng
 Ukraina/Nga/Trung cũng phải được đọc đối chiếu nghĩa với bản gốc. Giờ review của DE là giới hạn chính của US1.
+Ngoại lệ: cặp hard tự viết (T056) duyệt theo spec Clarification Session 2026-10-23 (xem T057).
 
 - [ ] T018 [P] [US1] **BỎ (2026-10-19, thay bằng T050–T054)** `data/seeds/interview_qa/backend-nodejs.json` (`de-qa-0001..0099`): 13 topic `node.*` (sàn 26), mục tiêu ≥ 32 cặp, ≥ 24 công khai từ DevLoversTeam/nodejs-interview-questions (MIT) + system-design-primer (CC-BY-4.0) cho `node.arch.*`, `node.data.*`
 - [ ] T019 [P] [US1] **BỎ (2026-10-19, thay bằng T050–T054)** `data/seeds/interview_qa/backend-python.json` (`de-qa-0100..0199`): 12 topic `py.*` (sàn 24), mục tiêu ≥ 32 cặp, ≥ 24 công khai từ DevLoversTeam/python-interview-questions, yakimka/python_interview_questions (MIT)
@@ -97,7 +98,7 @@ không commit vì repo public — spec Clarifications)
 
 - [X] T055 [US1] `pipeline/qa_seed_validator.py`, `pipeline/topic_catalog_reader.py`: thay luật "mỗi độ khó ≥ 20%" bằng `hard_coverage` — topic có level middle/senior phải có ≥ 2 cặp hard; `review-sample` cho review mẫu bản dịch
 - [X] T056 [US1] (2026-10-20: 144 cặp hard — node 22, python 22, java 22, ai 47, devops 18, frontend 13; viết bởi subagent Opus + 1 cặp GIL bởi phiên chính; `validate` báo sau khi duyệt: 0 topic thiếu hard, 0 topic mỏng; lệnh `review-seed` / `approve-seed` hỗ trợ duyệt) Sau `enrich` đầy đủ (+ `--only doocs-advanced-java --only genai-60`): đếm cặp hard theo topic; với topic thiếu, Claude viết câu hard tiếng Việt bám tài liệu thật (crawl nâng cao, docs chính thức) vào `data/seeds/interview_qa/hard-<track>.json` (dải `qa_id` trong `NOTICE`), `source = self`, `synthetic = true`, `grounding_urls`; làm theo nhóm track, mỗi lô `validate` sạch trước khi commit
-- [ ] T057 [US1] DE đọc từng cặp hard rồi điền `reviewed_by = minhtuann1102`; báo AIE về SC-001 mới (Interviewer lọc theo độ khó)
+- [X] T057 [US1] (2026-10-23: 7 lô, 7/7 cặp mồi bị bắt; rubric v2: Đạt 106, Cần sửa 38, cả 38 đã sửa trong seed; DE đọc các chỗ sửa, 4 cặp phải đọc còn lại và 15 cặp Đạt theo v2; `approve-seed` 144 cặp, `validate --extra-catalog` 0 lỗi; báo AIE trong PR) Duyệt 144 cặp hard theo spec Clarification Session 2026-10-23: skill `interview-qa-review` (rubric v2) + cặp mồi, áp đề xuất sửa vào seed; DE đọc nhóm "phải đọc", diff các cặp đã sửa và mẫu cặp Đạt theo v2, rồi `approve-seed --reviewer minhtuann1102`; báo AIE về SC-001 mới (Interviewer lọc theo độ khó) và giới hạn 600 token snippet của Planner
 
 **Checkpoint**: ≥ 200 cặp hợp lệ (crawl + curated), mọi topic ≥ 2 cặp, mỗi topic middle/senior ≥ 2 cặp hard
 

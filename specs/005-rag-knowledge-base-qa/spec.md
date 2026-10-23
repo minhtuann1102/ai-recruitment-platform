@@ -73,9 +73,21 @@ knowledge_chunks và verify retrieval relevant."
   thành mỗi topic có level `middle` hoặc `senior` có ≥ 2 cặp `hard` (phiên senior cần câu hard theo từng topic, không
   cần 20% toàn kho). Câu hard thiếu được sinh bằng Claude trong phiên làm việc, bám tài liệu thật (nguồn crawl nâng
   cao, tài liệu chính thức; ghi `grounding_urls`), viết bằng tiếng Việt → vào seed curated (`source = self`,
-  `synthetic = true`, commit), DE duyệt từng cặp (`reviewed_by`). Báo AIE vì Interviewer lọc theo độ khó.
+  `synthetic = true`, commit), DE duyệt (`reviewed_by`, cách duyệt: Session 2026-10-23). Báo AIE vì Interviewer lọc theo độ khó.
 - Q: Tách dữ liệu crawl khỏi seed curated? → A: Có. `dataset = de_crawled_qa`, định danh `cr-<nguồn>-<8 hex>` sinh
   từ URL + câu hỏi gốc (nguồn upstream là sự thật, khác `de-qa-NNNN`); dọn bản cũ (FR-013) theo từng dataset.
+
+### Session 2026-10-23
+
+- Q: Duyệt 144 cặp hard tự viết (`de-qa-1000..1262`, T057) thế nào khi DE không tự kiểm chứng được nội dung của mọi
+  mảng (Java, Node, Python, DevOps, AI, Frontend)? → A (DE chốt): `reviewed_by = minhtuann1102` nghĩa là DE chấp nhận
+  cặp sau một vòng duyệt có bằng chứng, không phải đã tự đọc từng chữ mọi cặp. Điều kiện: (1) mọi cặp qua skill
+  `interview-qa-review` (rubric v2), mỗi claim chính có câu trích nguyên văn từ nguồn, kiểm lại bằng `verify_quotes.py`;
+  (2) mỗi lô có một cặp mồi cài lỗi, lô để lọt mồi thì bỏ (7/7 mồi bị bắt); (3) mọi vấn đề critical/major đã được sửa
+  trong seed trước khi duyệt (gợi ý mức minor không áp); (4) DE đọc kỹ các cặp "phải đọc", toàn bộ các chỗ đã sửa và một
+  mẫu cặp chuyển sang Đạt theo rubric v2, phần còn lại chấp nhận theo báo cáo. Chỉ áp cho cặp hard tự viết; seed chuyển
+  thể/dịch và dữ liệu crawl giữ quy tắc cũ. Kết quả duyệt: `plans/reports/qa-review/results-*.json` tại commit `eac9b8e`
+  (nhánh `chore/qa-review-skill`). Báo AIE.
 
 ## User Scenarios & Testing *(mandatory)*
 

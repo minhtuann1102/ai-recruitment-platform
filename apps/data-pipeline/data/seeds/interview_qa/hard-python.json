@@ -14,7 +14,8 @@
       "https://docs.celeryq.dev/en/stable/userguide/tasks.html",
       "https://docs.celeryq.dev/en/stable/getting-started/backends-and-brokers/redis.html",
       "https://docs.celeryq.dev/en/stable/userguide/optimizing.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1051",
@@ -31,7 +32,8 @@
       "https://docs.celeryq.dev/en/stable/userguide/optimizing.html",
       "https://docs.celeryq.dev/en/stable/userguide/tasks.html",
       "https://docs.celeryq.dev/en/stable/getting-started/backends-and-brokers/redis.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1052",
@@ -48,7 +50,8 @@
       "https://docs.python.org/3/library/asyncio-dev.html",
       "https://docs.python.org/3/library/asyncio-task.html",
       "https://docs.python.org/3/howto/free-threading-python.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1053",
@@ -65,7 +68,8 @@
       "https://fastapi.tiangolo.com/async/",
       "https://anyio.readthedocs.io/en/stable/threads.html",
       "https://docs.python.org/3/library/asyncio-dev.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1054",
@@ -87,7 +91,8 @@
     "grounding_urls": [
       "https://fastapi.tiangolo.com/advanced/events/",
       "https://fastapi.tiangolo.com/tutorial/dependencies/dependencies-with-yield/"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1055",
@@ -110,7 +115,8 @@
       "https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html",
       "https://docs.sqlalchemy.org/en/20/orm/session_basics.html",
       "https://docs.sqlalchemy.org/en/20/orm/queryguide/relationships.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1056",
@@ -126,7 +132,8 @@
     "grounding_urls": [
       "https://docs.sqlalchemy.org/en/20/orm/queryguide/relationships.html",
       "https://docs.sqlalchemy.org/en/20/core/pooling.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1057",
@@ -150,7 +157,8 @@
       "https://docs.djangoproject.com/en/5.2/topics/db/transactions/",
       "https://docs.djangoproject.com/en/5.2/ref/models/querysets/",
       "https://docs.djangoproject.com/en/5.2/ref/models/expressions/"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1058",
@@ -170,7 +178,8 @@
     "source": "self",
     "license": "CC-BY-4.0",
     "synthetic": true,
-    "grounding_urls": ["https://docs.djangoproject.com/en/5.2/ref/models/querysets/"]
+    "grounding_urls": ["https://docs.djangoproject.com/en/5.2/ref/models/querysets/"],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1059",
@@ -187,7 +196,8 @@
       "https://docs.python.org/3/library/functools.html",
       "https://docs.python.org/3/library/inspect.html",
       "https://fastapi.tiangolo.com/async/"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1060",
@@ -206,7 +216,8 @@
     "source": "self",
     "license": "CC-BY-4.0",
     "synthetic": true,
-    "grounding_urls": ["https://docs.python.org/3/library/contextlib.html"]
+    "grounding_urls": ["https://docs.python.org/3/library/contextlib.html"],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1061",
@@ -229,7 +240,8 @@
       "https://docs.python.org/3/reference/expressions.html",
       "https://docs.python.org/3/library/contextlib.html",
       "https://docs.python.org/3/library/itertools.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1062",
@@ -245,7 +257,8 @@
     "grounding_urls": [
       "https://docs.python.org/3/library/itertools.html",
       "https://docs.python.org/3/reference/expressions.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1063",
@@ -262,7 +275,8 @@
       "https://pydantic.dev/docs/validation/latest/concepts/strict_mode/",
       "https://pydantic.dev/docs/validation/latest/concepts/validators/",
       "https://pydantic.dev/docs/validation/latest/concepts/models/"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1064",
@@ -279,13 +293,14 @@
       "https://typing.python.org/en/latest/spec/protocol.html",
       "https://mypy.readthedocs.io/en/stable/generics.html",
       "https://docs.python.org/3/library/typing.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1065",
     "topic_id": "py.ops.packaging-deployment",
     "question": "Bạn triển khai API FastAPI lên Kubernetes với Dockerfile chạy gunicorn và Uvicorn worker, số worker tính bằng `2 * $(nproc) + 1`. Trên node 32 core, mỗi pod (CPU limit 2, memory limit 1Gi) sinh ra 65 worker và liên tục bị OOMKill; khi deploy thì một số request bị cắt ngang. Phân tích cách chọn số worker, cấu hình gunicorn/uvicorn và health check cho môi trường container.",
-    "answer": "Vì sao ra 65 worker: nproc trong container thường trả số CPU của node chứ không phải CPU limit. Công thức (2 × core) + 1 trong tài liệu gunicorn chỉ là điểm xuất phát rồi phải chỉnh theo tải; tài liệu nhấn mạnh worker không tương ứng với số client, thường 4–12 worker đã chịu được tải lớn, và quá nhiều worker còn làm giảm throughput. Mỗi worker là một process Python với bộ nhớ riêng (app, thư viện, cache), nên 65 process vượt xa 1Gi.\n\nChọn số worker:\n- Tính theo CPU limit chứ không theo nproc của node. Worker async (Uvicorn) đã phục vụ được nhiều request đồng thời trong một process, nên thường chỉ cần khoảng 1–2 worker mỗi core được cấp. Đặt tường minh qua WEB_CONCURRENCY hoặc -w, đo bộ nhớ mỗi worker và kiểm tra tổng nằm trong limit.\n- Hoặc một process mỗi container rồi scale ngang bằng replica/HPA, giúp memory accounting và probe đơn giản hơn.\n\nCấu hình đáng chú ý:\n- Worker class: module uvicorn.workers đã deprecated, chuyển sang package uvicorn-worker; hoặc chạy uvicorn --workers (uvicorn dùng spawn, không pre-fork).\n- timeout (mặc định 30 giây): worker im lặng quá ngưỡng bị kill và khởi động lại.\n- graceful_timeout (mặc định 30 giây) phải nhỏ hơn terminationGracePeriodSeconds của pod để worker xử lý xong request đang chạy khi nhận SIGTERM; kết hợp readiness fail sớm hoặc preStop ngắn để load balancer ngừng gửi traffic trước — đây là nguyên nhân request bị cắt khi deploy.\n- max_requests kèm max_requests_jitter: khởi động lại worker sau một số request để hạn chế hậu quả rò rỉ bộ nhớ, jitter tránh mọi worker restart cùng lúc; không thay cho sửa leak.\n- preload_app: nạp code trước khi fork, nhưng không được mở kết nối DB hay thread trước fork.\n- Sau reverse proxy: bật proxy headers và chỉ tin IP của proxy (forwarded-allow-ips).\n\nHealth check: liveness chỉ kiểm tra process còn phản hồi (không gọi DB, tránh restart dây chuyền); readiness kiểm tra phụ thuộc thiết yếu và trả lỗi khi đang shutdown.",
+    "answer": "Vì sao ra 65 worker: nproc in số processing unit mà process được phép dùng (theo affinity), không nhất thiết phản ánh CPU limit kiểu quota của Kubernetes; trên node 32 core nó có thể trả 32, nên 2 × 32 + 1 = 65. Công thức (2 × core) + 1 trong tài liệu gunicorn chỉ là điểm xuất phát rồi phải chỉnh theo tải; quá nhiều worker còn làm giảm throughput. Mỗi worker là một process Python với bộ nhớ riêng (app, thư viện, cache), nên 65 process vượt xa 1Gi.\n\nChọn số worker:\n- Tính theo CPU limit chứ không theo nproc của node. Worker async (Uvicorn) đã phục vụ được nhiều request đồng thời trong một process, nên thường chỉ cần khoảng 1–2 worker mỗi core được cấp. Đặt tường minh qua WEB_CONCURRENCY hoặc -w, đo bộ nhớ mỗi worker và kiểm tra tổng nằm trong limit.\n- Hoặc một process mỗi container rồi scale ngang bằng replica/HPA, giúp memory accounting và probe đơn giản hơn.\n\nCấu hình đáng chú ý:\n- timeout (mặc định 30 giây): worker im lặng quá ngưỡng bị kill và khởi động lại.\n- graceful_timeout (mặc định 30 giây) phải nhỏ hơn terminationGracePeriodSeconds của pod để worker xử lý xong request đang chạy khi nhận SIGTERM; kết hợp readiness fail sớm hoặc preStop ngắn để load balancer ngừng gửi traffic trước — đây là nguyên nhân request bị cắt khi deploy.\n\nHealth check: liveness chỉ kiểm tra process còn phản hồi (không gọi DB, tránh restart dây chuyền); readiness kiểm tra phụ thuộc thiết yếu và trả lỗi khi đang shutdown.\n\nThêm nếu còn thời gian: module uvicorn.workers đã deprecated, chuyển sang package uvicorn-worker (hoặc chạy uvicorn --workers); max_requests kèm max_requests_jitter khởi động lại worker sau một số request để hạn chế hậu quả rò rỉ bộ nhớ (không thay cho sửa leak); preload_app không được mở kết nối DB hay thread trước fork.",
     "difficulty": "hard",
     "language": "vi",
     "tags": [
@@ -303,7 +318,8 @@
       "https://gunicorn.org/design/",
       "https://gunicorn.org/reference/settings/",
       "https://uvicorn.dev/deployment/"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1066",
@@ -326,7 +342,8 @@
       "https://pip.pypa.io/en/stable/topics/repeatable-installs/",
       "https://pip.pypa.io/en/stable/topics/secure-installs/",
       "https://docs.docker.com/build/building/multi-stage/"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1067",
@@ -342,20 +359,22 @@
     "grounding_urls": [
       "https://docs.pytest.org/en/stable/how-to/fixtures.html",
       "https://pytest-xdist.readthedocs.io/en/stable/how-to.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1068",
     "topic_id": "py.test.pytest-fixtures",
-    "question": "Một test dùng `@patch('app.payments.stripe_client.charge')` nhưng vẫn gọi API thật; test khác mock `send_email` và pass, trong khi production lỗi vì hàm thật đã đổi chữ ký; còn mock cho hàm async thì `await` báo lỗi. Giải thích nguyên tắc patch đúng chỗ, autospec, mock hàm async, và khi nào nên tránh mock.",
-    "answer": "1. Patch nơi tên được tra cứu, không phải nơi định nghĩa: patch thay object mà một tên trỏ tới. Nếu module service viết from app.payments.stripe_client import charge thì service đã giữ reference riêng tới hàm thật, nên patch app.payments.stripe_client.charge không có tác dụng; phải patch app.service.charge. Ngược lại, nếu service import module rồi gọi stripe_client.charge(...) thì patch trên module stripe_client mới đúng. monkeypatch.setattr của pytest theo cùng nguyên tắc.\n\n2. Mock thường chấp nhận mọi thứ: Mock/MagicMock tạo attribute khi được truy cập và nhận mọi đối số, nên test vẫn pass khi chữ ký hàm thật đã đổi hoặc gõ sai tên method — test xanh nhưng vô nghĩa. Dùng autospec=True hoặc create_autospec: mock mang đúng chữ ký của object thật, gọi sai đối số ném TypeError, truy cập attribute không tồn tại báo lỗi. Nên đặt autospec làm mặc định khi patch hàm hay class của chính codebase.\n\n3. Mock async: khi không truyền new, patch tự dùng AsyncMock nếu đối tượng bị patch là async function; kết quả gọi là awaitable và có các assert_awaited_*. Lỗi hay gặp là tự gán MagicMock cho hàm async nên giá trị trả về không await được.\n\n4. Khi nào tránh mock:\n- Thứ bạn sở hữu và rẻ để chạy thật (hàm thuần, repository với DB test): mock khiến test chỉ kiểm tra cách gọi, không kiểm tra hành vi.\n- Mock ở ranh giới hệ thống (HTTP ra ngoài, cổng thanh toán, thời gian, random). Tốt hơn nữa là bọc client bên thứ ba sau interface của mình rồi fake interface đó, hoặc dùng thư viện chặn HTTP để kiểm tra request thật được gửi đi.\n- Ưu tiên assert kết quả và hành vi hơn assert_called_with từng tham số, để refactor không làm vỡ test vô ích.\n\n5. Gắn với pytest: tạo patch qua fixture (monkeypatch hoặc mocker) để tự hoàn tác sau mỗi test, tránh patch thủ công rò sang test khác. Bổ sung contract test hoặc integration test với sandbox của đối tác để bắt thay đổi API mà mock không thể phát hiện.",
+    "question": "Một test dùng `@patch('app.payments.stripe_client.charge')` nhưng vẫn gọi API thật; test khác mock `send_email` và pass, trong khi production lỗi vì hàm thật đã đổi chữ ký. Giải thích nguyên nhân của từng lỗi và cách sửa.",
+    "answer": "1. Patch nơi tên được tra cứu, không phải nơi định nghĩa: patch thay object mà một tên trỏ tới. Nếu module service viết from app.payments.stripe_client import charge thì service đã giữ reference riêng tới hàm thật, nên patch app.payments.stripe_client.charge không có tác dụng; phải patch app.service.charge. Ngược lại, nếu service import module rồi gọi stripe_client.charge(...) thì patch trên module stripe_client mới đúng. monkeypatch.setattr của pytest theo cùng nguyên tắc.\n\n2. Mock thường chấp nhận mọi thứ: Mock/MagicMock tạo attribute khi được truy cập và nhận mọi đối số, nên test vẫn pass khi chữ ký hàm thật đã đổi hoặc gõ sai tên method — test xanh nhưng vô nghĩa. Dùng autospec=True hoặc create_autospec: mock mang đúng chữ ký của object thật, gọi sai đối số ném TypeError, truy cập attribute không tồn tại báo lỗi. Nên đặt autospec làm mặc định khi patch hàm hay class của chính codebase.\n\nFollow-up liên quan:\n- Mock hàm async: khi không truyền new, patch tự dùng AsyncMock nếu đối tượng bị patch là async function; tự gán MagicMock cho hàm async thì giá trị trả về không await được.\n- Thực hành (khuyến nghị, không phải quy định): mock ở ranh giới hệ thống (HTTP ra ngoài, cổng thanh toán, thời gian), tránh mock thứ mình sở hữu và rẻ để chạy thật; tạo patch qua fixture (monkeypatch hoặc mocker) để tự hoàn tác sau mỗi test; bổ sung contract test hoặc integration test với sandbox của đối tác để bắt thay đổi API mà mock không phát hiện.",
     "difficulty": "hard",
     "language": "vi",
     "tags": ["pytest", "mock", "monkeypatch", "autospec", "asyncmock"],
     "source": "self",
     "license": "CC-BY-4.0",
     "synthetic": true,
-    "grounding_urls": ["https://docs.python.org/3/library/unittest.mock.html"]
+    "grounding_urls": ["https://docs.python.org/3/library/unittest.mock.html"],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1069",
@@ -377,7 +396,8 @@
     "grounding_urls": [
       "https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html",
       "https://docs.python.org/3/library/hmac.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1070",
@@ -393,7 +413,8 @@
     "grounding_urls": [
       "https://www.django-rest-framework.org/api-guide/permissions/",
       "https://api-security.owasp.org/editions/2023/en/0xa1-broken-object-level-authorization"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   },
   {
     "qa_id": "de-qa-1071",
@@ -412,6 +433,7 @@
       "https://docs.python.org/3/library/multiprocessing.shared_memory.html",
       "https://peps.python.org/pep-0703/",
       "https://docs.python.org/3/howto/free-threading-python.html"
-    ]
+    ],
+    "reviewed_by": "minhtuann1102"
   }
 ]
