@@ -7,6 +7,7 @@ import sys
 from typing import Callable, Dict, List, Optional
 
 from .collect_command import run_collect
+from .crawl_command import run_crawl
 from .db_commands import run_index, run_search
 from .enrich_command import run_enrich
 from .offline_commands import run_process, run_validate
@@ -37,6 +38,7 @@ HANDLERS: Dict[str, Handler] = {
     "approve-seed": run_approve_seed,
     "index": run_index,
     "search": run_search,
+    "crawl": run_crawl,
 }
 
 
