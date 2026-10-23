@@ -83,10 +83,11 @@ knowledge_chunks và verify retrieval relevant."
   mảng (Java, Node, Python, DevOps, AI, Frontend)? → A (DE chốt): `reviewed_by = minhtuann1102` nghĩa là DE chấp nhận
   cặp sau một vòng duyệt có bằng chứng, không phải đã tự đọc từng chữ mọi cặp. Điều kiện: (1) mọi cặp qua skill
   `interview-qa-review` (rubric v2), mỗi claim chính có câu trích nguyên văn từ nguồn, kiểm lại bằng `verify_quotes.py`;
-  (2) mỗi lô có một cặp mồi cài lỗi, lô để lọt mồi thì bỏ (7/7 mồi bị bắt); (3) mọi đề xuất sửa đã áp vào seed trước
-  khi duyệt; (4) DE đọc kỹ các cặp "phải đọc", toàn bộ diff các cặp đã sửa và một mẫu cặp chuyển sang Đạt theo rubric
-  v2, phần còn lại chấp nhận theo báo cáo. Chỉ áp cho cặp hard tự viết; seed chuyển thể/dịch và dữ liệu crawl giữ quy
-  tắc cũ. Kết quả duyệt ở nhánh `chore/qa-review-skill` (`plans/reports/qa-review/`). Báo AIE.
+  (2) mỗi lô có một cặp mồi cài lỗi, lô để lọt mồi thì bỏ (7/7 mồi bị bắt); (3) mọi vấn đề critical/major đã được sửa
+  trong seed trước khi duyệt (gợi ý mức minor không áp); (4) DE đọc kỹ các cặp "phải đọc", toàn bộ các chỗ đã sửa và một
+  mẫu cặp chuyển sang Đạt theo rubric v2, phần còn lại chấp nhận theo báo cáo. Chỉ áp cho cặp hard tự viết; seed chuyển
+  thể/dịch và dữ liệu crawl giữ quy tắc cũ. Kết quả duyệt: `plans/reports/qa-review/results-*.json` tại commit `eac9b8e`
+  (nhánh `chore/qa-review-skill`). Báo AIE.
 
 ## User Scenarios & Testing *(mandatory)*
 
