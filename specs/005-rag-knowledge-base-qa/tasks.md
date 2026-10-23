@@ -158,11 +158,19 @@ không commit vì repo public — spec Clarifications)
 
 **Independent Test**: quickstart §7
 
-- [ ] T042 [US5] `crawlers/polite_fetcher.py`: `urllib.robotparser` đọc `robots.txt` một lần, log "robots checked" + bỏ URL bị cấm kèm log (US5-2); nghỉ ≥ `--delay` giây giữa request (mặc định 1); dừng ở `--max-pages`; user-agent `ai-recruit-data-pipeline/0.1 (+repo URL)`; tải bằng `httpx`, chế độ `--render` dùng `playwright` Chromium import lười (US5-4)
-- [ ] T043 [US5] `crawlers/react_docs_crawler.py`: bắt đầu `https://react.dev/learn`, `https://react.dev/reference/react`, theo link cùng domain dưới hai tiền tố đó; tách nội dung chính theo h1/h2/h3 → `sections[{heading_path, text}]`; `scrub_pii` mọi text (FR-023); ghi `data/raw/react_docs/<UTC timestamp>.jsonl` với `url, title, sections, crawled_at, license="CC-BY-4.0"`; 0 record → thoát 1 (FR-025)
-- [ ] T044 [US5] Nối lệnh `crawl react-docs [--max-pages N] [--delay S] [--render]` trong `pipeline/__main__.py`
-- [ ] T045 [P] [US5] `tests/test_polite_fetcher.py` (robots cấm `/private` với fixture → bỏ qua; đồng hồ giả kiểm khoảng nghỉ ≥ delay; không vượt max pages) và `tests/test_react_docs_parse.py` (HTML fixture → sections đúng heading path; email/số điện thoại bị scrub)
-- [ ] T046 [US5] Chạy quickstart §7 (≥ 50 record, SC-008); ghi log robots + thời gian vào PR; chuyển thể một phần record thành cặp Frontend cho T023
+- [X] T042 [US5] `crawlers/polite_fetcher.py`: `urllib.robotparser` đọc `robots.txt` một lần, log "robots checked" + bỏ URL bị cấm kèm log (US5-2); nghỉ ≥ `--delay` giây giữa request (mặc định 1); dừng ở `--max-pages`; user-agent `ai-recruit-data-pipeline/0.1 (+repo URL)`; tải bằng `httpx`, chế độ `--render` dùng `playwright` Chromium import lười (US5-4)
+- [X] T043 [US5] `crawlers/react_docs_crawler.py`: bắt đầu `https://react.dev/learn`, `https://react.dev/reference/react`, theo link cùng domain dưới hai tiền tố đó; tách nội dung chính theo h1/h2/h3 → `sections[{heading_path, text}]`; `scrub_pii` mọi text (FR-023); ghi `data/raw/react_docs/<UTC timestamp>.jsonl` với `url, title, sections, crawled_at, license="CC-BY-4.0"`; 0 record → thoát 1 (FR-025)
+- [X] T044 [US5] Nối lệnh `crawl react-docs [--max-pages N] [--delay S] [--render]` trong `pipeline/__main__.py`
+- [X] T045 [P] [US5] `tests/test_polite_fetcher.py` (robots cấm `/private` với fixture → bỏ qua; đồng hồ giả kiểm khoảng nghỉ ≥ delay; không vượt max pages) và `tests/test_react_docs_parse.py` (HTML fixture → sections đúng heading path; email/số điện thoại bị scrub)
+- [X] T046 [US5] Chạy quickstart §7 (≥ 50 record, SC-008); ghi log robots + thời gian vào PR; chuyển thể một phần record thành cặp Frontend cho T023
+  - Chạy 2026-10-23 03:47–03:48 UTC: `python -m pipeline crawl react-docs --max-pages 60 --delay 1` → thoát 0,
+    **60 record / 60 trang** (793 section, mỗi trang ≥ 5), 59.6 s (delay 1 s × 59 khoảng nghỉ), file
+    `data/raw/react_docs/20261023T034820Z.jsonl` (gitignore, không commit)
+  - Log robots: `robots checked: https://react.dev/robots.txt [200] doc luat` (`User-agent: *` / `Disallow:` rỗng),
+    robots bỏ qua 0, lỗi tải 0; grep email quickstart §7 = 0, `find_pii` trên mọi section = 0
+  - `--render` thử 3 trang với Chromium thật → 3 record; cần `playwright install chromium` khớp bản playwright đã pin
+  - Phần "chuyển thể cho T023": không làm vì T023 đã BỎ (thay bằng T050–T054)
+  - Kèm sửa `pipeline/pii_patterns.py`: số điện thoại đứng cuối câu (`0912 345 678.`) trước đây không bị phát hiện
 
 ---
 

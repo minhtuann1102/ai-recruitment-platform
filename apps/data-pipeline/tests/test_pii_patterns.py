@@ -11,6 +11,8 @@ from pipeline.pii_patterns import find_pii, scrub_pii
         "SĐT: +84 912.345.678",
         "Hotline 0283-822-1234",
         "Call +1 (415) 555-0100",
+        "Gọi 0912 345 678.",
+        "Hotline +1 (415) 555-0100.",
     ],
 )
 def test_detects_personal_contacts(text):
