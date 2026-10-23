@@ -26,14 +26,15 @@ Hợp đồng chung DE (ghi) ↔ AIE (đọc). Schema bảng: [rag-design.md §3
 | `chunk_type` | `question` \| `qa_pair` |
 | `dataset` | `de_interview_qa` |
 | `tags` | mảng string (có thể rỗng) |
-| `source_url` | URL nguồn hoặc `null` khi synthetic |
+| `source_url` | URL nguồn hoặc `null` khi `source = "self"` |
 | `license` | giá trị `license` của cặp |
 | `synthetic` | bool |
 
 ## Ngữ nghĩa ghi (chỉ pipeline DE)
 
 - Bản ghi mới: `INSERT ... ON CONFLICT (content_hash) DO NOTHING`.
-- Hash đã có cùng `dataset`: cập nhật `category`, `difficulty`, `topic_id`, `language`, `metadata`; giữ `embedding`.
+- Hash đã có cùng `dataset`: cập nhật `content`, `category`, `difficulty`, `topic_id`, `language`, `metadata`; giữ
+  `embedding`. Cập nhật cả `content` vì hash bỏ qua hoa/thường: sửa chỉ chữ hoa/thường giữ nguyên hash.
 - Hash đã có khác `dataset`: không đụng, đếm "skipped".
 - Dọn: xóa bản ghi `source_type = 'interview_qa'` cùng `dataset` có hash không thuộc lần chạy; chỉ khi lần chạy 0 lỗi
   embedding. Không bao giờ xóa bản ghi khác `dataset`.

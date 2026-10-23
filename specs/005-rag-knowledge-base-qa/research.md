@@ -56,8 +56,8 @@ Mỗi mục: Decision / Rationale / Alternatives. **VERIFY** = kiểm chứng l�
   3. Hash mới → **chỉ khi có hash mới**: embed thử 1 chuỗi kiểm provider + số chiều (lỗi → thoát 2, chưa ghi gì) →
      embed theo batch (100) → `INSERT ... ON CONFLICT (content_hash) DO NOTHING`, commit theo batch. Chạy lại không có
      hash mới → 0 lời gọi embed (SC-004).
-  4. Hash đã có, **cùng `dataset`** → `UPDATE` các cột phân loại + `metadata` (đổi `topic_id`/độ khó/tags mà nội dung
-     không đổi), không embed lại.
+  4. Hash đã có, **cùng `dataset`** → `UPDATE` `content` + các cột phân loại + `metadata` (đổi `topic_id`/độ khó/tags,
+     hoặc chỉ đổi hoa/thường — hash không đổi vì đã `lower`), không embed lại.
   5. Hash đã có, **khác `dataset`** (vd seed mock của AIE) → bỏ qua, đếm vào "skipped (dataset khác)".
   6. Dọn: `DELETE FROM knowledge_chunks WHERE source_type = 'interview_qa' AND metadata->>'dataset' = :dataset AND
      content_hash <> ALL(:hashes_of_this_run)`. **Chỉ chạy khi lần này 0 embedding lỗi**; có lỗi thì báo

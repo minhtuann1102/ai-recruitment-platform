@@ -18,8 +18,20 @@ cp .env.example .env                                   # §4–6: điền LLM_AP
 python -m pipeline validate --strict
 ```
 
-Kỳ vọng: thoát 0; báo cáo ≥ 200 cặp, mọi topic ≥ 2 cặp, mỗi độ khó ≥ 20%, công khai ≥ 50%, 0 trùng, 0 PII.
+Kỳ vọng: thoát 0; báo cáo ≥ 200 cặp (seed curated + dữ liệu crawl đã `enrich`), mọi topic ≥ 2 cặp, mỗi độ khó ≥ 20%,
+0 trùng, 0 PII.
 Kiểm luật lỗi: `pytest tests -k validator` (fixture thiếu trường, `topic_id` lạ, giấy phép NC, câu trùng, topic thiếu).
+
+## 1b. Thu thập + dịch (US1, quyết định 2026-10-19)
+
+```bash
+GITHUB_TOKEN=$(gh auth token) python -m pipeline collect          # ~4.800 cặp -> data/raw/collected_qa/
+python -m pipeline enrich --per-source 3 \
+  --extra-catalog ../../specs/005-rag-knowledge-base-qa/contracts/topic-catalog-proposal   # thử; bỏ --per-source để chạy hết (cần key)
+```
+
+Kỳ vọng: `collect` thoát 0; `enrich` in số cặp dịch được / bị loại theo lý do + chi phí ước tính. Nội dung chỉ nằm ở
+`data/raw/` (gitignore) — `git status` không thấy file dữ liệu.
 
 ## 2. Xử lý offline (US2, FR-009) — không DB, không key
 

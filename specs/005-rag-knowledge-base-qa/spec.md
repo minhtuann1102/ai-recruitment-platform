@@ -57,6 +57,26 @@ knowledge_chunks và verify retrieval relevant."
 - Q: Hoàn tất 001 PR-2 trước? → A: Có. Thứ tự: commit spec 005 + PR review → 001 PR-2 (T016–T026, mở khóa `ai_db` cho
   cả team và US3 của 005) → `/speckit-plan` 005. Soạn nội dung Q&A (US1) chạy song song.
 
+### Session 2026-10-19
+
+- Q: Nguồn Q&A — có cần giấy phép? → A (DE quyết định): **Không.** Thu thập (crawl) mọi nguồn Q&A phỏng vấn tìm được,
+  kể cả không rõ giấy phép hoặc ND/NC; dịch nội dung không phải tiếng Việt sang tiếng Việt (giữ thuật ngữ Anh). Bỏ
+  ngưỡng ≥ 50% nguồn có giấy phép (FR-003, SC-002 cũ). Vẫn giữ: robots.txt, rate limit, xóa PII (constitution V),
+  ghi `source` URL + `attribution` cho mỗi cặp.
+- Q: Repo public — có commit nội dung crawl? → A: **Không.** Commit trong repo = phân phối lại công khai. Chỉ commit
+  code thu thập + danh sách nguồn; nội dung nằm ở `data/raw/` (gitignore) và `ai_db`; tái lập bằng lệnh `collect`.
+  Seed curated (`data/seeds/`) chỉ chứa cặp tự soạn hoặc có giấy phép cho phép phân phối lại.
+- Q: Review thế nào khi có hàng nghìn cặp dịch máy? → A: Review theo mẫu (vd ~10 cặp ngẫu nhiên mỗi nguồn, đối chiếu
+  bản gốc), ghi kết quả; `reviewed_by` từng cặp chỉ bắt buộc với seed curated. Công cụ: lệnh `review-sample` (bảng
+  đọc không commit + CSV `cid, verdict, reviewer` commit được).
+- Q: Dữ liệu crawl gần như không có câu hard (~1–2%) — giữ "mỗi độ khó ≥ 20%"? → A (DE chốt): **Không.** SC-001 đổi
+  thành mỗi topic có level `middle` hoặc `senior` có ≥ 2 cặp `hard` (phiên senior cần câu hard theo từng topic, không
+  cần 20% toàn kho). Câu hard thiếu được sinh bằng Claude trong phiên làm việc, bám tài liệu thật (nguồn crawl nâng
+  cao, tài liệu chính thức; ghi `grounding_urls`), viết bằng tiếng Việt → vào seed curated (`source = self`,
+  `synthetic = true`, commit), DE duyệt từng cặp (`reviewed_by`). Báo AIE vì Interviewer lọc theo độ khó.
+- Q: Tách dữ liệu crawl khỏi seed curated? → A: Có. `dataset = de_crawled_qa`, định danh `cr-<nguồn>-<8 hex>` sinh
+  từ URL + câu hỏi gốc (nguồn upstream là sự thật, khác `de-qa-NNNN`); dọn bản cũ (FR-013) theo từng dataset.
+
 ## User Scenarios & Testing *(mandatory)*
 
 Người dùng trực tiếp của feature là **các agent AI** (Interviewer cần câu hỏi mẫu gần chủ đề, Evaluator cần đáp án
@@ -73,7 +93,7 @@ danh ổn định, độ khó, ngôn ngữ, nguồn gốc và giấy phép. Bộ
 ngay, không chờ hạ tầng.
 
 **Independent Test**: Chạy bước kiểm tra dữ liệu trên file seed → báo cáo số cặp theo topic/nhóm/độ khó/nguồn, 0 lỗi
-schema, 0 `topic_id` lạ, 0 cặp trùng, 0 thông tin cá nhân, 100% cặp có nguồn + giấy phép hợp lệ.
+schema, 0 `topic_id` lạ, 0 cặp trùng, 0 thông tin cá nhân, 100% cặp có nguồn.
 
 **Acceptance Scenarios**:
 
@@ -218,10 +238,10 @@ tra, khoảng cách giữa các request ≥ mức cấu hình, không có email/
 - **FR-002**: `topic_id` MUST là id của một **topic** (không phải scenario) trong topic catalog của ai-service tại thời
   điểm chạy; nhóm kiến thức MUST lấy từ `category` của topic đó, không nhập tay. Danh mục MUST đọc từ catalog, không
   chép cứng. Phạm vi topic theo catalog sau khi áp dụng đề xuất mở rộng (Clarifications Q1).
-- **FR-003**: ≥ 50% cặp MUST đến từ nguồn công khai có giấy phép cho phép sửa đổi và phân phối lại (vd CC0, MIT,
-  Apache-2.0, CC BY, CC BY-SA), kèm ghi công tác giả; phần còn lại tự soạn, `synthetic = true`, có người review đáp án.
-  MUST NOT dùng nội dung có giấy phép ND/NC hoặc không rõ giấy phép. 50 cặp seed của AIE chỉ được nhập sau khi DE review
-  và gán `qa_id` + `topic_id`.
+- **FR-003** *(sửa 2026-10-19)*: Mỗi cặp MUST ghi `source` (URL hoặc `self`) và `attribution` khi lấy từ ngoài; giấy
+  phép ghi nếu biết (`unknown` nếu không). Không còn ngưỡng nguồn có giấy phép. Nội dung không có giấy phép phân phối
+  lại MUST NOT commit (repo public) — chỉ ở `data/raw/` và `ai_db`. Seed curated: cặp tự soạn có người review. 50 cặp
+  seed của AIE chỉ được nhập sau khi DE review và gán `qa_id` + `topic_id`.
 - **FR-004**: Đáp án mẫu MUST viết bằng tiếng Việt, giữ nguyên thuật ngữ tiếng Anh (quyết định nhóm, rag-design §9);
   cặp tiếng Anh được phép nhưng MUST gắn `language = en`.
 - **FR-005**: MUST có bước kiểm tra dữ liệu: schema, `topic_id` thuộc catalog, giấy phép thuộc danh sách cho phép, trùng
@@ -294,9 +314,9 @@ tra, khoảng cách giữa các request ≥ mức cấu hình, không có email/
 ### Measurable Outcomes
 
 - **SC-001**: Bộ dữ liệu có ≥ 200 cặp hợp lệ; 100% có `topic_id` thuộc catalog; mỗi topic trong catalog lúc nghiệm thu
-  có ≥ 2 cặp; mỗi mức độ khó chiếm ≥ 20%.
-- **SC-002**: ≥ 50% cặp từ nguồn công khai; 100% cặp có nguồn + giấy phép thuộc danh sách cho phép; 0 cặp chứa thông
-  tin cá nhân; 0 cặp trùng tuyệt đối.
+  có ≥ 2 cặp; mỗi topic có level `middle`/`senior` có ≥ 2 cặp `hard` *(sửa 2026-10-19, thay "mỗi mức độ khó ≥ 20%")*.
+- **SC-002** *(sửa 2026-10-19)*: 100% cặp có `source`; 0 cặp chứa thông tin cá nhân; 0 cặp trùng tuyệt đối; 0 nội
+  dung crawl trong git; review mẫu được ghi lại cho mỗi nguồn.
 - **SC-003**: Kho tri thức có ≥ 400 bản ghi `interview_qa` sau một lần chạy; ≥ 99% có vector; tỉ lệ dedup < 5%.
 - **SC-004**: Chạy lại cùng input: 0 bản ghi mới, 0 lời gọi embed.
 - **SC-005**: Golden set ≥ 20 truy vấn, 100% nhãn được AIE duyệt; recall@5 tổng và theo nhóm (a)–(e) được báo; mục
