@@ -8,9 +8,10 @@ from typing import List, Tuple
 
 _EMAIL_RE = re.compile(r"(?<![\w.+-])([A-Za-z0-9._%+-]+)@([A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,})\b")
 # VN: +84 / 0084 / 0 roi 9-10 chu so, cho phep dau cach / cham / gach giua cac so
-_VN_PHONE_RE = re.compile(r"(?<![\w.+])(?:\+84|0084|0)(?:[ .-]?\d){9,10}(?![\w.])")
+_VN_PHONE_RE = re.compile(r"(?<![\w.+])(?:\+84|0084|0)(?:[ .-]?\d){9,10}(?!\w|\.\d)")
+# Dau cham ket cau sau so van tinh ("goi 0912 345 678."); chi chan khi cham noi tiep chu so (version)
 # Quoc te: bat buoc dau +, 8-15 chu so (co the co ngoac vung)
-_INTL_PHONE_RE = re.compile(r"(?<![\w.])\+\d{1,3}(?:[ .-]?\(?\d+\)?){2,5}(?![\w.])")
+_INTL_PHONE_RE = re.compile(r"(?<![\w.])\+\d{1,3}(?:[ .-]?\(?\d+\)?){2,5}(?!\w|\.\d)")
 _EXAMPLE_DOMAINS = ("example.com", "example.org", "example.net")
 _EXAMPLE_TLDS = (".test", ".example", ".invalid", ".localhost")
 
