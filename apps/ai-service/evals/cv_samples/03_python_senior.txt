@@ -1,0 +1,12 @@
+Phạm Quốc Anh
+Senior Python Engineer
+quocanh@example.com | +84 900 000 003
+Kinh nghiệm
+Tech Lead tại công ty sản phẩm SaaS (05/2021 - nay)
+Dẫn dắt nhóm 6 người, kiến trúc microservices FastAPI, PostgreSQL, Celery, Kubernetes.
+Python Developer tại công ty outsource (06/2017 - 04/2021)
+Xây dựng hệ thống báo cáo bằng Django, Redis, RabbitMQ.
+Dự án: Billing platform
+Tính cước cho 2 triệu thuê bao, chuyển từ batch sang event-driven.
+- Giảm chi phí hạ tầng 35%
+Học vấn: Thạc sĩ Hệ thống thông tin 2017

@@ -272,7 +272,7 @@ erDiagram
         varchar embedding_model "text-embedding-3-small"
         varchar source_type "interview_qa | textbook"
         varchar topic_id "id trong topic catalog, nullable"
-        varchar category "Backend, Database, System Design, DevOps, AI"
+        varchar category "Backend, Frontend, Database, System Design, DevOps, AI"
         varchar difficulty "easy | medium | hard, nullable"
         varchar language "vi | en"
         jsonb metadata "qa_id, chunk_type, tags, source_url..."

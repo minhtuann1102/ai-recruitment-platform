@@ -161,6 +161,8 @@ ghi trong comment là ràng buộc `max_length` / `max_items` thật.
 Không có field tên, email, SĐT, tên công ty (chỉ `company_type`). LLM trả mọi field trừ
 `total_years_experience` và `flags` (code điền).
 
+**Đã cài (2026-10-22):** `app/agents/cv_parser.py`. LLM cũng không trả `projects[].id` (code gán `p1`…`p6`). Dòng CV nghi injection bị bỏ **trước** khi gửi LLM; chuỗi output có dấu hiệu injection bị bỏ và bật `flags.injection_suspected`; `start`/`end` sai dạng `YYYY-MM` thành `null`; số năm kinh nghiệm tính lại bằng code từ `experiences`. Kiểm bằng `python -m evals.run_cv_samples` (10 CV tổng hợp, 3 CV injection, PII giả): thoát 1 nếu lộ liên hệ, lộ tên hoặc lọt chỉ dẫn.
+
 ### 3.3.2 Planner
 
 **Input**
@@ -248,6 +250,8 @@ trong catalog đã đưa; `cv_ref` tồn tại trong `cv_profile`; không trùng
 `[min, max]`; mỗi topic có `backup_question`. Không có CV hoặc `track_relevance = "low"` thì topic intro dùng
 `source = "generic"`.
 
+**Đã cài (2026-10-22):** `app/agents/planner.py` + `app/plan_validator.py` + `app/plan_template.py`. Khác thiết kế: LLM không trả `id` và `time_budget_min` (code gán theo khung); validator thêm hai luật (nội dung nghi injection; có yêu cầu `must` của JD ánh xạ được thì ≥ 1 topic technical theo JD); toàn bộ Planner (retry, repair) có hạn 22 s, quá hạn thì dùng plan dự phòng của `mock_planner`. Đầu vào thêm `jd_priority` và khối `jd_requirements`.
+
 **RAG ở bước plan:** sau khi plan hợp lệ, orchestrator lấy tối đa 3 chunk `interview_qa` / `textbook` cho
 mỗi topic (query = `title + key_points`), lưu `reference_snippets` (≤ 600 token / topic) vào plan. Evaluator
 dùng lại ở các lượt sau, **không phải gọi RAG mỗi lượt** (§9.2).
@@ -300,6 +304,8 @@ dùng lại ở các lượt sau, **không phải gọi RAG mỗi lượt** (§9
 }
 ```
 
+**Đã cài (2026-10-22):** output LLM thực tế gộp ý và bằng chứng thành `covered: [{point, quote}]` để code xóa đúng ý có quote không khớp, rồi code dựng lại `covered_points` và `evidence` như trên (`app/agents/evaluator.py`, schema `EvaluatorOutput`). Prompt `app/prompts/evaluator.v1.md` có thêm **5 mẫu neo** (yếu, đạt chuẩn, vượt chuẩn, nhồi thuật ngữ, cùng câu nhưng level senior) theo gợi ý ở báo cáo nghiên cứu 22/10; band của mẫu neo là đề xuất của AIE, cần hiệu chỉnh bằng golden set. **Prompt v2 (2026-10-22, giảm độ trễ):** LLM không còn viết `strength_tags`, `gap_tags` (code sinh slug từ ý đã kiểm chứng và `missing_points`), quote 3–12 từ, `covered ≤ 3`, `missing ≤ 2`, `max_tokens` 300. v1 vẫn giữ để so trên golden set, nhưng chạy v1 với schema hiện tại không còn trường tag (so độ trễ v1/v2 phải ghi rõ điều này). Hậu kiểm siết thêm so với thiết kế: quote phải có ≥ 3 từ và có từ nội dung chung với ý nó chứng minh; quote < 5 từ phải có đủ mọi từ trong câu trả lời (chặn "read committed" khớp nhầm "read uncommitted"); chỉ xét tối đa 4 ý; `off_topic` thì `relevance = 0`; `dont_know` chỉ khi câu trả lời **chỉ** gồm cụm "không biết" và từ đệm; thiếu khóa API thì lượt chạy heuristic và đánh dấu `degraded` thay vì lỗi 500.
+
 Code hậu kiểm (§4.6, §11): mọi `quote` phải xuất hiện trong `answer` (so khớp sau chuẩn hóa, fuzzy ≥ 0.9);
 `answer_type = dont_know` thì mọi band = 0; band `completeness` bị chặn trên theo tỉ lệ key point có bằng
 chứng (§6.3). Band lưu DB được quy đổi `× 2.5` sang thang 0–10 của `interview_turns.scores`.
@@ -326,6 +332,8 @@ chứng (§6.3). Band lưu DB được quy đổi `× 2.5` sang thang 0–10 c�
 **Output:** text thuần, stream. Hình dạng mong muốn: tối đa 1 câu dẫn trung tính + **đúng 1 câu hỏi**,
 ≤ 80 từ. Ví dụ: *"Mình muốn đào sâu chỗ này một chút. Spring áp dụng @Transactional qua proxy — vậy khi A gọi
 B trong cùng một class, lời gọi đó có đi qua proxy không, và điều đó ảnh hưởng gì tới REQUIRES_NEW?"*
+
+**Đã cài (2026-10-22):** `app/agents/interviewer.py` (`QuestionSpec`, LLM stream qua `LlmGateway.stream`) và `app/question_stream.py` (fallback, `replace`, kiểm câu). Đầu vào thêm `opening_hint`, `first_turn`; `asked_questions_on_topic` lấy từ `topic_turns` interview-service gửi. Câu dự phòng là `backup_question` (ask_main) hoặc mẫu cố định của `mock_interviewer`.
 
 ### 3.3.5 Reporter
 

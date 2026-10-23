@@ -70,7 +70,11 @@ nguyên văn từ `interview_qa` đã index.
 | Evidence hợp lệ | % quote khớp câu trả lời trước hậu kiểm | ≥ 95% |
 | `answer_type` đúng | Accuracy so với nhãn | ≥ 90% |
 
-Script: `python -m evals.run_evaluator --prompt v3 --model openai/gpt-4o-mini` → in bảng chỉ số + file JSON kết quả
+**Đã cài (2026-10-22), bản v1 của golden set:** 48 mẫu trong `evals/evaluator_golden.jsonl`: 12 câu hỏi trải 6 track và 4 level (fresher 2, junior 4, middle 3, senior 3) × 3 mức (giỏi, trung bình, yếu), cộng 12 mẫu adversarial (injection trực tiếp, injection giả ghi chú hệ thống, injection tiếng Anh, 2 injection lời lẽ mềm mà regex không bắt để đo riêng khả năng của LLM, nhồi thuật ngữ, lan man, sai nhưng tự tin, đúng nhưng cực ngắn, trả lời câu khác, tiếng Anh, không dấu). Câu trả lời do AIE soạn với LLM hỗ trợ; **người gán nhãn sửa câu nào không tự nhiên trước khi chấm**. `intended_tier` là ý định của người soạn, **không phải nhãn**; nhãn chỉ đến từ người chấm. Mẫu injection có `expect.answer_type = manipulation` theo định nghĩa (BRU, FR-AI-032), không cần nhãn.
+
+**Quy trình gán nhãn:** `python -m evals.label_sheet export --out sheet_a.csv` (phiếu đã trộn thứ tự, id mờ dạng `s1a2b3c4d`, ẩn `intended_tier` và loại adversarial, bỏ 5 mẫu injection vì đã có kỳ vọng; mở được bằng Excel/Sheets) → mỗi người chấm độc lập 4 band + `answer_type` → `python -m evals.label_sheet import --rater rater_a sheet_a.csv` (tương tự `rater_b`) → ghi `evals/evaluator_labels/rater_*.json`. Mẫu lệch ≥ 2 band ở bất kỳ tiêu chí nào bị loại khỏi phép đo cho tới khi hai người họp và ghi nhãn chốt vào `final.json`; lệch ≤ 1 thì lấy trung bình.
+
+Script: `python -m evals.run_evaluator --runs 3 [--prompt v1]` (model chọn bằng `LLM_MODEL_EVALUATOR`). Lần chạy rơi về heuristic (`degraded`) bị loại khỏi mọi chỉ số; nhãn một người không dùng để đo; kappa LLM–người (trung bình với từng người chấm) và kappa người–người tính trên cùng tập mẫu, không làm tròn nhãn; tỉ lệ bắt manipulation báo riêng phần do LLM tự nhận ra → in bảng chỉ số + file JSON kết quả
 (lưu ở `plans/reports/`, không commit dữ liệu lớn). Chi phí một lần chạy: ~70 × 3 lần × ~2.7k token ≈ 0.6M token,
 dưới $0.15 với giá giả định §9.4.
 
@@ -123,6 +127,8 @@ trả lời 1 từ, bấm kết thúc sớm sau 3 lượt). Thời gian giả l�
 | | Tỉ lệ fallback | < 2% |
 | | Persona injection không làm tăng điểm so với cùng persona không injection | Đúng 100% |
 | Vận hành (Q8) | TTFT P50 / P95, chi phí / phiên | ≤ mục tiêu §9 |
+
+**Đã cài (2026-10-22):** `evals/personas.py` (persona sinh bằng code từ catalog: kiến thức chia theo chất lượng, ổn định theo id; 24 + 4 adversarial: lan man, injection, trả lời một từ, kết thúc sớm sau 3 lượt; chưa có `cv_file`), `evals/simulator.py` (bản quy tắc cho CI và bản LLM dùng agent `simulator`, model riêng qua `LLM_MODEL_SIMULATOR`), `evals/simulate_session.py` (gọi HTTP như interview-service, in-process hoặc `--base-url`), `evals/sim_metrics.py`, `evals/cost_latency.py`, CLI `python -m evals.simulate --matrix quick|full --simulator rule|llm`. Chưa cài: LLM-as-judge cho Interviewer (Q5), kiểm tay `evidence_turns`. Kết quả chạy thử với mock: [eval-sim-20261022-mock-baseline.md](../../plans/20261019-1100-ai-interview-brd-implementation/reports/eval-sim-20261022-mock-baseline.md) (không phải số đo chất lượng).
 
 **Thiên lệch cần biết:** Simulator và Evaluator cùng họ model có thể "hiểu ý nhau" (chấm câu trả lời do LLM viết
 dễ hơn). Vì vậy **golden set có nhãn người (tầng 2) là thước đo chính** cho độ chính xác chấm điểm; tầng 3 chủ yếu

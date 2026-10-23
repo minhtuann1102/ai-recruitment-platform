@@ -58,7 +58,7 @@ team (research R1).
 - [X] T012 [US2] Đổi container `nest_turbo_*` → `ai_recruit_*` và network → `ai-recruit-network` trong `docker-compose.yml` (gồm block `ai-service` nếu `feat/aie` đã merge)
 - [X] T013 [P] [US2] Xóa `docker-compose-kong.yml`, `config/kong/`, `.docker/compose/kong/`; gỡ target `deckSync` trong `Makefile`; gỡ `KONG_*`, `GW_HOST` trong `.env.example`
 - [X] T014 [US2] (build/check-types/lint xanh; test đỏ như baseline → T031) `pnpm install` (sinh lại `pnpm-lock.yaml`) → `pnpm build`, `pnpm check-types`, `pnpm test` đều xanh
-- [ ] T015 [US2] (PR #2 đã mở; merge + báo rebase: chưa) Chạy quickstart §5; mở PR-1 `[root] chore: rename project scope to @ai-recruit`; sau merge báo FSD/AIE rebase
+- [X] T015 [US2] (PR #2 merged 2026-10-19 sau khi merge `main` + đổi tên container ai-service; báo rebase: chưa) Chạy quickstart §5; mở PR-1 `[root] chore: rename project scope to @ai-recruit`; sau merge báo FSD/AIE rebase
 
 **Checkpoint**: PR-1 merged — team rebase lên tên mới
 
@@ -73,13 +73,13 @@ team (research R1).
 
 **Independent Test**: quickstart §1, §2, §3
 
-- [ ] T016 [US1] Tạo branch `chore/docker-multi-db-minio`; tạo `scripts/init-databases.sh`: tạo idempotent `user_db`, `job_db`, `interview_db`, `notification_db`, `ai_db` bằng `\gexec`; `\c ai_db` + `CREATE EXTENSION IF NOT EXISTS vector`; chừa chỗ cho DDL của AIE ở cuối file (research R3)
-- [ ] T017 [US1] Service `db` trong `docker-compose.yml` và `.docker/compose/postgresql/postgresql.yml`: image `pgvector/pgvector:pg16`, mount `./scripts/init-databases.sh:/docker-entrypoint-initdb.d/init-databases.sh`, port `${PG_HOST_PORT:-5534}:5432`, healthcheck `pg_isready`
-- [ ] T018 [US1] Service `minio` trong `docker-compose.yml`: image `cgr.dev/chainguard/minio@sha256:<digest>` (research R6), command `server /data --console-address :9001`, env `MINIO_ROOT_USER/PASSWORD`, ports `${MINIO_API_PORT:-9000}`/`${MINIO_CONSOLE_PORT:-9001}`, volume `./.docker/volumes/minio_data`; healthcheck theo kết quả VERIFY R6 (distroless)
-- [ ] T019 [US1] Service `storage-init` (image `amazon/aws-cli:2.37.9`, `restart: "no"`, `entrypoint: ["/bin/sh", "-c"]` vì entrypoint mặc định là `aws`; env `AWS_ACCESS_KEY_ID=${MINIO_ROOT_USER}`, `AWS_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD}`, `AWS_DEFAULT_REGION=${AWS_S3_REGION}`, `AWS_S3_BUCKET_NAME`): retry `aws --endpoint-url http://minio:9000 s3 ls` tới khi sẵn sàng, rồi `s3 mb` nếu bucket chưa có
-- [ ] T020 [P] [US1] Healthcheck cho `redis` (`redis-cli ping`), `etcd`, `apisix`; bind port admin APISIX vào `127.0.0.1` (research R11) trong `docker-compose.yml`
-- [ ] T021 [P] [US1] Thêm target `db-ensure` (chạy lại init script qua `docker compose exec db`) trong `Makefile`
-- [ ] T022 [US1] Chạy quickstart §1–3 hai lần: volume sạch và volume cũ + `make db-ensure`; ghi kết quả vào PR
+- [X] T016 [US1] (kèm DDL `knowledge_chunks` từ rag-design §3, `IF NOT EXISTS`) Tạo branch `chore/docker-multi-db-minio`; tạo `scripts/init-databases.sh`: tạo idempotent `user_db`, `job_db`, `interview_db`, `notification_db`, `ai_db` bằng `\gexec`; `\c ai_db` + `CREATE EXTENSION IF NOT EXISTS vector`; chừa chỗ cho DDL của AIE ở cuối file (research R3)
+- [X] T017 [US1] (healthcheck `-h 127.0.0.1`, R3) Service `db` trong `docker-compose.yml` và `.docker/compose/postgresql/postgresql.yml`: image `pgvector/pgvector:pg16`, mount `./scripts/init-databases.sh:/docker-entrypoint-initdb.d/init-databases.sh`, port `${PG_HOST_PORT:-5534}:5432`, healthcheck `pg_isready`
+- [X] T018 [US1] (healthcheck TCP bằng bash, R6) Service `minio` trong `docker-compose.yml`: image `cgr.dev/chainguard/minio@sha256:<digest>` (research R6), command `server /data --console-address :9001`, env `MINIO_ROOT_USER/PASSWORD`, ports `${MINIO_API_PORT:-9000}`/`${MINIO_CONSOLE_PORT:-9001}`, volume `./.docker/volumes/minio_data`; healthcheck theo kết quả VERIFY R6 (distroless)
+- [X] T019 [US1] Service `storage-init` (image `amazon/aws-cli:2.37.9`, `restart: "no"`, `entrypoint: ["/bin/sh", "-c"]` vì entrypoint mặc định là `aws`; env `AWS_ACCESS_KEY_ID=${MINIO_ROOT_USER}`, `AWS_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD}`, `AWS_DEFAULT_REGION=${AWS_S3_REGION}`, `AWS_S3_BUCKET_NAME`): retry `aws --endpoint-url http://minio:9000 s3 ls` tới khi sẵn sàng, rồi `s3 mb` nếu bucket chưa có
+- [X] T020 [P] [US1] Healthcheck cho `redis` (`redis-cli ping`), `etcd`, `apisix`; bind port admin APISIX vào `127.0.0.1` (research R11) trong `docker-compose.yml`
+- [X] T021 [P] [US1] (lệnh bọc `bash -c`, R3) Thêm target `db-ensure` (chạy lại init script qua `docker compose exec db`) trong `Makefile`
+- [X] T022 [US1] (2026-10-19: §1–3 đạt trên volume sạch; volume cũ: xóa `job_db` → db-ensure tạo lại, chạy lần 2 không lỗi) Chạy quickstart §1–3 hai lần: volume sạch và volume cũ + `make db-ensure`; ghi kết quả vào PR
 
 **Checkpoint**: hạ tầng local dựng được bằng một lệnh — FSD/AIE bắt đầu dùng DB riêng
 
@@ -91,10 +91,10 @@ team (research R1).
 
 **Independent Test**: `docker compose config` không cảnh báo biến thiếu; quickstart §1 chạy với env copy nguyên trạng
 
-- [ ] T023 [US5] Cập nhật `.env.example` theo `contracts/env-variables.md` (Postgres, MinIO, `STORAGE_TYPE=minio` + `AWS_S3_*`, upstream job/interview, TCP user/notification, `AI_SERVICE_MOCK`) kèm comment nhóm; ghi chú cách chuyển sang AWS S3 (R6)
-- [ ] T024 [P] [US5] `apps/user-service/.env.example`, `apps/notification-service/.env.example`: `*_SERVICE_DB_DATABASE` → `user_db` / `notification_db`; comment host `db:5432` (Docker) vs `localhost:5534` (host)
-- [ ] T025 [US5] Thêm biến mới mà NestJS đọc vào `turbo.json` > `globalEnv` (vd `AI_SERVICE_MOCK`)
-- [ ] T026 [US5] Kiểm chứng: env copy nguyên trạng → `docker compose config` sạch cảnh báo; rà soát không còn secret thật; mở PR-2
+- [X] T023 [US5] (khối `TCP_*` giữ comment: chưa code nào đọc, chuyển transport là S0-FSD-2) Cập nhật `.env.example` theo `contracts/env-variables.md` (Postgres, MinIO, `STORAGE_TYPE=minio` + `AWS_S3_*`, upstream job/interview, TCP user/notification, `AI_SERVICE_MOCK`) kèm comment nhóm; ghi chú cách chuyển sang AWS S3 (R6)
+- [X] T024 [P] [US5] (notification-service: N/A, service không dùng DB) `apps/user-service/.env.example`, `apps/notification-service/.env.example`: `*_SERVICE_DB_DATABASE` → `user_db` / `notification_db`; comment host `db:5432` (Docker) vs `localhost:5534` (host)
+- [X] T025 [US5] Thêm biến mới mà NestJS đọc vào `turbo.json` > `globalEnv` (vd `AI_SERVICE_MOCK`)
+- [X] T026 [US5] Kiểm chứng: env copy nguyên trạng → `docker compose config` sạch cảnh báo; rà soát không còn secret thật; mở PR-2
 
 **Checkpoint**: PR-2 merged
 
@@ -106,7 +106,7 @@ team (research R1).
 
 **Independent Test**: quickstart §4
 
-- [ ] T027 [US4] Tạo branch `chore/apisix-routes-ci`; thêm service `job-service` (public + protected, upstream `APISIX_JOB_SERVICE_*`) vào `config/apisix/conf/apisix-dev.yaml` theo pattern user-service
+- [ ] T027 [US4] **HOÃN (2026-10-19)**: chưa có `apps/job-service`, `apps/interview-service` (S0-FSD-3/4) nên quickstart §4 không kiểm được; làm khi FSD scaffold. Tạo branch `chore/apisix-routes-ci`; thêm service `job-service` (public + protected, upstream `APISIX_JOB_SERVICE_*`) vào `config/apisix/conf/apisix-dev.yaml` theo pattern user-service
 - [ ] T028 [US4] Thêm service `interview-service` (upstream `APISIX_INTERVIEW_SERVICE_*`) vào `config/apisix/conf/apisix-dev.yaml`
 - [ ] T029 [US4] **HOÃN — phần AIE, tạm thời không làm.** Đảm bảo service `ai-service` từ `origin/feat/aie` có trong `config/apisix/conf/apisix-dev.yaml` sau merge; khớp `APISIX_AI_SERVICE_*` trong `.env.example`
 - [ ] T030 [US4] `make adcSync environment=dev` → quickstart §4 (401 không token, 200 health)

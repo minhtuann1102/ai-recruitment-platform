@@ -1,0 +1,9 @@
+Lê Thu Hà - Node.js Developer
+Liên hệ: ha.le@example.com, 0900 000 002
+Kinh nghiệm
+Node.js Developer tại startup fintech (01/2024 - nay)
+Viết REST API bằng NestJS, TypeScript, MongoDB; tích hợp cổng thanh toán.
+Dự án: Payment gateway adapter
+Chuẩn hóa 3 cổng thanh toán, retry với BullMQ.
+- 99.9% giao dịch callback được xử lý trong 5 giây
+Học vấn: Cử nhân Khoa học máy tính 2023

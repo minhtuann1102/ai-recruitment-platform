@@ -12,17 +12,17 @@ báo cáo, slides) là việc chung của team, không cần spec.
 
 | # | Feature | Sprint | Owner | Công cụ | Task sprint | Phụ thuộc | Trạng thái |
 |---|---|---|---|---|---|---|---|
-| 001 | [platform-foundation](001-platform-foundation/spec.md) | S0 | DE | Spec Kit | S0-DE-1..6 | — | Đang làm — PR-1 #2 (T001–T015) |
+| 001 | [platform-foundation](001-platform-foundation/spec.md) | S0 | DE | Spec Kit | S0-DE-1..6 | — | Đang làm — PR-1 #2 merged; PR-2 #6 (T016–T026); CI #5 (T031–T032); route job/interview hoãn chờ FSD scaffold |
 | 002 | backend-foundation | S0 | FSD (đề xuất) | Owner chọn | S0-FSD-1..6 | 001 (multi-DB) | Chưa viết |
 | 003 | ai-service-foundation | S0 | AIE (đề xuất) | Owner chọn | S0-AIE-1..4 | 001 (ai_db) | Đang làm tại `origin/feat/aie` |
 | 004 | auth-and-user-profiles | S1 | FSD (đề xuất) | Owner chọn | S1-FSD-1..7 | 002 | Chưa viết |
 | 005 | [rag-knowledge-base-qa](005-rag-knowledge-base-qa/spec.md) | S1 | AIE + DE | Spec Kit | S1-AIE-1..2, S1-DE-1..4 | 001, 003 | Plan + tasks xong (2026-10-19) — PR #7, chờ AIE duyệt hợp đồng ghi/đọc; S1-AIE-1 ingestion chuyển DE |
-| 006 | ai-interview-agents | S1–S2 | AIE (đề xuất) | Owner chọn | S1-AIE-3..4, S2-AIE-1..6 | 003, 005 | Chưa viết |
+| 006 | ai-interview-agents | S1–S2 | AIE (đề xuất) | Owner chọn | S1-AIE-3..4, S2-AIE-1..6 | 003, 005 | Kế hoạch: [plan](../plans/20261019-1100-ai-interview-brd-implementation/plan.md) (workflow `plans/`) |
 | 007 | job-posting-search | S2 | FSD (đề xuất) | Owner chọn | S2-FSD-1..4, S2-FSD-9..10 | 004 | Chưa viết |
 | 008 | job-applications | S2 | FSD (đề xuất) | Owner chọn | S2-FSD-5..8, S2-FSD-11 | 007, 001 (MinIO) | Chưa viết |
 | 009 | jd-crawling-seeding | S2 | DE | Spec Kit | S2-DE-1..4 | 005 (pipeline), 007 (schema job_db) | Chưa viết |
 | 010 | interview-sessions | S3 | FSD (đề xuất) | Owner chọn | S3-FSD-1..8 | 006, 002 | Chưa viết |
-| 011 | agentic-interview-hardening | S3–S4 | AIE (đề xuất) | Owner chọn | S3-AIE-1..6, S4-AIE-1..5 | 006, 010 | Chưa viết |
+| 011 | agentic-interview-hardening | S3–S4 | AIE (đề xuất) | Owner chọn | S3-AIE-1..6, S4-AIE-1..5 | 006, 010 | Kế hoạch: [plan](../plans/20261019-1100-ai-interview-brd-implementation/plan.md) (workflow `plans/`) |
 | 012 | textbook-ingestion-rag-quality | S3–S4 | DE | Spec Kit | S3-DE-1..5, S4-DE-1 | 009 (pipeline ổn định), 011 (S3-AIE-1 cho eval) | Chưa viết |
 | 013 | web-frontend | S4 | FSD (đề xuất) | Owner chọn | S4-FSD-1..9 | 004, 007, 008, 010 | Chưa viết |
 | 014 | staging-deploy-monitoring | S4 | DE | Spec Kit | S4-DE-2..4 | 001, mọi service chạy được | Chưa viết |

@@ -54,7 +54,7 @@ export interface AiInterviewClient {
 
 ## 5. Topic catalog và dữ liệu
 
-- Chủ đề phỏng vấn theo vị trí nằm trong `apps/ai-service/app/catalog/*.yaml` (`java_backend`, `python_backend`, `nodejs_backend`, `ai_engineer`). Planner chỉ chọn topic có trong catalog.
+- Chủ đề phỏng vấn theo vị trí nằm trong `apps/ai-service/app/catalog/*.yaml` (6 track: `java_backend`, `python_backend`, `nodejs_backend`, `ai_engineer`, `frontend_react`, `devops_engineer`). Planner chỉ chọn topic có trong catalog.
 - RAG chỉ dùng `interview_qa` và `textbook`. Thiết kế đầy đủ: [rag-design.md](rag-design.md).
 
 ## 6. Docker Compose — Mock AI Service

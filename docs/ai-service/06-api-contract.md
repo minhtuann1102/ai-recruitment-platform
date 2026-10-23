@@ -187,6 +187,8 @@ data: {"errorCode":"AI_SERVICE_ERROR","message":"AI tạm thời không phản h
 
 `error` với `retryable = true`: lượt chưa được ghi nhận, client cho gửi lại cùng `turnNumber`.
 
+*(Cài đặt 2026-10-22, ai-service.)* `replace` cũng được gửi khi câu Interviewer vừa stream bị code từ chối (lặp câu đã hỏi, lộ điểm hoặc đáp án, quá dài) hoặc đã được bỏ markdown. `done.question` luôn là câu cuối cùng (sau `replace` nếu có); `turn.question_source` là `ai` hoặc `fallback`. interview-service lưu `done.question`, không ghép lại từ các `token`.
+
 ### GET /sessions/:id
 
 ```jsonc
@@ -290,11 +292,12 @@ network là host nội bộ của MinIO; khi deploy là endpoint S3).
 
 ## 7.4 Internal API (ai-service)
 
-Giữ tên `start / next-turn / finalize` theo constitution IV; **nội dung** đổi theo thiết kế này. Thêm `cv/parse`.
+Giữ tên `start / next-turn / finalize` theo constitution IV; **nội dung** đổi theo thiết kế này. Thêm `cv/parse` và `jd/parse` (A11).
 
 | Method | Path | Agent chạy | Response | Timeout phía interview-service |
 |---|---|---|---|---|
 | POST | `/api/cv/parse` | CV Parser | JSON | 30 s |
+| POST | `/api/jd/parse` | JD Parser | JSON | 30 s |
 | POST | `/api/start` | Planner → Interviewer | SSE | 40 s (event đầu ≤ 25 s) |
 | POST | `/api/next-turn` | Evaluator → policy → Interviewer | SSE | 45 s (event đầu ≤ 15 s) |
 | POST | `/api/finalize` | (code tính điểm) → Reporter | JSON | 90 s |
@@ -319,6 +322,29 @@ Multipart: `file` (bytes interview-service đã tải từ job-service), `track`
 { "error": "cv_unreadable", "message": "Extracted text shorter than 200 characters", "details": { "chars": 37 } }
 ```
 
+### POST /api/jd/parse
+
+*(Thêm 2026-10-22, FR-AI-016, 017.)* JSON: `track`, `jd_text` (50 đến 20.000 ký tự, JD thô interview-service lấy qua TCP `application.getJobDescription`). ai-service không lưu JD; JD thô chỉ JD Parser thấy.
+
+```jsonc
+// 200 OK
+{
+  "jd_profile": {
+    "schema_version": 1,
+    "title": "Backend Developer (Java)",
+    "requirements": [                                   // ≤ 15
+      { "id": "r1", "text": "Thành thạo Spring Boot và DI", "kind": "must",   // must|nice
+        "topic_ids": ["java.spring.ioc-di"], "out_of_catalog": false },       // topic_ids ≤ 3, chỉ id có trong catalog của track
+      { "id": "r2", "text": "Kỹ năng làm việc nhóm", "kind": "must", "topic_ids": [], "out_of_catalog": true }
+    ],
+    "flags": { "injection_suspected": false, "truncated": false }
+  },
+  "metadata": { "model": "openai/gpt-4o-mini", "prompt_version": "jd_parser.v1", "input_tokens": 1800, "output_tokens": 300, "latency_ms": 3000 }
+}
+```
+
+`422 invalid_request` khi `track` không có trong catalog hoặc `jd_text` ngoài giới hạn.
+
 ### POST /api/start
 
 ```jsonc
@@ -327,7 +353,8 @@ Multipart: `file` (bytes interview-service đã tải từ job-service), `track`
   "track": "java_backend",
   "level": "junior",
   "duration_minutes": 30,
-  "cv_profile": { "...": "CvProfile hoặc null" }
+  "cv_profile": { "...": "CvProfile hoặc null" },
+  "jd_profile": { "...": "JdProfile hoặc null (không có thì luyện theo track + level)" }
 }
 ```
 
@@ -405,11 +432,12 @@ Event `done`:
   "turns": [
     { "turn_number": 4, "phase": "technical", "topic_id": "t2", "turn_kind": "main", "difficulty": 3,
       "question": "...", "answer": "...", "evaluation": { "...": "Evaluation đã lưu" } }
-  ]
+  ],
+  "jd_profile": { "...": "JdProfile đã lưu khi start, hoặc bỏ trống" }      // thêm 2026-10-22 (FR-AI-056)
 }
 ```
 
-Response 200: report theo §6.4 (snake_case) + `metadata` (usage, latency, prompt version của Reporter).
+Response 200: report theo §6.4 (snake_case) + `metadata` (usage, latency, prompt version của Reporter). Reporter lỗi vẫn trả 200 với `status = "partial"` (chỉ có điểm và nhận xét mẫu); `meta.fallbacks` ghi `reporter_partial`. Có `jd_profile` thì report có khối `requirements` (design 05 §6.4).
 
 ### Interface phía NestJS
 

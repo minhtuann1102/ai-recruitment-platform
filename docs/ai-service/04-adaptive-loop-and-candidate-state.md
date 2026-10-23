@@ -25,6 +25,8 @@ deterministic, cùng input luôn ra cùng quyết định.
 
 ## 5.2 Candidate state
 
+> **Thêm 2026-10-22:** `phase_started_s`, `topic_started_s` (giây kể từ đầu phiên khi phase và topic hiện tại bắt đầu), dùng cho ngân sách thời gian (design 03 §4.4). interview-service chỉ lưu và gửi lại state, không cần hiểu các trường này.
+
 JSON do ai-service trả trong event `done`, interview-service lưu ở `interview_sessions.candidate_state` và gửi lại
 nguyên văn ở lượt sau. Kích thước điển hình 2–4 KB.
 
@@ -87,6 +89,8 @@ Sau mỗi `Evaluation` hợp lệ (không degraded):
    `momentum = +1` nếu `score_band ≥ 3.0`, `-1` nếu `< 1.75`, ngược lại `0`.
 
 ## 5.4 Policy chọn hành động tiếp
+
+> **Cập nhật 2026-10-22 (`app/focus.py`):** `focus` không còn cố định. Luật 8 và `hint` chọn ý còn thiếu **chưa hỏi** trong topic (theo `missing_points`, gợi ý của Evaluator, rồi key point chưa nêu); luật 10 chọn key point chưa nêu, rồi các hướng đào sâu gắn tên topic (trade-off, edge case, cơ chế bên trong, khi scale). Hết ý mới thì `next_topic`. Focus đã hỏi lưu ở `topics[].focus_used` (tối đa 6, chỉ focus đã qua kiểm injection), hai focus coi là trùng khi Jaccard ≥ 0.8. Ý ứng viên đã nêu được gộp theo cả topic ở `topics[].covered` (tối đa 10) để không hỏi lại ý đã trả lời ở lượt trước; một ý coi là đã nêu khi chứa ≥ 50% từ nội dung của key point.
 
 Chạy sau khi các điều kiện ưu tiên 1–5 ở §4.4 (hết giờ, hết phase, đóng topic) không khớp. Đọc từ trên
 xuống, luật đầu tiên khớp thắng. `F` = follow-up còn lại của topic (`max_follow_up − counters.follow_ups`).

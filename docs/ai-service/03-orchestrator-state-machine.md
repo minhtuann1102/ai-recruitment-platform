@@ -121,6 +121,8 @@ Kiểm theo **thứ tự ưu tiên** dưới đây sau mỗi lượt (trong `tra
 
 Ngoài ra policy ở ưu tiên 6 (§5.4) cũng có thể trả `next_topic` (trả lời tốt đủ, hoặc yếu sau khi đã gợi ý); khi đó orchestrator đóng topic và xử lý giống ưu tiên 5.
 
+**Đã cài (2026-10-22):** `app/time_budget.py` (điều kiện ưu tiên 2–5) và `app/state_update.py` (áp dụng hành động). Turn cap = `round(24 × thời lượng / 30)` (16 cho 20 phút). Ngân sách topic = ngân sách phase / số topic của phase. Thời điểm bắt đầu phase và topic lưu trong state (`phase_started_s`, `topic_started_s`, tính theo `elapsed_seconds` interview-service gửi). Quá hạn cứng thì lượt đó vẫn được chấm, `done` có `question = null`, `session_end = true`, `end_reason = time_hard_limit`.
+
 **Mượn thời gian:** phase xong sớm thì thời gian dư cộng vào phase sau. Phase cuối (`scenario`) xong sớm thì
 vào `wrap_up` sớm; **không** thêm topic ngoài plan (buổi thật cũng có khi kết thúc sớm).
 
@@ -182,6 +184,8 @@ async def run_turn(req: NextTurnRequest) -> AsyncIterator[SseEvent]:
    *"Output trước không hợp lệ: `scores.completeness` phải là số nguyên 0–4. Trả lại JSON đúng schema."*
    `temperature = 0`.
 5. `finish_reason = "length"` (output bị cắt): retry 1 lần với `max_tokens × 1.5`.
+
+> **Cài đặt (Phase 02):** các mục 1–5 ở trên nằm ở `app/llm/` (`gateway.py`, `retry.py`, `structured_output.py`); chưa nối vào agent. Bảng fallback theo agent bên dưới sẽ cài ở Phase 06. Biến `LLM_STRUCTURED_OUTPUTS` bật/tắt `json_schema` strict (mặc định bật).
 
 ### Bảng xử lý theo loại lỗi
 

@@ -1,0 +1,77 @@
+track: devops_engineer
+title: DevOps Engineer
+id_prefix: devops
+topics:
+  - id: devops.linux.basics-networking
+    title: Linux và mạng cơ bản
+    levels: [fresher, junior]
+    category: DevOps
+    key_concepts: [process và signal, quyền file, systemd và log, DNS và TCP/IP, port và firewall]
+  - id: devops.git.workflow
+    title: Git và quy trình làm việc nhóm
+    levels: [fresher, junior]
+    category: DevOps
+    key_concepts: [branch và merge, merge vs rebase, GitHub Flow, pull request và code review, xử lý conflict]
+  - id: devops.docker.images
+    title: Docker image và container
+    levels: [fresher, junior, middle]
+    category: DevOps
+    key_concepts: [container vs VM, Dockerfile và layer cache, multi-stage build, giảm kích thước image, chạy non-root]
+  - id: devops.docker.compose-networking
+    title: Docker Compose, network và volume
+    levels: [fresher, junior, middle]
+    category: DevOps
+    key_concepts: [network giữa container, volume vs bind mount, healthcheck, thứ tự khởi động, biến môi trường và secret]
+  - id: devops.cicd.pipelines
+    title: CI/CD pipeline
+    levels: [fresher, junior, middle, senior]
+    category: DevOps
+    key_concepts: [CI vs CD, pipeline lint test build, cache dependency, artifact và image registry, blue-green và canary]
+  - id: devops.k8s.core-objects
+    title: "Kubernetes: các object cơ bản"
+    levels: [junior, middle, senior]
+    category: DevOps
+    key_concepts: [Pod và Deployment, Service và Ingress, ConfigMap và Secret, namespace, debug bằng kubectl]
+  - id: devops.k8s.scaling-reliability
+    title: Scale và độ tin cậy trên Kubernetes
+    levels: [middle, senior]
+    category: DevOps
+    key_concepts: [liveness vs readiness probe, rolling update và rollback, resource request và limit, HPA, PodDisruptionBudget]
+  - id: devops.iac.terraform
+    title: Infrastructure as Code
+    levels: [middle, senior]
+    category: DevOps
+    key_concepts: [IaC vs cấu hình tay, Terraform state và remote backend, module, plan và apply, drift]
+  - id: devops.cloud.core-services
+    title: Dịch vụ cloud cơ bản
+    levels: [fresher, junior, middle, senior]
+    category: DevOps
+    key_concepts: [VPC và subnet, compute như VM hoặc container service, object storage, IAM và least privilege, managed database]
+  - id: devops.observability.monitoring
+    title: Logging, monitoring và alerting
+    levels: [junior, middle, senior]
+    category: DevOps
+    key_concepts: [log metric trace, structured logging, Prometheus và Grafana, SLI và SLO, alert fatigue]
+  - id: devops.net.reverse-proxy-tls
+    title: Reverse proxy, load balancer và HTTPS
+    levels: [junior, middle, senior]
+    category: DevOps
+    key_concepts: [reverse proxy và API gateway, load balancing, TLS và chứng chỉ, rate limiting, health check upstream]
+  - id: devops.security.secrets-hardening
+    title: Bảo mật hạ tầng và quản lý secret
+    levels: [middle, senior]
+    category: DevOps
+    key_concepts: [quản lý secret, least privilege, quét lỗ hổng image, cập nhật bản vá, audit log]
+scenarios:
+  - id: scn.devops.dockerize-web-app
+    title: Đóng gói ứng dụng web và database bằng Docker Compose cho cả nhóm
+    levels: [fresher, junior]
+  - id: scn.devops.container-crashloop
+    title: Container khởi động lại liên tục sau khi deploy
+    levels: [junior, middle]
+  - id: scn.devops.zero-downtime-deploy
+    title: Triển khai phiên bản mới không downtime
+    levels: [middle, senior]
+  - id: scn.devops.prod-latency-incident
+    title: Sự cố latency tăng đột biến trên production
+    levels: [middle, senior]

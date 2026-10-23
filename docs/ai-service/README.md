@@ -21,6 +21,10 @@
 | 9 | Latency & chi phí, chọn model | [08-latency-and-cost.md](08-latency-and-cost.md) |
 | 10 | Đánh giá chất lượng agent | [09-agent-quality-evaluation.md](09-agent-quality-evaluation.md) |
 | 11–12 | Rủi ro, lộ trình 8 tuần | [10-risks-and-8-week-roadmap.md](10-risks-and-8-week-roadmap.md) |
+| 13 | Kiến trúc L2 (C4 Container): container, giao tiếp, dữ liệu, ranh giới tin cậy, triển khai | [11-architecture-l2-containers.md](11-architecture-l2-containers.md) |
+| — | Tài liệu yêu cầu: BRD (v0.4) | [requirements/01-brd.md](requirements/01-brd.md) |
+| — | Tài liệu yêu cầu: FR (75 yêu cầu chức năng) | [requirements/02-functional-requirements.md](requirements/02-functional-requirements.md) |
+| — | Tài liệu yêu cầu: NFR (109 yêu cầu phi chức năng) | [requirements/03-non-functional-requirements.md](requirements/03-non-functional-requirements.md) |
 
 ## Tóm tắt nhanh
 
@@ -53,7 +57,7 @@ Repo đã chốt stack và LLM provider nên tài liệu không đặt câu hỏ
 | A6 | Transport | REST giữa interview-service ↔ ai-service; streaming bằng **SSE** | ADR-003 |
 | A7 | Ngôn ngữ | Phỏng vấn tiếng Việt, giữ thuật ngữ tiếng Anh | rag-design.md §9 ¹ |
 | A8 | Kênh | Chat văn bản là lõi. Voice là **lớp kênh Stretch** (S4): TTS đọc `done.question`, STT bấm-để-nói rồi gửi transcript qua `/answer` hiện có. Không đổi trường bắt buộc của `/answer` (chỉ thêm trường tùy chọn cho bản STT gốc, tên chốt ở spec 015); ai-service không biết có voice | Quyết định của team 2026-10-15 |
-| A9 | Track MVP | `java_backend`, `nodejs_backend`. Thêm track = thêm 1 file topic catalog | Đề bài |
+| A9 | Track | Catalog có 6 track: `java_backend`, `python_backend`, `nodejs_backend`, `ai_engineer`, `frontend_react`, `devops_engineer` (90 topic). Thêm track = thêm 1 file topic catalog | Đề bài, đề xuất DE (spec 005) |
 | A10 | CV | **Dùng lại CV đã nộp ở job-service** (PDF / DOCX); interview-service không nhận upload, không lưu bản sao file | Quyết định của team 2026-10-06 (§2, §8) |
 | A11 | JD | **Input của Planner, không vào RAG**: trích có cấu trúc (`jd_profile`) từ JD của job trong application mà ứng viên chọn khi gắn CV, map kỹ năng về `topic_id`. Không embed JD; retriever vẫn chỉ lấy `interview_qa` + `textbook`. JD là dữ liệu không tin cậy, chống injection như CV. Đề bài gốc ghi không dùng JD; giảng viên đã chấp thuận dùng JD làm input phỏng vấn | Quyết định của team 2026-10-15, giảng viên chấp thuận |
 | A12 | Riêng tư | Phiên luyện tập **luôn riêng tư**: chỉ ứng viên xem; Employer không xem kết quả | Quyết định của team 2026-10-15 |
@@ -125,7 +129,7 @@ test được, ít thành phần.
 
 | Thuật ngữ | Nghĩa trong tài liệu này |
 |---|---|
-| **track** | Mảng phỏng vấn ứng viên chọn (đề bài gọi là "chủ đề"): `java_backend`, `nodejs_backend` |
+| **track** | Mảng phỏng vấn ứng viên chọn (đề bài gọi là "chủ đề"): 6 track trong catalog (A9) |
 | **topic** | Chủ đề con trong interview plan, ví dụ "Spring `@Transactional`", "Dự án order service". Một buổi có 5–6 topic |
 | **phase** | Giai đoạn buổi phỏng vấn: `intro`, `technical`, `scenario`, `wrap_up` |
 | **turn** | Một lượt: 1 câu hỏi của Interviewer + 1 câu trả lời của ứng viên |

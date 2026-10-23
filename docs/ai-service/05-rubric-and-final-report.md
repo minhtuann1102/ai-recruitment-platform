@@ -137,6 +137,23 @@ Lưu ở `interview_results.report` (JSONB, §8); các cột cũ (`overall_score
 }
 ```
 
+**Khối `requirements` (2026-10-22, FR-AI-056, chỉ có khi phiên luyện theo JD):**
+
+```jsonc
+"requirements": {
+  "assessed": 1, "total": 3,
+  "summary": "Đã đánh giá 1/3 yêu cầu của JD. Yêu cầu chưa được hỏi không bị tính là điểm yếu; báo cáo không kết luận tuyển hay không tuyển.",
+  "items": [
+    { "id": "r1", "text": "Spring transaction", "kind": "must", "status": "assessed",       // assessed | not_assessed | out_of_catalog
+      "score": 6.3, "band": "near", "evidence_turns": [4, 5], "confidence": "medium" },     // confidence low nếu < 2 lượt hoặc có lượt degraded
+    { "id": "r2", "text": "Kafka", "kind": "nice", "status": "not_assessed", "score": null, "band": null, "evidence_turns": [], "confidence": null },
+    { "id": "r3", "text": "Làm việc nhóm", "kind": "must", "status": "out_of_catalog", "score": null, "band": null, "evidence_turns": [], "confidence": null }
+  ]
+}
+```
+
+Reporter (`app/agents/reporter.py`) chỉ thay `overall.summary`, `strengths`, `improvements`, `study_plan`, `topics[].comment`, `turns[].comment`; các con số do code tính giữ nguyên. Điểm mạnh chỉ giữ khi mọi lượt dẫn chứng có điểm ≥ 6.0.
+
 `url` trong `resources` do **code tra từ topic catalog** theo `resource_ids` Reporter chọn; Reporter không bao
 giờ tự viết URL (chống link bịa).
 

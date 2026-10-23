@@ -1,0 +1,10 @@
+Võ Thị Lan
+Fresher Frontend Developer
+lan.vo@example.com - 0900 000 005
+Dự án: Website đặt lịch khám
+Đồ án tốt nghiệp, React, TypeScript, Redux Toolkit, Tailwind CSS.
+- Đạt Lighthouse performance 92 trên mobile
+Dự án: Trang portfolio cá nhân
+Next.js, deploy trên Vercel.
+Học vấn: Cử nhân Kỹ thuật phần mềm 2026
+Kỹ năng: HTML, CSS, JavaScript, React, Git

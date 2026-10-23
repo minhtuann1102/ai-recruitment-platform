@@ -40,7 +40,7 @@ CREATE TABLE knowledge_chunks (
   embedding        vector(1536) NOT NULL,
   embedding_model  VARCHAR(50) NOT NULL DEFAULT 'text-embedding-3-small',
   source_type      VARCHAR(30) NOT NULL,       -- interview_qa | textbook (job_description: Stretch, AI không dùng)
-  category         VARCHAR(30),                -- Backend | Database | System Design | DevOps | AI (khớp catalog)
+  category         VARCHAR(30),                -- Backend | Frontend | Database | System Design | DevOps | AI (khớp catalog)
   difficulty       VARCHAR(10),                -- easy | medium | hard (null với textbook)
   topic_id         VARCHAR(80),                -- id trong topic catalog; Q&A luôn có, textbook để NULL
   language         VARCHAR(5),                 -- vi | en
@@ -72,7 +72,9 @@ Mỗi agent có tool riêng (xem ai-integration.md mục 2). Tất cả dùng ch
 
 ### 4.1 Topic catalog (chủ đề theo vị trí phỏng vấn)
 
-Mỗi vị trí phỏng vấn (`track`) có một file YAML trong `apps/ai-service/app/catalog/`: `java_backend`, `python_backend`, `nodejs_backend`, `ai_engineer`. Mỗi topic có `id`, `title`, `levels`, `category`, `key_concepts`; kèm danh sách `scenarios` theo level. Thêm vị trí mới = thêm một file YAML, loader và test tự nhận.
+Mỗi vị trí phỏng vấn (`track`) có một file YAML trong `apps/ai-service/app/catalog/`: `java_backend`, `python_backend`, `nodejs_backend`, `ai_engineer`, `frontend_react`, `devops_engineer` (6 track, 90 topic: Backend 30, AI 25, DevOps 14, Frontend 12, System Design 5, Database 4). Mỗi topic có `id`, `title`, `levels`, `category`, `key_concepts`; kèm danh sách `scenarios` theo level. Thêm vị trí mới = thêm một file YAML, loader và test tự nhận.
+
+**Scenario không có `topic_id` hay `category`** nên phase scenario **không** lấy `interview_qa` theo topic; Evaluator chấm scenario bằng `key_points` chung của scenario, RAG chỉ bổ sung `textbook` lọc theo category của track (AIE xác nhận mục 7 trong spec 005).
 
 Lấy ngữ cảnh cho từng topic: `interview_qa` theo `topic_id` trước (khớp chính xác); dưới 2 kết quả thì bổ sung bằng vector search lọc `category` + `difficulty`, cả `interview_qa` và `textbook`. Pipeline index từ chối chunk có `topic_id` không có trong catalog.
 
@@ -90,19 +92,24 @@ Quy tắc chung:
 
 ## 6. Cấu trúc code trong `ai-service`
 
+**Đã cài (2026-10-22, Phase 03, đường đọc):**
+
 ```
 apps/ai-service/app/rag/
-├── embedder.py       # gọi OpenAI embeddings, batch + retry
-├── repository.py     # SQL: upsert theo content_hash, search cosine + filter, get theo qa_id
-├── retriever.py      # retrieve(query, filters, k) -> [{id, content, score, metadata}]
-└── chunking.py       # chunk_qa / chunk_textbook (dùng chung với pipeline)
+├── settings.py       # RAG_ENABLED (mặc định tắt), AI_DB_URL, tên embedding_model bỏ tiền tố provider
+├── difficulty.py     # độ khó 1–5 -> easy/medium/hard
+├── models.py         # Chunk, SearchFilters
+├── repository.py     # psycopg 3 async, phiên read-only: list_by_topic_id, search (cosine + filter), get_pair_by_qa_id
+├── retriever.py      # topic_id trước, < 2 thì vector fallback; dedup qa_id; ngân sách token; log id + điểm
+└── factory.py        # build_retriever(): None khi RAG tắt; embed truy vấn qua LlmGateway
+apps/ai-service/evals/ # rag_golden.json (bản nháp), rag_metrics.py, run_rag.py (recall@5 theo nhóm)
 ```
 
-`chunking.py` và `repository.py` là phần lõi mà pipeline index (DE) và tool của agent (AIE) cùng dùng, tránh viết hai lần.
+Khác thiết kế ban đầu: **không có `embedder.py`, `chunking.py` và upsert** trong ai-service, vì spec 005 giao toàn bộ đường ghi (chunk, embed, upsert) cho DE (`apps/data-pipeline`). Embed truy vấn dùng `LlmGateway.embed` (Phase 02). Hai bên dùng chung **contract** `specs/005-rag-knowledge-base-qa/contracts/knowledge-chunks-io.md` thay vì chung module. RAG lỗi (DB tắt, embedding lỗi) thì retriever ghi log và trả rỗng, phiên vẫn chạy chỉ với `key_points`.
 
 ## 7. Cách đánh giá (bắt đầu Sprint 1)
 
-1. **Golden set 20+ query** dạng `(query, filters, qa_id/chunk_id đúng)`, gồm cả query tiếng Việt và tiếng Anh. Ghi vào `apps/ai-service/tests/rag_golden.json`.
+1. **Golden set 20+ query** dạng `(query, filters, qa_id/chunk_id đúng)`, gồm cả query tiếng Việt và tiếng Anh. Ghi vào `apps/ai-service/evals/rag_golden.json` (bản nháp 24 query, 2026-10-22, nhãn trỏ vào `qa_id` của bộ canonical DE, chờ DE duyệt; nhóm Việt → tài liệu Anh để trống tới khi có textbook). Chạy `python -m evals.run_rag`. **Chưa có số đo.**
 2. Đo **recall@5** và xem tay top-3 (khớp quality gate "top-3 liên quan" trong data-pipeline.md). Mục tiêu đề xuất: recall@5 ≥ 0.8, cần nhóm xác nhận.
 3. So sánh trên cùng golden set: overlap 0 và 50; có và không có heading path.
 4. Nếu recall thấp ở truy vấn tiếng Việt: thử embedding model khác (ví dụ bge-m3) trước khi thêm hybrid hay rerank. Re-embed ~6000 chunk chỉ tốn vài cent và `embedding_model` đã có sẵn trong schema.

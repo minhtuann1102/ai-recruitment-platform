@@ -35,7 +35,7 @@ erDiagram
         varchar status "created|in_progress|reporting|completed|abandoned|report_failed (MỚI: created, reporting, report_failed)"
         string category "Backend (map từ track)"
         varchar difficulty "easy|medium|hard (map từ level)"
-        varchar track "MỚI: java_backend|nodejs_backend"
+        varchar track "MỚI: 6 track trong topic catalog"
         varchar level "MỚI: fresher|junior|middle|senior"
         int duration_minutes "MỚI, mặc định 30"
         varchar cv_status "MỚI: none|parsed|failed"

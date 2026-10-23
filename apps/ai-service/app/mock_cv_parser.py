@@ -12,9 +12,9 @@ from .models_cv import (CvEducation, CvExperience, CvFlags, CvParseMetadata, CvP
                         CvProfile, CvProject, CvSkill)
 
 _VOCAB = {
-    "language": ["Java", "Python", "JavaScript", "TypeScript", "Go", "C#", "Kotlin", "PHP", "SQL", "Dart"],
+    "language": ["Java", "Python", "JavaScript", "TypeScript", "Go", "C#", "Kotlin", "PHP", "SQL", "Dart", "HTML", "CSS"],
     "framework": ["Spring Boot", "Spring", "Hibernate", "Django", "FastAPI", "Flask", "NestJS", "Express",
-                  "React", "Next.js", "Vue", "Node.js", "PyTorch", "TensorFlow", "scikit-learn", "LangChain"],
+                  "React", "Next.js", "Redux", "Vue", "Node.js", "PyTorch", "TensorFlow", "scikit-learn", "LangChain"],
     "database": ["PostgreSQL", "MySQL", "MongoDB", "Redis", "Oracle", "Elasticsearch", "pgvector"],
     "devops": ["Docker", "Kubernetes", "Jenkins", "Terraform", "AWS", "GCP", "Azure", "CI/CD", "GitHub Actions"],
     "tool": ["Kafka", "RabbitMQ", "Git", "Postman", "Celery", "BullMQ", "Airflow", "Spark"],
@@ -25,6 +25,8 @@ _TRACK_HINTS = {
     "python_backend": {"python", "django", "fastapi", "flask", "celery"},
     "nodejs_backend": {"node.js", "nestjs", "express", "typescript", "javascript", "bullmq"},
     "ai_engineer": {"pytorch", "tensorflow", "scikit-learn", "langchain", "rag", "llm", "machine learning"},
+    "frontend_react": {"react", "next.js", "typescript", "javascript", "redux", "html", "css", "vue"},
+    "devops_engineer": {"docker", "kubernetes", "terraform", "jenkins", "aws", "gcp", "azure", "ci/cd", "github actions"},
 }
 _RANGE = re.compile(r"(\d{1,2})/(\d{4})\s*[-–—]\s*(?:(\d{1,2})/(\d{4})|(nay|hiện tại|present))", re.I)
 _PROJECT = re.compile(r"^(dự án|project)\s*[:\-]?\s*(.+)$", re.I)
@@ -79,6 +81,21 @@ def _years(spans: List[Tuple[int, Optional[int]]]) -> float:
             merged.append([s, e])
     months = sum(max(e - s, 0) for s, e in merged)
     return round(months / 12 * 2) / 2
+
+
+def years_from_experiences(experiences: List[CvExperience]) -> float:
+    """FR-AI-014: so nam kinh nghiem do code tinh tu start/end (YYYY-MM) da trich, khong tin con so cua LLM."""
+    spans = []
+    for e in experiences:
+        if not e.start:
+            continue
+        s_year, s_month = (int(x) for x in e.start.split("-"))
+        end = None
+        if e.end:
+            e_year, e_month = (int(x) for x in e.end.split("-"))
+            end = _month_index(e_year, e_month)
+        spans.append((_month_index(s_year, s_month), end))
+    return _years(spans)
 
 
 def _today() -> Tuple[int, int]:

@@ -1,0 +1,52 @@
+{
+ "01_java_middle.txt": {
+  "track": "java_backend",
+  "injection": false,
+  "expect_relevance": null
+ },
+ "02_node_junior.txt": {
+  "track": "nodejs_backend",
+  "injection": false,
+  "expect_relevance": null
+ },
+ "03_python_senior.txt": {
+  "track": "python_backend",
+  "injection": false,
+  "expect_relevance": null
+ },
+ "04_ai_junior.txt": {
+  "track": "ai_engineer",
+  "injection": false,
+  "expect_relevance": null
+ },
+ "05_fe_fresher.txt": {
+  "track": "frontend_react",
+  "injection": false,
+  "expect_relevance": null
+ },
+ "06_devops_middle.txt": {
+  "track": "devops_engineer",
+  "injection": false,
+  "expect_relevance": null
+ },
+ "07_non_it.txt": {
+  "track": "java_backend",
+  "injection": false,
+  "expect_relevance": "low"
+ },
+ "08_injection_java.txt": {
+  "track": "java_backend",
+  "injection": true,
+  "expect_relevance": null
+ },
+ "09_injection_node.txt": {
+  "track": "nodejs_backend",
+  "injection": true,
+  "expect_relevance": null
+ },
+ "10_injection_ai.txt": {
+  "track": "ai_engineer",
+  "injection": true,
+  "expect_relevance": null
+ }
+}

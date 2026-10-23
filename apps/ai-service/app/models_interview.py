@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 
 from .models_common import Action, AgentDecision, AnswerType, Level, Phase, TurnKind
 from .models_cv import CvProfile
+from .models_jd import JdProfile
 
 
 # --- Plan (Planner, 1 lan dau buoi) ---
@@ -43,6 +44,8 @@ class TopicState(BaseModel):
     turns: List[int] = Field(default_factory=list)
     n_scored: int = 0
     score_sum: float = 0.0
+    focus_used: List[str] = Field(default_factory=list)  # focus da hoi (follow-up, hint) de khong hoi lai
+    covered: List[str] = Field(default_factory=list)  # y ung vien da neu trong topic (gop qua cac luot, <= 10)
 
 
 class Counters(BaseModel):
@@ -73,6 +76,10 @@ class CandidateState(BaseModel):
     gaps: List[Tagged] = Field(default_factory=list)
     asked_questions: List[str] = Field(default_factory=list)
     end_reason: Optional[str] = None
+    # elapsed_seconds luc bat dau phase / topic hien tai (ngan sach thoi gian). None = chua biet (state luu truoc
+    # khi co truong nay): luot dau tien gan bang elapsed hien tai thay vi coi topic da chay tu giay 0
+    phase_started_s: Optional[int] = None
+    topic_started_s: Optional[int] = None
 
 
 class TurnInfo(BaseModel):
@@ -83,7 +90,7 @@ class TurnInfo(BaseModel):
     action: Action
     agent_decision: AgentDecision
     difficulty: int
-    question_source: Literal["ai", "bank"] = "ai"
+    question_source: Literal["ai", "bank", "fallback"] = "ai"  # fallback: cau du phong khi Interviewer loi
     reasoning: Optional[str] = None
 
 
@@ -94,6 +101,7 @@ class StartRequest(BaseModel):
     level: Level
     duration_minutes: int = Field(default=30, ge=15, le=45)
     cv_profile: Optional[CvProfile] = None
+    jd_profile: Optional[JdProfile] = None  # FR-AI-017: khong co thi luyen theo track + level
 
 
 class TopicTurn(BaseModel):
@@ -172,3 +180,4 @@ class FinalizeRequest(BaseModel):
     end_reason: str
     duration_s: int = Field(ge=0)
     turns: List[FinalizeTurn] = Field(min_length=1)
+    jd_profile: Optional[JdProfile] = None  # FR-AI-056: co thi bao cao them khoi requirements

@@ -1,0 +1,10 @@
+Đỗ Hoàng Nam
+DevOps Engineer
+nam.do@example.com | 0900 000 006
+Kinh nghiệm
+DevOps Engineer tại công ty outsource (02/2021 - nay)
+Vận hành cụm Kubernetes trên AWS, viết Terraform, CI/CD bằng GitHub Actions và Jenkins.
+Dự án: Chuyển hạ tầng lên Kubernetes
+Di chuyển 30 service từ VM sang EKS, giám sát bằng Prometheus và Grafana.
+- Thời gian deploy giảm từ 40 phút xuống 8 phút
+Học vấn: Kỹ sư Mạng máy tính 2020

@@ -11,7 +11,8 @@ pnpm install && pnpm build          # US2: phải xanh
 ```
 
 Máy đã có volume cũ: `docker compose down -v && rm -rf .docker/volumes/pgdata` (reset) **hoặc** chạy `make db-ensure`
-sau bước 1 (giữ dữ liệu).
+sau bước 1 (giữ dữ liệu; máy không có `make`: chạy lệnh của target trong `Makefile`).
+`.env` cũ thiếu biến mới (`MINIO_*`, `PG_HOST_PORT`...) → copy lại từ `.env.example` hoặc bổ sung các biến đó.
 
 ## 1. Hạ tầng (US1, SC-002)
 
