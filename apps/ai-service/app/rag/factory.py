@@ -3,6 +3,7 @@ from typing import List, Optional
 
 from ..llm.gateway import LlmGateway, get_gateway
 from ..llm.usage import UsageCollector
+from .query_rewrite import QueryRewriter
 from .repository import PgKnowledgeRepository
 from .retriever import Retriever
 from .settings import RagSettings, load_rag_settings
@@ -20,4 +21,6 @@ def build_retriever(settings: Optional[RagSettings] = None,
         # collector: ghi token embedding vao metadata cua request (FR-AI-080)
         return (await gw.embed([text], collector=collector))[0]
 
-    return Retriever(PgKnowledgeRepository(settings), embed_query, textbook=settings.textbook_enabled)
+    rewrite = QueryRewriter(gw).to_english if settings.query_rewrite else None
+    return Retriever(PgKnowledgeRepository(settings), embed_query, textbook=settings.textbook_enabled,
+                     rewrite=rewrite)

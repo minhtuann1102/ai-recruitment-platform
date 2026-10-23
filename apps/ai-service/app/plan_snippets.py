@@ -17,6 +17,7 @@ from .rag.factory import build_retriever
 from .rag.retriever import Retriever, build_query
 
 log = logging.getLogger("ai_service.rag")
+SNIPPET_DEADLINE_S = 5.0  # do 24/10: binh thuong ~0.5 s (topic_id), co viet lai truy van ~2 s
 _retriever: Optional[Retriever] = None
 _loaded = False
 
@@ -57,7 +58,14 @@ async def attach_reference_snippets(plan: InterviewPlan, catalog: TrackCatalog, 
     if retriever is None:
         return plan
     pairs = [(ph, t) for ph in plan.phases for t in ph.topics]
-    results = await asyncio.gather(*(_snippets(retriever, ph.phase, t, catalog, collector) for ph, t in pairs))
+    try:
+        # han tong cho RAG luc start: snippet la tuy chon, qua han thi plan khong co snippet (khong cham start)
+        results = await asyncio.wait_for(
+            asyncio.gather(*(_snippets(retriever, ph.phase, t, catalog, collector) for ph, t in pairs)),
+            timeout=SNIPPET_DEADLINE_S)
+    except asyncio.TimeoutError:
+        log.warning("rag_snippets_timeout deadline_s=%s", SNIPPET_DEADLINE_S)
+        return plan
     out = plan.model_copy(deep=True)
     flat = [t for ph in out.phases for t in ph.topics]
     for topic, snippets in zip(flat, results):

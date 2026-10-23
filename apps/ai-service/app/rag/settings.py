@@ -18,6 +18,7 @@ class RagSettings:
     embedding_model: str  # ten chuan luu trong cot embedding_model (khong tien to provider)
     connect_timeout_s: int
     textbook_enabled: bool = False  # bat khi DE da nap textbook vao knowledge_chunks
+    query_rewrite: bool = True  # LLM viet lai truy van sang tieng Anh o duong vector (+~1.6 s, chi khi can vector)
 
 
 def stored_model_name(name: str) -> str:
@@ -44,4 +45,5 @@ def load_rag_settings(env: Optional[Mapping[str, str]] = None) -> RagSettings:
         embedding_model=stored_model_name(env.get("EMBEDDING_MODEL") or "text-embedding-3-small"),
         connect_timeout_s=timeout,
         textbook_enabled=_flag(env.get("RAG_TEXTBOOK_ENABLED", ""), False),
+        query_rewrite=_flag(env.get("RAG_QUERY_REWRITE", ""), True),
     )

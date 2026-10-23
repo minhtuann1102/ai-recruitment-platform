@@ -12,7 +12,7 @@ from pathlib import Path
 
 from app.llm.gateway import get_gateway
 from app.rag.models import SearchFilters
-from app.rag.query_expansion import expand_query
+from app.rag.factory import build_retriever
 from app.rag.repository import PgKnowledgeRepository
 from app.rag.retriever import OVERFETCH, dedup
 from app.rag.settings import load_rag_settings
@@ -22,14 +22,17 @@ DEFAULT_GOLDEN = Path(__file__).with_name("rag_golden.json")
 
 
 async def evaluate(golden: dict, expand: bool = True) -> dict:
-    """expand=True: dung cung buoc mo rong truy van tieng Viet nhu retriever (app/rag/query_expansion.py)."""
+    """expand=True: dung dung van ban tim kiem nhu retriever (LLM viet lai neu RAG_QUERY_REWRITE bat, khong thi
+    tu dien); expand=False: truy van goc."""
     settings = load_rag_settings()
     if not settings.enabled:
         raise SystemExit("Dat RAG_ENABLED=true va AI_DB_URL truoc khi chay eval")
     repo, gateway, k = PgKnowledgeRepository(settings), get_gateway(), golden.get("k", 5)
+    retriever = build_retriever(settings, gateway)
     results = []
     for q in golden["queries"]:
-        vector = (await gateway.embed([expand_query(q["query"]) if expand else q["query"]]))[0]
+        text = await retriever.search_text(q["query"]) if expand else q["query"]
+        vector = (await gateway.embed([text]))[0]
         f = q.get("filters", {})
         filters = SearchFilters(("interview_qa",), f.get("category"), f.get("difficulty"), None)
         hits = dedup(await repo.search(vector, filters, k * OVERFETCH))[:k]
@@ -38,7 +41,7 @@ async def evaluate(golden: dict, expand: bool = True) -> dict:
                         "scores": [round(c.score or 0.0, 3) for c in hits]})
         mark = "OK  " if hit_at_k(retrieved, q["relevant"], k) else "MISS"
         print(f"{mark} {q['id']} [{q['group']}] top={retrieved[:3]}", file=sys.stderr)
-    return {"k": k, "embedding_model": settings.embedding_model, "query_expansion": expand, "recall": recall_by_group(results, k),
+    return {"k": k, "embedding_model": settings.embedding_model, "query_expansion": expand, "query_rewrite": settings.query_rewrite, "recall": recall_by_group(results, k),
             "results": results}
 
 
