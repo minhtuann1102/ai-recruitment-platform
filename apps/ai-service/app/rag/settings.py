@@ -17,6 +17,7 @@ class RagSettings:
     db_url: str
     embedding_model: str  # ten chuan luu trong cot embedding_model (khong tien to provider)
     connect_timeout_s: int
+    textbook_enabled: bool = False  # bat khi DE da nap textbook vao knowledge_chunks
 
 
 def stored_model_name(name: str) -> str:
@@ -42,4 +43,5 @@ def load_rag_settings(env: Optional[Mapping[str, str]] = None) -> RagSettings:
         db_url=db_url,
         embedding_model=stored_model_name(env.get("EMBEDDING_MODEL") or "text-embedding-3-small"),
         connect_timeout_s=timeout,
+        textbook_enabled=_flag(env.get("RAG_TEXTBOOK_ENABLED", ""), False),
     )

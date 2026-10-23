@@ -1,7 +1,8 @@
 """Gan reference_snippets vao plan sau khi plan hop le (FR-AI-022): <= 3 chunk, <= 600 token moi topic.
 
 Chi chay mot lan luc start; Evaluator dung lai o cac luot sau, khong goi RAG moi luot. Intro (du an trong CV)
-khong co topic_id nen bo qua; scenario khong lay interview_qa, chi textbook theo category chinh cua track.
+khong co topic_id nen bo qua; scenario khong lay interview_qa, chi textbook theo category chinh cua track
+(chi khi RAG_TEXTBOOK_ENABLED=true; kho chua co textbook thi scenario khong co snippet).
 """
 import asyncio
 import logging
@@ -10,6 +11,7 @@ from typing import Optional
 
 from .catalog.models import TrackCatalog
 from .llm.errors import ConfigError
+from .llm.usage import UsageCollector
 from .models_interview import InterviewPlan, PlanTopic
 from .rag.factory import build_retriever
 from .rag.retriever import Retriever, build_query
@@ -36,24 +38,26 @@ def main_category(catalog: TrackCatalog) -> Optional[str]:
     return counts.most_common(1)[0][0] if counts else None
 
 
-async def _snippets(retriever: Retriever, phase: str, topic: PlanTopic, catalog: TrackCatalog):
+async def _snippets(retriever: Retriever, phase: str, topic: PlanTopic, catalog: TrackCatalog,
+                    collector: Optional[UsageCollector] = None):
     if phase == "intro":
         return []
     query = build_query(None, topic.title, " ".join(topic.key_points))
     if phase == "scenario":
         return await retriever.plan_snippets(topic_id=None, category=main_category(catalog),
-                                             difficulty=topic.start_difficulty, query=query, include_qa=False)
+                                             difficulty=topic.start_difficulty, query=query, include_qa=False,
+                                             collector=collector)
     entry = next((t for t in catalog.topics if t.id == topic.catalog_ref), None)
     return await retriever.plan_snippets(topic_id=topic.catalog_ref, category=entry.category if entry else None,
-                                         difficulty=topic.start_difficulty, query=query)
+                                         difficulty=topic.start_difficulty, query=query, collector=collector)
 
 
-async def attach_reference_snippets(plan: InterviewPlan, catalog: TrackCatalog,
-                                    retriever: Optional[Retriever]) -> InterviewPlan:
+async def attach_reference_snippets(plan: InterviewPlan, catalog: TrackCatalog, retriever: Optional[Retriever],
+                                    collector: Optional[UsageCollector] = None) -> InterviewPlan:
     if retriever is None:
         return plan
     pairs = [(ph, t) for ph in plan.phases for t in ph.topics]
-    results = await asyncio.gather(*(_snippets(retriever, ph.phase, t, catalog) for ph, t in pairs))
+    results = await asyncio.gather(*(_snippets(retriever, ph.phase, t, catalog, collector) for ph, t in pairs))
     out = plan.model_copy(deep=True)
     flat = [t for ph in out.phases for t in ph.topics]
     for topic, snippets in zip(flat, results):

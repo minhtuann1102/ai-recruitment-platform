@@ -44,6 +44,24 @@ Persona Java junior: giỏi 5.3 / TB 4.8 / yếu 2.0 (không RAG: 5.7 / 4.3 / 1.
 3. Tiếng Việt thuần (0.667): thử mở rộng truy vấn bằng tên topic/thuật ngữ Anh trước khi nghĩ tới đổi model embedding (đổi model cần ADR và re-index).
 4. DE duyệt nhãn golden set RAG; thêm truy vấn nhắm cặp crawl.
 
+## Sau 3 cải tiến (nhánh `thang/rag-improvements`, 2026-10-24)
+
+1. **Tạm bỏ textbook** (`RAG_TEXTBOOK_ENABLED`, mặc định tắt): scenario không tìm nữa. Gắn snippet cả plan **~1.5 s → ~0.44 s** (3 lần đo, máy dev → Supabase Singapore); topic technical vẫn có snippet (3, 1, 3).
+2. **Ghi usage embedding** của RAG vào `metadata.usage.embedding` (start). Với plan đo được, cả 3 topic technical trúng theo `topic_id` nên không cần embed (usage rỗng); embed chỉ phát sinh khi topic có < 2 cặp Q&A.
+3. **Mở rộng truy vấn tiếng Việt** (`app/rag/query_expansion.py`): nối thuật ngữ Anh cho ~60 cụm IT tiếng Việt, so khớp trên chuỗi bỏ dấu.
+
+| Bộ truy vấn | Không mở rộng | Có mở rộng |
+|---|---|---|
+| Golden set chính (24) | 0.875 | **0.958** |
+| · tiếng Việt thuần (6) | 0.667 | 1.000 |
+| · không dấu (5) | 0.800 | 0.800 |
+| · en, mixed | 1.000 | 1.000 |
+| **Held-out tiếng Việt thuần (8)** | 0.500 | **0.625** |
+
+**Đọc số cẩn thận:** từ điển được viết sau khi biết 2 câu tiếng Việt bị trượt ở golden set chính; các cụm chép gần nguyên văn từ câu đó đã bị bỏ, nhưng vài thuật ngữ chung ("phân trang", "tồn kho", "cập nhật đồng thời") vẫn được chọn khi đã biết. Vì vậy con số 1.000 của nhóm tiếng Việt ở golden set chính **bị thổi phồng**. Bộ held-out (`evals/rag_golden_holdout.json`, 8 câu viết sau khi chốt từ điển, không sửa từ điển sau đó) cho thấy mức thật: **tiếng Việt thuần ~0.6, mở rộng giúp +1/8 câu**. Truy vấn thuần Việt vẫn là điểm yếu.
+
+Ảnh hưởng thực tế hạn chế: đường plan dùng `topic_id` trước (khớp chính xác), vector chỉ dùng khi topic có < 2 cặp. Hướng tiếp nếu cần: model embedding đa ngôn ngữ (cần ADR, DE re-index), hoặc LLM viết lại truy vấn sang tiếng Anh ở đường vector (thêm ~1 s).
+
 ## Câu hỏi chưa giải quyết
 - DE có kế hoạch nạp `textbook` trước feature freeze không?
 - Golden set RAG có cần gắn nhãn thêm cặp `cr-*` không?

@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "status": "held-out: AIE viet 2026-10-24 SAU KHI chot tu dien mo rong truy van, de kiem tra khong khop qua sat golden set chinh; nhan ban nhap cho DE duyet",
+  "corpus": "de_interview_qa",
+  "k": 5,
+  "groups": {"vi": "tieng Viet thuan, khong thuat ngu Anh"},
+  "queries": [
+    {"id": "h01", "group": "vi", "query": "Ghi cơ sở dữ liệu xong rồi xóa bộ nhớ đệm mà người dùng vẫn đọc ra dữ liệu cũ, vì sao", "relevant": ["de-qa-1009"], "filters": {}},
+    {"id": "h02", "group": "vi", "query": "Dịch vụ Node bị khởi động lại vì tràn bộ nhớ sau vài ngày, tìm chỗ rò rỉ bộ nhớ thế nào", "relevant": ["de-qa-1016"], "filters": {}},
+    {"id": "h03", "group": "vi", "query": "Trừ điểm thưởng trong ví bị sai khi hai yêu cầu đến cùng lúc trong Django", "relevant": ["de-qa-1057"], "filters": {}},
+    {"id": "h04", "group": "vi", "query": "Lưu mật khẩu người dùng thế nào cho an toàn và so sánh mã đặt lại mật khẩu ra sao", "relevant": ["de-qa-1069"], "filters": {}},
+    {"id": "h05", "group": "vi", "query": "Chọn ngưỡng xác suất cho mô hình phân loại hai lớp như thế nào", "relevant": ["de-qa-1181"], "filters": {}},
+    {"id": "h06", "group": "vi", "query": "Mỗi tuần nhận hàng trăm cảnh báo vô nghĩa, thiết kế lại cách cảnh báo thế nào", "relevant": ["de-qa-1212"], "filters": {}},
+    {"id": "h07", "group": "vi", "query": "Hộp thoại tự viết không dùng được bằng bàn phím và trình đọc màn hình", "relevant": ["de-qa-1260"], "filters": {}},
+    {"id": "h08", "group": "vi", "query": "Một tệp trạng thái duy nhất cho toàn bộ hạ tầng làm việc lập kế hoạch thay đổi rất chậm", "relevant": ["de-qa-1206"], "filters": {}}
+  ]
+}

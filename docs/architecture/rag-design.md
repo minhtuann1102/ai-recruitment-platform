@@ -110,6 +110,8 @@ Khác thiết kế ban đầu: **không có `embedder.py`, `chunking.py` và ups
 ## 7. Cách đánh giá (bắt đầu Sprint 1)
 
 1. **Golden set 20+ query** dạng `(query, filters, qa_id/chunk_id đúng)`, gồm cả query tiếng Việt và tiếng Anh. Ghi vào `apps/ai-service/evals/rag_golden.json` (bản nháp 24 query, 2026-10-22, nhãn trỏ vào `qa_id` của bộ canonical DE, chờ DE duyệt; nhóm Việt → tài liệu Anh để trống tới khi có textbook). Chạy `python -m evals.run_rag`. **Số đo 2026-10-24** (ai_db dùng chung trên Supabase, 9.006 bản ghi `interview_qa`, chưa có textbook): recall@5 0.875; en 1.0, mixed 1.0, không dấu 0.8, vi 0.667. Truy hồi theo `topic_id` ~0.4 s, vector ~1.5 s (gồm embed), gắn snippet cả plan ~1.5 s. Chi tiết: `plans/20261019-1100-ai-interview-brd-implementation/reports/eval-rag-20261024-shared-ai-db.md`.
+
+**Cải tiến 2026-10-24:** (a) mở rộng truy vấn tiếng Việt bằng thuật ngữ Anh trước khi embed (`app/rag/query_expansion.py`, áp cho đường vector của retriever và `run_rag`, tắt bằng `--no-expand`): golden chính 0.875 → 0.958, held-out tiếng Việt thuần 0.5 → 0.625; (b) `RAG_TEXTBOOK_ENABLED` (mặc định tắt khi kho chưa có textbook): scenario không truy hồi, gắn snippet ~1.5 s → ~0.44 s; (c) token embed truy vấn ghi vào `metadata.usage.embedding`.
 2. Đo **recall@5** và xem tay top-3 (khớp quality gate "top-3 liên quan" trong data-pipeline.md). Mục tiêu đề xuất: recall@5 ≥ 0.8, cần nhóm xác nhận.
 3. So sánh trên cùng golden set: overlap 0 và 50; có và không có heading path.
 4. Nếu recall thấp ở truy vấn tiếng Việt: thử embedding model khác (ví dụ bge-m3) trước khi thêm hybrid hay rerank. Re-embed ~6000 chunk chỉ tốn vài cent và `embedding_model` đã có sẵn trong schema.

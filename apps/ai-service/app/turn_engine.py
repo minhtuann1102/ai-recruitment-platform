@@ -66,7 +66,7 @@ async def start_session(req: StartRequest, planner=None, collector: Optional[Usa
     """Planner (LLM hoac mock, co plan du phong) -> gan reference_snippets (RAG, neu bat) -> cau hoi dau."""
     planner = planner or get_planner()
     plan = await planner.plan(req.track, req.level, req.duration_minutes, req.cv_profile, req.jd_profile, collector)
-    plan = await attach_reference_snippets(plan, load_track(req.track), retriever or get_retriever())
+    plan = await attach_reference_snippets(plan, load_track(req.track), retriever or get_retriever(), collector)
     topics = flat_topics(plan)
     lo, hi = LEVEL_CONFIG[req.level]["bounds"]
     first_phase, first = topics[0]

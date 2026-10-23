@@ -94,7 +94,7 @@ def test_read_only_session_rejects_writes(seeded):
 
 
 def test_retriever_end_to_end_fallback(seeded):
-    async def embed(_text):
+    async def embed(_text, collector=None):
         return onehot(1)
 
     out = run(Retriever(seeded, embed).retrieve_for_topic(

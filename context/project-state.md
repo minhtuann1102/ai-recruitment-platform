@@ -43,3 +43,4 @@ Nghiên cứu thị trường và gợi ý cải thiện (2026-10-22): `plans/20
 Số đo LLM thật đầu tiên (2026-10-22): `plans/20261019-1100-ai-interview-brd-implementation/reports/eval-sim-20261022-llm-quick.md`. Khóa OpenRouter ở `apps/ai-service/.env` (owner giữ, smoke test OK).
 
 RAG bật với ai_db dùng chung (2026-10-24): recall@5 0.875, snippet thêm ~1.5 s vào start; báo cáo `plans/20261019-1100-ai-interview-brd-implementation/reports/eval-rag-20261024-shared-ai-db.md` (nhánh `thang/rag-enable-measure`). Toàn bộ PR #13–#27 đã merge.
+Cải tiến RAG (nhánh `thang/rag-improvements`): bỏ textbook khi chưa có (snippet 1.5 → 0.44 s), usage embedding vào metadata, mở rộng truy vấn tiếng Việt (golden 0.958, held-out tiếng Việt 0.625).

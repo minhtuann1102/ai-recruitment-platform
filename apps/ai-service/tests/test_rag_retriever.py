@@ -32,7 +32,7 @@ def test_fewer_than_two_topic_hits_falls_back_to_vector_and_dedups():
                              hits=[qa("q1", TOPIC, chunk_type="question", score=0.9),
                                    qa("q7", "node.other", score=0.8), textbook("t1", score=0.7)])
     embed = FakeEmbed()
-    out = retrieve(Retriever(repo, embed))
+    out = retrieve(Retriever(repo, embed, textbook=True))
     assert [c.dedup_key for c in out] == ["q1", "q7", "t1"]
     assert out[0].chunk_type == "qa_pair"  # ban topic_id (qa_pair) giu truoc ban question trung qa_id
     _, filters, limit = repo.calls[1]
@@ -43,7 +43,7 @@ def test_fewer_than_two_topic_hits_falls_back_to_vector_and_dedups():
 
 def test_scenario_mode_uses_textbook_only():
     repo = FakeKnowledgeRepo(hits=[qa("q9", TOPIC, score=0.9), textbook("t1")])
-    out = retrieve(Retriever(repo, FakeEmbed()), topic_id=None, include_qa=False)
+    out = retrieve(Retriever(repo, FakeEmbed(), textbook=True), topic_id=None, include_qa=False)
     assert [c.id for c in out] == ["t1"]
     assert [c[0] for c in repo.calls] == ["search"]
     assert repo.calls[0][1].source_types == ("textbook",)
@@ -102,3 +102,17 @@ def test_helpers():
     assert trim_to_budget([qa("a", TOPIC, content="z" * 30)], 5) == []
     assert build_query("Backend", "Event loop", "  tra loi " + "w" * 500).startswith("Backend | Event loop | tra loi")
     assert len(build_query(None, "T", "w" * 500)) == len("T | ") + 300
+
+
+def test_textbook_disabled_skips_scenario_and_textbook_search():
+    repo, embed = FakeKnowledgeRepo(hits=[textbook("t1")]), FakeEmbed()
+    assert retrieve(Retriever(repo, embed), topic_id=None, include_qa=False) == []
+    assert repo.calls == [] and embed.queries == []  # khong ton DB hay embed
+    retrieve(Retriever(repo, embed))
+    assert repo.calls[-1][1].source_types == ("interview_qa",)
+
+
+def test_vector_query_is_expanded_with_english_terms():
+    embed = FakeEmbed()
+    retrieve(Retriever(FakeKnowledgeRepo(), embed), query="Phân trang làm trang cuối rất chậm")
+    assert embed.queries == ["Phân trang làm trang cuối rất chậm (pagination offset limit)"]

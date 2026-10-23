@@ -9,7 +9,9 @@ import math
 from typing import Awaitable, Callable, List, Optional, Protocol, Sequence
 
 from .difficulty import difficulty_bucket
+from ..llm.usage import UsageCollector
 from .models import Chunk, SearchFilters
+from .query_expansion import expand_query
 
 log = logging.getLogger("ai_service.rag")
 
@@ -17,7 +19,7 @@ MIN_TOPIC_HITS = 2
 OVERFETCH = 4  # lay du roi khu trung, de question va qa_pair cung cap khong chiem hai cho
 MIN_TAIL_TOKENS = 50  # phan con lai nho hon thi khong cat chunk cuoi nua
 
-EmbedFn = Callable[[str], Awaitable[List[float]]]
+EmbedFn = Callable[..., Awaitable[List[float]]]  # embed(text, collector=None)
 
 
 class KnowledgeRepository(Protocol):
@@ -62,15 +64,23 @@ def build_query(category: Optional[str], title: str, extra: str = "") -> str:
 
 
 class Retriever:
-    def __init__(self, repo: KnowledgeRepository, embed: EmbedFn, *, k: int = 5, token_budget: int = 1500):
+    def __init__(self, repo: KnowledgeRepository, embed: EmbedFn, *, k: int = 5, token_budget: int = 1500,
+                 textbook: bool = False):
+        """textbook=False (mac dinh, RAG_TEXTBOOK_ENABLED): kho chua co textbook nen khong tim (do 24/10: tim
+        textbook cho scenario ton ~1.5 s ma luon rong)."""
         self._repo, self._embed, self.k, self.token_budget = repo, embed, k, token_budget
+        self.textbook = textbook
 
     async def retrieve_for_topic(self, *, topic_id: Optional[str], category: Optional[str], difficulty: int,
                                  query: str, include_qa: bool = True, k: Optional[int] = None,
-                                 token_budget: Optional[int] = None, chunk_type: str = "qa_pair") -> List[Chunk]:
+                                 token_budget: Optional[int] = None, chunk_type: str = "qa_pair",
+                                 collector: Optional[UsageCollector] = None) -> List[Chunk]:
         """chunk_type cua interview_qa trong vector fallback: qa_pair (Planner, Evaluator) hoac question
         (Interviewer tim cau hoi tuong tu, rag-design muc 4)."""
         k, budget = k or self.k, token_budget or self.token_budget
+        types = (("interview_qa",) if include_qa else ()) + (("textbook",) if self.textbook else ())
+        if not types:  # vd scenario khi chua bat textbook: khong co gi de tim, khong ton embed
+            return []
         via = "topic"
         try:
             bucket = difficulty_bucket(difficulty)
@@ -78,8 +88,7 @@ class Retriever:
             found = dedup(found)
             if len(found) < MIN_TOPIC_HITS:
                 via = "topic+vector" if found else "vector"
-                types = ("interview_qa", "textbook") if include_qa else ("textbook",)
-                vector = await self._embed(query)
+                vector = await self._embed(expand_query(query), collector=collector)
                 hits = await self._repo.search(vector, SearchFilters(types, category, bucket, chunk_type),
                                                k * OVERFETCH)
                 found = dedup([*found, *hits])
@@ -93,10 +102,12 @@ class Retriever:
         return result
 
     async def plan_snippets(self, *, topic_id: Optional[str], category: Optional[str], difficulty: int,
-                            query: str, include_qa: bool = True) -> List[str]:
+                            query: str, include_qa: bool = True,
+                            collector: Optional[UsageCollector] = None) -> List[str]:
         """FR-AI-022: toi da 3 chunk, <= 600 token moi topic, luu vao PlanTopic.reference_snippets."""
         chunks = await self.retrieve_for_topic(topic_id=topic_id, category=category, difficulty=difficulty,
-                                               query=query, include_qa=include_qa, k=3, token_budget=600)
+                                               query=query, include_qa=include_qa, k=3, token_budget=600,
+                                               collector=collector)
         return [c.content for c in chunks]
 
     async def reference_answer(self, qa_id: str) -> Optional[Chunk]:
