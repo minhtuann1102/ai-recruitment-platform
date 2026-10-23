@@ -1,7 +1,7 @@
 # ADR-010: Truy hồi tiếng Việt thuần: viết lại truy vấn bằng LLM, cân nhắc đổi sang `text-embedding-3-large`
 
 **Ngày:** 2026-10-24  
-**Trạng thái:** Proposed (AIE). Phần 1 đã cài ở ai-service; phần 2 chờ DE (đường ghi) và team duyệt  
+**Trạng thái:** Phần 1 Accepted (owner, 2026-10-24, đã cài). Phần 2 **Deferred** (owner, 2026-10-24): giữ `text-embedding-3-small` cho giai đoạn 1; xem lại nếu recall tiếng Việt trên dữ liệu thật giảm hoặc muốn bỏ bước viết lại để giảm độ trễ  
 **Liên quan:** [rag-design.md](../rag-design.md) §1, §7; NFR-AI-QUAL14, CMP06; số đo: `plans/20261019-1100-ai-interview-brd-implementation/reports/eval-rag-20261024-vietnamese-retrieval.md`
 
 ## Bối cảnh
