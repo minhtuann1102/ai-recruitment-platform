@@ -76,7 +76,7 @@ Chưa chạy `/speckit-clarify`. Ba điểm phụ thuộc người khác hoặc 
   để `status` gì (`open`/`draft`)? Ai duyệt mapping — FSD?]
 - **NC-2 (S2-DE-3 Bắt buộc hay Stretch)**: [NEEDS CLARIFICATION: `docs/sprint-plan.md` ghi S2-DE-3 "Index JD vào
   ai_db" là **Bắt buộc**, nhưng `rag-design.md` §3 ghi `job_description` là **Stretch, AI không dùng**, và S2-AIE-6
-  ghi "JD không vào RAG" (JD đi qua JD Parser → `jd_profile`). Index JD có còn cần không? Nếu Stretch: SC-003 chỉ còn
+  ghi "JD không vào RAG" (JD đi qua JD Parser → `jd_profile`). Index JD có còn cần không? Nếu Stretch: SC-004 chỉ còn
   1500 chunk tổng của Quality Gate S2 (data-pipeline §9) — đạt bằng nguồn nào? AIE + DE chốt.]
 - **NC-3 (500 JD khả thi + nguồn hợp lệ)**: [NEEDS CLARIFICATION: topcv.vn chặn truy cập tự động (Cloudflare 403),
   itviec.com cho phép theo robots.txt nhưng điều khoản 2.2 hạn chế sao chép ngoài mục đích cá nhân khi chưa có đồng ý
