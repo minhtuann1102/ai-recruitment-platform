@@ -107,9 +107,9 @@
   },
   {
     "qa_id": "de-qa-1201",
-    "verdict": "fix",
+    "verdict": "ok",
     "confidence": "high",
-    "summary_vi": "Nội dung kỹ thuật đúng và có nguồn (nginx resolve DNS một lần, tham số `resolve` mở cho bản open source từ 1.27.3). Cần sửa vì câu hỏi có 3 yêu cầu, quá rộng cho 3–5 phút, và phần cuối bị cắt ở 600 token.",
+    "summary_vi": "Đạt theo rubric v2: câu hỏi có 2 ý độc lập, trả lời các ý bắt buộc trong khoảng 4 phút; các claim chính đều có trích dẫn. (v1 gợi ý Cần sửa vì đếm 3 ý.)",
     "claims": [
       {
         "claim": "Replica mới vào network với IP mới nhưng giữ tên; kết nối tới container cũ bị đóng, client phải tự phân giải lại và kết nối lại",
@@ -156,9 +156,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi yêu cầu phân tích 3 lỗi riêng (xung đột port, chia tải lệch, 502 sau deploy) cộng cách sửa: quá 2 sub-question, khó gói trong 3–5 phút.",
+        "detail": "Rubric v2: 2 ý độc lập, ~4 phút cho các ý bắt buộc (ba lỗi chỉ có hai nguyên nhân gốc: publish port và nginx phân giải tên một lần); v1 đếm 3 ý. Còn lại là gợi ý: Câu hỏi yêu cầu phân tích 3 lỗi riêng (xung đột port, chia tải lệch, 502 sau deploy) cộng cách sửa: quá 2 sub-question, khó gói trong 3–5 phút.",
         "fix": "Bỏ lỗi 1 (xung đột port, kiến thức junior) khỏi đề; giữ 2 lỗi có chung nguyên nhân DNS của nginx."
       },
       {
@@ -180,10 +180,10 @@
       "note": "Cần hiểu DNS-based discovery của Docker và cách nginx cache kết quả phân giải; middle thường chỉ nêu được 'restart nginx'."
     },
     "interview_fit": {
-      "minutes": 6,
-      "sub_questions": 3,
+      "minutes": 4,
+      "sub_questions": 2,
       "gradeable": true,
-      "note": "Ý chấm rõ nhưng 3 lỗi làm câu trả lời dài hơn 5 phút."
+      "note": "Rubric v2: ba lỗi chỉ có hai nguyên nhân gốc: publish port và nginx phân giải tên một lần. Ý chấm rõ nhưng 3 lỗi làm câu trả lời dài hơn 5 phút."
     },
     "junior_guide": {
       "tests": "Hiểu service discovery qua DNS nội bộ của Docker và việc nginx open source phân giải hostname tĩnh một lần lúc nạp cấu hình.",
@@ -200,10 +200,7 @@
       ],
       "follow_up": "Dùng biến trong proxy_pass thì mất những tính năng gì của block upstream, và bạn bù lại thế nào?"
     },
-    "proposed_fix": {
-      "question": "Bạn scale `api` lên 3 replica (`docker compose up --scale api=3`, api không publish port) phía sau nginx với `proxy_pass http://api:8080;`. Traffic không chia cho replica mới, và sau mỗi lần deploy (container tạo lại) nginx trả 502 cho tới khi restart. Giải thích nguyên nhân và cách sửa.",
-      "answer_change": "Rút phần 'Lỗi 1' còn một câu (không publish port cho api). Xóa mục 'Lưu ý thêm'. Giữ nguyên ba cách sửa; chunk sẽ dưới 600 token."
-    }
+    "proposed_fix": null
   },
   {
     "qa_id": "de-qa-1202",
@@ -301,7 +298,7 @@
     "qa_id": "de-qa-1203",
     "verdict": "fix",
     "confidence": "high",
-    "summary_vi": "Các bước debug và lệnh kubectl đều đúng theo tài liệu Kubernetes. Cần sửa vì đáp án liệt kê 8 nguyên nhân (khó chấm, quá 5 phút) và ~806 token nên bước 'cô lập lỗi bằng cách gọi thẳng PodIP' bị cắt khỏi snippet.",
+    "summary_vi": "Các bước debug và lệnh kubectl đều đúng theo tài liệu Kubernetes. Cần sửa vì đáp án liệt kê 8 nguyên nhân (khó chấm, quá 5 phút) và ~806 token nên bước 'cô lập lỗi bằng cách gọi thẳng PodIP' bị cắt khỏi snippet. (Rubric v2: không còn tính là quá rộng; vẫn cần sửa vì length.)",
     "claims": [
       {
         "claim": "EndpointSlice là kết quả của control loop đánh giá selector của Service",
@@ -354,9 +351,9 @@
         "fix": "Đưa bước 'cô lập lỗi' lên ngay sau 'Đường đi của request'; bỏ chi tiết `kubectl debug --copy-to`; gộp nguyên nhân 5–8 thành một dòng."
       },
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Đáp án có 8 nguyên nhân ngang hàng, không có thứ tự ưu tiên; khó chấm và vượt 5 phút. Câu hỏi gộp 3 yêu cầu (quy trình, nguyên nhân, cách xác nhận).",
+        "detail": "Rubric v2: 1 ý độc lập, ~5 phút cho các ý bắt buộc (quy trình debug, nguyên nhân và cách xác nhận là một bài chẩn đoán); v1 đếm 3 ý. Còn lại là gợi ý: Đáp án có 8 nguyên nhân ngang hàng, không có thứ tự ưu tiên; khó chấm và vượt 5 phút. Câu hỏi gộp 3 yêu cầu (quy trình, nguyên nhân, cách xác nhận).",
         "fix": "Giữ 4 nguyên nhân khớp triệu chứng nhất (selector quá rộng → response bản cũ; targetPort sai, thiếu readiness, rollout/SIGTERM → refused) và nêu rõ đó là các ý chấm điểm."
       },
       {
@@ -372,10 +369,10 @@
       "note": "Debug lỗi ngắt quãng qua nhiều lớp (DNS, kube-proxy, EndpointSlice, Pod) là kỹ năng vận hành thật, không phải định nghĩa."
     },
     "interview_fit": {
-      "minutes": 7,
-      "sub_questions": 3,
+      "minutes": 5,
+      "sub_questions": 1,
       "gradeable": false,
-      "note": "8 nguyên nhân + nhiều lệnh, quá dài và khó chọn ý chấm."
+      "note": "Rubric v2: quy trình debug, nguyên nhân và cách xác nhận là một bài chẩn đoán. 8 nguyên nhân + nhiều lệnh, quá dài và khó chọn ý chấm."
     },
     "junior_guide": {
       "tests": "Biết request đi từ Service tới Pod thế nào và debug lỗi chỉ xảy ra với một phần request bằng cách nhìn EndpointSlice thay vì chỉ nhìn `kubectl get pods`.",

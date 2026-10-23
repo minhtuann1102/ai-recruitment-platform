@@ -100,9 +100,9 @@
   },
   {
     "qa_id": "de-qa-1101",
-    "verdict": "fix",
+    "verdict": "ok",
     "confidence": "high",
-    "summary_vi": "Nội dung đúng và khớp javadoc ConcurrentHashMap (atomic từng thao tác, computeIfAbsent, merge/LongAdder, recursive update). Cần fix vì câu hỏi gồm 3 ý hỏi, quá rộng cho 3–5 phút; các ý phụ 4–5 bị cắt khỏi snippet.",
+    "summary_vi": "Đạt theo rubric v2: câu hỏi có 2 ý độc lập, trả lời các ý bắt buộc trong khoảng 4 phút; các claim chính đều có trích dẫn. (v1 gợi ý Cần sửa vì đếm 3 ý.)",
     "claims": [
       {
         "claim": "computeIfAbsent thực hiện atomic; hàm mapping được gọi đúng một lần nếu key vắng, không gọi nếu đã có",
@@ -156,9 +156,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi có 3 ý hỏi (vì sao sai, sửa thế nào, lưu ý khi dùng computeIfAbsent) và đáp án có 5 lưu ý phụ, khó trả lời gọn trong 3–5 phút và khó chấm theo ưu tiên.",
+        "detail": "Rubric v2: 2 ý độc lập, ~4 phút cho các ý bắt buộc (vì sao sai và cách sửa là một mạch; lưu ý khi dùng computeIfAbsent là phần của cách sửa); v1 đếm 3 ý. Còn lại là gợi ý: Câu hỏi có 3 ý hỏi (vì sao sai, sửa thế nào, lưu ý khi dùng computeIfAbsent) và đáp án có 5 lưu ý phụ, khó trả lời gọn trong 3–5 phút và khó chấm theo ưu tiên.",
         "fix": "Giữ 2 ý: 'Vì sao vẫn sai và sửa thế nào?'; chuyển phần lưu ý computeIfAbsent thành follow-up."
       },
       {
@@ -180,10 +180,10 @@
       "note": "Phân biệt thread-safe từng thao tác với atomic chuỗi thao tác, cộng các bẫy của compute*: lý luận chứ không chỉ nhớ."
     },
     "interview_fit": {
-      "minutes": 5,
-      "sub_questions": 3,
+      "minutes": 4,
+      "sub_questions": 2,
       "gradeable": true,
-      "note": "Có điểm chấm rõ nhưng 3 ý hỏi, vượt mức 2 của rubric."
+      "note": "Rubric v2: vì sao sai và cách sửa là một mạch; lưu ý khi dùng computeIfAbsent là phần của cách sửa. Có điểm chấm rõ nhưng 3 ý hỏi, vượt mức 2 của rubric."
     },
     "junior_guide": {
       "tests": "Hiểu rằng 'thread-safe' của ConcurrentHashMap chỉ áp dụng cho từng lời gọi, không cho chuỗi lời gọi.",
@@ -200,10 +200,7 @@
       ],
       "follow_up": "loadExpensive mất 2 giây; gọi nó trong computeIfAbsent trên map nóng thì có vấn đề gì và bạn thiết kế lại ra sao?"
     },
-    "proposed_fix": {
-      "question": "Code cache dùng ConcurrentHashMap viết `if (!map.containsKey(k)) map.put(k, loadExpensive(k));` và bộ đếm viết `counts.put(k, counts.get(k) + 1)`. Dưới tải cao, loadExpensive bị gọi trùng và số đếm bị thiếu. Vì sao ConcurrentHashMap \"thread-safe\" mà vẫn sai, và sửa thế nào?",
-      "answer_change": "Giữ phần nguyên nhân và cách sửa; rút 'Lưu ý' còn 2 ý (hàm mapping ngắn, không sửa chính map). Bỏ lưu ý 3–5 khỏi đáp án hoặc gộp thành một câu; chuyển phần computeIfAbsent nâng cao sang follow-up."
-    }
+    "proposed_fix": null
   },
   {
     "qa_id": "de-qa-1102",
@@ -492,7 +489,7 @@
     "qa_id": "de-qa-1105",
     "verdict": "fix",
     "confidence": "high",
-    "summary_vi": "Các fact về G1 và ZGC đều đúng và có version (IHOP 45%, MaxGCPauseMillis 200 ms, humongous, JEP 439/474). Cần fix vì câu hỏi có 4 ý hỏi và phần trade-off được hỏi trực tiếp lại nằm sau điểm cắt 600 token.",
+    "summary_vi": "Các fact về G1 và ZGC đều đúng và có version (IHOP 45%, MaxGCPauseMillis 200 ms, humongous, JEP 439/474). Cần fix vì câu hỏi có 4 ý hỏi và phần trade-off được hỏi trực tiếp lại nằm sau điểm cắt 600 token. (Rubric v2: không còn tính là quá rộng; vẫn cần sửa vì length.)",
     "claims": [
       {
         "claim": "G1 là collector mặc định",
@@ -553,9 +550,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi có 4 ý hỏi (đọc log, tune G1, khi nào chuyển ZGC, trade-off), quá rộng cho 3–5 phút.",
+        "detail": "Rubric v2: 2 ý độc lập, ~5 phút cho các ý bắt buộc (đọc log và tune G1 là một mạch chẩn đoán; khi nào chuyển ZGC kèm trade-off là ý thứ hai); v1 đếm 4 ý. Còn lại là gợi ý: Câu hỏi có 4 ý hỏi (đọc log, tune G1, khi nào chuyển ZGC, trade-off), quá rộng cho 3–5 phút.",
         "fix": "Thu hẹp còn 2 ý: 'Đọc log tìm nguyên nhân pause dài/Full GC thế nào, và khi nào bạn chuyển sang ZGC (trade-off)?'; chuyển phần tune G1 sang follow-up."
       },
       {
@@ -577,10 +574,10 @@
       "note": "Đọc GC log, chọn tham số và so sánh collector theo SLO: kiến thức vận hành sâu, thiên senior."
     },
     "interview_fit": {
-      "minutes": 6,
-      "sub_questions": 4,
+      "minutes": 5,
+      "sub_questions": 2,
       "gradeable": true,
-      "note": "Điểm chấm rõ nhưng 4 ý hỏi, vượt 2."
+      "note": "Rubric v2: đọc log và tune G1 là một mạch chẩn đoán; khi nào chuyển ZGC kèm trade-off là ý thứ hai. Điểm chấm rõ nhưng 4 ý hỏi, vượt 2."
     },
     "junior_guide": {
       "tests": "Hiểu cơ chế G1 đủ để giải thích pause dài/Full GC và biết khi nào cần collector pause thấp như ZGC.",
@@ -605,9 +602,9 @@
   },
   {
     "qa_id": "de-qa-1106",
-    "verdict": "fix",
+    "verdict": "ok",
     "confidence": "high",
-    "summary_vi": "Nội dung đúng theo tài liệu Hibernate 6.6 (N+1, phân trang in-memory khi join fetch collection, batch/subselect fetching, lazy mặc định). Cần fix vì câu hỏi gồm 3 ý hỏi lớn, quá rộng cho 3–5 phút.",
+    "summary_vi": "Đạt theo rubric v2: câu hỏi có 2 ý độc lập, trả lời các ý bắt buộc trong khoảng 5 phút; các claim chính đều có trích dẫn. (v1 gợi ý Cần sửa vì đếm 3 ý.)",
     "claims": [
       {
         "claim": "N+1 là nguyên nhân phổ biến nhất khiến code truy cập dữ liệu chậm",
@@ -654,9 +651,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi có 3 ý hỏi (giải thích N+1, vì sao cách sửa sai, các chiến lược đúng kèm trade-off) và đáp án liệt kê 6 chiến lược, khó trả lời gọn và khó chấm theo ưu tiên.",
+        "detail": "Rubric v2: 2 ý độc lập, ~5 phút cho các ý bắt buộc (giải thích N+1, vì sao cách sửa sai và chiến lược đúng là chuỗi nguyên nhân rồi cách sửa); v1 đếm 3 ý. Còn lại là gợi ý: Câu hỏi có 3 ý hỏi (giải thích N+1, vì sao cách sửa sai, các chiến lược đúng kèm trade-off) và đáp án liệt kê 6 chiến lược, khó trả lời gọn và khó chấm theo ưu tiên.",
         "fix": "Hỏi 2 ý: 'Vì sao JOIN FETCH items kèm phân trang làm chậm và tốn RAM, và bạn sửa thế nào?'; phần giải thích N+1 coi như nền, các chiến lược phụ (subselect, DTO) thành follow-up."
       },
       {
@@ -679,9 +676,9 @@
     },
     "interview_fit": {
       "minutes": 5,
-      "sub_questions": 3,
+      "sub_questions": 2,
       "gradeable": true,
-      "note": "Có điểm chấm rõ nhưng 3 ý hỏi, vượt 2."
+      "note": "Rubric v2: giải thích N+1, vì sao cách sửa sai và chiến lược đúng là chuỗi nguyên nhân rồi cách sửa. Có điểm chấm rõ nhưng 3 ý hỏi, vượt 2."
     },
     "junior_guide": {
       "tests": "Hiểu N+1 và cách chọn chiến lược fetch trong Hibernate/JPA cho danh sách có phân trang.",
@@ -699,10 +696,7 @@
       ],
       "follow_up": "Màn hình chỉ đọc cần 3 cột từ order và tổng số item; bạn có cần load entity không?"
     },
-    "proposed_fix": {
-      "question": "Endpoint liệt kê 20 đơn hàng kèm danh sách item và tên khách hàng sinh ra 41 câu SQL. Một dev sửa bằng `JOIN FETCH o.items` kèm phân trang thì số câu giảm nhưng memory và thời gian tăng khi bảng lớn. Vì sao cách sửa đó sai, và bạn sẽ fetch thế nào cho đúng?",
-      "answer_change": "Giữ đoạn N+1 thành một câu nền; giữ phần 'vì sao sai' và chiến lược 1–4; bỏ chiến lược 5–6 và phần phòng ngừa (hoặc chuyển thành follow-up)."
-    }
+    "proposed_fix": null
   },
   {
     "qa_id": "de-qa-1107",
@@ -1070,9 +1064,9 @@
   },
   {
     "qa_id": "de-qa-1111",
-    "verdict": "fix",
+    "verdict": "ok",
     "confidence": "high",
-    "summary_vi": "Các fact đều đúng theo tài liệu PostgreSQL, Spring và Hibernate (Read Committed mặc định, UPDATE đánh giá lại WHERE, lỗi serialization phải retry, @Version, @Lock). Cần fix vì câu hỏi liệt kê 4 cách cần so sánh cộng phần phân tích, quá rộng theo rubric.",
+    "summary_vi": "Đạt theo rubric v2: câu hỏi có 1 ý độc lập, trả lời các ý bắt buộc trong khoảng 5 phút; các claim chính đều có trích dẫn. (v1 gợi ý Cần sửa vì đếm 5 ý.)",
     "claims": [
       {
         "claim": "Read Committed là isolation mặc định của PostgreSQL",
@@ -1119,9 +1113,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi yêu cầu phân tích lost update và so sánh 4 cách (atomic update, pessimistic, optimistic, nâng isolation): tính theo rubric là 5 ý hỏi, quá nhiều cho 3–5 phút.",
+        "detail": "Rubric v2: 1 ý độc lập, ~5 phút cho các ý bắt buộc (phân tích lost update rồi so sánh các cách sửa là một bài nguyên nhân và cách sửa); v1 đếm 5 ý. Còn lại là gợi ý: Câu hỏi yêu cầu phân tích lost update và so sánh 4 cách (atomic update, pessimistic, optimistic, nâng isolation): tính theo rubric là 5 ý hỏi, quá nhiều cho 3–5 phút.",
         "fix": "Bỏ danh sách 4 cách khỏi câu hỏi: 'Phân tích lost update và bạn chọn cách khắc phục nào cho flash sale, vì sao?'; các cách còn lại làm follow-up."
       },
       {
@@ -1138,9 +1132,9 @@
     },
     "interview_fit": {
       "minutes": 5,
-      "sub_questions": 5,
+      "sub_questions": 1,
       "gradeable": true,
-      "note": "Điểm chấm rõ nhưng quá nhiều ý được liệt kê sẵn trong câu hỏi."
+      "note": "Rubric v2: phân tích lost update rồi so sánh các cách sửa là một bài nguyên nhân và cách sửa. Điểm chấm rõ nhưng quá nhiều ý được liệt kê sẵn trong câu hỏi."
     },
     "junior_guide": {
       "tests": "Hiểu lost update ở tầng ứng dụng và các cách chống bán vượt tồn kho.",
@@ -1158,16 +1152,13 @@
       ],
       "follow_up": "Với atomic update, nếu cần ghi thêm bảng order_items trong cùng transaction thì có rủi ro gì?"
     },
-    "proposed_fix": {
-      "question": "Endpoint trừ tồn kho làm `Product p = repo.findById(id); p.setStock(p.getStock() - qty);` trong một @Transactional trên PostgreSQL. Khi flash sale, hệ thống bán vượt số lượng tồn. Vì sao, và bạn chọn cách khắc phục nào, vì sao?",
-      "answer_change": "Giữ phần nguyên nhân; đặt atomic update làm đáp án chính; rút pessimistic/optimistic/isolation thành mỗi cách 1 câu trade-off; đưa đoạn 'Lựa chọn' lên trước."
-    }
+    "proposed_fix": null
   },
   {
     "qa_id": "de-qa-1112",
     "verdict": "fix",
     "confidence": "low",
-    "summary_vi": "Phần validate JWT khớp tài liệu Spring Security và yêu cầu RFC 9700 về refresh token cho public client có trích dẫn. Cần fix vì câu hỏi có 3 ý hỏi lớn; chi tiết reuse detection của rotation và phần lưu trữ trên trình duyệt chưa kiểm chứng được (không đọc được mục 4.14 của RFC 9700).",
+    "summary_vi": "Phần validate JWT khớp tài liệu Spring Security và yêu cầu RFC 9700 về refresh token cho public client có trích dẫn. Cần fix vì câu hỏi có 3 ý hỏi lớn; chi tiết reuse detection của rotation và phần lưu trữ trên trình duyệt chưa kiểm chứng được (không đọc được mục 4.14 của RFC 9700). (Rubric v2: không còn tính là quá rộng; vẫn cần sửa vì factual.)",
     "claims": [
       {
         "claim": "Resource server dùng issuer-uri để tìm public key (JWK Set) và validate chữ ký",
@@ -1214,9 +1205,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi có 3 ý hỏi lớn (cách validate JWT, vì sao khó thu hồi, thiết kế access/refresh gồm thời hạn, rotation, lưu trữ và trade-off), quá rộng cho 3–5 phút.",
+        "detail": "Rubric v2: 2 ý độc lập, ~5 phút cho các ý bắt buộc (cách validate giải thích luôn vì sao khó thu hồi; thiết kế access/refresh là ý thứ hai); v1 đếm 3 ý. Còn lại là gợi ý: Câu hỏi có 3 ý hỏi lớn (cách validate JWT, vì sao khó thu hồi, thiết kế access/refresh gồm thời hạn, rotation, lưu trữ và trade-off), quá rộng cho 3–5 phút.",
         "fix": "Hỏi 2 ý: 'Vì sao JWT khó thu hồi, và bạn thiết kế access/refresh token thế nào để logout/khóa tài khoản có hiệu lực nhanh?'; phần validate JWT thành follow-up."
       },
       {
@@ -1238,10 +1229,10 @@
       "note": "Thiết kế có trade-off giữa stateless và thu hồi tức thì, cộng bảo mật lưu trữ."
     },
     "interview_fit": {
-      "minutes": 6,
-      "sub_questions": 3,
+      "minutes": 5,
+      "sub_questions": 2,
       "gradeable": true,
-      "note": "Điểm chấm rõ nhưng 3 ý hỏi lớn."
+      "note": "Rubric v2: cách validate giải thích luôn vì sao khó thu hồi; thiết kế access/refresh là ý thứ hai. Điểm chấm rõ nhưng 3 ý hỏi lớn."
     },
     "junior_guide": {
       "tests": "Hiểu JWT được kiểm cục bộ nên khó thu hồi, và cách dùng access/refresh token để cân bằng.",
@@ -1268,7 +1259,7 @@
     "qa_id": "de-qa-1113",
     "verdict": "fix",
     "confidence": "high",
-    "summary_vi": "Nội dung đúng theo tài liệu Spring Security (DelegatingFilterProxy, FilterChainProxy, chain đầu tiên khớp, ExceptionTranslationFilter, khuyến nghị CSRF). Cần fix vì có 3 ý hỏi và toàn bộ phần 'khi nào tắt CSRF an toàn' nằm sau điểm cắt 600 token.",
+    "summary_vi": "Nội dung đúng theo tài liệu Spring Security (DelegatingFilterProxy, FilterChainProxy, chain đầu tiên khớp, ExceptionTranslationFilter, khuyến nghị CSRF). Cần fix vì có 3 ý hỏi và toàn bộ phần 'khi nào tắt CSRF an toàn' nằm sau điểm cắt 600 token. (Rubric v2: không còn tính là quá rộng; vẫn cần sửa vì length.)",
     "claims": [
       {
         "claim": "Servlet container không biết bean Spring; DelegatingFilterProxy ủy quyền cho bean Filter, lookup lazy",
@@ -1322,9 +1313,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi có 3 ý hỏi (luồng qua DelegatingFilterProxy/FilterChainProxy/SecurityFilterChain, cách tách hai chain, khi nào tắt CSRF an toàn), quá rộng cho 3–5 phút.",
+        "detail": "Rubric v2: 2 ý độc lập, ~5 phút cho các ý bắt buộc (luồng filter chain và cách tách hai chain là một mạch; khi nào tắt CSRF an toàn là ý thứ hai); v1 đếm 3 ý. Còn lại là gợi ý: Câu hỏi có 3 ý hỏi (luồng qua DelegatingFilterProxy/FilterChainProxy/SecurityFilterChain, cách tách hai chain, khi nào tắt CSRF an toàn), quá rộng cho 3–5 phút.",
         "fix": "Hỏi 2 ý: 'Vì sao API trả 401/403 và bạn tách hai chain thế nào? Có nên tắt CSRF toàn cục không?'; phần luồng DelegatingFilterProxy làm follow-up."
       },
       {
@@ -1340,10 +1331,10 @@
       "note": "Debug cấu hình nhiều chain và lý luận CSRF theo cách trình duyệt gửi credential."
     },
     "interview_fit": {
-      "minutes": 6,
-      "sub_questions": 3,
+      "minutes": 5,
+      "sub_questions": 2,
       "gradeable": true,
-      "note": "Điểm chấm rõ nhưng 3 ý hỏi."
+      "note": "Rubric v2: luồng filter chain và cách tách hai chain là một mạch; khi nào tắt CSRF an toàn là ý thứ hai. Điểm chấm rõ nhưng 3 ý hỏi."
     },
     "junior_guide": {
       "tests": "Hiểu cách Spring Security chọn filter chain và vì sao CSRF phụ thuộc vào việc trình duyệt tự gửi credential.",
@@ -1370,7 +1361,7 @@
     "qa_id": "de-qa-1114",
     "verdict": "fix",
     "confidence": "high",
-    "summary_vi": "Mọi fact về auto-configuration đều khớp tài liệu Spring Boot (file imports, không component scan, điều kiện bean, ordering, đặt tên starter). Cần fix vì câu hỏi có 3 ý hỏi lớn và phần debug (được hỏi trực tiếp) nằm sau điểm cắt 600 token.",
+    "summary_vi": "Mọi fact về auto-configuration đều khớp tài liệu Spring Boot (file imports, không component scan, điều kiện bean, ordering, đặt tên starter). Cần fix vì câu hỏi có 3 ý hỏi lớn và phần debug (được hỏi trực tiếp) nằm sau điểm cắt 600 token. (Rubric v2: không còn tính là quá rộng; vẫn cần sửa vì length.)",
     "claims": [
       {
         "claim": "Boot đọc file META-INF/spring/...AutoConfiguration.imports, mỗi dòng một class",
@@ -1424,9 +1415,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi có 3 ý hỏi lớn (cơ chế gồm tìm, điều kiện, thứ tự; cách viết đúng; cách debug), quá rộng cho 3–5 phút.",
+        "detail": "Rubric v2: 2 ý độc lập, ~5 phút cho các ý bắt buộc (cơ chế auto-configuration và cách viết đúng là một mạch; cách debug là ý thứ hai); v1 đếm 3 ý. Còn lại là gợi ý: Câu hỏi có 3 ý hỏi lớn (cơ chế gồm tìm, điều kiện, thứ tự; cách viết đúng; cách debug), quá rộng cho 3–5 phút.",
         "fix": "Hỏi 2 ý: 'Vì sao các lỗi này xảy ra và bạn sửa starter thế nào?'; cách debug làm follow-up."
       },
       {
@@ -1442,10 +1433,10 @@
       "note": "Phải hiểu thứ tự đánh giá điều kiện và vì sao component scan làm hỏng auto-configuration."
     },
     "interview_fit": {
-      "minutes": 6,
-      "sub_questions": 3,
+      "minutes": 5,
+      "sub_questions": 2,
       "gradeable": true,
-      "note": "Điểm chấm rõ nhưng 3 ý hỏi lớn."
+      "note": "Rubric v2: cơ chế auto-configuration và cách viết đúng là một mạch; cách debug là ý thứ hai. Điểm chấm rõ nhưng 3 ý hỏi lớn."
     },
     "junior_guide": {
       "tests": "Hiểu cách Spring Boot nạp và đánh giá auto-configuration, đủ để viết starter không đè bean của người dùng.",
@@ -1472,7 +1463,7 @@
     "qa_id": "de-qa-1115",
     "verdict": "fix",
     "confidence": "high",
-    "summary_vi": "Thứ tự ưu tiên property source, thứ tự config data, quy tắc profile đều khớp tài liệu Spring Boot. Cần fix vì câu hỏi có 4 ý hỏi và phần chẩn đoán/tổ chức config, secret nằm sau điểm cắt 600 token.",
+    "summary_vi": "Thứ tự ưu tiên property source, thứ tự config data, quy tắc profile đều khớp tài liệu Spring Boot. Cần fix vì câu hỏi có 4 ý hỏi và phần chẩn đoán/tổ chức config, secret nằm sau điểm cắt 600 token. (Rubric v2: không còn tính là quá rộng; vẫn cần sửa vì length.)",
     "claims": [
       {
         "claim": "Thứ tự ưu tiên: default < @PropertySource < config data < OS env < system properties < SPRING_APPLICATION_JSON < command line < test properties",
@@ -1519,9 +1510,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi có 4 ý hỏi (thứ tự ưu tiên, nguyên nhân, chẩn đoán, tổ chức config/secret), quá rộng cho 3–5 phút.",
+        "detail": "Rubric v2: 2 ý độc lập, ~5 phút cho các ý bắt buộc (thứ tự ưu tiên, nguyên nhân và chẩn đoán là một mạch; tổ chức config và secret là ý thứ hai); v1 đếm 4 ý. Còn lại là gợi ý: Câu hỏi có 4 ý hỏi (thứ tự ưu tiên, nguyên nhân, chẩn đoán, tổ chức config/secret), quá rộng cho 3–5 phút.",
         "fix": "Hỏi 2 ý: 'Nguyên nhân khả dĩ là gì và bạn chẩn đoán thế nào?'; thứ tự ưu tiên là kiến thức nền trong đáp án, phần tổ chức config/secret làm follow-up."
       },
       {
@@ -1543,10 +1534,10 @@
       "note": "Debug cấu hình thật trên Kubernetes dựa trên thứ tự ưu tiên, không chỉ nhớ danh sách."
     },
     "interview_fit": {
-      "minutes": 6,
-      "sub_questions": 4,
+      "minutes": 5,
+      "sub_questions": 2,
       "gradeable": true,
-      "note": "Điểm chấm rõ nhưng 4 ý hỏi."
+      "note": "Rubric v2: thứ tự ưu tiên, nguyên nhân và chẩn đoán là một mạch; tổ chức config và secret là ý thứ hai. Điểm chấm rõ nhưng 4 ý hỏi."
     },
     "junior_guide": {
       "tests": "Hiểu thứ tự ưu tiên externalized configuration để tìm vì sao giá trị trong application-prod.yml bị ghi đè.",
@@ -1571,9 +1562,9 @@
   },
   {
     "qa_id": "de-qa-1116",
-    "verdict": "fix",
+    "verdict": "ok",
     "confidence": "high",
-    "summary_vi": "Đúng theo tài liệu Spring Framework và release notes Boot 2.6 (circular reference bị cấm mặc định, constructor injection không phá được vòng, cờ allow-circular-references). Cần fix vì câu hỏi có 3 ý hỏi, vượt mức 2 của rubric.",
+    "summary_vi": "Đạt theo rubric v2: câu hỏi có 2 ý độc lập, trả lời các ý bắt buộc trong khoảng 4 phút; các claim chính đều có trích dẫn. (v1 gợi ý Cần sửa vì đếm 3 ý.)",
     "claims": [
       {
         "claim": "Từ Spring Boot 2.6, circular reference bị cấm mặc định",
@@ -1613,9 +1604,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi có 3 ý hỏi (vì sao trước chạy được, vì sao constructor injection không giải, xử lý từ tạm thời tới đúng thiết kế).",
+        "detail": "Rubric v2: 2 ý độc lập, ~4 phút cho các ý bắt buộc (vì sao trước chạy được và vì sao constructor injection không giải là nguyên nhân; cách xử lý là ý thứ hai); v1 đếm 3 ý. Còn lại là gợi ý: Câu hỏi có 3 ý hỏi (vì sao trước chạy được, vì sao constructor injection không giải, xử lý từ tạm thời tới đúng thiết kế).",
         "fix": "Gộp thành 2 ý: 'Vì sao bản nâng cấp làm lộ lỗi này, và bạn xử lý thế nào từ tạm thời tới đúng thiết kế?'; ý constructor injection làm follow-up."
       },
       {
@@ -1637,10 +1628,10 @@
       "note": "Phải hiểu cơ chế early reference của container và lý do thiết kế; topic chỉ tới middle nhưng có middle nên vẫn hợp lệ."
     },
     "interview_fit": {
-      "minutes": 5,
-      "sub_questions": 3,
+      "minutes": 4,
+      "sub_questions": 2,
       "gradeable": true,
-      "note": "Điểm chấm rõ nhưng 3 ý hỏi."
+      "note": "Rubric v2: vì sao trước chạy được và vì sao constructor injection không giải là nguyên nhân; cách xử lý là ý thứ hai. Điểm chấm rõ nhưng 3 ý hỏi."
     },
     "junior_guide": {
       "tests": "Hiểu vòng phụ thuộc giữa bean và vì sao Spring Boot 2.6 bắt đầu chặn nó.",
@@ -1658,10 +1649,7 @@
       ],
       "follow_up": "Nếu dùng event để đảo chiều, PaymentService xử lý lỗi thanh toán thế nào khi OrderService đã commit?"
     },
-    "proposed_fix": {
-      "question": "Sau khi nâng Spring Boot từ 2.5 lên bản mới, ứng dụng không khởi động được vì BeanCurrentlyInCreationException giữa OrderService và PaymentService (inject chéo bằng field @Autowired). Vì sao bản nâng cấp làm lộ lỗi này, và bạn xử lý thế nào từ tạm thời tới đúng về thiết kế?",
-      "answer_change": "Giữ đáp án, gộp đoạn 'Vì sao constructor injection không giải được' vào phần cách xử lý thành 1–2 câu; rút đoạn 'Rủi ro' còn một câu."
-    }
+    "proposed_fix": null
   },
   {
     "qa_id": "de-qa-1117",
@@ -1759,7 +1747,7 @@
     "qa_id": "de-qa-1118",
     "verdict": "fix",
     "confidence": "high",
-    "summary_vi": "Cơ chế context caching, cache key, @DirtiesContext, slice test, cảnh báo Testcontainers đều khớp tài liệu Spring. Cần fix vì có 3 ý hỏi và phần Testcontainers (được hỏi trực tiếp) nằm sau điểm cắt 600 token.",
+    "summary_vi": "Cơ chế context caching, cache key, @DirtiesContext, slice test, cảnh báo Testcontainers đều khớp tài liệu Spring. Cần fix vì có 3 ý hỏi và phần Testcontainers (được hỏi trực tiếp) nằm sau điểm cắt 600 token. (Rubric v2: không còn tính là quá rộng; vẫn cần sửa vì length.)",
     "claims": [
       {
         "claim": "Cache key gồm classes/locations, initializers, context customizers (@DynamicPropertySource, @MockitoBean, @MockitoSpyBean), profiles, @TestPropertySource",
@@ -1813,9 +1801,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi có 3 ý hỏi (cơ chế caching, nguyên nhân chậm, tổ chức lại gồm slice, Testcontainers, trade-off), quá rộng cho 3–5 phút.",
+        "detail": "Rubric v2: 2 ý độc lập, ~5 phút cho các ý bắt buộc (cơ chế cache và nguyên nhân chậm là một mạch; tổ chức lại test là ý thứ hai); v1 đếm 3 ý. Còn lại là gợi ý: Câu hỏi có 3 ý hỏi (cơ chế caching, nguyên nhân chậm, tổ chức lại gồm slice, Testcontainers, trade-off), quá rộng cho 3–5 phút.",
         "fix": "Hỏi 2 ý: 'Vì sao context bị dựng lại nhiều lần, và bạn tổ chức lại bộ test thế nào?'; phần H2 vs Testcontainers làm follow-up."
       },
       {
@@ -1843,10 +1831,10 @@
       "note": "Chẩn đoán test chậm theo cơ chế cache key và tổ chức lại test pyramid; topic chỉ tới middle nhưng hợp lệ."
     },
     "interview_fit": {
-      "minutes": 6,
-      "sub_questions": 3,
+      "minutes": 5,
+      "sub_questions": 2,
       "gradeable": true,
-      "note": "Điểm chấm rõ nhưng 3 ý hỏi lớn."
+      "note": "Rubric v2: cơ chế cache và nguyên nhân chậm là một mạch; tổ chức lại test là ý thứ hai. Điểm chấm rõ nhưng 3 ý hỏi lớn."
     },
     "junior_guide": {
       "tests": "Hiểu vì sao test Spring Boot chậm khi context không được dùng lại, và cách tổ chức test hợp lý.",
@@ -1915,7 +1903,7 @@
       {
         "severity": "major",
         "type": "interview_fit",
-        "detail": "Câu hỏi có 3 ý hỏi (phân biệt mock/stub/spy, pitfall Mockito, khi nào thay bằng test tích hợp).",
+        "detail": "Rubric v2 vẫn tính là quá rộng (3 ý độc lập, ~5 phút): ba triệu chứng có ba cơ chế khác nhau: ngữ nghĩa spy, strict stubbing, và giới hạn của mock so với test tích hợp. Câu hỏi có 3 ý hỏi (phân biệt mock/stub/spy, pitfall Mockito, khi nào thay bằng test tích hợp).",
         "fix": "Hỏi 2 ý: 'Vì sao unit test xanh mà production vẫn lỗi, và khi nào bạn thay mock bằng test tích hợp?'; phân biệt mock/stub/spy và pitfall spy làm follow-up."
       },
       {
@@ -1940,7 +1928,7 @@
       "minutes": 5,
       "sub_questions": 3,
       "gradeable": true,
-      "note": "Điểm chấm rõ nhưng 3 ý hỏi."
+      "note": "Rubric v2: ba triệu chứng có ba cơ chế khác nhau: ngữ nghĩa spy, strict stubbing, và giới hạn của mock so với test tích hợp. Điểm chấm rõ nhưng 3 ý hỏi."
     },
     "junior_guide": {
       "tests": "Hiểu test double nào dùng khi nào và giới hạn của unit test dùng mock.",
@@ -1967,7 +1955,7 @@
     "qa_id": "de-qa-1120",
     "verdict": "fix",
     "confidence": "medium",
-    "summary_vi": "Thiết kế idempotency key và status code khớp draft IETF (400/409/422, trả lại kết quả cũ, UUID, công bố thời hạn). Cần fix vì câu hỏi liệt kê 3 phần (lưu trữ, status code, trade-off) và câu trích RFC 9110 về retry chưa kiểm chứng trực tiếp được (trang bị cắt), chỉ có nguồn thứ cấp MDN.",
+    "summary_vi": "Thiết kế idempotency key và status code khớp draft IETF (400/409/422, trả lại kết quả cũ, UUID, công bố thời hạn). Cần fix vì câu hỏi liệt kê 3 phần (lưu trữ, status code, trade-off) và câu trích RFC 9110 về retry chưa kiểm chứng trực tiếp được (trang bị cắt), chỉ có nguồn thứ cấp MDN. (Rubric v2: không còn tính là quá rộng; vẫn cần sửa vì factual.)",
     "claims": [
       {
         "claim": "PUT, DELETE và các method an toàn là idempotent; POST không",
@@ -2014,9 +2002,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi yêu cầu thiết kế kèm 3 phần liệt kê (lưu trữ, status code từng tình huống, trade-off); tính theo rubric là 3 ý hỏi, vượt mức 2.",
+        "detail": "Rubric v2: 1 ý độc lập, ~5 phút cho các ý bắt buộc (lưu trữ, status code và trade-off là các mặt của một thiết kế idempotency key); v1 đếm 3 ý. Còn lại là gợi ý: Câu hỏi yêu cầu thiết kế kèm 3 phần liệt kê (lưu trữ, status code từng tình huống, trade-off); tính theo rubric là 3 ý hỏi, vượt mức 2.",
         "fix": "Hỏi: 'Thiết kế cơ chế chống trùng bằng idempotency key thế nào, và xử lý request trùng đến khi bản gốc còn đang chạy ra sao?'; status code chi tiết và trade-off làm follow-up."
       },
       {
@@ -2039,9 +2027,9 @@
     },
     "interview_fit": {
       "minutes": 5,
-      "sub_questions": 3,
+      "sub_questions": 1,
       "gradeable": true,
-      "note": "Điểm chấm rõ nhưng 3 phần liệt kê."
+      "note": "Rubric v2: lưu trữ, status code và trade-off là các mặt của một thiết kế idempotency key. Điểm chấm rõ nhưng 3 phần liệt kê."
     },
     "junior_guide": {
       "tests": "Hiểu vì sao retry POST gây trùng và cách dùng idempotency key để chống trùng an toàn.",

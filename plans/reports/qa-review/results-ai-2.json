@@ -1,9 +1,9 @@
 [
   {
     "qa_id": "de-qa-1174",
-    "verdict": "fix",
+    "verdict": "ok",
     "confidence": "high",
-    "summary_vi": "Nội dung khớp paper 'Calibrate Before Use' (3 loại bias, contextual calibration với input 'N/A'). Chỉ cần sửa vì câu hỏi có 3 ý (nguồn gốc thiên lệch, thiết kế, đánh giá) và vượt 600 token một chút.",
+    "summary_vi": "Đạt theo rubric v2: câu hỏi có 2 ý độc lập, trả lời các ý bắt buộc trong khoảng 5 phút; các claim chính đều có trích dẫn. (v1 gợi ý Cần sửa vì đếm 3 ý.)",
     "claims": [
       {
         "claim": "Định dạng prompt, chọn ví dụ, thứ tự ví dụ có thể đẩy accuracy từ gần ngẫu nhiên lên gần SOTA.",
@@ -36,9 +36,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi có 3 ý (giải thích nguồn gốc thiên lệch, cách thiết kế, cách đánh giá), vượt ngưỡng 2 của rubric.",
+        "detail": "Rubric v2: 2 ý độc lập, ~5 phút cho các ý bắt buộc (nguồn gốc thiên lệch và cách thiết kế là nguyên nhân và cách sửa; cách đánh giá là ý thứ hai); v1 đếm 3 ý. Còn lại là gợi ý: Câu hỏi có 3 ý (giải thích nguồn gốc thiên lệch, cách thiết kế, cách đánh giá), vượt ngưỡng 2 của rubric.",
         "fix": "Giữ 'nguồn gốc thiên lệch + cách thiết kế cho ổn định'; đánh giá làm follow-up."
       },
       {
@@ -55,9 +55,9 @@
     },
     "interview_fit": {
       "minutes": 5,
-      "sub_questions": 3,
+      "sub_questions": 2,
       "gradeable": true,
-      "note": "Điểm chấm rõ; 3 ý nên hơi rộng theo rubric."
+      "note": "Rubric v2: nguồn gốc thiên lệch và cách thiết kế là nguyên nhân và cách sửa; cách đánh giá là ý thứ hai. Điểm chấm rõ; 3 ý nên hơi rộng theo rubric."
     },
     "junior_guide": {
       "tests": "Hiểu vì sao few-shot prompt không ổn định và cách làm nó ổn định.",
@@ -75,16 +75,13 @@
       ],
       "follow_up": "Không có logprobs từ API, bạn hiệu chỉnh thiên lệch nhãn thế nào?"
     },
-    "proposed_fix": {
-      "question": "Bạn dùng few-shot prompting để phân loại câu trả lời ứng viên thành tốt/trung bình/kém, nhưng kết quả đổi mạnh khi đổi thứ tự hoặc tập ví dụ. Giải thích nguồn gốc thiên lệch và cách thiết kế prompt cho ổn định.",
-      "answer_change": "Rút mục 'Đánh giá' còn 1 dòng (đo phương sai qua hoán vị) và bỏ dòng ví dụ thực tế để dưới 600 token."
-    }
+    "proposed_fix": null
   },
   {
     "qa_id": "de-qa-1175",
-    "verdict": "fix",
+    "verdict": "ok",
     "confidence": "high",
-    "summary_vi": "Nội dung đúng theo docs SBERT và Elastic (lexical không nhận đồng nghĩa/viết tắt, RRF k mặc định 60, RRF không cần tune, retrieve ~100 rồi cross-encoder rerank). Cần sửa vì câu hỏi có 5 ý và vượt 600 token.",
+    "summary_vi": "Đạt theo rubric v2: câu hỏi có 1 ý độc lập, trả lời các ý bắt buộc trong khoảng 5 phút; các claim chính đều có trích dẫn. (v1 gợi ý Cần sửa vì đếm 5 ý.)",
     "claims": [
       {
         "claim": "Lexical khớp nghĩa đen, không nhận đồng nghĩa, viết tắt, biến thể chính tả; semantic search khắc phục được.",
@@ -124,9 +121,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi có 5 ý (thiết kế hybrid, hợp nhất kết quả, reranking, chi phí, cách tune).",
+        "detail": "Rubric v2: 1 ý độc lập, ~5 phút cho các ý bắt buộc (hybrid search, hợp nhất, reranking, chi phí và cách tune là các mặt của một thiết kế retrieval); v1 đếm 5 ý. Còn lại là gợi ý: Câu hỏi có 5 ý (thiết kế hybrid, hợp nhất kết quả, reranking, chi phí, cách tune).",
         "fix": "Giữ 'hybrid + hợp nhất kết quả (RRF) + đo recall theo tầng'; rerank và chi phí làm follow-up."
       },
       {
@@ -142,10 +139,10 @@
       "note": "Thiết kế retrieval có trade-off và đo theo tầng."
     },
     "interview_fit": {
-      "minutes": 7,
-      "sub_questions": 5,
+      "minutes": 5,
+      "sub_questions": 1,
       "gradeable": true,
-      "note": "Điểm chấm rõ nhưng quá nhiều ý."
+      "note": "Rubric v2: hybrid search, hợp nhất, reranking, chi phí và cách tune là các mặt của một thiết kế retrieval. Điểm chấm rõ nhưng quá nhiều ý."
     },
     "junior_guide": {
       "tests": "Hiểu vì sao dense retrieval bỏ sót truy vấn có định danh chính xác và cách kết hợp với BM25.",
@@ -163,10 +160,7 @@
       ],
       "follow_up": "Sau khi thêm BM25, recall truy vấn câu tự nhiên giảm: bạn kiểm tra gì?"
     },
-    "proposed_fix": {
-      "question": "Hệ RAG chỉ dùng dense retrieval hay bỏ sót truy vấn chứa mã lỗi, tên hàm, từ viết tắt. Thiết kế lại retrieval với hybrid search (BM25 + vector) và cách hợp nhất kết quả thế nào?",
-      "answer_change": "Rút mục 'Rerank' và 'Chi phí' còn 1–2 dòng mỗi mục để dưới 600 token."
-    }
+    "proposed_fix": null
   },
   {
     "qa_id": "de-qa-1176",
@@ -258,7 +252,7 @@
     "qa_id": "de-qa-1177",
     "verdict": "fix",
     "confidence": "high",
-    "summary_vi": "Các chi tiết vendor đều đúng và đã ghi tên vendor (Anthropic: budget là mục tiêu, model mới dùng adaptive thinking + effort, đổi budget làm mất cache; OpenAI: reasoning token tính như output, incomplete có thể vẫn tính tiền). Cần sửa vì câu hỏi có 5 ý và 687 token làm mục 'Bẫy vận hành' bị cắt.",
+    "summary_vi": "Các chi tiết vendor đều đúng và đã ghi tên vendor (Anthropic: budget là mục tiêu, model mới dùng adaptive thinking + effort, đổi budget làm mất cache; OpenAI: reasoning token tính như output, incomplete có thể vẫn tính tiền). Cần sửa vì câu hỏi có 5 ý và 687 token làm mục 'Bẫy vận hành' bị cắt. (Rubric v2: không còn tính là quá rộng; vẫn cần sửa vì length.)",
     "claims": [
       {
         "claim": "Reasoning token không hiển thị nhưng tính phí như output và chiếm context window (OpenAI).",
@@ -298,9 +292,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi có 5 ý (khi nào dùng, chi phí, độ trễ, cách đặt budget, bẫy vận hành).",
+        "detail": "Rubric v2: 2 ý độc lập, ~5 phút cho các ý bắt buộc (khi nào dùng reasoning model là một ý; chi phí, budget và bẫy vận hành là ý thứ hai); v1 đếm 5 ý. Còn lại là gợi ý: Câu hỏi có 5 ý (khi nào dùng, chi phí, độ trễ, cách đặt budget, bẫy vận hành).",
         "fix": "Giữ 'khi nào dùng + đánh đổi chi phí/độ trễ'; đặt budget và bẫy vận hành làm follow-up."
       },
       {
@@ -322,10 +316,10 @@
       "note": "Quyết định có trade-off chi phí/latency/chất lượng và failure mode vận hành."
     },
     "interview_fit": {
-      "minutes": 7,
-      "sub_questions": 5,
+      "minutes": 5,
+      "sub_questions": 2,
       "gradeable": true,
-      "note": "Điểm chấm rõ nhưng quá nhiều ý."
+      "note": "Rubric v2: khi nào dùng reasoning model là một ý; chi phí, budget và bẫy vận hành là ý thứ hai. Điểm chấm rõ nhưng quá nhiều ý."
     },
     "junior_guide": {
       "tests": "Biết khi nào reasoning model đáng tiền và các bẫy chi phí/độ trễ khi vận hành.",
@@ -435,9 +429,9 @@
   },
   {
     "qa_id": "de-qa-1179",
-    "verdict": "fix",
+    "verdict": "ok",
     "confidence": "high",
-    "summary_vi": "Nội dung đúng và có nguồn (OTel GenAI semantic conventions, best practices eval của OpenAI: log để khai thác eval case, continuous evaluation, anti-pattern). Cần sửa vì câu hỏi có 3 ý (giám sát, phát hiện sớm, thu thập dữ liệu) và vượt 600 token.",
+    "summary_vi": "Đạt theo rubric v2: câu hỏi có 2 ý độc lập, trả lời các ý bắt buộc trong khoảng 5 phút; các claim chính đều có trích dẫn. (v1 gợi ý Cần sửa vì đếm 3 ý.)",
     "claims": [
       {
         "claim": "OTel có semantic conventions GenAI gồm spans, metrics, events cho GenAI client và MCP.",
@@ -484,9 +478,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi có 3 ý (giám sát chất lượng online, phát hiện sớm khi giảm, thu thập dữ liệu để cải thiện), vượt ngưỡng 2.",
+        "detail": "Rubric v2: 2 ý độc lập, ~5 phút cho các ý bắt buộc (giám sát và phát hiện sớm là một thiết kế; thu thập dữ liệu để cải thiện là ý thứ hai); v1 đếm 3 ý. Còn lại là gợi ý: Câu hỏi có 3 ý (giám sát chất lượng online, phát hiện sớm khi giảm, thu thập dữ liệu để cải thiện), vượt ngưỡng 2.",
         "fix": "Gộp 'giám sát + phát hiện sớm' thành một ý; giữ 'thu thập dữ liệu để cải thiện'."
       },
       {
@@ -502,10 +496,10 @@
       "note": "Giám sát khi không có nhãn đòi chọn tín hiệu proxy có trade-off."
     },
     "interview_fit": {
-      "minutes": 6,
-      "sub_questions": 3,
+      "minutes": 5,
+      "sub_questions": 2,
       "gradeable": true,
-      "note": "Điểm chấm rõ; 3 ý nên hơi rộng theo rubric."
+      "note": "Rubric v2: giám sát và phát hiện sớm là một thiết kế; thu thập dữ liệu để cải thiện là ý thứ hai. Điểm chấm rõ; 3 ý nên hơi rộng theo rubric."
     },
     "junior_guide": {
       "tests": "Giám sát chất lượng LLM trong production khi không có nhãn đúng.",
@@ -522,16 +516,13 @@
       ],
       "follow_up": "Sau một lần đổi model, tỷ lệ recruiter sửa điểm tăng từ 5% lên 12%: bạn truy nguyên nhân thế nào?"
     },
-    "proposed_fix": {
-      "question": "AI interviewer đã chạy production và không có nhãn đúng cho từng phiên. Làm sao giám sát chất lượng và phát hiện sớm khi chất lượng giảm?",
-      "answer_change": "Rút 'Vòng cải thiện' còn 1 dòng (hoặc làm follow-up) và gộp tín hiệu 4–5 để dưới 600 token."
-    }
+    "proposed_fix": null
   },
   {
     "qa_id": "de-qa-1180",
-    "verdict": "fix",
+    "verdict": "ok",
     "confidence": "high",
-    "summary_vi": "Quy trình rollout hợp lý và các ý về eval có nguồn (OpenAI eval best practices: pairwise/pass-fail ổn định hơn; MT-Bench: verbosity bias, đổi vị trí). Cần sửa vì câu hỏi có 4 ý (cổng chặn, đơn vị ngẫu nhiên hóa, metric, bẫy riêng của LLM).",
+    "summary_vi": "Đạt theo rubric v2: câu hỏi có 1 ý độc lập, trả lời các ý bắt buộc trong khoảng 5 phút; các claim chính đều có trích dẫn. (v1 gợi ý Cần sửa vì đếm 4 ý.)",
     "claims": [
       {
         "claim": "Ưu tiên so sánh cặp hoặc pass/fail theo tiêu chí vì ổn định hơn chấm mở.",
@@ -564,9 +555,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi có 4 ý (các cổng chặn, đơn vị ngẫu nhiên hóa, metric, bẫy riêng của LLM).",
+        "detail": "Rubric v2: 1 ý độc lập, ~5 phút cho các ý bắt buộc (cổng chặn, đơn vị ngẫu nhiên hóa, metric và bẫy là các mặt của một quy trình rollout); v1 đếm 4 ý. Còn lại là gợi ý: Câu hỏi có 4 ý (các cổng chặn, đơn vị ngẫu nhiên hóa, metric, bẫy riêng của LLM).",
         "fix": "Giữ 'các cổng từ offline tới A/B + bẫy riêng của LLM'; đơn vị ngẫu nhiên hóa và metric làm follow-up."
       },
       {
@@ -582,10 +573,10 @@
       "note": "Thiết kế thử nghiệm online có bẫy riêng của hệ không tất định."
     },
     "interview_fit": {
-      "minutes": 6,
-      "sub_questions": 4,
+      "minutes": 5,
+      "sub_questions": 1,
       "gradeable": true,
-      "note": "Điểm chấm rõ nhưng nhiều ý."
+      "note": "Rubric v2: cổng chặn, đơn vị ngẫu nhiên hóa, metric và bẫy là các mặt của một quy trình rollout. Điểm chấm rõ nhưng nhiều ý."
     },
     "junior_guide": {
       "tests": "Thiết kế rollout an toàn cho thay đổi prompt/model từ offline eval tới A/B online.",
@@ -603,16 +594,13 @@
       ],
       "follow_up": "Phiên bản mới có điểm judge cao hơn nhưng recruiter đồng ý ít hơn: bạn tin tín hiệu nào và vì sao?"
     },
-    "proposed_fix": {
-      "question": "Bạn muốn đổi prompt hoặc model cho tính năng chấm điểm. Thiết kế quy trình rollout từ offline eval tới A/B test online, và những bẫy riêng của hệ dựa trên LLM là gì?",
-      "answer_change": "Giữ nguyên nội dung; chỉ đổi câu hỏi (đơn vị ngẫu nhiên hóa và metric vẫn có thể nằm trong đáp án như chi tiết của cổng 3)."
-    }
+    "proposed_fix": null
   },
   {
     "qa_id": "de-qa-1181",
-    "verdict": "fix",
+    "verdict": "ok",
     "confidence": "high",
-    "summary_vi": "Mọi chi tiết khớp docs scikit-learn (ngưỡng ~0,02 trong ví dụ bảo hiểm, balanced accuracy mặc định, không dùng chung dữ liệu train và tune ngưỡng, isotonic cần >~1000 mẫu và tạo ties, Brier score không đủ). Cần sửa vì câu hỏi có 4 ý và 670 token làm mất mục 'Bẫy khác'.",
+    "summary_vi": "Đạt theo rubric v2: câu hỏi có 2 ý độc lập, trả lời các ý bắt buộc trong khoảng 5 phút; các claim chính đều có trích dẫn. (v1 gợi ý Cần sửa vì đếm 4 ý.)",
     "claims": [
       {
         "claim": "Ví dụ scikit-learn: ngưỡng tối ưu theo utility khoảng 0,02.",
@@ -666,9 +654,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi có 4 ý (chọn ngưỡng theo chi phí, vì sao kiểm calibration, quy trình, bẫy thường gặp).",
+        "detail": "Rubric v2: 2 ý độc lập, ~5 phút cho các ý bắt buộc (chọn ngưỡng theo chi phí là một ý; vì sao kiểm calibration là ý thứ hai; quy trình và bẫy đi kèm); v1 đếm 4 ý. Còn lại là gợi ý: Câu hỏi có 4 ý (chọn ngưỡng theo chi phí, vì sao kiểm calibration, quy trình, bẫy thường gặp).",
         "fix": "Giữ 'chọn ngưỡng theo chi phí + vì sao kiểm calibration'; quy trình và bẫy nằm trong 2 ý đó."
       },
       {
@@ -690,10 +678,10 @@
       "note": "Gắn ngưỡng với chi phí nghiệp vụ và hiểu calibration là reasoning, không phải định nghĩa."
     },
     "interview_fit": {
-      "minutes": 6,
-      "sub_questions": 4,
+      "minutes": 5,
+      "sub_questions": 2,
       "gradeable": true,
-      "note": "Điểm chấm rõ nhưng nhiều ý."
+      "note": "Rubric v2: chọn ngưỡng theo chi phí là một ý; vì sao kiểm calibration là ý thứ hai; quy trình và bẫy đi kèm. Điểm chấm rõ nhưng nhiều ý."
     },
     "junior_guide": {
       "tests": "Chọn ngưỡng quyết định theo chi phí nghiệp vụ và hiểu khi nào xác suất của model đáng tin.",
@@ -711,16 +699,13 @@
       ],
       "follow_up": "Chỉ cần xếp hạng top 50 hồ sơ mỗi ngày: bạn có còn cần calibration không?"
     },
-    "proposed_fix": {
-      "question": "Mô hình phân loại nhị phân (ví dụ dự đoán ứng viên phù hợp để mời phỏng vấn) trả về xác suất. Làm sao chọn ngưỡng quyết định theo chi phí nghiệp vụ, và vì sao phải kiểm tra calibration trước khi dùng xác suất?",
-      "answer_change": "Bỏ tên tham số sklearn chi tiết (cv='prefit', TunedThresholdClassifierCV, CalibratedClassifierCV) hoặc rút còn 1 lần nhắc để mục 'Bẫy khác' nằm trong 600 token."
-    }
+    "proposed_fix": null
   },
   {
     "qa_id": "de-qa-1182",
-    "verdict": "fix",
+    "verdict": "ok",
     "confidence": "high",
-    "summary_vi": "Lập luận và phép tính đúng (tự tính lại: π = 0,5 → precision ≈ 0,98; π = 0,001 → ≈ 0,043), khớp Saito & Rehmsmeier (baseline của PR thay đổi theo tỷ lệ lớp, ROC thì cố định) và docs scikit-learn. Cần sửa vì câu hỏi có 3 ý.",
+    "summary_vi": "Đạt theo rubric v2: câu hỏi có 2 ý độc lập, trả lời các ý bắt buộc trong khoảng 4 phút; các claim chính đều có trích dẫn. (v1 gợi ý Cần sửa vì đếm 3 ý.)",
     "claims": [
       {
         "claim": "ROC (TPR, FPR) không phụ thuộc tỷ lệ lớp; precision và PR phụ thuộc mạnh.",
@@ -760,9 +745,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi có 3 ý (giải thích vì sao, cách đánh giá, chọn điểm vận hành), vượt ngưỡng 2.",
+        "detail": "Rubric v2: 2 ý độc lập, ~4 phút cho các ý bắt buộc (giải thích vì sao là nguyên nhân; cách đánh giá và chọn điểm vận hành là cách sửa); v1 đếm 3 ý. Còn lại là gợi ý: Câu hỏi có 3 ý (giải thích vì sao, cách đánh giá, chọn điểm vận hành), vượt ngưỡng 2.",
         "fix": "Gộp 'đánh giá và chọn điểm vận hành' thành một ý."
       },
       {
@@ -778,10 +763,10 @@
       "note": "Cần tính precision theo prevalence và hiểu vì sao AUC đánh lừa."
     },
     "interview_fit": {
-      "minutes": 5,
-      "sub_questions": 3,
+      "minutes": 4,
+      "sub_questions": 2,
       "gradeable": true,
-      "note": "Có phép tính kiểm chứng được; 3 ý nên hơi rộng theo rubric."
+      "note": "Rubric v2: giải thích vì sao là nguyên nhân; cách đánh giá và chọn điểm vận hành là cách sửa. Có phép tính kiểm chứng được; 3 ý nên hơi rộng theo rubric."
     },
     "junior_guide": {
       "tests": "Hiểu vì sao ROC AUC cao trên tập cân bằng vẫn cho rất nhiều cảnh báo sai khi lớp dương cực hiếm.",
@@ -799,16 +784,13 @@
       ],
       "follow_up": "Nhãn gian lận về trễ 30 ngày: bạn giám sát precision thế nào trong thời gian đó?"
     },
-    "proposed_fix": {
-      "question": "Mô hình phát hiện gian lận đạt ROC AUC 0,98 trên tập test cân bằng 50/50, nhưng khi chạy thật (tỷ lệ gian lận ~0,1%) đội vận hành bị ngập cảnh báo sai. Vì sao, và nên đánh giá để chọn điểm vận hành thế nào?",
-      "answer_change": "Giữ nguyên đáp án; chỉ gộp ý trong câu hỏi. Cân nhắc thay grounding URL GitHub bằng paper PLOS ONE."
-    }
+    "proposed_fix": null
   },
   {
     "qa_id": "de-qa-1183",
-    "verdict": "fix",
+    "verdict": "ok",
     "confidence": "high",
-    "summary_vi": "Nội dung khớp docs scikit-learn (định nghĩa leakage, ví dụ 10.000 feature ngẫu nhiên cho 0,76 thay vì ~0,5, quy tắc không fit trên test, TargetEncoder cross fitting). Cần sửa vì câu hỏi liệt kê 4 dạng leakage, mỗi dạng hỏi cả phát hiện lẫn phòng tránh, và vượt 600 token. Có golden label g06.",
+    "summary_vi": "Đạt theo rubric v2: câu hỏi có 1 ý độc lập, trả lời các ý bắt buộc trong khoảng 5 phút; các claim chính đều có trích dẫn. (v1 gợi ý Cần sửa vì đếm 4 ý.)",
     "claims": [
       {
         "claim": "Leakage là dùng thông tin không có lúc dự đoán; ước lượng CV quá lạc quan.",
@@ -848,9 +830,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi liệt kê 4 dạng leakage và đòi cả cách phát hiện lẫn phòng tránh cho từng dạng — ít nhất 4 ý.",
+        "detail": "Rubric v2: 1 ý độc lập, ~5 phút cho các ý bắt buộc (các dạng leakage liệt kê là các mặt của một bài chẩn đoán và phòng tránh); v1 đếm 4 ý. Còn lại là gợi ý: Câu hỏi liệt kê 4 dạng leakage và đòi cả cách phát hiện lẫn phòng tránh cho từng dạng — ít nhất 4 ý.",
         "fix": "Hỏi 2 dạng (preprocessing trên toàn bộ dữ liệu và target leakage qua feature), các dạng còn lại làm follow-up."
       },
       {
@@ -866,10 +848,10 @@
       "note": "Debug tình huống CV cao bất thường, nhận diện nhiều cơ chế rò."
     },
     "interview_fit": {
-      "minutes": 7,
-      "sub_questions": 4,
+      "minutes": 5,
+      "sub_questions": 1,
       "gradeable": true,
-      "note": "Điểm chấm rõ nhưng nhiều ý. Golden label g06: đổi wording phải kiểm lại golden set."
+      "note": "Rubric v2: các dạng leakage liệt kê là các mặt của một bài chẩn đoán và phòng tránh. Điểm chấm rõ nhưng nhiều ý. Golden label g06: đổi wording phải kiểm lại golden set."
     },
     "junior_guide": {
       "tests": "Nhận diện và phòng tránh các dạng data leakage làm điểm offline cao giả.",
@@ -887,16 +869,13 @@
       ],
       "follow_up": "Xáo trộn nhãn mà điểm CV vẫn 0,7: bạn tìm chỗ rò ở đâu trước?"
     },
-    "proposed_fix": {
-      "question": "Mô hình đạt điểm cross-validation cao bất thường nhưng sụp khi lên production. Hai dạng data leakage thường gặp là target leakage qua feature và preprocessing trên toàn bộ dữ liệu: phát hiện và phòng tránh thế nào?",
-      "answer_change": "Rút mục 3–5 còn 1 dòng mỗi mục (giữ làm điểm cộng), giữ 'Kiểm tra nhanh' trong 600 token. Golden label g06: kiểm lại golden set nếu đổi câu hỏi."
-    }
+    "proposed_fix": null
   },
   {
     "qa_id": "de-qa-1184",
-    "verdict": "fix",
+    "verdict": "ok",
     "confidence": "high",
-    "summary_vi": "Nội dung khớp docs scikit-learn (GroupKFold, KFold giả định i.i.d.) và Feast (point-in-time join quét ngược tới TTL, filter_by_created_timestamp). Cần sửa vì câu hỏi liệt kê 3 kỹ thuật cần trình bày và vượt 600 token một chút.",
+    "summary_vi": "Đạt theo rubric v2: câu hỏi có 1 ý độc lập, trả lời các ý bắt buộc trong khoảng 4 phút; các claim chính đều có trích dẫn. (v1 gợi ý Cần sửa vì đếm 3 ý.)",
     "claims": [
       {
         "claim": "GroupKFold bảo đảm một nhóm không ở cả train và test; phát hiện overfit theo người.",
@@ -929,9 +908,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi đòi trình bày 3 kỹ thuật (GroupKFold, TimeSeriesSplit, point-in-time correctness) cho cả chia dữ liệu lẫn tạo feature.",
+        "detail": "Rubric v2: 1 ý độc lập, ~4 phút cho các ý bắt buộc (GroupKFold, TimeSeriesSplit, point-in-time là các mặt của một thiết kế chia dữ liệu); v1 đếm 3 ý. Còn lại là gợi ý: Câu hỏi đòi trình bày 3 kỹ thuật (GroupKFold, TimeSeriesSplit, point-in-time correctness) cho cả chia dữ liệu lẫn tạo feature.",
         "fix": "Bỏ danh sách tên kỹ thuật khỏi câu hỏi, để ứng viên tự nêu; chấm theo 2 ý: chia dữ liệu (nhóm + thời gian) và feature đúng thời điểm."
       },
       {
@@ -953,10 +932,10 @@
       "note": "Thiết kế split theo kịch bản production, cần hiểu phụ thuộc nhóm/thời gian."
     },
     "interview_fit": {
-      "minutes": 6,
-      "sub_questions": 3,
+      "minutes": 4,
+      "sub_questions": 1,
       "gradeable": true,
-      "note": "Điểm chấm rõ; câu hỏi gợi sẵn đáp án bằng tên kỹ thuật."
+      "note": "Rubric v2: GroupKFold, TimeSeriesSplit, point-in-time là các mặt của một thiết kế chia dữ liệu. Điểm chấm rõ; câu hỏi gợi sẵn đáp án bằng tên kỹ thuật."
     },
     "junior_guide": {
       "tests": "Chia dữ liệu và tạo feature không rò rỉ khi mẫu phụ thuộc theo người và theo thời gian.",
@@ -974,16 +953,13 @@
       ],
       "follow_up": "Feature 'điểm trung bình các vòng trước' được tính lại hằng đêm: làm sao bảo đảm training dùng đúng giá trị tại thời điểm dự đoán?"
     },
-    "proposed_fix": {
-      "question": "Bạn xây model dự đoán khả năng ứng viên vượt vòng phỏng vấn từ dữ liệu nhiều năm, một ứng viên có thể nộp nhiều lần. Thiết kế cách chia dữ liệu và tạo feature để không rò rỉ.",
-      "answer_change": "Rút đoạn Feast còn 1 dòng (as-of join, ví dụ Feast) để mục 'Kiểm chứng' nằm trong 600 token."
-    }
+    "proposed_fix": null
   },
   {
     "qa_id": "de-qa-1185",
-    "verdict": "fix",
+    "verdict": "ok",
     "confidence": "high",
-    "summary_vi": "Khái niệm và số liệu khớp docs Google (JS divergence cho feature số, L-infinity cho phân loại, ngưỡng mặc định 0,3; feature store chống skew; 4 trigger retrain). Cần sửa vì câu hỏi có 4 ý; tên sản phẩm 'Vertex AI' đã được docs đổi sang Gemini Enterprise Agent Platform (Model Monitoring v1).",
+    "summary_vi": "Đạt theo rubric v2: câu hỏi có 2 ý độc lập, trả lời các ý bắt buộc trong khoảng 5 phút; các claim chính đều có trích dẫn. (v1 gợi ý Cần sửa vì đếm 4 ý.)",
     "claims": [
       {
         "claim": "Training-serving skew: phân phối feature production lệch so với dữ liệu train; inference drift: phân phối thay đổi theo thời gian.",
@@ -1030,9 +1006,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi có 4 ý (phân biệt skew/data drift/concept drift, chỉ số, ngưỡng, khi nào retrain).",
+        "detail": "Rubric v2: 2 ý độc lập, ~5 phút cho các ý bắt buộc (phân biệt ba loại drift là một ý; chỉ số, ngưỡng, khi nào retrain là các mặt của thiết kế giám sát); v1 đếm 4 ý. Còn lại là gợi ý: Câu hỏi có 4 ý (phân biệt skew/data drift/concept drift, chỉ số, ngưỡng, khi nào retrain).",
         "fix": "Giữ 'phân biệt 3 loại + giám sát khi nhãn về trễ'; ngưỡng và retrain làm follow-up."
       },
       {
@@ -1054,10 +1030,10 @@
       "note": "Giám sát khi nhãn về trễ đòi chọn tín hiệu proxy và phân biệt loại drift."
     },
     "interview_fit": {
-      "minutes": 6,
-      "sub_questions": 4,
+      "minutes": 5,
+      "sub_questions": 2,
       "gradeable": true,
-      "note": "Điểm chấm rõ nhưng nhiều ý."
+      "note": "Rubric v2: phân biệt ba loại drift là một ý; chỉ số, ngưỡng, khi nào retrain là các mặt của thiết kế giám sát. Điểm chấm rõ nhưng nhiều ý."
     },
     "junior_guide": {
       "tests": "Giám sát model production khi nhãn thật về trễ và phân biệt các loại lệch dữ liệu.",
@@ -1075,10 +1051,7 @@
       ],
       "follow_up": "Một feature quan trọng drift mạnh nhưng phân phối điểm dự đoán không đổi: bạn hiểu và xử lý thế nào?"
     },
-    "proposed_fix": {
-      "question": "Mô hình phân loại đang chạy production nhưng nhãn thật chỉ có sau vài tuần. Phân biệt training-serving skew, data drift và concept drift, và bạn giám sát chúng thế nào khi chưa có nhãn?",
-      "answer_change": "Đổi 'Vertex AI Model Monitoring' thành 'Model Monitoring của Google Cloud (trước là Vertex AI)'; rút mục 'Ngưỡng' để dưới 600 token."
-    }
+    "proposed_fix": null
   },
   {
     "qa_id": "de-qa-1186",
@@ -1119,7 +1092,7 @@
       {
         "severity": "major",
         "type": "interview_fit",
-        "detail": "Câu hỏi liệt kê 6 bước (versioning/registry, validation offline, shadow, canary, A/B, rollback) và hỏi thêm mỗi bước bắt lỗi gì.",
+        "detail": "Rubric v2 vẫn tính là quá rộng (1 ý độc lập, ~6 phút): một quy trình nhưng sáu bước, mỗi bước kèm loại lỗi nó bắt: các ý bắt buộc vẫn cần khoảng 6 phút. Câu hỏi liệt kê 6 bước (versioning/registry, validation offline, shadow, canary, A/B, rollback) và hỏi thêm mỗi bước bắt lỗi gì.",
         "fix": "Hỏi: 'Shadow, canary và A/B test mỗi cái bắt được loại lỗi nào mà cái khác bỏ sót?' — các bước khác làm follow-up."
       },
       {
@@ -1135,10 +1108,10 @@
       "note": "Phân tích từng cổng bắt lỗi gì là reasoning, không chỉ liệt kê."
     },
     "interview_fit": {
-      "minutes": 8,
-      "sub_questions": 7,
+      "minutes": 6,
+      "sub_questions": 1,
       "gradeable": true,
-      "note": "Điểm chấm rõ nhưng quá rộng."
+      "note": "Rubric v2: một quy trình nhưng sáu bước, mỗi bước kèm loại lỗi nó bắt: các ý bắt buộc vẫn cần khoảng 6 phút. Điểm chấm rõ nhưng quá rộng."
     },
     "junior_guide": {
       "tests": "Hiểu quy trình rollout model an toàn và vai trò riêng của từng cổng.",
@@ -1163,9 +1136,9 @@
   },
   {
     "qa_id": "de-qa-1187",
-    "verdict": "fix",
+    "verdict": "ok",
     "confidence": "high",
-    "summary_vi": "So sánh chained vs speech-to-speech, ngân sách độ trễ và kỹ thuật streaming khớp docs OpenAI (voice agents, VAD, latency). Cần sửa vì câu hỏi có 3 ý (so sánh kiến trúc, ngân sách từng chặng, kỹ thuật giảm độ trễ) và vượt 600 token.",
+    "summary_vi": "Đạt theo rubric v2: câu hỏi có 2 ý độc lập, trả lời các ý bắt buộc trong khoảng 5 phút; các claim chính đều có trích dẫn. (v1 gợi ý Cần sửa vì đếm 3 ý.)",
     "claims": [
       {
         "claim": "Chained: ứng dụng quản lý ba chặng speech-to-text, agent workflow, text-to-speech; xem/biến đổi được text trung gian.",
@@ -1205,9 +1178,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi có 3 ý (so sánh 2 kiến trúc, ngân sách độ trễ từng chặng, kỹ thuật giảm độ trễ cảm nhận).",
+        "detail": "Rubric v2: 2 ý độc lập, ~5 phút cho các ý bắt buộc (so sánh hai kiến trúc là một ý; ngân sách độ trễ và kỹ thuật giảm là ý thứ hai); v1 đếm 3 ý. Còn lại là gợi ý: Câu hỏi có 3 ý (so sánh 2 kiến trúc, ngân sách độ trễ từng chặng, kỹ thuật giảm độ trễ cảm nhận).",
         "fix": "Giữ 'so sánh kiến trúc + ngân sách độ trễ'; kỹ thuật giảm độ trễ làm follow-up."
       },
       {
@@ -1223,10 +1196,10 @@
       "note": "Quyết định kiến trúc có trade-off kiểm soát vs độ trễ, cần phân rã latency."
     },
     "interview_fit": {
-      "minutes": 6,
-      "sub_questions": 3,
+      "minutes": 5,
+      "sub_questions": 2,
       "gradeable": true,
-      "note": "Điểm chấm rõ; 3 ý nên hơi rộng theo rubric."
+      "note": "Rubric v2: so sánh hai kiến trúc là một ý; ngân sách độ trễ và kỹ thuật giảm là ý thứ hai. Điểm chấm rõ; 3 ý nên hơi rộng theo rubric."
     },
     "junior_guide": {
       "tests": "So sánh kiến trúc voice agent và phân rã độ trễ để giảm thời gian chờ.",
@@ -1244,16 +1217,13 @@
       ],
       "follow_up": "Ứng viên hay dừng 2–3 giây để nghĩ: bạn cấu hình phát hiện hết lượt thế nào?"
     },
-    "proposed_fix": {
-      "question": "Thiết kế voice agent cho phỏng vấn bằng giọng nói: so sánh kiến trúc chained (ASR, LLM, TTS) với speech-to-speech, và phân tích ngân sách độ trễ của từng chặng.",
-      "answer_change": "Rút mục 'Giảm độ trễ cảm nhận' còn 2 dòng để mục 'Chọn' nằm trong 600 token."
-    }
+    "proposed_fix": null
   },
   {
     "qa_id": "de-qa-1188",
     "verdict": "fix",
     "confidence": "high",
-    "summary_vi": "Các tham số và luồng barge-in khớp docs OpenAI Realtime (threshold, prefix_padding_ms, silence_duration_ms, semantic_vad + eagerness, speech_started → response.cancelled → conversation.item.truncate). Cần sửa vì đáp án mô tả tham số/sự kiện riêng của OpenAI Realtime như chuẩn chung, và câu hỏi có 4 ý.",
+    "summary_vi": "Các tham số và luồng barge-in khớp docs OpenAI Realtime (threshold, prefix_padding_ms, silence_duration_ms, semantic_vad + eagerness, speech_started → response.cancelled → conversation.item.truncate). Cần sửa vì đáp án mô tả tham số/sự kiện riêng của OpenAI Realtime như chuẩn chung, và câu hỏi có 4 ý. (Rubric v2: không còn tính là quá rộng; vẫn cần sửa vì outdated.)",
     "claims": [
       {
         "claim": "threshold cao cần âm to hơn, hợp môi trường ồn.",
@@ -1306,9 +1276,9 @@
         "fix": "Ghi 'Với OpenAI Realtime API: ...' trước tham số và sự kiện, hoặc mô tả trung lập (ngưỡng năng lượng, đệm trước, độ dài khoảng lặng; hủy response, cắt phần chưa phát khỏi context)."
       },
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi có 4 ý (turn-taking/barge-in, VAD khoảng lặng vs semantic, ý nghĩa tham số, đồng bộ context khi ngắt lời).",
+        "detail": "Rubric v2: 2 ý độc lập, ~5 phút cho các ý bắt buộc (phát hiện hết lượt (hai loại VAD, tham số) là một ý; đồng bộ context khi bị ngắt lời là ý thứ hai); v1 đếm 4 ý. Còn lại là gợi ý: Câu hỏi có 4 ý (turn-taking/barge-in, VAD khoảng lặng vs semantic, ý nghĩa tham số, đồng bộ context khi ngắt lời).",
         "fix": "Giữ 'VAD khoảng lặng vs semantic' + 'đồng bộ context khi ngắt lời'; tham số làm follow-up."
       },
       {
@@ -1324,10 +1294,10 @@
       "note": "Hiểu vì sao phải truncate để context khớp những gì người dùng đã nghe là reasoning tốt."
     },
     "interview_fit": {
-      "minutes": 6,
-      "sub_questions": 4,
+      "minutes": 5,
+      "sub_questions": 2,
       "gradeable": true,
-      "note": "Điểm chấm rõ nhưng nặng tên tham số một vendor."
+      "note": "Rubric v2: phát hiện hết lượt (hai loại VAD, tham số) là một ý; đồng bộ context khi bị ngắt lời là ý thứ hai. Điểm chấm rõ nhưng nặng tên tham số một vendor."
     },
     "junior_guide": {
       "tests": "Xử lý lượt nói và ngắt lời trong voice agent realtime, giữ context khớp với những gì người dùng thật sự nghe.",
@@ -1352,9 +1322,9 @@
   },
   {
     "qa_id": "de-qa-1189",
-    "verdict": "fix",
+    "verdict": "ok",
     "confidence": "high",
-    "summary_vi": "Chi phí token khớp docs Anthropic hiện tại (patch 28×28, ảnh 1000×1000 = 1.296 token, PDF 1.500–3.000 token text/trang cộng token ảnh) và giới hạn VLM (ảnh <200 px, xoay). Cần sửa vì câu hỏi có 3 ý (so sánh, ước lượng chi phí, đề xuất kiến trúc).",
+    "summary_vi": "Đạt theo rubric v2: câu hỏi có 2 ý độc lập, trả lời các ý bắt buộc trong khoảng 5 phút; các claim chính đều có trích dẫn. (v1 gợi ý Cần sửa vì đếm 3 ý.)",
     "claims": [
       {
         "claim": "Ảnh tính theo patch 28×28: ⌈rộng/28⌉ × ⌈cao/28⌉ token.",
@@ -1394,9 +1364,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi có 3 ý (so sánh OCR với VLM, ước lượng chi phí token, đề xuất kiến trúc).",
+        "detail": "Rubric v2: 2 ý độc lập, ~5 phút cho các ý bắt buộc (so sánh OCR và VLM kèm kiến trúc đề xuất là một ý; ước lượng chi phí token là ý thứ hai); v1 đếm 3 ý. Còn lại là gợi ý: Câu hỏi có 3 ý (so sánh OCR với VLM, ước lượng chi phí token, đề xuất kiến trúc).",
         "fix": "Giữ 'so sánh + đề xuất kiến trúc'; chi phí token làm follow-up."
       },
       {
@@ -1418,10 +1388,10 @@
       "note": "Thiết kế pipeline hybrid có định tuyến và đo đạc."
     },
     "interview_fit": {
-      "minutes": 6,
-      "sub_questions": 3,
+      "minutes": 5,
+      "sub_questions": 2,
       "gradeable": true,
-      "note": "Điểm chấm rõ; 3 ý nên hơi rộng theo rubric."
+      "note": "Rubric v2: so sánh OCR và VLM kèm kiến trúc đề xuất là một ý; ước lượng chi phí token là ý thứ hai. Điểm chấm rõ; 3 ý nên hơi rộng theo rubric."
     },
     "junior_guide": {
       "tests": "Chọn giữa OCR và VLM để trích xuất CV, hiểu chi phí và thiết kế pipeline kết hợp.",
@@ -1439,16 +1409,13 @@
       ],
       "follow_up": "CV 4 trang scan 300 dpi: bạn ước lượng chi phí mỗi CV thế nào và giảm ra sao?"
     },
-    "proposed_fix": {
-      "question": "Cần trích xuất dữ liệu có cấu trúc từ CV dạng PDF và ảnh chụp (nhiều cột, bảng, có khi chụp nghiêng). So sánh pipeline OCR truyền thống với vision-language model và đề xuất kiến trúc.",
-      "answer_change": "Rút mục 'Chi phí token' còn 2 dòng (ghi rõ theo docs Anthropic) để dòng PII nằm trong 600 token."
-    }
+    "proposed_fix": null
   },
   {
     "qa_id": "de-qa-1190",
-    "verdict": "fix",
+    "verdict": "ok",
     "confidence": "high",
-    "summary_vi": "Nội dung đúng và có nguồn (docs vision Anthropic, Structured Outputs của OpenAI, OWASP LLM01 có cả kịch bản resume chứa prompt độc hại). Cần sửa vì câu hỏi có 4 ý (đánh giá offline, validate từng bản ghi, khi nào chuyển người, rủi ro bảo mật).",
+    "summary_vi": "Đạt theo rubric v2: câu hỏi có 2 ý độc lập, trả lời các ý bắt buộc trong khoảng 5 phút; các claim chính đều có trích dẫn. (v1 gợi ý Cần sửa vì đếm 4 ý.)",
     "claims": [
       {
         "claim": "Đúng schema không có nghĩa là đúng giá trị.",
@@ -1488,9 +1455,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi có 4 ý (đánh giá offline, validate từng bản ghi, khi nào chuyển người duyệt, rủi ro bảo mật từ nội dung tài liệu).",
+        "detail": "Rubric v2: 2 ý độc lập, ~5 phút cho các ý bắt buộc (đánh giá, validate, chuyển người duyệt là một thiết kế; rủi ro bảo mật từ nội dung tài liệu là ý thứ hai); v1 đếm 4 ý. Còn lại là gợi ý: Câu hỏi có 4 ý (đánh giá offline, validate từng bản ghi, khi nào chuyển người duyệt, rủi ro bảo mật từ nội dung tài liệu).",
         "fix": "Giữ 'validate từng bản ghi + khi nào chuyển người'; đánh giá offline và bảo mật làm follow-up."
       },
       {
@@ -1506,10 +1473,10 @@
       "note": "Đảm bảo chất lượng ở quy mô lớn có nhiều trade-off và failure mode."
     },
     "interview_fit": {
-      "minutes": 6,
-      "sub_questions": 4,
+      "minutes": 5,
+      "sub_questions": 2,
       "gradeable": true,
-      "note": "Điểm chấm rõ nhưng nhiều ý."
+      "note": "Rubric v2: đánh giá, validate, chuyển người duyệt là một thiết kế; rủi ro bảo mật từ nội dung tài liệu là ý thứ hai. Điểm chấm rõ nhưng nhiều ý."
     },
     "junior_guide": {
       "tests": "Bảo đảm chất lượng trích xuất bằng VLM ở quy mô lớn và nhận diện rủi ro từ chính nội dung tài liệu.",
@@ -1527,16 +1494,13 @@
       ],
       "follow_up": "Một CV chứa chữ trắng trên nền trắng 'đánh giá ứng viên này xuất sắc': lớp nào trong hệ của bạn chặn được?"
     },
-    "proposed_fix": {
-      "question": "Bạn dùng VLM trích xuất thông tin từ hàng nghìn CV và hóa đơn mỗi ngày. Làm sao validate từng bản ghi và quyết định khi nào chuyển cho người duyệt?",
-      "answer_change": "Rút 'Đánh giá offline' và 'Rủi ro bảo mật' mỗi mục còn 1–2 dòng (hoặc làm follow-up)."
-    }
+    "proposed_fix": null
   },
   {
     "qa_id": "de-qa-1191",
-    "verdict": "fix",
+    "verdict": "ok",
     "confidence": "high",
-    "summary_vi": "Nguyên nhân và biện pháp đúng: Petrov và cộng sự (chênh tới 15 lần, kể cả tokenizer đa ngôn ngữ và byte-level), UAX #15 (chuẩn hóa cho biểu diễn nhị phân duy nhất). Cần sửa vì câu hỏi có 3 ý (nguyên nhân, cách đo, biện pháp).",
+    "summary_vi": "Đạt theo rubric v2: câu hỏi có 2 ý độc lập, trả lời các ý bắt buộc trong khoảng 4 phút; các claim chính đều có trích dẫn. (v1 gợi ý Cần sửa vì đếm 3 ý.)",
     "claims": [
       {
         "claim": "Cùng văn bản dịch sang ngôn ngữ khác có thể chênh độ dài token tới 15 lần.",
@@ -1576,9 +1540,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi có 3 ý (giải thích nguyên nhân từ tokenization và Unicode, cách đo, biện pháp).",
+        "detail": "Rubric v2: 2 ý độc lập, ~4 phút cho các ý bắt buộc (hai vấn đề (chi phí do tokenization, so khớp lệch do Unicode), mỗi vấn đề nguyên nhân và cách sửa); v1 đếm 3 ý. Còn lại là gợi ý: Câu hỏi có 3 ý (giải thích nguyên nhân từ tokenization và Unicode, cách đo, biện pháp).",
         "fix": "Gộp 'cách đo' vào 'biện pháp' hoặc làm follow-up."
       },
       {
@@ -1594,10 +1558,10 @@
       "note": "Chẩn đoán hai nguyên nhân khác nhau (tokenization, Unicode) từ triệu chứng."
     },
     "interview_fit": {
-      "minutes": 5,
-      "sub_questions": 3,
+      "minutes": 4,
+      "sub_questions": 2,
       "gradeable": true,
-      "note": "Điểm chấm rõ; 3 ý nên hơi rộng theo rubric."
+      "note": "Rubric v2: hai vấn đề (chi phí do tokenization, so khớp lệch do Unicode), mỗi vấn đề nguyên nhân và cách sửa. Điểm chấm rõ; 3 ý nên hơi rộng theo rubric."
     },
     "junior_guide": {
       "tests": "Hiểu vì sao tiếng Việt tốn token hơn và vì sao chuỗi trông giống nhau vẫn không khớp.",
@@ -1615,16 +1579,13 @@
       ],
       "follow_up": "Cache theo hash prompt có tỷ lệ hit thấp bất thường với người dùng iOS: bạn nghi điều gì?"
     },
-    "proposed_fix": {
-      "question": "Ứng dụng LLM tiếng Việt có chi phí token cao hơn hẳn bản tiếng Anh, và một số truy vấn không khớp dữ liệu dù chữ trông giống hệt nhau. Giải thích nguyên nhân từ tokenization và Unicode, và cách khắc phục.",
-      "answer_change": "Gộp mục 'Đo' vào 'Biện pháp' (1 dòng); bỏ dòng 'Hệ quả' để dưới 600 token."
-    }
+    "proposed_fix": null
   },
   {
     "qa_id": "de-qa-1192",
-    "verdict": "fix",
+    "verdict": "ok",
     "confidence": "high",
-    "summary_vi": "Thiết kế đúng và có nguồn (PhoBERT cần tách từ bằng RDRSegmenter, max length 256; multilingual-e5 hỗ trợ 100 ngôn ngữ, prefix query:/passage:; RRF không cần tune). Cần sửa vì câu hỏi liệt kê 4 ý (lexical, embedding, khôi phục dấu, đánh giá).",
+    "summary_vi": "Đạt theo rubric v2: câu hỏi có 1 ý độc lập, trả lời các ý bắt buộc trong khoảng 5 phút; các claim chính đều có trích dẫn. (v1 gợi ý Cần sửa vì đếm 4 ý.)",
     "claims": [
       {
         "claim": "PhoBERT: input phải tách từ bằng RDRSegmenter của VnCoreNLP như khi pre-train.",
@@ -1657,9 +1618,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi liệt kê 4 ý (xử lý lexical, embedding đa ngôn ngữ, khôi phục dấu, đánh giá).",
+        "detail": "Rubric v2: 1 ý độc lập, ~5 phút cho các ý bắt buộc (xử lý lexical, embedding, khôi phục dấu và đánh giá là các mặt của một thiết kế retrieval); v1 đếm 4 ý. Còn lại là gợi ý: Câu hỏi liệt kê 4 ý (xử lý lexical, embedding đa ngôn ngữ, khôi phục dấu, đánh giá).",
         "fix": "Bỏ danh sách trong câu hỏi; chấm theo 2 ý: thiết kế retrieval chịu biến thể + cách đánh giá theo lát."
       },
       {
@@ -1681,10 +1642,10 @@
       "note": "Thiết kế retrieval cho đặc thù tiếng Việt, kết hợp nhiều nhánh có đo đạc."
     },
     "interview_fit": {
-      "minutes": 6,
-      "sub_questions": 4,
+      "minutes": 5,
+      "sub_questions": 1,
       "gradeable": true,
-      "note": "Điểm chấm rõ nhưng câu hỏi gợi sẵn đáp án."
+      "note": "Rubric v2: xử lý lexical, embedding, khôi phục dấu và đánh giá là các mặt của một thiết kế retrieval. Điểm chấm rõ nhưng câu hỏi gợi sẵn đáp án."
     },
     "junior_guide": {
       "tests": "Thiết kế tìm kiếm tiếng Việt chịu được truy vấn không dấu và trộn Anh–Việt.",
@@ -1702,10 +1663,7 @@
       ],
       "follow_up": "Khôi phục dấu biến 'ban hang' thành 'bàn hàng': hệ của bạn giảm thiệt hại thế nào?"
     },
-    "proposed_fix": {
-      "question": "Người dùng gõ truy vấn tiếng Việt không dấu hoặc trộn Anh–Việt, trong khi knowledge base viết có dấu. Thiết kế retrieval chịu được các biến thể này và đánh giá nó thế nào?",
-      "answer_change": "Rút mục 'Vấn đề' và 'Khôi phục dấu' mỗi mục 1 dòng để dưới 600 token."
-    }
+    "proposed_fix": null
   },
   {
     "qa_id": "de-qa-1193",
@@ -1753,7 +1711,7 @@
       {
         "severity": "major",
         "type": "interview_fit",
-        "detail": "Câu hỏi đòi chọn và giải thích 5 kỹ thuật (contextual chunking, parent-document, query rewriting, multi-query, HyDE) kèm chi phí và cách đo.",
+        "detail": "Rubric v2 vẫn tính là quá rộng (2 ý độc lập, ~6 phút): hai lỗi gốc nhưng năm kỹ thuật kèm chi phí và cách đo: các ý bắt buộc vẫn cần khoảng 6 phút. Câu hỏi đòi chọn và giải thích 5 kỹ thuật (contextual chunking, parent-document, query rewriting, multi-query, HyDE) kèm chi phí và cách đo.",
         "fix": "Để ứng viên tự chọn kỹ thuật cho 2 lỗi đã nêu; bỏ danh sách tên trong câu hỏi; hỏi thêm 'đo thế nào' là đủ."
       },
       {
@@ -1775,10 +1733,10 @@
       "note": "Chẩn đoán theo loại lỗi và chọn kỹ thuật phù hợp."
     },
     "interview_fit": {
-      "minutes": 8,
-      "sub_questions": 6,
+      "minutes": 6,
+      "sub_questions": 2,
       "gradeable": true,
-      "note": "Điểm chấm rõ nhưng quá rộng và gợi sẵn đáp án."
+      "note": "Rubric v2: hai lỗi gốc nhưng năm kỹ thuật kèm chi phí và cách đo: các ý bắt buộc vẫn cần khoảng 6 phút. Điểm chấm rõ nhưng quá rộng và gợi sẵn đáp án."
     },
     "junior_guide": {
       "tests": "Chọn kỹ thuật RAG nâng cao đúng với loại lỗi đã phân tích.",
@@ -1803,9 +1761,9 @@
   },
   {
     "qa_id": "de-qa-1194",
-    "verdict": "fix",
+    "verdict": "ok",
     "confidence": "medium",
-    "summary_vi": "Mô tả GraphRAG khớp paper (câu hỏi toàn cục là bài toán QFS, đồ thị thực thể + tóm tắt cộng đồng, cải thiện độ toàn diện/đa dạng trên dataset ~1M token); phần agentic RAG và đánh giá tách riêng hợp lý. Cần sửa vì câu hỏi có 3 ý. Confidence medium vì phần agentic dựa vào bài blog Anthropic.",
+    "summary_vi": "Đạt theo rubric v2: câu hỏi có 2 ý độc lập, trả lời các ý bắt buộc trong khoảng 5 phút; các claim chính đều có trích dẫn. (v1 gợi ý Cần sửa vì đếm 3 ý.)",
     "claims": [
       {
         "claim": "RAG thường thất bại với câu hỏi toàn cục vì đó là bài toán tóm tắt theo truy vấn.",
@@ -1838,9 +1796,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi có 3 ý (loại câu hỏi phù hợp, chi phí xây dựng và truy vấn, đánh giá tách riêng retrieval/generation).",
+        "detail": "Rubric v2: 2 ý độc lập, ~5 phút cho các ý bắt buộc (khi nào cần GraphRAG/agentic RAG (loại câu hỏi, chi phí) là một ý; cách đánh giá tách riêng là ý thứ hai); v1 đếm 3 ý. Còn lại là gợi ý: Câu hỏi có 3 ý (loại câu hỏi phù hợp, chi phí xây dựng và truy vấn, đánh giá tách riêng retrieval/generation).",
         "fix": "Giữ 'khi nào cần + chi phí'; đánh giá tách riêng làm follow-up (đã có ở các cặp RAG khác)."
       },
       {
@@ -1857,9 +1815,9 @@
     },
     "interview_fit": {
       "minutes": 5,
-      "sub_questions": 3,
+      "sub_questions": 2,
       "gradeable": true,
-      "note": "Điểm chấm rõ; 3 ý nên hơi rộng theo rubric."
+      "note": "Rubric v2: khi nào cần GraphRAG/agentic RAG (loại câu hỏi, chi phí) là một ý; cách đánh giá tách riêng là ý thứ hai. Điểm chấm rõ; 3 ý nên hơi rộng theo rubric."
     },
     "junior_guide": {
       "tests": "Biết khi nào vector RAG không đủ và cần GraphRAG hoặc agentic RAG.",
@@ -1877,16 +1835,13 @@
       ],
       "follow_up": "Corpus đổi 10% mỗi tuần: GraphRAG còn hợp không, và cập nhật đồ thị thế nào?"
     },
-    "proposed_fix": {
-      "question": "Khi nào cần GraphRAG hoặc agentic RAG thay cho vector RAG thông thường? Phân tích loại câu hỏi phù hợp và chi phí xây dựng, truy vấn.",
-      "answer_change": "Rút mục 'Đánh giá tách riêng' còn 1–2 dòng (hoặc làm follow-up)."
-    }
+    "proposed_fix": null
   },
   {
     "qa_id": "de-qa-1195",
-    "verdict": "fix",
+    "verdict": "ok",
     "confidence": "high",
-    "summary_vi": "Kịch bản và phòng thủ khớp Greshake và cộng sự cùng OWASP (LLM01 chưa có cách chống tuyệt đối; LLM06 tool tối thiểu, tránh tool mở, người duyệt hành động tác động cao; LLM05 encode output). Cần sửa vì câu hỏi có 3 ý. Có golden label g23.",
+    "summary_vi": "Đạt theo rubric v2: câu hỏi có 2 ý độc lập, trả lời các ý bắt buộc trong khoảng 5 phút; các claim chính đều có trích dẫn. (v1 gợi ý Cần sửa vì đếm 3 ý.)",
     "claims": [
       {
         "claim": "Ứng dụng tích hợp LLM xóa nhòa ranh giới dữ liệu và chỉ dẫn; kẻ tấn công cài chỉ dẫn vào dữ liệu có khả năng bị truy hồi.",
@@ -1933,9 +1888,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi có 3 ý (mô tả kịch bản, vì sao lọc prompt không đủ, thiết kế phòng thủ nhiều lớp).",
+        "detail": "Rubric v2: 2 ý độc lập, ~5 phút cho các ý bắt buộc (kịch bản tấn công và vì sao lọc không đủ là một mạch; thiết kế phòng thủ là ý thứ hai); v1 đếm 3 ý. Còn lại là gợi ý: Câu hỏi có 3 ý (mô tả kịch bản, vì sao lọc prompt không đủ, thiết kế phòng thủ nhiều lớp).",
         "fix": "Gộp 'kịch bản + vì sao lọc không đủ' thành một ý; giữ 'phòng thủ nhiều lớp'."
       },
       {
@@ -1951,10 +1906,10 @@
       "note": "Threat modeling cụ thể và thiết kế phòng thủ nhiều lớp."
     },
     "interview_fit": {
-      "minutes": 6,
-      "sub_questions": 3,
+      "minutes": 5,
+      "sub_questions": 2,
       "gradeable": true,
-      "note": "Điểm chấm rõ. Golden label g23: đổi wording phải kiểm lại golden set."
+      "note": "Rubric v2: kịch bản tấn công và vì sao lọc không đủ là một mạch; thiết kế phòng thủ là ý thứ hai. Điểm chấm rõ. Golden label g23: đổi wording phải kiểm lại golden set."
     },
     "junior_guide": {
       "tests": "Hiểu indirect prompt injection qua dữ liệu và vì sao phải thiết kế giả định model có thể bị điều khiển.",
@@ -1972,16 +1927,13 @@
       ],
       "follow_up": "Agent cần vừa đọc email bên ngoài vừa gửi email: bạn tách quyền theo phiên thế nào?"
     },
-    "proposed_fix": {
-      "question": "Một agent hỗ trợ recruiter có quyền đọc email, duyệt web và gửi email. Mô tả một kịch bản indirect prompt injection dẫn tới rò rỉ dữ liệu và thiết kế phòng thủ nhiều lớp.",
-      "answer_change": "Giữ nội dung; gộp đoạn 'Vì sao lọc không đủ' vào phần mở đầu phòng thủ. Golden label g23: kiểm lại golden set nếu đổi câu hỏi."
-    }
+    "proposed_fix": null
   },
   {
     "qa_id": "de-qa-1196",
     "verdict": "fix",
     "confidence": "high",
-    "summary_vi": "Mã số OWASP 2025 (LLM01/02/05/06/07/10) và các khuyến nghị (system prompt không phải bí mật/control bảo mật, kiểm soát độc lập với LLM, zero-trust với output, encode theo ngữ cảnh, parameterized query) đều khớp OWASP. Cần sửa vì câu hỏi có 4+ ý và 660 token làm mất phần chặn nhầm mà câu hỏi hỏi.",
+    "summary_vi": "Mã số OWASP 2025 (LLM01/02/05/06/07/10) và các khuyến nghị (system prompt không phải bí mật/control bảo mật, kiểm soát độc lập với LLM, zero-trust với output, encode theo ngữ cảnh, parameterized query) đều khớp OWASP. Cần sửa vì câu hỏi có 4+ ý và 660 token làm mất phần chặn nhầm mà câu hỏi hỏi. (Rubric v2: không còn tính là quá rộng; vẫn cần sửa vì length.)",
     "claims": [
       {
         "claim": "Mã số OWASP Top 10 cho LLM 2025: LLM01 prompt injection, LLM02 sensitive info, LLM05 output handling, LLM06 excessive agency, LLM07 system prompt leakage, LLM10 unbounded consumption.",
@@ -2021,9 +1973,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi có 4+ ý (guardrail 3 lớp, những gì không dựa vào system prompt, xử lý output trước khi chuyển hệ khác, đánh đổi an toàn–độ trễ–chặn nhầm).",
+        "detail": "Rubric v2: 2 ý độc lập, ~5 phút cho các ý bắt buộc (guardrail ba lớp là một thiết kế; các điểm nêu rõ là các mặt của nó, đánh đổi là ý thứ hai); v1 đếm 4 ý. Còn lại là gợi ý: Câu hỏi có 4+ ý (guardrail 3 lớp, những gì không dựa vào system prompt, xử lý output trước khi chuyển hệ khác, đánh đổi an toàn–độ trễ–chặn nhầm).",
         "fix": "Giữ 'không dựa vào system prompt + xử lý output'; 3 lớp và đánh đổi làm follow-up."
       },
       {
@@ -2039,10 +1991,10 @@
       "note": "Thiết kế guardrail có trade-off, áp vào sản phẩm cụ thể (tách module chấm điểm)."
     },
     "interview_fit": {
-      "minutes": 7,
-      "sub_questions": 4,
+      "minutes": 5,
+      "sub_questions": 2,
       "gradeable": true,
-      "note": "Điểm chấm rõ nhưng nhiều ý."
+      "note": "Rubric v2: guardrail ba lớp là một thiết kế; các điểm nêu rõ là các mặt của nó, đánh đổi là ý thứ hai. Điểm chấm rõ nhưng nhiều ý."
     },
     "junior_guide": {
       "tests": "Thiết kế guardrails nhiều lớp cho AI interviewer và biết giới hạn của system prompt.",

@@ -103,7 +103,7 @@
     "qa_id": "de-qa-1251",
     "verdict": "fix",
     "confidence": "high",
-    "summary_vi": "Cần sửa. Đáp án nói gộp tín hiệu bằng AbortSignal.any() thì 'không còn phân biệt bằng tên lỗi', nhưng spec và MDN cho thấy signal gộp mang reason của signal abort đầu tiên nên fetch vẫn reject với TimeoutError hoặc AbortError. Câu hỏi cũng có 4 yêu cầu, quá rộng cho 3–5 phút.",
+    "summary_vi": "Cần sửa. Đáp án nói gộp tín hiệu bằng AbortSignal.any() thì 'không còn phân biệt bằng tên lỗi', nhưng spec và MDN cho thấy signal gộp mang reason của signal abort đầu tiên nên fetch vẫn reject với TimeoutError hoặc AbortError. Câu hỏi cũng có 4 yêu cầu, quá rộng cho 3–5 phút. (Rubric v2: không còn tính là quá rộng; vẫn cần sửa vì factual.)",
     "claims": [
       {
         "claim": "Response có thể về không theo thứ tự nên kết quả của từ khóa cũ ghi đè; cần bỏ qua response cũ",
@@ -163,9 +163,9 @@
         "fix": "Thay bằng: 'Khi gộp bằng AbortSignal.any(), signal gộp mang reason của signal bị abort trước, nên fetch vẫn reject với TimeoutError (hết giờ) hoặc AbortError (bị hủy); vẫn phân loại theo err.name được.'"
       },
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi có 4 yêu cầu: phân tích nguyên nhân, hủy request, timeout, phân loại lỗi. Trả lời đủ cần hơn 5 phút và khó chấm.",
+        "detail": "Rubric v2: 1 ý độc lập, ~5 phút cho các ý bắt buộc (nguyên nhân và thiết kế lại lớp gọi API là một mạch; hủy, timeout, phân loại lỗi là các mặt của thiết kế); v1 đếm 4 ý. Còn lại là gợi ý: Câu hỏi có 4 yêu cầu: phân tích nguyên nhân, hủy request, timeout, phân loại lỗi. Trả lời đủ cần hơn 5 phút và khó chấm.",
         "fix": "Thu hẹp còn 'giải thích nguyên nhân hai triệu chứng và cách sửa'; phân loại lỗi chuyển thành follow-up."
       },
       {
@@ -187,10 +187,10 @@
       "note": "Tình huống debug cụ thể, cần hiểu race condition 'last response wins', ngữ nghĩa reject của fetch và AbortSignal. Middle nêu được abort + kiểm res.ok; senior thêm chốt chặn request id, phân loại lỗi và lưu ý mutation."
     },
     "interview_fit": {
-      "minutes": 6,
-      "sub_questions": 4,
+      "minutes": 5,
+      "sub_questions": 1,
       "gradeable": true,
-      "note": "Đáp án có các điểm chấm rõ, nhưng 4 yêu cầu trong một câu là quá rộng cho 3–5 phút."
+      "note": "Rubric v2: nguyên nhân và thiết kế lại lớp gọi API là một mạch; hủy, timeout, phân loại lỗi là các mặt của thiết kế. Đáp án có các điểm chấm rõ, nhưng 4 yêu cầu trong một câu là quá rộng cho 3–5 phút."
     },
     "junior_guide": {
       "tests": "Hiểu race condition khi gọi API liên tiếp, cách fetch báo lỗi, và cách dùng AbortController/AbortSignal để hủy và đặt timeout.",
@@ -217,7 +217,7 @@
     "qa_id": "de-qa-1252",
     "verdict": "fix",
     "confidence": "high",
-    "summary_vi": "Nội dung đúng, mọi claim có quote từ react.dev/nextjs.org. Cần sửa vì chunk vượt budget 600 token và phần bị cắt chính là mục suppressHydrationWarning mà câu hỏi hỏi trực tiếp. Pair có golden label g11 nên chỉ nên rút gọn đáp án, giữ nguyên câu hỏi.",
+    "summary_vi": "Nội dung đúng, mọi claim có quote từ react.dev/nextjs.org. Cần sửa vì chunk vượt budget 600 token và phần bị cắt chính là mục suppressHydrationWarning mà câu hỏi hỏi trực tiếp. Pair có golden label g11 nên chỉ nên rút gọn đáp án, giữ nguyên câu hỏi. (Rubric v2: không còn tính là quá rộng; vẫn cần sửa vì length.)",
     "claims": [
       {
         "claim": "Hydration là bước React gắn event handler vào HTML đã prerender",
@@ -284,9 +284,9 @@
         "fix": "Gộp danh sách nguyên nhân còn 3 dòng (thời gian/locale; API chỉ có ở trình duyệt; môi trường sửa DOM: extension, iOS, CDN; HTML lồng sai), rút đoạn 'Chẩn đoán' còn 1 câu, để mục suppressHydrationWarning nằm trong 600 token đầu."
       },
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi có 3 yêu cầu (chẩn đoán, xử lý, chọn giữa suppressHydrationWarning và render hai lượt), vượt mức 2 của rubric. Các yêu cầu liên kết chặt nên vẫn trả lời được trong ~5 phút nếu ứng viên chỉ nêu 2–3 nguyên nhân tiêu biểu.",
+        "detail": "Rubric v2: 2 ý độc lập, ~5 phút cho các ý bắt buộc (chẩn đoán và xử lý là một mạch; chọn suppressHydrationWarning hay render hai lượt là ý thứ hai); v1 đếm 3 ý. Còn lại là gợi ý: Câu hỏi có 3 yêu cầu (chẩn đoán, xử lý, chọn giữa suppressHydrationWarning và render hai lượt), vượt mức 2 của rubric. Các yêu cầu liên kết chặt nên vẫn trả lời được trong ~5 phút nếu ứng viên chỉ nêu 2–3 nguyên nhân tiêu biểu.",
         "fix": "Cách gọn nhất là bỏ câu thứ hai ('Khi nào dùng suppressHydrationWarning, khi nào cần render hai lượt?') và để nó làm follow-up. Nhưng pair có golden label g11, đổi câu hỏi có thể làm lệch recall của golden set; người duyệt quyết định. Nếu giữ câu hỏi thì bắt buộc rút đáp án (xem issue length)."
       }
     ],
@@ -297,9 +297,9 @@
     },
     "interview_fit": {
       "minutes": 5,
-      "sub_questions": 3,
+      "sub_questions": 2,
       "gradeable": true,
-      "note": "Có 4–5 điểm chấm rõ: bản chất mismatch, nhóm nguyên nhân, thứ tự cách sửa, giới hạn của suppressHydrationWarning."
+      "note": "Rubric v2: chẩn đoán và xử lý là một mạch; chọn suppressHydrationWarning hay render hai lượt là ý thứ hai. Có 4–5 điểm chấm rõ: bản chất mismatch, nhóm nguyên nhân, thứ tự cách sửa, giới hạn của suppressHydrationWarning."
     },
     "junior_guide": {
       "tests": "Hiểu hydration trong SSR (Next.js/React): vì sao HTML từ server phải khớp lần render đầu trên client và cách xử lý khi không khớp.",
@@ -424,9 +424,9 @@
   },
   {
     "qa_id": "de-qa-1254",
-    "verdict": "fix",
+    "verdict": "ok",
     "confidence": "high",
-    "summary_vi": "Nội dung đúng, mọi claim khớp react.dev ('You Might Not Need an Effect', blog React 19.2). Cần sửa vì câu hỏi bắt đánh giá 4 effect, đề xuất cách viết lại và nêu khi nào effect đúng: quá nhiều yêu cầu cho 3–5 phút.",
+    "summary_vi": "Đạt theo rubric v2: câu hỏi có 2 ý độc lập, trả lời các ý bắt buộc trong khoảng 5 phút; các claim chính đều có trích dẫn. (v1 gợi ý Cần sửa vì đếm 6 ý.)",
     "claims": [
       {
         "claim": "Effect dùng để đồng bộ với hệ thống bên ngoài React (widget, network, DOM)",
@@ -487,9 +487,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi có nhiều yêu cầu: đánh giá 4 effect, viết lại từng cái, rồi nêu khi nào effect là đúng (gợi ý của batch đếm 8). Trả lời đủ mất 6–8 phút, khó chấm theo 3–6 điểm.",
+        "detail": "Rubric v2: 2 ý độc lập, ~5 phút cho các ý bắt buộc (bốn effect cùng một nguyên tắc (effect chỉ để đồng bộ với hệ ngoài React), cộng ý khi nào effect là đúng); v1 đếm 6 ý. Còn lại là gợi ý: Câu hỏi có nhiều yêu cầu: đánh giá 4 effect, viết lại từng cái, rồi nêu khi nào effect là đúng (gợi ý của batch đếm 8). Trả lời đủ mất 6–8 phút, khó chấm theo 3–6 điểm.",
         "fix": "Giữ 2 effect khó nhất (reset selection khi items đổi, gọi onChange của cha) và bỏ yêu cầu 'khi nào effect đúng' (chuyển thành follow-up)."
       },
       {
@@ -505,10 +505,10 @@
       "note": "Áp dụng nguyên tắc 'effect chỉ để đồng bộ với hệ thống ngoài' vào từng case cụ thể, nêu đánh đổi giữa key, set state trong render và suy ra từ id. Effect 1 (fullName) khá dễ, effect 2 và 4 mới thật sự phân loại middle/senior."
     },
     "interview_fit": {
-      "minutes": 7,
-      "sub_questions": 6,
+      "minutes": 5,
+      "sub_questions": 2,
       "gradeable": true,
-      "note": "Các điểm chấm rõ nhưng quá nhiều; một phiên 15–20 phút không nên dành 7 phút cho một câu."
+      "note": "Rubric v2: bốn effect cùng một nguyên tắc (effect chỉ để đồng bộ với hệ ngoài React), cộng ý khi nào effect là đúng. Các điểm chấm rõ nhưng quá nhiều; một phiên 15–20 phút không nên dành 7 phút cho một câu."
     },
     "junior_guide": {
       "tests": "Biết khi nào KHÔNG cần useEffect trong React: phân biệt dữ liệu suy ra được, logic theo sự kiện và việc đồng bộ với hệ thống bên ngoài.",
@@ -526,10 +526,7 @@
       ],
       "follow_up": "Vậy trường hợp nào effect mới là công cụ đúng, và khi fetch dữ liệu trong effect bạn chống race condition thế nào?"
     },
-    "proposed_fix": {
-      "question": "Khi review code, bạn thấy một component có hai `useEffect`: một reset `selection` khi prop `items` đổi, và một gọi `onChange` của component cha mỗi khi state nội bộ đổi. Hai effect này gây vấn đề gì, và bạn viết lại thế nào?",
-      "answer_change": "Giữ phần 'Nguyên tắc' và mục 2, 4 của đáp án; bỏ mục 1 (fullName) và 3 (isInCart); chuyển 'Khi nào effect là đúng' và useEffectEvent sang follow-up hoặc rút còn 1 câu. Đáp án sẽ dưới 600 token."
-    }
+    "proposed_fix": null
   },
   {
     "qa_id": "de-qa-1255",
@@ -929,9 +926,9 @@
   },
   {
     "qa_id": "de-qa-1259",
-    "verdict": "fix",
+    "verdict": "ok",
     "confidence": "medium",
-    "summary_vi": "Nội dung đúng: discriminated union, exhaustiveness bằng never, định nghĩa Omit = Pick<T, Exclude<keyof T, K>>, việc Omit làm mất discriminated union và cách sửa bằng distributive conditional type đều có quote. Cần sửa nhẹ vì câu hỏi có 3 yêu cầu (thiết kế type, vì sao Omit làm hỏng, cách sửa); nên đưa sẵn type union vào câu hỏi. Confidence medium vì hành vi Omit trên union được quote từ issue GitHub của TypeScript (maintainer xác nhận 'Working as Intended'), không phải từ handbook.",
+    "summary_vi": "Đạt theo rubric v2: câu hỏi có 2 ý độc lập, trả lời các ý bắt buộc trong khoảng 4 phút; các claim chính đều có trích dẫn. (v1 gợi ý Cần sửa vì đếm 3 ý.)",
     "claims": [
       {
         "claim": "Union có thuộc tính chung mang literal type (kind) là discriminated union, TypeScript tự narrow khi kiểm kind",
@@ -977,9 +974,9 @@
         "fix": "Rút đoạn 'Vấn đề của optional props' còn một câu và bỏ gạch 'Lỗi này hay gặp khi viết wrapper...' để code DistributiveOmit lọt vào 600 token."
       },
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi có 3 yêu cầu (thiết kế type cho props, vì sao Omit làm hỏng, cách sửa), vượt mức 2 của rubric. Chúng nối tiếp nhau nhưng trả lời đủ cả ba cần ~5–6 phút, và đề bài đã gợi ý gần hết phần 'thiết kế type'.",
+        "detail": "Rubric v2: 2 ý độc lập, ~4 phút cho các ý bắt buộc (thiết kế type rồi vì sao Omit làm hỏng và cách sửa là một chuỗi nối tiếp); v1 đếm 3 ý. Còn lại là gợi ý: Câu hỏi có 3 yêu cầu (thiết kế type cho props, vì sao Omit làm hỏng, cách sửa), vượt mức 2 của rubric. Chúng nối tiếp nhau nhưng trả lời đủ cả ba cần ~5–6 phút, và đề bài đã gợi ý gần hết phần 'thiết kế type'.",
         "fix": "Đưa sẵn type union NotificationProps vào câu hỏi và chỉ hỏi 'vì sao Omit làm hỏng và cách sửa'; phần discriminated union/exhaustiveness thành follow-up."
       }
     ],
@@ -989,10 +986,10 @@
       "note": "Phần discriminated union ở mức middle; phần giải thích Omit trên union (keyof chỉ lấy key chung) và distributive conditional type là kiến thức type-level sâu, phân loại senior."
     },
     "interview_fit": {
-      "minutes": 5,
-      "sub_questions": 3,
+      "minutes": 4,
+      "sub_questions": 2,
       "gradeable": true,
-      "note": "4 điểm chấm rõ: discriminated union, exhaustiveness, cơ chế Omit trên union, DistributiveOmit. Không bắt gõ code dài, nhưng 3 yêu cầu hơi nhiều cho một câu."
+      "note": "Rubric v2: thiết kế type rồi vì sao Omit làm hỏng và cách sửa là một chuỗi nối tiếp. 4 điểm chấm rõ: discriminated union, exhaustiveness, cơ chế Omit trên union, DistributiveOmit. Không bắt gõ code dài, nhưng 3 yêu cầu hơi nhiều cho một câu."
     },
     "junior_guide": {
       "tests": "Thiết kế type cho props có nhiều biến thể bằng discriminated union, và hiểu vì sao utility type Omit phá vỡ union.",
@@ -1009,16 +1006,13 @@
       ],
       "follow_up": "Pick cũng có vấn đề tương tự với union không? Bạn viết DistributivePick thế nào?"
     },
-    "proposed_fix": {
-      "question": "Props của component `<Notification>` được khai báo bằng discriminated union: `type NotificationProps = { id: string; message: string } & ({ kind: 'toast'; duration: number } | { kind: 'banner'; action: { label: string; href: string } } | { kind: 'modal'; onConfirm: () => void })`. Một wrapper dùng `Omit<NotificationProps, 'id'>` và từ đó TypeScript không còn bắt lỗi toast thiếu `duration`. Vì sao, và bạn sửa thế nào?",
-      "answer_change": "Rút phần 'Vấn đề của optional props' và 'Dùng discriminated union' còn 1–2 câu (đề đã cho sẵn type); giữ mục 'Vì sao Omit làm hỏng', 'Cách sửa' (DistributiveOmit) và 'Đánh đổi'. Đáp án sẽ dưới 600 token, code DistributiveOmit không còn bị cắt. Chuyển exhaustiveness check sang follow-up."
-    }
+    "proposed_fix": null
   },
   {
     "qa_id": "de-qa-1260",
     "verdict": "fix",
     "confidence": "medium",
-    "summary_vi": "Cần sửa. Hành vi theo APG và MDN (focus ban đầu, Tab vòng trong dialog, Esc, trả focus, role/aria-modal/aria-labelledby, inert, showModal so với show) đều đúng. Nhưng đáp án bảo phải tự trả focus khi đóng <dialog> và 'đừng mặc định trình duyệt sẽ làm', trong khi HTML spec quy định trình duyệt trả focus về phần tử đã focus trước khi mở. Confidence medium vì chưa kiểm mức hỗ trợ thực tế trên từng trình duyệt.",
+    "summary_vi": "Cần sửa. Hành vi theo APG và MDN (focus ban đầu, Tab vòng trong dialog, Esc, trả focus, role/aria-modal/aria-labelledby, inert, showModal so với show) đều đúng. Nhưng đáp án bảo phải tự trả focus khi đóng <dialog> và 'đừng mặc định trình duyệt sẽ làm', trong khi HTML spec quy định trình duyệt trả focus về phần tử đã focus trước khi mở. Confidence medium vì chưa kiểm mức hỗ trợ thực tế trên từng trình duyệt. (Rubric v2: không còn tính là quá rộng; vẫn cần sửa vì factual.)",
     "claims": [
       {
         "claim": "Khi mở: focus vào trong dialog, thường là phần tử focus được đầu tiên; nội dung dài thì focus phần tử tĩnh ở đầu; hành động khó hoàn tác thì focus nút ít phá hủy hơn",
@@ -1078,9 +1072,9 @@
         "fix": "Viết lại: 'Theo HTML spec, khi đóng dialog modal trình duyệt trả focus về phần tử đã focus trước khi mở. Chỉ cần tự xử lý khi phần tử đó không còn (ví dụ vừa xóa item) hoặc luồng công việc cần focus chỗ khác; vẫn nên kiểm thử trên các trình duyệt mục tiêu.'"
       },
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi có 3 yêu cầu (sửa thế nào, tự xây hay dùng <dialog>, những hành vi cần đảm bảo), vượt mức 2 của rubric; chúng liên quan chặt nhưng đáp án đầy đủ cần ~5 phút.",
+        "detail": "Rubric v2: 1 ý độc lập, ~5 phút cho các ý bắt buộc (sửa modal, chọn <dialog> hay tự xây và các hành vi cần có đều là một bài sửa accessibility); v1 đếm 3 ý. Còn lại là gợi ý: Câu hỏi có 3 yêu cầu (sửa thế nào, tự xây hay dùng <dialog>, những hành vi cần đảm bảo), vượt mức 2 của rubric; chúng liên quan chặt nhưng đáp án đầy đủ cần ~5 phút.",
         "fix": "Có thể gộp thành: 'Bạn sửa thế nào, và vì sao chọn <dialog> native hay tự xây theo WAI-ARIA?'"
       },
       {
@@ -1097,9 +1091,9 @@
     },
     "interview_fit": {
       "minutes": 5,
-      "sub_questions": 3,
+      "sub_questions": 1,
       "gradeable": true,
-      "note": "Có 4–5 điểm chấm rõ: focus khi mở/trong lúc mở/khi đóng, inert nền, semantic, native vs tự xây."
+      "note": "Rubric v2: sửa modal, chọn <dialog> hay tự xây và các hành vi cần có đều là một bài sửa accessibility. Có 4–5 điểm chấm rõ: focus khi mở/trong lúc mở/khi đóng, inert nền, semantic, native vs tự xây."
     },
     "junior_guide": {
       "tests": "Biết làm modal dialog truy cập được bằng bàn phím và screen reader: quản lý focus, chặn nội dung nền, semantic ARIA.",
@@ -1124,9 +1118,9 @@
   },
   {
     "qa_id": "de-qa-1261",
-    "verdict": "fix",
+    "verdict": "ok",
     "confidence": "high",
-    "summary_vi": "Nội dung đúng: route announcer của Next.js, live region phải có sẵn trước khi cập nhật, status/polite với assertive, aria-atomic, đọc như plain text và khác nhau giữa trình duyệt/AT đều có quote từ nextjs.org và MDN. Cần sửa vì câu hỏi gồm 4 yêu cầu (vì sao đặc trưng SPA cộng ba vấn đề, mỗi vấn đề một kỹ thuật), quá rộng cho 3–5 phút.",
+    "summary_vi": "Đạt theo rubric v2: câu hỏi có 2 ý độc lập, trả lời các ý bắt buộc trong khoảng 5 phút; các claim chính đều có trích dẫn. (v1 gợi ý Cần sửa vì đếm 4 ý.)",
     "claims": [
       {
         "claim": "Điều hướng truyền thống: trình duyệt tải trang mới và AT đọc title; SPA chuyển trang phía client nên cần cơ chế thông báo riêng",
@@ -1180,9 +1174,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi có 4 yêu cầu: giải thích vì sao đặc trưng cho SPA, rồi xử lý ba vấn đề, mỗi vấn đề cần một kỹ thuật (route announcement/focus, status region, tóm tắt kết quả). Trả lời đủ mất hơn 5 phút.",
+        "detail": "Rubric v2: 2 ý độc lập, ~5 phút cho các ý bắt buộc (ba vấn đề cùng một nguyên nhân gốc (SPA không có page load để AT nhận biết) cộng cách xử lý); v1 đếm 4 ý. Còn lại là gợi ý: Câu hỏi có 4 yêu cầu: giải thích vì sao đặc trưng cho SPA, rồi xử lý ba vấn đề, mỗi vấn đề cần một kỹ thuật (route announcement/focus, status region, tóm tắt kết quả). Trả lời đủ mất hơn 5 phút.",
         "fix": "Giữ hai vấn đề: chuyển route và toast. Kết quả lọc dùng cùng kỹ thuật status region nên chuyển thành follow-up."
       },
       {
@@ -1198,10 +1192,10 @@
       "note": "Phải hiểu cách AT nhận biết thay đổi (page load, focus, live region) và đánh đổi khi chuyển focus. Junior thường không biết live region phải có sẵn trước khi cập nhật."
     },
     "interview_fit": {
-      "minutes": 6,
-      "sub_questions": 4,
+      "minutes": 5,
+      "sub_questions": 2,
       "gradeable": true,
-      "note": "Điểm chấm rõ nhưng nhiều; thu hẹp còn hai vấn đề sẽ vừa 3–5 phút."
+      "note": "Rubric v2: ba vấn đề cùng một nguyên nhân gốc (SPA không có page load để AT nhận biết) cộng cách xử lý. Điểm chấm rõ nhưng nhiều; thu hẹp còn hai vấn đề sẽ vừa 3–5 phút."
     },
     "junior_guide": {
       "tests": "Hiểu vì sao SPA cần chủ động báo thay đổi cho screen reader, và cách dùng route announcement, focus và ARIA live region.",
@@ -1219,10 +1213,7 @@
       ],
       "follow_up": "Khi người dùng đổi tab hoặc bộ lọc trong cùng một trang, bạn có chuyển focus không? Vì sao?"
     },
-    "proposed_fix": {
-      "question": "Trong một SPA, người dùng screen reader phản ánh hai vấn đề: bấm link chuyển trang thì \"không có gì xảy ra\", và toast \"Đã lưu\" không được đọc. Vì sao các vấn đề này hay gặp ở SPA, và bạn xử lý thế nào?",
-      "answer_change": "Bỏ mục 3 'Kết quả lọc' (chuyển ý aria-atomic sang follow-up); giữ phần 'Vì sao', mục 1, mục 2 và 'Giới hạn'. Đáp án sẽ dưới 600 token."
-    }
+    "proposed_fix": null
   },
   {
     "qa_id": "de-qa-1262",

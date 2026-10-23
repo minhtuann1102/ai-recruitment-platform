@@ -267,7 +267,7 @@
     "qa_id": "de-qa-1003",
     "verdict": "fix",
     "confidence": "high",
-    "summary_vi": "Nội dung đúng và bám tài liệu Buffer/StringDecoder, nhưng câu hỏi liệt kê 4 bẫy riêng (chunk UTF-8, subarray, allocUnsafe, pool) nên quá rộng cho 3-5 phút và dễ thành câu hỏi kể tên. Nên thu hẹp câu hỏi.",
+    "summary_vi": "Nội dung đúng và bám tài liệu Buffer/StringDecoder, nhưng câu hỏi liệt kê 4 bẫy riêng (chunk UTF-8, subarray, allocUnsafe, pool) nên quá rộng cho 3-5 phút và dễ thành câu hỏi kể tên. Nên thu hẹp câu hỏi. (Rubric v2: không còn tính là quá rộng; vẫn cần sửa vì claim chưa có nguồn.)",
     "claims": [
       {
         "claim": "StringDecoder giữ byte dở dang của ký tự nhiều byte tới lần write()/end() tiếp",
@@ -321,9 +321,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi liệt kê 4 bẫy trong ngoặc cộng 'tránh thế nào', thực tế là 4-5 yêu cầu; ứng viên dễ trả lời kiểu kể tên và không đủ thời gian đi sâu.",
+        "detail": "Rubric v2: 1 ý độc lập, ~5 phút cho các ý bắt buộc (các bẫy liệt kê là các mặt của một câu: dùng Buffer an toàn); v1 đếm 4 ý. Còn lại là gợi ý: Câu hỏi liệt kê 4 bẫy trong ngoặc cộng 'tránh thế nào', thực tế là 4-5 yêu cầu; ứng viên dễ trả lời kiểu kể tên và không đủ thời gian đi sâu.",
         "fix": "Thu hẹp còn 2 bẫy có tình huống, ví dụ chỉ chunk UTF-8 bị cắt và rò bộ nhớ do giữ subarray/pool."
       },
       {
@@ -345,10 +345,10 @@
       "note": "Có chiều sâu (pool, view giữ sống vùng nhớ lớn), nhưng dạng liệt kê kéo nó về phía nhớ kiến thức."
     },
     "interview_fit": {
-      "minutes": 6,
-      "sub_questions": 4,
+      "minutes": 5,
+      "sub_questions": 1,
       "gradeable": true,
-      "note": "4 bẫy được nêu sẵn trong câu hỏi, đáp án có 5 ý; quá rộng cho một câu."
+      "note": "Rubric v2: các bẫy liệt kê là các mặt của một câu: dùng Buffer an toàn. 4 bẫy được nêu sẵn trong câu hỏi, đáp án có 5 ý; quá rộng cho một câu."
     },
     "junior_guide": {
       "tests": "Hiểu Buffer là vùng nhớ nhị phân ngoài V8 heap, các API chia sẻ vùng nhớ và giải mã UTF-8 qua nhiều chunk.",
@@ -373,9 +373,9 @@
   },
   {
     "qa_id": "de-qa-1004",
-    "verdict": "fix",
+    "verdict": "ok",
     "confidence": "high",
-    "summary_vi": "Các ý kỹ thuật đều khớp tài liệu worker_threads, nhưng câu hỏi gộp 4 yêu cầu (pool hay tạo mới, 3 cách truyền dữ liệu, xử lý lỗi, giới hạn tài nguyên) nên quá rộng. Nên thu hẹp; lưu ý trùng một phần với de-qa-1022.",
+    "summary_vi": "Đạt theo rubric v2: câu hỏi có 1 ý độc lập, trả lời các ý bắt buộc trong khoảng 5 phút; các claim chính đều có trích dẫn. (v1 gợi ý Cần sửa vì đếm 4 ý.)",
     "claims": [
       {
         "claim": "Worker hữu ích cho việc CPU-bound, ít giúp cho I/O",
@@ -429,9 +429,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi có 4 yêu cầu (pool/tạo mới, structured clone vs transferList vs SharedArrayBuffer, xử lý lỗi, giới hạn tài nguyên); không trả lời đủ trong 3-5 phút.",
+        "detail": "Rubric v2: 1 ý độc lập, ~5 phút cho các ý bắt buộc (pool, cách truyền dữ liệu, lỗi và giới hạn tài nguyên là các mặt của một thiết kế offload); v1 đếm 4 ý. Còn lại là gợi ý: Câu hỏi có 4 yêu cầu (pool/tạo mới, structured clone vs transferList vs SharedArrayBuffer, xử lý lỗi, giới hạn tài nguyên); không trả lời đủ trong 3-5 phút.",
         "fix": "Giữ trọng tâm pool + cách truyền dữ liệu; chuyển xử lý lỗi/resourceLimits thành follow-up."
       },
       {
@@ -453,10 +453,10 @@
       "note": "Thiết kế offload có đánh đổi rõ (chi phí clone, pool, cô lập lỗi)."
     },
     "interview_fit": {
-      "minutes": 6,
-      "sub_questions": 4,
+      "minutes": 5,
+      "sub_questions": 1,
       "gradeable": true,
-      "note": "Đáp án chấm được nhưng câu hỏi quá rộng."
+      "note": "Rubric v2: pool, cách truyền dữ liệu, lỗi và giới hạn tài nguyên là các mặt của một thiết kế offload. Đáp án chấm được nhưng câu hỏi quá rộng."
     },
     "junior_guide": {
       "tests": "Biết khi nào worker_threads giúp được và cách truyền dữ liệu giữa các thread với chi phí thấp.",
@@ -474,16 +474,13 @@
       ],
       "follow_up": "Worker trong pool bị treo vì input độc hại; bạn phát hiện và phục hồi thế nào mà không làm mất các task khác?"
     },
-    "proposed_fix": {
-      "question": "API Node.js phải tạo thumbnail (CPU-bound) cho mỗi upload. Bạn offload sang worker_threads thế nào: tạo worker mỗi request hay dùng pool, và truyền ảnh sang worker bằng cách nào để không tốn CPU/bộ nhớ?",
-      "answer_change": "Giữ phần Pool hay tạo mới và Truyền dữ liệu; rút phần Lỗi và tài nguyên còn 1-2 câu hoặc chuyển sang follow-up; bỏ đoạn đánh đổi cuối nếu cần dưới 600 token."
-    }
+    "proposed_fix": null
   },
   {
     "qa_id": "de-qa-1005",
     "verdict": "fix",
     "confidence": "high",
-    "summary_vi": "Các ý về cluster và graceful shutdown khớp tài liệu, nhưng câu hỏi gộp 5 yêu cầu (lựa chọn kiến trúc, phân phối kết nối, state, WebSocket, graceful shutdown) nên quá rộng. Ý 'process thấy số core của host' chưa kiểm chứng và phụ thuộc phiên bản.",
+    "summary_vi": "Các ý về cluster và graceful shutdown khớp tài liệu, nhưng câu hỏi gộp 5 yêu cầu (lựa chọn kiến trúc, phân phối kết nối, state, WebSocket, graceful shutdown) nên quá rộng. Ý 'process thấy số core của host' chưa kiểm chứng và phụ thuộc phiên bản. (Rubric v2: không còn tính là quá rộng; vẫn cần sửa vì claim chưa có nguồn.)",
     "claims": [
       {
         "claim": "Round-robin là mặc định trên mọi nền tảng trừ Windows",
@@ -530,9 +527,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi có 5 yêu cầu: chọn cluster hay 1 process/pod, cách cluster phân phối kết nối, state, WebSocket, graceful shutdown.",
+        "detail": "Rubric v2: 1 ý độc lập, ~5 phút cho các ý bắt buộc (một quyết định (cluster hay 1 process mỗi pod) với các mặt phân phối kết nối, state, WebSocket, shutdown); v1 đếm 5 ý. Còn lại là gợi ý: Câu hỏi có 5 yêu cầu: chọn cluster hay 1 process/pod, cách cluster phân phối kết nối, state, WebSocket, graceful shutdown.",
         "fix": "Giữ câu hỏi chính (cluster trong pod hay 1 process/pod) kèm state; đưa WebSocket và graceful shutdown thành follow-up."
       },
       {
@@ -554,10 +551,10 @@
       "note": "Câu hỏi kiến trúc có đánh đổi giữa process model của Node và Kubernetes."
     },
     "interview_fit": {
-      "minutes": 6,
-      "sub_questions": 5,
+      "minutes": 5,
+      "sub_questions": 1,
       "gradeable": true,
-      "note": "Nhiều ý chấm được nhưng quá rộng cho một câu."
+      "note": "Rubric v2: một quyết định (cluster hay 1 process mỗi pod) với các mặt phân phối kết nối, state, WebSocket, shutdown. Nhiều ý chấm được nhưng quá rộng cho một câu."
     },
     "junior_guide": {
       "tests": "Hiểu cluster module chia kết nối thế nào và vì sao trên Kubernetes thường chạy 1 process mỗi container.",
@@ -681,9 +678,9 @@
   },
   {
     "qa_id": "de-qa-1007",
-    "verdict": "fix",
+    "verdict": "ok",
     "confidence": "high",
-    "summary_vi": "Các ý về backoff, UnrecoverableError, RateLimitError và limiter global đều khớp tài liệu BullMQ, nhưng câu hỏi gộp 4 mảng (retry/backoff, rate limit, dead letter, giám sát) nên quá rộng. Nên thu hẹp.",
+    "summary_vi": "Đạt theo rubric v2: câu hỏi có 1 ý độc lập, trả lời các ý bắt buộc trong khoảng 5 phút; các claim chính đều có trích dẫn. (v1 gợi ý Cần sửa vì đếm 4 ý.)",
     "claims": [
       {
         "claim": "Backoff exponential: trễ 2^(attempts-1) × delay; jitter trong khoảng 0..1",
@@ -730,9 +727,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi có 4 yêu cầu (retry/backoff, rate limit, dead letter, giám sát), mỗi mảng đủ cho một câu riêng.",
+        "detail": "Rubric v2: 1 ý độc lập, ~5 phút cho các ý bắt buộc (retry, rate limit, dead letter và giám sát là các mặt của một thiết kế xử lý lỗi hàng đợi); v1 đếm 4 ý. Còn lại là gợi ý: Câu hỏi có 4 yêu cầu (retry/backoff, rate limit, dead letter, giám sát), mỗi mảng đủ cho một câu riêng.",
         "fix": "Tập trung vào phân loại lỗi để retry/backoff/rate limit; dead letter và giám sát thành follow-up."
       },
       {
@@ -748,10 +745,10 @@
       "note": "Phải phân loại lỗi và chọn cơ chế BullMQ phù hợp cho từng loại."
     },
     "interview_fit": {
-      "minutes": 6,
-      "sub_questions": 4,
+      "minutes": 5,
+      "sub_questions": 1,
       "gradeable": true,
-      "note": "Đáp án nhiều ý chấm được nhưng câu hỏi quá rộng."
+      "note": "Rubric v2: retry, rate limit, dead letter và giám sát là các mặt của một thiết kế xử lý lỗi hàng đợi. Đáp án nhiều ý chấm được nhưng câu hỏi quá rộng."
     },
     "junior_guide": {
       "tests": "Biết phân loại lỗi (tạm thời, vĩnh viễn, rate limit) và dùng đúng cơ chế retry của BullMQ.",
@@ -769,16 +766,13 @@
       ],
       "follow_up": "Đối tác sập 2 giờ; làm sao để job không hết attempts và không dồn tải khi đối tác vừa hồi phục?"
     },
-    "proposed_fix": {
-      "question": "Hàng đợi BullMQ của bạn gọi API bên thứ ba thường xuyên trả 429 hoặc 5xx, đôi khi trả 400 do dữ liệu sai. Bạn xử lý từng loại lỗi này thế nào (retry, backoff, rate limit)?",
-      "answer_change": "Giữ phần Phân loại lỗi và Giới hạn chủ động; rút Dead letter và Giám sát còn 1-2 câu hoặc chuyển sang follow-up."
-    }
+    "proposed_fix": null
   },
   {
     "qa_id": "de-qa-1008",
     "verdict": "fix",
     "confidence": "high",
-    "summary_vi": "Các ý kỹ thuật về INCR/EXPIRE, Lua nguyên tử và KEYS khớp tài liệu Redis, nhưng câu hỏi có 3 yêu cầu lớn (so sánh 3 thuật toán, tính nguyên tử, hành vi khi Redis lỗi) nên quá rộng. Pair có golden label g16: chỉ sửa câu hỏi khi đã cập nhật golden set.",
+    "summary_vi": "Các ý kỹ thuật về INCR/EXPIRE, Lua nguyên tử và KEYS khớp tài liệu Redis, nhưng câu hỏi có 3 yêu cầu lớn (so sánh 3 thuật toán, tính nguyên tử, hành vi khi Redis lỗi) nên quá rộng. Pair có golden label g16: chỉ sửa câu hỏi khi đã cập nhật golden set. (Rubric v2: không còn tính là quá rộng; vẫn cần sửa vì claim chưa có nguồn.)",
     "claims": [
       {
         "claim": "INCR rồi EXPIRE có race: client chết giữa hai lệnh thì key không có TTL",
@@ -818,9 +812,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "3 yêu cầu lớn: so sánh fixed/sliding/token bucket, tính nguyên tử trên nhiều instance, hành vi khi Redis lỗi.",
+        "detail": "Rubric v2: 2 ý độc lập, ~5 phút cho các ý bắt buộc (so sánh thuật toán và tính nguyên tử là một thiết kế; hành vi khi Redis lỗi là ý thứ hai); v1 đếm 3 ý. Còn lại là gợi ý: 3 yêu cầu lớn: so sánh fixed/sliding/token bucket, tính nguyên tử trên nhiều instance, hành vi khi Redis lỗi.",
         "fix": "Giữ so sánh thuật toán + tính nguyên tử; chuyển 'khi Redis lỗi' thành follow-up."
       },
       {
@@ -842,10 +836,10 @@
       "note": "Thiết kế phân tán có đánh đổi độ chính xác, bộ nhớ, nguyên tử."
     },
     "interview_fit": {
-      "minutes": 6,
-      "sub_questions": 3,
+      "minutes": 5,
+      "sub_questions": 2,
       "gradeable": true,
-      "note": "Đáp án có 5 ý chấm được, câu hỏi hơi rộng."
+      "note": "Rubric v2: so sánh thuật toán và tính nguyên tử là một thiết kế; hành vi khi Redis lỗi là ý thứ hai. Đáp án có 5 ý chấm được, câu hỏi hơi rộng."
     },
     "junior_guide": {
       "tests": "Thiết kế rate limiter dùng chung nhiều instance và giữ tính nguyên tử trên Redis.",
@@ -1067,9 +1061,9 @@
   },
   {
     "qa_id": "de-qa-1011",
-    "verdict": "fix",
+    "verdict": "ok",
     "confidence": "high",
-    "summary_vi": "Thứ tự lifecycle và các bẫy đều khớp tài liệu NestJS, nhưng câu hỏi gộp 3 yêu cầu (đặt 5 việc vào đâu, giải thích thứ tự lifecycle, các bẫy) và đáp án dài, phần bẫy bị cắt ở 600 token. Nên thu hẹp.",
+    "summary_vi": "Đạt theo rubric v2: câu hỏi có 1 ý độc lập, trả lời các ý bắt buộc trong khoảng 4 phút; các claim chính đều có trích dẫn. (v1 gợi ý Cần sửa vì đếm 3 ý.)",
     "claims": [
       {
         "claim": "Guard chạy sau mọi middleware, trước interceptor và pipe",
@@ -1123,9 +1117,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi có 3 yêu cầu (đặt 5 việc vào 5 lớp, giải thích thứ tự lifecycle, bẫy thường gặp); đáp án 7 ý, khó nói hết trong 3-5 phút.",
+        "detail": "Rubric v2: 1 ý độc lập, ~4 phút cho các ý bắt buộc (đặt việc vào đúng lớp và thứ tự lifecycle là cùng một mạch); v1 đếm 3 ý. Còn lại là gợi ý: Câu hỏi có 3 yêu cầu (đặt 5 việc vào 5 lớp, giải thích thứ tự lifecycle, bẫy thường gặp); đáp án 7 ý, khó nói hết trong 3-5 phút.",
         "fix": "Hỏi đặt 5 việc vào đâu và vì sao; thứ tự lifecycle là must-have, bẫy là follow-up."
       },
       {
@@ -1147,10 +1141,10 @@
       "note": "Phần lớn là hiểu đúng vai trò từng lớp; độ khó middle hơn là senior."
     },
     "interview_fit": {
-      "minutes": 6,
-      "sub_questions": 3,
+      "minutes": 4,
+      "sub_questions": 1,
       "gradeable": true,
-      "note": "Chấm được theo từng việc, nhưng câu quá rộng."
+      "note": "Rubric v2: đặt việc vào đúng lớp và thứ tự lifecycle là cùng một mạch. Chấm được theo từng việc, nhưng câu quá rộng."
     },
     "junior_guide": {
       "tests": "Hiểu vai trò và thứ tự chạy của middleware, guard, interceptor, pipe, exception filter trong NestJS.",
@@ -1167,16 +1161,13 @@
       ],
       "follow_up": "Bạn muốn log mọi request kể cả bị guard từ chối, kèm thời gian xử lý; đặt logic đó ở đâu?"
     },
-    "proposed_fix": {
-      "question": "Trong NestJS bạn cần thêm xác thực JWT, kiểm tra quyền theo role, validate DTO, đo thời gian xử lý và chuẩn hóa định dạng lỗi. Mỗi việc nên đặt ở middleware, guard, interceptor, pipe hay exception filter, và vì sao?",
-      "answer_change": "Giữ phần Đặt từng việc và một dòng thứ tự lifecycle; giữ bẫy APP_GUARD, chuyển 2 bẫy còn lại sang follow-up."
-    }
+    "proposed_fix": null
   },
   {
     "qa_id": "de-qa-1012",
     "verdict": "fix",
     "confidence": "high",
-    "summary_vi": "Phân tích đúng theo tài liệu PostgreSQL (Read Committed, UPDATE đánh giá lại WHERE, serialization failure 40001), nhưng phần sửa lỗi pool cạn bị cắt ở 600 token và câu hỏi có 2 vấn đề lớn với nhiều cách sửa. Pair có golden label g05.",
+    "summary_vi": "Phân tích đúng theo tài liệu PostgreSQL (Read Committed, UPDATE đánh giá lại WHERE, serialization failure 40001), nhưng phần sửa lỗi pool cạn bị cắt ở 600 token và câu hỏi có 2 vấn đề lớn với nhiều cách sửa. Pair có golden label g05. (Rubric v2: không còn tính là quá rộng; vẫn cần sửa vì length.)",
     "claims": [
       {
         "claim": "PostgreSQL mặc định Read Committed; SELECT chỉ thấy dữ liệu commit trước khi câu bắt đầu",
@@ -1229,9 +1220,9 @@
         "fix": "Rút gọn 4 cách sửa oversell còn 1 dòng mỗi cách để câu 'Sửa' nằm trong 600 token."
       },
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi hỏi 2 sự cố (oversell và pool cạn), đáp án có 4 cách sửa oversell + 2 nguyên nhân + nhiều cách sửa pool; dày cho 3-5 phút.",
+        "detail": "Rubric v2: 2 ý độc lập, ~5 phút cho các ý bắt buộc (hai sự cố độc lập (oversell, cạn pool), mỗi cái nguyên nhân và cách sửa); v1 đếm 2 ý. Còn lại là gợi ý: Câu hỏi hỏi 2 sự cố (oversell và pool cạn), đáp án có 4 cách sửa oversell + 2 nguyên nhân + nhiều cách sửa pool; dày cho 3-5 phút.",
         "fix": "Giữ cả hai sự cố nhưng chỉ yêu cầu 1-2 cách sửa mỗi sự cố."
       }
     ],
@@ -1244,7 +1235,7 @@
       "minutes": 5,
       "sub_questions": 2,
       "gradeable": true,
-      "note": "Hai sự cố, nhiều điểm chấm được nhưng đáp án quá dày."
+      "note": "Rubric v2: hai sự cố độc lập (oversell, cạn pool), mỗi cái nguyên nhân và cách sửa. Hai sự cố, nhiều điểm chấm được nhưng đáp án quá dày."
     },
     "junior_guide": {
       "tests": "Hiểu vì sao bọc transaction không đủ chống oversell ở Read Committed và vì sao transaction dài làm cạn pool.",
@@ -1467,9 +1458,9 @@
   },
   {
     "qa_id": "de-qa-1015",
-    "verdict": "fix",
+    "verdict": "ok",
     "confidence": "high",
-    "summary_vi": "Kỹ thuật đúng theo handbook TypeScript (keyof/indexed access, mapped type, infer, distributive, [T] extends [any]), nhưng câu hỏi gộp 3 yêu cầu (thiết kế EventBus, trình bày 4 tính năng type, khi nào thành gánh nặng) nên quá rộng và nặng về kể tính năng.",
+    "summary_vi": "Đạt theo rubric v2: câu hỏi có 1 ý độc lập, trả lời các ý bắt buộc trong khoảng 5 phút; các claim chính đều có trích dẫn. (v1 gợi ý Cần sửa vì đếm 3 ý.)",
     "claims": [
       {
         "claim": "Mapped type duyệt qua keyof để tạo type mới",
@@ -1509,9 +1500,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi có 3 yêu cầu và liệt kê 4 tính năng phải trình bày (generics/keyof, mapped, conditional/infer, distributive); dễ thành bài kể tính năng, khó nói trong 3-5 phút, và đáp án có code block.",
+        "detail": "Rubric v2: 1 ý độc lập, ~5 phút cho các ý bắt buộc (một thiết kế type kèm khi nào type quá phức tạp (trade-off của chính thiết kế đó)); v1 đếm 3 ý. Còn lại là gợi ý: Câu hỏi có 3 yêu cầu và liệt kê 4 tính năng phải trình bày (generics/keyof, mapped, conditional/infer, distributive); dễ thành bài kể tính năng, khó nói trong 3-5 phút, và đáp án có code block.",
         "fix": "Giữ thiết kế EventBus + một bẫy (distributive); đưa 'khi nào thành gánh nặng' sang follow-up."
       },
       {
@@ -1527,10 +1518,10 @@
       "note": "Generics nâng cao và distributive conditional type là phần khó; phần còn lại là áp dụng."
     },
     "interview_fit": {
-      "minutes": 6,
-      "sub_questions": 3,
+      "minutes": 5,
+      "sub_questions": 1,
       "gradeable": true,
-      "note": "Chấm được nhưng quá rộng; có code nên phù hợp vòng có màn hình hơn vòng nói."
+      "note": "Rubric v2: một thiết kế type kèm khi nào type quá phức tạp (trade-off của chính thiết kế đó). Chấm được nhưng quá rộng; có code nên phù hợp vòng có màn hình hơn vòng nói."
     },
     "junior_guide": {
       "tests": "Dùng generics của TypeScript để ràng buộc payload theo tên event và hiểu bẫy distributive conditional type.",
@@ -1548,10 +1539,7 @@
       ],
       "follow_up": "Làm sao viết test khẳng định emit('order.created', { userId }) phải lỗi compile?"
     },
-    "proposed_fix": {
-      "question": "Thiết kế một EventBus type-safe cho backend TypeScript sao cho `emit('order.created', payload)` báo lỗi compile nếu payload sai kiểu theo tên event. Bạn dùng generics và keyof thế nào, và gặp bẫy gì với conditional type trên union?",
-      "answer_change": "Giữ code EventBus, mapped type Handlers, phần distributive; rút phần 'Khi nào thành gánh nặng' còn 1 câu hoặc chuyển sang follow-up; bỏ ví dụ Array<infer U>."
-    }
+    "proposed_fix": null
   },
   {
     "qa_id": "de-qa-1016",
@@ -1648,9 +1636,9 @@
   },
   {
     "qa_id": "de-qa-1017",
-    "verdict": "fix",
+    "verdict": "ok",
     "confidence": "high",
-    "summary_vi": "Nội dung đúng theo tài liệu Node (monitorEventLoopDelay, --cpu-prof, flame graph với perf, JSON lớn, ReDoS), nhưng câu hỏi có 3 yêu cầu (đo lag, profile CPU, nguyên nhân hay gặp). Nên thu hẹp, đưa nguyên nhân thành follow-up.",
+    "summary_vi": "Đạt theo rubric v2: câu hỏi có 1 ý độc lập, trả lời các ý bắt buộc trong khoảng 4 phút; các claim chính đều có trích dẫn. (v1 gợi ý Cần sửa vì đếm 3 ý.)",
     "claims": [
       {
         "claim": "monitorEventLoopDelay tạo histogram độ trễ event loop, đơn vị nanosecond",
@@ -1697,9 +1685,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "3 yêu cầu: đo event loop lag, profile CPU tìm code, liệt kê nguyên nhân hay gặp; đáp án có 4 phần.",
+        "detail": "Rubric v2: 1 ý độc lập, ~4 phút cho các ý bắt buộc (đo event loop lag, profile CPU và nguyên nhân hay gặp là một bài chẩn đoán); v1 đếm 3 ý. Còn lại là gợi ý: 3 yêu cầu: đo event loop lag, profile CPU tìm code, liệt kê nguyên nhân hay gặp; đáp án có 4 phần.",
         "fix": "Giữ đo lag + profile; nguyên nhân hay gặp làm follow-up."
       },
       {
@@ -1721,10 +1709,10 @@
       "note": "Debug một sự cố cụ thể bằng công cụ đo và profile."
     },
     "interview_fit": {
-      "minutes": 6,
-      "sub_questions": 3,
+      "minutes": 4,
+      "sub_questions": 1,
       "gradeable": true,
-      "note": "Chấm được nhưng hơi rộng."
+      "note": "Rubric v2: đo event loop lag, profile CPU và nguyên nhân hay gặp là một bài chẩn đoán. Chấm được nhưng hơi rộng."
     },
     "junior_guide": {
       "tests": "Biết cách xác nhận event loop bị chặn và tìm đoạn code gây chặn.",
@@ -1741,10 +1729,7 @@
       ],
       "follow_up": "Profile chỉ ra một regex validate email chiếm 90% CPU; bạn sửa và phòng tái diễn thế nào?"
     },
-    "proposed_fix": {
-      "question": "Sau một release, API Node.js có p99 latency tăng từ khoảng 50ms lên vài giây theo từng đợt, trong lúc đó một core CPU chạm 100% và log không có lỗi. Bạn xác nhận event loop bị chặn và tìm ra đoạn code gây chặn thế nào?",
-      "answer_change": "Giữ phần 1 và 2; rút phần 3 (nguyên nhân) còn một dòng liệt kê hoặc chuyển sang follow-up; giữ một câu khắc phục."
-    }
+    "proposed_fix": null
   },
   {
     "qa_id": "de-qa-1018",
@@ -1927,7 +1912,7 @@
     "qa_id": "de-qa-1020",
     "verdict": "fix",
     "confidence": "high",
-    "summary_vi": "Nội dung đúng theo RFC 9700 (rotation, reuse detection, hết hạn khi không hoạt động), nhưng câu hỏi gộp 4 yêu cầu và phần lưu access token ở client bị cắt ở 600 token. Pair có golden label g22.",
+    "summary_vi": "Nội dung đúng theo RFC 9700 (rotation, reuse detection, hết hạn khi không hoạt động), nhưng câu hỏi gộp 4 yêu cầu và phần lưu access token ở client bị cắt ở 600 token. Pair có golden label g22. (Rubric v2: không còn tính là quá rộng; vẫn cần sửa vì length.)",
     "claims": [
       {
         "claim": "Public client phải dùng sender-constrained refresh token hoặc rotation",
@@ -1967,9 +1952,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "4 yêu cầu: rotation, reuse detection, nơi lưu token, đánh đổi; đáp án dài 687 token.",
+        "detail": "Rubric v2: 1 ý độc lập, ~5 phút cho các ý bắt buộc (rotation, reuse detection, nơi lưu và đánh đổi là các mặt của một thiết kế token); v1 đếm 4 ý. Còn lại là gợi ý: 4 yêu cầu: rotation, reuse detection, nơi lưu token, đánh đổi; đáp án dài 687 token.",
         "fix": "Giữ rotation + reuse detection (cốt lõi); nơi lưu token thành follow-up."
       },
       {
@@ -1991,10 +1976,10 @@
       "note": "Thiết kế bảo mật có đánh đổi (stateless vs thu hồi, XSS vs CSRF)."
     },
     "interview_fit": {
-      "minutes": 6,
-      "sub_questions": 4,
+      "minutes": 5,
+      "sub_questions": 1,
       "gradeable": true,
-      "note": "Nhiều ý chấm được, câu hỏi quá rộng."
+      "note": "Rubric v2: rotation, reuse detection, nơi lưu và đánh đổi là các mặt của một thiết kế token. Nhiều ý chấm được, câu hỏi quá rộng."
     },
     "junior_guide": {
       "tests": "Hiểu vai trò access/refresh token và cách rotation + reuse detection phát hiện token bị đánh cắp.",
@@ -2021,7 +2006,7 @@
     "qa_id": "de-qa-1021",
     "verdict": "fix",
     "confidence": "high",
-    "summary_vi": "Các ý bảo mật đều khớp RFC 8725, nhưng câu hỏi yêu cầu giải thích 5 chủ đề (alg none, RS256/HS256, iss/aud, cross-JWT, JWKS) nên quá rộng cho 3-5 phút.",
+    "summary_vi": "Các ý bảo mật đều khớp RFC 8725, nhưng câu hỏi yêu cầu giải thích 5 chủ đề (alg none, RS256/HS256, iss/aud, cross-JWT, JWKS) nên quá rộng cho 3-5 phút. (Rubric v2: không còn tính là quá rộng; vẫn cần sửa vì claim chưa có nguồn.)",
     "claims": [
       {
         "claim": "Thư viện phải cho caller chỉ định tập thuật toán; không suy ra từ header",
@@ -2068,9 +2053,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi nêu 5 chủ đề phải giải thích (alg none, RS256/HS256, iss/aud, cross-JWT confusion, xoay khóa JWKS); thành bài kể checklist.",
+        "detail": "Rubric v2: 1 ý độc lập, ~5 phút cho các ý bắt buộc (các lỗ hổng liệt kê là checklist của một bài review jwt.verify); v1 đếm 5 ý. Còn lại là gợi ý: Câu hỏi nêu 5 chủ đề phải giải thích (alg none, RS256/HS256, iss/aud, cross-JWT confusion, xoay khóa JWKS); thành bài kể checklist.",
         "fix": "Hỏi 'review jwt.verify(token, key) bạn thấy lỗ hổng gì' và để ứng viên tự nêu; chỉ yêu cầu đi sâu 2 lỗ hổng (algorithm confusion, aud)."
       },
       {
@@ -2092,10 +2077,10 @@
       "note": "Cần hiểu cơ chế tấn công, không chỉ thuộc khuyến nghị."
     },
     "interview_fit": {
-      "minutes": 6,
-      "sub_questions": 5,
+      "minutes": 5,
+      "sub_questions": 1,
       "gradeable": true,
-      "note": "Chấm được theo checklist nhưng quá rộng."
+      "note": "Rubric v2: các lỗ hổng liệt kê là checklist của một bài review jwt.verify. Chấm được theo checklist nhưng quá rộng."
     },
     "junior_guide": {
       "tests": "Biết các lỗ hổng xác minh JWT phổ biến và cách cấu hình verify đúng.",

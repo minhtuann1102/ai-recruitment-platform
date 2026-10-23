@@ -1,9 +1,9 @@
 [
   {
     "qa_id": "de-qa-1050",
-    "verdict": "fix",
+    "verdict": "ok",
     "confidence": "high",
-    "summary_vi": "Nội dung kỹ thuật đúng và khớp tài liệu Celery (ack sớm, acks_late, reject_on_worker_lost, visibility timeout). Cần sửa vì câu hỏi liệt kê 3 yêu cầu riêng, quá rộng cho 3–5 phút; nên hỏi theo kịch bản và để ứng viên tự nêu cơ chế.",
+    "summary_vi": "Đạt theo rubric v2: câu hỏi có 2 ý độc lập, trả lời các ý bắt buộc trong khoảng 5 phút; các claim chính đều có trích dẫn. (v1 gợi ý Cần sửa vì đếm 3 ý.)",
     "claims": [
       {
         "claim": "Mặc định worker ack message ngay trước khi chạy task",
@@ -64,9 +64,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi có 3 yêu cầu (cơ chế ack mặc định/acks_late, visibility timeout, thiết kế an toàn) và gợi sẵn tên cơ chế, vừa rộng vừa làm lộ đáp án.",
+        "detail": "Rubric v2: 2 ý độc lập, ~5 phút cho các ý bắt buộc (cơ chế ack và visibility timeout là nguyên nhân chạy hai lần; thiết kế an toàn là cách sửa); v1 đếm 3 ý. Còn lại là gợi ý: Câu hỏi có 3 yêu cầu (cơ chế ack mặc định/acks_late, visibility timeout, thiết kế an toàn) và gợi sẵn tên cơ chế, vừa rộng vừa làm lộ đáp án.",
         "fix": "Hỏi theo kịch bản: 'Vì sao charge_order chạy hai lần trong hai tình huống trên, và bạn thiết kế thế nào để khách không bị trừ tiền hai lần?' (2 yêu cầu). Cặp có golden label g13: đổi câu hỏi thì chạy lại eval retrieval."
       },
       {
@@ -83,9 +83,9 @@
     },
     "interview_fit": {
       "minutes": 5,
-      "sub_questions": 3,
+      "sub_questions": 2,
       "gradeable": true,
-      "note": "Có 5 ý chấm được rõ, nhưng 3 yêu cầu là nhiều so với 3–5 phút."
+      "note": "Rubric v2: cơ chế ack và visibility timeout là nguyên nhân chạy hai lần; thiết kế an toàn là cách sửa. Có 5 ý chấm được rõ, nhưng 3 yêu cầu là nhiều so với 3–5 phút."
     },
     "junior_guide": {
       "tests": "Hiểu khi nào Celery xác nhận (ack) message, vì sao task có thể chạy lại, và cách làm task chạy lại vẫn an toàn (idempotent).",
@@ -103,10 +103,7 @@
       ],
       "follow_up": "Nếu cổng thanh toán không hỗ trợ idempotency key thì bạn chống charge trùng thế nào?"
     },
-    "proposed_fix": {
-      "question": "Hệ thống dùng Celery với Redis làm broker. Task `charge_order` đôi khi chạy hai lần: một lần sau khi worker bị OOM kill, và một số task đặt countdown dài thì bị chạy lặp đi lặp lại. Vì sao task chạy hai lần trong từng tình huống, và bạn thiết kế thế nào để khách không bị trừ tiền hai lần?",
-      "answer_change": "Giữ nội dung. Rút đoạn 'Chọn chế độ' thành một câu để các ý trong phần thiết kế không bị cắt ở 600 token."
-    }
+    "proposed_fix": null
   },
   {
     "qa_id": "de-qa-1051",
@@ -1127,9 +1124,9 @@
   },
   {
     "qa_id": "de-qa-1062",
-    "verdict": "fix",
+    "verdict": "ok",
     "confidence": "high",
-    "summary_vi": "Nội dung đúng theo tài liệu Python (iterator dùng một lần, tee đệm dữ liệu, generator expression đánh giá lười trừ iterable ngoài cùng). Cần sửa vì câu hỏi gói 4 lỗi độc lập + nguyên tắc thiết kế, quá rộng cho 3–5 phút.",
+    "summary_vi": "Đạt theo rubric v2: câu hỏi có 2 ý độc lập, trả lời các ý bắt buộc trong khoảng 5 phút; các claim chính đều có trích dẫn. (v1 gợi ý Cần sửa vì đếm 5 ý.)",
     "claims": [
       {
         "claim": "Generator là iterator, duyệt lần hai trên cùng object ra rỗng",
@@ -1176,9 +1173,9 @@
     ],
     "issues": [
       {
-        "severity": "major",
+        "severity": "minor",
         "type": "interview_fit",
-        "detail": "Câu hỏi gói 4 hiện tượng độc lập (iterator cạn, tee tốn RAM, lỗi nổ muộn, late binding) cộng nguyên tắc thiết kế: 5 yêu cầu, khó trả lời trong 3–5 phút và khó chấm.",
+        "detail": "Rubric v2: 2 ý độc lập, ~5 phút cho các ý bắt buộc (bốn triệu chứng có hai cơ chế gốc: iterator một lượt (cạn, tee đệm) và đánh giá lười (lỗi nổ muộn, late binding)); v1 đếm 5 ý. Còn lại là gợi ý: Câu hỏi gói 4 hiện tượng độc lập (iterator cạn, tee tốn RAM, lỗi nổ muộn, late binding) cộng nguyên tắc thiết kế: 5 yêu cầu, khó trả lời trong 3–5 phút và khó chấm.",
         "fix": "Giữ 2 hiện tượng có giá trị nhất (thống kê lần hai ra rỗng + tee tốn RAM) và hỏi cách thiết kế pipeline duyệt một lượt; chuyển 'lỗi nổ muộn/late binding' thành follow-up."
       },
       {
@@ -1194,10 +1191,10 @@
       "note": "Các lỗi thực tế của pipeline lười, cần hiểu iterator protocol và tee; không phải định nghĩa generator."
     },
     "interview_fit": {
-      "minutes": 7,
-      "sub_questions": 5,
+      "minutes": 5,
+      "sub_questions": 2,
       "gradeable": true,
-      "note": "Mỗi hiện tượng chấm được, nhưng tổng cộng quá nhiều cho một câu."
+      "note": "Rubric v2: bốn triệu chứng có hai cơ chế gốc: iterator một lượt (cạn, tee đệm) và đánh giá lười (lỗi nổ muộn, late binding). Mỗi hiện tượng chấm được, nhưng tổng cộng quá nhiều cho một câu."
     },
     "junior_guide": {
       "tests": "Hiểu iterator chỉ duyệt được một lần, chi phí bộ nhớ của tee và tính lười của generator.",
@@ -1214,10 +1211,7 @@
       ],
       "follow_up": "Generator expression dùng biến bị gán lại trước khi tiêu thụ cho kết quả gì, và bạn cố định giá trị thế nào?"
     },
-    "proposed_fix": {
-      "question": "Một pipeline ETL viết bằng chuỗi generator để xử lý file vài chục GB. Bước thống kê thứ hai luôn ra kết quả rỗng; khi chuyển sang `itertools.tee` để tính hai thống kê thì RAM tăng vọt. Giải thích hai hiện tượng và thiết kế lại để chỉ duyệt dữ liệu một lần với bộ nhớ ổn định.",
-      "answer_change": "Giữ ý 1, 2 và 'Nguyên tắc thiết kế pipeline'; bỏ ý 3 (lỗi nổ muộn) và ý 4 (late binding) khỏi đáp án hoặc đưa thành follow-up."
-    }
+    "proposed_fix": null
   },
   {
     "qa_id": "de-qa-1063",
@@ -1749,7 +1743,7 @@
       {
         "severity": "major",
         "type": "interview_fit",
-        "detail": "Câu hỏi nêu 3 triệu chứng và yêu cầu giải thích 4 chủ đề riêng: 4 yêu cầu, quá rộng cho 3–5 phút.",
+        "detail": "Rubric v2 vẫn tính là quá rộng (3 ý độc lập, ~6 phút): ba triệu chứng có ba cơ chế khác nhau: patch nơi tra cứu tên, autospec, AsyncMock. Câu hỏi nêu 3 triệu chứng và yêu cầu giải thích 4 chủ đề riêng: 4 yêu cầu, quá rộng cho 3–5 phút.",
         "fix": "Thu hẹp còn hai triệu chứng đầu (patch không ăn, test pass dù chữ ký đổi) và hỏi 'vì sao và sửa thế nào'; chuyển mock async và 'khi nào tránh mock' thành follow-up."
       },
       {
@@ -1765,10 +1759,10 @@
       "note": "Patch sai chỗ và mock không spec là lỗi thật, cần hiểu cách import gắn tên; không phải định nghĩa mock."
     },
     "interview_fit": {
-      "minutes": 7,
-      "sub_questions": 4,
+      "minutes": 6,
+      "sub_questions": 3,
       "gradeable": true,
-      "note": "Mỗi chủ đề chấm được nhưng tổng cộng quá nhiều."
+      "note": "Rubric v2: ba triệu chứng có ba cơ chế khác nhau: patch nơi tra cứu tên, autospec, AsyncMock. Mỗi chủ đề chấm được nhưng tổng cộng quá nhiều."
     },
     "junior_guide": {
       "tests": "Hiểu patch thay tên ở đâu, vì sao mock thường che lỗi chữ ký, và mock hàm async.",

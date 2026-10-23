@@ -1,5 +1,8 @@
 # Review rubric
 
+Version 2 (2026-10-23): criterion 5 counts linked asks once and times only the must-have points. Version 1 counted
+every listed facet as an ask; v1 results are kept at commit `27d1b22`.
+
 How the platform uses a pair decides what "good" means:
 - **Interviewer / Planner** (ai-service, PR #14 and #19) picks hard pairs for middle/senior sessions by `topic_id`
   and difficulty, and puts at most 3 chunks / 600 tokens of reference snippets into a topic plan. A session lasts
@@ -25,8 +28,14 @@ How the platform uses a pair decides what "good" means:
    scenario. A solid middle answers part of it; a senior answers it fully. A definition question in hard
    clothing is not hard.
 5. **Interview fit.**
-   - Answerable aloud in about 3–5 minutes. More than 2 sub-questions (count the asks, e.g. "schema, errors,
-     idempotency, timeout and authz" is 5) is too broad: propose a split or a narrower question.
+   - Count independent asks: parts that need their own line of reasoning and would each make a standalone
+     question. Linked asks count once: cause and fix of the same problem, compare A and B and when to pick each,
+     a design and its trade-offs. A list of facets of one design or diagnosis ("schema, errors, idempotency,
+     timeout and authz" of one tool) is the scope of one ask: count it once, but weigh it in the time estimate.
+   - Estimate the spoken time for a senior to cover the must-have points (`junior_guide.must_have`), not the whole
+     reference answer, which may hold extra detail for the grader.
+   - More than 2 independent asks, or more than about 5 minutes for the must-have points, is too broad: propose a
+     split or a narrower question.
    - The answer contains 3–6 points a grader can check. A wall of facts with no priority is hard to grade.
    - No vendor trivia, exact flag names or version numbers as the thing being tested, unless the topic is that
      tool. No long code to type.
@@ -78,7 +87,7 @@ How the platform uses a pair decides what "good" means:
 | `difficulty.levels` | array | levels the question suits: `junior` / `middle` / `senior` |
 | `difficulty.note` | string | why |
 | `interview_fit.minutes` | number | estimated spoken answer time |
-| `interview_fit.sub_questions` | number | asks counted in the question |
+| `interview_fit.sub_questions` | number | independent asks in the question (criterion 5) |
 | `interview_fit.gradeable` | bool | answer has 3–6 checkable points |
 | `interview_fit.note` | string | why |
 | `junior_guide.tests` | string | the skill or understanding the question probes |
