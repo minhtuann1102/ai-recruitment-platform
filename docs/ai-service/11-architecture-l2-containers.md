@@ -133,7 +133,7 @@ Chú giải màu: xanh lá = đã có trong repo; vàng = mock; xám nét đứt
 | I6 | interview-service | MinIO / S3 | HTTPS, presigned URL | Tải file CV, stream, tối đa 10 MB, không ghi đĩa | URL có hạn 5 phút | |
 | I7 | interview-service | interview_db | SQL (MikroORM) | Lưu và đọc dữ liệu phiên | | State có `state_version` để khóa lạc quan |
 | I8 | interview-service | Redis | Redis protocol | Khóa phiên TTL 60 s, quota ngày | | |
-| I9 | ai-service | ai_db | SQL (psycopg 3 async, pgvector; `app/rag/repository.py`) | **Đọc** `knowledge_chunks` | Phiên `default_transaction_read_only=on` (đã cài, có test tích hợp); tài khoản chỉ đọc (đề xuất, DE tạo) | Chỉ ai-service và pipeline đụng `ai_db` |
+| I9 | ai-service | ai_db | SQL (psycopg 3 async, pgvector; `app/rag/repository.py`) | **Đọc** `knowledge_chunks` | Role `aie_reader` chỉ `SELECT`, read-only ở cấp role (DE tạo, PR #32; Supavisor bỏ qua cờ `options` của phiên nên cờ phía ai-service chỉ là lớp phụ). Dev/demo: ai_db dùng chung trên Supabase qua Session pooler cổng 5432 | Chỉ ai-service và pipeline đụng `ai_db` |
 | I10 | ai-service | LLM provider | HTTPS | Chat completions, embeddings | API key trong biến môi trường | Retry tối đa 2 lần; ngân sách thời gian theo agent (D08 §9.3) |
 | I11 | data-pipeline | ai_db | SQL | **Ghi** chunk, upsert theo `content_hash` | Tài khoản ghi | Idempotent (CON V) |
 | I12 | data-pipeline | LLM provider | HTTPS | Embedding khi index | API key | |
