@@ -27,6 +27,10 @@ __pycache__/
 *.pyc
 .venv/
 
+# data pipeline: raw + processed data never committed (constitution V)
+apps/data-pipeline/data/raw/
+apps/data-pipeline/data/processed/
+
 # os
 .DS_Store
 # Ket qua eval tho (transcript tong hop, lon): chi commit bao cao .md

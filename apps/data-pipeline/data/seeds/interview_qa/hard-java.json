@@ -1,0 +1,453 @@
+[
+  {
+    "qa_id": "de-qa-1100",
+    "topic_id": "java.core.collections-hashmap",
+    "question": "Một service giữ HashMap<OrderKey, Order> vài trăm nghìn entry; profiling cho thấy get/put ngày càng chậm và CPU cao. OrderKey tự viết hashCode() chỉ dựa trên một trường có rất ít giá trị khác nhau. Dựa vào cơ chế bên trong HashMap (hash spreading, resize, treeify), hãy giải thích vì sao chậm và cách khắc phục.",
+    "answer": "Nguyên nhân gốc: hashCode() phân bố kém nên rất nhiều key rơi vào cùng bucket, HashMap thoái hóa từ O(1) về O(log n) hoặc gần O(n) mỗi thao tác.\n\nCơ chế (theo mã nguồn OpenJDK, là chi tiết cài đặt chứ không phải đặc tả API):\n- Số bucket luôn là lũy thừa của 2 (mặc định 16), index = hash & (n - 1). Vì chỉ dùng bit thấp, hàm hash() trộn bit cao xuống: h ^ (h >>> 16). Điều này giúp khi hashCode chỉ khác nhau ở bit cao, nhưng vô dụng khi nhiều key cùng hashCode.\n- Khi số entry vượt capacity × load factor (mặc định 0.75), bảng được rehash sang kích thước gấp đôi; mỗi entry giữ index cũ hoặc dịch đúng oldCapacity. Resize tốn O(n), map lớn không khai báo capacity sẽ resize nhiều lần.\n- Bucket đạt 8 node (TREEIFY_THRESHOLD) thì danh sách liên kết thành cây đỏ-đen; nhưng nếu bảng còn dưới 64 bucket (MIN_TREEIFY_CAPACITY) thì resize thay vì treeify. Khi resize tách bin, cây còn từ 6 node trở xuống trở lại thành danh sách.\n- Cây sắp theo hash; khi hash trùng, chỉ phân xử hiệu quả nếu key implement Comparable. Key không Comparable và cùng hashCode có thể buộc tìm cả hai nhánh, lợi ích của cây gần như mất.\n\nChẩn đoán: đếm số hashCode phân biệt trên tập key thật; profiler cho thấy thời gian dồn vào equals()/compareTo().\n\nKhắc phục:\n1. Viết lại hashCode() dùng đủ các trường tham gia equals() (Objects.hash hoặc record), giữ đúng contract equals/hashCode.\n2. Key phải immutable: đổi trường sau khi put làm entry không get lại được và bị giữ mãi.\n3. Biết trước số lượng thì khởi tạo capacity khoảng expected / 0.75 để tránh resize liên tiếp; không đặt quá lớn vì duyệt map tốn thời gian tỉ lệ capacity + size.\n4. Cho key implement Comparable nhất quán với equals để giảm worst case khi va chạm không tránh được, ví dụ key do client bên ngoài kiểm soát.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": ["hashmap", "hashcode", "treeify", "resize", "performance"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/HashMap.html",
+      "https://raw.githubusercontent.com/openjdk/jdk/master/src/java.base/share/classes/java/util/HashMap.java"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1101",
+    "topic_id": "java.core.collections-hashmap",
+    "question": "Code cache dùng ConcurrentHashMap viết `if (!map.containsKey(k)) map.put(k, loadExpensive(k));` và bộ đếm viết `counts.put(k, counts.get(k) + 1)`. Dưới tải cao, loadExpensive bị gọi trùng và số đếm bị thiếu. Vì sao ConcurrentHashMap \"thread-safe\" mà vẫn sai, sửa thế nào, và cần lưu ý gì khi dùng computeIfAbsent?",
+    "answer": "ConcurrentHashMap chỉ bảo đảm từng thao tác đơn lẻ (get, put, remove...) an toàn; một chuỗi check-then-act hay read-modify-write gồm nhiều lời gọi thì không atomic. Hai thread có thể cùng thấy containsKey = false rồi cùng gọi loadExpensive; với bộ đếm, hai thread cùng đọc 5 và cùng ghi 6, mất một lần cập nhật.\n\nCách sửa:\n- Cache: map.computeIfAbsent(k, this::loadExpensive). Javadoc bảo đảm toàn bộ lời gọi được thực hiện atomic, hàm mapping được gọi đúng một lần nếu key vắng mặt và không gọi nếu đã có.\n- Bộ đếm: counts.merge(k, 1L, Long::sum), hoặc mẫu histogram mà javadoc gợi ý: ConcurrentHashMap<String, LongAdder> với freqs.computeIfAbsent(k, x -> new LongAdder()).increment(); LongAdder giảm tranh chấp khi nhiều thread cùng tăng một key.\n\nLưu ý khi dùng computeIfAbsent/compute/merge:\n1. Trong lúc hàm mapping chạy, một số thao tác cập nhật của thread khác trên map có thể bị chặn, nên hàm phải ngắn và đơn giản. Không gọi HTTP/DB chậm bên trong trên map nóng; thay vào đó lưu CompletableFuture<V> làm value để phần tính toán nặng chạy ngoài vùng khóa, hoặc dùng thư viện cache có loader.\n2. Hàm mapping không được sửa chính map đó (ví dụ computeIfAbsent lồng nhau cho key khác). Javadoc nêu IllegalStateException có thể bị ném khi phát hiện recursive update mà nếu không sẽ không bao giờ hoàn tất.\n3. Không cho phép null làm key hoặc value; hàm trả null nghĩa là không thêm mapping. Nhờ đó get() trả null luôn có nghĩa là không có mapping.\n4. size(), isEmpty(), containsValue() chỉ phản ánh trạng thái tạm thời khi đang có cập nhật đồng thời: dùng để giám sát hoặc ước lượng, không dùng để điều khiển logic. Map rất lớn nên dùng mappingCount().\n5. Phép đọc không chặn và thấy kết quả của các cập nhật đã hoàn tất; cập nhật một key happens-before lần đọc thấy giá trị đó, nên object đặt vào map được publish an toàn. Nhưng nếu value là object mutable, việc sửa nó sau đó vẫn cần đồng bộ riêng.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": [
+      "concurrenthashmap",
+      "computeifabsent",
+      "atomicity",
+      "longadder",
+      "thread-safety"
+    ],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ConcurrentHashMap.html"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1102",
+    "topic_id": "java.core.concurrency",
+    "question": "Vì sao double-checked locking cho lazy singleton mà không khai báo volatile lại sai theo Java Memory Model, dù phần khởi tạo đã nằm trong synchronized? Giải thích bằng quan hệ happens-before và nêu các cách sửa cùng trade-off.",
+    "answer": "Đoạn code điển hình:\n```java\nprivate static Config instance;\nstatic Config get() {\n  if (instance == null) {                 // đọc ngoài lock\n    synchronized (Config.class) {\n      if (instance == null) instance = new Config();\n    }\n  }\n  return instance;\n}\n```\nJMM chỉ bảo đảm thread B thấy kết quả ghi của thread A khi phép ghi happens-before phép đọc. Nguồn happens-before chính: unlock monitor happens-before mọi lần lock sau đó trên cùng monitor; ghi volatile happens-before mọi lần đọc sau của biến đó; start() và join() của Thread.\n\nThread B đọc instance != null ở dòng đầu mà không lock, nên không có cạnh happens-before nào từ các lệnh ghi trong constructor (thread A) tới lệnh đọc trường của B. Đây là data race: compiler và CPU được phép sắp xếp lại để reference được publish trước khi các trường ghi xong, B có thể thấy object với trường còn giá trị mặc định (0, null). Lỗi hiếm, phụ thuộc JIT và kiến trúc CPU, nên test thường không bắt được.\n\nCách sửa:\n1. Khai báo instance là volatile. Ghi volatile happens-before đọc volatile sau đó; nhờ tính bắc cầu và program order, mọi lệnh ghi trong constructor đều hiển thị với B. Chi phí: một volatile read ở fast path, thường gán vào biến local để chỉ đọc một lần.\n2. Holder idiom: private static class Holder { static final Config I = new Config(); }. JVM khởi tạo class đúng một lần, an toàn giữa các thread và lazy tới lần truy cập đầu, không cần volatile; chỉ dùng cho singleton static.\n3. Enum singleton hoặc khởi tạo eager nếu tạo object rẻ: đơn giản, ít lỗi nhất.\n4. Ngữ nghĩa final field bảo đảm thread thấy reference sau khi constructor xong sẽ thấy đúng giá trị các trường final, nhưng dựa riêng vào đó cho DCL rất mong manh.\n\nBài học: thread-safe cần cả atomicity lẫn visibility; biến chia sẻ phải đi qua synchronized, volatile, lớp java.util.concurrent (vốn mở rộng bảo đảm happens-before), hoặc là final và được publish an toàn.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": [
+      "java-memory-model",
+      "happens-before",
+      "volatile",
+      "double-checked-locking",
+      "safe-publication"
+    ],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.oracle.com/javase/specs/jls/se21/html/jls-17.html",
+      "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/package-summary.html"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1103",
+    "topic_id": "java.core.concurrency",
+    "question": "Một API aggregator gọi song song 3 service downstream bằng CompletableFuture.supplyAsync(() -> restClient.call(...)) mà không truyền Executor. Khi một downstream chậm, latency toàn service tăng, kể cả những chỗ dùng parallel stream. Bạn phân tích nguyên nhân và thiết kế lại phần thực thi bất đồng bộ thế nào?",
+    "answer": "Nguyên nhân: các method *Async không truyền Executor chạy trên ForkJoinPool.commonPool() (trừ khi pool này không hỗ trợ parallelism từ 2 trở lên, khi đó mỗi task chạy trên một Thread mới). Common pool dùng chung cho cả JVM: parallel stream, ForkJoinTask không submit vào pool cụ thể và mọi CompletableFuture async mặc định. Javadoc ForkJoinPool nói pool cố duy trì đủ thread khi task chờ join nhau, nhưng không bảo đảm điều chỉnh khi gặp blocking I/O hay đồng bộ không được quản lý. Gọi HTTP blocking trong supplyAsync vì thế chiếm trọn số ít worker; khi downstream chậm, mọi tác vụ khác dùng common pool phải xếp hàng.\n\nThiết kế lại:\n1. Executor riêng cho I/O, truyền tường minh: supplyAsync(supplier, ioExecutor). Dùng ThreadPoolExecutor với queue có giới hạn và hiểu quy tắc của nó: ít hơn corePoolSize thì tạo thread mới; đủ core thì ưu tiên xếp vào queue; chỉ khi queue đầy mới tạo thêm tới maximumPoolSize; vượt nữa thì reject. Với LinkedBlockingQueue không giới hạn, maximumPoolSize vô tác dụng và queue có thể phình vô hạn.\n2. Chọn rejection policy có chủ đích: AbortPolicy (mặc định, ném RejectedExecutionException để trả lỗi nhanh, ví dụ 503) hoặc CallerRunsPolicy (thread gọi tự chạy task, tạo backpressure nhưng chặn luôn thread nhận request).\n3. Timeout cho từng nhánh bằng orTimeout hoặc completeOnTimeout (trả giá trị fallback), kèm timeout ở HTTP client: timeout của future không hủy được lời gọi I/O đang block bên dưới.\n4. Bulkhead: mỗi downstream một pool hoặc một giới hạn đồng thời riêng, để một service chậm không kéo cả hệ thống.\n5. Lỗi: join() ném CompletionException (unchecked), get() ném ExecutionException; dùng exceptionally/handle để trả kết quả từng phần thay vì làm hỏng cả response.\n6. Callback không async (thenApply...) có thể chạy trên thread hoàn tất future hoặc thread gọi; đừng đặt việc nặng vào đó.\n\nTrên JDK 21, virtual thread (Executors.newVirtualThreadPerTaskExecutor()) phù hợp cho I/O blocking vì không cần pool lớn, nhưng vẫn cần giới hạn đồng thời (ví dụ Semaphore) để bảo vệ downstream và connection pool.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": [
+      "completablefuture",
+      "forkjoinpool",
+      "threadpoolexecutor",
+      "bulkhead",
+      "backpressure"
+    ],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/CompletableFuture.html",
+      "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ForkJoinPool.html",
+      "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ThreadPoolExecutor.html"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1104",
+    "topic_id": "java.core.jvm-memory-gc",
+    "question": "Một service Java chạy vài ngày thì ném OutOfMemoryError: Java heap space, restart xong lại ổn một thời gian. Làm sao phân biệt memory leak với heap cấu hình quá nhỏ, và quy trình thu thập, phân tích bằng chứng trên production của bạn ra sao?",
+    "answer": "Thông báo \"Java heap space\" chỉ nói không cấp phát được object trong heap, không tự chứng minh có leak. Hai khả năng: heap quá nhỏ so với live set thật, hoặc ứng dụng vô tình giữ reference khiến object không được thu hồi (memory leak kiểu Java).\n\nPhân biệt bằng xu hướng live set: theo dõi heap đã dùng sau GC (nhất là sau full GC) dưới tải ổn định. Mức đáy tăng dần theo thời gian là dấu hiệu leak; mức đáy phẳng nhưng spike tải làm tràn là thiếu heap hoặc có request cấp phát quá lớn. Bật GC log từ đầu, ví dụ -Xlog:gc*:file=gc.log; full GC lặp lại mà thu hồi rất ít ở old gen là tín hiệu mạnh của leak hoặc heap quá nhỏ.\n\nThu thập bằng chứng:\n1. -XX:+HeapDumpOnOutOfMemoryError (kèm -XX:HeapDumpPath) để có heap dump đúng lúc lỗi.\n2. Trên process đang chạy: jcmd <pid> GC.class_histogram lấy định kỳ để thấy class nào tăng đều; jcmd <pid> GC.heap_dump khi cần dump đầy đủ (gây pause, tốn disk cỡ heap).\n3. Java Flight Recorder với sự kiện OldObjectSample (dump với path-to-gc-roots=true) cho biết object sống lâu, nơi cấp phát và chuỗi tham chiếu tới GC root, overhead thấp nên dùng được trên production.\n\nPhân tích heap dump bằng Eclipse MAT hoặc công cụ tương đương: xem retained size / dominator tree để tìm cấu trúc giữ nhiều bộ nhớ nhất, rồi đi đường tham chiếu tới GC root để biết ai đang giữ. Nguyên nhân hay gặp: cache static không giới hạn, không eviction; ThreadLocal không remove() trong thread pool; listener đăng ký mà không hủy; collection theo user/session không dọn khi logout; classloader leak khi redeploy (lỗi khi đó thường là Metaspace).\n\nKhắc phục: sửa vòng đời tham chiếu (cache có giới hạn và TTL, remove ThreadLocal trong finally) thay vì chỉ tăng -Xmx, vì với leak thì tăng heap chỉ hoãn lần OOM sau. Nếu thực sự thiếu heap, định cỡ lại -Xmx theo live set cộng headroom, lưu ý giới hạn bộ nhớ container.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": ["memory-leak", "outofmemoryerror", "heap-dump", "jfr", "gc-log"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.oracle.com/en/java/javase/21/troubleshoot/troubleshooting-memory-leaks.html",
+      "https://docs.oracle.com/en/java/javase/21/docs/specs/man/java.html"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1105",
+    "topic_id": "java.core.jvm-memory-gc",
+    "question": "Service có heap 24 GB, SLO p99 latency 50 ms; GC log của G1 cho thấy pause 150–300 ms ở các mixed collection và thỉnh thoảng có Full GC. Bạn đọc log để tìm nguyên nhân thế nào, tune G1 ra sao, và khi nào chuyển sang ZGC? Nêu trade-off.",
+    "answer": "Cách G1 làm việc: G1 (collector mặc định) chia heap thành các region bằng nhau, mỗi pause sơ tán (copy) object sống của một tập region. Khi old gen vượt ngưỡng Initiating Heap Occupancy (mặc định 45%, có cơ chế adaptive), G1 chạy concurrent marking rồi sang pha space-reclamation gồm các mixed collection sơ tán thêm region old. G1 nhắm mục tiêu pause mềm -XX:MaxGCPauseMillis, mặc định 200 ms; nó không phải collector real-time.\n\nĐọc log tìm nguyên nhân:\n- Mixed pause dài: mỗi lần sơ tán region old chứa nhiều object sống, tốn thời gian copy.\n- Full GC: thường do evacuation failure (không đủ chỗ để copy) hoặc marking bắt đầu quá muộn so với tốc độ cấp phát. Full GC của G1 compact toàn heap tại chỗ, rất chậm.\n- Humongous object: object từ nửa region trở lên được cấp phát thẳng thành chuỗi region liền nhau ở old gen, phần dư region cuối bị lãng phí, và thường chỉ được thu hồi ở Cleanup hoặc Full GC. Nhiều buffer/mảng lớn dễ gây phân mảnh và Full GC.\n\nTune G1: đặt MaxGCPauseMillis gần SLO (mỗi pause làm ít việc hơn, đổi lại GC chạy dày hơn, tốn throughput); tăng headroom heap; tăng G1HeapRegionSize (lũy thừa 2, 1–32 MB) để buffer lớn không còn humongous; giảm cấp phát trong code. Mỗi lần đổi một tham số rồi đo lại bằng GC log và p99 thật.\n\nKhi nào chọn ZGC: cần pause rất thấp, không phụ thuộc kích thước heap. ZGC làm gần hết việc đồng thời với ứng dụng; JEP 439 đặt mục tiêu pause không vượt 1 ms, heap từ vài trăm MB tới nhiều TB. Generational ZGC có từ JDK 21 (-XX:+UseZGC -XX:+ZGenerational) và là chế độ mặc định của -XX:+UseZGC từ JDK 23. Trade-off: tốn thêm CPU cho thread GC đồng thời, cần headroom bộ nhớ; nếu tốc độ cấp phát vượt tốc độ thu gom, thread ứng dụng bị allocation stall và latency vẫn tăng. Workload ưu tiên throughput (batch) thường hợp với G1 hoặc Parallel GC hơn.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": ["g1", "zgc", "gc-tuning", "humongous-objects", "latency"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.oracle.com/en/java/javase/21/gctuning/garbage-first-g1-garbage-collector1.html",
+      "https://docs.oracle.com/en/java/javase/21/docs/specs/man/java.html",
+      "https://openjdk.org/jeps/439",
+      "https://openjdk.org/jeps/474"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1106",
+    "topic_id": "java.data.jpa-hibernate",
+    "question": "Endpoint liệt kê 20 đơn hàng kèm danh sách item và tên khách hàng sinh ra 41 câu SQL. Một dev sửa bằng `JOIN FETCH o.items` kèm phân trang thì số câu giảm nhưng memory và thời gian tăng khi bảng lớn. Giải thích N+1, vì sao cách sửa đó sai, và các chiến lược fetch đúng cùng trade-off.",
+    "answer": "N+1: một câu lấy danh sách cha, rồi mỗi khi code (thường là mapper sang DTO hoặc serializer) chạm vào association lazy của từng phần tử, Hibernate bắn thêm một câu. 1 + 20 (items) + 20 (customer) = 41. Tài liệu Hibernate gọi đây là nguyên nhân phổ biến nhất khiến tầng truy cập dữ liệu chậm; vấn đề là số round trip, không phải độ phức tạp từng câu.\n\nVì sao JOIN FETCH collection + phân trang sai: join với collection nhân mỗi đơn thành nhiều dòng, nên LIMIT/OFFSET ở SQL không còn đếm theo đơn. Hibernate phải tải toàn bộ kết quả rồi cắt trang trong bộ nhớ, rất chậm và tốn RAM khi dữ liệu lớn. Bật QuerySettings.FAIL_ON_PAGINATION_OVER_COLLECTION_FETCH để biến tình huống này thành exception thay vì âm thầm chạy. Thêm nữa, join fetch hai collection cùng lúc tạo tích Descartes.\n\nChiến lược đúng:\n1. Map association LAZY làm mặc định và quyết định fetch theo từng use case; FetchType.EAGER áp cho mọi truy vấn và không chữa được N+1 khi dùng JPQL.\n2. To-one (customer): JOIN FETCH hoặc @EntityGraph an toàn với phân trang vì không nhân dòng.\n3. Collection + phân trang: truy vấn hai bước. Bước 1 lấy trang ID theo ORDER BY ổn định; bước 2 `where o.id in :ids` kèm join fetch items. Luôn hai round trip, không phụ thuộc kích thước trang.\n4. Batch fetching (@BatchSize hoặc hibernate.default_batch_fetch_size): khi khởi tạo một collection lazy, Hibernate nạp luôn collection của nhiều cha khác bằng một câu với lô khóa; số câu giảm theo batch size. Tài liệu nói rõ cách này giảm nhẹ chứ không giải quyết triệt để N+1.\n5. Subselect fetching (@Fetch(SUBSELECT)): một câu bổ sung chạy lại query gốc dưới dạng subselect để nạp collection cho mọi cha.\n6. Màn hình chỉ đọc: projection thẳng sang DTO thường rẻ nhất, không tạo entity managed, không dirty checking.\n\nPhòng ngừa: bật log SQL hoặc statistics trong test và viết test khẳng định số câu SQL của endpoint quan trọng, để N+1 bị bắt trước khi lên production.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": ["n-plus-one", "fetch-join", "batch-fetching", "pagination", "hibernate"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.hibernate.org/orm/6.6/introduction/html_single/Hibernate_Introduction.html",
+      "https://docs.hibernate.org/orm/6.6/javadocs/org/hibernate/cfg/QuerySettings.html"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1107",
+    "topic_id": "java.data.jpa-hibernate",
+    "question": "Job đồng bộ 1 triệu bản ghi viết bằng Spring Data JPA trong một @Transactional duy nhất: đọc từng entity, sửa vài trường rồi lưu. Job chạy chậm dần rồi chết vì OutOfMemoryError. Phân tích nguyên nhân dựa trên persistence context và dirty checking, và bạn viết lại job thế nào?",
+    "answer": "Nguyên nhân: mọi entity được load hoặc persist trong transaction đều nằm trong persistence context (first-level cache) cho tới khi session đóng hoặc bị clear; Hibernate không tự evict entity không còn dùng. Với 1 triệu entity:\n- Heap tăng tuyến tính (entity cùng trạng thái lúc load mà Hibernate giữ để so sánh), dẫn tới OOM.\n- Mỗi lần flush, session phải dirty-check mọi entity managed, nên chi phí flush tăng theo kích thước context.\n- Ở flush mode AUTO, Hibernate còn flush trước các query JPQL/HQL có thể bị ảnh hưởng bởi thay đổi chưa ghi; nếu trong vòng lặp có query, mỗi lần lại dirty-check toàn bộ context, tổng chi phí tăng gần bậc hai.\n\nViết lại:\n1. Chia chunk (vài trăm tới vài nghìn bản ghi); sau mỗi chunk gọi flush() rồi clear() để giới hạn first-level cache, đúng khuyến nghị batch processing của Hibernate. Sau clear(), entity cũ trở thành detached, không dùng tiếp.\n2. Bật JDBC batching bằng hibernate.jdbc.batch_size (cùng cỡ chunk) để nhiều INSERT/UPDATE cùng bảng được gửi theo lô. Hibernate âm thầm tắt insert batching nếu id dùng IDENTITY generator; cần batch insert thì dùng SEQUENCE.\n3. Đọc theo khóa (WHERE id > :lastId ORDER BY id LIMIT n) hoặc scroll/stream, tránh OFFSET sâu và tránh nạp tất cả vào một List.\n4. Mỗi chunk một transaction ngắn (hoặc Spring Batch chunk-oriented) để không giữ transaction và lock quá lâu, và có thể chạy tiếp từ chỗ lỗi.\n5. Dữ liệu chỉ đọc: load ở chế độ read-only (Session.setDefaultReadOnly hoặc query read-only) để bỏ dirty checking cho các entity đó.\n6. Không cần cascade hay lazy loading: dùng StatelessSession, không có persistence context, không dirty checking tự động, mỗi thao tác thực thi ngay; đổi lại collection bị bỏ qua và dễ gặp data aliasing.\n7. Cập nhật đồng loạt theo cùng quy tắc: một câu UPDATE HQL hoặc SQL bulk thường nhanh nhất, nhưng nó đi vòng qua persistence context, nên chạy trước khi load entity hoặc clear sau đó.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": [
+      "persistence-context",
+      "dirty-checking",
+      "jdbc-batching",
+      "batch-processing",
+      "stateless-session"
+    ],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://raw.githubusercontent.com/hibernate/hibernate-orm/6.6/documentation/src/main/asciidoc/userguide/chapters/batch/Batching.adoc",
+      "https://raw.githubusercontent.com/hibernate/hibernate-orm/6.6/documentation/src/main/asciidoc/userguide/chapters/flushing/Flushing.adoc",
+      "https://docs.hibernate.org/orm/6.6/introduction/html_single/Hibernate_Introduction.html"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1108",
+    "topic_id": "java.data.sql-index-tuning",
+    "question": "Một query PostgreSQL JOIN orders với customers, lọc `country = 'VN' AND city = 'Hanoi'`, trước chạy 50 ms nhưng sau khi dữ liệu tăng mất 20 giây. EXPLAIN ANALYZE cho thấy Nested Loop với ước lượng rows=12 ở phía ngoài nhưng thực tế 180000 dòng. Bạn đọc plan này thế nào và xử lý ra sao?",
+    "answer": "Đọc plan: EXPLAIN chỉ in kế hoạch với ước lượng; EXPLAIN ANALYZE chạy thật và in số dòng, thời gian thực của từng node cạnh ước lượng. Điều quan trọng nhất là so estimated rows với actual rows. Với node con bên trong Nested Loop, actual time và rows là trung bình mỗi lần chạy, phải nhân với loops để ra tổng.\n\nBa chiến lược join:\n- Nested Loop: quét phía trong một lần cho mỗi dòng phía ngoài; tốt khi phía ngoài ít dòng và phía trong có index trên khóa join.\n- Hash Join: nạp một phía vào hash table rồi quét phía kia; hợp với tập lớn, tốn bộ nhớ.\n- Merge Join: hai phía được sắp theo khóa join (bằng sort hoặc đọc index) rồi quét song song.\n\nỞ đây planner tin phía ngoài chỉ 12 dòng nên chọn Nested Loop + index lookup; thực tế 180000 dòng nghĩa là 180000 lần quét phía trong. Ước lượng sai vì planner mặc định coi điều kiện trên nhiều cột là độc lập, nhân selectivity của country và city ra con số quá nhỏ, trong khi city gần như quyết định country (functional dependency), dẫn tới underestimate.\n\nXử lý:\n1. Kiểm tra statistics có cũ không (pg_stats, lần analyze gần nhất); chạy ANALYZE sau khi nạp dữ liệu lớn.\n2. Tạo extended statistics: CREATE STATISTICS st_city_country (dependencies) ON country, city FROM customers; rồi ANALYZE. Lưu ý dependencies hiện chỉ áp dụng cho điều kiện bằng hoặc IN với hằng số; còn có loại mcv (tổ hợp giá trị phổ biến) và ndistinct (ước lượng GROUP BY).\n3. Cột phân bố lệch: tăng statistics target bằng ALTER TABLE ... ALTER COLUMN ... SET STATISTICS để lưu nhiều most-common values hơn.\n4. Kiểm tra index khớp predicate và khóa join; dùng EXPLAIN (ANALYZE, BUFFERS) để thấy I/O thực.\n5. Không 'chữa' bằng tắt enable_nestloop toàn cục; chỉ dùng trong session để chẩn đoán.\n\nEXPLAIN ANALYZE thực thi thật, nên với UPDATE/DELETE hãy bọc trong BEGIN ... ROLLBACK. Sau khi sửa, xác nhận estimate đã sát actual.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": [
+      "explain-analyze",
+      "join-strategy",
+      "cardinality-estimation",
+      "extended-statistics",
+      "postgresql"
+    ],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://www.postgresql.org/docs/current/using-explain.html",
+      "https://www.postgresql.org/docs/current/planner-optimizer.html",
+      "https://www.postgresql.org/docs/current/planner-stats.html"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1109",
+    "topic_id": "java.data.sql-index-tuning",
+    "question": "API danh sách giao dịch dùng `ORDER BY created_at DESC LIMIT 20 OFFSET :offset`. Trang đầu nhanh nhưng trang thứ 5000 mất vài giây, và người dùng thấy bản ghi bị lặp hoặc mất khi có dữ liệu mới chèn vào. Giải thích nguyên nhân và thiết kế keyset pagination, gồm index cần tạo và các trade-off.",
+    "answer": "Nguyên nhân hiệu năng: các dòng bị OFFSET bỏ qua vẫn phải được tính trong server; trang 5000 phải đọc rồi vứt 100000 dòng. Nguyên nhân sai lệch: OFFSET đếm theo vị trí; khi có bản ghi mới chèn lên đầu, mọi dòng bị đẩy xuống nên trang sau lặp lại phần cuối trang trước, khi có xóa thì bỏ sót. Ngoài ra created_at không duy nhất, nên thứ tự giữa các dòng trùng timestamp không xác định; ORDER BY phải ràng buộc thành thứ tự duy nhất thì tập con mới dự đoán được.\n\nKeyset (seek) pagination: client gửi lại khóa của dòng cuối trang trước, server đọc tiếp từ đó:\n```sql\nSELECT id, created_at, amount FROM transactions\nWHERE account_id = :acc\n  AND (created_at, id) < (:lastCreatedAt, :lastId)\nORDER BY created_at DESC, id DESC\nLIMIT 20;\n```\nSo sánh row constructor xét từng cặp từ trái sang phải, dừng ở cặp khác nhau đầu tiên, tương đương created_at < x OR (created_at = x AND id < y); id là tie-breaker tạo thứ tự toàn phần.\n\nIndex: (account_id, created_at, id). Cột so sánh bằng đứng đầu, sau đó các cột sắp xếp đúng thứ tự ORDER BY. B-tree trả dữ liệu đã sắp xếp và quét ngược được, nên phục vụ được created_at DESC, id DESC; với ORDER BY + LIMIT n, PostgreSQL lấy thẳng n dòng đầu mà không sort toàn bộ. Chi phí mỗi trang gần như không đổi dù đi sâu tới đâu. Khi ORDER BY trộn ASC/DESC thì index phải khai báo chiều tương ứng.\n\nTrade-off:\n- Không nhảy tới trang N tùy ý, khó hiển thị tổng số trang; hợp với infinite scroll hoặc nút \"tiếp\".\n- Cursor nên opaque (mã hóa created_at + id); trang trước cần đảo chiều so sánh và ORDER BY.\n- Mỗi kiểu sort cần index tương ứng.\n- Bản ghi mới chèn phía trước cursor không xuất hiện ở các trang sau; thường chấp nhận được, tốt hơn lặp hoặc mất dữ liệu.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": ["keyset-pagination", "offset", "composite-index", "b-tree", "postgresql"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://www.postgresql.org/docs/current/queries-limit.html",
+      "https://www.postgresql.org/docs/current/indexes-ordering.html",
+      "https://www.postgresql.org/docs/current/indexes-multicolumn.html",
+      "https://www.postgresql.org/docs/current/functions-comparisons.html"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1110",
+    "topic_id": "java.spring.transaction",
+    "question": "Trong OrderService, placeOrder() có @Transactional; bên trong nó gọi this.writeAudit() được đánh dấu @Transactional(propagation = REQUIRES_NEW), và gọi paymentService.charge() (@Transactional mặc định) trong try/catch để \"nuốt\" lỗi thanh toán. Kết quả: audit bị rollback cùng đơn hàng, và lúc commit lại nhận UnexpectedRollbackException. Giải thích từng hiện tượng và cách sửa.",
+    "answer": "Spring áp dụng @Transactional qua proxy (mặc định): chỉ lời gọi từ bên ngoài đi qua proxy mới bị chặn để mở hoặc tham gia transaction.\n\n1. Audit bị rollback cùng đơn: this.writeAudit() là self-invocation, gọi thẳng vào object đích và bỏ qua proxy, nên REQUIRES_NEW bị phớt lờ hoàn toàn; writeAudit chạy trong transaction của placeOrder và rollback theo nó. Các annotation dựa trên proxy khác như @Async, @Cacheable cũng gặp đúng vấn đề này.\nCách sửa: tách writeAudit sang bean khác (AuditService) và inject vào; hoặc dùng TransactionTemplate với propagation REQUIRES_NEW; hoặc chuyển sang AspectJ mode (weaving bytecode) nếu thật sự cần self-invocation có transaction.\n\n2. UnexpectedRollbackException: charge() dùng REQUIRED nên tham gia cùng physical transaction với placeOrder. Mỗi method có logical transaction scope riêng nhưng chung một transaction vật lý; khi charge() ném RuntimeException ra khỏi proxy, transaction dùng chung bị đánh dấu rollback-only. placeOrder bắt exception và chạy tiếp; tới lúc commit, Spring thấy cờ rollback-only nên rollback và ném UnexpectedRollbackException để caller biết commit đã không xảy ra.\nCách sửa tùy nghiệp vụ: (a) thanh toán lỗi thì đơn cũng phải hủy: đừng nuốt exception; (b) muốn vẫn lưu đơn với trạng thái PAYMENT_FAILED: cho charge() chạy REQUIRES_NEW (transaction độc lập, rollback riêng) hoặc NESTED (savepoint, chỉ với JDBC transaction); (c) lỗi là kết quả nghiệp vụ dự kiến: trả về kết quả thay vì ném exception.\n\nLưu ý thêm:\n- Mặc định chỉ RuntimeException và Error gây rollback; checked exception vẫn commit trừ khi khai báo rollbackFor. Exception đã bị catch bên trong method thì interceptor không thấy.\n- REQUIRES_NEW giữ connection của transaction ngoài trong khi lấy connection mới; nhiều thread đồng thời có thể làm cạn connection pool và deadlock, nên pool phải lớn hơn số thread đồng thời ít nhất 1.\n- Từ Spring 6.0, method protected hoặc package-private cũng được áp transaction với class-based proxy; method private thì không.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": ["transactional", "self-invocation", "propagation", "rollback", "spring-aop"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/annotations.html",
+      "https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/tx-propagation.html",
+      "https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/rolling-back.html"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1111",
+    "topic_id": "java.spring.transaction",
+    "question": "Endpoint trừ tồn kho làm `Product p = repo.findById(id); p.setStock(p.getStock() - qty);` trong một @Transactional trên PostgreSQL. Khi flash sale, hệ thống bán vượt số lượng tồn. Phân tích lost update dưới isolation mặc định và so sánh các cách khắc phục: atomic update, pessimistic lock, optimistic lock, nâng isolation level.",
+    "answer": "Nguyên nhân: Read Committed là isolation mặc định của PostgreSQL. Hai transaction cùng đọc stock = 5, cùng tính 5 - 3 = 2 trong Java rồi lần lượt UPDATE stock = 2. Cả hai commit: bán 6 sản phẩm nhưng tồn chỉ giảm 3 (lost update). @Transactional không ngăn được vì lỗi nằm ở read-modify-write tại tầng ứng dụng.\n\nCác cách khắc phục:\n1. Atomic conditional update: UPDATE product SET stock = stock - :qty WHERE id = :id AND stock >= :qty, rồi kiểm tra số dòng bị ảnh hưởng (0 là hết hàng). Ở Read Committed, nếu dòng vừa bị transaction khác sửa, UPDATE chờ transaction đó kết thúc rồi đánh giá lại WHERE trên phiên bản mới nhất, nên không bán vượt. Nhanh nhất; nhược điểm là logic nằm trong SQL, đi vòng qua entity đang managed.\n2. Pessimistic lock: SELECT ... FOR UPDATE, trong Spring Data JPA là @Lock(LockModeType.PESSIMISTIC_WRITE) trên query method. Transaction sau chờ khóa dòng. Đúng khi xung đột cao, nhưng giữ khóa suốt transaction: transaction phải ngắn, không gọi API ngoài khi giữ khóa, khóa nhiều dòng theo thứ tự cố định để tránh deadlock.\n3. Optimistic lock: cột @Version; Hibernate tăng version mỗi lần cập nhật và phát hiện cập nhật xung đột, transaction thua bị rollback. Không giữ khóa, hợp khi xung đột hiếm; flash sale xung đột dày thì retry nhiều, lãng phí.\n4. Nâng isolation: ở REPEATABLE READ hoặc SERIALIZABLE, PostgreSQL làm transaction đến sau thất bại với lỗi serialization (SQLSTATE 40001) thay vì ghi đè; ứng dụng bắt buộc retry toàn bộ transaction. Lưu ý isolation trong @Transactional chỉ có hiệu lực khi method mở transaction mới; nếu tham gia transaction ngoài với REQUIRED, thiết lập cục bộ bị âm thầm bỏ qua (trừ khi bật validateExistingTransaction).\n\nLựa chọn: tồn kho dạng bộ đếm thì atomic update là mặc định; cần đọc rồi quyết định theo logic phức tạp thì pessimistic lock; dữ liệu ít tranh chấp thì optimistic lock. Retry phải có giới hạn số lần và an toàn khi chạy lại.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": [
+      "isolation-level",
+      "lost-update",
+      "optimistic-locking",
+      "pessimistic-locking",
+      "postgresql"
+    ],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://www.postgresql.org/docs/current/transaction-iso.html",
+      "https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/tx-propagation.html",
+      "https://docs.spring.io/spring-data/jpa/reference/jpa/locking.html",
+      "https://raw.githubusercontent.com/hibernate/hibernate-orm/6.6/documentation/src/main/asciidoc/userguide/chapters/locking/Locking.adoc"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1112",
+    "topic_id": "java.security.spring-security-jwt",
+    "question": "Bạn thiết kế xác thực cho SPA và mobile app gọi Spring Boot API bằng JWT access token, với yêu cầu: logout hoặc khóa tài khoản phải có hiệu lực nhanh, token bị đánh cắp phải hạn chế được thiệt hại. Trình bày cách resource server validate JWT, vì sao JWT khó thu hồi, và thiết kế access/refresh token (thời hạn, rotation, lưu trữ) cùng trade-off.",
+    "answer": "Validate JWT: với Spring Security OAuth2 Resource Server, JwtDecoder kiểm chữ ký bằng public key lấy từ JWK Set của issuer (cấu hình issuer-uri), kiểm exp, nbf, iss (mặc định cho phép lệch đồng hồ 60 giây), rồi map scope thành authority có tiền tố SCOPE_ (tùy biến bằng JwtAuthenticationConverter). Mọi bước đều cục bộ, không hỏi lại server cấp token.\n\nVì sao khó thu hồi: chính vì kiểm cục bộ nên token hợp lệ tới khi hết hạn; logout hay khóa tài khoản không làm token đã phát mất hiệu lực nếu không có trạng thái phía server.\n\nThiết kế:\n1. Access token ngắn hạn (vài phút), ít claim, giới hạn audience và scope hẹp: đây là cơ chế giới hạn thiệt hại chính.\n2. Refresh token dài hạn hơn, opaque, lưu phía server (DB/Redis) để thu hồi được; hết hạn khi client không hoạt động một thời gian và bị thu hồi khi đổi mật khẩu, logout hoặc khóa tài khoản.\n3. Refresh token rotation: mỗi lần refresh cấp refresh token mới và vô hiệu cái cũ, nhưng ghi nhớ chuỗi liên kết. Nếu token đã vô hiệu bị dùng lại, server không biết bên nào là kẻ tấn công nên thu hồi luôn refresh token đang hoạt động của chuỗi, buộc đăng nhập lại. RFC 9700 yêu cầu refresh token của public client (SPA, mobile) phải sender-constrained (DPoP, mTLS) hoặc dùng rotation.\n4. Cần hiệu lực tức thì cho thao tác nhạy cảm: denylist theo jti hoặc user tới khi token hết hạn, hoặc opaque token với introspection. Đánh đổi: thêm một lần tra cứu mỗi request, mất một phần tính stateless.\n5. Lưu trữ trên trình duyệt: localStorage dễ bị đọc khi có XSS; cookie HttpOnly, Secure, SameSite chặn script đọc token nhưng trình duyệt tự gửi cookie nên phải chống CSRF. Mobile dùng secure storage của hệ điều hành.\n\nTrade-off cốt lõi: access token ngắn hạn cộng rotation giữ hệ thống gần stateless mà vẫn giới hạn thiệt hại; denylist hoặc introspection cho thu hồi tức thì nhưng phụ thuộc kho trạng thái.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": [
+      "jwt",
+      "refresh-token",
+      "token-rotation",
+      "oauth2-resource-server",
+      "revocation"
+    ],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/jwt.html",
+      "https://www.rfc-editor.org/rfc/rfc9700.html"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1113",
+    "topic_id": "java.security.spring-security-jwt",
+    "question": "Một ứng dụng Spring Boot vừa có trang admin đăng nhập bằng form (session cookie) vừa có REST API /api/** dùng JWT bearer token. Sau khi thêm cấu hình, API trả 401/403 bất ngờ và có người đề xuất tắt CSRF toàn cục. Giải thích request đi qua DelegatingFilterProxy, FilterChainProxy và SecurityFilterChain thế nào, cách tách hai chain, và khi nào tắt CSRF là an toàn.",
+    "answer": "Luồng request: servlet container không biết bean Spring, nên Spring đăng ký DelegatingFilterProxy như một Filter chuẩn, và nó ủy quyền (lookup lazy) cho bean FilterChainProxy. FilterChainProxy là điểm vào của Spring Security: chọn SecurityFilterChain phù hợp, đồng thời làm việc bắt buộc như xóa SecurityContext để tránh leak và áp HttpFirewall. Chỉ chain đầu tiên khớp request được gọi; các chain sau bị bỏ qua dù cũng khớp.\n\nTrong một chain, filter chạy theo thứ tự cố định, ví dụ SecurityContextHolderFilter, CsrfFilter, các filter xác thực, ExceptionTranslationFilter, AuthorizationFilter. ExceptionTranslationFilter chuyển AuthenticationException (chưa xác thực) cho AuthenticationEntryPoint, với API thường là 401 kèm header WWW-Authenticate, với web là redirect tới trang login; còn AccessDeniedException (đã xác thực nhưng thiếu quyền) đi tới AccessDeniedHandler, thường trả 403.\n\nTách hai chain:\n- Chain API: securityMatcher(\"/api/**\"), @Order nhỏ hơn để được xét trước; oauth2ResourceServer với JWT, session STATELESS, bỏ CSRF chỉ trong chain này.\n- Chain web: không có securityMatcher (bắt phần còn lại), formLogin, session, giữ CSRF.\nLỗi hay gặp: chain chung đứng trước nên /api/** bị redirect tới login hoặc POST bị CsrfFilter chặn với 403; hoặc so authority quên tiền tố SCOPE_/ROLE_. Đặt logging.level.org.springframework.security=TRACE để thấy chain nào khớp và filter nào từ chối.\n\nKhi nào tắt CSRF an toàn: Spring khuyến nghị bật CSRF cho mọi request có thể được trình duyệt của người dùng xử lý, chỉ nên tắt khi service hoàn toàn phục vụ client không phải trình duyệt. Mấu chốt là trình duyệt có tự đính kèm credential không: token trong header Authorization do code client tự gắn thì không bị CSRF theo cách đó. Nhưng stateless không đồng nghĩa an toàn: nếu JWT nằm trong cookie, hoặc dùng basic auth, trình duyệt tự gửi credential và ứng dụng vẫn dễ bị CSRF. Ngoài ra GET, HEAD, OPTIONS, TRACE phải chỉ đọc thì CSRF protection mới có tác dụng. Vì vậy chỉ tắt CSRF trên chain API dùng bearer header, không tắt toàn cục.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": [
+      "spring-security",
+      "filter-chain",
+      "csrf",
+      "authentication-entry-point",
+      "security-filter-chain"
+    ],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.spring.io/spring-security/reference/servlet/architecture.html",
+      "https://docs.spring.io/spring-security/reference/features/exploits/csrf.html",
+      "https://docs.spring.io/spring-security/reference/servlet/exploits/csrf.html"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1114",
+    "topic_id": "java.spring.boot-autoconfig",
+    "question": "Bạn viết starter nội bộ acme-spring-boot-starter tự cấu hình một AcmeClient. Vài service báo bean AcmeClient tự khai báo của họ bị trùng hoặc bị bỏ qua, service khác lỗi khởi động vì không có thư viện Acme trên classpath. Giải thích cơ chế auto-configuration (cách Boot tìm, đánh giá điều kiện, thứ tự), cách viết đúng và cách debug.",
+    "answer": "Cơ chế: Spring Boot đọc file META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports trong các jar; mỗi dòng là một class @AutoConfiguration (bản chất là @Configuration). Các class này chỉ áp dụng khi điều kiện @Conditional... thỏa và được bảo đảm xử lý sau các bean definition do người dùng khai báo. Auto-configuration là non-invasive: ứng dụng tự định nghĩa bean (ví dụ DataSource) thì phần mặc định tương ứng rút lui.\n\nNguyên nhân các lỗi:\n1. Bean người dùng bị trùng hoặc bị bỏ qua: thiếu @ConditionalOnMissingBean trên @Bean, hoặc class auto-configuration bị component scan quét trúng (nằm dưới package gốc của ứng dụng). Khi đó nó được xử lý như cấu hình thường, không còn chạy sau bean người dùng, nên điều kiện đánh giá sai. Tài liệu yêu cầu auto-configuration chỉ được nạp qua file imports, đặt trong package riêng, không bao giờ là mục tiêu component scan và không tự bật component scan (dùng @Import cụ thể).\n2. Lỗi khi thiếu thư viện: không có @ConditionalOnClass. Cách an toàn là gom các @Bean dùng kiểu của thư viện vào nested @Configuration có @ConditionalOnClass.\n3. @ConditionalOnBean/@ConditionalOnMissingBean đánh giá dựa trên những gì đã xử lý tới thời điểm đó, nên chỉ nên dùng trên auto-configuration. Kiểu trả về của @Bean nên cụ thể nhất có thể để điều kiện so khớp đúng.\n4. Phụ thuộc giữa các auto-configuration: dùng before/after trên @AutoConfiguration (hoặc @AutoConfigureBefore/After). Thứ tự này chỉ quyết định thứ tự đăng ký bean definition, không phải thứ tự tạo bean.\n\nThiết kế starter: tên module không bắt đầu bằng spring-boot (acme-spring-boot-starter); property gom vào @ConfigurationProperties(\"acme\") với namespace riêng, có Javadoc cho từng trường để sinh metadata cho IDE; không dùng namespace của Boot như spring, server, management.\n\nDebug: chạy với --debug để in conditions report (điều kiện nào khớp, không khớp và lý do). Tắt auto-configuration không mong muốn bằng @SpringBootApplication(exclude = ...) hoặc spring.autoconfigure.exclude. Kiểm thử bằng ApplicationContextRunner: dựng context với từng tổ hợp classpath, bean, property rồi khẳng định bean có hay không, thay vì phải khởi động cả ứng dụng.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": [
+      "auto-configuration",
+      "conditional-on-missing-bean",
+      "spring-boot-starter",
+      "conditions-report",
+      "configuration-properties"
+    ],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.spring.io/spring-boot/reference/features/developing-auto-configuration.html",
+      "https://docs.spring.io/spring-boot/reference/using/auto-configuration.html"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1115",
+    "topic_id": "java.spring.boot-autoconfig",
+    "question": "Sau khi deploy lên Kubernetes, service vẫn kết nối DB staging dù image có application-prod.yml và pod đặt SPRING_PROFILES_ACTIVE=prod. Trình bày thứ tự ưu tiên của externalized configuration và profile trong Spring Boot, các nguyên nhân khả dĩ, cách chẩn đoán, và cách tổ chức config cùng secret cho hợp lý.",
+    "answer": "Thứ tự ưu tiên (nguồn sau ghi đè nguồn trước, rút gọn): default properties, @PropertySource, config data (application.*), OS environment variables, Java system properties, SPRING_APPLICATION_JSON, command line arguments; trong test còn có properties của @SpringBootTest, @DynamicPropertySource, @TestPropertySource. Trong config data: application.* trong jar < application-{profile}.* trong jar < application.* ngoài jar < application-{profile}.* ngoài jar. Như vậy biến môi trường thắng mọi file cấu hình, kể cả file theo profile.\n\nNguyên nhân khả dĩ:\n1. Biến môi trường ghi đè: manifest còn sót SPRING_DATASOURCE_URL trỏ staging; nhờ relaxed binding, biến này ứng với spring.datasource.url và thắng giá trị trong application-prod.yml.\n2. Command line hoặc SPRING_APPLICATION_JSON trong entrypoint đặt lại spring.profiles.active. Profile active theo cùng thứ tự, nguồn cao nhất thắng và thay thế danh sách chứ không cộng thêm; muốn cộng thêm dùng spring.profiles.include hoặc profile group.\n3. File ngoài jar (ConfigMap mount vào ./config) chứa application.yml với URL staging: file ngoài jar thắng file cùng loại trong jar.\n4. Khai báo spring.profiles.active trong file theo profile hoặc document có spring.config.activate.on-profile: cấu hình này không hợp lệ.\n5. Giá trị đặt bằng @PropertySource có ưu tiên thấp hơn application.* và được nạp lúc context refresh, quá muộn cho logging.* và spring.main.*.\n\nChẩn đoán: xem log khởi động liệt kê profile đang active; endpoint env của Actuator cho biết mỗi property lấy từ property source nào (phải bảo vệ endpoint, che giá trị nhạy cảm); hoặc tái hiện cục bộ với đúng bộ biến môi trường của pod.\n\nTổ chức:\n- Một image cho mọi môi trường; khác biệt đặt ngoài image qua env var, ConfigMap, hoặc spring.config.import=optional:configtree:/etc/secrets/ để đọc Secret mount thành file. Không đóng gói secret production vào jar.\n- Gom cấu hình vào @ConfigurationProperties có kiểu, kèm validation để fail-fast khi thiếu hoặc sai giá trị; dùng profile group (production gồm proddb, prodmq) thay vì liệt kê nhiều profile rời rạc.\n- Hạn chế số tầng ghi đè và quy ước rõ nguồn sự thật cho từng nhóm property.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": [
+      "externalized-configuration",
+      "profiles",
+      "property-source-order",
+      "relaxed-binding",
+      "kubernetes"
+    ],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.spring.io/spring-boot/reference/features/external-config.html",
+      "https://docs.spring.io/spring-boot/reference/features/profiles.html"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1116",
+    "topic_id": "java.spring.ioc-di",
+    "question": "Sau khi nâng Spring Boot từ 2.5 lên bản mới, ứng dụng không khởi động được vì BeanCurrentlyInCreationException giữa OrderService và PaymentService (inject chéo bằng field @Autowired). Vì sao trước đây vẫn chạy, vì sao constructor injection không tự giải được vòng phụ thuộc, và bạn xử lý thế nào từ tạm thời tới đúng về thiết kế?",
+    "answer": "Vì sao trước đây chạy được: với field/setter injection, container có thể phá vòng giữa các singleton: tạo instance A bằng constructor, để lộ một tham chiếu sớm của A, rồi khi populate A cần B thì tạo B và inject A chưa khởi tạo xong vào B. Tài liệu Spring gọi đây là tình huống con gà quả trứng: một bean bị inject vào bean kia trước khi chính nó khởi tạo hoàn chỉnh. Từ Spring Boot 2.6, circular reference bị cấm mặc định, nên khởi động thất bại với BeanCurrentlyInCreationException.\n\nVì sao constructor injection không giải được: A cần một B hoàn chỉnh ngay trong constructor và B cũng vậy; không lúc nào có tham chiếu sớm để chia sẻ, nên container phát hiện vòng và ném exception. Đây là ưu điểm: lỗi thiết kế lộ ra ngay lúc khởi động.\n\nRủi ro của việc phá vòng bằng tham chiếu sớm: B dùng A trong @PostConstruct có thể gặp trạng thái chưa đầy đủ; nếu A được bọc proxy (transaction, async), B có thể giữ bản thô thay vì proxy cuối cùng khiến advice không chạy, hoặc container từ chối khởi động.\n\nCách xử lý:\n1. Tạm thời: spring.main.allow-circular-references=true khôi phục hành vi 2.5; chỉ dùng để mở khóa việc nâng cấp, kèm kế hoạch sửa.\n2. @Lazy tại điểm inject hoặc inject ObjectProvider<PaymentService>: bean thật chỉ được lấy khi dùng. Hết lỗi nhưng vòng phụ thuộc vẫn còn, chỉ bị che đi.\n3. Đúng về thiết kế: (a) tách phần logic dùng chung thành service thứ ba mà cả hai phụ thuộc; (b) đảo chiều bằng sự kiện: OrderService publish OrderPlacedEvent qua ApplicationEventPublisher, PaymentService xử lý bằng @EventListener; (c) gộp hai class nếu thực chất là một trách nhiệm.\n\nSau khi sửa, dùng constructor injection cho dependency bắt buộc: Spring khuyến nghị cách này vì cho phép object immutable, dependency không null, bean luôn trả về ở trạng thái khởi tạo đầy đủ, và vòng phụ thuộc mới bị phát hiện ngay. Constructor có quá nhiều tham số là dấu hiệu class gánh quá nhiều trách nhiệm.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": [
+      "circular-dependency",
+      "constructor-injection",
+      "bean-lifecycle",
+      "lazy-injection",
+      "spring-boot-upgrade"
+    ],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.spring.io/spring-framework/reference/core/beans/dependencies/factory-collaborators.html",
+      "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-2.6-Release-Notes",
+      "https://docs.spring.io/spring-framework/reference/core/beans/factory-scopes.html"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1117",
+    "topic_id": "java.spring.ioc-di",
+    "question": "Một singleton ReportService inject bean prototype ReportBuilder (giữ state theo từng lần build) và bean request-scope CurrentTenant. Trên production, dữ liệu báo cáo giữa các request bị trộn lẫn, còn job @Scheduled gọi ReportService thì lỗi vì không có request đang hoạt động. Giải thích nguyên nhân theo bean scope và các cách khắc phục.",
+    "answer": "Nguyên nhân 1, prototype trong singleton: dependency được giải quyết lúc singleton được tạo. Container tạo đúng một ReportBuilder và inject vào ReportService; đó là instance duy nhất singleton nhận được suốt vòng đời. Mọi request dùng chung một builder có state, trong khi singleton được nhiều thread gọi đồng thời, nên dữ liệu bị trộn và có race condition.\n\nCách sửa, lấy instance mới mỗi lần dùng:\n- Inject ObjectProvider<ReportBuilder> (hoặc ObjectFactory, JSR-330 Provider) và gọi getObject() mỗi lần cần.\n- Lookup method injection với @Lookup: Spring sinh subclass CGLIB override method để trả bean mới; class và method không được final, và không dùng được với bean tạo từ @Bean factory method.\n- Đơn giản nhất: nếu builder không cần dependency nào của container, cứ new trong method.\nLưu ý Spring không quản lý trọn vòng đời prototype: destroy callback không được gọi, client phải tự giải phóng tài nguyên.\n\nNguyên nhân 2, request scope trong singleton: muốn inject bean phạm vi ngắn vào bean sống lâu phải qua scoped proxy. Proxy có cùng public interface; mỗi lần gọi method, nó lấy đối tượng thật từ scope hiện tại (request đang gắn với thread) rồi ủy quyền. @RequestScope/@SessionScope mặc định proxyMode = TARGET_CLASS, tức proxy CGLIB, không chặn method private. Khi job @Scheduled hay thread @Async gọi vào, thread không gắn request nào nên proxy không tìm được target và ném exception.\n\nCách sửa:\n- Logic nền không phụ thuộc request scope: truyền tenantId tường minh qua tham số, hoặc trừu tượng hóa TenantContext với nguồn riêng cho job.\n- Cần mang context sang thread khác thì sao chép giá trị ra trước khi chuyển thread, không truyền chính proxy.\n\nNguyên tắc chung: singleton nên stateless hoặc chỉ giữ state immutable, thread-safe; state theo request hay theo lần dùng nằm trong biến local, tham số, hoặc bean có scope tương ứng lấy qua provider hay proxy. Chọn ObjectProvider khi muốn tường minh; chọn scoped proxy khi muốn code gọi như bean thường, chấp nhận chi phí ủy quyền mỗi lần gọi và lỗi khi bị dùng ngoài scope.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": [
+      "bean-scope",
+      "prototype",
+      "request-scope",
+      "scoped-proxy",
+      "lookup-method-injection"
+    ],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.spring.io/spring-framework/reference/core/beans/factory-scopes.html",
+      "https://docs.spring.io/spring-framework/reference/core/beans/dependencies/factory-method-injection.html",
+      "https://docs.spring.io/spring-framework/reference/core/beans/classpath-scanning.html"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1118",
+    "topic_id": "java.testing.junit-mockito",
+    "question": "Bộ test Spring Boot của team chạy 25 phút; log cho thấy ApplicationContext bị khởi tạo lại hàng chục lần. Các test class dùng @SpringBootTest với tổ hợp @MockitoBean khác nhau, vài class có @DirtiesContext, còn test repository chạy trên H2. Giải thích cơ chế context caching của Spring TestContext, nguyên nhân chậm, và cách tổ chức lại test (test slice, Testcontainers) cùng trade-off.",
+    "answer": "Cơ chế: Spring TestContext lưu ApplicationContext trong một cache static, khóa bởi tổ hợp cấu hình: classes/locations, initializers, context customizers (gồm @DynamicPropertySource và các bean override như @MockitoBean, @MockitoSpyBean), active profiles, @TestPropertySource... Test class có cùng tổ hợp dùng chung context; khác một chi tiết là phải dựng context mới. Cache chỉ có tác dụng khi các test chạy trong cùng process (fork riêng cho từng test class sẽ vô hiệu hóa nó); mặc định giữ tối đa 32 context, vượt thì loại theo LRU.\n\nNguyên nhân chậm:\n1. Mỗi class mock một tập bean khác nhau, thậm chí cùng bean nhưng tên field khác, tạo cache key khác, nên mỗi class một context.\n2. @DirtiesContext xóa context khỏi cache, buộc test sau dựng lại.\n3. @SpringBootTest nạp toàn bộ ứng dụng cho cả những test chỉ cần một lớp.\nChẩn đoán: đặt log DEBUG cho org.springframework.test.context.cache để xem thống kê cache.\n\nTổ chức lại:\n- Test slice: @WebMvcTest chỉ nạp hạ tầng MVC và bean web (controller, @ControllerAdvice, converter, filter...), collaborator thay bằng @MockitoBean; @DataJpaTest chỉ nạp JPA, mặc định mỗi test chạy trong transaction và rollback. Nhanh, cô lập lỗi, nhưng không bắt được lỗi nối giữa các lớp.\n- Chuẩn hóa vài base class hoặc meta-annotation có cùng tập mock và profile để tăng cache hit; thay @DirtiesContext bằng dọn dữ liệu chủ động.\n- Database thật thay H2: H2 khác PostgreSQL về dialect, kiểu dữ liệu, hành vi lock, nên test xanh trên H2 vẫn có thể lỗi production. Dùng Testcontainers với @ServiceConnection (Boot tự tạo ConnectionDetails, ghi đè property kết nối), và @AutoConfigureTestDatabase(replace = NONE) cho @DataJpaTest. Container static do JUnit extension quản lý bị dừng sau test class, trong khi context còn trong cache có thể được class khác dùng lại; nên quản lý container như Spring bean.\n- @SpringBootTest với RANDOM_PORT: client và server chạy ở transaction khác nhau, nên @Transactional trên test không rollback dữ liệu server đã ghi.\n\nTrade-off: nhiều slice test nhanh cộng ít integration test với hạ tầng thật.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": [
+      "spring-test",
+      "context-caching",
+      "test-slices",
+      "testcontainers",
+      "mockitobean"
+    ],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.spring.io/spring-framework/reference/testing/testcontext-framework/ctx-management/caching.html",
+      "https://docs.spring.io/spring-framework/reference/testing/annotations/integration-spring/annotation-mockitobean.html",
+      "https://docs.spring.io/spring-boot/reference/testing/spring-boot-applications.html",
+      "https://docs.spring.io/spring-boot/reference/testing/testcontainers.html"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1119",
+    "topic_id": "java.testing.junit-mockito",
+    "question": "Unit test Mockito của OrderService đều xanh, nhưng production lỗi vì câu query JPA sai và vì cổng thanh toán trả lỗi khác với mô phỏng. Trong test còn có `when(spy.calculate(...))` ném exception khó hiểu và nhiều stub thừa. Phân biệt mock, stub, spy; nêu các pitfall khi dùng Mockito và khi nào nên thay mock bằng test tích hợp.",
+    "answer": "Phân biệt:\n- Stub: test double trả câu trả lời dựng sẵn để đưa code đang test vào trạng thái cần thử, ví dụ when(repo.findById(1L)).thenReturn(...); test kiểm tra kết quả hoặc trạng thái.\n- Mock: test double mà test kiểm tra tương tác, ví dụ verify(gateway).charge(...); hợp với side effect ra ngoài (gửi email, publish event). Trong Mockito, một mock có thể vừa stub vừa verify.\n- Spy: bọc object thật, mặc định gọi method thật, chỉ ghi đè vài method. Tài liệu Mockito khuyên dùng spy cẩn thận và thỉnh thoảng, ví dụ với code legacy; partial mock không nên dùng cho code mới thiết kế tốt.\n\nPitfall:\n1. when(spy.calculate(x)) gọi method thật ngay lúc stub, có thể ném exception hoặc gây side effect. Với spy dùng doReturn(v).when(spy).calculate(x). Method final trên spy cũng gây rắc rối và không verify được.\n2. Stub thừa, tham số lệch: Mockito mặc định \"loose\"; bật strict stubbing (Strictness.STRICT_STUBS, có tích hợp qua MockitoExtension của JUnit 5) để báo stub không dùng và argument mismatch.\n3. Over-mocking: verify từng lời gọi nội bộ làm test dính chặt vào cài đặt, refactor là vỡ dù hành vi không đổi. Chỉ verify tương tác có ý nghĩa nghiệp vụ ở biên; với value object hay collection, dùng object thật.\n4. Mock thứ mình không kiểm soát (repository JPA, client của bên thứ ba): mock chỉ phản ánh giả định của người viết test, nên JPQL sai, mapping sai, constraint DB hay lỗi thật của gateway không bao giờ lộ ra.\n\nKhi nào thay bằng test tích hợp:\n- Repository và query: @DataJpaTest trên database thật qua Testcontainers thay vì mock repository hoặc H2.\n- HTTP client: test với HTTP server giả lập ở mức giao thức (ví dụ WireMock) để thử timeout, 4xx/5xx, payload lỗi; hoặc contract test với provider.\n- Unit test thuần cho logic nghiệp vụ, phụ thuộc vào interface do mình sở hữu (adapter) và mock ở biên đó.\n\nTiêu chí: test phải đỏ khi hành vi sai và giữ xanh khi chỉ cài đặt thay đổi.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": ["mockito", "test-doubles", "spy", "strict-stubs", "integration-testing"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://javadoc.io/static/org.mockito/mockito-core/5.14.2/org/mockito/Mockito.html",
+      "https://docs.spring.io/spring-boot/reference/testing/spring-boot-applications.html",
+      "https://docs.spring.io/spring-boot/reference/testing/testcontainers.html"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1120",
+    "topic_id": "java.web.rest-api-design",
+    "question": "API POST /payments tạo giao dịch; mobile client tự retry khi timeout nên thỉnh thoảng khách bị trừ tiền hai lần. Dựa trên ngữ nghĩa HTTP method, thiết kế cơ chế chống trùng bằng idempotency key: cách lưu trữ, status code cho từng tình huống, và các trade-off.",
+    "answer": "Ngữ nghĩa HTTP: theo RFC 9110, PUT, DELETE và các method an toàn là idempotent: nhiều request giống nhau có cùng hiệu ứng dự định như một request, nên có thể tự động lặp lại khi lỗi kết nối xảy ra trước khi đọc được response. POST không idempotent; client không nên tự retry trừ khi biết request thực chất idempotent. Timeout không cho biết server đã xử lý hay chưa, nên retry POST mù quáng gây trừ tiền hai lần.\n\nThiết kế theo draft IETF Idempotency-Key (Internet-Draft đã hết hạn nhưng là mẫu phổ biến):\n1. Client sinh key ngẫu nhiên khó đoán (UUID) cho mỗi thao tác nghiệp vụ, gửi trong header Idempotency-Key và dùng lại đúng key đó khi retry.\n2. Server lưu bản ghi (phạm vi client, key, fingerprint của payload, trạng thái, response) với ràng buộc UNIQUE trên (client, key). Ghi bản ghi trạng thái \"đang xử lý\" trước khi thực hiện, dựa vào unique constraint để hai request đồng thời không cùng đi qua.\n3. Phản hồi:\n- Lặp lại sau khi đã hoàn tất: trả đúng kết quả lần trước, dù thành công hay lỗi.\n- Lặp lại khi bản gốc còn đang xử lý: 409 Conflict.\n- Cùng key nhưng payload khác: 422.\n- Endpoint bắt buộc key mà thiếu: 400.\n4. Hết hạn: giữ key trong khoảng thời gian công bố trong tài liệu API, dọn định kỳ.\n\nTrade-off và lưu ý:\n- Thêm một lần đọc/ghi kho lưu trữ mỗi request. Lưu cùng DB (ghi kết quả và key trong một transaction) cho nhất quán, hoặc Redis cho nhanh nhưng chấp nhận rủi ro mất key.\n- Side effect bên ngoài như gọi cổng thanh toán cũng phải idempotent: truyền key xuống provider nếu được hỗ trợ, nếu không thì cần đối soát.\n- Phương án khác: client tự tạo ID và gọi PUT /payments/{id}, vốn idempotent; hoặc unique constraint theo khóa nghiệp vụ (orderId).\n- Idempotency không thay cho kiểm soát cập nhật đồng thời: dùng ETag với If-Match, server trả 412 Precondition Failed khi phiên bản đã đổi.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": ["idempotency", "idempotency-key", "http-methods", "retry", "status-codes"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://www.rfc-editor.org/rfc/rfc9110.html",
+      "https://www.ietf.org/archive/id/draft-ietf-httpapi-idempotency-key-header-07.html"
+    ]
+  },
+  {
+    "qa_id": "de-qa-1121",
+    "topic_id": "java.web.rest-api-design",
+    "question": "Bạn chuẩn hóa xử lý lỗi cho hơn chục service Spring MVC: hiện mỗi controller tự try/catch, có chỗ trả 200 kèm body lỗi, có chỗ lộ stack trace và tên cột DB, client không phân biệt được lỗi validation với lỗi hệ thống. Thiết kế error contract và global exception handling thế nào, và vì sao việc tách DTO khỏi entity là một phần của thiết kế đó?",
+    "answer": "Error contract: dùng Problem Details (RFC 9457) với các trường type (URI định danh loại lỗi), title, status, detail, instance, cộng trường mở rộng như errorCode ổn định và danh sách lỗi theo field cho validation. Status code phải đúng ngữ nghĩa: 400 dữ liệu không hợp lệ, 401/403 xác thực và phân quyền, 404 không tìm thấy, 409 xung đột trạng thái, 5xx lỗi phía server; không bao giờ trả 200 kèm body lỗi.\n\nCơ chế trong Spring MVC:\n- ProblemDetail chứa cả trường chuẩn lẫn không chuẩn; mọi exception có sẵn của Spring MVC implement ErrorResponse nên tự mang status và body.\n- Một @RestControllerAdvice kế thừa ResponseEntityExceptionHandler: lớp này đã xử lý mọi exception của Spring MVC (ví dụ MethodArgumentNotValidException khi @Valid thất bại) thành ProblemDetail. Thêm @ExceptionHandler cho exception nghiệp vụ (OrderNotFound thành 404, InsufficientStock thành 409) và handler cuối cho Exception: log đầy đủ kèm trace id, response chỉ có thông điệp chung.\n- Spring Boot có property spring.mvc.problemdetails.enabled; nếu tự viết advice để thay xử lý một exception có sẵn, phải xếp nó trước handler do Boot cấu hình.\n- Trường mở rộng thêm qua map properties của ProblemDetail (Jackson trải thành thuộc tính JSON cấp cao nhất) hoặc subclass. title/detail có thể resolve qua MessageSource để đa ngôn ngữ; tài liệu Spring khuyên tùy biến để không lộ chi tiết cài đặt.\n- Đóng gói thành thư viện dùng chung để mọi service có cùng contract.\n\nVì sao tách DTO khỏi entity:\n- Bảo mật: bind request thẳng vào entity cho phép client gửi trường không được sửa (mass assignment, ví dụ role, balance); trả entity ra làm lộ cột nội bộ.\n- Validation theo use case: ràng buộc đặt trên request DTO, khác nhau giữa create và update.\n- Ổn định contract: đổi schema DB không làm vỡ API.\n- Tránh lỗi serialize entity JPA: association lazy gây LazyInitializationException hoặc N+1 khi Jackson duyệt, quan hệ hai chiều gây đệ quy vô hạn.\nĐánh đổi là thêm code mapping, đổi lại ranh giới rõ ràng giữa API và persistence.",
+    "difficulty": "hard",
+    "language": "vi",
+    "tags": [
+      "exception-handling",
+      "problem-details",
+      "controller-advice",
+      "dto",
+      "validation"
+    ],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-ann-rest-exceptions.html",
+      "https://docs.hibernate.org/orm/6.6/introduction/html_single/Hibernate_Introduction.html"
+    ]
+  }
+]

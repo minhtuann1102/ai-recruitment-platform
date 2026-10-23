@@ -4,16 +4,18 @@
 |---|---|---|---|---|---|
 | `validate [--strict] [--extra-catalog DIR]` | US1 | không | không | kiểm seed ([qa-seed-format.md](qa-seed-format.md)), in báo cáo phân bố | 0 sạch · 1 có lỗi |
 | `process [--extra-catalog DIR]` | US2 | không | không | đọc seed → loại cặp lỗi kèm lý do → làm sạch → 2 bản ghi/cặp → dedup → ghi `data/processed/interview_qa.jsonl` (sắp theo `qa_id`, `chunk_type`) | 0 · 1 không đọc được seed/catalog |
-| `index` | US3 | có | có | `process` → preflight (không gọi API) → embed thử + embed bản ghi mới (chỉ khi có) → ghi / cập nhật / dọn ([knowledge-chunks-io.md](knowledge-chunks-io.md)) | 0 · 1 như `process` · 2 preflight / embed thử lỗi · 3 có embedding lỗi |
+| `index [--extra-catalog DIR]` | US3 | có | có | `process` → preflight (không gọi API) → embed thử + embed bản ghi mới (chỉ khi có) → ghi / cập nhật / dọn ([knowledge-chunks-io.md](knowledge-chunks-io.md)) | 0 · 1 như `process` · 2 preflight / embed thử lỗi · 3 có embedding lỗi |
 | `search "<query>" [--k 5] [--category C] [--difficulty D] [--topic-id T] [--chunk-type question\|qa_pair]` | US3 | có | có | truy hồi chỉ đọc, dedup theo `qa_id`, in top-k: điểm, `qa_id`, `chunk_type`, `topic_id`, 120 ký tự đầu | 0 · 2 preflight lỗi |
 | `eval [--k 5]` | US4 | có | có | kiểm golden set → recall@k tổng + theo nhóm + truy vấn trượt + top-3 mỗi truy vấn; ghi báo cáo `data/processed/eval-<timestamp>.json` | 0 khi chạy xong (kể cả < 0.8) · 1 golden set lỗi · 2 preflight lỗi |
+| `collect [--only SOURCE] [--delay S]` | US1 | không | không | tải Q&A từ repo GitHub trong `crawlers/qa_sources.py` qua GitHub API → `data/raw/collected_qa/<nguồn>.jsonl` (làm sạch, xóa PII, cắt đáp án > 4000 ký tự) | 0 · 1 lỗi tải hoặc nguồn thu 0 cặp |
+| `enrich [--extra-catalog DIR] [--only SOURCE] [--per-source N] [--workers 8] [--retry-rejected]` | US1 | không | có | LLM dịch sang tiếng Việt + gán `topic_id` + độ khó → `data/raw/enriched_qa/<nguồn>.json` (định dạng seed, dataset `de_crawled_qa`) + `_rejected.jsonl`; chạy tiếp được | 0 · 2 thiếu key/catalog · 3 còn lỗi API |
 | `crawl react-docs [--max-pages N] [--delay S] [--render]` | US5 | không | không | crawl nguồn mẫu → `data/raw/react_docs/<timestamp>.jsonl` | 0 · 1 thu 0 record |
 
 `--extra-catalog` chỉ dùng khi soạn trước với YAML đề xuất; nghiệm thu không dùng (research R5).
 
 ## Thống kê mỗi lần chạy (FR-016, constitution V)
 
-`process` và `index` in một khối và ghi `data/processed/run-report-<timestamp>.json`:
+`process` và `index` in một khối và ghi `data/processed/run-report-<lệnh>-<timestamp>.json`:
 
 ```text
 records_in        cặp Q&A đọc được
@@ -36,4 +38,7 @@ cleanup           done | skipped (embed_errors > 0)
 | `EMBEDDING_MODEL` | `openai/text-embedding-3-small` | như trên; tên lưu DB = phần sau `/` cuối |
 | `EMBEDDING_DIMENSIONS` | `1536` | preflight kiểm số chiều |
 | `AI_DB_URL` | `postgresql://postgres:secret@localhost:5534/ai_db` | `index`, `search`, `eval` |
-| `CATALOG_DIR` | `../ai-service/app/catalog` | `validate`, `process`, `index` |
+| `CATALOG_DIR` | `../ai-service/app/catalog` | `validate`, `process`, `index`, `enrich` |
+| `LLM_MODEL` | `openai/gpt-4o-mini` | `enrich` |
+| `EMBEDDING_API_KEY`, `EMBEDDING_BASE_URL` | trống (dùng `LLM_*`) | `index`, `search`, `eval` khi key embedding khác key dịch (vd dịch DeepSeek, embed OpenAI) |
+| `GITHUB_TOKEN` | trống (tùy chọn, `gh auth token`) | `collect` (60 → 5000 request/giờ) |
