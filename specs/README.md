@@ -16,7 +16,7 @@ báo cáo, slides) là việc chung của team, không cần spec.
 | 002 | backend-foundation | S0 | FSD (đề xuất) | Owner chọn | S0-FSD-1..6 | 001 (multi-DB) | Chưa viết |
 | 003 | ai-service-foundation | S0 | AIE (đề xuất) | Owner chọn | S0-AIE-1..4 | 001 (ai_db) | Đang làm tại `origin/feat/aie` |
 | 004 | auth-and-user-profiles | S1 | FSD (đề xuất) | Owner chọn | S1-FSD-1..7 | 002 | Chưa viết |
-| 005 | [rag-knowledge-base-qa](005-rag-knowledge-base-qa/spec.md) | S1 | AIE + DE | Spec Kit | S1-AIE-1..2, S1-DE-1..4 | 001, 003 | Spec xong (đã clarify) — review tại PR #4; S1-AIE-1 ingestion chuyển DE |
+| 005 | [rag-knowledge-base-qa](005-rag-knowledge-base-qa/spec.md) | S1 | AIE + DE | Spec Kit | S1-AIE-1..2, S1-DE-1..4 | 001, 003 | Plan + tasks xong (2026-10-19) — PR #7, chờ AIE duyệt hợp đồng ghi/đọc; S1-AIE-1 ingestion chuyển DE |
 | 006 | ai-interview-agents | S1–S2 | AIE (đề xuất) | Owner chọn | S1-AIE-3..4, S2-AIE-1..6 | 003, 005 | Kế hoạch: [plan](../plans/20261019-1100-ai-interview-brd-implementation/plan.md) (workflow `plans/`) |
 | 007 | job-posting-search | S2 | FSD (đề xuất) | Owner chọn | S2-FSD-1..4, S2-FSD-9..10 | 004 | Chưa viết |
 | 008 | job-applications | S2 | FSD (đề xuất) | Owner chọn | S2-FSD-5..8, S2-FSD-11 | 007, 001 (MinIO) | Chưa viết |
