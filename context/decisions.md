@@ -11,6 +11,9 @@ Nguồn chi tiết: `docs/ai-service/requirements/01-brd.md` §0.2 (D1–D12), �
 
 - **Truy hồi tiếng Việt (2026-10-24, ADR-010):** giữ `text-embedding-3-small` + LLM viết lại truy vấn (held-out 32 câu tiếng Việt thuần 0.938) cho giai đoạn 1. Chưa đổi sang `3-large`, chưa nhờ DE index lại.
 
+- **Ngân hàng câu hỏi từ kho (2026-10-24, PR #39):** giữ như hiện tại (`RAG_QUESTION_BANK` bật). Chưa chỉnh độ khó câu kho (vd hỏi cao hơn một bậc) cho đến khi golden set có người chấm.
+- **Ngôn ngữ (2026-10-24, PR #38):** câu tiếng Việt, giữ thuật ngữ tiếng Anh; không đổi prompt, chặn bằng code ở đầu ra.
+
 ## Mặc định của kế hoạch, chờ owner xác nhận
 - D7 JD vào Planner (không vào RAG); D8 voice tùy chọn A (theo `main`, DE sở hữu, TTS + STT bấm-để-nói); D9 phiên riêng tư; D10 6 track; D11 DE sở hữu đường ghi RAG, AIE đường đọc; D12 thời lượng 15–20 phút, mặc định 20, turn cap 16.
 
