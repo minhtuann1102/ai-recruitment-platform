@@ -129,11 +129,16 @@ def test_reference_snippets_attached_per_phase():
     plan = build_plan("java_backend", "junior", 20, CV, JD)
     tech_ref = plan.phases[1].topics[0].catalog_ref
     repo = FakeKnowledgeRepo(by_topic=[qa("q1", tech_ref), qa("q2", tech_ref)], hits=[textbook("tb1")])
-    out = asyncio.run(attach_reference_snippets(plan, load_catalog("java_backend"), Retriever(repo, FakeEmbed())))
+    out = asyncio.run(attach_reference_snippets(plan, load_catalog("java_backend"),
+                                                Retriever(repo, FakeEmbed(), textbook=True)))
     assert out.phases[0].topics[0].reference_snippets == []  # intro tu CV: khong RAG
     assert len(out.phases[1].topics[0].reference_snippets) == 2
     scenario_calls = [c for c in repo.calls if c[0] == "search" and c[1].source_types == ("textbook",)]
     assert scenario_calls and plan.phases[1].topics[0].reference_snippets == []  # plan goc khong bi sua
+    repo2 = FakeKnowledgeRepo(by_topic=[qa("q1", tech_ref), qa("q2", tech_ref)], hits=[textbook("tb1")])
+    out2 = asyncio.run(attach_reference_snippets(plan, load_catalog("java_backend"), Retriever(repo2, FakeEmbed())))
+    assert out2.phases[2].topics[0].reference_snippets == []  # textbook tat: scenario khong tim
+    assert not any(c[0] == "search" and "textbook" in c[1].source_types for c in repo2.calls)
     assert asyncio.run(attach_reference_snippets(plan, load_catalog("java_backend"), None)) is plan
 
 

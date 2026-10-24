@@ -257,7 +257,7 @@ Ghi chú: mốc "khớp ±1 band" có hai giá trị trong tài liệu gốc (80
 | A-1 | Giả định | Dùng API OpenAI-compatible qua OpenRouter, model mặc định `gpt-4o-mini`, embedding `text-embedding-3-small` (1536 chiều) |
 | A-2 | Giả định | Giá token là giả định; cần kiểm tra trang giá OpenRouter khi triển khai |
 | A-3 | Giả định | **Đã lỗi thời.** Phiên chuẩn 30 phút, khoảng 15 lượt, 72k token vào, 7.5k token ra. Cần tính lại cho 15 đến 20 phút và chi phí STT, TTS |
-| A-4 | Giả định | Chất lượng `text-embedding-3-small` với tiếng Việt xen thuật ngữ Anh **chưa được đo**. Đường đo đã sẵn (2026-10-22): golden set 24 query bản nháp (Việt, code-mixed, Anh, không dấu) và `evals/run_rag.py`; chờ DE duyệt nhãn và nạp bộ Q&A canonical vào `ai_db` |
+| A-4 | Giả định | Chất lượng `text-embedding-3-small` với tiếng Việt xen thuật ngữ Anh **chưa được đo**. **Đã đo 2026-10-24** trên ai_db dùng chung (9.006 bản ghi): recall@5 0.875 trên golden set 24 query (en 1.0, code-mixed 1.0, không dấu 0.8, **tiếng Việt thuần 0.667**); nhãn golden set còn là bản nháp |
 | A-5 | Giả định | Quy mô demo vài chục người dùng, khoảng 20 phiên đồng thời. **Phiên real-time tốn tài nguyên hơn chat, con số này cần kiểm tra lại** |
 | A-6 *(mới)* | Giả định **đã xác nhận (owner, 19/10)** | "Video ứng viên chỉ hiển thị" nghĩa là ứng viên **thấy chính mình** trong khung tự xem; video không rời khỏi trình duyệt. AI là ảnh tĩnh. Nhận diện cảm xúc đã hoãn nên không phân tích video |
 | A-7 *(mới)* | Giả định | Hạ tầng voice-agent có sẵn kèm nhà cung cấp STT và TTS hỗ trợ tiếng Việt xen thuật ngữ tiếng Anh đủ dùng. **Chưa khảo sát, chưa có số liệu** (chỉ liên quan giai đoạn 2) |

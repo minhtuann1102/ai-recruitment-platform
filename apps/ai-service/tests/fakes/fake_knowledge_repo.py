@@ -44,7 +44,7 @@ class FakeEmbed:
         self.queries: List[str] = []
         self.fail = fail
 
-    async def __call__(self, text: str) -> List[float]:
+    async def __call__(self, text: str, collector=None) -> List[float]:
         self.queries.append(text)
         if self.fail:
             raise self.fail

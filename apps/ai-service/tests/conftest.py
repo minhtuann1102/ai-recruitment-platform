@@ -1,5 +1,12 @@
 import json
+import os
 from typing import List, Tuple
+
+# Test khong phu thuoc .env cua may dev (load_dotenv khong ghi de bien da co): RAG tat, moi agent mock.
+# Test nao can LLM/RAG thi tu monkeypatch.
+os.environ["RAG_ENABLED"] = "false"
+for _agent in ("CV_PARSER", "JD_PARSER", "PLANNER", "EVALUATOR", "INTERVIEWER", "REPORTER"):
+    os.environ[f"AGENT_{_agent}_MODE"] = "mock"
 
 import pytest
 from fastapi.testclient import TestClient
