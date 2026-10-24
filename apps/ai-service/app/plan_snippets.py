@@ -57,8 +57,8 @@ async def _snippets(retriever: Retriever, phase: str, topic: PlanTopic, catalog:
 
 async def _bank(retriever: Retriever, phase: str, topic: PlanTopic, catalog: TrackCatalog) -> List[BankQuestion]:
     """Cau hoi tu kho cho topic ky thuat co catalog_ref (intro la du an trong CV, scenario khong co cau trong kho)."""
-    if phase != "technical" or not topic.catalog_ref:
-        return []
+    if phase != "technical" or not topic.catalog_ref or not getattr(retriever, "question_bank", True):
+        return []  # RAG_QUESTION_BANK=false: Interviewer tu dat cau nhu truoc
     entry = next((t for t in catalog.topics if t.id == topic.catalog_ref), None)
     terms = [topic.title, *topic.key_points, *(entry.key_concepts if entry else [])]
     generic = [catalog.title, catalog.track.replace("_", " "), entry.category if entry else ""]

@@ -266,6 +266,9 @@ và `state.current_qa_id` ghi câu gốc. Lượt sau, Evaluator (prompt v3, lu�
 theo `qa_id` (cache trong process, trượt thì đọc ai_db, hạn 2 s) và chấm đầy đủ theo ý chính của đáp án đó thay vì
 `key_points` của cả topic; code giới hạn `completeness` theo số ý có quote (1 ý → 2, 3 ý trở lên → 4). Interviewer lỗi
 thì câu dự phòng là nguyên văn câu trong kho (đã bỏ markdown). Topic không có câu phù hợp thì Interviewer tự đặt như cũ.
+Interviewer đổi sang ý khác (< 50% từ của câu gốc còn trong câu hỏi, `kept_meaning`) thì lượt đó coi là câu AI tự đặt,
+không chấm theo đáp án chuẩn. Cờ `RAG_QUESTION_BANK` (mặc định bật). Số đo trước/sau và A/B đáp án chuẩn:
+[eval-261024-1614-rag-question-bank.md](../../plans/reports/eval-261024-1614-rag-question-bank.md).
 
 ### 3.3.3 Evaluator
 

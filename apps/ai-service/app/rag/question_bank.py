@@ -15,6 +15,14 @@ from ..text_similarity import words
 MAX_QUESTION_CHARS = 200
 ANSWER_KEY_CHARS = 1800  # ~600 token (uoc 3 ky tu/token), du cho mot dap an chuan
 _MARKDOWN = re.compile(r"[*_#`>]+")
+_LEVEL = {"easy": 0, "medium": 1, "hard": 2}
+
+
+def gap(difficulty: Optional[str], bucket: Optional[str]) -> int:
+    """So bac do kho lech nhau (easy/medium/hard); khong ro thi coi la lech 1."""
+    if difficulty not in _LEVEL or bucket not in _LEVEL:
+        return 1
+    return abs(_LEVEL[difficulty] - _LEVEL[bucket])
 
 
 @dataclass(frozen=True)
@@ -40,19 +48,33 @@ def rank(entries: Sequence[BankEntry], topic_terms: Iterable[str], bucket: Optio
          generic: Iterable[str] = ()) -> List[BankEntry]:
     """Chi giu cau co it nhat mot tu chung voi topic (title, key_points, key_concepts), khong tinh tu chung cua ca
     track ("java", "backend") vi topic_id trong kho gan rong (vd cau doc input console nam o topic HashMap).
-    Cau sat hon truoc, cung muc thi uu tien dung do kho. Khong cau nao dat: tra rong, Interviewer tu dat cau."""
+    Dung do kho truoc (kho chi ~4% cau hard), roi cau sat topic hon. Khong cau nao dat: tra rong, Interviewer tu
+    dat cau."""
     stop = {w for t in generic for w in words(t)}
     terms = {w for t in topic_terms for w in words(t) if len(w) > 2} - stop  # bo hu tu ngan ("va", "la", "gi")
     scored = [(len(words(e.question) & terms), e) for e in entries if spoken_ok(e.question)]
     scored = [x for x in scored if x[0] > 0]
-    scored.sort(key=lambda x: (-x[0], x[1].difficulty != bucket, x[1].qa_id))
+    scored.sort(key=lambda x: (gap(x[1].difficulty, bucket), -x[0], x[1].qa_id))
     return [e for _, e in scored[:n]]
 
 
+KEEP_MEANING_MIN = 0.5
+
+
+def kept_meaning(bank_question: str, asked: str) -> bool:
+    """Interviewer co giu y cau trong kho khong: >= 50% tu (> 2 ky tu) cua cau goc co trong cau da hoi. Cau dan them
+    phia truoc khong lam giam; doi sang y khac (vd danh sach package -> middleware noi chung) thi rot -> khong dung
+    dap an chuan cho luot do."""
+    original = {w for w in words(bank_question) if len(w) > 2}
+    return not original or len(original & words(asked)) / len(original) >= KEEP_MEANING_MIN
+
+
 def pick(bank: Sequence, used: Sequence[str], bucket: Optional[str]):
-    """Chon cau chua dung trong phien; uu tien dung do kho hien tai. bank: list BankQuestion cua PlanTopic."""
-    fresh = [b for b in bank if b.qa_id not in used]
-    return next((b for b in fresh if b.difficulty == bucket), fresh[0] if fresh else None)
+    """Chon cau chua dung trong phien, gan do kho hien tai nhat; lech 2 bac (cau easy khi dang o muc hard) thi khong
+    dung, Interviewer tu dat cau dung do kho. bank: list BankQuestion cua PlanTopic."""
+    fresh = sorted((b for b in bank if b.qa_id not in used and gap(b.difficulty, bucket) < 2),
+                   key=lambda b: gap(b.difficulty, bucket))
+    return fresh[0] if fresh else None
 
 
 class AnswerCache:

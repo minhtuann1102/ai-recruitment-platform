@@ -27,11 +27,13 @@ def test_spoken_filter_rank_and_pick():
                entry("c", "HashMap xử lý collision thế nào?"), entry("d", "Code:\n```x```")]
     ranked = rank(entries, ["Java Collections và HashMap", "collision và treeification"], "easy", 3,
                   generic=["Java Backend Developer"])
-    assert [e.qa_id for e in ranked] == ["c", "b"]  # sat topic truoc; bo cau co code va cau chi trung "Java"
+    assert [e.qa_id for e in ranked] == ["c", "b"]  # bo cau co code va cau chi trung "Java"
     ranked = rank(entries, ["Java Collections và HashMap", "collision"], "easy", 3)  # khong co tu chung cua track
-    assert [e.qa_id for e in ranked] == ["c", "a", "b"]  # cung muc thi dung do kho truoc
+    assert [e.qa_id for e in ranked] == ["c", "a", "b"]  # dung do kho truoc, roi cau sat topic hon
+    assert [e.qa_id for e in rank(entries, ["HashMap", "collision"], "hard", 3)][0] == "b"
     bank = [BankQuestion(qa_id=e.qa_id, question=e.question, difficulty=e.difficulty) for e in ranked]
-    assert pick(bank, ["c"], "hard").qa_id == "b" and pick(bank, ["c", "b"], "hard").qa_id == "a"
+    assert pick(bank, [], "hard").qa_id == "b" and pick(bank, ["b"], "hard") is None  # easy khi dang hard: bo
+    assert pick(bank, ["c"], "easy").qa_id == "a" and pick(bank, ["c", "a"], "medium").qa_id == "b"
     assert pick(bank, ["a", "b", "c"], "easy") is None
     assert plain("`HashMap` dùng **hashCode** thế nào?") == "HashMap dùng hashCode thế nào?"
 
@@ -125,6 +127,26 @@ def test_engine_asks_bank_question_and_evaluator_gets_answer_key():
                            answer="Em trả lời câu hỏi trong kho.", elapsed_seconds=600)
     run(next_turn(nreq, evaluator=evaluator, retriever=retr))
     assert evaluator.inputs[-1].reference_answer == f"Đáp án chuẩn {qa_id}" and retr.asked == [qa_id]
+
+
+def test_drifted_rephrase_is_not_graded_with_answer_key():
+    bank = "Giải thích các package sau trong Express.js: body-parser, cookie-parser, morgan, cors, dotenv?"
+    r = run(start_session(StartRequest(session_id="s", track="java_backend", level="junior"),
+                          planner=MockPlanner(), retriever=FakeRetriever()))
+    r.state.current_qa_id, r.turn.qa_id, r.spec.bank_question = "x#1", "x#1", bank
+    finish_turn(r, "Giờ mình sang Express. Bạn giải thích vai trò của middleware trong Express được không?", "ai")
+    assert r.turn.question_source == "ai" and r.turn.qa_id is None and r.state.current_qa_id is None
+    r.state.current_qa_id, r.turn.qa_id, r.spec.bank_question = "y#1", "y#1", "Phân biệt JDK, JRE và JVM."
+    finish_turn(r, "Mình hỏi một câu cơ bản về Java nhé. Bạn có thể phân biệt JDK, JRE và JVM không?", "ai")
+    assert r.turn.question_source == "bank" and r.state.current_qa_id == "y#1"  # them cau dan van giu y
+
+
+def test_flag_off_keeps_plan_without_bank():
+    retr = FakeRetriever()
+    retr.question_bank = False
+    r = run(start_session(StartRequest(session_id="s", track="java_backend", level="junior"),
+                          planner=MockPlanner(), retriever=retr))
+    assert not any(t.bank_questions for ph in r.plan.phases for t in ph.topics)
 
 
 def test_template_fallback_clears_qa_id():

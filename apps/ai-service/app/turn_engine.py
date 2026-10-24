@@ -22,7 +22,7 @@ from .models_interview import (CandidateState, Evaluation, InterviewPlan, NextTu
                                StartRequest, TopicState, TurnInfo)
 from .policy import Decision, decide
 from .rag.difficulty import difficulty_bucket
-from .rag.question_bank import pick
+from .rag.question_bank import kept_meaning, pick
 from .state_update import apply_action, record_evaluation
 from .time_budget import forced_transition, phase_deadline_s
 
@@ -51,8 +51,9 @@ def finish_turn(result: TurnResult, question: str, source: str) -> None:
     result.state.asked_questions = (result.state.asked_questions + [_norm(question)])[-30:]
     if result.turn is not None:
         # Interviewer dien dat lai cau trong kho (hoac Interviewer loi, dung nguyen van cau trong kho): nguon "bank"
-        from_bank = result.spec is not None and result.spec.bank_question and (
-            source == "ai" or question == result.spec.bank_question)
+        # Interviewer doi sang y khac thi dap an chuan khong con khop: coi la cau AI tu dat
+        bank_q = result.spec.bank_question if result.spec is not None else None
+        from_bank = bool(bank_q) and (question == bank_q or (source == "ai" and kept_meaning(bank_q, question)))
         result.turn.question_source = "bank" if from_bank else source
         if not from_bank:
             result.turn.qa_id = result.state.current_qa_id = None  # cau mau thay cau trong kho: khong co dap an chuan

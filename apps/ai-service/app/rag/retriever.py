@@ -69,13 +69,13 @@ def build_query(category: Optional[str], title: str, extra: str = "") -> str:
 
 class Retriever:
     def __init__(self, repo: KnowledgeRepository, embed: EmbedFn, *, k: int = 5, token_budget: int = 1500,
-                 textbook: bool = False, rewrite: Optional[RewriteFn] = None):
+                 textbook: bool = False, rewrite: Optional[RewriteFn] = None, question_bank: bool = True):
         """textbook=False (mac dinh, RAG_TEXTBOOK_ENABLED): kho chua co textbook nen khong tim (do 24/10: tim
         textbook cho scenario ton ~1.5 s ma luon rong). rewrite: LLM viet lai truy van sang tieng Anh cho duong
         vector (RAG_QUERY_REWRITE); do 24/10 tren 32 truy van thuan Viet: recall@5 0.594 -> 0.938."""
         self._repo, self._embed, self.k, self.token_budget = repo, embed, k, token_budget
         self.textbook, self._rewrite = textbook, rewrite
-        self.answers = AnswerCache()
+        self.answers, self.question_bank = AnswerCache(), question_bank
 
     async def search_text(self, query: str, collector: Optional[UsageCollector] = None) -> str:
         """Van ban dem embed: truy van goc + ban tieng Anh do LLM viet lai; khong co hoac loi thi dung tu dien."""
