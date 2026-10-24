@@ -7,6 +7,15 @@
 - Tài liệu: `python apps/ai-service/scripts/check_docs.py` (thoát 1 nếu lệch)
 - Test tích hợp pgvector (sau Phase 03): marker `integration`, cần DB bật bằng Docker Compose.
 
+## Chạy thử một buổi phỏng vấn thật (bạn là ứng viên)
+Không cần interview-service hay giao diện: `evals/play.py` gọi ai-service như interview-service sẽ gọi.
+- In-process: `cd apps/ai-service && AGENT_EVALUATOR_MODE=llm AGENT_INTERVIEWER_MODE=llm AGENT_PLANNER_MODE=llm AGENT_REPORTER_MODE=llm .venv/bin/python -m evals.play --track java_backend --level junior`
+- Qua server: chạy `.venv/bin/python -m uvicorn app.main:app --port 8000` (cùng các biến `AGENT_*_MODE=llm`, `RAG_ENABLED=true`) rồi `.venv/bin/python -m evals.play --base-url http://localhost:8000`. Swagger: `http://localhost:8000/docs` (khi chưa đặt token nội bộ).
+- Enter 2 lần để gửi câu trả lời, `/end` để kết thúc; báo cáo hiện sau khi kết thúc, phiên lưu ở `plans/reports/play-*.json` (git bỏ qua). Thời gian trong phiên là giả lập.
+
+## Hook của repo
+Repo có hook Node trong `.claude/hooks/` (chỉ chạy khi máy có Node; Node v24 cài ở `~/.local/node` từ 2026-10-24). `scout-block` chặn đường dẫn trong `.claude/config/adf-ignore.txt`; đã thêm `!.venv` để chạy được Python của ai-service.
+
 ## Docker
 Docker Desktop cài ở `/Applications/Docker.app`; nếu shell không thấy `docker`, thêm `/Applications/Docker.app/Contents/Resources/bin` vào `PATH`. Nếu lỗi "cannot connect to the Docker API" thì Docker Desktop đang tắt.
 

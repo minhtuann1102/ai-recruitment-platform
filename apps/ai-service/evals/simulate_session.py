@@ -58,6 +58,9 @@ async def run_session(client: httpx.AsyncClient, persona: Persona, simulator, du
     for _ in range(MAX_TURNS):
         topic = _topic(plan, turn["topic_id"])
         answer = await simulator.answer(persona, topic, question, turn["action"])
+        if answer is None:  # ung vien bam ket thuc (vd go /end trong evals.play)
+            state["end_reason"] = "candidate_ended"
+            break
         elapsed += int(30 + 0.4 * len(answer.split()))
         body = {"session_id": sid, "level": persona.level, "track": persona.track, "plan": plan_json,
                 "state": state, "turn_number": turn["turn_number"], "question": question,
@@ -78,6 +81,9 @@ async def run_session(client: httpx.AsyncClient, persona: Persona, simulator, du
             state["end_reason"] = "candidate_ended"
             break
         question, turn = nd["question"], nd["turn"]
+    if not turns:  # ket thuc truoc khi tra loi cau nao: khong co gi de cham
+        return {"persona": persona.id, "plan": plan_json, "turns": [], "report": None, "calls": calls,
+                "elapsed_s": elapsed}
     resp = await client.post("/api/finalize", json={
         "session_id": sid, "track": persona.track, "level": persona.level, "plan": plan_json, "state": state,
         "end_reason": state.get("end_reason") or "plan_complete", "duration_s": elapsed,
