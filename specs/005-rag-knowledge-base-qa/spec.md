@@ -89,6 +89,18 @@ knowledge_chunks và verify retrieval relevant."
   thể/dịch và dữ liệu crawl giữ quy tắc cũ. Kết quả duyệt: `plans/reports/qa-review/results-*.json` tại commit `eac9b8e`
   (nhánh `chore/qa-review-skill`). Báo AIE.
 
+### Session 2026-10-24
+
+- Q: Q1 của AIE (`context/next-phase-plan.md`): bỏ 1.145 cặp CC-BY-NC-ND (`bregman-arie/devops-exercises`, bản dịch là
+  bản sửa đổi) và 2.147 cặp `unknown`? → A (DE chốt): **Giữ hết, chỉ dùng nội bộ** — xác nhận lại quyết định
+  2026-10-19. Nội dung crawl chỉ nằm ở `data/raw/` (gitignore) và `ai_db` dùng chung của team, dùng cho demo đồ án;
+  không công bố lại; báo cáo chỉ trích ví dụ có ghi nguồn. Tra GitHub 2026-10-24: `unknown` là repo không có file giấy
+  phép (`learning-zone/*`, `sudheerj/javascript-interview-questions`, `Devinterview-io/*`), trừ
+  `learning-zone/docker-and-kubernetes-basics` (85 cặp) thực ra là MIT → sửa nhãn ở lần thu thập sau. Khi mở staging
+  công khai (014) MUST lọc bỏ cặp ND và cặp không có giấy phép.
+- Q: Ai duyệt dữ liệu Q&A (bản dịch, gán lại topic, nhãn độ khó, câu hard)? → A: **DE duyệt toàn bộ**, gồm cả 440 dòng
+  `data/reviews/translation-review.csv` (T053), không chia cho thành viên khác.
+
 ## User Scenarios & Testing *(mandatory)*
 
 Người dùng trực tiếp của feature là **các agent AI** (Interviewer cần câu hỏi mẫu gần chủ đề, Evaluator cần đáp án
