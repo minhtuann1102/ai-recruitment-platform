@@ -34,6 +34,7 @@ class QuestionSpec:
     asked_on_topic: List[str] = field(default_factory=list)
     time_hint: str = "normal"  # normal | hurry
     avoid: List[str] = field(default_factory=list)  # cau da hoi trong phien (da chuan hoa), cau du phong phai khac
+    bank_question: Optional[str] = None  # ask_main: cau da kiem chung trong kho, Interviewer dien dat lai
 
 
 def safe_focus(focus: Optional[str]) -> Optional[str]:
@@ -49,6 +50,8 @@ def fallback_question(spec: QuestionSpec) -> str:
     khong lap cau da hoi; neu cach nao cung lap thi dung cach dau (con hon khong co cau hoi)."""
     options = mock_interviewer.candidates(spec.action, spec.topic, spec.phase, spec.focus, spec.last_question,
                                           spec.first_turn, spec.phase_changed)
+    if spec.bank_question:  # cau trong kho (da bo markdown) truoc cau mau
+        options = [spec.bank_question, *options]
     return next((q for q in options if not is_repeat(q, spec.avoid)), options[0])
 
 
@@ -61,6 +64,7 @@ def build_messages(system: str, spec: QuestionSpec) -> List[dict]:
             "transition": {"phase_changed": spec.phase_changed} if spec.action == "ask_main" else None,
             "last_question": spec.last_question, "asked_questions_on_topic": spec.asked_on_topic[-5:]}
     user = "\n\n".join([json.dumps(data, ensure_ascii=False), wrap_untrusted("focus", spec.focus or "(không có)"),
+                        wrap_untrusted("bank_question", spec.bank_question or "(không có)"),
                         wrap_untrusted("last_answer", spec.last_answer[:2000])])
     return [{"role": "system", "content": f"{system}\n\n{UNTRUSTED_NOTICE}"}, {"role": "user", "content": user}]
 

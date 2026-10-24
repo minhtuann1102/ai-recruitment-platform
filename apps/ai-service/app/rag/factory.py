@@ -23,4 +23,4 @@ def build_retriever(settings: Optional[RagSettings] = None,
 
     rewrite = QueryRewriter(gw).to_english if settings.query_rewrite else None
     return Retriever(PgKnowledgeRepository(settings), embed_query, textbook=settings.textbook_enabled,
-                     rewrite=rewrite)
+                     rewrite=rewrite, question_bank=settings.question_bank)

@@ -2,6 +2,8 @@
 
 Luong moi luot (docs/ai-service/03): Evaluator cham -> cap nhat state -> policy chon action -> Interviewer dien dat.
 """
+import asyncio
+import logging
 import re
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
@@ -19,12 +21,16 @@ from .models_common import LEVEL_CONFIG
 from .models_interview import (CandidateState, Evaluation, InterviewPlan, NextTurnRequest, PlanTopic,
                                StartRequest, TopicState, TurnInfo)
 from .policy import Decision, decide
+from .rag.difficulty import difficulty_bucket
+from .rag.question_bank import kept_meaning, pick
 from .state_update import apply_action, record_evaluation
 from .time_budget import forced_transition, phase_deadline_s
 
 _KIND = {"ask_main": "main", "follow_up": "follow_up", "hint": "hint", "clarify": "clarify",
          "wrap_up": "main", "end": "main"}  # next_topic / next_phase deu thanh ask_main sau apply_action
 _AGENT = {"follow_up": "deepen", "hint": "keep_difficulty", "clarify": "keep_difficulty"}
+ANSWER_KEY_TIMEOUT_S = 2.0  # cache truot -> doc ai_db; qua han thi cham khong co dap an chuan
+log = logging.getLogger("ai_service.turn_engine")
 
 
 @dataclass
@@ -44,7 +50,13 @@ def finish_turn(result: TurnResult, question: str, source: str) -> None:
     result.question = question
     result.state.asked_questions = (result.state.asked_questions + [_norm(question)])[-30:]
     if result.turn is not None:
-        result.turn.question_source = source
+        # Interviewer dien dat lai cau trong kho (hoac Interviewer loi, dung nguyen van cau trong kho): nguon "bank"
+        # Interviewer doi sang y khac thi dap an chuan khong con khop: coi la cau AI tu dat
+        bank_q = result.spec.bank_question if result.spec is not None else None
+        from_bank = bool(bank_q) and (question == bank_q or (source == "ai" and kept_meaning(bank_q, question)))
+        result.turn.question_source = "bank" if from_bank else source
+        if not from_bank:
+            result.turn.qa_id = result.state.current_qa_id = None  # cau mau thay cau trong kho: khong co dap an chuan
 
 
 def flat_topics(plan: InterviewPlan) -> List[Tuple[str, PlanTopic]]:
@@ -82,8 +94,19 @@ async def start_session(req: StartRequest, planner=None, collector: Optional[Usa
     return TurnResult(spec, turn, state, plan, None, False, _meta(first_phase, 1, len(topics), "ask_main", 1))
 
 
+async def _answer_key(retriever, qa_id: Optional[str]) -> str:
+    """Dap an chuan cua cau vua hoi neu cau do lay tu kho; RAG tat, loi hay qua han thi chuoi rong."""
+    if not qa_id or retriever is None:
+        return ""
+    try:
+        return await asyncio.wait_for(retriever.answer_key(qa_id), timeout=ANSWER_KEY_TIMEOUT_S) or ""
+    except asyncio.TimeoutError:
+        log.warning("answer_key_timeout qa_id=%s", qa_id)
+        return ""
+
+
 async def next_turn(req: NextTurnRequest, evaluator: Optional[Evaluator] = None,
-                    collector: Optional[UsageCollector] = None) -> TurnResult:
+                    collector: Optional[UsageCollector] = None, retriever=None) -> TurnResult:
     plan, state = req.plan, req.state.model_copy(deep=True)
     topics = flat_topics(plan)
     if state.phase == "done":
@@ -98,8 +121,8 @@ async def next_turn(req: NextTurnRequest, evaluator: Optional[Evaluator] = None,
 
     ev = await (evaluator or get_evaluator()).evaluate(EvaluationInput(
         level=req.level, phase=phase, topic=topic, difficulty=state.current_difficulty, turn_kind=req.turn_kind,
-        turn_number=req.turn_number, question=req.question, answer=req.answer, topic_turns=req.topic_turns),
-        collector)
+        turn_number=req.turn_number, question=req.question, answer=req.answer, topic_turns=req.topic_turns,
+        reference_answer=await _answer_key(retriever or get_retriever(), state.current_qa_id)), collector)
     record_evaluation(state, ev, req.turn_number)
     if state.topic_started_s is None:  # state cu: chua biet topic bat dau luc nao
         state.topic_started_s = state.phase_started_s = req.elapsed_seconds
@@ -122,16 +145,22 @@ async def next_turn(req: NextTurnRequest, evaluator: Optional[Evaluator] = None,
     action, phase_changed, next_pos = apply_action(state, topics, pos, dec.action, dec.difficulty_delta,
                                                    req.elapsed_seconds, focus)
     n_phase, n_topic = (topics[next_pos] if next_pos is not None else ("wrap_up", None))
+    bank = pick(n_topic.bank_questions, state.used_qa_ids, difficulty_bucket(state.current_difficulty)) \
+        if action == "ask_main" and n_topic else None
+    state.current_qa_id = bank.qa_id if bank else None
+    if bank:
+        state.used_qa_ids = (state.used_qa_ids + [bank.qa_id])[-30:]
     spec = QuestionSpec(action, n_phase, n_topic, state.current_difficulty, focus=focus,
                         last_question=req.question, last_answer=req.answer, phase_changed=phase_changed,
                         asked_on_topic=[t.q for t in req.topic_turns] + [req.question] if action != "ask_main" else [],
-                        time_hint=_time_hint(req.elapsed_seconds, plan, n_phase), avoid=list(state.asked_questions))
+                        time_hint=_time_hint(req.elapsed_seconds, plan, n_phase), avoid=list(state.asked_questions),
+                        bank_question=bank.question if bank else None)
     state.turn_count += 1
     if n_topic:
         next(t for t in state.topics if t.id == n_topic.id).turns.append(req.turn_number + 1)
     info = TurnInfo(turn_number=req.turn_number + 1, phase=n_phase, topic_id=n_topic.id if n_topic else None,
                     turn_kind=_KIND[action], action=action, agent_decision=_AGENT.get(action, "switch_topic"),
-                    difficulty=state.current_difficulty, reasoning=dec.reasoning)
+                    difficulty=state.current_difficulty, reasoning=dec.reasoning, qa_id=state.current_qa_id)
     meta = _meta(n_phase, (next_pos or 0) + 1 if n_topic else len(topics), len(topics), action, info.turn_number)
     return TurnResult(spec, info, state, plan, ev, False, meta)
 

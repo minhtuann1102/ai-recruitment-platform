@@ -19,6 +19,7 @@ class RagSettings:
     connect_timeout_s: int
     textbook_enabled: bool = False  # bat khi DE da nap textbook vao knowledge_chunks
     query_rewrite: bool = True  # LLM viet lai truy van sang tieng Anh o duong vector (+~1.6 s, chi khi can vector)
+    question_bank: bool = True  # cau hoi chinh phan technical lay tu kho interview_qa (app/rag/question_bank.py)
 
 
 def stored_model_name(name: str) -> str:
@@ -46,4 +47,5 @@ def load_rag_settings(env: Optional[Mapping[str, str]] = None) -> RagSettings:
         connect_timeout_s=timeout,
         textbook_enabled=_flag(env.get("RAG_TEXTBOOK_ENABLED", ""), False),
         query_rewrite=_flag(env.get("RAG_QUERY_REWRITE", ""), True),
+        question_bank=_flag(env.get("RAG_QUESTION_BANK", ""), True),
     )

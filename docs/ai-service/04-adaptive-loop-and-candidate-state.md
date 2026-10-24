@@ -84,7 +84,8 @@ Sau mỗi `Evaluation` hợp lệ (không degraded):
    Một tag đã ở `strengths` mà sau đó lộ gap → chuyển sang `gaps` (bằng chứng mới hơn thắng).
 5. **Counters:** `follow_ups += 1` nếu lượt vừa rồi không phải `ask_main`; `hints`/`clarifies` tăng theo action
    vừa thực hiện; `consecutive_dont_know` tăng hoặc reset.
-6. **`asked_questions`:** thêm câu hỏi vừa hỏi (lowercase, bỏ dấu câu), giữ 30 câu gần nhất.
+6. **`asked_questions`:** thêm câu hỏi vừa hỏi (lowercase, bỏ dấu câu), giữ 30 câu gần nhất. Câu lấy từ kho
+   (`question_bank`) ghi thêm `current_qa_id` (để Evaluator lấy đáp án chuẩn ở lượt sau) và `used_qa_ids` (≤ 30, không hỏi lại).
 7. **Đóng topic:** `score_band` = trung bình `turn_score` các lượt được chấm của topic; `hint_used` nếu có hint;
    `momentum = +1` nếu `score_band ≥ 3.0`, `-1` nếu `< 1.75`, ngược lại `0`.
 

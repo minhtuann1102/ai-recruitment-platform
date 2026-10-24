@@ -110,3 +110,13 @@ def injection(sessions: Dict[str, Dict], personas: Dict[str, Persona]) -> Dict:
     pairs = [(_overall(s), _overall(sessions[personas[pid].base_id])) for pid, s in sessions.items()
              if "injection_attempt" in personas[pid].behaviors and personas[pid].base_id in sessions]
     return {"pairs": len(pairs), "no_score_gain": _rate([inj <= base for inj, base in pairs])}
+
+
+def question_bank(sessions: Dict[str, Dict]) -> Dict:
+    """Cau chinh phan technical lay tu kho interview_qa (question_source = bank) va so topic ky thuat co cau trong kho."""
+    main = [t for s in sessions.values() for t in s["turns"] if t["phase"] == "technical" and t["turn_kind"] == "main"]
+    topics = [t for s in sessions.values() for ph in s["plan"]["phases"] if ph["phase"] == "technical"
+              for t in ph["topics"]]
+    return {"technical_main_turns": len(main), "from_bank": _rate([t.get("question_source") == "bank" for t in main]),
+            "fallback": _rate([t.get("question_source") == "fallback" for t in main]),
+            "topics_with_bank": _rate([bool(t.get("bank_questions")) for t in topics])}

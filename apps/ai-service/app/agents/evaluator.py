@@ -59,6 +59,7 @@ class EvaluationInput:
     question: str
     answer: str
     topic_turns: List[TopicTurn] = field(default_factory=list)
+    reference_answer: str = ""  # cap Q&A chuan trong kho khi cau vua hoi lay tu kho (question_bank)
 
 
 def build_messages(system_prompt: str, inp: EvaluationInput) -> List[dict]:
@@ -70,7 +71,9 @@ def build_messages(system_prompt: str, inp: EvaluationInput) -> List[dict]:
     turns = "\n".join(f"Q: {t.q}\nA: {t.a}" for t in inp.topic_turns[-5:]) or "(không có)"
     snippets = "\n---\n".join(inp.topic.reference_snippets) or "(không có)"
     user = "\n\n".join([json.dumps(data, ensure_ascii=False), wrap_untrusted("topic_turns", turns),
-                        wrap_untrusted("reference_snippets", snippets), wrap_untrusted("answer", inp.answer)])
+                        wrap_untrusted("reference_snippets", snippets),
+                        wrap_untrusted("reference_answer", inp.reference_answer or "(không có)"),
+                        wrap_untrusted("answer", inp.answer)])
     return [{"role": "system", "content": f"{system_prompt}\n\n{UNTRUSTED_NOTICE}"},
             {"role": "user", "content": user}]
 
@@ -82,9 +85,15 @@ def postcheck(out: EvaluatorOutput, inp: EvaluationInput) -> Evaluation:
     dropped = len(candidates) - len(verified)
     if dropped:
         log.info("evaluator_quote_dropped turn=%d dropped=%d", inp.turn_number, dropped)
-    bands = apply_caps(out.scores.model_dump(), answer_type=out.answer_type,
-                       verified_key_points=matched_key_points([c.point for c in verified], inp.topic.key_points),
-                       total_key_points=len(inp.topic.key_points), has_misconception=any(m.strip() for m in out.misconceptions),
+    if inp.reference_answer:
+        # cau tu kho chi hoi mot khia canh cua topic: tran completeness theo so y co quote (1 y -> 2, 3+ y -> 4)
+        # thay vi ti le key_points cua ca topic (se ep diem thap du tra loi du dap an chuan)
+        verified_kp, total_kp = (min(len(verified) + 1, 4) if verified else 0), 4
+    else:
+        verified_kp = matched_key_points([c.point for c in verified], inp.topic.key_points)
+        total_kp = len(inp.topic.key_points)
+    bands = apply_caps(out.scores.model_dump(), answer_type=out.answer_type, verified_key_points=verified_kp,
+                       total_key_points=total_kp, has_misconception=any(m.strip() for m in out.misconceptions),
                        turn_kind=inp.turn_kind)
     return build_evaluation(
         turn_number=inp.turn_number, answer_type=out.answer_type, bands=bands,

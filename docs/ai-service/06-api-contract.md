@@ -367,7 +367,7 @@ SSE: `meta`, `token`…, `done`. Event `done` nội bộ chứa đủ dữ liệ
   "question": "Chào bạn, mình bắt đầu nhé. ...",
   "turn": { "turn_number": 1, "phase": "intro", "topic_id": "t1", "turn_kind": "main", "action": "ask_main",
             "agent_decision": "switch_topic", "difficulty": 2, "question_source": "ai" },
-  "plan": { "...": "InterviewPlan + reference_snippets" },
+  "plan": { "...": "InterviewPlan + reference_snippets + bank_questions (câu hỏi từ kho, mỗi topic technical ≤ 3)" },
   "state": { "...": "candidate state §5.2" },
   "metadata": { "usage": { "planner": { "input_tokens": 2600, "output_tokens": 1400 }, "interviewer": { "input_tokens": 1200, "output_tokens": 60 } },
                 "latency_ms": { "planner": 9800, "interviewer_ttft": 600, "total": 11200 },

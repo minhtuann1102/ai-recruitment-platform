@@ -256,6 +256,20 @@ trong catalog đã đưa; `cv_ref` tồn tại trong `cv_profile`; không trùng
 mỗi topic (query = `title + key_points`), lưu `reference_snippets` (≤ 600 token / topic) vào plan. Evaluator
 dùng lại ở các lượt sau, **không phải gọi RAG mỗi lượt** (§9.2).
 
+**Ngân hàng câu hỏi từ kho (2026-10-24, `app/rag/question_bank.py`):** cùng lúc với snippet, mỗi topic `technical` có
+`catalog_ref` lấy tối đa 80 cặp Q&A theo `topic_id` (chunk `question` + `qa_pair` cùng `qa_id`), bỏ câu không đọc thành
+tiếng được (có code, nhiều dòng, > 200 ký tự), chỉ giữ câu có ít nhất một từ chung với topic (title, `key_points`,
+`key_concepts`, không tính từ chung của track như "java"), xếp theo độ sát rồi độ khó, lưu tối đa 3 câu vào
+`PlanTopic.bank_questions` (`qa_id`, câu hỏi, độ khó). Lượt `ask_main` của topic đó chọn một câu chưa dùng
+(`state.used_qa_ids`), Interviewer (prompt v2) **chỉ diễn đạt lại** câu đó; `turn.question_source = "bank"`, `turn.qa_id`
+và `state.current_qa_id` ghi câu gốc. Lượt sau, Evaluator (prompt v3, luật 11) nhận `reference_answer` = cặp Q&A chuẩn
+theo `qa_id` (cache trong process, trượt thì đọc ai_db, hạn 2 s) và chấm đầy đủ theo ý chính của đáp án đó thay vì
+`key_points` của cả topic; code giới hạn `completeness` theo số ý có quote (1 ý → 2, 3 ý trở lên → 4). Interviewer lỗi
+thì câu dự phòng là nguyên văn câu trong kho (đã bỏ markdown). Topic không có câu phù hợp thì Interviewer tự đặt như cũ.
+Interviewer đổi sang ý khác (< 50% từ của câu gốc còn trong câu hỏi, `kept_meaning`) thì lượt đó coi là câu AI tự đặt,
+không chấm theo đáp án chuẩn. Cờ `RAG_QUESTION_BANK` (mặc định bật). Số đo trước/sau và A/B đáp án chuẩn:
+[eval-261024-1614-rag-question-bank.md](../../plans/reports/eval-261024-1614-rag-question-bank.md).
+
 ### 3.3.3 Evaluator
 
 **Input**
