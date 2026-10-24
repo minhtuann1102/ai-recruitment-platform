@@ -13,7 +13,7 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, sans-serif; }
-  main { max-width: 860px; margin: 0 auto; padding: 16px; }
+  main { max-width: 1280px; margin: 0 auto; padding: 16px; }
   h1 { font-size: 20px; margin: 4px 0 12px; }
   h2 { font-size: 16px; margin: 18px 0 8px; }
   .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; margin-bottom: 12px; }
@@ -42,12 +42,23 @@
   .score { font-size: 28px; font-weight: 600; }
   details summary { cursor: pointer; color: var(--muted); font-size: 13px; }
   pre { white-space: pre-wrap; font-size: 12px; }
+  .layout { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 12px; align-items: start; }
+  @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+  #tracePanel { position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow: auto; }
+  .trace-block { border-top: 1px solid var(--line); padding: 8px 0; font-size: 13px; }
+  .trace-block:first-child { border-top: 0; }
+  .trace-plan { margin: 2px 0 4px; }
+  .trace-lines { margin: 0; padding-left: 18px; }
+  .trace-lines li.agent { color: var(--accent); }
+  .trace-lines li.warn { color: var(--warn); }
+  .trace-lines li.error { color: var(--bad); }
 </style>
 </head>
 <body>
 <main>
   <h1>Phỏng vấn thử với ai-service (dev)</h1>
 
+  <div class="layout"><div>
   <section id="setup" class="panel">
     <div class="grid">
       <div><label for="track">Track</label><select id="track"></select></div>
@@ -87,9 +98,18 @@
 
   <div class="row"><button id="downloadBtn" class="hidden">Tải phiên (JSON)</button>
     <button id="resetBtn" class="hidden">Buổi mới</button></div>
+  </div>
+  <aside id="tracePanel" class="panel">
+    <h2 style="margin-top:0">Luồng hệ thống</h2>
+    <p class="muted">Mỗi request một khối, mới nhất ở trên: các bước ai-service làm, mốc thời gian (event meta, token đầu, done), độ trễ và token của từng agent, quyết định của policy, fallback. Log chi tiết hơn (RAG, fallback) nằm ở terminal chạy uvicorn.</p>
+    <div id="trace"></div>
+  </aside>
+  </div>
 </main>
 <script>window.TRACKS = __TRACKS__;</script>
 <script src="/dev/dev-play-report.js"></script>
+<script src="/dev/dev-play-trace.js"></script>
+<script src="/dev/dev-play-api.js"></script>
 <script src="/dev/dev-play.js"></script>
 </body>
 </html>

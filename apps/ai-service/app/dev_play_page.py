@@ -16,7 +16,7 @@ from .catalog.loader import list_tracks
 from .security import STRICT_ENVS
 
 STATIC = Path(__file__).parent / "static"
-SCRIPTS = ("dev-play.js", "dev-play-report.js")
+SCRIPTS = ("dev-play.js", "dev-play-api.js", "dev-play-report.js", "dev-play-trace.js")
 router = APIRouter(include_in_schema=False)
 
 

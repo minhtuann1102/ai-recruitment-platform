@@ -1,55 +1,9 @@
 // Trang dev /dev/play: dong vai interview-service (giu plan/state/turns giua cac luot) va goi API that cua ai-service.
-// Luong: [cv/parse] [jd/parse] -> start (SSE) -> next-turn (SSE) ... -> finalize. Bao cao render o dev-play-report.js.
+// Luong: [cv/parse] [jd/parse] -> start (SSE) -> next-turn (SSE) ... -> finalize. Bao cao render o dev-play-report.js,
+// bang "Luong he thong" o dev-play-trace.js, goi HTTP/SSE o dev-play-api.js.
 const $ = (id) => document.getElementById(id);
 const ACTION_TAG = { hint: "gợi ý", clarify: "hỏi lại", follow_up: "hỏi sâu", wrap_up: "kết thúc", ask_main: "câu chính" };
 let S = null; // phien hien tai
-
-function headers(json) {
-  const h = json ? { "Content-Type": "application/json" } : {};
-  const token = $("token").value.trim();
-  if (token) h["X-Internal-Token"] = token;
-  return h;
-}
-
-async function errorText(resp) {
-  const body = await resp.text();
-  try { const j = JSON.parse(body); return `${resp.status} ${j.error}: ${j.message}`; } catch { return `${resp.status}: ${body.slice(0, 200)}`; }
-}
-
-async function postJson(path, body, isForm) {
-  const resp = await fetch(path, { method: "POST", headers: headers(!isForm), body: isForm ? body : JSON.stringify(body) });
-  if (!resp.ok) throw new Error(await errorText(resp));
-  return resp.json();
-}
-
-// POST + doc SSE (EventSource khong ho tro POST). Tra data cua event `done`; event `error` nem loi.
-async function postSse(path, body, onEvent) {
-  const resp = await fetch(path, { method: "POST", headers: headers(true), body: JSON.stringify(body) });
-  if (!resp.ok) throw new Error(await errorText(resp));
-  const reader = resp.body.getReader(), decoder = new TextDecoder();
-  let buf = "", done = null;
-  for (;;) {
-    const { value, done: end } = await reader.read();
-    if (end) break;
-    buf += decoder.decode(value, { stream: true });
-    let i;
-    while ((i = buf.indexOf("\n\n")) >= 0) {
-      const block = buf.slice(0, i);
-      buf = buf.slice(i + 2);
-      let name = "", data = "{}";
-      for (const line of block.split("\n")) {
-        if (line.startsWith("event: ")) name = line.slice(7);
-        else if (line.startsWith("data: ")) data = line.slice(6);
-      }
-      const payload = JSON.parse(data);
-      if (name === "error") throw new Error(`${payload.errorCode}: ${payload.message}`);
-      if (name === "done") done = payload;
-      onEvent(name, payload);
-    }
-  }
-  if (!done) throw new Error("Stream kết thúc mà không có event done");
-  return done;
-}
 
 function bubble(cls, text) {
   const div = document.createElement("div");
@@ -82,16 +36,38 @@ function elapsedSeconds(answer) {
 // Stream mot cau hoi cua AI vao bubble moi; tra event done.
 async function streamQuestion(path, body) {
   const div = bubble("ai");
+  const tr = traceStart(path);
+  traceLine(tr, "đã gửi request, đang chờ event đầu tiên…");
   S.liveBubble = div;
   const text = div.querySelector(".body");
   const started = performance.now();
   let ttft = null;
-  const done = await postSse(path, body, (name, d) => {
-    if (name === "meta") div.querySelector(".tag").textContent = `${d.phase} · topic ${d.topic_index}/${d.topic_total} · ${ACTION_TAG[d.action] || d.action}`;
-    if (name === "token") { ttft ??= performance.now() - started; text.textContent += d.t; }
-    if (name === "replace") { ttft ??= performance.now() - started; text.textContent = d.question; }
-    div.scrollIntoView({ block: "end" });
-  });
+  let done;
+  try {
+    done = await postSse(path, body, (name, d) => {
+      if (name === "meta") {
+        div.querySelector(".tag").textContent = `${d.phase} · topic ${d.topic_index}/${d.topic_total} · ${ACTION_TAG[d.action] || d.action}`;
+        traceLine(tr, `meta: ${path === "/api/start" ? "Planner + RAG xong" : "Evaluator + policy xong"} → ${d.action}, ${d.phase}, topic ${d.topic_index}/${d.topic_total}; Interviewer bắt đầu viết`);
+      }
+      if (name === "token") {
+        if (ttft === null) { ttft = performance.now() - started; traceLine(tr, "token đầu tiên từ Interviewer"); }
+        text.textContent += d.t;
+      }
+      if (name === "replace") {
+        ttft ??= performance.now() - started;
+        traceLine(tr, "replace: câu hỏi bị thay (lỗi stream, vi phạm kiểm tra, hoặc bỏ markdown)", "warn");
+        text.textContent = d.question;
+      }
+      if (name === "done") traceLine(tr, "done");
+      div.scrollIntoView({ block: "end" });
+    });
+  } catch (err) {
+    traceLine(tr, err.message, "error");
+    throw err;
+  }
+  traceAgents(tr, done.metadata);
+  if (done.plan) tracePlan(tr, done.plan);
+  traceTurn(tr, done, $("showEval").checked);
   S.liveBubble = null;
   if (!done.turn) { div.remove(); return done; } // phien ket thuc, khong co cau hoi
   text.textContent = done.question;

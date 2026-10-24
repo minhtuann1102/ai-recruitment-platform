@@ -12,7 +12,7 @@ from fastapi.responses import JSONResponse
 
 log = logging.getLogger("ai_service.security")
 # trang dev /dev/play (app/dev_play_page.py) khong chua bi mat va tu tra 404 khi APP_ENV strict; API van can token
-DEV_PAGE_PATHS = {"/dev/play", "/dev/dev-play.js", "/dev/dev-play-report.js"}
+DEV_PAGE_PATHS = {"/dev/play", *(f"/dev/dev-play{s}.js" for s in ("", "-api", "-report", "-trace"))}
 OPEN_PATHS = {"/api/health", *DEV_PAGE_PATHS}
 STRICT_ENVS = {"staging", "production", "prod"}
 HEADER = "X-Internal-Token"
