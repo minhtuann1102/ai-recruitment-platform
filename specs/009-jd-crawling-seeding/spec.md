@@ -313,8 +313,8 @@ Không chặn US1, US2; chạy sau chúng.
 - **FR-019**: Seed MUST bám đúng schema do migration của job-service tạo; MUST NOT tạo/sửa bảng; schema thiếu/khác MUST
   dừng trước khi ghi (constitution I).
 - **FR-020**: Seed MUST idempotent và dọn riêng được mà không thêm cột ngoài contract: mọi posting seed thuộc Employer
-  seed (email miền `seed.ai-recruit.test`); khóa idempotent `(employer_id, title)`; manifest ngoài git ghi `jd_id` ↔ id
-  posting; dọn = xóa posting của Employer seed, không đụng dữ liệu khác.
+  seed (email miền `seed.ai-recruit.test`); khóa idempotent `(employer_id, title, md5(description))` (cùng công ty + tiêu đề nhưng khác nội dung vẫn là hai
+  posting, khớp dedup FR-013); manifest ngoài git ghi `jd_id` ↔ id posting, chỉ để bỏ qua nhanh, không thay khóa; dọn = xóa posting của Employer seed, không đụng dữ liệu khác.
 - **FR-021**: Mỗi công ty MUST có một Employer seed (`users.role = Employer`) + `company_profiles.company_name`, ghi theo
   schema migration user-service; posting gắn `employer_id` của Employer đó. Tài khoản seed MUST NOT đăng nhập được
   (password là bcrypt của chuỗi ngẫu nhiên không lưu), email `seed-<slug công ty>@seed.ai-recruit.test`, MUST NOT chứa

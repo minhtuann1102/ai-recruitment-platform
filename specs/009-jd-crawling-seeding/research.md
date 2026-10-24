@@ -120,7 +120,8 @@ danh mục (top 50), tỉ lệ crawl / synthetic.
      bcrypt của chuỗi ngẫu nhiên không lưu, `email_verified = true`) + `company_profiles.company_name`; đã có (theo email)
      thì dùng lại.
   3. Posting: `employer_id` của Employer seed, `status = open`, `experience_level_id` tra theo tên, `job_skills` tra
-     `skills.slug` (thiếu thì thêm từ danh mục, `ON CONFLICT (slug) DO NOTHING`). Khóa idempotent `(employer_id, title)`.
+     `skills.slug` (thiếu thì thêm từ danh mục, `ON CONFLICT (slug) DO NOTHING`). Khóa idempotent `(employer_id, title,
+     md5(description))` kiểm trong DB (manifest ngoài git chỉ để bỏ qua nhanh; máy khác không có manifest vẫn không trùng).
   4. Manifest `data/processed/job-seed-manifest.jsonl` (gitignore): `jd_id`, id posting, id Employer, `synthetic`.
   5. `--clean`: xóa posting + `job_skills` của Employer seed, rồi `company_profiles` + `users` có email miền seed.
   Ghi bằng `psycopg` qua `USER_DB_URL`, `JOB_DB_URL`; mỗi DB một transaction, ghi `user_db` trước.
