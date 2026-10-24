@@ -30,7 +30,7 @@ class Persona:
     knows_partially: List[str]
     does_not_know: List[str]
     style: str
-    behaviors: List[str] = field(default_factory=list)  # rambling | injection_attempt | one_word_answers | end_early
+    behaviors: List[str] = field(default_factory=list)  # rambling | injection_attempt | one_word_answers | end_early | english_answers
     base_id: str = ""  # persona goc cua ban adversarial (de so sanh, vd injection khong lam tang diem)
 
     def knowledge(self, catalog_ref: str) -> str:
@@ -61,7 +61,8 @@ def matrix() -> List[Persona]:
 def adversarial() -> List[Persona]:
     out = []
     for base, behavior in (("junior-java-average", "rambling"), ("junior-java-average", "injection_attempt"),
-                           ("middle-nodejs-average", "one_word_answers"), ("junior-nodejs-strong", "end_early")):
+                           ("middle-nodejs-average", "one_word_answers"), ("junior-nodejs-strong", "end_early"),
+                           ("junior-java-strong", "english_answers")):
         level, short, quality = base.split("-")
         p = build_persona(f"{short}_backend", level, quality)
         out.append(Persona(f"{base}+{behavior}", p.track, p.level, p.quality, p.knows_well, p.knows_partially,

@@ -2,7 +2,7 @@
 
 - Loi truoc token dau (hoac qua FIRST_TOKEN_TIMEOUT_S): gui cau du phong qua event `token`.
 - Loi giua stream: gui `replace` chua cau du phong day du.
-- Stream xong ma cau vi pham (rong, qua dai, lo diem, lap cau da hoi - Jaccard >= 0.8): `replace` bang cau du phong.
+- Stream xong ma cau vi pham (rong, qua dai, lo diem, lap cau da hoi - Jaccard >= 0.8, sai ngon ngu): `replace` bang cau du phong.
 Moi lan dung cau du phong ghi `interviewer_fallback` vao metadata.fallbacks.
 """
 import asyncio
@@ -11,6 +11,7 @@ import re
 from typing import AsyncIterator, List, Optional, Tuple
 
 from .agents.interviewer import QuestionSpec, fallback_question
+from .language_check import wrong_language
 from .llm.usage import CallRecord, UsageCollector
 from .mock_evaluator import fold
 from .sse import chunk_tokens
@@ -37,6 +38,8 @@ def violation(question: str, asked: List[str]) -> Optional[str]:
         return "score_leak"
     if is_repeat(question, asked):
         return "repeat"
+    if wrong_language(question):  # cau tieng Anh tron cau / khong dau: cau du phong la tieng Viet
+        return "wrong_language"
     return None
 
 

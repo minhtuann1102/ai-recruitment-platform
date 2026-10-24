@@ -73,6 +73,8 @@ def test_repeat_leak_and_markdown_are_replaced():
     assert events[-1][0] == "replace" and qs.source == "fallback"
     events, qs, _ = run_stream([FakeStream(["Câu trước bạn được 7/10. Vậy proxy là gì?"])])
     assert events[-1][0] == "replace" and qs.source == "fallback"
+    events, qs, _ = run_stream([FakeStream(["So how does the proxy ", "handle a self-invocation call?"])])
+    assert events[-1][0] == "replace" and qs.source == "fallback"  # LLM chay theo tieng Anh cua ung vien
     events, qs, _ = run_stream([FakeStream(["**Proxy** của Spring hoạt động thế nào?"])])
     assert events[-1] == ("replace", {"question": "Proxy của Spring hoạt động thế nào?"}) and qs.source == "ai"
 
@@ -82,6 +84,7 @@ def test_guard_helpers():
     assert not is_repeat("Kafka đảm bảo thứ tự message ra sao?", ["ban dung kafka the nao"])
     assert violation("", []) == "empty" and violation("từ " * 130, []) == "too_long"
     assert violation("Đáp án là dùng proxy, đúng không?", []) == "score_leak"
+    assert violation("Can you explain how the Spring proxy works here?", []) == "wrong_language"
 
 
 def test_messages_wrap_last_answer_untrusted():
