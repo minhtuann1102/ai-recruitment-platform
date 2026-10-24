@@ -5,7 +5,7 @@ code đặt ở plan (theo `docs/conventions.md`; thư mục spec độc lập v
 
 **Created**: 2026-10-23
 
-**Status**: Clarified 2026-10-24 — NC-2, NC-3 đã chốt; còn NC-1 (chờ FSD, chỉ chặn US4)
+**Status**: Clarified 2026-10-24 — NC-1, NC-2, NC-3 đã chốt; US4 chờ migration `company_profiles` (004) và job-service (007)
 
 **Owner**: DE — **Sprint**: 2 (26/10 → 09/11/2026)
 
@@ -97,17 +97,13 @@ DE đã chấp nhận, xem Clarifications).
   dung; theo DE, giảng viên không yêu cầu nguồn cụ thể. Ràng buộc an toàn giữ nguyên: robots.txt, giới hạn tốc độ, không
   đăng nhập, không né chặn (topcv, jobsgo, Facebook loại), xóa PII, không commit nội dung crawl. JD synthetic sinh
   **sau** khi crawl + xử lý, theo báo cáo phân bố, để lấp phần thiếu (FR-023–FR-027). DE chốt.
-
-### Còn mở
-
-- **NC-1 (schema `job_db`)**: [NEEDS CLARIFICATION: Schema `job_postings`/`skills`/`job_skills`/`experience_levels`
-  do migration của job-service (feature 007, FSD) tạo — trên `main` chưa có job-service và chưa có migration nào.
-  Seed (US4) bám theo bản nào: (a) chờ migration 007 merge rồi mới viết mapping; (b) viết mapping theo
-  `data-model.md` §2 và sửa khi 007 chốt; (c) seed qua API/TCP của job-service thay vì ghi DB? Kèm: `employer_id`
-  (UUID user Employer bên `user_db`) lấy từ đâu — tạo tài khoản Employer seed hay dùng một UUID cố định? Bản ghi seed
-  để `status` gì (`open`/`draft`)? Ai duyệt mapping — FSD? Thêm từ 2026-10-24: posting synthetic cần cờ phân biệt
-  (FR-026) — cột riêng hay quy ước? Danh mục kỹ năng của DE (FR-010) có dùng làm seed ~50 skills của S2-FSD-1 không,
-  để `job_db.skills` và danh mục không lệch nhau?]
+- Q: NC-1 — seed `job_db` bám schema nào, công ty / `employer_id` / dấu seed lấy từ đâu? → A: **Bám contract đã có**
+  ([`data-model.md`](../../docs/architecture/data-model.md) §1 `users` + `company_profiles`, §2 `job_db`), không cần FSD
+  thêm cột. Theo contract, công ty của posting là `company_profiles` của Employer sở hữu → seed tạo một **Employer seed**
+  + `company_profiles` cho mỗi công ty (theo schema migration của user-service), posting gắn `employer_id` đó (FR-021).
+  Dọn / idempotent qua Employer seed (FR-020); cờ synthetic giữ ở manifest ngoài git (FR-026); `status = open`; kỹ năng
+  khớp `skills.slug`, thiếu thì thêm từ danh mục (FR-010). Chỉ còn chờ migration có trên `main`: `company_profiles`
+  (user-service, 004) và job-service (007) — không phải quyết định cần chốt. DE chốt.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -189,7 +185,7 @@ truy vấn kỹ năng mẫu trả chunk JD liên quan.
 
 ---
 
-### User Story 4 - Seed 200 job posting vào job_db (Priority: P1 — phụ thuộc NC-1) · S2-DE-4
+### User Story 4 - Seed 200 job posting vào job_db (Priority: P1 — chờ migration 004, 007) · S2-DE-4
 
 DE chạy một lệnh lấy ≥ 200 JD chuẩn hóa, map sang job posting theo schema của job-service (007) và nạp vào `job_db`,
 để FSD demo tìm kiếm, lọc, ứng tuyển trên dữ liệu thật.
@@ -288,7 +284,7 @@ Không chặn US1, US2; chạy sau chúng.
 - **FR-009**: MUST xóa PII trước khi ghi bất kỳ output nào (kể cả file thô): email, số điện thoại, tên/liên hệ cá nhân
   của người tuyển dụng, link hồ sơ cá nhân; giữ tên công ty. Bước kiểm tra MUST báo 0 PII còn sót, nếu còn → thất bại.
 - **FR-010**: MUST trích và chuẩn hóa kỹ năng về một danh mục kỹ năng (bí danh → tên chuẩn); kỹ năng ngoài danh mục MUST
-  được báo cáo. Danh mục kỹ năng dùng chung với bảng `skills` của `job_db` (NC-1).
+  được báo cáo. Seed khớp bảng `skills` của `job_db` theo `slug`; kỹ năng thiếu thì thêm từ danh mục, không ghi đè bản ghi có sẵn.
 - **FR-011**: MUST chuẩn hóa cấp bậc về tập `experience_levels` của `job_db`, loại hình về `remote | onsite | hybrid`,
   địa điểm về tên thành phố; lương về min/max/đơn vị tiền khi là số, nếu không thì để trống.
 - **FR-012**: MUST chunk mỗi JD thành: 1 chunk tóm tắt (tiêu đề, công ty, kỹ năng, cấp bậc) + 1 chunk mỗi section nhận
@@ -310,15 +306,19 @@ Không chặn US1, US2; chạy sau chúng.
 - **FR-017**: Mỗi lần chạy MUST in thống kê: record vào, JD hợp lệ, chunk, tỉ lệ dedup, embedding lỗi, thêm/bỏ qua/gỡ
   (constitution V).
 
-**Seed `job_db` (US4 · S2-DE-4 — phụ thuộc NC-1)**
+**Seed `job_db` (US4 · S2-DE-4 — theo contract `data-model.md` §1–§2)**
 
 - **FR-018**: Seed MUST nạp ≥ 200 job posting từ JD chuẩn hóa, mỗi posting có tiêu đề, mô tả, yêu cầu, địa điểm, loại
   hình, cấp bậc, ≥ 1 kỹ năng; lương chỉ khi có số thật.
 - **FR-019**: Seed MUST bám đúng schema do migration của job-service tạo; MUST NOT tạo/sửa bảng; schema thiếu/khác MUST
   dừng trước khi ghi (constitution I).
-- **FR-020**: Seed MUST idempotent theo (nguồn, id JD gốc) và MUST đánh dấu được bản ghi do seed tạo để dọn riêng.
-- **FR-021**: Posting seed MUST gắn với một chủ sở hữu Employer hợp lệ theo quy ước chốt ở NC-1; MUST NOT tạo tài khoản
-  với thông tin cá nhân thật.
+- **FR-020**: Seed MUST idempotent và dọn riêng được mà không thêm cột ngoài contract: mọi posting seed thuộc Employer
+  seed (email miền `seed.ai-recruit.test`); khóa idempotent `(employer_id, title)`; manifest ngoài git ghi `jd_id` ↔ id
+  posting; dọn = xóa posting của Employer seed, không đụng dữ liệu khác.
+- **FR-021**: Mỗi công ty MUST có một Employer seed (`users.role = Employer`) + `company_profiles.company_name`, ghi theo
+  schema migration user-service; posting gắn `employer_id` của Employer đó. Tài khoản seed MUST NOT đăng nhập được
+  (password là bcrypt của chuỗi ngẫu nhiên không lưu), email `seed-<slug công ty>@seed.ai-recruit.test`, MUST NOT chứa
+  tên hay liên hệ người thật.
 - **FR-022**: Seed SHOULD chọn 200 posting đa dạng: phủ ≥ 5 nhóm kỹ năng chính (Backend, Frontend, Mobile/Fullstack,
   DevOps, AI/Data), ≥ 3 cấp bậc, ≥ 3 thành phố; MUST ưu tiên JD crawl, JD synthetic chỉ lấp phần thiếu.
 
@@ -330,8 +330,8 @@ Không chặn US1, US2; chạy sau chúng.
   đưa nội dung JD crawl vào prompt (không viết lại JD thật thành synthetic).
 - **FR-025**: JD synthetic MUST dùng tên công ty hư cấu, không trùng tên công ty nào trong JD crawl; MUST NOT chứa
   email, số điện thoại, URL thật. Lương MAY có khoảng số hợp lý theo cấp bậc.
-- **FR-026**: Mỗi JD synthetic MUST mang cờ `synthetic` từ output sinh tới JD chuẩn hóa và posting seed (cách lưu trong
-  `job_db` chốt ở NC-1); báo cáo mỗi lần chạy MUST in tỉ lệ crawl / synthetic.
+- **FR-026**: Mỗi JD synthetic MUST mang cờ `synthetic` từ output sinh tới JD chuẩn hóa và posting seed (contract không có cột
+  này: lưu ở manifest seed ngoài git; công ty synthetic là Employer seed hư cấu); báo cáo mỗi lần chạy MUST in tỉ lệ crawl / synthetic.
 - **FR-027**: JD synthetic MUST qua cùng bước xử lý US2 (FR-008–FR-014, FR-028); lời gọi LLM dùng cấu hình LLM sẵn có
   của pipeline (005), lỗi có retry giới hạn; deterministic theo (ô, số thứ tự) để chạy lại không sinh trùng.
 
@@ -344,7 +344,8 @@ Không chặn US1, US2; chạy sau chúng.
   đăng/hạn, các section, ngôn ngữ, hash nội dung.
 - **Skill Dictionary**: tên chuẩn, bí danh, nhóm; đồng bộ với `job_db.skills`.
 - **JD Chunk**: một bản ghi `knowledge_chunks` nguồn `job_description`; nội dung, nhãn section, id JD nguồn, `dataset`.
-- **Seeded Job Posting**: một bản ghi `job_postings` + `job_skills` sinh từ Normalized JD, có dấu "do seed tạo".
+- **Seed Employer**: một `users` (Employer) + `company_profiles` cho một công ty JD, không đăng nhập được.
+- **Seeded Job Posting**: một bản ghi `job_postings` + `job_skills` sinh từ Normalized JD, thuộc một Seed Employer.
 - **Synthetic JD**: JD do LLM sinh cho một ô thiếu (kỹ năng × cấp bậc × thành phố), tên công ty hư cấu, cờ `synthetic`;
   sau sinh có cùng dạng Raw JD để đi chung bước xử lý.
 - **Pipeline Run Report**: thống kê crawl/xử lý/index/seed của một lần chạy.
@@ -375,23 +376,23 @@ Không chặn US1, US2; chạy sau chúng.
 - **Phụ thuộc 005**: tái dùng crawler mẫu (005 US5, `crawlers/polite_fetcher.py`), làm sạch, scrub PII, client LLM và
   đường ghi clean → chunk → dedup → embed → upsert (005 US2, US3); đã có trên `main` từ 2026-10-23 (PR #28, #29, #31).
 - **Phụ thuộc 001**: `ai_db` + pgvector + DDL `knowledge_chunks` (AIE) đã có; chỉ cần cho US3 (Stretch).
-- **Phụ thuộc 007 (FSD)**: `job_db` chỉ có bản thiết kế ở `data-model.md` §2, chưa có job-service/migration. US4 bị chặn
-  tới khi 007 có migration (NC-1). US1, US2 làm ngay được.
+- **Phụ thuộc 004, 007 (FSD)**: contract có ở `data-model.md` §1–§2; trên `main` chưa có migration `company_profiles`
+  (user-service) và job-service. US4 viết theo contract, chạy được khi hai migration có trên `main`; preflight dừng nếu
+  schema lệch contract (FR-019). US1, US2, US5 làm ngay được.
 - **Mục đích sử dụng**: dữ liệu JD chỉ dùng nội bộ cho đồ án học thuật (demo, đánh giá), không công bố lại, không
   thương mại; môi trường staging (014) cần quyết định riêng có hiển thị posting seed công khai hay không.
 - **Lương**: itviec ẩn lương khi không đăng nhập; careerviet công khai số VND min/max, topdev và careerlink có trường
   lương (định dạng khác nhau) → một phần posting có lương, phần còn lại để trống; FSD/UI phải chấp nhận lương trống.
 - **Truy cập bị chặn**: topcv trả 403 cả từ IP datacenter (2026-10-23) lẫn IP cá nhân (2026-10-24), jobsgo trả 403 →
   loại; khi site chặn thì crawler dừng (FR-004), không thử né.
-- **Ngoài phạm vi**: JD Parser/`jd_profile` (S2-AIE-6, AIE); TCP lấy JD theo application (S2-FSD-11); seed công ty,
-  ứng viên, question bank (S4-DE-2); textbook (012); crawl định kỳ/cập nhật liên tục.
+- **Ngoài phạm vi**: JD Parser/`jd_profile` (S2-AIE-6, AIE); TCP lấy JD theo application (S2-FSD-11); seed ứng viên,
+  question bank, công ty ngoài các công ty của posting seed (S4-DE-2); textbook (012); crawl định kỳ/cập nhật liên tục.
 - **Lệch phát hiện khi viết spec (báo người sở hữu, 009 không sửa file của họ)**:
   1. `rag-design.md` §3 (AIE): `job_description` là Stretch; `docs/sprint-plan.md` S2-DE-3: Bắt buộc; S2-AIE-6: "JD
      không vào RAG" → NC-2, đã chốt 2026-10-24; `docs/sprint-plan.md` S2-DE-1, S2-DE-3 sửa cùng PR clarify.
   2. `data-pipeline.md` §5 ghi `https://www.topcv.vn/tim-viec-lam-it` + `max_pages: 50` cho cả hai site và dùng
      Playwright: không khớp kết quả kiểm tra (topcv chặn; các nguồn được dùng không cần JS) — cập nhật ở plan.
   3. `data-pipeline.md` §5 lấy `salary_range`: itviec ẩn lương khi chưa đăng nhập.
-  4. `data-model.md` §2 `job_postings` không có cột lưu nguồn/id JD gốc hoặc cờ "do seed tạo" → idempotent/dọn seed
-     (FR-020) cần FSD thêm cột hoặc quy ước khác (NC-1).
-  5. `data-model.md` `company_profiles` nằm ở `user_db`; `job_postings` chỉ có `employer_id` → tên công ty JD không có
-     chỗ lưu trong `job_db` nếu không tạo Employer/company tương ứng (NC-1).
+  4. `data-model.md` §2 `job_postings` không có cột nguồn / id JD gốc / cờ seed → giải bằng Employer seed + manifest
+     (FR-020, FR-026), không cần FSD thêm cột.
+  5. Tên công ty nằm ở `company_profiles` (`user_db`) → seed tạo Employer seed + `company_profiles` theo contract (FR-021).

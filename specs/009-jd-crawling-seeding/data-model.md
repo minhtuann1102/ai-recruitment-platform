@@ -15,6 +15,8 @@ không tạo/sửa bảng. Định dạng file chi tiết: [contracts/jd-record-
 | **Normalized JD** | `data/processed/jd_normalized.jsonl` (gitignore) | `jd_id = <source>:<source_job_id>` | `title`, `company`, `skills[]` (slug), `skills_unknown[]`, `group`, `level`, `work_type`, `city`, `salary_min/max/currency`, `date_posted`, `deadline`, `sections{}`, `language`, `content_hash`, `synthetic`, `source_url` | sắp theo `jd_id` (deterministic, FR-014); `content_hash` duy nhất (FR-013) |
 | **JD Chunk** | `data/processed/jd_chunks.jsonl` (gitignore) | `content_hash` | `jd_id`, `section`, `content`, `skills`, `company`, `language`, `source_url` | sinh offline; chỉ index khi làm US3 (Stretch) |
 | **Gap Cell** | trong `jd-report-<ts>.json` | `(group, level, city)` | `crawled`, `synthetic`, `target`, `missing` | `missing = max(0, target - crawled - synthetic)` |
+| **Seed Employer** | `user_db.users` + `company_profiles` | email `seed-<slug>@seed.ai-recruit.test` | `role = Employer`, `company_name` | không đăng nhập được; chỉ tạo cho công ty có posting seed (FR-021) |
+| **Seed Manifest** | `data/processed/job-seed-manifest.jsonl` (gitignore) | `jd_id` | id posting, id Employer, `synthetic` | nơi giữ cờ synthetic (contract không có cột, FR-026) |
 | **Pipeline Run Report** | `data/processed/jd-report-<ts>.json` | thời điểm chạy | xem research R8 | in ra màn hình + ghi file mỗi lần chạy (constitution V) |
 
 ## Giá trị chuẩn
@@ -33,19 +35,21 @@ crawl-jd ──► Raw JD ─┐
 synth-jd ──► Synthetic JD ─┴─► process-jd ──► Normalized JD (+ JD Chunk, Report)
                                                │ loại: not_it | missing_field | duplicate
                                                ▼
-                                         seed-jobs (chờ NC-1) ──► job_db.job_postings + job_skills
+                                         seed-jobs ──► user_db (Employer seed) + job_db.job_postings + job_skills
 ```
 
-## Mapping sang `job_db` (bản nháp, chốt ở NC-1)
+## Mapping theo contract (`data-model.md` §1–§2, NC-1)
 
-| `job_postings` | Từ Normalized JD | Còn chờ FSD |
-|---|---|---|
-| `title`, `location`, `work_type`, `deadline` | `title`, `city`, `work_type`, `deadline` | — |
-| `description` | `summary` + `description` + `responsibilities` + `benefits` | có cần giữ tên công ty trong mô tả không |
-| `requirements` | `requirements` | — |
-| `salary_min`, `salary_max`, `salary_currency` | như tên, chỉ khi là số | — |
-| `experience_level_id` | tra `experience_levels.name = level` | posting không có `level` → bỏ hay gán mặc định |
-| `employer_id` | — | UUID Employer seed (NC-1) |
-| `status` | — | `open` hay `draft` (NC-1) |
-| cột seed / synthetic | `jd_id`, `synthetic` | cột mới hay quy ước (NC-1, FR-020, FR-026) |
-| `job_skills` | tra `skills.slug ∈ skills[]` | `skills` seed từ danh mục R5? |
+| Bảng.cột | Từ Normalized JD / quy ước |
+|---|---|
+| `users` (Employer seed) | `email = seed-<slug công ty>@seed.ai-recruit.test`, `role = Employer`, password bcrypt ngẫu nhiên không lưu |
+| `company_profiles.company_name` | `company` |
+| `job_postings.employer_id` | id Employer seed của công ty |
+| `title`, `location`, `work_type`, `deadline` | `title`, `city`, `work_type`, `deadline` (trống → `date_posted` + 30 ngày) |
+| `description` | `summary` + `description` + `responsibilities` + `benefits` |
+| `requirements` | `requirements` |
+| `salary_min`, `salary_max`, `salary_currency` | như tên, chỉ khi là số |
+| `experience_level_id` | tra `experience_levels.name = level`; JD không có `level` → không chọn vào seed |
+| `status` | `open` |
+| `job_skills` | tra `skills.slug ∈ skills[]`; thiếu thì thêm từ danh mục |
+| (không có cột) | `jd_id`, `synthetic` → Seed Manifest |

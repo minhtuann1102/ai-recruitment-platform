@@ -58,8 +58,8 @@ thêm request nghiên cứu, lần crawl thật đầu tiên với `--max-pages`
   `slug`, `name`, `category` (giá trị cột `skills.category` của `job_db`), `group` (một trong 5 nhóm FR-022), `aliases`.
   Bắt đầu ~100 kỹ năng, bổ sung theo danh sách "ngoài danh mục" của báo cáo. Khớp: `skills_raw` qua bảng bí danh; với
   tiêu đề + mô tả, khớp theo ranh giới từ, không phân biệt hoa thường (`ReactJS`, `React.js`, `react` → `react`).
-- **Rationale**: một nguồn sự thật cho chuẩn hóa, cho lọc IT (R7) và cho lưới synthetic (R9). Đề xuất FSD dùng file này
-  làm seed ~50 skills của S2-FSD-1 để `job_db.skills` không lệch danh mục (NC-1).
+- **Rationale**: một nguồn sự thật cho chuẩn hóa, cho lọc IT (R7) và cho lưới synthetic (R9). Seed khớp `skills.slug`
+  (S2-FSD-1 seed ~50 skills), kỹ năng thiếu thì thêm từ danh mục.
 - **Alternatives considered**: LLM trích kỹ năng — tốn tiền, không deterministic (FR-014 cần chạy không key), bỏ.
 
 ## R6. Chuẩn hóa cấp bậc, loại hình, thành phố, lương, ngôn ngữ (FR-011)
@@ -111,17 +111,25 @@ danh mục (top 50), tỉ lệ crawl / synthetic.
 - **Alternatives considered**: viết lại JD crawl — vi phạm FR-024; template không LLM — JD giống nhau, demo kém; dataset
   JD công khai — license từng bộ phải kiểm, đa số tiếng Anh/nước ngoài.
 
-## R10. Seed `job_db` (US4, chờ NC-1)
+## R10. Seed `job_db` + Employer seed (US4, theo contract)
 
-- **Decision (đề xuất gửi FSD)**: phương án (b) của NC-1: viết mapping theo `data-model.md` §2, chạy preflight đọc
-  `information_schema` của `job_db` và **dừng** khi thiếu bảng/cột (FR-019); ghi bằng `psycopg` qua `JOB_DB_URL`, một
-  transaction. Cần FSD chốt: (1) cột đánh dấu seed + khóa idempotent + cờ synthetic (vd `source`, `source_ref`,
-  `is_synthetic` trong migration 007) hay quy ước khác; (2) `employer_id` cho posting seed; (3) chỗ lưu tên công ty
-  (`company_profiles` ở `user_db`); (4) `status` mặc định; (5) danh mục kỹ năng R5 làm seed `skills`.
-- **Rationale**: constitution I cho phép script seed ghi DB khác khi bám đúng schema migration; preflight giữ an toàn khi
-  007 đổi schema.
-- **Alternatives considered**: seed qua API/TCP job-service — đúng ranh giới service hơn nhưng phụ thuộc job-service
-  chạy + auth Employer, chưa có trên `main`; FSD có thể chọn ở NC-1.
+- **Decision**: bám contract [`data-model.md`](../../docs/architecture/data-model.md) §1–§2 (NC-1), không thêm cột:
+  1. Preflight đọc `information_schema` của `user_db` (`users`, `company_profiles`) và `job_db` (`job_postings`,
+     `job_skills`, `skills`, `experience_levels`); thiếu bảng/cột → dừng, không ghi (FR-019).
+  2. Mỗi công ty → một Employer seed: `users` (`role = Employer`, email `seed-<slug>@seed.ai-recruit.test`, password
+     bcrypt của chuỗi ngẫu nhiên không lưu, `email_verified = true`) + `company_profiles.company_name`; đã có (theo email)
+     thì dùng lại.
+  3. Posting: `employer_id` của Employer seed, `status = open`, `experience_level_id` tra theo tên, `job_skills` tra
+     `skills.slug` (thiếu thì thêm từ danh mục, `ON CONFLICT (slug) DO NOTHING`). Khóa idempotent `(employer_id, title)`.
+  4. Manifest `data/processed/job-seed-manifest.jsonl` (gitignore): `jd_id`, id posting, id Employer, `synthetic`.
+  5. `--clean`: xóa posting + `job_skills` của Employer seed, rồi `company_profiles` + `users` có email miền seed.
+  Ghi bằng `psycopg` qua `USER_DB_URL`, `JOB_DB_URL`; mỗi DB một transaction, ghi `user_db` trước.
+- **Rationale**: contract đặt tên công ty ở `company_profiles` của Employer, nên tạo Employer seed là cách có tên công
+  ty mà không đổi contract; constitution I cho phép script seed ghi DB khác khi bám đúng schema migration. Chỉ chờ
+  migration có trên `main` (user-service `company_profiles`, feature 004; job-service, 007).
+- **Alternatives considered**: FSD thêm cột `source` / `company_name` vào `job_postings` — đổi contract, không cần;
+  seed qua API/TCP job-service — cần job-service chạy + đăng nhập Employer, chậm hơn cho 200 bản ghi; một Employer chung
+  cho mọi posting — mất tên công ty khi demo.
 
 ## R11. Dữ liệu và chia sẻ
 

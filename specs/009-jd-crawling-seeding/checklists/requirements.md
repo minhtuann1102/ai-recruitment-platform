@@ -13,8 +13,7 @@
 
 ## Requirement Completeness
 
-- [ ] No [NEEDS CLARIFICATION] markers remain — 2026-10-24: NC-2, NC-3 đã chốt (Clarifications); còn NC-1 schema
-  `job_db` (chờ FSD), chỉ chặn US4, cố ý để lại
+- [x] No [NEEDS CLARIFICATION] markers remain — 2026-10-24: NC-1 (theo contract `data-model.md`), NC-2, NC-3 đã chốt
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic (no implementation details)
@@ -27,7 +26,7 @@
 
 - [x] All functional requirements have clear acceptance criteria
 - [x] User scenarios cover primary flows
-- [ ] Feature meets measurable outcomes defined in Success Criteria — SC-005 phụ thuộc NC-1; SC-004 là Stretch (US3)
+- [ ] Feature meets measurable outcomes defined in Success Criteria — SC-005 chờ migration 004, 007; SC-004 là Stretch (US3)
 - [x] No implementation details leak into specification
 
 ## Notes
@@ -38,5 +37,5 @@
 - Mục "Kiểm tra nguồn crawl" ghi kết quả robots.txt/ToS ngày 2026-10-23 (itviec: robots cho phép, không cần JS, ToS
   2.2 hạn chế sao chép; topcv: robots cho phép trang job nhưng Cloudflare 403 mọi trang, ToS không đọc được). Plan
   MUST kiểm tra lại trước lần crawl thật.
-- 2026-10-24: NC-2, NC-3 chốt bởi DE (spec Clarifications); kiểm nguồn bổ sung từ IP cá nhân; plan chạy với NC-1 còn
-  mở vì chỉ ảnh hưởng US4.
+- 2026-10-24: NC-2, NC-3 chốt bởi DE (spec Clarifications); kiểm nguồn bổ sung từ IP cá nhân; NC-1 chốt theo contract
+  đã có, US4 chỉ chờ migration.

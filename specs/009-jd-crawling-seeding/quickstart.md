@@ -58,7 +58,7 @@ PII / URL; sau `process-jd` lần 2: ≥ 500 JD hợp lệ, in tỉ lệ crawl /
 → 0 lời gọi LLM.
 Kiểm luật: `pytest tests -k "jd_gap or jd_synthetic"` (client LLM giả trả JSON lỗi / có email / kỹ năng lạ → bị loại).
 
-## 5. Seed `job_db` (US4, SC-005) — chờ NC-1 + migration 007
+## 5. Seed `job_db` (US4, SC-005) — cần migration `company_profiles` (004) + job-service (007)
 
 ```bash
 python -m pipeline seed-jobs --count 200
@@ -67,7 +67,8 @@ python -m pipeline seed-jobs --count 200        # lần 2: 0 posting mới
 
 Kỳ vọng: preflight báo đủ bảng/cột (thiếu → thoát 2, không ghi); ≥ 200 posting, phủ ≥ 5 nhóm / ≥ 3 cấp / ≥ 3 thành phố,
 JD crawl được chọn trước; tìm kiếm của 007 trả kết quả cho "NodeJS", "React", "DevOps", "Senior", "Hà Nội".
-`seed-jobs --clean` chỉ xóa posting do seed tạo.
+Mỗi công ty có một Employer seed (email miền `seed.ai-recruit.test`), không đăng nhập được. `seed-jobs --clean`
+chỉ xóa dữ liệu của Employer seed.
 
 ## 6. Không commit nội dung crawl (SC-003)
 
@@ -77,4 +78,4 @@ git status --porcelain apps/data-pipeline/data/raw apps/data-pipeline/data/proce
 
 ## Demo Sprint 2
 
-§3 báo cáo phân bố trên dữ liệu thật → §4 tỉ lệ crawl / synthetic → (khi NC-1 xong) §5 danh sách job trên job-service.
+§3 báo cáo phân bố trên dữ liệu thật → §4 tỉ lệ crawl / synthetic → (khi có migration 004, 007) §5 danh sách job trên job-service.
