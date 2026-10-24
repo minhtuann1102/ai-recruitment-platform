@@ -25,3 +25,5 @@ coverage
 # Allow reading these files
 !.env
 !.env.*
+# Cho phep chay Python trong virtualenv cua apps (owner dong y 2026-10-24)
+!.venv

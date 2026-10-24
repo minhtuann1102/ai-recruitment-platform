@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phỏng vấn thử (dev)</title>
+<style>
+  :root { --bg: #f6f7f9; --panel: #fff; --text: #1d2330; --muted: #667085; --line: #e3e6eb;
+          --accent: #2f6fed; --ai: #eef3fe; --me: #e9f7ef; --warn: #b54708; --bad: #b42318; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #14171c; --panel: #1c2027; --text: #e6e8ec; --muted: #98a2b3; --line: #2c323c;
+            --accent: #6d9bff; --ai: #1f2a3d; --me: #1d3227; --warn: #f79009; --bad: #f97066; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, sans-serif; }
+  main { max-width: 1280px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 20px; margin: 4px 0 12px; }
+  h2 { font-size: 16px; margin: 18px 0 8px; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; margin-bottom: 12px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
+  label { display: block; font-size: 13px; color: var(--muted); }
+  input, select, textarea, button { font: inherit; color: inherit; }
+  input, select, textarea { width: 100%; padding: 7px 9px; border: 1px solid var(--line); border-radius: 7px; background: var(--bg); }
+  textarea { resize: vertical; }
+  button { padding: 8px 14px; border-radius: 7px; border: 1px solid var(--line); background: var(--panel); cursor: pointer; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button:disabled { opacity: .5; cursor: default; }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
+  .muted { color: var(--muted); font-size: 13px; }
+  .hidden { display: none !important; }
+  #log { display: flex; flex-direction: column; gap: 10px; }
+  .msg { padding: 10px 12px; border-radius: 10px; max-width: 88%; white-space: pre-wrap; }
+  .msg.ai { background: var(--ai); align-self: flex-start; }
+  .msg.me { background: var(--me); align-self: flex-end; }
+  .msg .tag { display: block; font-size: 12px; color: var(--muted); margin-bottom: 2px; }
+  .msg .debug { display: block; font-size: 12px; color: var(--muted); margin-top: 6px; border-top: 1px dashed var(--line); padding-top: 4px; }
+  .status { font-size: 13px; color: var(--muted); }
+  .error { color: var(--bad); }
+  .warn { color: var(--warn); }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  td, th { border-bottom: 1px solid var(--line); padding: 5px 6px; text-align: left; vertical-align: top; }
+  .score { font-size: 28px; font-weight: 600; }
+  details summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+  pre { white-space: pre-wrap; font-size: 12px; }
+  .layout { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 12px; align-items: start; }
+  @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+  #tracePanel { position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow: auto; }
+  .trace-block { border-top: 1px solid var(--line); padding: 8px 0; font-size: 13px; }
+  .trace-block:first-child { border-top: 0; }
+  .trace-plan { margin: 2px 0 4px; }
+  .trace-lines { margin: 0; padding-left: 18px; }
+  .trace-lines li.agent { color: var(--accent); }
+  .trace-lines li.warn { color: var(--warn); }
+  .trace-lines li.error { color: var(--bad); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Phỏng vấn thử với ai-service (dev)</h1>
+
+  <div class="layout"><div>
+  <section id="setup" class="panel">
+    <div class="grid">
+      <div><label for="track">Track</label><select id="track"></select></div>
+      <div><label for="level">Level</label>
+        <select id="level"><option>fresher</option><option selected>junior</option><option>middle</option><option>senior</option></select></div>
+      <div><label for="duration">Thời lượng (phút, 15–45)</label><input id="duration" type="number" min="15" max="45" value="20"></div>
+      <div><label for="clock">Đồng hồ</label>
+        <select id="clock"><option value="real">Thời gian thật</option><option value="sim">Giả lập (30 s + 0,4 s/từ)</option></select></div>
+    </div>
+    <div class="grid" style="margin-top:10px">
+      <div><label for="cv">CV (PDF/DOCX, tuỳ chọn)</label><input id="cv" type="file" accept=".pdf,.docx"></div>
+      <div><label for="token">X-Internal-Token (nếu máy có đặt)</label><input id="token" type="password" autocomplete="off"></div>
+    </div>
+    <div style="margin-top:10px"><label for="jd">JD (tuỳ chọn, ≥ 50 ký tự)</label><textarea id="jd" rows="3"></textarea></div>
+    <div class="row">
+      <button id="startBtn" class="primary">Bắt đầu</button>
+      <label class="muted"><input id="showEval" type="checkbox" style="width:auto"> Hiện chấm điểm từng lượt (debug)</label>
+      <span id="setupStatus" class="status"></span>
+    </div>
+  </section>
+
+  <section id="chat" class="panel hidden">
+    <div class="row" style="margin:0 0 10px"><span id="progress" class="status"></span></div>
+    <div id="log"></div>
+    <div id="answerBox" style="margin-top:12px">
+      <textarea id="answer" rows="4" placeholder="Câu trả lời của bạn (Ctrl/⌘ + Enter để gửi)"></textarea>
+      <div class="row">
+        <button id="sendBtn" class="primary">Gửi</button>
+        <button id="endBtn">Kết thúc buổi</button>
+        <button id="retryBtn" class="hidden">Gửi lại</button>
+        <span id="chatStatus" class="status"></span>
+      </div>
+    </div>
+  </section>
+
+  <section id="report" class="panel hidden"></section>
+
+  <div class="row"><button id="downloadBtn" class="hidden">Tải phiên (JSON)</button>
+    <button id="resetBtn" class="hidden">Buổi mới</button></div>
+  </div>
+  <aside id="tracePanel" class="panel">
+    <h2 style="margin-top:0">Luồng hệ thống</h2>
+    <p class="muted">Mỗi request một khối, mới nhất ở trên: các bước ai-service làm, mốc thời gian (event meta, token đầu, done), độ trễ và token của từng agent, quyết định của policy, fallback. Log chi tiết hơn (RAG, fallback) nằm ở terminal chạy uvicorn.</p>
+    <div id="trace"></div>
+  </aside>
+  </div>
+</main>
+<script>window.TRACKS = __TRACKS__;</script>
+<script src="/dev/dev-play-report.js"></script>
+<script src="/dev/dev-play-trace.js"></script>
+<script src="/dev/dev-play-api.js"></script>
+<script src="/dev/dev-play.js"></script>
+</body>
+</html>

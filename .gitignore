@@ -34,4 +34,4 @@ apps/data-pipeline/data/processed/
 # os
 .DS_Store
 # Ket qua eval tho (transcript tong hop, lon): chi commit bao cao .md
-plans/reports/eval-*.json
+plans/reports/*.json

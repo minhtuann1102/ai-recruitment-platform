@@ -303,6 +303,8 @@ Giữ tên `start / next-turn / finalize` theo constitution IV; **nội dung** �
 | POST | `/api/finalize` | (code tính điểm) → Reporter | JSON | 90 s |
 | GET | `/api/health` | — | JSON | 5 s |
 
+Ngoài contract: `GET /dev/play` là trang HTML tĩnh cho dev tự phỏng vấn thử (đóng vai interview-service, gọi các endpoint trên). Không qua token, tự trả 404 khi `APP_ENV` là staging/production; interview-service không dùng.
+
 ### POST /api/cv/parse
 
 Multipart: `file` (bytes interview-service đã tải từ job-service), `track`. ai-service không biết CV đến từ đâu.
