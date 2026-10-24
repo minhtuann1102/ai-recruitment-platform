@@ -61,6 +61,31 @@ docker exec ai_recruit_db psql -U postgres -d ai_db -tAc \
 Sửa đáp án một cặp + xóa một cặp khỏi seed → `index` → `updated/deleted` đúng, `search` không còn trả bản cũ
 (US3-3). Đổi `LLM_API_KEY` thành rỗng → `index` thoát 2, bảng không đổi (US3-6).
 
+## 4b. Kho dùng chung trên Supabase (cho AIE) — DE chạy một lần
+
+`ai_db` local chỉ nằm trên máy DE. Bản dùng chung là một project Supabase (Postgres + pgvector, cùng DDL của AIE).
+DE ghi bằng `postgres`; ai-service đọc bằng role `aie_reader` (chỉ `SELECT`, mọi transaction read-only). Data API
+của Supabase bị chặn bằng RLS.
+
+1. supabase.com → New project, region **Southeast Asia (Singapore)**, đặt DB password (chỉ chữ + số cho dễ ghép URI).
+2. Nút **Connect** → **Session pooler** → copy URI, thay `[YOUR-PASSWORD]`, thêm `?sslmode=require`. Direct
+   connection (`db.<ref>.supabase.co`) chỉ có IPv6, chỉ dùng khi mạng có IPv6; không dùng Transaction pooler 6543
+   (psycopg prepare statement). Pooler bỏ qua startup `options`, nên read-only của `aie_reader` đặt ở cấp role.
+3. Trong `apps/data-pipeline/.env`: `AI_DB_URL=<URI trên>`; `AIE_READER_PASSWORD=` lấy từ
+   `python -c "import secrets; print(secrets.token_urlsafe(24))"`.
+
+```bash
+bash scripts/supabase-setup-ai-db.sh     # ở thư mục gốc repo; idempotent; in URI mẫu cho aie_reader
+cd apps/data-pipeline
+python -m pipeline index                 # lần 1 embed toàn bộ (~9k bản ghi); lần 2: embedded = 0
+python -m pipeline search "event loop trong Node.js chạy thế nào" --category Backend
+```
+
+Gửi riêng cho AIE (không qua PR hay kênh chung): `RAG_ENABLED=true`, URI qua Session pooler (IPv4, chạy mọi mạng)
+`AI_DB_URL=postgresql://aie_reader.<project_ref>:<AIE_READER_PASSWORD>@<pooler host>:5432/postgres?sslmode=require`,
+`EMBEDDING_MODEL` cùng model đã index. Project free bị tạm dừng khi không hoạt động một thời gian (kiểm chính sách
+hiện tại của Supabase); vào dashboard bấm Restore là chạy lại, dữ liệu còn nguyên.
+
 ## 5. Truy hồi (US3-4, US3-5, SC-009 demo)
 
 ```bash
