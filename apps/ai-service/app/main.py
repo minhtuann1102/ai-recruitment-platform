@@ -21,6 +21,7 @@ from .models_interview import FinalizeRequest, NextTurnRequest, StartRequest
 from .agents.reporter import get_reporter
 from .agents.interviewer import get_interviewer
 from .question_stream import QuestionStream
+from .dev_play_page import router as dev_play_router
 from .security import internal_token_middleware
 from .sse import SSE_HEADERS, event
 from .turn_engine import TurnResult, finish_turn, next_turn, start_session
@@ -29,6 +30,7 @@ MODEL = "mock-v2"
 log = logging.getLogger("ai_service")
 app = FastAPI(title="AI Interview Service (Mock)", version="0.2.0")
 app.middleware("http")(internal_token_middleware)
+app.include_router(dev_play_router)  # GET /dev/play: trang phong van thu cho dev
 
 
 @app.exception_handler(ApiError)
