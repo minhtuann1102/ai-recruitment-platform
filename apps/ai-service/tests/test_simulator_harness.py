@@ -15,7 +15,7 @@ from evals.simulator import INJECTION, RuleSimulator, apply_behavior
 
 def test_personas_matrix_and_disjoint_knowledge():
     ps = all_personas()
-    assert len(matrix()) == 24 and len(ps) == 28
+    assert len(matrix()) == 24 and len(ps) == 29
     for p in ps.values():
         sets = [set(p.knows_well), set(p.knows_partially), set(p.does_not_know)]
         assert not (sets[0] & sets[1] or sets[0] & sets[2] or sets[1] & sets[2])

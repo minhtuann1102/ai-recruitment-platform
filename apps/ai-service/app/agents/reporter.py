@@ -13,6 +13,7 @@ import openai
 from pydantic import BaseModel
 
 from .. import cv_text
+from ..language_check import wrong_language
 from ..llm.errors import ConfigError, LlmError
 from ..llm.gateway import LlmGateway
 from ..llm.usage import CallRecord, UsageCollector
@@ -58,8 +59,9 @@ class ReporterOutput(BaseModel):
 
 
 def _text(value: str, limit: int) -> str:
+    """Chuoi rong = bo muc LLM, giu ban code: nghi injection hoac sai ngon ngu (cau tieng Anh tron cau / khong dau)."""
     value = _URL.sub("", value).strip()
-    return "" if cv_text.has_injection(value) else value[:limit]
+    return "" if cv_text.has_injection(value) or wrong_language(value) else value[:limit]
 
 
 def reporter_input(report: Dict, req: FinalizeRequest) -> Dict:
