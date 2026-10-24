@@ -22,7 +22,8 @@ _DEFAULTS = {
     "evaluator": (0.0, 300, 8.0, 7, 10.0),  # v2 do 22/10: output P95 172, max 219 token; 300 de khong bi cat
     "interviewer": (0.7, 200, 5.0, None, None),
     "reporter": (0.3, 2000, 60.0, None, None),
-    "simulator": (0.8, 350, 20.0, None, None),
+    "simulator": (0.8, 500, 20.0, None, None),  # 350 cat cau tra loi tieng Anh dai (persona english_answers, 24/10)
+    "judge": (0.0, 300, 20.0, 7, None),  # evals: LLM-as-judge cho cau hoi Interviewer (evals/judge_interviewer.py)
     "query_rewriter": (0.0, 60, 3.0, None, 0.0),  # viet lai truy van RAG (ADR-010): 3 s, khong retry; loi -> tu dien
 }
 

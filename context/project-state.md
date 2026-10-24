@@ -18,6 +18,9 @@ Quy ước merge của owner: merge commit (không squash). Tiêu đề PR dạn
 ## Số đo mới nhất (harness full, LLM thật, 2026-10-24)
 TTFT P50 3.8 s / P95 6.0 s; $0.008/phiên; fallback 0; lặp câu 0; sai ngôn ngữ 0; câu technical từ kho 72/72; thứ tự strong > average > weak 5/8 (trước khi dùng kho: 8/8). Chi tiết: `plans/reports/eval-261024-1614-rag-question-bank.md`.
 
+## Đang làm
+Phase A (`context/next-phase-plan.md`): chỉ số văn phong trong harness, bộ 60 câu hỏi + phiếu người chấm, LLM-judge Interviewer (nhánh `thang/phase-a-question-quality`). Chờ 2 người chấm: phiếu `plans/reports/question-rating-sheet-261024.csv` và golden set Evaluator.
+
 ## Mốc
 Feature freeze 06/12/2026; Sprint 5 07–21/12. Gate voice 22/11. Mốc Evaluator ±1 band ≥ 80% ở tuần 09–15/11.
 
