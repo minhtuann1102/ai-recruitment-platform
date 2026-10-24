@@ -27,7 +27,7 @@ báo cáo, slides) là việc chung của team, không cần spec.
 | 013 | web-frontend | S4 | FSD (đề xuất) | Owner chọn | S4-FSD-1..9 | 004, 007, 008, 010 | Chưa viết |
 | 014 | staging-deploy-monitoring | S4 | DE | Spec Kit | S4-DE-2..4 | 001, mọi service chạy được | Chưa viết |
 | 015 | voice-mode | S4 | DE | Spec Kit | S4-DE-5 | 006, 010, 013 | Chưa viết (Stretch; cần tài khoản STT/TTS) |
-| 016 | [interview-learning-roadmap](016-interview-learning-roadmap/spec.md) | S3 | DE (AIE review) | Spec Kit | S3-DE-6 (đề xuất), phần `improvements`/`study_plan` của S3-AIE-1 | 005, 011 (Reporter, finalize), 012 (tùy chọn) | Draft spec (2026-10-21) — chờ AIE đồng ý ranh giới |
+| 016 | [interview-learning-roadmap](016-interview-learning-roadmap/spec.md) | S3 | DE (AIE review) | Spec Kit | S3-DE-6 (đề xuất), phần `improvements`/`study_plan` của S3-AIE-1 | 005, 011 (Reporter, finalize), 012 (tùy chọn) | Draft spec (2026-10-21) — AIE đồng ý ranh giới 2026-10-24; tiếp theo `/speckit-clarify` |
 
 Owner "(đề xuất)" được bỏ chữ đề xuất khi người đó xác nhận trong PR review. Feature 005 dùng Spec Kit vì DE đồng
 sở hữu; AIE review spec.

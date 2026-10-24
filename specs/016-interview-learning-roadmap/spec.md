@@ -5,7 +5,7 @@
 
 **Created**: 2026-10-21
 
-**Status**: Draft — chờ AIE đồng ý ranh giới với Reporter (S3-AIE-1) trước `/speckit-clarify`
+**Status**: Draft — AIE đồng ý ranh giới với Reporter (S3-AIE-1) ngày 2026-10-24; tiếp theo `/speckit-clarify`
 
 **Owner**: DE (chính), AIE review — **Sprint**: 3 (09/11 → 23/11/2026)
 
