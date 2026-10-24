@@ -12,12 +12,14 @@ from .difficulty import difficulty_bucket
 from ..llm.usage import UsageCollector
 from .models import Chunk, SearchFilters
 from .query_expansion import expand_query
+from .question_bank import AnswerCache, BankEntry, rank
 
 log = logging.getLogger("ai_service.rag")
 
 MIN_TOPIC_HITS = 2
 OVERFETCH = 4  # lay du roi khu trung, de question va qa_pair cung cap khong chiem hai cho
-MIN_TAIL_TOKENS = 50  # phan con lai nho hon thi khong cat chunk cuoi nua
+MIN_TAIL_TOKENS = 50
+BANK_FETCH = 80  # so cap Q&A lay moi topic de loc + xep (p90 ~110 cau/topic), giu toi da 3 cau trong plan  # phan con lai nho hon thi khong cat chunk cuoi nua
 
 EmbedFn = Callable[..., Awaitable[List[float]]]  # embed(text, collector=None)
 RewriteFn = Callable[..., Awaitable[str]]  # rewrite(query, collector) -> truy van tieng Anh
@@ -27,6 +29,7 @@ class KnowledgeRepository(Protocol):
     async def list_by_topic_id(self, topic_id: str, difficulty: Optional[str], limit: int) -> List[Chunk]: ...
     async def search(self, vector: Sequence[float], filters: SearchFilters, limit: int) -> List[Chunk]: ...
     async def get_pair_by_qa_id(self, qa_id: str) -> Optional[Chunk]: ...
+    async def list_bank(self, topic_id: str, difficulty: Optional[str], limit: int) -> List[BankEntry]: ...
 
 
 def estimate_tokens(text: str) -> int:
@@ -72,6 +75,7 @@ class Retriever:
         vector (RAG_QUERY_REWRITE); do 24/10 tren 32 truy van thuan Viet: recall@5 0.594 -> 0.938."""
         self._repo, self._embed, self.k, self.token_budget = repo, embed, k, token_budget
         self.textbook, self._rewrite = textbook, rewrite
+        self.answers = AnswerCache()
 
     async def search_text(self, query: str, collector: Optional[UsageCollector] = None) -> str:
         """Van ban dem embed: truy van goc + ban tieng Anh do LLM viet lai; khong co hoac loi thi dung tu dien."""
@@ -127,3 +131,29 @@ class Retriever:
         except Exception as err:
             log.warning("rag_reference_failed qa_id=%s error=%s", qa_id, type(err).__name__)
             return None
+
+    async def bank_for_topic(self, topic_id: str, difficulty: int, topic_terms: Sequence[str],
+                             generic: Sequence[str] = (), n: int = 3) -> List[BankEntry]:
+        """Cau hoi tu kho cho topic (question_bank.rank); dap an vao cache cho Evaluator. Loi thi tra rong."""
+        bucket = difficulty_bucket(difficulty)
+        try:
+            entries = await self._repo.list_bank(topic_id, bucket, BANK_FETCH)
+        except Exception as err:
+            log.warning("rag_bank_failed topic=%s error=%s", topic_id, type(err).__name__)
+            return []
+        chosen = rank(entries, topic_terms, bucket, n, generic)
+        for e in chosen:
+            self.answers.put(e.qa_id, e.pair)
+        log.info("rag_bank topic=%s fetched=%d chosen=%s", topic_id, len(entries), " ".join(e.qa_id for e in chosen))
+        return chosen
+
+    async def answer_key(self, qa_id: str) -> Optional[str]:
+        """Dap an chuan (cap Q&A) theo qa_id: cache truoc, truot thi doc ai_db; loi thi None (cham khong co dap an)."""
+        cached = self.answers.get(qa_id)
+        if cached is not None:
+            return cached
+        chunk = await self.reference_answer(qa_id)
+        if chunk is None:
+            return None
+        self.answers.put(qa_id, chunk.content)
+        return self.answers.get(qa_id)

@@ -69,7 +69,8 @@ async def run_session(client: httpx.AsyncClient, persona: Persona, simulator, du
                       "replaced": any(n == "replace" for n, _ in events)})
         turns.append({"turn_number": turn["turn_number"], "phase": turn["phase"], "topic_id": turn["topic_id"],
                       "turn_kind": turn["turn_kind"], "difficulty": turn["difficulty"], "question": question,
-                      "answer": answer, "evaluation": nd["evaluation"], "action": turn["action"]})
+                      "answer": answer, "evaluation": nd["evaluation"], "action": turn["action"],
+                      "question_source": turn.get("question_source"), "qa_id": turn.get("qa_id")})
         history.setdefault(turn["topic_id"], []).append({"q": question, "a": answer})
         state = nd["state"]
         if nd["session_end"]:
@@ -81,7 +82,7 @@ async def run_session(client: httpx.AsyncClient, persona: Persona, simulator, du
     resp = await client.post("/api/finalize", json={
         "session_id": sid, "track": persona.track, "level": persona.level, "plan": plan_json, "state": state,
         "end_reason": state.get("end_reason") or "plan_complete", "duration_s": elapsed,
-        "turns": [{k: v for k, v in t.items() if k != "action"} for t in turns]})
+        "turns": [{k: v for k, v in t.items() if k not in ("action", "question_source", "qa_id")} for t in turns]})
     if resp.status_code != 200:
         raise RuntimeError(f"/api/finalize {resp.status_code}: {resp.text[:300]}")
     report = resp.json()

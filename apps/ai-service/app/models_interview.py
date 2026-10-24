@@ -9,6 +9,13 @@ from .models_jd import JdProfile
 
 
 # --- Plan (Planner, 1 lan dau buoi) ---
+class BankQuestion(BaseModel):
+    """Cau hoi da kiem chung trong kho interview_qa (RAG); dap an chuan Evaluator lay theo qa_id."""
+    qa_id: str
+    question: str
+    difficulty: Optional[str] = None
+
+
 class PlanTopic(BaseModel):
     id: str
     title: str
@@ -21,6 +28,7 @@ class PlanTopic(BaseModel):
     opening_hint: str
     backup_question: str
     reference_snippets: List[str] = Field(default_factory=list)
+    bank_questions: List[BankQuestion] = Field(default_factory=list)  # <= 3, chi topic co catalog_ref, RAG bat
 
 
 class PlanPhase(BaseModel):
@@ -80,6 +88,8 @@ class CandidateState(BaseModel):
     # khi co truong nay): luot dau tien gan bang elapsed hien tai thay vi coi topic da chay tu giay 0
     phase_started_s: Optional[int] = None
     topic_started_s: Optional[int] = None
+    current_qa_id: Optional[str] = None  # cau vua hoi lay tu kho (dap an chuan cho Evaluator o luot sau)
+    used_qa_ids: List[str] = Field(default_factory=list)
 
 
 class TurnInfo(BaseModel):
@@ -90,7 +100,8 @@ class TurnInfo(BaseModel):
     action: Action
     agent_decision: AgentDecision
     difficulty: int
-    question_source: Literal["ai", "bank", "fallback"] = "ai"  # fallback: cau du phong khi Interviewer loi
+    question_source: Literal["ai", "bank", "fallback"] = "ai"  # bank: tu kho (AI dien dat lai); fallback: cau mau
+    qa_id: Optional[str] = None  # cau hoi goc trong kho (question_source = bank)
     reasoning: Optional[str] = None
 
 

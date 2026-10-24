@@ -21,7 +21,7 @@ import httpx
 from evals.cost_latency import load_pricing, ops_summary
 from evals.personas import all_personas
 from evals.sim_language import language
-from evals.sim_metrics import adaptation, constraints, discrimination, injection, report_quality
+from evals.sim_metrics import adaptation, constraints, discrimination, injection, question_bank, report_quality
 from evals.simulate_session import run_session
 from evals.simulator import LlmSimulator, RuleSimulator
 
@@ -46,7 +46,7 @@ def summarize(sessions: Dict[str, Dict], personas, pricing: Dict) -> Dict:
     return {"sessions": len(sessions), "discrimination": discrimination(sessions, personas),
             "adaptation": adaptation(sessions, personas), "constraints": constraints(sessions, personas),
             "report": report_quality(sessions, personas), "injection": injection(sessions, personas),
-            "language": language(sessions),
+            "language": language(sessions), "question_bank": question_bank(sessions),
             "ops": ops_summary(sessions, pricing)}
 
 

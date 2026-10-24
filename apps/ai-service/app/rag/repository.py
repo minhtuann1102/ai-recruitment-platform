@@ -7,6 +7,7 @@ from typing import Any, Callable, List, Optional, Sequence, Tuple
 import psycopg
 
 from .models import Chunk, SearchFilters
+from .question_bank import BankEntry
 from .settings import RagSettings
 
 _COLS = ("id::text, content, source_type, topic_id, category, difficulty, "
@@ -21,6 +22,15 @@ TOPIC_SQL = (f"SELECT {_COLS}, NULL::float8 FROM knowledge_chunks "
 PAIR_SQL = (f"SELECT {_COLS}, NULL::float8 FROM knowledge_chunks "
             "WHERE source_type = 'interview_qa' AND metadata->>'qa_id' = %s "
             "AND metadata->>'chunk_type' = 'qa_pair' AND embedding_model = %s LIMIT 1")
+
+
+# Ngan hang cau hoi: cau hoi (chunk question) + cap Q&A cung qa_id theo topic_id; uu tien dung do kho
+BANK_SQL = ("SELECT q.metadata->>'qa_id', q.content, q.difficulty, p.content FROM knowledge_chunks q "
+            "JOIN knowledge_chunks p ON p.metadata->>'qa_id' = q.metadata->>'qa_id' "
+            "AND p.metadata->>'chunk_type' = 'qa_pair' AND p.embedding_model = q.embedding_model "
+            "WHERE q.source_type = 'interview_qa' AND q.topic_id = %s AND q.embedding_model = %s "
+            "AND q.metadata->>'chunk_type' = 'question' "
+            "ORDER BY (q.difficulty = %s) DESC NULLS LAST, q.metadata->>'qa_id' LIMIT %s")
 
 
 def vector_literal(vector: Sequence[float]) -> str:
@@ -59,13 +69,13 @@ class PgKnowledgeRepository:
         self._settings = settings
         self._connect = connect or psycopg.AsyncConnection.connect
 
-    async def _fetch(self, sql: str, params: Sequence[Any]) -> List[Chunk]:
+    async def _fetch(self, sql: str, params: Sequence[Any], convert: Callable = None) -> List[Any]:
         conn = await self._connect(self._settings.db_url, autocommit=True,
                                    connect_timeout=self._settings.connect_timeout_s,
                                    options="-c default_transaction_read_only=on")
         async with conn:
             cur = await conn.execute(sql, params)
-            return [row_to_chunk(r) for r in await cur.fetchall()]
+            return [(convert or row_to_chunk)(r) for r in await cur.fetchall()]
 
     async def list_by_topic_id(self, topic_id: str, difficulty: Optional[str], limit: int) -> List[Chunk]:
         return await self._fetch(TOPIC_SQL, [topic_id, self._settings.embedding_model, difficulty, limit])
@@ -73,6 +83,10 @@ class PgKnowledgeRepository:
     async def search(self, vector: Sequence[float], filters: SearchFilters, limit: int) -> List[Chunk]:
         sql, params = build_search_sql(vector, filters, self._settings.embedding_model, limit)
         return await self._fetch(sql, params)
+
+    async def list_bank(self, topic_id: str, difficulty: Optional[str], limit: int) -> List[BankEntry]:
+        return await self._fetch(BANK_SQL, [topic_id, self._settings.embedding_model, difficulty, limit],
+                                 lambda r: BankEntry(qa_id=r[0], question=r[1], difficulty=r[2], pair=r[3]))
 
     async def get_pair_by_qa_id(self, qa_id: str) -> Optional[Chunk]:
         rows = await self._fetch(PAIR_SQL, [qa_id, self._settings.embedding_model])
