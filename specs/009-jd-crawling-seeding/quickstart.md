@@ -35,8 +35,11 @@ do giới hạn tốc độ (không tính vào SC-006).
 
 ```bash
 python -m pipeline process-jd
-grep -cE "[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.[A-Za-z]{2,}" data/processed/jd_normalized.jsonl   # kỳ vọng 0
+grep -cE "[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.[A-Za-z]{2,}" data/processed/jd_normalized.jsonl   # email: kỳ vọng 0
+grep -ciE "linkedin\.com/in/|facebook\.com/|fb\.com/|zalo\.me/|t\.me/" data/processed/jd_normalized.jsonl   # kỳ vọng 0
 ```
+
+Kiểm tay thêm: đọc 10 JD ngẫu nhiên, không còn dòng "Liên hệ / Contact / Anh, Chị + tên" kèm số hay email.
 
 Kỳ vọng: thoát 0; báo cáo in `pii_remaining 0`, `with_skill_ratio ≥ 0.9`, bị loại theo lý do (`not_it`, …), phân bố
 group / level / city, top kỹ năng ngoài danh mục. Chạy lại → output giống hệt (deterministic).

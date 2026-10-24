@@ -44,8 +44,11 @@ thêm request nghiên cứu, lần crawl thật đầu tiên với `--max-pages`
 ## R4. Lưu raw, idempotent khi crawl (FR-006, FR-007, FR-009)
 
 - **Decision**: `data/raw/jd/<nguồn>/<UTC timestamp>.jsonl`, khóa `(source, source_job_id)`. Trước khi tải trang chi
-  tiết, đọc các file raw cũ của nguồn và **bỏ qua id đã có** (không request lại). Scrub PII (dùng `pii_patterns.py`)
-  ngay trước khi ghi raw. Thư mục raw đã nằm trong `.gitignore` (005).
+  tiết, đọc các file raw cũ của nguồn và **bỏ qua id đã có** (không request lại). Scrub PII ngay trước khi ghi raw, phạm
+  vi đủ FR-009: (1) email + số điện thoại (`pii_patterns.py` của 005); (2) **dòng liên hệ**: dòng bắt đầu bằng "Liên
+  hệ", "Contact", "Người liên hệ", "Hotline", hoặc "Mr./Ms./Mrs./Anh/Chị/A./C. + tên" đi kèm số điện thoại hay email →
+  bỏ cả dòng; (3) **URL hồ sơ cá nhân**: `linkedin.com/in/`, `facebook.com/`, `fb.com/`, `zalo.me/`, `t.me/`. Bộ kiểm
+  `pii_remaining` đếm cả ba loại trên output; > 0 → lệnh thất bại. Thư mục raw đã nằm trong `.gitignore` (005).
 - **Rationale**: chạy lại không tạo trùng và không gửi request thừa; FR-009 đòi xóa PII trước mọi output, kể cả raw.
 - **Alternatives considered**: lưu HTML gốc để parse lại — tăng dung lượng và chứa PII, bỏ.
 
@@ -89,8 +92,14 @@ danh mục (top 50), tỉ lệ crawl / synthetic.
 
 ## R9. JD synthetic (FR-023–FR-027)
 
-- **Decision**: lưới ô = nhóm kỹ năng (5) × cấp bậc × thành phố (Hà Nội, Hồ Chí Minh, Đà Nẵng). Mục tiêu mỗi ô tính từ
-  mục tiêu tổng (FR-002) và sàn đa dạng (FR-022); `missing = max(0, target - crawl)`. Mỗi JD synthetic: code chọn kỹ
+- **Decision**: lưới ô = nhóm kỹ năng (5) × cấp bậc (6) × thành phố (Hà Nội, Hồ Chí Minh, Đà Nẵng) = 90 ô. Số JD
+  synthetic **không** chia đều cho 90 ô (sẽ sinh cả khi crawl đã đủ, trái SC-008). Công thức:
+  1. **Bù số lượng**: `need_total = max(0, 500 - jd_hợp_lệ)`; phân cho các ô theo thứ tự ít JD nhất trước (hòa → theo
+     thứ tự cố định group, level, city), mỗi lượt +1 JD cho một ô, tới khi hết `need_total`.
+  2. **Bù sàn đa dạng** (FR-022), tính trên số đã cộng bước 1: mỗi nhóm kỹ năng (5), mỗi cấp Junior / Mid / Senior, mỗi
+     thành phố (3) cần ≥ `sàn` JD hợp lệ (mặc định 20, đủ để chọn 200 posting đa dạng); giá trị nào thiếu thì sinh phần
+     thiếu vào ô ít JD nhất thuộc giá trị đó.
+  Crawl đủ 500 và đủ sàn → 0 JD synthetic. Mỗi JD synthetic: code chọn kỹ
   năng từ danh mục của nhóm và tên công ty hư cấu (ghép từ danh sách từ cố định, kiểm không trùng tên công ty crawl);
   LLM chỉ viết tiêu đề + các section theo tham số đó, trả JSON. Code hậu kiểm: kỹ năng thuộc danh mục, 0 PII, 0 URL,
   đủ section. Id `syn-<group>-<level>-<city>-<n>` → chạy lại bỏ qua id đã có.
