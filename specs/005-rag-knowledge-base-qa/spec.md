@@ -5,7 +5,7 @@
 
 **Created**: 2026-10-13
 
-**Status**: Draft — đã clarify, chờ review PR (AIE + FSD duyệt đổi AC S1-DE-1)
+**Status**: Implemented — merged 2026-10-23 (PR #6, #7, #31, #28, #29); kho dùng chung Supabase (PR #32); golden set + eval chuyển AIE
 
 **Owner**: DE (chính) + AIE (đồng sở hữu, review spec) — **Sprint**: 1 (12/10 → 26/10/2026)
 
