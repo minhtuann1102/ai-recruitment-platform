@@ -5,7 +5,7 @@
 
 **Created**: 2026-10-13
 
-**Status**: Implemented — merged 2026-10-23 (PR #6, #7, #31, #28, #29); kho dùng chung Supabase (PR #32); golden set + eval chuyển AIE
+**Status**: Merged 2026-10-23 (PR #6, #7, #31, #28, #29); kho dùng chung Supabase (PR #32); golden set + eval chuyển AIE; còn T041, T047, T049, T053
 
 **Owner**: DE (chính) + AIE (đồng sở hữu, review spec) — **Sprint**: 1 (12/10 → 26/10/2026)
 
