@@ -14,6 +14,9 @@ Không cần interview-service hay giao diện: `evals/play.py` gọi ai-service
 - Enter 2 lần để gửi câu trả lời, `/end` để kết thúc; báo cáo hiện sau khi kết thúc, phiên lưu ở `plans/reports/play-*.json` (git bỏ qua). Thời gian trong phiên là giả lập.
 - Giao diện web: chạy server như trên (thêm `AGENT_CV_PARSER_MODE=llm AGENT_JD_PARSER_MODE=llm` nếu muốn thử CV/JD) rồi mở `http://localhost:8000/dev/play`. Trang giữ plan/state/turns như interview-service, cho tải CV, dán JD, chọn đồng hồ thật hoặc giả lập, bật xem điểm từng lượt (debug), tải phiên JSON. Bảng "Luồng hệ thống" bên phải ghi từng request: các bước, mốc event meta/token đầu/done, độ trễ và token từng agent, quyết định policy, fallback, plan kèm số đoạn RAG. Trang tự trả 404 khi `APP_ENV` là staging/production; API vẫn cần `X-Internal-Token` nếu máy có đặt (nhập trên trang).
 
+## Đo chất lượng câu hỏi (Phase A)
+`cd apps/ai-service`, rồi: `python -m evals.sim_style <file phiên>` (văn phong), `python -m evals.question_set export --out <csv>` (phiếu người chấm), `python -m evals.judge_interviewer` (LLM-judge, cần `LLM_API_KEY`). Chi tiết: `context/quality-criteria.md`.
+
 ## Hook của repo
 Repo có hook Node trong `.claude/hooks/` (chỉ chạy khi máy có Node; Node v24 cài ở `~/.local/node` từ 2026-10-24). `scout-block` chặn đường dẫn trong `.claude/config/adf-ignore.txt`; đã thêm `!.venv` để chạy được Python của ai-service.
 

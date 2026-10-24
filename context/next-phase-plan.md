@@ -15,6 +15,7 @@ Cơ sở: `context/quality-criteria.md`, `context/de-data-assessment.md`, `plans
 3. LLM-judge cho Interviewer (Q5): hiệu chỉnh theo nhãn người ở bước 2 (đồng ý ≥ 0.7) rồi đưa vào harness.
 4. Chỉ số văn phong bằng code trong harness: tỉ lệ khuôn "Bạn có thể ... không?", độ dài, độ đa dạng mở đầu.
 Xong khi: có số đo thật cho Evaluator, level-fit và tự nhiên.
+**Tiến độ 2026-10-24:** bước 2, 3, 4 đã có công cụ và số đo đầu (chưa hiệu chỉnh), xem `context/quality-criteria.md`; còn chờ người chấm (bước 1 và nhãn cho bước 2).
 
 ## Phase B: làm sạch dữ liệu DE (27/10 – 09/11, DE chính, AIE hỗ trợ công cụ)
 1. Giấy phép theo Q1 (DE lọc trong pipeline, ghi rõ trong NOTICE).
