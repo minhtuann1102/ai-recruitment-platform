@@ -79,6 +79,7 @@ Tất cả qua cùng một endpoint OpenAI-compatible. Env riêng từng agent; 
 | Planner | `LLM_MODEL_PLANNER` | gpt-4o-mini | 0.4 | 1500 (từ 2026-10-22, prompt v2: code sinh `opening_hint`, `backup_question`, bù `key_points` thiếu; P50 13 s → 8.2 s) | JSON strict | 25 s (hạn tổng 22 s) | 1 lần/phiên: ứng viên dùng model mạnh hơn nếu eval cho thấy plan kém (chi phí tăng không đáng kể) |
 | **Evaluator** | `LLM_MODEL_EVALUATOR` | gpt-4o-mini | 0 (+ `seed` cố định) | 300 (từ 2026-10-22, prompt v2; đo output P95 ~200 token, P50 3.6 s) | JSON strict | 8 s, tổng ≤ 10 s | **Nhỏ, nhanh**, nằm trên đường nóng. Độ khắt khe đến từ rubric + luật code, không từ model to |
 | Interviewer | `LLM_MODEL_INTERVIEWER` | gpt-4o-mini | 0.7 | 200 | Text stream | TTFT 5 s | Nhiệt độ cao hơn để câu hỏi tự nhiên, không rập khuôn |
+| Query rewriter (RAG) | `LLM_MODEL_QUERY_REWRITER` | gpt-4o-mini | 0 | 60 | Text | 3 s, không retry | Chỉ khi tìm vector (topic < 2 cặp Q&A); đo 24/10 P50 1.6 s (ADR-010) |
 | Reporter | `LLM_MODEL_REPORTER` | gpt-4o-mini | 0.3 | 2000 | JSON strict | 60 s | 1 lần/phiên: ứng viên dùng model mạnh hơn để nhận xét sâu hơn |
 
 Đổi model của Evaluator **chỉ khi** chạy lại golden set (§10) và độ khớp với người chấm không giảm quá 5 điểm %.

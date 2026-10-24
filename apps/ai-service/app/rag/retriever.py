@@ -20,6 +20,7 @@ OVERFETCH = 4  # lay du roi khu trung, de question va qa_pair cung cap khong chi
 MIN_TAIL_TOKENS = 50  # phan con lai nho hon thi khong cat chunk cuoi nua
 
 EmbedFn = Callable[..., Awaitable[List[float]]]  # embed(text, collector=None)
+RewriteFn = Callable[..., Awaitable[str]]  # rewrite(query, collector) -> truy van tieng Anh
 
 
 class KnowledgeRepository(Protocol):
@@ -65,11 +66,20 @@ def build_query(category: Optional[str], title: str, extra: str = "") -> str:
 
 class Retriever:
     def __init__(self, repo: KnowledgeRepository, embed: EmbedFn, *, k: int = 5, token_budget: int = 1500,
-                 textbook: bool = False):
+                 textbook: bool = False, rewrite: Optional[RewriteFn] = None):
         """textbook=False (mac dinh, RAG_TEXTBOOK_ENABLED): kho chua co textbook nen khong tim (do 24/10: tim
-        textbook cho scenario ton ~1.5 s ma luon rong)."""
+        textbook cho scenario ton ~1.5 s ma luon rong). rewrite: LLM viet lai truy van sang tieng Anh cho duong
+        vector (RAG_QUERY_REWRITE); do 24/10 tren 32 truy van thuan Viet: recall@5 0.594 -> 0.938."""
         self._repo, self._embed, self.k, self.token_budget = repo, embed, k, token_budget
-        self.textbook = textbook
+        self.textbook, self._rewrite = textbook, rewrite
+
+    async def search_text(self, query: str, collector: Optional[UsageCollector] = None) -> str:
+        """Van ban dem embed: truy van goc + ban tieng Anh do LLM viet lai; khong co hoac loi thi dung tu dien."""
+        if self._rewrite is not None:
+            english = await self._rewrite(query, collector)
+            if english and english.strip() != query.strip():
+                return f"{query}\n{english}"
+        return expand_query(query)
 
     async def retrieve_for_topic(self, *, topic_id: Optional[str], category: Optional[str], difficulty: int,
                                  query: str, include_qa: bool = True, k: Optional[int] = None,
@@ -88,7 +98,7 @@ class Retriever:
             found = dedup(found)
             if len(found) < MIN_TOPIC_HITS:
                 via = "topic+vector" if found else "vector"
-                vector = await self._embed(expand_query(query), collector=collector)
+                vector = await self._embed(await self.search_text(query, collector), collector=collector)
                 hits = await self._repo.search(vector, SearchFilters(types, category, bucket, chunk_type),
                                                k * OVERFETCH)
                 found = dedup([*found, *hits])

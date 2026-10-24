@@ -44,3 +44,4 @@ Số đo LLM thật đầu tiên (2026-10-22): `plans/20261019-1100-ai-interview
 
 RAG bật với ai_db dùng chung (2026-10-24): recall@5 0.875, snippet thêm ~1.5 s vào start; báo cáo `plans/20261019-1100-ai-interview-brd-implementation/reports/eval-rag-20261024-shared-ai-db.md` (nhánh `thang/rag-enable-measure`). Toàn bộ PR #13–#27 đã merge.
 Cải tiến RAG (nhánh `thang/rag-improvements`): bỏ textbook khi chưa có (snippet 1.5 → 0.44 s), usage embedding vào metadata, mở rộng truy vấn tiếng Việt (golden 0.958, held-out tiếng Việt 0.625).
+Truy hồi tiếng Việt (nhánh `thang/vi-retrieval-experiment`): LLM viết lại truy vấn, held-out 32 câu tiếng Việt 0.594 → 0.938; ADR-010 đề xuất đổi sang `text-embedding-3-large` (chờ DE index lại).

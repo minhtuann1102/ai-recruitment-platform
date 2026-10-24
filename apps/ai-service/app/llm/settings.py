@@ -23,6 +23,7 @@ _DEFAULTS = {
     "interviewer": (0.7, 200, 5.0, None, None),
     "reporter": (0.3, 2000, 60.0, None, None),
     "simulator": (0.8, 350, 20.0, None, None),
+    "query_rewriter": (0.0, 60, 3.0, None, 0.0),  # viet lai truy van RAG (ADR-010): 3 s, khong retry; loi -> tu dien
 }
 
 
