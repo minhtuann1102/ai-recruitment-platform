@@ -5,12 +5,11 @@
 
 **Created**: 2026-10-21
 
-**Status**: Draft — AIE đồng ý ranh giới với Reporter (S3-AIE-1) ngày 2026-10-24; tiếp theo `/speckit-clarify`
+**Status**: Draft — ranh giới với AIE + FSD chốt 2026-10-24 (chỉ `study_plan`); còn FR-020, FR-024 (`/speckit-clarify`)
 
 **Owner**: DE (chính), AIE review — **Sprint**: 3 (09/11 → 23/11/2026)
 
-**Covers**: S3-DE-6 (đề xuất, chưa có trong `docs/sprint-plan.md`); phần `improvements` + `study_plan` của
-S3-AIE-1 (chuyển từ AIE sang DE nếu AIE đồng ý)
+**Covers**: S3-DE-6; phần `study_plan` của S3-AIE-1 (AIE đồng ý chuyển sang DE 2026-10-24)
 
 **Input**: User description: "Feature 016 interview-learning-roadmap (owner DE, AIE review): sau buổi phỏng vấn luyện
 tập, một agent có tool (vòng lặp giới hạn) sinh phần `improvements` + `study_plan` của report `/api/finalize` từ kết quả
@@ -33,7 +32,8 @@ thêm một thành phần **tự quyết các bước tìm kiếm** ở chỗ an
 
 ### Session 2026-10-21
 
-- Q: Phạm vi của DE trong report? → A: `improvements` + `study_plan` và đo chất lượng lộ trình. AIE giữ Evaluator từng
+- Q: Phạm vi của DE trong report? → A: (thay bởi Session 2026-10-24: chỉ `study_plan`) `improvements` + `study_plan`
+  và đo chất lượng lộ trình. AIE giữ Evaluator từng
   lượt, phần điểm do code tính, `summary`, `strengths`, `topic_comments`, `turn_comments`.
 - Q: Input? → A: kết quả phỏng vấn là input chính; CV (kỹ năng tự khai) và JD (mục tiêu, tùy chọn) là phụ.
 - Q: Ai xem lộ trình? → A: chỉ ứng viên (A12: phiên luyện tập riêng tư). Phần dành cho nhà tuyển dụng (chống gian lận,
@@ -43,31 +43,47 @@ thêm một thành phần **tự quyết các bước tìm kiếm** ở chỗ an
 - Q: Có đổi thứ tự phase không? → A: không trong feature này. Luồng `intro → technical → scenario → wrap_up` giữ nguyên;
   đề xuất chọn dự án để hỏi theo điểm yếu gửi AIE riêng.
 
+### Session 2026-10-24 (AIE + FSD đồng ý)
+
+- Q: Phạm vi thay thế? → A: **chỉ `study_plan`**. `improvements` vẫn do Reporter sinh (đã kiểm `evidence_turns`) và là
+  đầu vào của 016; thay câu trả lời "phạm vi" của Session 2026-10-21.
+- Q: Số mục? → A: ≤ 3, theo code Reporter; AIE sửa `docs/ai-service/05` §6.4 cho khớp.
+- Q: `cv_profile` ở bước tổng kết? → A: thêm `cv_profile` tùy chọn vào request `/api/finalize` (như `jd_profile`), sửa
+  `docs/ai-service/06`; interview-service (FSD) gửi trường này.
+- Q: Code ở đâu, ai review? → A: module riêng trong `apps/ai-service` (vd `app/agents/roadmap_*.py` + test), DE viết,
+  AIE review và approve; chỉ sửa Reporter ở điểm nối.
+- Q: Dự phòng? → A: agent lỗi hoặc quá hạn → `study_plan` của Reporter, rồi fallback code (`app/report_scoring.py`).
+  Hạn thời gian nằm trong ngân sách bước tổng kết (SC-004), số cụ thể chốt ở plan.
+- Q: Câu luyện tập lấy thế nào? → A: dùng chung bộ lọc ngân hàng câu hỏi `app/rag/question_bank.py` (PR #39), bỏ câu
+  đã hỏi trong phiên.
+- Q: Bộ phiên mẫu để đo? → A: dùng ứng viên giả lập tầng 3 của AIE.
+- Q: Sprint plan? → A: thêm S3-DE-6; S3-AIE-1 ghi phần `study_plan` nâng cấp ở S3-DE-6.
+
 ## User Scenarios & Testing *(mandatory)*
 
 Tác nhân: **ứng viên** (đọc lộ trình sau buổi), **AIE** (tích hợp vào bước tổng kết), **DE** (vận hành, đo chất lượng).
 
 ### User Story 1 - Lộ trình cải thiện từ kết quả phỏng vấn (Priority: P1)
 
-Sau buổi, ứng viên mở report và thấy phần "Cần cải thiện" và "Lộ trình học". Mỗi mục nêu một điểm yếu cụ thể kèm lượt
-hỏi làm bằng chứng, việc cần làm, tài liệu đọc, câu luyện tập và tiêu chí hoàn thành. Với từng điểm yếu, hệ thống tự
+Sau buổi, ứng viên mở report và thấy phần "Lộ trình học". Mỗi mục gắn với một điểm yếu trong phần "Cần cải thiện" (do
+Reporter sinh, kèm lượt bằng chứng) và có việc cần làm, tài liệu đọc, câu luyện tập, tiêu chí hoàn thành. Với từng điểm yếu, hệ thống tự
 quyết tìm gì, tự đánh giá kết quả có khớp không, chưa khớp thì tìm lại theo cách khác, trong giới hạn số bước và thời
 gian.
 
 **Why this priority**: là phần agentic demo được độc lập, không cần CV, JD, textbook (012) hay thay đổi phía FSD.
 
 **Independent Test**: chạy bước tổng kết trên một phiên mẫu có hai topic yếu (đánh giá từng lượt có sẵn) → report có
-`improvements` và `study_plan` đúng cấu trúc hiện có; mọi tài liệu và câu luyện truy được về nguồn.
+`study_plan` đúng cấu trúc hiện có, mỗi mục gắn với một mục `improvements` của Reporter; mọi tài liệu và câu luyện truy được về nguồn.
 
 **Acceptance Scenarios**:
 
-1. **Given** phiên có topic yếu kèm hiểu sai được Evaluator ghi nhận, **When** tổng kết, **Then** có mục "cần cải thiện"
-   nêu đúng chỗ hiểu sai với lượt bằng chứng tồn tại, và mục lộ trình có việc cần làm, ≥ 1 tài liệu, ≥ 1 câu luyện ở độ
+1. **Given** phiên có topic yếu kèm hiểu sai được Evaluator ghi nhận, **When** tổng kết, **Then** mục lộ trình gắn với
+   mục `improvements` tương ứng của Reporter và có việc cần làm, ≥ 1 tài liệu, ≥ 1 câu luyện ở độ
    khó cao hơn mức ứng viên đã đạt một bậc (khi kho có).
 2. **Given** kết quả tìm lần đầu không khớp topic, **When** hệ thống tự đánh giá, **Then** nó tìm lại bằng cách khác
    trong giới hạn bước; vẫn không có thì dùng tài liệu của topic trong danh mục và ghi rõ.
 3. **Given** tìm kiếm hoặc LLM lỗi, quá giới hạn bước hoặc thời gian, **When** tổng kết, **Then** report vẫn có lộ trình
-   theo cách dự phòng (chọn tài liệu từ danh mục topic như hiện nay), phần điểm và phần nhận xét khác không bị ảnh hưởng.
+   dự phòng (`study_plan` của Reporter, rồi fallback code), phần điểm và phần nhận xét khác không bị ảnh hưởng.
 4. **Given** mọi topic đều tốt, **When** tổng kết, **Then** lộ trình đề xuất nâng cao (độ khó cao hơn một bậc), không
    bịa điểm yếu.
 5. **Given** buổi kết thúc sớm hoặc < 6 lượt được chấm, **When** tổng kết, **Then** lộ trình chỉ dựa trên topic đã chấm và
@@ -163,8 +179,7 @@ lộ trình phiên một được đánh dấu hoàn thành.
 - Mọi lượt đều bị chấm lỗi (degraded) → không sinh lộ trình cải thiện, ghi lý do; report vẫn có điểm.
 - Ứng viên kết thúc ngay sau intro → chỉ có phần dự án.
 - Nhiều điểm yếu trùng tag hoặc trải nhiều topic → gộp thành một mục.
-- Hơn 5 điểm yếu → giữ 5 mục ưu tiên cao nhất (giới hạn `improvements` ≤ 5 theo `docs/ai-service/05` §6.4; code
-  Reporter trên `main` cắt còn 3 — số cuối chốt với AIE).
+- Hơn 3 điểm yếu → giữ 3 mục ưu tiên cao nhất (≤ 3 mục, chốt 2026-10-24).
 - Kho không có câu khó hơn cho topic → câu luyện cùng mức hoặc bỏ, ghi rõ.
 - CV hoặc JD chứa chỉ dẫn (prompt injection) → chỉ là dữ liệu, không đổi hành vi hay luật.
 - Câu trả lời của ứng viên chứa chỉ dẫn → thành phần lộ trình không bao giờ thấy nguyên văn câu trả lời.
@@ -177,10 +192,10 @@ lộ trình phiên một được đánh dấu hoàn thành.
 
 **Lộ trình (US1)**
 
-- **FR-001**: Sau khi điểm đã tính, hệ thống MUST sinh `improvements` (≤ 5) và `study_plan` theo cấu trúc report hiện
-  có (`docs/ai-service/05` §6.4); feature MUST NOT tính hay sửa điểm.
-- **FR-002**: Mỗi mục cần cải thiện MUST dựa trên kết quả đánh giá từng lượt (ý thiếu, hiểu sai, phải gợi ý) và ghi lượt
-  bằng chứng tồn tại trong phiên.
+- **FR-001**: Sau khi điểm đã tính và Reporter đã sinh `improvements`, hệ thống MUST sinh `study_plan` (≤ 3 mục) theo
+  cấu trúc report hiện có (`docs/ai-service/05` §6.4); feature MUST NOT tính hay sửa điểm, MUST NOT sửa `improvements`.
+- **FR-002**: Mỗi mục lộ trình MUST gắn với một điểm yếu có bằng chứng: mục `improvements` của Reporter hoặc kết quả
+  đánh giá từng lượt (ý thiếu, hiểu sai, phải gợi ý); MUST NOT tạo điểm yếu không có lượt bằng chứng trong phiên.
 - **FR-003**: Mỗi mục lộ trình MUST có: điểm yếu liên quan, mức ưu tiên, việc cần làm hành động được (vd "ôn rollback
   rules với checked exception", không phải "học thêm Spring"), tài liệu, câu luyện tập (khi kho có), tiêu chí hoàn thành.
 - **FR-004**: Với từng điểm yếu, hệ thống MUST tự quyết các bước tìm tài liệu và câu luyện: tìm, tự đánh giá độ khớp,
@@ -188,10 +203,10 @@ lộ trình phiên một được đánh dấu hoàn thành.
   của bước tổng kết.
 - **FR-005**: Mọi tài liệu và câu luyện được trích MUST đến từ kết quả tìm trong kho tri thức hoặc danh mục topic; hệ
   thống MUST NOT tự viết link. Mục trích không truy được MUST bị loại trước khi trả report.
-- **FR-006**: Câu luyện MUST lấy từ bộ Q&A cùng topic, độ khó cao hơn mức ứng viên đã đạt một bậc khi có; không có thì
-  cùng mức và ghi rõ.
-- **FR-007**: Lỗi tìm kiếm, lỗi LLM, vượt giới hạn bước hoặc thời gian, hay output không hợp lệ MUST chuyển về lộ trình
-  dự phòng (chọn tài liệu từ danh mục topic như hiện nay). Lỗi ở phần này MUST NOT làm hỏng phần điểm hay phần nhận xét.
+- **FR-006**: Câu luyện MUST lấy từ bộ Q&A cùng topic qua bộ lọc ngân hàng câu hỏi của AIE (`app/rag/question_bank.py`),
+  bỏ câu đã hỏi trong phiên, độ khó cao hơn mức ứng viên đã đạt một bậc khi có; không có thì cùng mức và ghi rõ.
+- **FR-007**: Lỗi tìm kiếm, lỗi LLM, vượt giới hạn bước hoặc thời gian, hay output không hợp lệ MUST chuyển về `study_plan`
+  của Reporter, rồi fallback code (`app/report_scoring.py`). Lỗi ở phần này MUST NOT làm hỏng phần điểm hay phần nhận xét.
 - **FR-008**: Thành phần sinh lộ trình MUST NOT nhận nguyên văn câu trả lời của ứng viên; chỉ nhận kết quả đã qua
   Evaluator, hồ sơ CV đã redact (đánh dấu không tin cậy), yêu cầu JD đã trích và danh mục topic (giữ tính chất chống
   injection của Reporter, `docs/ai-service/02` §Reporter).
@@ -248,7 +263,7 @@ lộ trình phiên một được đánh dấu hoàn thành.
   kinh nghiệm kèm công nghệ.
 - **Yêu cầu JD**: `must` / `nice`, mỗi yêu cầu map sang topic hoặc `out_of_catalog`.
 - **Nhóm kỹ năng**: topic hoặc kỹ năng, nhóm (FR-010), bằng chứng.
-- **Mục cần cải thiện**: điểm yếu, lý do, lượt bằng chứng.
+- **Mục cần cải thiện** (do Reporter sinh, đầu vào của 016): điểm yếu, lý do, lượt bằng chứng.
 - **Mục lộ trình**: điểm yếu, ưu tiên, việc cần làm, tài liệu (id truy được), câu luyện (id cặp Q&A), tiêu chí hoàn
   thành.
 - **Nhật ký chạy**: số bước, truy vấn, id được chọn, dự phòng, thời gian.
@@ -265,7 +280,7 @@ lộ trình phiên một được đánh dấu hoàn thành.
 - **SC-003**: 100% lần gây lỗi giả (tìm kiếm lỗi, LLM lỗi, quá thời gian) vẫn ra report có lộ trình hợp lệ.
 - **SC-004**: Ở 95% số buổi, ứng viên nhận report đầy đủ, kể cả lộ trình, trong ngân sách hiện có của bước tổng kết
   (90 giây).
-- **SC-005**: ≥ 90% điểm yếu có bằng chứng (hiểu sai hoặc trả lời yếu) thuộc 5 ưu tiên cao nhất có mục lộ trình tương
+- **SC-005**: ≥ 90% điểm yếu có bằng chứng (hiểu sai hoặc trả lời yếu) thuộc 3 ưu tiên cao nhất có mục lộ trình tương
   ứng.
 - **SC-006**: Trên ≥ 12 phiên mẫu (giỏi / trung bình / yếu × ≥ 2 track), điểm hữu ích trung bình của hai người chấm
   ≥ 4/5.
@@ -278,7 +293,8 @@ lộ trình phiên một được đánh dấu hoàn thành.
 - **Thứ tự học**: theo `levels` của topic trong danh mục; nếu AIE thêm trường tiên quyết vào danh mục thì dùng thêm.
 - **Textbook**: v1 chạy không cần 012 (danh mục topic + Q&A 005); textbook bổ sung khi 012 index xong.
 - **Checklist trình bày dự án** theo level do DE soạn, AIE duyệt, bám hàng "Dự án" của rubric.
-- **Vị trí chạy**: trong bước tổng kết, sau khi code tính điểm, song song với Reporter của AIE.
+- **Vị trí chạy**: trong bước tổng kết, sau Reporter (cần `improvements` làm đầu vào); code là module riêng trong
+  `apps/ai-service`, DE viết, AIE review.
 - **Bộ phiên mẫu**: dùng ứng viên giả lập tầng 3 của AIE (`docs/ai-service/09`); chưa có thì DE dựng phiên mẫu từ
   đánh giá có sẵn.
 - **Người chấm thứ hai**: một thành viên khác của team (như golden set của 005).
@@ -286,15 +302,15 @@ lộ trình phiên một được đánh dấu hoàn thành.
 
 ### Phụ thuộc
 
-- **AIE (ranh giới)**: Reporter thôi sinh `improvements` / `study_plan`, hoặc phần của 016 ghi đè; cập nhật
-  `docs/ai-service/02` §3.3.5 và `05` §6.4 (tài liệu của AIE, 016 không tự sửa).
+- **AIE (ranh giới, chốt 2026-10-24)**: Reporter giữ `improvements` và `study_plan` hiện có (làm dự phòng); 016 thay
+  `study_plan` khi chạy thành công. AIE cập nhật `docs/ai-service/02` §3.3.5 và `05` §6.4 (≤ 3 mục); 016 không tự sửa.
   **Hiện trạng 2026-10-24** (PR #22 merged 2026-10-22): Reporter LLM trên `main` đã sinh `improvements` (code cắt ≤ 3,
   có `evidence_turns`) và `study_plan` (≤ 3 mục: `topic`, `priority` `high | medium`, `actions` 2–3 việc, không URL),
   có bản dự phòng tính bằng code (`apps/ai-service/app/report_scoring.py`). 016 vì vậy là **thay / nâng cấp** phần này
   (vòng tool có RAG + tài liệu + câu luyện), không thêm mới; bản dự phòng của AIE giữ làm fallback.
 - **AIE + FSD (contract)**: request `/api/finalize` đã có `jd_profile` (FR-AI-056, PR #22, dùng cho khối
   `requirements`) nhưng chưa có `cv_profile` (chỉ gửi ở `/api/start`). US2, US3 cần thêm `cv_profile` vào request
-  `/api/finalize`: đổi `docs/ai-service/06` và interview-service cùng PR (constitution III). US1 không cần.
+  `/api/finalize` (AIE + FSD đồng ý 2026-10-24): đổi `docs/ai-service/06` và interview-service cùng PR (constitution III). US1 không cần.
 - **AIE (đường đọc RAG, S1-AIE-2)**: tìm kiếm dùng đường đọc của AIE; 016 không viết đường đọc riêng.
 - **005**: Q&A đã index, có câu khó cho các topic middle/senior (T057).
 - **012** (tùy chọn): textbook.
