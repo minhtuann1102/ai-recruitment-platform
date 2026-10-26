@@ -87,6 +87,8 @@ apps/data-pipeline/
 │   └── jd_listing_crawler.py        # danh sách → link chi tiết → bỏ id đã có → raw record (R4)
 ├── pipeline/
 │   ├── __main__.py                  # SỬA: thêm crawl-jd | process-jd | synth-jd | seed-jobs
+│   ├── settings.py                  # SỬA: đường dẫn JD, require_seed_settings (US4)
+│   ├── jd_pii.py                    # scrub_pii của 005 + dòng liên hệ + URL hồ sơ cá nhân (R4)
 │   ├── jd_crawl_command.py          # US1
 │   ├── skill_dictionary.py          # nạp YAML, bí danh → slug, khớp trong text (R5)
 │   ├── jd_normalizer.py             # cấp bậc, loại hình, thành phố, lương, ngôn ngữ (R6)
@@ -96,7 +98,10 @@ apps/data-pipeline/
 │   ├── jd_gap_planner.py            # ô thiếu từ báo cáo (R9)
 │   ├── jd_synthetic_generator.py    # prompt + hậu kiểm + công ty hư cấu (R9)
 │   ├── jd_synth_command.py          # US5
-│   └── job_db_seed_writer.py        # US4: Employer seed + posting theo contract (R10)
+│   ├── job_seed_selector.py         # US4: chọn 200 posting đa dạng, crawl trước (FR-022)
+│   ├── job_db_seed_preflight.py     # US4: đối chiếu information_schema (FR-019)
+│   ├── job_db_seed_writer.py        # US4: Employer seed + posting theo contract (R10)
+│   └── jd_seed_command.py           # US4: lệnh seed-jobs (tách để mỗi file < 200 dòng)
 ├── data/seeds/skill_dictionary.yaml # commit
 └── tests/                           # + fixtures/jd/*.html tự soạn
 docs/architecture/data-pipeline.md   # §5 nguồn JD + §10 phụ thuộc S3-DE-3 (không còn chờ S2-DE-3), cập nhật trong PR jd-crawl
