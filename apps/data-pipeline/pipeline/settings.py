@@ -17,6 +17,14 @@ RAW_DIR = APP_DIR / "data" / "raw"
 # Q&A crawl da dich + gan topic (lenh enrich); gitignore vi repo public (spec 005 Clarifications 2026-10-19)
 ENRICHED_DIR = RAW_DIR / "enriched_qa"
 
+# Spec 009 (JD): raw crawl + synthetic, JD chuan hoa, chunk, manifest seed deu nam ngoai git (FR-007);
+# chi skill_dictionary.yaml la seed commit duoc
+JD_RAW_DIR = RAW_DIR / "jd"
+SKILL_DICTIONARY_PATH = APP_DIR / "data" / "seeds" / "skill_dictionary.yaml"
+JD_NORMALIZED_PATH = PROCESSED_DIR / "jd_normalized.jsonl"
+JD_CHUNKS_PATH = PROCESSED_DIR / "jd_chunks.jsonl"
+JD_SEED_MANIFEST_PATH = PROCESSED_DIR / "job-seed-manifest.jsonl"
+
 # Dau bo du lieu: chi don ban ghi cung dataset (FR-013)
 CURATED_DATASET = "de_interview_qa"  # seed commit trong repo
 CRAWLED_DATASET = "de_crawled_qa"  # crawl + dich, khong commit
