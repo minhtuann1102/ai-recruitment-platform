@@ -26,6 +26,8 @@ def test_email_and_phone_replaced_with_labels():
         "Mr. Quang - quang.hr@congty-gia.vn",
         "A. Hùng 0988 111 222",
         "C. Thảo thao@congty-gia.vn",
+        "1. Liên hệ: Chị Lan 0912 345 678",  # dong danh so thu tu
+        "2) Hotline: 0283-822-1234",
     ],
 )
 def test_contact_line_dropped_entirely(line):

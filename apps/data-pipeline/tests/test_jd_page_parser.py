@@ -121,6 +121,12 @@ def test_missing_required_names_empty_fields(fixtures_dir):
         ({"currency": "USD", "value": {"minValue": "1000", "maxValue": 2000.5}}, {"currency": "USD", "min": 1000, "max": 2000.5, "text": None}),
         ({"currency": "VND", "value": {"minValue": 0, "maxValue": 0}}, None),
         ("Cạnh tranh", {"text": "Cạnh tranh", "min": None, "max": None}),
+        ({"currency": "VND", "value": {"minValue": "15.000.000", "maxValue": "25.000.000"}},
+         {"currency": "VND", "min": 15000000, "max": 25000000, "text": None}),
+        ({"currency": "USD", "value": {"minValue": "1.500", "maxValue": "2,500"}},
+         {"currency": "USD", "min": 1500, "max": 2500, "text": None}),
+        ({"currency": "USD", "value": {"value": "2.5"}}, {"currency": "USD", "min": 2.5, "max": 2.5, "text": None}),
+        ({"value": {"minValue": "Thỏa thuận"}}, {"text": "Thỏa thuận", "min": None, "max": None}),
         (None, None),
     ],
 )

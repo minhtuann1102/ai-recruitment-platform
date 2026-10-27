@@ -61,7 +61,8 @@ def test_raw_has_required_fields_and_zero_pii(web, raw_dir, capsys):
     assert "Email: [email]" in read_records(raw_dir, "itviec")[0]["description_text"]
     out = capsys.readouterr().out
     assert "robots checked: https://itviec.com/robots.txt [200]" in out and "record mới: 3" in out
-    assert "Công ty" in next((raw_dir / "itviec").glob("*.jsonl")).read_text(encoding="utf-8")  # khong escape \u
+    raw_bytes = next((raw_dir / "itviec").glob("*.jsonl")).read_bytes()
+    assert "Công ty".encode() in raw_bytes and b"\r\n" not in raw_bytes  # khong escape \u; LF tren moi may
 
 
 def test_crawl_touches_only_own_hosts_and_never_other_host_links(web, raw_dir):

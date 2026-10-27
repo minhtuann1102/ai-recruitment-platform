@@ -42,7 +42,7 @@ def write_raw(source_name: str, records: List[Dict], now: datetime) -> Path:
     out_dir = JD_RAW_DIR / source_name
     out_dir.mkdir(parents=True, exist_ok=True)
     out = out_dir / f"{now:%Y%m%dT%H%M%SZ}.jsonl"
-    out.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in records), encoding="utf-8")
+    out.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in records), encoding="utf-8", newline="\n")
     return out
 
 

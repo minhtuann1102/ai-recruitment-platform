@@ -16,7 +16,8 @@ _CONTACT_KEYWORD_RE = re.compile(
 )
 # Xung ho + ten: "Mr./Ms./Mrs./Anh/Chi" (dau cham tuy chon), "A./C." (bat buoc dau cham, tranh "A Bachelor ...")
 _HONORIFIC_RE = re.compile(r"^(?:(?:Mr|Ms|Mrs|Anh|Chị)\b\.?|[AC]\.)\s+(\w+)")
-_LEADING_MARK_RE = re.compile(r"^[\s\-*•·–—>]+")
+# Dau dong: gach dau dong, so thu tu "1." / "2)" (phai co khoang trang sau, tranh "1.500 USD")
+_LEADING_MARK_RE = re.compile(r"^(?:[\s\-*•·–—>]|\d{1,2}[.)](?=\s))+")
 _KEYWORD_TAIL_RE = re.compile(r"^[\s:：\-–—]*")
 _PROFILE_URL_RE = re.compile(
     r"(?<![\w-])(?:https?://)?(?:[\w-]+\.)*(?:linkedin\.com/in/|facebook\.com/|fb\.com/|zalo\.me/|t\.me/)"

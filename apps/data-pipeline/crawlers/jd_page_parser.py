@@ -15,8 +15,10 @@ from .jd_sources import JdSource
 
 REQUIRED_FIELDS = ("source", "source_job_id", "url", "crawled_at", "title", "company", "description_text")
 # Xuong dong o the khoi; the inline (strong, a, code) giu lien mach de tieu de section nam tren dong rieng
-_BLOCK_TAGS = ("p", "div", "li", "ul", "ol", "tr", "h1", "h2", "h3", "h4", "h5", "h6", "section", "blockquote")
+_BLOCK_TAGS = ("p", "div", "li", "ul", "ol", "tr", "td", "th", "h1", "h2", "h3", "h4", "h5", "h6", "section", "blockquote")
 _PLAIN_NUMBER_RE = re.compile(r"\d+(?:\.\d+)?")
+# Dau phan nghin kieu VN / EN: "15.000.000", "1.500", "1,500" (moi nhom sau dau du 3 chu so) -> 15000000, 1500, 1500
+_THOUSANDS_RE = re.compile(r"\d{1,3}([.,])\d{3}(?:\1\d{3})*")
 _ISO_DATE_RE = re.compile(r"\d{4}-\d{2}-\d{2}")
 
 
@@ -110,7 +112,11 @@ def _number(value: Any) -> Optional[float]:
     if isinstance(value, bool):
         return None
     if isinstance(value, str):
-        value = float(value) if _PLAIN_NUMBER_RE.fullmatch(value.strip()) else None
+        text = value.strip()
+        if _THOUSANDS_RE.fullmatch(text):
+            value = float(re.sub(r"[.,]", "", text))
+        else:
+            value = float(text) if _PLAIN_NUMBER_RE.fullmatch(text) else None
     if not isinstance(value, (int, float)) or value <= 0:
         return None
     return int(value) if float(value).is_integer() else value
@@ -127,7 +133,8 @@ def _salary(posting: Dict) -> Optional[Dict]:
         low = high = single
     if low is not None or high is not None:
         return {"currency": currency, "min": low, "max": high, "text": None}
-    text = _text(node.get("value"))
+    # Chu nam o value hoac o minValue / maxValue ("Thỏa thuận", "Up to 2000$") -> giu nguyen lam text
+    text = _text(node.get("value")) or " - ".join(t for t in (_text(node.get(k)) for k in ("minValue", "maxValue")) if t)
     return {"text": text, "min": None, "max": None} if text else None
 
 
