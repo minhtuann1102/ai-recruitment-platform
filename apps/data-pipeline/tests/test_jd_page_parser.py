@@ -12,7 +12,7 @@ URLS = {
     "itviec": "https://itviec.com/it-jobs/backend-nodejs-developer-may-xanh-gia-1101",
     "careerviet": "https://careerviet.vn/vi/tim-viec-lam/lap-trinh-vien-frontend-reactjs.35C1A2B3.html",
     "topdev": "https://topdev.vn/detail-jobs/backend-developer-java-spring-2201",
-    "careerlink": "https://www.careerlink.vn/viec-lam/lap-trinh-vien-net/3301",
+    "careerlink": "https://www.careerlink.vn/tim-viec-lam/lap-trinh-vien-net/3301",
 }
 
 

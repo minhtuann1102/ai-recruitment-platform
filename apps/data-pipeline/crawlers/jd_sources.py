@@ -3,13 +3,13 @@
 Moi nguon: trang danh sach IT phan trang -> link chi tiet -> trang chi tiet co JSON-LD JobPosting.
 detail_link_re va job_id_re khop tren PATH cua URL (bo query / #fragment); nhom 'id' = source_job_id.
 
-TRANG THAI KIEM CHUNG (T008 viet offline, khong gui request toi nguon):
-- itviec: danh sach /it-jobs?page=N va chi tiet /it-jobs/<slug>-<id> theo spec ("Kiem tra nguon crawl");
-  kieu id (so o cuoi slug) chua do tren trang that.
-- topdev, careerviet, careerlink: URL danh sach, tham so trang, regex link / id va selector la DU DOAN,
-  CHUA kiem bang request that. careerviet: dang id hex (vd 35C1A2B3) theo vi du trong contracts/jd-record-formats.md.
-  Cach kiem: `crawl-jd --source <ten> --max-pages 2 --max-jobs 3` tren may DE (quickstart §1). Sai cau hinh thi
-  nguon bao `empty` (thoat 1), khong lang le thanh cong. Sua o day, khong sua code crawl.
+TRANG THAI KIEM CHUNG (T016, may DE 2026-10-27, `crawl-jd --max-pages 2 --max-jobs 3`):
+- itviec, topdev, careerviet: cau hinh dung, moi nguon 3/3 record co JobPosting. topdev: danh sach co phan trang
+  that nhung lan ca tin khong phai IT (de buoc xu ly US2 loai, JD can >= 1 ky nang); selector mo ta khop o trang
+  IT, trang khong khop thi lay mo ta ngan cua JSON-LD.
+- careerlink: ban doan dau (/viec-lam-tai/...) tra 404; da sua theo trang that: danh sach /viec-lam/cntt-phan-mem/19,
+  chi tiet /tim-viec-lam/<slug>/<id> (link danh muc /viec-lam/... khong duoc tinh la tin).
+Nguon doi giao dien thi nguon bao `empty` (thoat 1), khong lang le thanh cong. Sua o day, khong sua code crawl.
 """
 import re
 from dataclasses import dataclass
@@ -38,7 +38,7 @@ class JdSource:
 _ITVIEC_JOB = re.compile(r"^/it-jobs/[^/?#]+-(?P<id>\d+)$")
 _TOPDEV_JOB = re.compile(r"^/detail-jobs/[^/?#]+-(?P<id>\d+)$")
 _CAREERVIET_JOB = re.compile(r"^/vi/tim-viec-lam/[^/?#]+\.(?P<id>[0-9A-Fa-f]{6,})\.html$")
-_CAREERLINK_JOB = re.compile(r"^/viec-lam/[^/?#]+/(?P<id>\d+)$")
+_CAREERLINK_JOB = re.compile(r"^/tim-viec-lam/[^/?#]+/(?P<id>\d+)$")
 
 
 def _careerviet_listing(page: int) -> str:
@@ -59,23 +59,23 @@ SOURCES: Dict[str, JdSource] = {
         JdSource(
             name="topdev",
             base_url="https://topdev.vn",
-            listing_url=lambda page: f"https://topdev.vn/jobs/search?page={page}",  # DU DOAN
-            detail_link_re=_TOPDEV_JOB,  # DU DOAN
+            listing_url=lambda page: f"https://topdev.vn/jobs/search?page={page}",
+            detail_link_re=_TOPDEV_JOB,
             job_id_re=_TOPDEV_JOB,
-            description_selector="#job-description, .job-description",  # DU DOAN
+            description_selector="#job-description, .job-description",
         ),
         JdSource(
             name="careerviet",
             base_url="https://careerviet.vn",
-            listing_url=_careerviet_listing,  # DU DOAN
-            detail_link_re=_CAREERVIET_JOB,  # DU DOAN (id hex theo contract)
+            listing_url=_careerviet_listing,
+            detail_link_re=_CAREERVIET_JOB,  # id hex, vd 35C8B493
             job_id_re=_CAREERVIET_JOB,
         ),
         JdSource(
             name="careerlink",
             base_url="https://www.careerlink.vn",
-            listing_url=lambda page: f"https://www.careerlink.vn/viec-lam-tai/cntt-phan-mem/19?page={page}",  # DU DOAN
-            detail_link_re=_CAREERLINK_JOB,  # DU DOAN
+            listing_url=lambda page: f"https://www.careerlink.vn/viec-lam/cntt-phan-mem/19?page={page}",
+            detail_link_re=_CAREERLINK_JOB,
             job_id_re=_CAREERLINK_JOB,
         ),
     )
