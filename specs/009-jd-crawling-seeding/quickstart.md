@@ -16,8 +16,9 @@ python -m pipeline crawl-jd --source careerviet --max-pages 2 --max-jobs 10
 ```
 
 Kỳ vọng: thoát 0; log có `robots checked: https://careerviet.vn/robots.txt [200]`; mỗi request cách nhau ≥ 2 giây;
-`data/raw/jd/careerviet/<ts>.jsonl` có ≤ 10 record đủ trường bắt buộc. Chạy lại cùng lệnh → `record mới: 0`, các id đã
-có bị bỏ qua, không request lại trang chi tiết.
+`data/raw/jd/careerviet/<ts>.jsonl` có ≤ 10 record đủ trường bắt buộc. Chạy lại cùng lệnh → không record trùng: id đã
+có bị bỏ qua, không request lại trang chi tiết (`id đã có, bỏ qua` tăng). `--max-jobs` tính trên JD **mới**, nên lần
+chạy lại vẫn lấy tiếp tối đa 10 JD chưa có; `record mới: 0` chỉ khi các trang trong `--max-pages` đã crawl hết.
 
 Kiểm luật crawler: `pytest tests -k "jd_page_parser or polite_fetcher"` (fixture HTML tự soạn: `JobPosting` trong mảng /
 `@graph`, JSON lỗi, robots 2 nhóm `*`, 3 lần 403 liên tiếp → dừng nguồn).
