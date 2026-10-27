@@ -21,7 +21,7 @@ Textbook/Tutorial        ──┘   → dedup → tag          knowledge_chunks
 | Sprint | Loại | Nguồn | Volume | source_type |
 |---|---|---|---|---|
 | S1 | Interview Q&A | Curated thủ công + public datasets | 200+ cặp Q&A | `interview_qa` |
-| S2 | Job Descriptions | Crawl: topcv.vn, itviec.com | 500+ JD | `job_description` |
+| S2 | Job Descriptions | Crawl: itviec, topdev, careerviet, careerlink (topcv, jobsgo bị loại vì 403); phần thiếu bù JD synthetic | 500+ JD | `job_description` |
 | S3 | Textbook/Tutorial | Node.js, React, PostgreSQL docs; CS fundamentals; System Design | 5000+ chunks | `textbook` |
 
 ---
@@ -31,7 +31,7 @@ Textbook/Tutorial        ──┘   → dedup → tag          knowledge_chunks
 ```
 apps/data-pipeline/
 ├── crawlers/
-│   ├── jd_crawler.py          # Scrapy spider crawl JD từ IT job sites
+│   ├── jd_sources.py          # Cấu hình 4 nguồn JD; jd_page_parser.py (JSON-LD), jd_listing_crawler.py
 │   └── docs_crawler.py        # Crawl technical documentation
 ├── processors/
 │   ├── qa_processor.py        # Xử lý Interview Q&A (JSON/CSV → chunks)
@@ -104,27 +104,38 @@ Mỗi cặp sinh 2 bản ghi `question` (chỉ câu hỏi) và `qa_pair` (câu h
 
 ## 5. Sprint 2 — Job Descriptions
 
-### Crawl (`crawlers/jd_crawler.py`)
+### Crawl (`crawl-jd`: `crawlers/jd_sources.py`, `jd_page_parser.py`, `jd_listing_crawler.py`)
 
-Dùng Scrapy + Playwright (cho JS-rendered pages):
+4 nguồn: **itviec, topdev, careerviet, careerlink**. Mỗi nguồn: trang danh sách IT phân trang → link chi tiết →
+khối JSON-LD `JobPosting` trong HTML tĩnh. **Không dùng Scrapy hay Playwright**: không nguồn nào cần render JavaScript.
+Dùng lại `PoliteFetcher` của 005 (đọc robots.txt mỗi lần chạy, delay ≥ 2 s) và dừng nguồn sau 3 lần 403/429 hoặc
+trang thử thách chống bot liên tiếp (không retry, không đăng nhập, không né chặn).
 
-```python
-# Target sites
-CRAWL_TARGETS = [
-    {"site": "topcv.vn", "url": "https://www.topcv.vn/tim-viec-lam-it", "max_pages": 50},
-    {"site": "itviec.com", "url": "https://itviec.com/it-jobs", "max_pages": 50},
-]
+| Nguồn | Ghi chú |
+|---|---|
+| itviec | Có `skills`. **Ẩn lương** khi chưa đăng nhập ("Sign in to view salary") → để trống |
+| topdev | JSON-LD `description` chỉ ~180 ký tự → lấy mô tả đầy đủ từ HTML trang |
+| careerviet | Lương số VND `minValue`/`maxValue` |
+| careerlink | Không có `skills` → trích từ mô tả bằng danh mục kỹ năng |
+| topcv, jobsgo | **Loại**: trả HTTP 403 (chặn bot), kể cả từ IP cá nhân |
 
-# Fields cần extract
-JD_FIELDS = ["title", "company", "description", "requirements", "skills", "location", "salary_range"]
-```
+Mỗi JD thô gồm: `title`, `company`, `skills_raw`, `description_text`, `location_raw`, `experience_raw`,
+`employment_type_raw`, `salary_raw`, `date_posted`, `valid_through` + `source`, `source_job_id`, `url`, `crawled_at`.
+Email, số điện thoại, dòng liên hệ và URL hồ sơ cá nhân bị xóa trước khi ghi. Định dạng đầy đủ:
+[`specs/009-jd-crawling-seeding/contracts/jd-record-formats.md`](../../specs/009-jd-crawling-seeding/contracts/jd-record-formats.md).
 
 **Verify crawl:**
 ```bash
 cd apps/data-pipeline
-python -m scrapy crawl jd_spider -o data/raw/jd_raw.json --logfile logs/crawl.log
-# Expect: >= 500 records trong jd_raw.json
+python -m pipeline crawl-jd --source careerviet --max-pages 2 --max-jobs 10   # thử nhỏ
+python -m pipeline crawl-jd                                                   # đủ 4 nguồn
+# Output: data/raw/jd/<nguồn>/<UTC timestamp>.jsonl (gitignore); chạy lại: "record mới: 0"
+# Mã thoát: 0 ok · 1 nguồn rỗng / thiếu trường hàng loạt · 4 có nguồn bị chặn
 ```
+
+Lệnh `crawl-jd` và các lệnh JD tiếp theo (`process-jd`, `synth-jd`, `seed-jobs`) theo
+[spec 009](../../specs/009-jd-crawling-seeding/spec.md). Mục Processing bên dưới là thiết kế ban đầu: xử lý JD
+chạy offline bằng `process-jd`, còn index JD vào `ai_db` là Stretch (ngoài Sprint 2).
 
 ### Processing (`jd_processor.py`)
 
@@ -287,8 +298,8 @@ python pipeline/run.py \
 ### Sprint 2 — JD
 
 ```bash
-# Step 1: Crawl
-python -m scrapy crawl jd_spider -o data/raw/jd_raw.json
+# Step 1: Crawl (4 nguồn, ra data/raw/jd/<nguồn>/*.jsonl)
+python -m pipeline crawl-jd
 
 # Step 2: Process + embed + index
 python pipeline/run.py \
@@ -338,7 +349,7 @@ Dùng JD crawled để seed `job_postings` trong `job_db`:
 # scripts/seed_job_db.py
 # Map crawled JD → job_postings schema
 # 200 bản ghi với skills, location, salary_range thực tế
-# Chạy sau khi jd_crawler hoàn thành
+# Chạy sau khi crawl-jd + process-jd hoàn thành
 ```
 
 ---
@@ -351,5 +362,5 @@ Dùng JD crawled để seed `job_postings` trong `job_db`:
 | S2-DE-1 (JD crawl) | Không (crawl độc lập) |
 | S2-DE-3 (JD index) | S2-DE-1 xong, S1-AIE-1 RAG ingestion pipeline đã test |
 | S2-DE-4 (seed job_db) | S2-DE-1 crawl xong, FSD job-service entities đã tạo |
-| S3-DE-3 (textbook index) | S2-DE-3 xong (pipeline đã stable) |
+| S3-DE-3 (textbook index) | Không còn chờ S2-DE-3 (index JD là Stretch); dùng đường ghi của 005, đã stable với `interview_qa` |
 | S3-DE-4 (RAG quality eval) | S3-AIE-1 full agentic E2E chạy được |
