@@ -1,15 +1,19 @@
 """CLI: python -m pipeline <lenh> (chay trong apps/data-pipeline/).
 
-Lenh va ma thoat: specs/005-rag-knowledge-base-qa/contracts/pipeline-cli.md.
+Lenh va ma thoat: specs/005-rag-knowledge-base-qa/contracts/pipeline-cli.md;
+lenh JD (crawl-jd...): specs/009-jd-crawling-seeding/contracts/pipeline-cli-jd.md.
 """
 import argparse
 import sys
 from typing import Callable, Dict, List, Optional
 
+from crawlers.jd_sources import SOURCES as JD_SOURCES
+
 from .collect_command import run_collect
 from .crawl_command import run_crawl
 from .db_commands import run_index, run_search
 from .enrich_command import run_enrich
+from .jd_crawl_command import run_crawl_jd
 from .offline_commands import run_process, run_validate
 from .review_sample_command import run_review_sample
 from .seed_review_command import run_approve_seed, run_review_seed
@@ -18,6 +22,7 @@ EXIT_OK = 0
 EXIT_INPUT_ERROR = 1  # seed / catalog / golden set loi, hoac crawl thu 0 record
 EXIT_PREFLIGHT_ERROR = 2  # thieu key, DB chua san sang, provider loi; lenh chua lam cung dung ma nay
 EXIT_EMBED_ERRORS = 3  # index xong nhung con ban ghi embed loi
+EXIT_SOURCE_BLOCKED = 4  # crawl-jd: co nguon bi chan (3 lan 403/429 lien tiep); cac nguon con lai van chay het
 
 Handler = Callable[[argparse.Namespace], int]
 
@@ -39,6 +44,7 @@ HANDLERS: Dict[str, Handler] = {
     "index": run_index,
     "search": run_search,
     "crawl": run_crawl,
+    "crawl-jd": run_crawl_jd,
 }
 
 
@@ -102,6 +108,15 @@ def build_parser() -> argparse.ArgumentParser:
     crawl.add_argument("--max-pages", type=int, default=60)
     crawl.add_argument("--delay", type=float, default=1.0, help="giay nghi toi thieu giua hai request")
     crawl.add_argument("--render", action="store_true", help="dung Playwright cho trang can JavaScript")
+
+    crawl_jd = sub.add_parser("crawl-jd", help="crawl JD IT tu itviec, topdev, careerviet, careerlink (spec 009 US1)")
+    crawl_jd.add_argument(
+        "--source", action="append", default=[], choices=list(JD_SOURCES), metavar="S",
+        help=f"chi crawl nguon nay, lap lai duoc ({', '.join(JD_SOURCES)}); mac dinh ca 4",
+    )
+    crawl_jd.add_argument("--max-pages", type=int, default=20, help="toi da trang danh sach moi nguon")
+    crawl_jd.add_argument("--max-jobs", type=int, default=150, help="toi da trang chi tiet moi nguon")
+    crawl_jd.add_argument("--delay", type=float, default=2.0, help="giay nghi toi thieu giua hai request (FR-004)")
     return parser
 
 
