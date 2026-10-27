@@ -1,11 +1,15 @@
 """Tai trang web lich su (FR-022, constitution V): ton trong robots.txt, nghi giua request, gioi han so trang.
 
 - robots.txt doc MOT lan cho moi host khi khoi tao; URL bi cam -> bo qua + log (US5-2)
-- khoang nghi = max(--delay, Crawl-delay cua robots) giay giua hai request trang
+- khoang nghi = max(--delay, Crawl-delay cua robots) giay giua hai request lien tiep, ke ca request robots.txt
+  va request trang dau tien
 - dung khi da gui du max_pages request trang (request robots.txt khong tinh)
+- bi chan (FR-004, spec 009): 3 phan hoi 403/429 hoac trang thu thach chong bot LIEN TIEP, hoac robots.txt
+  tra 403/429 -> blocked = True, moi fetch sau do tra None khong gui request; khong retry, khong ne chan
 - mac dinh httpx (trang tinh); render=True dung Playwright Chromium cho trang can JS (US5-4),
   import luoi de CI / test khong can trinh duyet
 """
+import re
 import time
 from typing import Callable, Optional
 from urllib.parse import urlsplit
@@ -15,6 +19,11 @@ import httpx
 
 USER_AGENT = "ai-recruit-data-pipeline/0.1 (+https://github.com/minhtuann1102/ai-recruitment-platform)"
 ROBOTS_AGENT = "ai-recruit-data-pipeline"
+
+BLOCK_STATUSES = (403, 429)
+BLOCK_STREAK_LIMIT = 3
+# Tieu de trang thu thach chong bot (Cloudflare...), co the tra HTTP 200
+_CHALLENGE_TITLE_RE = re.compile(r"<title[^>]*>[^<]*(?:Attention Required|Just a moment)", re.I)
 
 Log = Callable[[str], None]
 
@@ -47,7 +56,10 @@ class PoliteFetcher:
         self._last_request: Optional[float] = None
         self.pages_requested = 0
         self.skipped_by_robots = 0
+        self.blocked = False  # nguon chan bot: moi fetch sau do tra None, khong gui request
+        self._block_streak = 0
         self._robots = self._load_robots()
+        self._last_request = self._clock()  # request trang dau cung cach request robots.txt >= delay (FR-004, SC-002)
         crawl_delay = self._robots.crawl_delay(ROBOTS_AGENT)
         self.delay = max(delay, float(crawl_delay or 0))
 
@@ -70,7 +82,13 @@ class PoliteFetcher:
             parser.parse(["User-agent: *", "Disallow: /"])
             verdict = "khong doc duoc -> cam het"
         self._log(f"robots checked: {robots_url} [{status}] {verdict}")
+        if status in BLOCK_STATUSES:  # site chan ngay tu robots.txt: bao blocked, khong bao nhu nguon rong
+            self._mark_blocked()
         return parser
+
+    def _mark_blocked(self) -> None:
+        self.blocked = True
+        self._log(f"source blocked: {self._origin}")
 
     @property
     def exhausted(self) -> bool:
@@ -91,8 +109,8 @@ class PoliteFetcher:
         self._last_request = self._clock()
 
     def fetch(self, url: str) -> Optional[str]:
-        """HTML cua trang; None neu bi robots cam, het luot, loi HTTP hoac khong phai HTML."""
-        if self.exhausted or not self.allowed(url):
+        """HTML cua trang; None neu nguon bi chan, bi robots cam, het luot, loi HTTP hoac khong phai HTML."""
+        if self.blocked or self.exhausted or not self.allowed(url):
             return None
         self._wait_turn()
         self.pages_requested += 1
@@ -102,8 +120,23 @@ class PoliteFetcher:
             self._log(f"[loi] {url}: {exc}")
             return None
 
+    def _is_block_response(self, response: httpx.Response) -> bool:
+        if response.status_code in BLOCK_STATUSES:
+            return True
+        return "html" in response.headers.get("content-type", "") and bool(_CHALLENGE_TITLE_RE.search(response.text))
+
+    def _count_block(self, url: str, status: int) -> None:
+        self._block_streak += 1
+        self._log(f"[chan] {url}: HTTP {status} ({self._block_streak}/{BLOCK_STREAK_LIMIT} lien tiep)")
+        if self._block_streak >= BLOCK_STREAK_LIMIT:
+            self._mark_blocked()
+
     def _get_html(self, url: str) -> Optional[str]:
         response = self._client.get(url)
+        if self._is_block_response(response):
+            self._count_block(url, response.status_code)
+            return None  # FR-004: khong retry, khong doi header / IP, khong render de vuot thu thach
+        self._block_streak = 0  # moi phan hoi khong bi chan cat chuoi: 403, 200, 403 chua phai bi chan
         response.raise_for_status()
         if "html" not in response.headers.get("content-type", ""):
             self._log(f"bo qua (khong phai HTML): {url}")
