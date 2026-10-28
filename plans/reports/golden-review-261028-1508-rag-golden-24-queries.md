@@ -59,9 +59,17 @@ Bằng chứng: script tạm đọc 144 cặp curated (`data/seeds/interview_qa/
   **"libuv threadpool bị bão hòa chứ không phải event loop bị block"** (nếu event loop bị block thì request đọc cache
   cũng chậm).
 - Ứng viên khác cũng không khớp: 1017 là event loop bị chặn nhưng **một core CPU 100%**; 1052 là asyncio (Python).
-- Không có cặp nào khớp cả hai ý → sửa nhãn không giải quyết được, phải viết lại query. Đề xuất:
-  `nodejs p99 latency tang vot du cpu thap, doc file va goi crypto deu cham` → chỉ 1000 đúng.
-- Đây là đổi thiết kế test của AIE → ghi trong PR, Thắng duyệt.
+- Không có cặp nào khớp cả hai ý → sửa nhãn không giải quyết được, phải viết lại query.
+- Hai cách viết, đo tỉ lệ từ của query có trong câu hỏi 1000 (bỏ dấu):
+
+  | Query | Trùng từ |
+  |---|---|
+  | cũ: `event loop bi chan lam latency p99 tang du cpu thap` | 45% |
+  | A: `nodejs p99 latency tang vot du cpu thap, doc file va goi crypto deu cham` | **80%**: chép chữ của câu hỏi, lộ đáp án |
+  | **B (chọn)**: `dich vu node gan nhu khong ton cpu ma cac yeu cau bam mat khau va mo tep van phai xep hang cho` | 17% |
+
+- B tả triệu chứng threadpool (CPU rảnh, việc băm mật khẩu và mở tệp phải xếp hàng) mà không dùng chữ của câu hỏi.
+- Query do DE viết sau khi biết đáp án → g21 **không có `approved_by`**, Thắng xác nhận rồi điền.
 
 ### g02 — thiếu nhãn
 
@@ -84,12 +92,11 @@ dấu), nhưng recall nhóm no_diacritics sẽ hơi lạc quan.
 
 ## Quyết định DE (2026-10-28)
 
-- g21: viết lại query thành `nodejs p99 latency tang vot du cpu thap, doc file va goi crypto deu cham`, giữ nhãn 1000
-  (chờ AIE xác nhận).
+- g21: viết lại query theo cách B (trùng 17%), giữ nhãn 1000, chưa có `approved_by` (chờ AIE xác nhận).
 - g02: thêm `de-qa-1016` vào `relevant`.
 - g05: giữ nguyên.
 - Held-out: duyệt luôn (dưới).
-- Mọi query đã duyệt có `approved_by: "minhtuann1102"`; `status` hai file ghi ngày duyệt và thay đổi.
+- 55/56 query có `approved_by: "minhtuann1102"` (trừ g21); `status` hai file ghi ngày duyệt và thay đổi.
 
 ## Held-out `rag_golden_holdout.json` (32 query, toàn nhóm vi)
 
