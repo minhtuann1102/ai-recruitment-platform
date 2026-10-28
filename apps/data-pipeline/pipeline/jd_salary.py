@@ -20,9 +20,11 @@ _UNIT = r"triệu|million|tr\b|m\b|k\b|usd|vnd|vnđ|đ\b|₫|\$"
 _SALARY_RE = re.compile(
     rf"(?P<prefix>up\s*to|lên\s+(?:tới|đến)|tới|đến|max|from|từ|trên|over|min)?\s*(?P<cur1>\$|usd)?\s*"
     rf"(?P<a>{_NUM})\s*(?P<unit1>{_UNIT})?"
-    rf"(?:\s*(?:-|–|~|to|đến)\s*(?P<cur2>\$|usd)?\s*(?P<b>{_NUM})\s*(?P<unit2>{_UNIT})?)?",
+    rf"(?:\s*(?:-|–|~|to|đến)\s*(?P<cur2>\$|usd)?\s*(?P<b>{_NUM})\s*(?P<unit2>{_UNIT})?)?"
+    rf"(?:(?<=k)\s*(?P<cur3>usd|vnd|vnđ|\$))?",  # tien te sau don vi k: "1.5k - 2k USD"
     re.IGNORECASE,
 )
+VND_MIN = 1_000_000  # luong VND duoi 1 trieu / thang la doc sai (vd "500k" khong ghi tien te), bo
 _MAX_ONLY = ("up", "lên", "tới", "đến", "max")
 _MILLION_UNITS = ("triệu", "million", "tr", "m")
 _THOUSANDS_SEP_RE = re.compile(r"\d{1,3}(?:([.,])\d{3})(?:\1\d{3})*")
@@ -47,11 +49,14 @@ def _finish(low: Optional[float], high: Optional[float], currency: Optional[str]
     low, high = (int(v) if v is not None and v > 0 else None for v in (low, high))
     if low is not None and high is not None and low > high:
         low, high = high, low
-    return low, high, _currency_for(values, currency)
+    currency = _currency_for(values, currency)
+    if currency == "VND" and max(values) < VND_MIN:
+        return NO_SALARY
+    return low, high, currency
 
 
 def _from_match(match: re.Match) -> Optional[Salary]:
-    units = [u.lower() for u in (match["cur1"], match["unit1"], match["cur2"], match["unit2"]) if u]
+    units = [u.lower() for u in (match["cur1"], match["unit1"], match["cur2"], match["unit2"], match["cur3"]) if u]
     numbers = [_to_number(match[k]) for k in ("a", "b") if match[k]]
     if not units and max(numbers) < 1_000_000:  # so tran khong don vi ("Java 8", "5 years") khong phai luong
         return None
@@ -59,7 +64,8 @@ def _from_match(match: re.Match) -> Optional[Salary]:
         numbers = [n * 1_000_000 if n < 1000 else n for n in numbers]
     elif "k" in units:
         numbers = [n * 1000 if n < USD_MAX else n for n in numbers]
-    currency = "USD" if any(u in ("$", "usd") for u in units) else ("VND" if units and units != ["k"] else None)
+    # Chi co don vi "k" -> chua ro tien te, de _currency_for doan theo do lon
+    currency = "USD" if any(u in ("$", "usd") for u in units) else ("VND" if set(units) - {"k"} else None)
     if len(numbers) == 2:
         return _finish(numbers[0], numbers[1], currency)
     prefix = (match["prefix"] or "").lower()

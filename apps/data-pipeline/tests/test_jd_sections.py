@@ -48,6 +48,20 @@ def test_english_headings_with_marks_and_curly_apostrophe():
     }
 
 
+def test_careerlink_and_careerviet_requirement_headings():
+    careerlink = "Phát triển API nội bộ.\n* Kinh nghiệm / Kỹ năng chi tiết:\n- 2 năm Java."
+    assert split_sections(careerlink)["requirements"] == "- 2 năm Java."
+    careerviet = (
+        "I. Mô tả công việc:\nVận hành kho dữ liệu.\nII. Tiêu chuẩn tuyển dụng:\n1. Trình độ:\nĐại học CNTT.\n"
+        "2. Kinh nghiệm:\nTối thiểu 2 năm.\nIII. Quyền lợi:\nThưởng quý."
+    )
+    sections = split_sections(careerviet)
+    assert sections["description"] == "Vận hành kho dữ liệu."
+    # tieu de con cua section dang mo giu lai lam noi dung
+    assert sections["requirements"] == "1. Trình độ:\nĐại học CNTT.\n2. Kinh nghiệm:\nTối thiểu 2 năm."
+    assert sections["benefits"] == "Thưởng quý."
+
+
 def test_heading_key_variants():
     assert heading_key("## REQUIREMENTS:") == "requirements"
     assert heading_key("II. Trách nhiệm") == "responsibilities"

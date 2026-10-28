@@ -22,6 +22,10 @@ _HEADINGS = {
         "job requirements", "requirement", "your skills", "your skills and experience", "your skills & experience",
         "qualifications", "skills and experience", "skills & experience", "what we are looking for",
         "what we're looking for",
+        # careerlink "* Kinh nghiệm / Kỹ năng chi tiết:", careerviet "II. Tiêu chuẩn tuyển dụng:" va tieu de con
+        "kinh nghiệm / kỹ năng chi tiết", "tiêu chuẩn tuyển dụng", "yêu cầu bắt buộc", "yêu cầu khác",
+        "knowledge requirements", "kinh nghiệm", "trình độ", "kỹ năng", "kiến thức", "ưu tiên", "nice to have",
+        "your skills & qualifications", "your skills and qualifications",  # topdev
     ),
     "responsibilities": (
         "trách nhiệm", "trách nhiệm công việc", "nhiệm vụ", "responsibilities", "job responsibilities",
@@ -30,7 +34,7 @@ _HEADINGS = {
     ),
     "benefits": (
         "quyền lợi", "quyền lợi được hưởng", "phúc lợi", "chế độ đãi ngộ", "benefits", "why you'll love working here",
-        "what we offer", "what we can offer", "perks", "perks and benefits", "perks & benefits",
+        "what we offer", "what we can offer", "perks", "perks and benefits", "perks & benefits", "benefits for you",
     ),
 }
 _HEADING_TO_KEY = {phrase: key for key, phrases in _HEADINGS.items() for phrase in phrases}
@@ -49,10 +53,13 @@ def split_sections(description: str) -> Dict[str, str]:
     """description_text -> {description | requirements | responsibilities | benefits: noi dung}; section rong bi bo."""
     parts: Dict[str, List[str]] = {}
     current = "description"
+    headed = set()  # section da mo bang mot tieu de
     for line in (description or "").split("\n"):
         key = heading_key(line) if line.strip() else None
-        if key:
+        # Tieu de con cua section dang mo ("1. Trình độ:" duoi "II. Tiêu chuẩn tuyển dụng:") giu lai lam noi dung
+        if key and not (key == current and key in headed):
             current = key
+            headed.add(key)
             continue
         parts.setdefault(current, []).append(line)
     sections = {key: "\n".join(lines).strip() for key, lines in parts.items()}

@@ -36,6 +36,58 @@ def test_graphic_design_job_is_not_it(dictionary, make_raw_jd):
     assert build_record(raw, dictionary) == (None, "not_it")
 
 
+GENERIC_DESCRIPTION = (
+    "Mô tả công việc\n- Hỗ trợ vận hành hệ thống nội bộ của Công ty Phần mềm Sao Mai, xử lý yêu cầu từ các phòng ban.\n"
+    "Yêu cầu\n- Cẩn thận, chủ động, giao tiếp tốt; tốt nghiệp đại học chuyên ngành liên quan.\n"
+    "Quyền lợi\n- Lương tháng 13, bảo hiểm sức khỏe, 15 ngày phép mỗi năm."
+)
+
+
+@pytest.mark.parametrize(
+    "title, skills_raw",
+    [
+        ("Nhân viên IT", ...),  # "IT" viet hoa la tu khoa nghe
+        ("Kỹ sư hệ thống", ...),
+        ("Chuyên viên an toàn thông tin", ...),
+        ("Network Administrator", ...),
+        ("Nhân viên kiểm thử", ...),
+        ("Chuyên viên", ["Java"]),  # the skills_raw co ky nang trong danh muc
+    ],
+)
+def test_it_titles_and_tags_are_kept(dictionary, make_raw_jd, title, skills_raw):
+    raw = make_raw_jd(title=title, skills_raw=skills_raw, description_text=GENERIC_DESCRIPTION)
+    record, reason = build_record(raw, dictionary)
+    assert reason is None and record["title"] == title
+
+
+def test_title_skills_decide_group(dictionary, make_raw_jd):
+    description = GENERIC_DESCRIPTION + "\n- Triển khai trên AWS, Azure, Nginx, Docker, Kubernetes."
+    record, _ = build_record(make_raw_jd(title="Angular Developer", skills_raw=..., description_text=description), dictionary)
+    assert record["group"] == "frontend"  # mo ta nghieng devops nhung tieu de la frontend
+    record, _ = build_record(make_raw_jd(title="Chuyên viên", skills_raw=..., description_text=description), dictionary)
+    assert record["group"] == "devops"  # tieu de khong co ky nang -> nhom nhieu nhat
+
+
+@pytest.mark.parametrize(
+    "title",
+    [
+        "Chuyên viên tư vấn giải pháp phần mềm",  # ban hang / tu van phan mem
+        "Chuyên viên phân tích nghiệp vụ phần mềm",  # BA tieng Viet
+        "Chuyên viên quản lý dự án phần mềm",  # PM tieng Viet
+        "Korean IT Interpreter",
+        "Software Sales Executive",
+        "Giảng viên Công nghệ thông tin",
+        "IT Business Analyst",  # BA / PO / PM ngoai 5 nhom (Clarifications 2026-10-28)
+        "Product Owner (Fintech)",
+        "Technical Project Manager",
+        "BA tiếng Nhật",
+    ],
+)
+def test_out_of_scope_titles_are_not_it_even_with_skills(dictionary, make_raw_jd, title):
+    # mo ta mac dinh khop >= 2 ky nang va skills_raw co NodeJS, van bi loai vi tieu de
+    assert build_record(make_raw_jd(title=title), dictionary) == (None, "not_it")
+
+
 def test_short_non_it_posting_is_not_it_and_short_it_posting_is_missing(dictionary, make_raw_jd):
     short = "Bán hàng tại cửa hàng tiện lợi, ca xoay, thưởng doanh số."
     assert build_record(make_raw_jd(title="Nhân viên bán hàng", description_text=short), dictionary) == (None, "not_it")

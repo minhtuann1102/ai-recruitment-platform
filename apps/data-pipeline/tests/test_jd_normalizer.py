@@ -21,7 +21,8 @@ from pipeline.jd_salary import normalize_salary, parse_salary_text
         ("Junior/Middle React Developer", None, "Junior"),  # tu khoa som nhat
         ("Trưởng nhóm Backend", None, "Lead"),
         ("Engineering Manager", None, "Manager"),
-        ("Backend Developer", "6 months", "Intern"),
+        ("Backend Developer", "6 months", "Junior"),  # duoi 12 thang = fresher -> Junior (Clarifications 2026-10-28)
+        ("Backend Developer", "1 year 6 months", "Junior"),  # 1.5 nam, khong phai 0.5
         ("Backend Developer", "2 năm", "Junior"),
         ("Backend Developer", "36 months", "Mid"),
         ("Backend Developer", "5+ years", "Senior"),
@@ -35,6 +36,26 @@ def test_level(title, experience, expected):
 
 def test_lead_keyword_does_not_match_leading():
     assert normalize_level("Developer at a leading fintech", None) is None
+
+
+@pytest.mark.parametrize(
+    "experience, description, source, expected",
+    [
+        # itviec: experience_raw la nhom tu gan ("10 months") -> bo qua, lay so nam trong mo ta
+        ("10 months", "Yêu cầu:\n- Có 3 năm kinh nghiệm Java", "itviec", "Mid"),
+        ("10 months", "Requirements:\n- At least 5+ years of hands-on experience", "itviec", "Senior"),
+        ("10 months", "Requirements:\n- Good English", "itviec", None),
+        ("10 months", "", "topdev", "Junior"),  # nguon khac van tin experience_raw
+        (None, "Kinh nghiệm: tối thiểu 2 năm", "careerlink", "Junior"),
+        (None, "Với hơn 20 năm kinh nghiệm trong ngành ngân hàng", "careerviet", None),  # so nam cua cong ty
+    ],
+)
+def test_level_from_description_years(experience, description, source, expected):
+    assert normalize_level("Backend Developer", experience, description, source) == expected
+
+
+def test_title_level_beats_description_years():
+    assert normalize_level("Senior Backend Developer", "10 months", "1 năm kinh nghiệm", "itviec") == "Senior"
 
 
 @pytest.mark.parametrize(
@@ -70,6 +91,24 @@ def test_city(locations, expected):
 
 
 @pytest.mark.parametrize(
+    "locations, description, expected",
+    [
+        (["Quận Cầu Giấy"], "", "Hà Nội"),  # careerviet chi ghi quan
+        (["Quận 3"], "", "Hồ Chí Minh"),
+        (["Quận 10"], "", "Hồ Chí Minh"),  # "quan 1" khong khop nham "quan 10"
+        (["Thành Phố Thủ Đức"], "", "Hồ Chí Minh"),
+        (["Quận Hải Châu"], "", "Đà Nẵng"),
+        (["Trụ sở chính"], "Mô tả công việc\nĐịa điểm: Hồ Chí Minh", "Hồ Chí Minh"),
+        (["Quận Cầu Giấy"], "Địa điểm: Hồ Chí Minh", "Hồ Chí Minh"),  # ten thanh pho thang ten quan
+        ([], "Địa điểm làm việc: 25 Trần Hưng Đạo, quận Hoàn Kiếm", "Hà Nội"),
+        ([], "Công ty có văn phòng tại Hà Nội", None),  # chi doc dong dia diem, khong doc ca mo ta
+    ],
+)
+def test_city_fallbacks(locations, description, expected):
+    assert normalize_city(locations, description) == expected
+
+
+@pytest.mark.parametrize(
     "text, expected",
     [
         ("9.000.000 VND - 20.000.000 VND", (9_000_000, 20_000_000, "VND")),
@@ -78,6 +117,9 @@ def test_city(locations, expected):
         ("Up to 2000$", (None, 2000, "USD")),
         ("Up to 60M", (None, 60_000_000, "VND")),
         ("Từ 15 triệu", (15_000_000, None, "VND")),
+        ("1.5k - 2k USD", (1500, 2000, "USD")),  # tien te sau don vi k
+        ("1.5k - 2.5k", (1500, 2500, "USD")),  # chi co k -> doan theo do lon, khong mac dinh VND
+        ("500k VND", (None, None, None)),  # VND duoi 1 trieu: doc sai, bo
     ],
 )
 def test_numeric_salary_text(text, expected):
