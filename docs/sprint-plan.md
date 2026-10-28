@@ -175,7 +175,7 @@ Sprint 5  07/12 ─ 21/12   Polish, Testing & Báo cáo
 
 | # | Story | AC | Bắt buộc |
 |---|---|---|---|
-| S3-AIE-1 | Full agentic E2E + Reporter | Phiên đầy đủ: start → ~15 lượt nextTurn → finalize (code tính điểm, Reporter viết nhận xét) → interview_results | Bắt buộc |
+| S3-AIE-1 | Full agentic E2E + Reporter | Phiên đầy đủ: start → ~15 lượt nextTurn → finalize (code tính điểm, Reporter viết nhận xét) → interview_results. Phần `study_plan` nâng cấp ở S3-DE-6 (Reporter giữ bản hiện có làm dự phòng), chốt 2026-10-24 | Bắt buộc |
 | S3-AIE-2 | Context window management | Trim history để giữ trong token limit. Giữ N turns gần nhất + summary | Bắt buộc |
 | S3-AIE-3 | Error handling + fallback | OpenAI timeout → fallback mock response. Retry 3x exponential backoff | Bắt buộc |
 | S3-AIE-4 | Evaluator calibration | Prompts Evaluator cho scores consistent. Golden set 40–70 mẫu, ±1 band ≥ 80%, độ lệch khoan dung trong [−0.3, +0.3] | Bắt buộc |
@@ -191,6 +191,7 @@ Sprint 5  07/12 ─ 21/12   Polish, Testing & Báo cáo
 | S3-DE-3 | Index textbook vào ai_db | ~5000+ chunks. Coverage: Backend, Frontend, DB, System Design | Bắt buộc |
 | S3-DE-4 | RAG quality evaluation | Test queries, đánh giá relevance. Điều chỉnh chunk_size nếu cần | Bắt buộc |
 | S3-DE-5 | Dedup | Loại bỏ chunks trùng nội dung trước index | Bắt buộc |
+| S3-DE-6 | Lộ trình học sau phỏng vấn (agentic) | Agent có tool, vòng lặp giới hạn, sinh `study_plan` của report finalize từ `improvements` của Reporter: tài liệu + câu luyện truy được về nguồn, dự phòng = `study_plan` của Reporter; đo chất lượng trên bộ phiên mẫu. Spec 016, AIE + FSD đồng ý 2026-10-24 | Bắt buộc |
 
 **Demo:** Phỏng vấn với AI thật — câu hỏi từ RAG, đánh giá GPT-4o-mini, agent quyết định hướng tiếp theo.
 
