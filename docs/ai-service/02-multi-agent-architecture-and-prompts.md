@@ -261,7 +261,7 @@ dùng lại ở các lượt sau, **không phải gọi RAG mỗi lượt** (§9
 tiếng được (có code, nhiều dòng, > 200 ký tự), chỉ giữ câu có ít nhất một từ chung với topic (title, `key_points`,
 `key_concepts`, không tính từ chung của track như "java"), xếp theo độ sát rồi độ khó, lưu tối đa 3 câu vào
 `PlanTopic.bank_questions` (`qa_id`, câu hỏi, độ khó). Lượt `ask_main` của topic đó chọn một câu chưa dùng
-(`state.used_qa_ids`), Interviewer (prompt v2) **chỉ diễn đạt lại** câu đó; `turn.question_source = "bank"`, `turn.qa_id`
+(`state.used_qa_ids`), Interviewer (prompt v2, từ 2026-10-28 là v3) **chỉ diễn đạt lại** câu đó; `turn.question_source = "bank"`, `turn.qa_id`
 và `state.current_qa_id` ghi câu gốc. Lượt sau, Evaluator (prompt v3, luật 11) nhận `reference_answer` = cặp Q&A chuẩn
 theo `qa_id` (cache trong process, trượt thì đọc ai_db, hạn 2 s) và chấm đầy đủ theo ý chính của đáp án đó thay vì
 `key_points` của cả topic; code giới hạn `completeness` theo số ý có quote (1 ý → 2, 3 ý trở lên → 4). Interviewer lỗi
@@ -348,6 +348,13 @@ chứng (§6.3). Band lưu DB được quy đổi `× 2.5` sang thang 0–10 c�
 B trong cùng một class, lời gọi đó có đi qua proxy không, và điều đó ảnh hưởng gì tới REQUIRES_NEW?"*
 
 **Đã cài (2026-10-22):** `app/agents/interviewer.py` (`QuestionSpec`, LLM stream qua `LlmGateway.stream`) và `app/question_stream.py` (fallback, `replace`, kiểm câu). Đầu vào thêm `opening_hint`, `first_turn`; `asked_questions_on_topic` lấy từ `topic_turns` interview-service gửi. Câu dự phòng là `backup_question` (ask_main) hoặc mẫu cố định của `mock_interviewer`.
+
+**Prompt v3 (2026-10-28, `interviewer.v3.md`):** văn nói ngắn hơn: câu hỏi ≤ 25 từ, tổng ≤ 35 từ (thay ≤ 80); tránh
+khuôn "Bạn có thể ... không?", không mở đầu bằng việc nhắc lại lời ứng viên, không khen chê; đầu vào thêm
+`recent_openers` (3 chữ đầu đã bỏ dấu của 4 câu gần nhất trong phiên, lấy từ `state.asked_questions`) để không mở đầu
+trùng. Lượt `hint` giữ nguyên câu đang hỏi và nhận thêm `reference_answer` (đáp án chuẩn của câu vừa hỏi nếu câu đó
+lấy từ kho, khối untrusted, chỉ gửi cho `hint`) để chọn hướng gợi ý; code chặn gợi ý chép ≥ 6 chữ liền từ đáp án
+(`violation` → `answer_leak`, thay bằng câu dự phòng). Có `bank_question` thì `topic` chỉ gửi `title` (bỏ `opening_hint`, `objective`) để Interviewer không bỏ câu kho; `kept_meaning` bỏ từ khuôn câu hỏi khi so. Số đo trước/sau: `plans/reports/eval-261028-2306-interviewer-v3.md`.
 
 ### 3.3.5 Reporter
 
