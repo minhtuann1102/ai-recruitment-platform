@@ -3,16 +3,15 @@
 Mot ban ghi: lam sach (text_cleaning.clean_text) + xoa PII (jd_pii) -> ky nang = canonical(skills_raw) ∪
 find_in_text(tieu de + mo ta) -> loc IT -> chuan hoa truong -> section. Loai voi ly do:
 - missing_field: thieu truong bat buoc, hoac mo ta sau lam sach ngan hon MIN_DESCRIPTION_CHARS (mo ta coi nhu thieu);
-- not_it: tieu de ngoai pham vi (ban hang / tu van, BA / PO / PM), hoac tieu de khong khop ky nang / tu khoa nghe IT,
-  the skills_raw khong co ky nang nao trong danh muc va mo ta khop < 2 ky nang.
+- not_it: khong qua jd_it_filter.is_it_job (FR-028, Clarifications 2026-10-28).
 Dedup (duplicate) lam o jd_record_dedup.py.
 """
 import hashlib
-import re
 import unicodedata
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from .jd_city import normalize_city
+from .jd_it_filter import is_it_job
 from .jd_normalizer import detect_language, normalize_level, normalize_work_type
 from .jd_pii import scrub_jd_pii
 from .jd_salary import normalize_salary
@@ -28,29 +27,6 @@ REQUIRED_RAW_FIELDS = ("source", "source_job_id", "crawled_at", "title", "compan
 SYNTHETIC_SOURCE = "synthetic"
 # Mo ta qua ngan khong du lam posting / chunk (topdev co tin chi ~180 ky tu)
 MIN_DESCRIPTION_CHARS = 200
-MIN_DESCRIPTION_SKILLS = 2  # mo ta khop >= 2 ky nang thi giu du tieu de chung chung
-_IT_TITLE_RE = re.compile(
-    r"(?<![\w])(?:developer|engineer|engineering|lập trình|programmer|tester|testing|qa|qc|kiểm thử|devops|data|"
-    r"software|phần mềm|công nghệ thông tin|cntt|frontend|front-end|backend|back-end|fullstack|full-stack|"
-    r"solution architect|software architect|system admin|sysadmin|it helpdesk|it support|ai|"
-    r"kỹ sư (?:phần mềm|hệ thống|mạng|dữ liệu|cntt|an toàn|bảo mật|ai)|"
-    r"security|an toàn thông tin|bảo mật|pentest(?:er)?|network admin(?:istrator)?|quản trị mạng)(?![\w])",
-    re.IGNORECASE,
-)
-_IT_WORD_RE = re.compile(r"(?<![\w])IT(?![\w])")  # "Nhân viên IT", "IT Staff": phan biet hoa thuong (khong khop "it")
-# Tieu de ngoai pham vi 5 nhom, thang moi tu khoa IT (Clarifications 2026-10-28): ban hang / tu van / dao tao phan mem,
-# va BA / PO / PM / Scrum Master (de sau, du lieu tho van giu de xu ly lai)
-_NON_IT_TITLE_RE = re.compile(
-    r"(?<![\w])(?:(?:pre-?)?sales?|presales?|kinh doanh|bán hàng|telesales|tư vấn|consultant|marketing|"
-    r"business development|account manager|account executive|chăm sóc khách hàng|customer service|giảng viên|"
-    r"giáo viên|lecturer|teacher|trainer|hành chính|phiên dịch|interpreter|comtor|kiểm toán|auditor|field service|"
-    r"business analyst|phân tích nghiệp vụ|product owner|product manager|project manager|quản lý dự án|"
-    r"quản trị dự án|scrum master)(?![\w])",
-    re.IGNORECASE,
-)
-_NON_IT_ABBR_RE = re.compile(r"(?<![\w])(?:BA|PO|PM)(?![\w])")
-
-
 def is_synthetic(raw: Dict) -> bool:
     return bool(raw.get("synthetic")) or raw.get("source") == SYNTHETIC_SOURCE
 
@@ -67,16 +43,6 @@ def content_hash(company: str, title: str, description: str) -> str:
     """SHA-256 cua 'cong ty | tieu de | mo ta' sau NFC, chu thuong, gop khoang trang (FR-013)."""
     joined = " | ".join(" ".join(unicodedata.normalize("NFC", part).lower().split()) for part in (company, title, description))
     return "sha256:" + hashlib.sha256(joined.encode("utf-8")).hexdigest()
-
-
-def is_it_job(title: str, title_skills: List[str], description_skills: List[str],
-              tag_skills: Sequence[str] = ()) -> bool:
-    """FR-028 (+ Clarifications 2026-10-28): tieu de ngoai pham vi -> khong; con lai tieu de khop >= 1 ky nang hoac tu
-    khoa nghe IT, hoac the skills_raw co >= 1 ky nang trong danh muc, hoac mo ta khop >= 2 ky nang."""
-    if _NON_IT_TITLE_RE.search(title) or _NON_IT_ABBR_RE.search(title):
-        return False
-    return (bool(title_skills) or bool(_IT_TITLE_RE.search(title)) or bool(_IT_WORD_RE.search(title))
-            or bool(tag_skills) or len(description_skills) >= MIN_DESCRIPTION_SKILLS)
 
 
 def _skill_names(raw: Dict) -> List[str]:

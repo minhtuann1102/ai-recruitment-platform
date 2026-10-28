@@ -60,6 +60,21 @@ def test_it_titles_and_tags_are_kept(dictionary, make_raw_jd, title, skills_raw)
     assert reason is None and record["title"] == title
 
 
+@pytest.mark.parametrize(
+    "title", ["Senior Security Consultant", "Nhân viên IT - BA ĐÌNH", "IT Support (ca 5 PM - 10 PM)"]
+)
+def test_technical_consultant_and_lookalike_abbreviations_stay_it(dictionary, make_raw_jd, title):
+    record, reason = build_record(make_raw_jd(title=title, description_text=GENERIC_DESCRIPTION), dictionary)
+    assert reason is None
+
+
+def test_generic_skills_alone_do_not_make_a_job_it(dictionary, make_raw_jd):
+    # JD ngan hang nhac "cơ sở dữ liệu", "bảo mật thông tin", the "QA/QC": khong du la IT
+    description = GENERIC_DESCRIPTION + "\n- Bảo mật thông tin khách hàng, cập nhật cơ sở dữ liệu tài sản."
+    raw = make_raw_jd(title="Chuyên viên định giá tài sản", skills_raw=["QA/QC"], description_text=description)
+    assert build_record(raw, dictionary) == (None, "not_it")
+
+
 def test_title_skills_decide_group(dictionary, make_raw_jd):
     description = GENERIC_DESCRIPTION + "\n- Triển khai trên AWS, Azure, Nginx, Docker, Kubernetes."
     record, _ = build_record(make_raw_jd(title="Angular Developer", skills_raw=..., description_text=description), dictionary)
@@ -75,6 +90,7 @@ def test_title_skills_decide_group(dictionary, make_raw_jd):
         "Chuyên viên phân tích nghiệp vụ phần mềm",  # BA tieng Viet
         "Chuyên viên quản lý dự án phần mềm",  # PM tieng Viet
         "Korean IT Interpreter",
+        "Chuyen vien San Pham PHAN TICH NGHIEP VU",  # tieu de khong dau
         "Software Sales Executive",
         "Giảng viên Công nghệ thông tin",
         "IT Business Analyst",  # BA / PO / PM ngoai 5 nhom (Clarifications 2026-10-28)
