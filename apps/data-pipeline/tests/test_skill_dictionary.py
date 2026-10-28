@@ -72,6 +72,30 @@ def test_cpp_does_not_match_c(dictionary):
     assert dictionary.find_in_text("Kinh nghiệm C# / .NET Core") == ["csharp", "dotnet"]
 
 
+def test_alias_followed_by_plus_or_hash_does_not_match():
+    # "c" la TAG_ONLY nen test tren khong cham toi lookahead; kiem lookahead bang bi danh thuong
+    small = SkillDictionary([Skill("foo", "Foo", "Backend", "backend", ())])
+    assert small.find_in_text("Thành thạo Foo") == ["foo"]
+    assert small.find_in_text("Thành thạo Foo++ và Foo#") == []
+
+
+def test_computer_science_degree_is_not_machine_learning(dictionary):
+    assert dictionary.find_in_text("Tốt nghiệp Khoa học máy tính, Công nghệ thông tin") == []
+    assert dictionary.find_in_text("Có kiến thức về học máy và học sâu") == ["deep-learning", "machine-learning"]
+
+
+def test_ts_abbreviation_is_tag_only(dictionary):
+    assert dictionary.find_in_text("Ưu tiên ứng viên có học vị TS. hoặc ThS.") == []
+    assert dictionary.canonical("TS") == "typescript"
+
+
+def test_distinct_tools_keep_their_own_slug(dictionary):
+    text = "Vite, Webpack, Grafana, Prometheus, GitLab CI, Jest, Tableau, Power BI, RAG, NumPy, MariaDB"
+    assert dictionary.find_in_text(text) == [
+        "gitlab-ci", "grafana", "jest", "mariadb", "numpy", "power-bi", "prometheus", "rag", "tableau", "vite", "webpack",
+    ]
+
+
 def test_find_in_text_respects_word_boundaries(dictionary):
     text = "Biết JavaScript, Node.js, React Native; ưu tiên ASP.NET và PostgreSQL."
     assert dictionary.find_in_text(text) == ["dotnet", "javascript", "nodejs", "postgresql", "react-native"]

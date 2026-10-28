@@ -29,7 +29,8 @@
 - {slug: nestjs, name: NestJS, category: Backend, group: backend, aliases: [nest.js, nest js]}
 - {slug: expressjs, name: Express.js, category: Backend, group: backend, aliases: [express, expressjs]}
 - {slug: spring-boot, name: Spring Boot, category: Backend, group: backend, aliases: [springboot, spring, spring framework, spring mvc]}
-- {slug: hibernate, name: Hibernate, category: Backend, group: backend, aliases: [jpa]}
+- {slug: hibernate, name: Hibernate, category: Backend, group: backend, aliases: []}
+- {slug: jpa, name: JPA, category: Backend, group: backend, aliases: [spring data jpa]}
 - {slug: django, name: Django, category: Backend, group: backend, aliases: []}
 - {slug: flask, name: Flask, category: Backend, group: backend, aliases: []}
 - {slug: fastapi, name: FastAPI, category: Backend, group: backend, aliases: [fast api]}
@@ -39,6 +40,9 @@
 - {slug: microservices, name: Microservices, category: System Design, group: backend, aliases: [microservice, micro-service, micro-services, kiến trúc microservices]}
 - {slug: rest-api, name: RESTful API, category: Backend, group: backend, aliases: [rest, restful, rest api, restful api, restful apis, rest apis]}
 - {slug: graphql, name: GraphQL, category: Backend, group: backend, aliases: []}
+- {slug: rpa, name: RPA, category: Backend, group: backend, aliases: [robotic process automation, uipath]}
+- {slug: cobol, name: COBOL, category: Backend, group: backend, aliases: []}
+- {slug: servicenow, name: ServiceNow, category: Backend, group: backend, aliases: []}
 - {slug: grpc, name: gRPC, category: Backend, group: backend, aliases: []}
 - {slug: system-design, name: System Design, category: System Design, group: backend, aliases: [thiết kế hệ thống, software architecture]}
 - {slug: design-patterns, name: Design Patterns, category: System Design, group: backend, aliases: [design pattern]}
@@ -46,7 +50,9 @@
 
 # --- Database / message
 - {slug: sql, name: SQL, category: Database, group: backend, aliases: [t-sql, pl/sql]}
-- {slug: mysql, name: MySQL, category: Database, group: backend, aliases: [mariadb]}
+- {slug: database, name: Database, category: Database, group: backend, aliases: [databases, cơ sở dữ liệu, csdl]}
+- {slug: mysql, name: MySQL, category: Database, group: backend, aliases: []}
+- {slug: mariadb, name: MariaDB, category: Database, group: backend, aliases: []}
 - {slug: postgresql, name: PostgreSQL, category: Database, group: backend, aliases: [postgres, postgre, postgre sql]}
 - {slug: sql-server, name: SQL Server, category: Database, group: backend, aliases: [mssql, ms sql, microsoft sql server]}
 - {slug: oracle, name: Oracle, category: Database, group: backend, aliases: [oracle db, oracle database]}
@@ -69,7 +75,8 @@
 - {slug: jquery, name: jQuery, category: Frontend, group: frontend, aliases: []}
 - {slug: tailwindcss, name: Tailwind CSS, category: Frontend, group: frontend, aliases: [tailwind]}
 - {slug: sass, name: Sass, category: Frontend, group: frontend, aliases: [scss]}
-- {slug: webpack, name: Webpack, category: Frontend, group: frontend, aliases: [vite]}
+- {slug: webpack, name: Webpack, category: Frontend, group: frontend, aliases: []}
+- {slug: vite, name: Vite, category: Frontend, group: frontend, aliases: [vitejs]}
 
 # --- Mobile
 - {slug: android, name: Android, category: Mobile, group: mobile_fullstack, aliases: [android sdk]}
@@ -89,36 +96,64 @@
 - {slug: git, name: Git, category: DevOps, group: devops, aliases: [github, gitlab, bitbucket]}
 - {slug: ci-cd, name: CI/CD, category: DevOps, group: devops, aliases: [cicd, ci / cd, continuous integration]}
 - {slug: jenkins, name: Jenkins, category: DevOps, group: devops, aliases: []}
-- {slug: github-actions, name: GitHub Actions, category: DevOps, group: devops, aliases: [gitlab ci]}
+- {slug: github-actions, name: GitHub Actions, category: DevOps, group: devops, aliases: []}
+- {slug: gitlab-ci, name: GitLab CI, category: DevOps, group: devops, aliases: [gitlab ci/cd, gitlab-ci/cd]}
 - {slug: terraform, name: Terraform, category: DevOps, group: devops, aliases: []}
 - {slug: ansible, name: Ansible, category: DevOps, group: devops, aliases: []}
 - {slug: nginx, name: Nginx, category: DevOps, group: devops, aliases: []}
-- {slug: prometheus, name: Prometheus, category: DevOps, group: devops, aliases: [grafana]}
-- {slug: networking, name: Networking, category: DevOps, group: devops, aliases: [tcp/ip, mạng máy tính]}
-- {slug: devops, name: DevOps, category: DevOps, group: devops, aliases: [sre]}
+- {slug: prometheus, name: Prometheus, category: DevOps, group: devops, aliases: []}
+- {slug: grafana, name: Grafana, category: DevOps, group: devops, aliases: []}
+- {slug: networking, name: Networking, category: DevOps, group: devops, aliases: [tcp/ip, mạng máy tính, network, networks, quản trị mạng, hạ tầng mạng]}
+- {slug: cisco, name: Cisco, category: DevOps, group: devops, aliases: [ccna, ccnp]}
+- {slug: it-infrastructure, name: IT Infrastructure, category: DevOps, group: devops, aliases: [hạ tầng cntt, hạ tầng công nghệ thông tin, it infrastructure]}
+- {slug: it-support, name: IT Support, category: DevOps, group: devops, aliases: [it helpdesk, helpdesk, help desk, technical support, hỗ trợ kỹ thuật, it operation, it operations]}
+- {slug: cloud-computing, name: Cloud Computing, category: Cloud, group: devops, aliases: [cloud, điện toán đám mây]}
+- {slug: information-security, name: Information Security, category: DevOps, group: devops, aliases: [security, it security, cybersecurity, cyber security, an toàn thông tin, bảo mật thông tin, an ninh mạng, system security, cloud security, network security]}
+- {slug: penetration-testing, name: Penetration Testing, category: DevOps, group: devops, aliases: [pentest, penetration test, kiểm thử xâm nhập]}
+- {slug: devops, name: DevOps, category: DevOps, group: devops, aliases: []}
+- {slug: sre, name: SRE, category: DevOps, group: devops, aliases: [site reliability engineering]}
 
 # --- Testing (nhom devops: chat luong + phat hanh)
-- {slug: manual-testing, name: Manual Testing, category: Testing, group: devops, aliases: [manual test, kiểm thử thủ công]}
-- {slug: automation-testing, name: Automation Testing, category: Testing, group: devops, aliases: [automation test, test automation, kiểm thử tự động]}
+- {slug: software-testing, name: Software Testing, category: Testing, group: devops, aliases: [qa, qc, qa/qc, qa qc, tester, software testing, kiểm thử phần mềm, kiểm thử, quality assurance]}
+- {slug: manual-testing, name: Manual Testing, category: Testing, group: devops, aliases: [manual test, manual tester, kiểm thử thủ công]}
+- {slug: automation-testing, name: Automation Testing, category: Testing, group: devops, aliases: [automation test, automation tester, test automation, kiểm thử tự động]}
 - {slug: selenium, name: Selenium, category: Testing, group: devops, aliases: []}
-- {slug: cypress, name: Cypress, category: Testing, group: devops, aliases: [playwright]}
-- {slug: jmeter, name: JMeter, category: Testing, group: devops, aliases: [performance testing]}
-- {slug: unit-testing, name: Unit Testing, category: Testing, group: devops, aliases: [unit test, junit, jest, pytest]}
+- {slug: cypress, name: Cypress, category: Testing, group: devops, aliases: []}
+- {slug: playwright, name: Playwright, category: Testing, group: devops, aliases: []}
+- {slug: jmeter, name: JMeter, category: Testing, group: devops, aliases: []}
+- {slug: performance-testing, name: Performance Testing, category: Testing, group: devops, aliases: [performance test, load testing, kiểm thử hiệu năng]}
+- {slug: unit-testing, name: Unit Testing, category: Testing, group: devops, aliases: [unit test]}
+- {slug: junit, name: JUnit, category: Testing, group: devops, aliases: []}
+- {slug: jest, name: Jest, category: Testing, group: devops, aliases: []}
+- {slug: pytest, name: pytest, category: Testing, group: devops, aliases: []}
 
 # --- Data / AI
+- {slug: artificial-intelligence, name: AI, category: AI/ML, group: ai_data, aliases: [ai, artificial intelligence, trí tuệ nhân tạo]}
 - {slug: machine-learning, name: Machine Learning, category: AI/ML, group: ai_data, aliases: [ml, học máy]}
 - {slug: deep-learning, name: Deep Learning, category: AI/ML, group: ai_data, aliases: [học sâu]}
 - {slug: nlp, name: NLP, category: AI/ML, group: ai_data, aliases: [natural language processing, xử lý ngôn ngữ tự nhiên]}
-- {slug: computer-vision, name: Computer Vision, category: AI/ML, group: ai_data, aliases: [opencv, thị giác máy tính]}
-- {slug: llm, name: LLM, category: AI/ML, group: ai_data, aliases: [large language model, large language models, generative ai, genai, rag]}
-- {slug: tensorflow, name: TensorFlow, category: AI/ML, group: ai_data, aliases: [keras]}
+- {slug: computer-vision, name: Computer Vision, category: AI/ML, group: ai_data, aliases: [thị giác máy tính]}
+- {slug: opencv, name: OpenCV, category: AI/ML, group: ai_data, aliases: []}
+- {slug: llm, name: LLM, category: AI/ML, group: ai_data, aliases: [large language model, large language models]}
+- {slug: generative-ai, name: Generative AI, category: AI/ML, group: ai_data, aliases: [genai, gen ai]}
+- {slug: rag, name: RAG, category: AI/ML, group: ai_data, aliases: [retrieval-augmented generation, retrieval augmented generation]}
+- {slug: tensorflow, name: TensorFlow, category: AI/ML, group: ai_data, aliases: []}
+- {slug: keras, name: Keras, category: AI/ML, group: ai_data, aliases: []}
 - {slug: pytorch, name: PyTorch, category: AI/ML, group: ai_data, aliases: []}
 - {slug: scikit-learn, name: scikit-learn, category: AI/ML, group: ai_data, aliases: [sklearn]}
-- {slug: pandas, name: Pandas, category: Data, group: ai_data, aliases: [numpy]}
+- {slug: pandas, name: Pandas, category: Data, group: ai_data, aliases: []}
+- {slug: numpy, name: NumPy, category: Data, group: ai_data, aliases: []}
 - {slug: spark, name: Apache Spark, category: Data, group: ai_data, aliases: [pyspark, apache spark]}
 - {slug: hadoop, name: Hadoop, category: Data, group: ai_data, aliases: [hive, hdfs]}
 - {slug: airflow, name: Airflow, category: Data, group: ai_data, aliases: [apache airflow]}
 - {slug: etl, name: ETL, category: Data, group: ai_data, aliases: [elt, data pipeline]}
-- {slug: data-warehouse, name: Data Warehouse, category: Data, group: ai_data, aliases: [bigquery, snowflake, redshift]}
-- {slug: power-bi, name: Power BI, category: Data, group: ai_data, aliases: [powerbi, tableau, looker]}
+- {slug: data-engineering, name: Data Engineering, category: Data, group: ai_data, aliases: [data engineer, kỹ sư dữ liệu]}
+- {slug: data-governance, name: Data Governance, category: Data, group: ai_data, aliases: [data quality, data steward, data stewardship, quản trị dữ liệu, chất lượng dữ liệu]}
+- {slug: data-warehouse, name: Data Warehouse, category: Data, group: ai_data, aliases: [kho dữ liệu]}
+- {slug: bigquery, name: BigQuery, category: Data, group: ai_data, aliases: [google bigquery]}
+- {slug: snowflake, name: Snowflake, category: Data, group: ai_data, aliases: []}
+- {slug: redshift, name: Redshift, category: Data, group: ai_data, aliases: [amazon redshift]}
+- {slug: power-bi, name: Power BI, category: Data, group: ai_data, aliases: [powerbi]}
+- {slug: tableau, name: Tableau, category: Data, group: ai_data, aliases: []}
+- {slug: looker, name: Looker, category: Data, group: ai_data, aliases: [looker studio]}
 - {slug: data-analysis, name: Data Analysis, category: Data, group: ai_data, aliases: [data analytics, phân tích dữ liệu]}

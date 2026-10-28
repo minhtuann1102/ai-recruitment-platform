@@ -17,9 +17,11 @@ from .settings import SKILL_DICTIONARY_PATH
 
 GROUPS = ("backend", "frontend", "mobile_fullstack", "devops", "ai_data")  # thu tu = thu tu hoa cua group_of
 _SLUG_RE = re.compile(r"^[a-z0-9][a-z0-9+#.-]*$")
-# Bi danh trung tu thuong ("go live", "the rest of", "spring 2026", "Chị C."): chi nhan khi la the ky nang
-# (skills_raw), khong nhan khi gap trong tieu de / mo ta
-TAG_ONLY_TERMS = frozenset({"c", "r", "go", "rest", "express", "spring", "swift"})
+# Bi danh trung tu thuong ("go live", "the rest of", "spring 2026", "Chị C.", "TS." = tien si, "ai" = "who" tieng
+# Viet): chi nhan khi la the ky nang (skills_raw), khong nhan khi gap trong tieu de / mo ta
+TAG_ONLY_TERMS = frozenset({"c", "r", "go", "rest", "express", "spring", "swift", "ts", "ai"})
+# Bi danh nam trong cum tu khac nghia: "học máy" trong "Khoa học máy tính" (bang Computer Science) khong phai ML
+_BLOCKED_BEFORE = {"học máy": re.compile(r"khoa\s+$", re.IGNORECASE)}
 
 
 class SkillDictionaryError(ValueError):
@@ -100,14 +102,23 @@ class SkillDictionary:
         if not text or self._text_re is None:
             return []
         text = unicodedata.normalize("NFC", text)
-        return sorted({self._alias_to_slug[_key(m.group(0))] for m in self._text_re.finditer(text)})
+        found = set()
+        for match in self._text_re.finditer(text):
+            term = _key(match.group(0))
+            blocked = _BLOCKED_BEFORE.get(term)
+            if blocked and blocked.search(text[max(0, match.start() - 12):match.start()]):
+                continue
+            found.add(self._alias_to_slug[term])
+        return sorted(found)
 
-    def group_of(self, slugs: Iterable[str]) -> Optional[str]:
-        """Nhom xuat hien nhieu nhat; hoa thi theo thu tu GROUPS; khong co ky nang -> None."""
+    def group_of(self, slugs: Iterable[str], tie_break: Iterable[str] = ()) -> Optional[str]:
+        """Nhom xuat hien nhieu nhat; hoa thi nhom nhieu hon trong tie_break, roi theo thu tu GROUPS;
+        khong co ky nang -> None."""
         counts = Counter(self.skills[s].group for s in slugs if s in self.skills)
         if not counts:
             return None
-        return max(GROUPS, key=lambda g: (counts[g], -GROUPS.index(g)))
+        ties = Counter(self.skills[s].group for s in tie_break if s in self.skills)
+        return max(GROUPS, key=lambda g: (counts[g], ties[g], -GROUPS.index(g)))
 
     def name_of(self, slug: str) -> str:
         return self.skills[slug].name if slug in self.skills else slug
