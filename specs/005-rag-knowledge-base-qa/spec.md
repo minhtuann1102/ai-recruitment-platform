@@ -5,7 +5,7 @@
 
 **Created**: 2026-10-13
 
-**Status**: Draft — đã clarify, chờ review PR (AIE + FSD duyệt đổi AC S1-DE-1)
+**Status**: Merged 2026-10-23 (PR #6, #7, #31, #28, #29); kho dùng chung Supabase (PR #32); golden set + eval chuyển AIE; còn T041, T047, T049, T053
 
 **Owner**: DE (chính) + AIE (đồng sở hữu, review spec) — **Sprint**: 1 (12/10 → 26/10/2026)
 
@@ -88,6 +88,18 @@ knowledge_chunks và verify retrieval relevant."
   mẫu cặp chuyển sang Đạt theo rubric v2, phần còn lại chấp nhận theo báo cáo. Chỉ áp cho cặp hard tự viết; seed chuyển
   thể/dịch và dữ liệu crawl giữ quy tắc cũ. Kết quả duyệt: `plans/reports/qa-review/results-*.json` tại commit `eac9b8e`
   (nhánh `chore/qa-review-skill`). Báo AIE.
+
+### Session 2026-10-24
+
+- Q: Q1 của AIE (`context/next-phase-plan.md`): bỏ 1.145 cặp CC-BY-NC-ND (`bregman-arie/devops-exercises`, bản dịch là
+  bản sửa đổi) và 2.147 cặp `unknown`? → A (DE chốt): **Giữ hết, chỉ dùng nội bộ** — xác nhận lại quyết định
+  2026-10-19. Nội dung crawl chỉ nằm ở `data/raw/` (gitignore) và `ai_db` dùng chung của team, dùng cho demo đồ án;
+  không công bố lại; báo cáo chỉ trích ví dụ có ghi nguồn. Tra GitHub 2026-10-24: `unknown` là repo không có file giấy
+  phép (`learning-zone/*`, `sudheerj/javascript-interview-questions`, `Devinterview-io/*`), trừ
+  `learning-zone/docker-and-kubernetes-basics` (85 cặp) thực ra là MIT → sửa nhãn ở lần thu thập sau. Khi mở staging
+  công khai (014) MUST lọc bỏ cặp ND và cặp không có giấy phép.
+- Q: Ai duyệt dữ liệu Q&A (bản dịch, gán lại topic, nhãn độ khó, câu hard)? → A: **DE duyệt toàn bộ**, gồm cả 440 dòng
+  `data/reviews/translation-review.csv` (T053), không chia cho thành viên khác.
 
 ## User Scenarios & Testing *(mandatory)*
 
