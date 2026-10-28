@@ -14,6 +14,7 @@ from .crawl_command import run_crawl
 from .db_commands import run_index, run_search
 from .enrich_command import run_enrich
 from .jd_crawl_command import run_crawl_jd
+from .jd_process_command import run_process_jd
 from .offline_commands import run_process, run_validate
 from .review_sample_command import run_review_sample
 from .seed_review_command import run_approve_seed, run_review_seed
@@ -45,6 +46,7 @@ HANDLERS: Dict[str, Handler] = {
     "search": run_search,
     "crawl": run_crawl,
     "crawl-jd": run_crawl_jd,
+    "process-jd": run_process_jd,
 }
 
 
@@ -117,6 +119,8 @@ def build_parser() -> argparse.ArgumentParser:
     crawl_jd.add_argument("--max-pages", type=int, default=20, help="toi da trang danh sach moi nguon")
     crawl_jd.add_argument("--max-jobs", type=int, default=150, help="toi da trang chi tiet moi nguon")
     crawl_jd.add_argument("--delay", type=float, default=2.0, help="giay nghi toi thieu giua hai request (FR-004)")
+
+    sub.add_parser("process-jd", help="raw JD -> JD chuan hoa + chunk + bao cao phan bo, offline (spec 009 US2)")
     return parser
 
 
