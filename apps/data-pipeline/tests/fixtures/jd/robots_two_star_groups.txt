@@ -1,0 +1,8 @@
+# Tu soan, mo phong robots.txt co hai nhom "User-Agent: *" (spec 009 "Kiem tra nguon crawl").
+User-Agent: *
+Disallow: /subscriptions/new
+
+User-Agent: *
+Allow: /
+
+Sitemap: https://nguon-gia.example/sitemap.xml
