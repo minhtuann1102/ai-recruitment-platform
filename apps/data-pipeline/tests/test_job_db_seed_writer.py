@@ -61,3 +61,13 @@ def test_employer_rows_have_no_person_data_and_link_profile():
     assert user["role"] == "Employer" and user["email_verified"] is True and user["password"] == "$2b$12$hash"
     assert set(user) == {"id", "email", "password", "role", "email_verified", "created_at", "updated_at"}
     assert profile["user_id"] == user["id"] and profile["company_name"] == "Công Ty CP Đất Việt"
+
+
+def test_selector_key_matches_sql_idempotency_key():
+    """posting_key cua selector va khoa (employer_id, title, md5(description)) cua SQL khong duoc lech nhau."""
+    from pipeline.job_seed_selector import posting_key
+
+    jd = _jd()
+    row = posting_row(jd, "emp-1", "lvl", NOW)
+    assert posting_key(jd)[1:] == (row["title"], row["description"])
+    assert employer_email(jd["company"]) == f"seed-{posting_key(jd)[0]}@{SEED_EMAIL_DOMAIN}"

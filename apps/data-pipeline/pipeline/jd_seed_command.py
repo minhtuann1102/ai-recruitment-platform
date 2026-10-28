@@ -2,15 +2,16 @@
 
 Preflight schema user_db + job_db -> chon posting tu JD_NORMALIZED_PATH (crawl truoc) -> Employer seed (user_db, commit
 truoc) -> posting + job_skills (job_db) -> manifest JD_SEED_MANIFEST_PATH. `--clean` chi xoa du lieu cua Employer seed.
-Ma thoat: 0; 1 chua co JD chuan hoa / thieu JD dat dieu kien; 2 thieu USER_DB_URL / JOB_DB_URL, khong ket noi duoc,
+Ma thoat: 0; 1 `--count` < 1, chua co JD chuan hoa, thieu JD dat dieu kien hoac JD da chon co du lieu loi; 2 thieu
+USER_DB_URL / JOB_DB_URL, khong ket noi duoc, loi DB khi ghi (job_db rollback; Employer seed da commit thi lan sau dung lai),
 schema thieu / khac contract, hoac chua chot cach tao password Employer seed (T039).
 """
 import argparse
 import json
 import sys
 from collections import Counter
-from datetime import datetime, timezone
-from typing import Dict, List, Optional
+from datetime import date, datetime, timezone
+from typing import Container, Dict, List, Optional
 
 import psycopg
 
@@ -47,6 +48,7 @@ def _clean(user_conn, job_conn) -> int:
     job_conn.commit()
     employers = clean_employers(user_conn, employer_ids)
     user_conn.commit()
+    JD_SEED_MANIFEST_PATH.unlink(missing_ok=True)  # manifest chi dung khi con du lieu seed
     print(f"da xoa {postings} posting, {employers} Employer seed")
     return EXIT_OK
 
@@ -60,7 +62,26 @@ def _print_summary(selected: List[Dict], manifest: List[Dict], employers: int) -
         print(f"  {axis}: " + ", ".join(f"{value} {n}" for value, n in sorted(counts.items(), key=lambda kv: -kv[1])))
 
 
+def input_problems(selected: List[Dict], known_slugs: Container[str]) -> List[str]:
+    """Loi du lieu cua JD da chon phai bat truoc moi lenh ghi: ky nang ngoai danh muc, ngay khong dung ISO."""
+    problems = []
+    for jd in selected:
+        unknown = [slug for slug in jd["skills"] if slug not in known_slugs]
+        if unknown:
+            problems.append(f"{jd['jd_id']}: ky nang khong co trong danh muc: {', '.join(unknown)}")
+        for name in ("deadline", "date_posted"):
+            try:
+                if jd.get(name):
+                    date.fromisoformat(jd[name])
+            except (TypeError, ValueError):
+                problems.append(f"{jd['jd_id']}: {name} khong dung dinh dang YYYY-MM-DD: {jd[name]!r}")
+    return problems
+
+
 def seed_jobs(args: argparse.Namespace, user_conn, job_conn, password_hash: Optional[PasswordHashFn], now: datetime) -> int:
+    if args.count < 1:
+        print("--count phai >= 1", file=sys.stderr)
+        return EXIT_INPUT_ERROR
     problems = schema_problems({"user_db": user_conn, "job_db": job_conn})
     if problems:
         print("schema khong khop contract, khong ghi:\n  " + "\n  ".join(problems), file=sys.stderr)
@@ -81,18 +102,16 @@ def seed_jobs(args: argparse.Namespace, user_conn, job_conn, password_hash: Opti
     except (OSError, ValueError, SkillDictionaryError) as exc:
         print(f"loi doc du lieu: {exc}", file=sys.stderr)
         return EXIT_INPUT_ERROR
-    if selection.errors:
-        print("khong du JD dat dieu kien seed:\n  " + "\n  ".join(selection.errors), file=sys.stderr)
+    problems = selection.errors or input_problems(selection.selected, dictionary.skills)
+    if problems:
+        print("khong du JD dat dieu kien seed:\n  " + "\n  ".join(problems), file=sys.stderr)
         return EXIT_INPUT_ERROR
     for warning in selection.warnings:
         print(f"canh bao: {warning}")
 
     employer_ids = ensure_employers(user_conn, {jd["company"] for jd in selection.selected}, password_hash, now)
     user_conn.commit()  # user_db truoc: chay lai sau loi job_db se dung lai Employer theo email
-    slugs = {slug for jd in selection.selected for slug in jd["skills"]}
-    skill_ids = ensure_skills(job_conn, slugs, dictionary, now)
-    if slugs - set(skill_ids):
-        print(f"canh bao: skills trung ten khac slug, khong gan: {', '.join(sorted(slugs - set(skill_ids)))}")
+    skill_ids = ensure_skills(job_conn, {slug for jd in selection.selected for slug in jd["skills"]}, dictionary, now)
     items = [
         (jd, posting_row(jd, employer_ids[jd["company"]], levels[jd["level"]], now)) for jd in selection.selected
     ]
@@ -109,6 +128,6 @@ def run_seed_jobs(args: argparse.Namespace) -> int:
         settings = require_seed_settings()
         with psycopg.connect(settings.user_db_url) as user_conn, psycopg.connect(settings.job_db_url) as job_conn:
             return seed_jobs(args, user_conn, job_conn, SEED_PASSWORD_HASH, datetime.now(timezone.utc))
-    except (ConfigError, psycopg.OperationalError) as exc:
+    except (ConfigError, psycopg.Error) as exc:  # loi DB khi ghi (rang buoc, kieu, quyen) cung thoat 2, da rollback
         print(f"loi: {exc}", file=sys.stderr)
         return EXIT_PREFLIGHT_ERROR

@@ -24,6 +24,8 @@ EXPECTED_COLUMNS: Dict[str, Dict[str, Tuple[str, ...]]] = {
         "experience_levels": ("id", "name"),
     },
 }
+# Bang seed chi doc: chi kiem co cot, khong kiem cot NOT NULL (vd experience_levels.sort_order cua migration that)
+READ_ONLY_TABLES = frozenset({"experience_levels"})
 
 # bang -> {cot: True neu NOT NULL va khong co default}
 ActualColumns = Dict[str, Dict[str, bool]]
@@ -68,14 +70,19 @@ def read_columns(conn, tables: Iterable[str]) -> ActualColumns:
     return actual
 
 
+def db_problems(db: str, actual: ActualColumns) -> List[str]:
+    """Loi schema cua mot DB so voi EXPECTED_COLUMNS[db]; cot bat buoc chi kiem o bang seed ghi."""
+    expected = EXPECTED_COLUMNS[db]
+    written = {table: columns for table, columns in expected.items() if table not in READ_ONLY_TABLES}
+    return [f"{db}: thieu {name}" for name in missing_columns(expected, actual)] + [
+        f"{db}: {name} NOT NULL khong co default, seed khong co gia tri"
+        for name in unfilled_required_columns(written, actual)
+    ]
+
+
 def schema_problems(connections: Dict[str, object]) -> List[str]:
     """Loi schema cua moi DB trong EXPECTED_COLUMNS, `connections` = {'user_db': conn, 'job_db': conn}; rong = ghi duoc."""
     problems = []
     for db, expected in EXPECTED_COLUMNS.items():
-        actual = read_columns(connections[db], expected)
-        problems.extend(f"{db}: thieu {name}" for name in missing_columns(expected, actual))
-        problems.extend(
-            f"{db}: {name} NOT NULL khong co default, seed khong co gia tri"
-            for name in unfilled_required_columns(expected, actual)
-        )
+        problems.extend(db_problems(db, read_columns(connections[db], expected)))
     return problems

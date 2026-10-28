@@ -91,19 +91,26 @@ def ensure_employers(user_conn, companies: Iterable[str], password_hash: Passwor
 
 
 def ensure_skills(job_conn, slugs: Iterable[str], dictionary: SkillDictionary, now: datetime) -> Dict[str, str]:
-    """{slug: id}; slug chua co trong job_db.skills thi them tu danh muc. ON CONFLICT DO NOTHING bo qua ca trung
-    `name` (UNIQUE theo contract): slug do vang mat trong ket qua, posting khong gan ky nang do."""
+    """{slug danh muc: id trong job_db.skills}, moi slug deu co id. Tra theo slug truoc; khong co thi tra theo ten
+    (job-service co the da co ky nang cung ten khac slug, `name` UNIQUE theo contract) va dung lai; khong co nua moi
+    them tu danh muc. Kiem truoc khi them nen chay lai khong tao ban trung, ke ca khi `slug` khong co UNIQUE."""
     slugs = sorted(set(slugs))
     with job_conn.cursor() as cur:
-        for slug in slugs:
-            skill = dictionary.skills[slug]
-            cur.execute(
-                "INSERT INTO skills (id, name, slug, category, created_at) VALUES (%s, %s, %s, %s, %s)"
-                " ON CONFLICT DO NOTHING",
-                (str(uuid.uuid4()), skill.name, slug, skill.category, now),
-            )
         cur.execute("SELECT slug, id FROM skills WHERE slug = ANY(%s)", (slugs,))
-        return {slug: str(skill_id) for slug, skill_id in cur.fetchall()}
+        ids = {slug: str(skill_id) for slug, skill_id in cur.fetchall()}
+        for slug in (s for s in slugs if s not in ids):
+            skill = dictionary.skills[slug]
+            cur.execute("SELECT id FROM skills WHERE lower(name) = lower(%s)", (skill.name,))
+            found = cur.fetchone()
+            if found:
+                ids[slug] = str(found[0])
+                continue
+            ids[slug] = str(uuid.uuid4())
+            cur.execute(
+                "INSERT INTO skills (id, name, slug, category, created_at) VALUES (%s, %s, %s, %s, %s)",
+                (ids[slug], skill.name, slug, skill.category, now),
+            )
+    return ids
 
 
 def insert_postings(job_conn, items: List[Tuple[Dict, Dict]], skill_ids: Dict[str, str]) -> List[Dict]:
@@ -119,7 +126,7 @@ def insert_postings(job_conn, items: List[Tuple[Dict, Dict]], skill_ids: Dict[st
             posting_id = str(found[0]) if found else str(uuid.uuid4())
             if not found:
                 _insert(cur, "job_postings", {"id": posting_id, **row})
-                for slug in dict.fromkeys(slug for slug in jd["skills"] if slug in skill_ids):
+                for slug in dict.fromkeys(jd["skills"]):
                     cur.execute("INSERT INTO job_skills (job_id, skill_id) VALUES (%s, %s)", (posting_id, skill_ids[slug]))
             manifest.append({
                 "jd_id": jd["jd_id"], "posting_id": posting_id, "employer_id": row["employer_id"],
