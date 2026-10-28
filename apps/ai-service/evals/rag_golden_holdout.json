@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "held-out: h01-h08 viet 2026-10-24 sau khi chot tu dien; h09-h32 viet 2026-10-24 TRUOC thu nghiem query rewrite va doi model embedding; DE (minhtuann1102) duyet nhan 2026-10-28 (005 T041): 32/32 dung, khong sua nhan",
+  "status": "held-out: h01-h08 viet 2026-10-24 sau khi chot tu dien; h09-h32 viet 2026-10-24 TRUOC thu nghiem query rewrite va doi model embedding; DE (minhtuann1102) duyet nhan 2026-10-28 (005 T041): 32/32 dung, khong sua nhan; AIE (thangp97) 2026-10-28: viet lai h29, h30 cho khong chep cau hoi goc (cho DE duyet lai)",
   "corpus": "de_interview_qa",
   "k": 5,
   "groups": {
@@ -234,18 +234,16 @@
     {
       "id": "h29",
       "group": "vi",
-      "query": "Bảng điều khiển bị đơ hoàn toàn khi xử lý mảng hai trăm nghìn phần tử dù đã chia nhỏ từng lô",
+      "query": "Giao diện treo cứng, bấm không ăn và màn hình không cập nhật khi duyệt một danh sách cực lớn, dù mã đã cắt việc thành nhiều phần nối đuôi nhau bất đồng bộ",
       "relevant": ["de-qa-1250"],
-      "filters": {},
-      "approved_by": "minhtuann1102"
+      "filters": {}
     },
     {
       "id": "h30",
       "group": "vi",
-      "query": "Ô tìm kiếm gợi ý đôi khi hiện kết quả của từ khóa cũ còn biểu tượng đang tải quay mãi không dừng",
+      "query": "Người dùng gõ liên tục vào khung tra cứu thì phần đề xuất lúc khớp với chữ đã gõ trước đó, còn máy chủ trả lời chậm thì vòng chờ cứ xoay không tắt",
       "relevant": ["de-qa-1251"],
-      "filters": {},
-      "approved_by": "minhtuann1102"
+      "filters": {}
     },
     {
       "id": "h31",

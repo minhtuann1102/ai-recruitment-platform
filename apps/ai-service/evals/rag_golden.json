@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "DE (minhtuann1102) duyet nhan 2026-10-28 (005 T041): 24/24 qa_id ton tai, category khop filters; g02 them de-qa-1016 (query khong noi ngon ngu, cap Node tra loi tuong duong cap Java); g21 viet lai query vi query cu mau thuan dap an de-qa-1000 (libuv threadpool bao hoa, khong phai event loop bi chan); query moi do DE viet nen chua co approved_by, cho AIE xac nhan. AIE soan 2026-10-22; doi qa_id thi phai sua file nay",
+  "status": "DE (minhtuann1102) duyet nhan 2026-10-28 (005 T041): 24/24 qa_id ton tai, category khop filters; g02 them de-qa-1016 (query khong noi ngon ngu, cap Node tra loi tuong duong cap Java); g21 viet lai query vi query cu mau thuan dap an de-qa-1000 (libuv threadpool bao hoa, khong phai event loop bi chan); query moi do DE viet nen chua co approved_by, cho AIE xac nhan. AIE soan 2026-10-22; doi qa_id thi phai sua file nay; AIE (thangp97) 2026-10-28: dong y g21 (approved_by), viet lai g22, g24 cho khong chep cau hoi goc (cho DE duyet lai)",
   "corpus": "de_interview_qa",
   "k": 5,
   "groups": {
@@ -176,15 +176,15 @@
       "group": "no_diacritics",
       "query": "dich vu node gan nhu khong ton cpu ma cac yeu cau bam mat khau va mo tep van phai xep hang cho",
       "relevant": ["de-qa-1000"],
-      "filters": {}
+      "filters": {},
+      "approved_by": "thangp97"
     },
     {
       "id": "g22",
       "group": "no_diacritics",
-      "query": "thiet ke access token va refresh token co the thu hoi phien",
+      "query": "nguoi dung bam thoat hoac bi cam thi moi phien dang mo phai mat quyen ngay, lam sao nhan ra chuoi gia han bi ke gian lay mat khi xac thuc bang jwt",
       "relevant": ["de-qa-1020", "de-qa-1112"],
-      "filters": {},
-      "approved_by": "minhtuann1102"
+      "filters": {}
     },
     {
       "id": "g23",
@@ -197,10 +197,9 @@
     {
       "id": "g24",
       "group": "no_diacritics",
-      "query": "test e2e playwright fail ngau nhien tren ci",
+      "query": "kich ban kiem thu trinh duyet tu dong luc qua luc truot tren may build nhung chay o may ca nhan luon qua, chua tan goc the nao thay vi ngu cho va chay lai",
       "relevant": ["de-qa-1256"],
-      "filters": {},
-      "approved_by": "minhtuann1102"
+      "filters": {}
     }
   ]
 }
