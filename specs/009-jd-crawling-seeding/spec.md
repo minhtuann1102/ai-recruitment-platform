@@ -136,6 +136,13 @@ Sau review `jd-process` và chạy `process-jd` trên 515 JD crawl thật (2026-
   machine learning.
 - Q: Mô tả quá ngắn? → A: Giữ luật của bản cài đặt: mô tả sau làm sạch < 200 ký tự → `missing_field` (topdev có tin
   ~180 ký tự). DE chấp nhận.
+- Q: Bù synthetic tới 500 JD (SC-001) hay chỉ tới sàn đa dạng? → A: **Chỉ bù sàn đa dạng của FR-022** (mỗi nhóm kỹ
+  năng, mỗi cấp Junior / Mid / Senior, mỗi thành phố Hà Nội / Hồ Chí Minh / Đà Nẵng ≥ 20 JD) = bước 2 của T030,
+  `synth-jd --target 0`. Mục tiêu "≥ 500 JD" của SC-001 hạ xuống: 341 JD crawl + 24 synthetic = 365 JD, đủ cho 200
+  posting seed (US4) và JD crawl chiếm 93%. Key LLM của `.env` hết số dư nên 24 JD do Claude viết trong phiên làm việc
+  của DE theo đúng tham số `build_params`, đi qua cùng hậu kiểm `generate_one` / `check_candidate` (0 PII / URL, kỹ
+  năng đúng nhóm, round trip đúng ô) và ghi bằng `write_synthetic`; code `synth-jd` giữ nguyên để chạy với LLM sau này.
+  DE chốt.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -386,7 +393,8 @@ Không chặn US1, US2; chạy sau chúng.
 
 ### Measurable Outcomes
 
-- **SC-001**: ≥ 500 JD hợp lệ sau dedup (crawl + synthetic, báo tỉ lệ); ≥ 90% JD có tiêu đề, công ty, mô tả và ≥ 1 kỹ
+- **SC-001**: ≥ 500 JD hợp lệ sau dedup (crawl + synthetic, báo tỉ lệ) *(hạ 2026-10-28: chỉ cần đạt sàn đa dạng
+  FR-022 và đủ 200 posting seed, xem Clarifications)*; ≥ 90% JD có tiêu đề, công ty, mô tả và ≥ 1 kỹ
   năng (đo riêng cho JD crawl, vì careerlink không có trường `skills` và phải trích từ mô tả).
 - **SC-002**: 0 request tới đường dẫn robots.txt cấm; khoảng cách request ≥ cấu hình ở 100% request; 0 lần đăng nhập
   hoặc né chặn (kiểm chứng qua log).
