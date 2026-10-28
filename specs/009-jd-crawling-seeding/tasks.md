@@ -148,9 +148,9 @@ theo contract `docs/architecture/data-model.md` §1–§2, idempotent, dọn ri�
 
 ## Phase 8: Polish & Cross-Cutting
 
-- [ ] T051 [P] Kiểm mọi file mới/sửa trong `crawlers/` và `pipeline/` < 200 dòng (constitution VII); quá thì tách module
+- [x] T051 [P] (2026-10-28: mọi file `crawlers/`, `pipeline/` < 200 dòng, lớn nhất `crawlers/jd_page_parser.py` 173) Kiểm mọi file mới/sửa trong `crawlers/` và `pipeline/` < 200 dòng (constitution VII); quá thì tách module
 - [ ] T052 [P] Cập nhật dòng 009 trong `specs/README.md` mỗi khi một PR merge (jd-crawl, jd-process, jd-synthetic, jd-seed)
-- [ ] T053 Chạy quickstart §6: `git status --porcelain apps/data-pipeline/data/raw apps/data-pipeline/data/processed` rỗng; `git ls-files apps/data-pipeline/tests/fixtures/jd` chỉ có file tự soạn (SC-003)
+- [x] T053 (2026-10-28: `git status` data rỗng; 12 fixture JD tự soạn, ≤ 1,9 KB, công ty giả) Chạy quickstart §6: `git status --porcelain apps/data-pipeline/data/raw apps/data-pipeline/data/processed` rỗng; `git ls-files apps/data-pipeline/tests/fixtures/jd` chỉ có file tự soạn (SC-003)
 - [ ] T054 `python -m pytest` + job `python` của CI xanh trước mỗi PR (constitution VI)
 - [ ] T055 [P] Chia sẻ riêng `data/processed/jd_normalized.jsonl` cho FSD nếu FSD cần dữ liệu trước khi có US4 (research R11, plan Rủi ro); không đưa vào git hay kênh công khai
 
