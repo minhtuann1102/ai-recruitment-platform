@@ -1,0 +1,303 @@
+{
+ "a04-keyword-stuffing": {
+  "answer_type": "answered",
+  "completeness": 0,
+  "extensibility": 1,
+  "relevance": 1,
+  "technical_accuracy": 1
+ },
+ "a05-rambling": {
+  "answer_type": "answered",
+  "completeness": 1,
+  "extensibility": 1,
+  "relevance": 2,
+  "technical_accuracy": 2
+ },
+ "a06-confident-wrong": {
+  "answer_type": "answered",
+  "completeness": 1,
+  "extensibility": 1,
+  "relevance": 3,
+  "technical_accuracy": 0
+ },
+ "a07-correct-but-short": {
+  "answer_type": "answered",
+  "completeness": 1,
+  "extensibility": 0,
+  "relevance": 4,
+  "technical_accuracy": 3
+ },
+ "a08-wrong-question": {
+  "answer_type": "off_topic",
+  "completeness": 0,
+  "extensibility": 1,
+  "relevance": 0,
+  "technical_accuracy": 2
+ },
+ "a09-english": {
+  "answer_type": "answered",
+  "completeness": 4,
+  "extensibility": 4,
+  "relevance": 4,
+  "technical_accuracy": 4
+ },
+ "a10-no-diacritics": {
+  "answer_type": "answered",
+  "completeness": 3,
+  "extensibility": 3,
+  "relevance": 4,
+  "technical_accuracy": 4
+ },
+ "q01-medium": {
+  "answer_type": "answered",
+  "completeness": 1,
+  "extensibility": 1,
+  "relevance": 4,
+  "technical_accuracy": 3
+ },
+ "q01-strong": {
+  "answer_type": "answered",
+  "completeness": 4,
+  "extensibility": 4,
+  "relevance": 4,
+  "technical_accuracy": 4
+ },
+ "q01-weak": {
+  "answer_type": "answered",
+  "completeness": 0,
+  "extensibility": 0,
+  "relevance": 2,
+  "technical_accuracy": 1
+ },
+ "q02-medium": {
+  "answer_type": "answered",
+  "completeness": 2,
+  "extensibility": 2,
+  "relevance": 4,
+  "technical_accuracy": 4
+ },
+ "q02-strong": {
+  "answer_type": "answered",
+  "completeness": 4,
+  "extensibility": 4,
+  "relevance": 4,
+  "technical_accuracy": 4
+ },
+ "q02-weak": {
+  "answer_type": "answered",
+  "completeness": 0,
+  "extensibility": 0,
+  "relevance": 2,
+  "technical_accuracy": 0
+ },
+ "q03-medium": {
+  "answer_type": "answered",
+  "completeness": 1,
+  "extensibility": 1,
+  "relevance": 4,
+  "technical_accuracy": 2
+ },
+ "q03-strong": {
+  "answer_type": "answered",
+  "completeness": 4,
+  "extensibility": 4,
+  "relevance": 4,
+  "technical_accuracy": 4
+ },
+ "q03-weak": {
+  "answer_type": "answered",
+  "completeness": 0,
+  "extensibility": 0,
+  "relevance": 3,
+  "technical_accuracy": 1
+ },
+ "q04-medium": {
+  "answer_type": "answered",
+  "completeness": 3,
+  "extensibility": 2,
+  "relevance": 4,
+  "technical_accuracy": 3
+ },
+ "q04-strong": {
+  "answer_type": "answered",
+  "completeness": 4,
+  "extensibility": 3,
+  "relevance": 4,
+  "technical_accuracy": 4
+ },
+ "q04-weak": {
+  "answer_type": "answered",
+  "completeness": 0,
+  "extensibility": 0,
+  "relevance": 2,
+  "technical_accuracy": 0
+ },
+ "q05-medium": {
+  "answer_type": "answered",
+  "completeness": 2,
+  "extensibility": 1,
+  "relevance": 4,
+  "technical_accuracy": 4
+ },
+ "q05-strong": {
+  "answer_type": "answered",
+  "completeness": 4,
+  "extensibility": 4,
+  "relevance": 4,
+  "technical_accuracy": 4
+ },
+ "q05-weak": {
+  "answer_type": "partial",
+  "completeness": 0,
+  "extensibility": 0,
+  "relevance": 2,
+  "technical_accuracy": 0
+ },
+ "q06-medium": {
+  "answer_type": "answered",
+  "completeness": 2,
+  "extensibility": 1,
+  "relevance": 4,
+  "technical_accuracy": 2
+ },
+ "q06-strong": {
+  "answer_type": "answered",
+  "completeness": 4,
+  "extensibility": 4,
+  "relevance": 4,
+  "technical_accuracy": 4
+ },
+ "q06-weak": {
+  "answer_type": "answered",
+  "completeness": 0,
+  "extensibility": 0,
+  "relevance": 2,
+  "technical_accuracy": 0
+ },
+ "q07-medium": {
+  "answer_type": "answered",
+  "completeness": 2,
+  "extensibility": 2,
+  "relevance": 4,
+  "technical_accuracy": 3
+ },
+ "q07-strong": {
+  "answer_type": "answered",
+  "completeness": 4,
+  "extensibility": 4,
+  "relevance": 4,
+  "technical_accuracy": 4
+ },
+ "q07-weak": {
+  "answer_type": "answered",
+  "completeness": 0,
+  "extensibility": 0,
+  "relevance": 2,
+  "technical_accuracy": 0
+ },
+ "q08-medium": {
+  "answer_type": "answered",
+  "completeness": 2,
+  "extensibility": 1,
+  "relevance": 4,
+  "technical_accuracy": 3
+ },
+ "q08-strong": {
+  "answer_type": "answered",
+  "completeness": 4,
+  "extensibility": 4,
+  "relevance": 4,
+  "technical_accuracy": 4
+ },
+ "q08-weak": {
+  "answer_type": "answered",
+  "completeness": 0,
+  "extensibility": 0,
+  "relevance": 2,
+  "technical_accuracy": 0
+ },
+ "q09-medium": {
+  "answer_type": "answered",
+  "completeness": 2,
+  "extensibility": 1,
+  "relevance": 4,
+  "technical_accuracy": 3
+ },
+ "q09-strong": {
+  "answer_type": "answered",
+  "completeness": 4,
+  "extensibility": 3,
+  "relevance": 4,
+  "technical_accuracy": 4
+ },
+ "q09-weak": {
+  "answer_type": "answered",
+  "completeness": 0,
+  "extensibility": 0,
+  "relevance": 2,
+  "technical_accuracy": 0
+ },
+ "q10-medium": {
+  "answer_type": "answered",
+  "completeness": 1,
+  "extensibility": 1,
+  "relevance": 4,
+  "technical_accuracy": 3
+ },
+ "q10-strong": {
+  "answer_type": "answered",
+  "completeness": 4,
+  "extensibility": 4,
+  "relevance": 4,
+  "technical_accuracy": 4
+ },
+ "q10-weak": {
+  "answer_type": "answered",
+  "completeness": 0,
+  "extensibility": 0,
+  "relevance": 3,
+  "technical_accuracy": 1
+ },
+ "q11-medium": {
+  "answer_type": "answered",
+  "completeness": 2,
+  "extensibility": 1,
+  "relevance": 4,
+  "technical_accuracy": 3
+ },
+ "q11-strong": {
+  "answer_type": "answered",
+  "completeness": 4,
+  "extensibility": 3,
+  "relevance": 4,
+  "technical_accuracy": 4
+ },
+ "q11-weak": {
+  "answer_type": "answered",
+  "completeness": 0,
+  "extensibility": 0,
+  "relevance": 2,
+  "technical_accuracy": 1
+ },
+ "q12-medium": {
+  "answer_type": "answered",
+  "completeness": 2,
+  "extensibility": 1,
+  "relevance": 4,
+  "technical_accuracy": 3
+ },
+ "q12-strong": {
+  "answer_type": "answered",
+  "completeness": 4,
+  "extensibility": 4,
+  "relevance": 4,
+  "technical_accuracy": 4
+ },
+ "q12-weak": {
+  "answer_type": "answered",
+  "completeness": 0,
+  "extensibility": 0,
+  "relevance": 3,
+  "technical_accuracy": 0
+ }
+}
