@@ -98,6 +98,13 @@ def test_provider_error_counts_as_failed_attempt(dictionary):
     assert all(r.startswith("error") for r in outcome.reasons)
 
 
+def test_generic_skills_from_other_groups_are_allowed(dictionary):
+    # "kiểm thử", "bảo mật", "cloud" la ky nang chung chung (nhom devops) xuat hien tu nhien trong JD backend
+    extra = "- Phối hợp với QA để kiểm thử, đảm bảo bảo mật thông tin và triển khai trên cloud."
+    outcome = _generate(dictionary, FakeLlm(lambda m, a: good_answer(m, extra=extra)))
+    assert outcome.record is not None, outcome.reasons
+
+
 def test_worker_node_banned_outside_devops(dictionary):
     phrase = "- Vận hành cụm máy chủ, theo dõi worker node."
     backend = _generate(dictionary, FakeLlm(lambda m, a: good_answer(m, extra=phrase)))

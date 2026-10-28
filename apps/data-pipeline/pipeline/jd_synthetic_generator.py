@@ -2,7 +2,8 @@
 
 Mot JD = mot o (group, level, city) + so thu tu n. Tham so do code chon (jd_synthetic_prompt), LLM viet tieu de + mo ta.
 Hau kiem bang code, loi -> goi lai LLM kem ly do (toi da MAX_RETRIES lan) roi bo, khong lap vo han:
-JSON dung dang, 0 PII (count_jd_pii), 0 URL, khong cum cam, moi ky nang nhac trong van ban thuoc nhom cua o, va round
+JSON dung dang, 0 PII (count_jd_pii), 0 URL, khong cum cam, moi ky nang cu the nhac trong van ban thuoc nhom cua o
+(ky nang chung chung GENERIC_SKILLS duoc phep), va round
 trip qua dung build_record cua process-jd: khong bi loai, (group, level, city) suy lai trung o, du section.
 """
 import json
@@ -11,6 +12,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import AbstractSet, Callable, Dict, List, Optional, Tuple
 
+from .jd_it_filter import GENERIC_SKILLS
 from .jd_pii import count_jd_pii
 from .jd_record_builder import SYNTHETIC_SOURCE, build_record
 from .jd_synthetic_prompt import LOCATION_PREFIX, SynthParams, build_messages, build_params
@@ -87,7 +89,10 @@ def check_candidate(raw: Dict, params: SynthParams, dictionary: SkillDictionary)
         return "banned_phrase: co cum bi cam (Khoa hoc may tinh / TS / worker node)"
     if not raw["description_text"].startswith(f"{LOCATION_PREFIX}{city}"):
         return f"location: dong dau phai la '{LOCATION_PREFIX}{city}'"
-    foreign = [s for s in dictionary.find_in_text(text) if dictionary.skills[s].group != group]
+    # Ky nang chung chung ("kiểm thử", "bảo mật", "cloud", "cơ sở dữ liệu") tu nhien o moi JD, khong doi nhom vi nhom
+    # do ky nang tieu de quyet dinh; round trip ben duoi van kiem nhom suy lai dung o
+    foreign = [s for s in dictionary.find_in_text(text)
+               if dictionary.skills[s].group != group and s not in GENERIC_SKILLS]
     if foreign:
         return f"foreign_skill: nhac ky nang ngoai danh sach: {', '.join(dictionary.name_of(s) for s in foreign)}"
     record, reason = build_record(raw, dictionary)
