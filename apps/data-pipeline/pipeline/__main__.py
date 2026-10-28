@@ -15,6 +15,7 @@ from .db_commands import run_index, run_search
 from .enrich_command import run_enrich
 from .jd_crawl_command import run_crawl_jd
 from .jd_process_command import run_process_jd
+from .jd_synth_command import run_synth_jd
 from .offline_commands import run_process, run_validate
 from .review_sample_command import run_review_sample
 from .seed_review_command import run_approve_seed, run_review_seed
@@ -47,6 +48,7 @@ HANDLERS: Dict[str, Handler] = {
     "crawl": run_crawl,
     "crawl-jd": run_crawl_jd,
     "process-jd": run_process_jd,
+    "synth-jd": run_synth_jd,
 }
 
 
@@ -121,6 +123,11 @@ def build_parser() -> argparse.ArgumentParser:
     crawl_jd.add_argument("--delay", type=float, default=2.0, help="giay nghi toi thieu giua hai request (FR-004)")
 
     sub.add_parser("process-jd", help="raw JD -> JD chuan hoa + chunk + bao cao phan bo, offline (spec 009 US2)")
+
+    synth_jd = sub.add_parser("synth-jd", help="sinh JD synthetic cho o thieu theo bao cao process-jd (spec 009 US5)")
+    synth_jd.add_argument("--target", type=int, default=500, help="so JD hop le muc tieu (FR-002)")
+    synth_jd.add_argument("--limit", type=int, default=None, metavar="N", help="toi da N JD moi lan chay")
+    synth_jd.add_argument("--dry-run", action="store_true", help="chi in o thieu, khong goi LLM, khong can key")
     return parser
 
 
