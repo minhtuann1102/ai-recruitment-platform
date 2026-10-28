@@ -1,299 +1,267 @@
 {
- "version": 1,
- "status": "held-out: h01-h08 viet 2026-10-24 sau khi chot tu dien; h09-h32 viet 2026-10-24 TRUOC thu nghiem query rewrite va doi model embedding; nhan ban nhap cho DE duyet",
- "corpus": "de_interview_qa",
- "k": 5,
- "groups": {
-  "vi": "tieng Viet thuan, khong thuat ngu Anh"
- },
- "queries": [
-  {
-   "id": "h01",
-   "group": "vi",
-   "query": "Ghi cơ sở dữ liệu xong rồi xóa bộ nhớ đệm mà người dùng vẫn đọc ra dữ liệu cũ, vì sao",
-   "relevant": [
-    "de-qa-1009"
-   ],
-   "filters": {}
+  "version": 1,
+  "status": "held-out: h01-h08 viet 2026-10-24 sau khi chot tu dien; h09-h32 viet 2026-10-24 TRUOC thu nghiem query rewrite va doi model embedding; DE (minhtuann1102) duyet nhan 2026-10-28 (005 T041): 32/32 dung, khong sua nhan",
+  "corpus": "de_interview_qa",
+  "k": 5,
+  "groups": {
+    "vi": "tieng Viet thuan, khong thuat ngu Anh"
   },
-  {
-   "id": "h02",
-   "group": "vi",
-   "query": "Dịch vụ Node bị khởi động lại vì tràn bộ nhớ sau vài ngày, tìm chỗ rò rỉ bộ nhớ thế nào",
-   "relevant": [
-    "de-qa-1016"
-   ],
-   "filters": {}
-  },
-  {
-   "id": "h03",
-   "group": "vi",
-   "query": "Trừ điểm thưởng trong ví bị sai khi hai yêu cầu đến cùng lúc trong Django",
-   "relevant": [
-    "de-qa-1057"
-   ],
-   "filters": {}
-  },
-  {
-   "id": "h04",
-   "group": "vi",
-   "query": "Lưu mật khẩu người dùng thế nào cho an toàn và so sánh mã đặt lại mật khẩu ra sao",
-   "relevant": [
-    "de-qa-1069"
-   ],
-   "filters": {}
-  },
-  {
-   "id": "h05",
-   "group": "vi",
-   "query": "Chọn ngưỡng xác suất cho mô hình phân loại hai lớp như thế nào",
-   "relevant": [
-    "de-qa-1181"
-   ],
-   "filters": {}
-  },
-  {
-   "id": "h06",
-   "group": "vi",
-   "query": "Mỗi tuần nhận hàng trăm cảnh báo vô nghĩa, thiết kế lại cách cảnh báo thế nào",
-   "relevant": [
-    "de-qa-1212"
-   ],
-   "filters": {}
-  },
-  {
-   "id": "h07",
-   "group": "vi",
-   "query": "Hộp thoại tự viết không dùng được bằng bàn phím và trình đọc màn hình",
-   "relevant": [
-    "de-qa-1260"
-   ],
-   "filters": {}
-  },
-  {
-   "id": "h08",
-   "group": "vi",
-   "query": "Một tệp trạng thái duy nhất cho toàn bộ hạ tầng làm việc lập kế hoạch thay đổi rất chậm",
-   "relevant": [
-    "de-qa-1206"
-   ],
-   "filters": {}
-  },
-  {
-   "id": "h09",
-   "group": "vi",
-   "query": "Kiểm tra khóa có trong bảng rồi mới thêm vào thì vẫn bị ghi đè khi nhiều luồng chạy cùng lúc, sửa thế nào",
-   "relevant": [
-    "de-qa-1101"
-   ],
-   "filters": {}
-  },
-  {
-   "id": "h10",
-   "group": "vi",
-   "query": "Gọi song song ba dịch vụ phía sau mà không truyền bộ thực thi riêng, một dịch vụ chậm kéo sập cả ứng dụng",
-   "relevant": [
-    "de-qa-1103"
-   ],
-   "filters": {}
-  },
-  {
-   "id": "h11",
-   "group": "vi",
-   "query": "Bộ dọn rác dừng chương trình vài trăm mili giây làm trễ phản hồi vượt cam kết, đọc nhật ký và chỉnh thế nào",
-   "relevant": [
-    "de-qa-1105"
-   ],
-   "filters": {}
-  },
-  {
-   "id": "h12",
-   "group": "vi",
-   "query": "Tác vụ đồng bộ một triệu bản ghi trong một giao dịch duy nhất chạy chậm dần rồi hết bộ nhớ",
-   "relevant": [
-    "de-qa-1107"
-   ],
-   "filters": {}
-  },
-  {
-   "id": "h13",
-   "group": "vi",
-   "query": "Ứng dụng vừa có trang quản trị đăng nhập bằng phiên vừa có giao diện lập trình dùng mã thông báo, cấu hình bảo mật thế nào cho đúng",
-   "relevant": [
-    "de-qa-1113"
-   ],
-   "filters": {}
-  },
-  {
-   "id": "h14",
-   "group": "vi",
-   "query": "Hai lớp dịch vụ phụ thuộc vòng tròn lẫn nhau nên ứng dụng không khởi động được sau khi nâng phiên bản",
-   "relevant": [
-    "de-qa-1116"
-   ],
-   "filters": {}
-  },
-  {
-   "id": "h15",
-   "group": "vi",
-   "query": "Bộ kiểm thử chạy hai mươi lăm phút vì ngữ cảnh ứng dụng bị khởi tạo lại liên tục",
-   "relevant": [
-    "de-qa-1118"
-   ],
-   "filters": {}
-  },
-  {
-   "id": "h16",
-   "group": "vi",
-   "query": "Xuất tệp dữ liệu hàng triệu dòng cho người dùng mạng chậm làm bộ nhớ tiến trình phình lên hàng gigabyte",
-   "relevant": [
-    "de-qa-1002"
-   ],
-   "filters": {}
-  },
-  {
-   "id": "h17",
-   "group": "vi",
-   "query": "Tự vận hành mô hình ngôn ngữ lớn, card đồ họa còn dư sức tính mà số yêu cầu xử lý được không tăng",
-   "relevant": [
-    "de-qa-1156"
-   ],
-   "filters": {}
-  },
-  {
-   "id": "h18",
-   "group": "vi",
-   "query": "Chi phí gọi mô hình tăng mạnh vì đoạn hướng dẫn hệ thống dài bị gửi lặp lại ở mọi yêu cầu",
-   "relevant": [
-    "de-qa-1161"
-   ],
-   "filters": {}
-  },
-  {
-   "id": "h19",
-   "group": "vi",
-   "query": "So sánh học tăng cường từ phản hồi của con người với tối ưu trực tiếp theo sở thích",
-   "relevant": [
-    "de-qa-1171"
-   ],
-   "filters": {}
-  },
-  {
-   "id": "h20",
-   "group": "vi",
-   "query": "Hệ thống hỏi đáp dựa trên tài liệu vẫn trả lời trôi chảy nhưng sai khi kho không có thông tin",
-   "relevant": [
-    "de-qa-1176"
-   ],
-   "filters": {}
-  },
-  {
-   "id": "h21",
-   "group": "vi",
-   "query": "Mô hình phát hiện gian lận rất tốt khi thử với dữ liệu cân bằng nhưng ngoài thực tế báo động sai quá nhiều",
-   "relevant": [
-    "de-qa-1182"
-   ],
-   "filters": {}
-  },
-  {
-   "id": "h22",
-   "group": "vi",
-   "query": "Trợ lý giọng nói cần xử lý chuyện người dùng ngắt lời và biết khi nào họ nói xong",
-   "relevant": [
-    "de-qa-1188"
-   ],
-   "filters": {}
-  },
-  {
-   "id": "h23",
-   "group": "vi",
-   "query": "Tường lửa chỉ mở ba cổng nhưng quét từ bên ngoài vẫn thấy cổng cơ sở dữ liệu của máy chủ ảo đang mở",
-   "relevant": [
-    "de-qa-1200"
-   ],
-   "filters": {}
-  },
-  {
-   "id": "h24",
-   "group": "vi",
-   "query": "Một phần nhỏ yêu cầu tới dịch vụ thanh toán trong cụm bị từ chối kết nối hoặc nhận phản hồi từ phiên bản cũ",
-   "relevant": [
-    "de-qa-1203"
-   ],
-   "filters": {}
-  },
-  {
-   "id": "h25",
-   "group": "vi",
-   "query": "Yêu cầu hợp nhất chỉ đổi tên vài thứ nhưng bản kế hoạch hạ tầng báo sẽ xóa và tạo lại cơ sở dữ liệu thật",
-   "relevant": [
-    "de-qa-1207"
-   ],
-   "filters": {}
-  },
-  {
-   "id": "h26",
-   "group": "vi",
-   "query": "Đặt ứng dụng sau bộ cân bằng tải thì giới hạn tần suất theo địa chỉ chặn nhầm hàng loạt người dùng",
-   "relevant": [
-    "de-qa-1210"
-   ],
-   "filters": {}
-  },
-  {
-   "id": "h27",
-   "group": "vi",
-   "query": "Lỡ đẩy khóa truy cập đám mây lên kho mã công khai, hai mươi phút sau mới phát hiện thì xử lý thế nào",
-   "relevant": [
-    "de-qa-1214"
-   ],
-   "filters": {}
-  },
-  {
-   "id": "h28",
-   "group": "vi",
-   "query": "Thử phiên bản mới cho mười phần trăm người dùng nhưng phiên bản đó đổi tên một cột trong cơ sở dữ liệu dùng chung",
-   "relevant": [
-    "de-qa-1216"
-   ],
-   "filters": {}
-  },
-  {
-   "id": "h29",
-   "group": "vi",
-   "query": "Bảng điều khiển bị đơ hoàn toàn khi xử lý mảng hai trăm nghìn phần tử dù đã chia nhỏ từng lô",
-   "relevant": [
-    "de-qa-1250"
-   ],
-   "filters": {}
-  },
-  {
-   "id": "h30",
-   "group": "vi",
-   "query": "Ô tìm kiếm gợi ý đôi khi hiện kết quả của từ khóa cũ còn biểu tượng đang tải quay mãi không dừng",
-   "relevant": [
-    "de-qa-1251"
-   ],
-   "filters": {}
-  },
-  {
-   "id": "h31",
-   "group": "vi",
-   "query": "Cập nhật lạc quan danh sách việc cần làm bị sai khi người dùng bấm chuyển trạng thái liên tục",
-   "relevant": [
-    "de-qa-1255"
-   ],
-   "filters": {}
-  },
-  {
-   "id": "h32",
-   "group": "vi",
-   "query": "Người dùng trình đọc màn hình không biết trang đã chuyển và không nghe thông báo đã lưu",
-   "relevant": [
-    "de-qa-1261"
-   ],
-   "filters": {}
-  }
- ]
+  "queries": [
+    {
+      "id": "h01",
+      "group": "vi",
+      "query": "Ghi cơ sở dữ liệu xong rồi xóa bộ nhớ đệm mà người dùng vẫn đọc ra dữ liệu cũ, vì sao",
+      "relevant": ["de-qa-1009"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "h02",
+      "group": "vi",
+      "query": "Dịch vụ Node bị khởi động lại vì tràn bộ nhớ sau vài ngày, tìm chỗ rò rỉ bộ nhớ thế nào",
+      "relevant": ["de-qa-1016"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "h03",
+      "group": "vi",
+      "query": "Trừ điểm thưởng trong ví bị sai khi hai yêu cầu đến cùng lúc trong Django",
+      "relevant": ["de-qa-1057"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "h04",
+      "group": "vi",
+      "query": "Lưu mật khẩu người dùng thế nào cho an toàn và so sánh mã đặt lại mật khẩu ra sao",
+      "relevant": ["de-qa-1069"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "h05",
+      "group": "vi",
+      "query": "Chọn ngưỡng xác suất cho mô hình phân loại hai lớp như thế nào",
+      "relevant": ["de-qa-1181"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "h06",
+      "group": "vi",
+      "query": "Mỗi tuần nhận hàng trăm cảnh báo vô nghĩa, thiết kế lại cách cảnh báo thế nào",
+      "relevant": ["de-qa-1212"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "h07",
+      "group": "vi",
+      "query": "Hộp thoại tự viết không dùng được bằng bàn phím và trình đọc màn hình",
+      "relevant": ["de-qa-1260"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "h08",
+      "group": "vi",
+      "query": "Một tệp trạng thái duy nhất cho toàn bộ hạ tầng làm việc lập kế hoạch thay đổi rất chậm",
+      "relevant": ["de-qa-1206"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "h09",
+      "group": "vi",
+      "query": "Kiểm tra khóa có trong bảng rồi mới thêm vào thì vẫn bị ghi đè khi nhiều luồng chạy cùng lúc, sửa thế nào",
+      "relevant": ["de-qa-1101"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "h10",
+      "group": "vi",
+      "query": "Gọi song song ba dịch vụ phía sau mà không truyền bộ thực thi riêng, một dịch vụ chậm kéo sập cả ứng dụng",
+      "relevant": ["de-qa-1103"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "h11",
+      "group": "vi",
+      "query": "Bộ dọn rác dừng chương trình vài trăm mili giây làm trễ phản hồi vượt cam kết, đọc nhật ký và chỉnh thế nào",
+      "relevant": ["de-qa-1105"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "h12",
+      "group": "vi",
+      "query": "Tác vụ đồng bộ một triệu bản ghi trong một giao dịch duy nhất chạy chậm dần rồi hết bộ nhớ",
+      "relevant": ["de-qa-1107"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "h13",
+      "group": "vi",
+      "query": "Ứng dụng vừa có trang quản trị đăng nhập bằng phiên vừa có giao diện lập trình dùng mã thông báo, cấu hình bảo mật thế nào cho đúng",
+      "relevant": ["de-qa-1113"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "h14",
+      "group": "vi",
+      "query": "Hai lớp dịch vụ phụ thuộc vòng tròn lẫn nhau nên ứng dụng không khởi động được sau khi nâng phiên bản",
+      "relevant": ["de-qa-1116"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "h15",
+      "group": "vi",
+      "query": "Bộ kiểm thử chạy hai mươi lăm phút vì ngữ cảnh ứng dụng bị khởi tạo lại liên tục",
+      "relevant": ["de-qa-1118"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "h16",
+      "group": "vi",
+      "query": "Xuất tệp dữ liệu hàng triệu dòng cho người dùng mạng chậm làm bộ nhớ tiến trình phình lên hàng gigabyte",
+      "relevant": ["de-qa-1002"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "h17",
+      "group": "vi",
+      "query": "Tự vận hành mô hình ngôn ngữ lớn, card đồ họa còn dư sức tính mà số yêu cầu xử lý được không tăng",
+      "relevant": ["de-qa-1156"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "h18",
+      "group": "vi",
+      "query": "Chi phí gọi mô hình tăng mạnh vì đoạn hướng dẫn hệ thống dài bị gửi lặp lại ở mọi yêu cầu",
+      "relevant": ["de-qa-1161"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "h19",
+      "group": "vi",
+      "query": "So sánh học tăng cường từ phản hồi của con người với tối ưu trực tiếp theo sở thích",
+      "relevant": ["de-qa-1171"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "h20",
+      "group": "vi",
+      "query": "Hệ thống hỏi đáp dựa trên tài liệu vẫn trả lời trôi chảy nhưng sai khi kho không có thông tin",
+      "relevant": ["de-qa-1176"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "h21",
+      "group": "vi",
+      "query": "Mô hình phát hiện gian lận rất tốt khi thử với dữ liệu cân bằng nhưng ngoài thực tế báo động sai quá nhiều",
+      "relevant": ["de-qa-1182"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "h22",
+      "group": "vi",
+      "query": "Trợ lý giọng nói cần xử lý chuyện người dùng ngắt lời và biết khi nào họ nói xong",
+      "relevant": ["de-qa-1188"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "h23",
+      "group": "vi",
+      "query": "Tường lửa chỉ mở ba cổng nhưng quét từ bên ngoài vẫn thấy cổng cơ sở dữ liệu của máy chủ ảo đang mở",
+      "relevant": ["de-qa-1200"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "h24",
+      "group": "vi",
+      "query": "Một phần nhỏ yêu cầu tới dịch vụ thanh toán trong cụm bị từ chối kết nối hoặc nhận phản hồi từ phiên bản cũ",
+      "relevant": ["de-qa-1203"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "h25",
+      "group": "vi",
+      "query": "Yêu cầu hợp nhất chỉ đổi tên vài thứ nhưng bản kế hoạch hạ tầng báo sẽ xóa và tạo lại cơ sở dữ liệu thật",
+      "relevant": ["de-qa-1207"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "h26",
+      "group": "vi",
+      "query": "Đặt ứng dụng sau bộ cân bằng tải thì giới hạn tần suất theo địa chỉ chặn nhầm hàng loạt người dùng",
+      "relevant": ["de-qa-1210"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "h27",
+      "group": "vi",
+      "query": "Lỡ đẩy khóa truy cập đám mây lên kho mã công khai, hai mươi phút sau mới phát hiện thì xử lý thế nào",
+      "relevant": ["de-qa-1214"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "h28",
+      "group": "vi",
+      "query": "Thử phiên bản mới cho mười phần trăm người dùng nhưng phiên bản đó đổi tên một cột trong cơ sở dữ liệu dùng chung",
+      "relevant": ["de-qa-1216"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "h29",
+      "group": "vi",
+      "query": "Bảng điều khiển bị đơ hoàn toàn khi xử lý mảng hai trăm nghìn phần tử dù đã chia nhỏ từng lô",
+      "relevant": ["de-qa-1250"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "h30",
+      "group": "vi",
+      "query": "Ô tìm kiếm gợi ý đôi khi hiện kết quả của từ khóa cũ còn biểu tượng đang tải quay mãi không dừng",
+      "relevant": ["de-qa-1251"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "h31",
+      "group": "vi",
+      "query": "Cập nhật lạc quan danh sách việc cần làm bị sai khi người dùng bấm chuyển trạng thái liên tục",
+      "relevant": ["de-qa-1255"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "h32",
+      "group": "vi",
+      "query": "Người dùng trình đọc màn hình không biết trang đã chuyển và không nghe thông báo đã lưu",
+      "relevant": ["de-qa-1261"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    }
+  ]
 }
