@@ -20,7 +20,7 @@ báo cáo, slides) là việc chung của team, không cần spec.
 | 006 | ai-interview-agents | S1–S2 | AIE (đề xuất) | Owner chọn | S1-AIE-3..4, S2-AIE-1..6 | 003, 005 | Kế hoạch: [plan](../plans/20261019-1100-ai-interview-brd-implementation/plan.md) (workflow `plans/`) |
 | 007 | job-posting-search | S2 | FSD (đề xuất) | Owner chọn | S2-FSD-1..4, S2-FSD-9..10 | 004 | Chưa viết |
 | 008 | job-applications | S2 | FSD (đề xuất) | Owner chọn | S2-FSD-5..8, S2-FSD-11 | 007, 001 (MinIO) | Chưa viết |
-| 009 | [jd-crawling-seeding](009-jd-crawling-seeding/spec.md) | S2 | DE | Spec Kit | S2-DE-1..4 | 005 (pipeline), 004 + 007 (migration) | US1 crawl merged (#45), US2 process merged (#47, 341 JD); US5 synthetic (#48): 24 JD bù sàn → 365 JD, 210 đủ điều kiện seed; seed (US4) chờ migration `company_profiles` (004) + job-service (007) |
+| 009 | [jd-crawling-seeding](009-jd-crawling-seeding/spec.md) | S2 | DE | Spec Kit | S2-DE-1..4 | 005 (pipeline), 004 + 007 (migration) | US1 crawl merged (#45), US2 process merged (#47, 341 JD); US5 synthetic (#48): 24 JD bù sàn → 365 JD, 210 đủ điều kiện seed; US4 `seed-jobs` code xong (nhánh `jd-seed`, T040–T047), chạy thật (T038, T048) chờ migration `company_profiles` (004) + job-service (007), password Employer seed chờ T039 (FSD) |
 | 010 | interview-sessions | S3 | FSD (đề xuất) | Owner chọn | S3-FSD-1..8 | 006, 002 | Chưa viết |
 | 011 | agentic-interview-hardening | S3–S4 | AIE (đề xuất) | Owner chọn | S3-AIE-1..6, S4-AIE-1..5 | 006, 010 | Kế hoạch: [plan](../plans/20261019-1100-ai-interview-brd-implementation/plan.md) (workflow `plans/`) |
 | 012 | textbook-ingestion-rag-quality | S3–S4 | DE | Spec Kit | S3-DE-1..5, S4-DE-1 | 009 (pipeline ổn định), 011 (S3-AIE-1 cho eval) | Chưa viết |

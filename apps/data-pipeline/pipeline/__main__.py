@@ -15,6 +15,7 @@ from .db_commands import run_index, run_search
 from .enrich_command import run_enrich
 from .jd_crawl_command import run_crawl_jd
 from .jd_process_command import run_process_jd
+from .jd_seed_command import run_seed_jobs
 from .jd_synth_command import run_synth_jd
 from .offline_commands import run_process, run_validate
 from .review_sample_command import run_review_sample
@@ -49,6 +50,7 @@ HANDLERS: Dict[str, Handler] = {
     "crawl-jd": run_crawl_jd,
     "process-jd": run_process_jd,
     "synth-jd": run_synth_jd,
+    "seed-jobs": run_seed_jobs,
 }
 
 
@@ -128,6 +130,10 @@ def build_parser() -> argparse.ArgumentParser:
     synth_jd.add_argument("--target", type=int, default=500, help="so JD hop le muc tieu (FR-002)")
     synth_jd.add_argument("--limit", type=int, default=None, metavar="N", help="toi da N JD moi lan chay")
     synth_jd.add_argument("--dry-run", action="store_true", help="chi in o thieu, khong goi LLM, khong can key")
+
+    seed_jobs = sub.add_parser("seed-jobs", help="seed posting vao job_db + Employer seed vao user_db (spec 009 US4)")
+    seed_jobs.add_argument("--count", type=int, default=200, help="so posting can seed (FR-018)")
+    seed_jobs.add_argument("--clean", action="store_true", help="chi xoa posting + Employer seed (email mien seed)")
     return parser
 
 
