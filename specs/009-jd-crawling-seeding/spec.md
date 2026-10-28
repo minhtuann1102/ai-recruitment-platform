@@ -105,6 +105,38 @@ DE đã chấp nhận, xem Clarifications).
   khớp `skills.slug`, thiếu thì thêm từ danh mục (FR-010). Chỉ còn chờ migration có trên `main`: `company_profiles`
   (user-service, 004) và job-service (007) — không phải quyết định cần chốt. DE chốt.
 
+### Session 2026-10-28
+
+Sau review `jd-process` và chạy `process-jd` trên 515 JD crawl thật (2026-10-27/28). DE chốt cả mục dưới.
+
+- Q: Cấp bậc khi tiêu đề không ghi cấp (FR-011, R6)? → A: **Dưới 12 tháng kinh nghiệm = fresher → `Junior`; `Intern`
+  chỉ suy từ tiêu đề (intern / thực tập / trainee).** Riêng itviec, `experience_raw` không phải số năm thật (chỉ có 4
+  giá trị "10 months", "37 months", "61 months", "No requirements" do itviec tự gán; 67 JD "10 months" có tiêu đề
+  Middle/Senior/Architect và mô tả ghi 1–5 năm) nên bỏ qua. Nguồn nào không có số năm dùng được thì lấy số năm đầu tiên
+  đi kèm "kinh nghiệm" / "experience" trong mô tả (bỏ số > 10 năm, thường là tuổi công ty); không có thì `null`.
+- Q: Phạm vi lọc IT (FR-028)? → A: **Mở rộng từ khóa và tính thẻ kỹ năng; loại vai trò ngoài 5 nhóm.** Thêm "IT" (viết
+  hoa), kỹ sư phần mềm / hệ thống / mạng / dữ liệu, security / an toàn thông tin / an ninh mạng, pentest, QA/QC /
+  kiểm thử, vận hành / quản trị hệ thống, network administrator, DBA. JD có ≥ 1 thẻ `skills_raw` thuộc danh mục cũng là
+  IT. Kỹ năng chung chung (cơ sở dữ liệu, bảo mật thông tin, network, cloud, QA/QC, IT support, hạ tầng) vẫn ghi vào
+  `skills` nhưng không tự làm JD thành IT (hay gặp ở JD ngân hàng / sản xuất / kinh doanh). Tiêu đề bán hàng / tư vấn
+  (tiếng Việt) / presale, giảng dạy, hành chính, phiên dịch / comtor, kiểm toán viên, field service → `not_it` dù có từ
+  khóa IT (so trên tiêu đề đã bỏ dấu); "consultant" tiếng Anh không loại vì phần lớn là vai trò kỹ thuật. **BA, PO,
+  PM, Scrum Master** → `not_it` ở bản này (không thuộc 5 nhóm, AIE chưa có hướng phỏng vấn); dữ liệu thô vẫn giữ, bổ
+  sung sau chỉ cần chạy lại `process-jd`. Data Engineer (nhóm `ai_data`) và QA/QC (nhóm `devops`, theo danh mục) là IT.
+- Q: Thành phố khi nguồn chỉ ghi quận (careerviet "Quận Cầu Giấy", "Quận 3")? → A: **Sửa ở chuẩn hóa, không crawl
+  lại.** Thứ tự: tên thành phố trong `location_raw` → dòng "Địa điểm:" / "Nơi làm việc:" / "Location:" của mô tả →
+  bảng quận/huyện → thành phố (chỉ quận thuộc riêng Hà Nội, Hồ Chí Minh, Đà Nẵng).
+- Q: Nhóm kỹ năng của JD (FR-010)? → A: **Kỹ năng trong tiêu đề quyết định nhóm** (hòa thì xét toàn JD); tiêu đề không
+  có kỹ năng thì lấy nhóm xuất hiện nhiều nhất của toàn JD như cũ. Lý do: "Angular Developer" có mô tả nhắc AWS/Nginx
+  bị xếp `devops`.
+- Q: Danh mục kỹ năng (R5)? → A: Bí danh gộp nhầm sản phẩm khác nhau được tách thành kỹ năng riêng (vite ≠ webpack,
+  grafana ≠ prometheus, jest/junit/pytest ≠ unit-testing, rag/genai ≠ llm, tableau/looker ≠ power-bi, ...); thêm kỹ năng
+  hạ tầng / bảo mật / kiểm thử / dữ liệu (IT support, information security, software testing, cloud, data engineering,
+  ...). "TS" và "ai" chỉ nhận khi là thẻ (TS. = tiến sĩ, "ai" = who); "học máy" trong "Khoa học máy tính" không tính là
+  machine learning.
+- Q: Mô tả quá ngắn? → A: Giữ luật của bản cài đặt: mô tả sau làm sạch < 200 ký tự → `missing_field` (topdev có tin
+  ~180 ký tự). DE chấp nhận.
+
 ## User Scenarios & Testing *(mandatory)*
 
 Người dùng trực tiếp: **DE** (vận hành crawl, xử lý, index, seed), **FSD** (cần `job_db` có dữ liệu thật để demo tìm
