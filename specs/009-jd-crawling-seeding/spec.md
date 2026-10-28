@@ -115,11 +115,14 @@ Sau review `jd-process` và chạy `process-jd` trên 515 JD crawl thật (2026-
   Middle/Senior/Architect và mô tả ghi 1–5 năm) nên bỏ qua. Nguồn nào không có số năm dùng được thì lấy số năm đầu tiên
   đi kèm "kinh nghiệm" / "experience" trong mô tả (bỏ số > 10 năm, thường là tuổi công ty); không có thì `null`.
 - Q: Phạm vi lọc IT (FR-028)? → A: **Mở rộng từ khóa và tính thẻ kỹ năng; loại vai trò ngoài 5 nhóm.** Thêm "IT" (viết
-  hoa), kỹ sư phần mềm / hệ thống / mạng / dữ liệu, security / an toàn thông tin, pentest, QA/QC / kiểm thử, network
-  administrator. JD có ≥ 1 thẻ `skills_raw` thuộc danh mục cũng là IT. Tiêu đề bán hàng / tư vấn / presale, giảng dạy,
-  hành chính, phiên dịch / comtor, kiểm toán, field service → `not_it` dù có từ khóa IT. **BA, PO, PM, Scrum Master**
-  → `not_it` ở bản này (không thuộc 5 nhóm, AIE chưa có hướng phỏng vấn); dữ liệu thô vẫn giữ, bổ sung sau chỉ cần chạy
-  lại `process-jd`. Data Engineer (nhóm `ai_data`) và QA/QC (nhóm `devops`, theo danh mục) là IT.
+  hoa), kỹ sư phần mềm / hệ thống / mạng / dữ liệu, security / an toàn thông tin / an ninh mạng, pentest, QA/QC /
+  kiểm thử, vận hành / quản trị hệ thống, network administrator, DBA. JD có ≥ 1 thẻ `skills_raw` thuộc danh mục cũng là
+  IT. Kỹ năng chung chung (cơ sở dữ liệu, bảo mật thông tin, network, cloud, QA/QC, IT support, hạ tầng) vẫn ghi vào
+  `skills` nhưng không tự làm JD thành IT (hay gặp ở JD ngân hàng / sản xuất / kinh doanh). Tiêu đề bán hàng / tư vấn
+  (tiếng Việt) / presale, giảng dạy, hành chính, phiên dịch / comtor, kiểm toán viên, field service → `not_it` dù có từ
+  khóa IT (so trên tiêu đề đã bỏ dấu); "consultant" tiếng Anh không loại vì phần lớn là vai trò kỹ thuật. **BA, PO,
+  PM, Scrum Master** → `not_it` ở bản này (không thuộc 5 nhóm, AIE chưa có hướng phỏng vấn); dữ liệu thô vẫn giữ, bổ
+  sung sau chỉ cần chạy lại `process-jd`. Data Engineer (nhóm `ai_data`) và QA/QC (nhóm `devops`, theo danh mục) là IT.
 - Q: Thành phố khi nguồn chỉ ghi quận (careerviet "Quận Cầu Giấy", "Quận 3")? → A: **Sửa ở chuẩn hóa, không crawl
   lại.** Thứ tự: tên thành phố trong `location_raw` → dòng "Địa điểm:" / "Nơi làm việc:" / "Location:" của mô tả →
   bảng quận/huyện → thành phố (chỉ quận thuộc riêng Hà Nội, Hồ Chí Minh, Đà Nẵng).
