@@ -119,10 +119,11 @@ async def next_turn(req: NextTurnRequest, evaluator: Optional[Evaluator] = None,
         raise ApiError(422, "invalid_request", "active_topic_id khong co trong plan")
     phase, topic = topics[pos]
 
+    key = await _answer_key(retriever or get_retriever(), state.current_qa_id)
     ev = await (evaluator or get_evaluator()).evaluate(EvaluationInput(
         level=req.level, phase=phase, topic=topic, difficulty=state.current_difficulty, turn_kind=req.turn_kind,
         turn_number=req.turn_number, question=req.question, answer=req.answer, topic_turns=req.topic_turns,
-        reference_answer=await _answer_key(retriever or get_retriever(), state.current_qa_id)), collector)
+        reference_answer=key), collector)
     record_evaluation(state, ev, req.turn_number)
     if state.topic_started_s is None:  # state cu: chua biet topic bat dau luc nao
         state.topic_started_s = state.phase_started_s = req.elapsed_seconds
@@ -154,7 +155,8 @@ async def next_turn(req: NextTurnRequest, evaluator: Optional[Evaluator] = None,
                         last_question=req.question, last_answer=req.answer, phase_changed=phase_changed,
                         asked_on_topic=[t.q for t in req.topic_turns] + [req.question] if action != "ask_main" else [],
                         time_hint=_time_hint(req.elapsed_seconds, plan, n_phase), avoid=list(state.asked_questions),
-                        bank_question=bank.question if bank else None)
+                        bank_question=bank.question if bank else None,
+                        reference_answer=key if action == "hint" else "")  # goi y cho dung cau vua hoi
     state.turn_count += 1
     if n_topic:
         next(t for t in state.topics if t.id == n_topic.id).turns.append(req.turn_number + 1)

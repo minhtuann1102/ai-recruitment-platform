@@ -2,7 +2,7 @@
 
 - Loi truoc token dau (hoac qua FIRST_TOKEN_TIMEOUT_S): gui cau du phong qua event `token`.
 - Loi giua stream: gui `replace` chua cau du phong day du.
-- Stream xong ma cau vi pham (rong, qua dai, lo diem, lap cau da hoi - Jaccard >= 0.8, sai ngon ngu): `replace` bang cau du phong.
+- Stream xong ma cau vi pham (rong, qua dai, lo diem, chep dap an chuan khi goi y, lap cau da hoi - Jaccard >= 0.8, sai ngon ngu): `replace` bang cau du phong.
 Moi lan dung cau du phong ghi `interviewer_fallback` vao metadata.fallbacks.
 """
 import asyncio
@@ -29,13 +29,26 @@ def clean_question(text: str) -> str:
     return " ".join(_MARKDOWN.sub("", text).split())
 
 
-def violation(question: str, asked: List[str]) -> Optional[str]:
+def _grams(text: str, span: int) -> set:
+    words = fold(text).split()
+    return {" ".join(words[i:i + span]) for i in range(len(words) - span + 1)}
+
+
+def copies_answer(question: str, reference: str, allowed: str = "", span: int = 6) -> bool:
+    """Cau goi y chep >= span chu lien tu dap an chuan: coi nhu lo dap an. Dap an chuan gom ca cau hoi goc, ma hint
+    duoc nhac lai cau dang hoi, nen cum chu co trong `allowed` (cau vua hoi) khong tinh."""
+    return bool(_grams(question, span) & (_grams(reference, span) - _grams(allowed, span)))
+
+
+def violation(question: str, asked: List[str], reference: str = "", allowed: str = "") -> Optional[str]:
     if not question:
         return "empty"
     if len(question.split()) > MAX_WORDS:
         return "too_long"
     if _LEAK.search(fold(question)):
         return "score_leak"
+    if reference and copies_answer(question, reference, allowed):
+        return "answer_leak"
     if is_repeat(question, asked):
         return "repeat"
     if wrong_language(question):  # cau tieng Anh tron cau / khong dau: cau du phong la tieng Viet
@@ -81,7 +94,7 @@ class QuestionStream:
             await _close(gen)
         raw = "".join(parts)
         self.question = clean_question(raw)
-        problem = violation(self.question, self.asked)
+        problem = violation(self.question, self.asked, self.spec.reference_answer, self.spec.last_question)
         if problem and self.question == fallback_question(self.spec):
             # cau mau (mock) da la lua chon tot nhat (fallback_question da ne cau da hoi): thay bang no vo ich
             problem = None

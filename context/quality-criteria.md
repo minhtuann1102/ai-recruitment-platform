@@ -1,14 +1,20 @@
-# Tiêu chí chất lượng và golden set (cập nhật 2026-10-24)
+# Tiêu chí chất lượng và golden set (cập nhật 2026-10-28)
 
 ## Golden set hiện có
 
 | Bộ | Đo gì | Kích thước | Trạng thái |
 |---|---|---|---|
-| `evals/evaluator_golden.jsonl` | Evaluator chấm đúng band (mốc ±1 band ≥ 80%, tuần 09–15/11) | 48 mẫu (12 câu × 3 mức + 12 adversarial) | **Chưa có nhãn người** (0/48). `intended_tier` chỉ là ý định người soạn, không phải nhãn. Cần 2 người chấm qua `python -m evals.label_sheet`, rồi `python -m evals.run_evaluator --runs 3` |
+| `evals/evaluator_golden.jsonl` | Evaluator chấm đúng band (mốc ±1 band ≥ 80%, tuần 09–15/11) | 48 mẫu (12 câu × 3 mức + 12 adversarial) | **Nhãn 1 người chấm** (`rater_a` = `final.json`, 43 mẫu, PR #46; nhãn người thứ hai bị loại vì không qua kiểm tra nội dung). Đã đo 2026-10-28, xem dưới |
 | `evals/rag_golden.json` + `rag_golden_holdout.json` | Truy hồi đúng tài liệu (recall@5) | 24 + 32 truy vấn | AIE gán nhãn; **DE chưa duyệt**. Số đo: 1.000 / 0.938 (sau viết lại truy vấn) |
-| `evals/question_golden.jsonl` | Câu hỏi của AI: đúng level, tự nhiên, đúng hành động (Q5) | 60 câu (mỗi level 6 ask_main, 4 follow_up, 4 hint, 1 wrap_up; 45 AI tự đặt, 15 từ kho) | Đã dựng 2026-10-24 từ lần chạy `eval-sim-bank-after2`; **chưa có nhãn người**. Phiếu: `plans/reports/question-rating-sheet-261024.csv` |
+| `evals/question_golden.jsonl` | Câu hỏi của AI: đúng level, tự nhiên, đúng hành động (Q5) | 60 câu (mỗi level 6 ask_main, 4 follow_up, 4 hint, 1 wrap_up; 45 AI tự đặt, 15 từ kho) | Dựng 2026-10-24 từ `eval-sim-bank-after2` (Interviewer v2); **nhãn 1 người chấm** (`question_labels/rater_a.json`). Đã đo 2026-10-28 |
 
-Hệ quả: hiện **chưa đo được** Evaluator chấm có đúng không, và câu hỏi có hợp level và tự nhiên không. Harness tầng 3 chỉ đo gián tiếp: phân biệt strong/average/weak, lặp câu, ngôn ngữ, độ trễ, chi phí.
+## Số đo với nhãn người (2026-10-28, 1 người chấm)
+
+Báo cáo: `plans/reports/eval-261028-2255-golden-rater-a.md`. Không có kappa (một người chấm).
+
+- **Evaluator v3:** ±1 band **0.932** (đạt mốc 80%), MAE 0.69, lệch khoan dung **−0.34** (khắt khe; ngưỡng ±0.3), `answer_type` 0.98, ổn định giữa 3 lần (std 0.05), bắt injection **2/5** (3 mẫu "ghi chú hệ thống / người phỏng vấn đã đồng ý" lọt nhưng điểm vẫn thấp). Lệch chính: `extensibility` của câu trả lời strong (2 so với 4), trả lời toàn tiếng Anh hoặc không dấu bị trừ điểm.
+- **Câu hỏi (người chấm, Interviewer v2):** hợp level **87%** (câu từ kho cũng 87%), tự nhiên **3.78/5**, đúng hành động 90% (hint **75%**).
+- **Judge v1 so với người:** level_fit đồng ý **0.70** (vừa ngưỡng; judge gán "quá dễ" cho 13 câu người thấy vừa), tự nhiên lệch ≤ 1: 0.93, action_ok 0.88. Con số "60% câu kho quá dễ" ngày 24/10 là do judge khắt khe, không phải do kho.
 
 ## Câu hỏi khớp trình độ ứng viên: hiện dựa vào gì
 
@@ -50,7 +56,7 @@ Mỗi dòng là một câu AI đã hỏi, kèm level, phase, hành động, đ�
 - `action_ok`: `y`/`n` (ask_main mở đúng topic; follow_up hỏi sâu từ câu trả lời trước; hint là **gợi ý cho câu trước**, hỏi câu khác là `n`; wrap_up không hỏi kiến thức).
 Hai người chấm độc lập, không trao đổi; nhập bằng `python -m evals.question_set import --rater <tên> <file.csv>`.
 
-## Số đo đầu tiên (2026-10-24, chưa hiệu chỉnh với người)
+## Số đo đầu tiên (2026-10-24, chưa hiệu chỉnh với người; đã được thay bằng số đo có nhãn người ở trên)
 
 Judge v1 trên 60 câu (`plans/reports/judge-interviewer-261024-1658.json`, không commit):
 
@@ -66,6 +72,8 @@ Judge v1 trên 60 câu (`plans/reports/judge-interviewer-261024-1658.json`, khô
 Đọc với dè dặt: judge cho `natural` 4.05 trong khi đo bằng code 76% câu theo khuôn (judge có vẻ dễ tính ở mục này) và chấp nhận một số lượt hint thực chất là câu hỏi mới. Chỉ dùng số của judge sau khi đồng ý với người: `level_fit` ≥ 0.7, `natural` lệch ≤ 1 ở ≥ 80% câu. Tín hiệu đáng kiểm bằng nhãn người: câu kho cho junior (nhãn `easy`) bị đánh giá quá dễ.
 
 Văn phong bằng code (harness full, 286 câu): khuôn "Bạn có thể ... không?" 76% (ngưỡng ≤ 40%), 31.5 từ (≤ 25), mở đầu "Giờ mình sang" 20% (≤ 15%): **cả ba chưa đạt**.
+
+**Interviewer v3 (2026-10-28, `plans/reports/eval-261028-2306-interviewer-v3.md`):** khuôn 33%, 16.6 từ, mở đầu phổ biến nhất 15%: **cả ba đạt** (dao động giữa các lần chạy: khuôn 28–38%). Câu kho 100%, thứ tự strong > average > weak 7/8. Còn lại: `follow_up` vẫn 68% theo khuôn; chưa có nhãn người cho câu v3.
 
 ## Tiêu chí đề xuất (giai đoạn tiếp theo, xem `context/next-phase-plan.md`)
 

@@ -6,6 +6,7 @@ cua mock_interviewer, cung la cau du phong khi LLM loi (FR-AI-071).
 import asyncio
 import json
 import os
+import re
 from dataclasses import dataclass, field
 from typing import AsyncIterator, List, Optional
 
@@ -35,6 +36,7 @@ class QuestionSpec:
     time_hint: str = "normal"  # normal | hurry
     avoid: List[str] = field(default_factory=list)  # cau da hoi trong phien (da chuan hoa), cau du phong phai khac
     bank_question: Optional[str] = None  # ask_main: cau da kiem chung trong kho, Interviewer dien dat lai
+    reference_answer: str = ""  # hint: dap an chuan cua cau dang hoi (cau trong kho) de chon huong goi y
 
 
 def safe_focus(focus: Optional[str]) -> Optional[str]:
@@ -55,17 +57,28 @@ def fallback_question(spec: QuestionSpec) -> str:
     return next((q for q in options if not is_repeat(q, spec.avoid)), options[0])
 
 
+def recent_openers(avoid: List[str], n: int = 4) -> List[str]:
+    """3 chu dau (da bo dau) cua n cau gan nhat trong phien: Interviewer v3 khong mo dau trung."""
+    out = [" ".join(re.findall(r"[a-z0-9]+", q)[:3]) for q in avoid[-n:]]
+    return list(dict.fromkeys(o for o in out if o))
+
+
 def build_messages(system: str, spec: QuestionSpec) -> List[dict]:
     topic = spec.topic
     data = {"action": spec.action, "phase": spec.phase, "difficulty": spec.difficulty,
             "first_turn": spec.first_turn, "time_hint": spec.time_hint,
-            "topic": {"title": topic.title, "objective": topic.objective, "opening_hint": topic.opening_hint}
+            # co cau trong kho thi chi gui ten topic: opening_hint keo Interviewer sang cau tu dat, mat dap an chuan
+            "topic": ({"title": topic.title} if spec.bank_question else
+                      {"title": topic.title, "objective": topic.objective, "opening_hint": topic.opening_hint})
             if topic else None,
             "transition": {"phase_changed": spec.phase_changed} if spec.action == "ask_main" else None,
-            "last_question": spec.last_question, "asked_questions_on_topic": spec.asked_on_topic[-5:]}
-    user = "\n\n".join([json.dumps(data, ensure_ascii=False), wrap_untrusted("focus", spec.focus or "(không có)"),
-                        wrap_untrusted("bank_question", spec.bank_question or "(không có)"),
-                        wrap_untrusted("last_answer", spec.last_answer[:2000])])
+            "last_question": spec.last_question, "asked_questions_on_topic": spec.asked_on_topic[-5:],
+            "recent_openers": recent_openers(spec.avoid)}
+    blocks = [json.dumps(data, ensure_ascii=False), wrap_untrusted("focus", spec.focus or "(không có)"),
+              wrap_untrusted("bank_question", spec.bank_question or "(không có)")]
+    if spec.action == "hint" and spec.reference_answer:  # chi hint can dap an chuan; hanh dong khac khong nhan
+        blocks.append(wrap_untrusted("reference_answer", spec.reference_answer[:1500]))
+    user = "\n\n".join(blocks + [wrap_untrusted("last_answer", spec.last_answer[:2000])])
     return [{"role": "system", "content": f"{system}\n\n{UNTRUSTED_NOTICE}"}, {"role": "user", "content": user}]
 
 

@@ -59,13 +59,17 @@ def rank(entries: Sequence[BankEntry], topic_terms: Iterable[str], bucket: Optio
 
 
 KEEP_MEANING_MIN = 0.5
+# tu khuon cau hoi (da bo dau): Interviewer v3 noi gon nen bo chung; chi so tu noi dung de cau ngan van giu nghia
+QUESTION_FILLER = {"ban", "the", "giai", "thich", "khac", "biet", "giua", "khong", "nhu", "nao", "hay", "cho", "minh",
+                   "duoc", "nhung", "cac", "mot", "trinh", "bay", "neu", "nhau", "diem", "cua", "trong", "voi", "thi",
+                   "hoi", "hieu", "sao", "nay", "biet"}
 
 
 def kept_meaning(bank_question: str, asked: str) -> bool:
-    """Interviewer co giu y cau trong kho khong: >= 50% tu (> 2 ky tu) cua cau goc co trong cau da hoi. Cau dan them
-    phia truoc khong lam giam; doi sang y khac (vd danh sach package -> middleware noi chung) thi rot -> khong dung
-    dap an chuan cho luot do."""
-    original = {w for w in words(bank_question) if len(w) > 2}
+    """Interviewer co giu y cau trong kho khong: >= 50% tu noi dung (> 2 ky tu, tru tu khuon cau hoi) cua cau goc co
+    trong cau da hoi. Cau dan them phia truoc khong lam giam; doi sang y khac (vd danh sach package -> middleware noi
+    chung) thi rot -> khong dung dap an chuan cho luot do."""
+    original = {w for w in words(bank_question) if len(w) > 2} - QUESTION_FILLER
     return not original or len(original & words(asked)) / len(original) >= KEEP_MEANING_MIN
 
 

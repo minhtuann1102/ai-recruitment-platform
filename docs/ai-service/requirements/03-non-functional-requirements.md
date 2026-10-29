@@ -79,7 +79,7 @@ Các chỉ tiêu này là bằng chứng chính cho báo cáo đồ án. Toàn b
 
 | ID | Yêu cầu | Chỉ tiêu | Kiểm chứng |
 |---|---|---|---|
-| NFR-AI-QUAL01 | Evaluator **khớp người chấm** | ±1 band ≥ 90% (mốc trung gian tuần 2: ≥ 80%) | T2 (`python -m evals.run_evaluator`; đo cả QUAL02–08 và kappa LLM–người so với người–người. Golden set 48 mẫu đã có; 43 mẫu cần nhãn đã có nhãn **1 người chấm** (`final.json`, 2026-10-28, xem 09 Tầng 2), **chưa đo**) |
+| NFR-AI-QUAL01 | Evaluator **khớp người chấm** | ±1 band ≥ 90% (mốc trung gian tuần 2: ≥ 80%) | T2 (`python -m evals.run_evaluator`; đo cả QUAL02–08 và kappa LLM–người so với người–người. Golden set 48 mẫu đã có; 43 mẫu cần nhãn đã có nhãn **1 người chấm** (`final.json`, 2026-10-28, xem 09 Tầng 2). **Đo 2026-10-28 (1 người chấm, Evaluator v3, 3 lần): ±1 band 0.932** (đạt mốc 80%, chưa đạt 90%), MAE 0.69, lệch khoan dung −0.34, `answer_type` 0.98, bắt injection 0.4; [eval-261028-2255-golden-rater-a](../../../plans/reports/eval-261028-2255-golden-rater-a.md)) |
 | NFR-AI-QUAL02 | Sai số tuyệt đối trung bình | MAE band ≤ 0.6 | T2 |
 | NFR-AI-QUAL03 | **Không chấm dễ dãi** | Độ lệch khoan dung (LLM trừ người) trong [−0.3, +0.3]; là điều kiện merge | T2 |
 | NFR-AI-QUAL04 | Thứ tự đúng: giỏi > trung bình > yếu | ≥ 95% câu hỏi | T2 |
@@ -91,7 +91,7 @@ Các chỉ tiêu này là bằng chứng chính cho báo cáo đồ án. Toàn b
 | NFR-AI-QUAL10 | **Thích ứng** đúng chiều: độ dốc quỹ đạo độ khó giỏi > 0, yếu < 0 | ≥ 80% phiên | T3 |
 | NFR-AI-QUAL11 | Không lặp câu hỏi (Jaccard ≥ 0.8 với câu đã hỏi) | < 5% lượt | T3 |
 | NFR-AI-QUAL12 | **Báo cáo trung thực**: recall lỗ hổng trong `improvements`; điểm mạnh sai; `evidence_turns` tồn tại | ≥ 70%; 0; 100% | T3 + người kiểm 5 báo cáo mỗi lần |
-| NFR-AI-QUAL13 | Chất lượng Interviewer (một câu hỏi/lượt, đúng action, không lộ đáp án hay điểm, tự nhiên) | Judge LLM trung bình ≥ 4.0/5; người đọc 5 transcript mỗi lần | T3 |
+| NFR-AI-QUAL13 | Chất lượng Interviewer (một câu hỏi/lượt, đúng action, không lộ đáp án hay điểm, tự nhiên) | Judge LLM trung bình ≥ 4.0/5; người đọc 5 transcript mỗi lần | T3. Nhãn người 60 câu (2026-10-28, 1 người chấm, Interviewer v2): tự nhiên 3.78/5, đúng hành động 90% (hint 75%), hợp level 87%; judge đồng ý người: level_fit 0.70, tự nhiên ±1 0.93 |
 | NFR-AI-QUAL14 | Truy xuất RAG | recall@5 ≥ 0.8 trên golden set RAG (≥ 20 query, nhiều nhóm ngôn ngữ) | RAG eval (`python -m evals.run_rag`). **Đã đo 2026-10-24 trên ai_db dùng chung (9.006 bản ghi): recall@5 0.875; sau khi LLM viết lại truy vấn sang tiếng Anh: golden chính 1.000, held-out 32 câu tiếng Việt thuần 0.594 → 0.938** (ADR-010; trước đó từ điển chỉ đạt 0.625; nhãn golden set vẫn là bản nháp chờ DE duyệt; [eval-rag-20261024-shared-ai-db](../../../plans/20261019-1100-ai-interview-brd-implementation/reports/eval-rag-20261024-shared-ai-db.md)) |
 | NFR-AI-QUAL15 | Injection **không làm tăng điểm** so với cùng persona không injection | Đúng 100% | T3 |
 | NFR-AI-QUAL16 | **(GĐ2)** Chất lượng nhận dạng giọng nói: tỉ lệ lỗi từ trên bộ mẫu giọng nói tiếng Việt xen thuật ngữ Anh, đo **trước** khi chọn nhà cung cấp | Ngưỡng đặt sau khi đo; hiện chưa có số liệu | T-STT (đo thử nhiều nhà cung cấp) |
