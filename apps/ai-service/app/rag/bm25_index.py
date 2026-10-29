@@ -88,6 +88,10 @@ class Bm25Store:
         self._loaded_at = self._failed_at = -math.inf
         self._task: Optional[asyncio.Task] = None
 
+    def ready(self) -> Optional[Bm25Index]:
+        """Index da nap (co the cu hon TTL) hoac None, khong cho nap: duong theo luot (Phase 02) khong duoc cham."""
+        return self._index
+
     async def index(self) -> Bm25Index:
         now = self._clock()
         if self._index is not None and now - self._loaded_at < CORPUS_TTL_S:

@@ -60,6 +60,7 @@ class EvaluationInput:
     answer: str
     topic_turns: List[TopicTurn] = field(default_factory=list)
     reference_answer: str = ""  # cap Q&A chuan trong kho khi cau vua hoi lay tu kho (question_bank)
+    turn_snippets: List[str] = field(default_factory=list)  # Phase 02: chunk theo cau vua hoi + cau tra loi
 
 
 def build_messages(system_prompt: str, inp: EvaluationInput) -> List[dict]:
@@ -69,7 +70,8 @@ def build_messages(system_prompt: str, inp: EvaluationInput) -> List[dict]:
                       "key_points": inp.topic.key_points},
             "question": inp.question}
     turns = "\n".join(f"Q: {t.q}\nA: {t.a}" for t in inp.topic_turns[-5:]) or "(không có)"
-    snippets = "\n---\n".join(inp.topic.reference_snippets) or "(không có)"
+    # snippet cua topic (luc start) truoc, chunk theo luot sau; prompt coi ca hai la tai lieu doi chieu (luat 8)
+    snippets = "\n---\n".join([*inp.topic.reference_snippets, *inp.turn_snippets]) or "(không có)"
     user = "\n\n".join([json.dumps(data, ensure_ascii=False), wrap_untrusted("topic_turns", turns),
                         wrap_untrusted("reference_snippets", snippets),
                         wrap_untrusted("reference_answer", inp.reference_answer or "(không có)"),

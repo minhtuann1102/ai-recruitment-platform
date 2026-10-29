@@ -77,7 +77,7 @@ def build_query(category: Optional[str], title: str, extra: str = "") -> str:
 class Retriever:
     def __init__(self, repo: KnowledgeRepository, embed: EmbedFn, *, k: int = 5, token_budget: int = 1500,
                  textbook: bool = False, rewrite: Optional[RewriteFn] = None, question_bank: bool = True,
-                 hybrid: bool = False):
+                 hybrid: bool = False, turn_retrieval: bool = False):
         """textbook=False (mac dinh, RAG_TEXTBOOK_ENABLED): kho chua co textbook nen khong tim (do 24/10: tim
         textbook cho scenario ton ~1.5 s ma luon rong). rewrite: LLM viet lai truy van sang tieng Anh cho duong
         vector (RAG_QUERY_REWRITE); do 24/10 tren 32 truy van thuan Viet: recall@5 0.594 -> 0.938."""
@@ -87,6 +87,11 @@ class Retriever:
         # hybrid (RAG_HYBRID, mac dinh bat qua factory): tu khoa + vector + topic_id gop RRF; False: duong cu
         # (topic_id truoc, vector khi < MIN_TOPIC_HITS), giu de so sanh truoc/sau
         self.hybrid = HybridSearcher(repo, embed, self._search_text) if hybrid else None
+        self.turn_retrieval = turn_retrieval  # Phase 02: app/turn_reference_snippets.py (can hybrid de co BM25)
+
+    @property
+    def repo(self) -> KnowledgeRepository:
+        return self._repo
 
     async def search_text(self, query: str, collector: Optional[UsageCollector] = None) -> str:
         """Van ban dem embed: truy van goc + ban tieng Anh do LLM viet lai; khong co hoac loi thi dung tu dien."""

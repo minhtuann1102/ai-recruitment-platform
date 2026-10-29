@@ -6,7 +6,8 @@ import time
 from typing import Callable, List, Sequence
 
 log = logging.getLogger("ai_service.rag")
-SOFT_ERRORS = frozenset({"rag_hybrid_partial"})  # mot duong hybrid loi, cac duong con lai van chay: khong ngat
+# Mot duong hybrid loi (cac duong con lai van chay) hay truy hoi theo luot loi (van co snippet topic): khong ngat
+SOFT_ERRORS = frozenset({"rag_hybrid_partial", "rag_turn_failed"})
 
 
 class CircuitBreaker:
