@@ -15,12 +15,13 @@ from typing import List, Optional, Sequence
 from .catalog.models import TrackCatalog
 from .mock_planner import load_track
 from .llm.usage import UsageCollector
-from .models_interview import PlanTopic
+from .models_interview import PlanTopic, SourceRef
 from .plan_snippets import main_category
 from .rag.difficulty import difficulty_bucket
 from .rag.hybrid_fusion import rrf
 from .rag.models import Chunk, SearchFilters
 from .rag.retriever import OVERFETCH, Retriever, dedup, trim_to_budget
+from .source_refs import source_ref
 
 log = logging.getLogger("ai_service.rag")
 TURN_DEADLINE_S = 1.0  # BM25 < 20 ms; con lai la SQL topic_id (~0.25 s qua pool), chay cung luc voi dap an chuan
@@ -38,6 +39,7 @@ class TurnChunks:
     # nguon hint khi khong co dap an chuan: chi chunk cung topic_id voi topic dang hoi (BM25 thuan co the bat nham
     # theo tu chung, cau tra loi sai keo truy van lech sang khai niem khac)
     hint: str = ""
+    sources: List[SourceRef] = field(default_factory=list)  # cung thu tu texts (03b)
 
 
 def _known(content: str, known: Sequence[str]) -> bool:
@@ -121,4 +123,4 @@ async def turn_snippets(retriever: Optional[Retriever], track: str, *, phase: st
     log.info("rag_turn topic=%s hits=%s", topic.catalog_ref,
              " ".join(f"{c.dedup_key}:{'-' if c.score is None else f'{c.score:.4f}'}" for c in chunks))
     hint = next((c.content for c in chunks if topic.catalog_ref and c.topic_id == topic.catalog_ref), "")
-    return TurnChunks([c.content for c in chunks], hint)
+    return TurnChunks([c.content for c in chunks], hint, [source_ref(c) for c in chunks])

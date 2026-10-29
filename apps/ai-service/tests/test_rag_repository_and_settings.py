@@ -92,7 +92,8 @@ class _Conn:
 
 
 def test_repository_opens_read_only_session_and_maps_rows():
-    row = ("uuid-1", "Q\n\nA", "interview_qa", "node.x", "Backend", "hard", "de-qa-1", "qa_pair", None)
+    row = ("uuid-1", "Q\n\nA", "interview_qa", "node.x", "Backend", "hard", "de-qa-1", "qa_pair", "https://x.dev/a",
+           None)
     conn, seen = _Conn([row]), {}
 
     async def connect(dsn, **kw):
@@ -104,4 +105,5 @@ def test_repository_opens_read_only_session_and_maps_rows():
     assert seen["options"].startswith("-c default_transaction_read_only=on")
     assert "statement_timeout" in seen["options"] and seen["keepalives"] == 1 and seen["connect_timeout"] == 3
     assert chunk.qa_id == "de-qa-1" and chunk.score is None and chunk.dedup_key == "de-qa-1"
+    assert chunk.source_url == "https://x.dev/a"
     assert conn.executed[0][1] == ["de-qa-1", "text-embedding-3-small"]

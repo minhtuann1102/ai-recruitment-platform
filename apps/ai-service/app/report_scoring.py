@@ -7,6 +7,7 @@ from typing import Dict, List
 
 from .mock_evaluator import is_scored
 from .models_interview import FinalizeRequest, FinalizeTurn
+from .report_resources import MAX_RESOURCES, plan_sources, resource, topic_sources
 from .requirements_coverage import requirements_block
 
 PHASE_WEIGHTS = {
@@ -77,6 +78,7 @@ def build_report(req: FinalizeRequest) -> Dict:
     good = [t for t in topics if t["score"] >= 7.0]
     weak = sorted([t for t in topics if t["score"] < 5.0], key=lambda t: t["score"])
     kp = {t.id: t.key_points for ph in req.plan.phases for t in ph.topics}
+    fallback = plan_sources(req.plan)
     v = verdict(overall)
     requirements = requirements_block(req.jd_profile, req.plan, scored, req.turns)
     return {
@@ -92,7 +94,9 @@ def build_report(req: FinalizeRequest) -> Dict:
         "improvements": [{"point": t["title"], "why": t["comment"], "evidence_turns": t["_turns"]}
                          for t in weak[:3]],
         "study_plan": [{"topic": t["title"], "priority": "high" if t["score"] < 3.5 else "medium",
-                        "actions": [f"Ôn lại: {p}" for p in kp.get(t["topic_id"], [])[:3]], "resources": []}
+                        "actions": [f"Ôn lại: {p}" for p in kp.get(t["topic_id"], [])[:3]],
+                        "resources": [resource(s) for s in topic_sources(
+                            scored, t["topic_id"], fallback.get(t["topic_id"], ()))[:MAX_RESOURCES]]}
                        for t in weak[:3]],
         **({"requirements": requirements} if requirements else {}),
         "turns": [{"turn_number": t.turn_number, "topic_id": t.topic_id, "turn_kind": t.turn_kind,

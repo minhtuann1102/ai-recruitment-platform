@@ -158,6 +158,14 @@ Reporter (`app/agents/reporter.py`) chỉ thay `overall.summary`, `strengths`, `
 `url` trong `resources` do **code tra từ topic catalog** theo `resource_ids` Reporter chọn; Reporter không bao
 giờ tự viết URL (chống link bịa).
 
+**Đã cài (2026-10-29, Phase 03b):** catalog chưa có `resources`, kho chưa có textbook, nên `resources` lấy từ **câu Q&A
+của DE mà Evaluator v4 đã trích** ở các lượt của topic (`Evaluation.sources`): `title` = câu hỏi, `url` =
+`metadata.source_url` của DE (chỉ `http(s)`, có thể `null`). Nguồn bác bỏ ý ứng viên đứng trước, bỏ trùng, ≤ 3 mỗi mục;
+còn thiếu thì bù bằng câu Q&A DE gắn cho topic lúc start (`plan.topics[].reference_sources`), vì ứng viên yếu ít ý đúng
+nên ít nguồn được trích (đo 29/10: không bù thì 5/10 phiên không có tài liệu nào).
+Reporter v2 chọn `resource_ids` (`r1..`) trong `input.resources` (chỉ id, `topic_id`, `title`); báo cáo mock lấy 3 nguồn
+đầu của topic yếu. Khi DE bổ sung catalog `resources` / textbook thì thêm vào cùng danh sách.
+
 ## 6.5 Quy tắc hiển thị
 
 - **Trong phiên:** ứng viên chỉ thấy câu hỏi, tiến độ (phase, topic x/y, thời gian còn lại). Không thấy điểm hay

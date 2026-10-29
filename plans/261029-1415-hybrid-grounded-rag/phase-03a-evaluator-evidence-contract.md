@@ -7,7 +7,7 @@
 - Rubric, luật khắt khe: `docs/ai-service/05-rubric-and-final-report.md` mục 6; đo: `docs/ai-service/09` mục 10
 
 ## Overview
-- Priority P1. Trạng thái: **đang làm** (nhánh `thang/evidence-contract`).
+- Priority P1. Trạng thái: **xong**, merge PR #55.
 - Hiện nay Evaluator nhận snippet + đáp án chuẩn làm tài liệu đối chiếu nhưng không nói mình dựa vào tài liệu nào; code
   chỉ kiểm quote nằm trong câu trả lời. Không biết điểm có bám tài liệu (DE đã duyệt) hay dựa kiến thức của model.
 - Phase này: mỗi ý `covered` ghi `source_ids` (tài liệu nào) + `support`; code hậu kiểm id; đo tỉ lệ bám nguồn.
@@ -47,7 +47,7 @@
   (v3 dao động 0.919–0.930), v4 khắt hơn (leniency −0.47 so với −0.37), 0 id bịa
 - [x] Đo mô phỏng: supported 0.47 / contradicted 0 / no_source 0.53; Evaluator +0.3–0.4 s (vào thẳng TTFT)
 - [x] Docs, review độc lập (sửa: chỉ `R` bác bỏ mới chặn điểm, point của ý contradicted, gộp misconceptions, version sai không 500)
-- [ ] Chốt v4 mặc định hay v3, owner test
+- [x] Chốt v4 mặc định (owner), owner test
 
 ## Success Criteria
 - Agreement ±1 band trên golden ≥ 0.93 và không thấp hơn v3.

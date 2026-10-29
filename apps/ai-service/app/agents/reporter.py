@@ -18,6 +18,7 @@ from ..llm.errors import ConfigError, LlmError
 from ..llm.gateway import LlmGateway
 from ..llm.usage import CallRecord, UsageCollector
 from ..prompts.store import UNTRUSTED_NOTICE, PromptStore, wrap_untrusted
+from ..report_resources import MAX_RESOURCES, plan_sources, resource_catalog
 from ..report_scoring import build_report, scored_turns
 from ..models_interview import FinalizeRequest
 from .registry import agent_mode, cached_llm_agent
@@ -42,6 +43,7 @@ class StudyItem(BaseModel):
     topic: str
     priority: Literal["high", "medium"]
     actions: List[str]
+    resource_ids: List[str] = []  # v2 (03b): id r1.. trong input.resources; code doi ra title + url
 
 
 class IdComment(BaseModel):
@@ -64,8 +66,8 @@ def _text(value: str, limit: int) -> str:
     return "" if cv_text.has_injection(value) or wrong_language(value) else value[:limit]
 
 
-def reporter_input(report: Dict, req: FinalizeRequest) -> Dict:
-    """Chi ket qua da cham (khong nguyen van tra loi, FR-AI-052)."""
+def reporter_input(report: Dict, req: FinalizeRequest, resources: Optional[Dict[str, Dict]] = None) -> Dict:
+    """Chi ket qua da cham (khong nguyen van tra loi, FR-AI-052); resources: tai lieu da trich, chi id + title."""
     titles = {t.id: t.title for ph in req.plan.phases for t in ph.topics}
     turns = [{"turn_number": t.turn_number, "topic": titles.get(t.topic_id, ""), "turn_kind": t.turn_kind,
               "scores": t.evaluation.scores_10.model_dump(), "covered": t.evaluation.covered_points,
@@ -73,10 +75,17 @@ def reporter_input(report: Dict, req: FinalizeRequest) -> Dict:
              for t in scored_turns(req)]
     return {"level": req.level, "track": req.track, "overall": report["overall"], "sections": report["sections"],
             "criteria": report["criteria"], "topics": report["topics"], "turns": turns,
-            "requirements": report.get("requirements")}
+            "requirements": report.get("requirements"),
+            "resources": [{"id": i, "topic_id": r["topic_id"], "title": r["title"]}
+                          for i, r in (resources or {}).items()]}
 
 
-def merge_comments(report: Dict, out: ReporterOutput) -> Dict:
+def _resources(ids: List[str], catalog: Dict[str, Dict]) -> List[Dict]:
+    picked = [catalog[i] for i in dict.fromkeys(i.strip().lower() for i in ids) if i in catalog]
+    return [{"title": r["title"], "url": r["url"]} for r in picked[:MAX_RESOURCES]]
+
+
+def merge_comments(report: Dict, out: ReporterOutput, resources: Optional[Dict[str, Dict]] = None) -> Dict:
     """Ghep nhan xet vao bao cao; diem giu nguyen. Muc khong con evidence hop le thi bi bo."""
     turn_score = {t["turn_number"]: sum(t["scores"].values()) / 4 for t in report["turns"]}
     valid = lambda turns: [n for n in dict.fromkeys(turns) if n in turn_score]  # noqa: E731
@@ -88,7 +97,8 @@ def merge_comments(report: Dict, out: ReporterOutput) -> Dict:
     improvements = [{"point": _text(i.point, 200), "why": _text(i.why, 300), "evidence_turns": valid(i.evidence_turns)}
                     for i in out.improvements[:3] if valid(i.evidence_turns) and _text(i.point, 200)]
     study = [{"topic": _text(s.topic, 150), "priority": s.priority,
-              "actions": [a for a in (_text(x, 200) for x in s.actions[:3]) if a], "resources": []}
+              "actions": [a for a in (_text(x, 200) for x in s.actions[:3]) if a],
+              "resources": _resources(s.resource_ids, resources or {})}
              for s in out.study_plan[:3] if _text(s.topic, 150)]
     topic_c = {c.id: _text(c.comment, 300) for c in out.topic_comments}
     turn_c = {c.id: _text(c.comment, 300) for c in out.turn_comments}
@@ -111,7 +121,9 @@ class LlmReporter:
 
     async def report(self, req: FinalizeRequest, collector: Optional[UsageCollector] = None) -> Dict:
         base = build_report(req)
-        data = json.dumps(reporter_input(base, req), ensure_ascii=False)
+        resources = resource_catalog(scored_turns(req), [t["topic_id"] for t in base["topics"]],
+                                     plan_sources(req.plan))
+        data = json.dumps(reporter_input(base, req, resources), ensure_ascii=False)
         messages = [{"role": "system", "content": f"{self._prompt.text}\n\n{UNTRUSTED_NOTICE}"},
                     {"role": "user", "content": wrap_untrusted("scored_session", data)}]
         try:
@@ -122,7 +134,7 @@ class LlmReporter:
             if collector is not None:
                 collector.add(CallRecord(self.agent, "rule-based", fallback="reporter_partial"))
             return {**base, "status": "partial"}
-        report = merge_comments(base, result.data)
+        report = merge_comments(base, result.data, resources)
         report["meta"] = {**report["meta"], "prompt_versions": {**report["meta"]["prompt_versions"],
                                                                 "reporter": self._prompt.version}}
         report["metadata"] = {"model": result.record.model, "latency_ms": result.record.latency_ms}

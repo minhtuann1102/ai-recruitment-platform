@@ -22,7 +22,7 @@ from ..llm.errors import ConfigError, LlmError
 from ..llm.gateway import LlmGateway
 from ..llm.usage import CallRecord, UsageCollector
 from ..models_common import AnswerType
-from ..models_interview import Evaluation, Evidence, PlanTopic, TopicTurn
+from ..models_interview import CitedSource, Evaluation, Evidence, PlanTopic, SourceRef, TopicTurn
 from ..prompts.store import UNTRUSTED_NOTICE, PromptStore, wrap_untrusted
 
 log = logging.getLogger("ai_service.evaluator")
@@ -78,6 +78,8 @@ class EvaluationInput:
     topic_turns: List[TopicTurn] = field(default_factory=list)
     reference_answer: str = ""  # cap Q&A chuan trong kho khi cau vua hoi lay tu kho (question_bank)
     turn_snippets: List[str] = field(default_factory=list)  # Phase 02: chunk theo cau vua hoi + cau tra loi
+    turn_sources: List[SourceRef] = field(default_factory=list)  # 03b: cung thu tu turn_snippets
+    reference_source: Optional[SourceRef] = None  # 03b: cau tu kho cua reference_answer
 
 
 def build_messages(system_prompt: str, inp: EvaluationInput, with_ids: bool = False) -> List[dict]:
@@ -106,6 +108,27 @@ def all_snippets(inp: EvaluationInput) -> List[str]:
     return [*inp.topic.reference_snippets, *inp.turn_snippets]
 
 
+def source_refs(inp: EvaluationInput) -> List[Optional[SourceRef]]:
+    """Tham chieu ben vung cung thu tu id S1.. / R; thieu (plan cu, interview-service bo truong) thi None."""
+    topic = list(inp.topic.reference_sources)[:len(inp.topic.reference_snippets)]
+    topic += [None] * (len(inp.topic.reference_snippets) - len(topic))
+    turn = list(inp.turn_sources)[:len(inp.turn_snippets)]
+    turn += [None] * (len(inp.turn_snippets) - len(turn))
+    return topic + turn + ([inp.reference_source] if inp.reference_answer else [])
+
+
+def cited_sources(points: List[SourcedPoint], inp: EvaluationInput) -> List[CitedSource]:
+    """Tai lieu cac y (giu lai + bi bac bo) da trich, bo trung theo id; y contradicted dung truoc (can on nhat)."""
+    ids = [i for i, _ in source_blocks(all_snippets(inp), inp.reference_answer)]
+    refs = dict(zip(ids, source_refs(inp)))
+    out: dict = {}
+    for p in sorted(points, key=lambda p: p.support != "contradicted"):
+        for i in p.source_ids:
+            if refs.get(i) is not None and i not in out:
+                out[i] = CitedSource(**refs[i].model_dump(), id=i, support=p.support)
+    return list(out.values())
+
+
 def _sourced(c: CoveredPoint) -> SourcedPoint:
     return SourcedPoint(c.point, c.quote, list(getattr(c, "source_ids", [])), getattr(c, "support", "no_source"))
 
@@ -120,6 +143,7 @@ def postcheck(out: EvaluatorOutput, inp: EvaluationInput) -> Evaluation:
         log.info("evaluator_quote_dropped turn=%d dropped=%d", inp.turn_number, dropped)
     misconceptions = [m for m in out.misconceptions if m.strip()]
     sourced = isinstance(out, EvaluatorOutputV4)
+    contradicted: List[SourcedPoint] = []
     ids = [i for i, _ in source_blocks(all_snippets(inp), inp.reference_answer)]
     if sourced:
         verified, contradicted, invalid = check_sources(verified, ids)
@@ -147,7 +171,8 @@ def postcheck(out: EvaluatorOutput, inp: EvaluationInput) -> Evaluation:
                            support=c.support if sourced else None) for c in verified],
         # tag do code sinh tu y da kiem chung (v2 khong bat LLM viet tag: bot token o duong nong)
         strength_tags=slug_tags(c.point for c in verified), gap_tags=slug_tags(out.missing_points),
-        follow_up_focus=out.follow_up_focus, confidence=confidence(verified, bool(ids)) if sourced else None)
+        follow_up_focus=out.follow_up_focus, confidence=confidence(verified, bool(ids)) if sourced else None,
+        sources=cited_sources([*verified, *contradicted], inp) if sourced else [])
 
 
 class LlmEvaluator:

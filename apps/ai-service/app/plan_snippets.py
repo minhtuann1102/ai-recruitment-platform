@@ -19,6 +19,7 @@ from .rag.factory import build_retriever
 from .rag.question_bank import plain
 from .rag.retriever import Retriever, build_query
 from .rag.settings import load_rag_settings
+from .source_refs import source_ref
 
 log = logging.getLogger("ai_service.rag")
 SNIPPET_DEADLINE_S = 5.0  # do 24/10: binh thuong ~0.5 s (topic_id), co viet lai truy van ~2 s
@@ -153,7 +154,8 @@ async def attach_reference_snippets(plan: InterviewPlan, catalog: TrackCatalog, 
         return plan
     out = plan.model_copy(deep=True)
     flat = [t for ph in out.phases for t in ph.topics]
-    for topic, snippets, bank in zip(flat, *results):
-        topic.reference_snippets = list(snippets)
+    for topic, chunks, bank in zip(flat, *results):
+        topic.reference_snippets = [c.content for c in chunks]
+        topic.reference_sources = [source_ref(c) for c in chunks]
         topic.bank_questions = bank
     return out

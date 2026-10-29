@@ -18,13 +18,14 @@ from .agents.planner import get_planner
 from .mock_planner import load_track
 from .plan_snippets import attach_reference_snippets, get_retriever
 from .models_common import LEVEL_CONFIG
-from .models_interview import (CandidateState, Evaluation, InterviewPlan, NextTurnRequest, PlanTopic,
+from .models_interview import (CandidateState, Evaluation, InterviewPlan, NextTurnRequest, PlanTopic, SourceRef,
                                StartRequest, TopicState, TurnInfo)
 from .policy import Decision, decide
 from .rag.difficulty import difficulty_bucket
 from .rag.question_bank import kept_meaning, pick
 from .state_update import apply_action, record_evaluation
 from .time_budget import forced_transition, phase_deadline_s
+from .source_refs import title_of
 from .turn_reference_snippets import TurnChunks, turn_snippets
 
 _KIND = {"ask_main": "main", "follow_up": "follow_up", "hint": "hint", "clarify": "clarify",
@@ -109,6 +110,14 @@ async def _answer_key(retriever, qa_id: Optional[str], collector: Optional[Usage
         return ""
 
 
+def _reference_source(topic: PlanTopic, qa_id: Optional[str], key: str) -> Optional[SourceRef]:
+    """Cau tu kho: tieu de la cau hoi trong plan (khong co thi dong dau dap an); 03b dua vao study_plan."""
+    if not key or not qa_id:
+        return None
+    question = next((b.question for b in topic.bank_questions if b.qa_id == qa_id), "")
+    return SourceRef(ref=qa_id, title=title_of(question or key))
+
+
 def _hint_source(action: str, key: str, extra: TurnChunks) -> str:
     """Hint goi y cho dung cau vua hoi: dap an chuan (cau tu kho), khong co thi chunk theo luot cung topic_id."""
     if action != "hint":
@@ -139,7 +148,8 @@ async def next_turn(req: NextTurnRequest, evaluator: Optional[Evaluator] = None,
     ev = await (evaluator or get_evaluator()).evaluate(EvaluationInput(
         level=req.level, phase=phase, topic=topic, difficulty=state.current_difficulty, turn_kind=req.turn_kind,
         turn_number=req.turn_number, question=req.question, answer=req.answer, topic_turns=req.topic_turns,
-        reference_answer=key, turn_snippets=extra.texts), collector)
+        reference_answer=key, turn_snippets=extra.texts, turn_sources=extra.sources,
+        reference_source=_reference_source(topic, state.current_qa_id, key)), collector)
     record_evaluation(state, ev, req.turn_number)
     if state.topic_started_s is None:  # state cu: chua biet topic bat dau luc nao
         state.topic_started_s = state.phase_started_s = req.elapsed_seconds
