@@ -6,7 +6,7 @@
 - Code: `app/turn_engine.py` (`next_turn`), `app/agents/evaluator.py` (`build_messages`), `app/rag/bm25_index.py`
 
 ## Overview
-- Priority P1. Trạng thái: **đang làm** (nhánh `thang/per-turn-retrieval`).
+- Priority P1. Trạng thái: **xong**, merge PR #53.
 - Hiện nay RAG chỉ chạy một lần lúc `/start`: Evaluator mỗi lượt nhận `reference_snippets` cố định của topic, cộng
   `reference_answer` khi câu vừa hỏi lấy từ kho. Follow-up, hint và câu AI tự đặt chấm theo snippet của cả topic, có
   thể không khớp câu đang hỏi.
@@ -54,7 +54,7 @@ chờ) + `repo.list_by_topic_id`.
 - [x] Đo lại A/B ([báo cáo](../reports/eval-261029-1722-per-turn-retrieval-ab.md)): p50 không đổi, p95 +0.31 s (nhiễu,
   vượt tiêu chí 0.2 s), 24/24 lượt có chunk
 - [x] Docs, review độc lập (sửa: shield SQL quá hạn, cooldown 30 s, hint cùng topic, khử trùng snippet cắt đuôi)
-- [ ] Owner test
+- [x] Owner test
 
 ## Success Criteria
 - TTFT P95 không tăng quá 0.2 s so với mốc.
