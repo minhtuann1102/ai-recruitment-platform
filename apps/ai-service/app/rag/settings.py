@@ -23,6 +23,7 @@ class RagSettings:
     question_bank: bool = True  # cau hoi chinh phan technical lay tu kho interview_qa (app/rag/question_bank.py)
     cooldown_s: int = 60  # RAG loi thi bo qua RAG trong N giay (app/rag/circuit_breaker.py); 0 = khong ngat
     hybrid: bool = True  # tu khoa + vector + topic_id gop RRF (app/rag/hybrid_search.py); false: duong cu
+    turn_retrieval: bool = True  # moi next-turn tim them chunk BM25 theo cau hoi + tra loi (can hybrid)
 
 
 def stored_model_name(name: str) -> str:
@@ -60,4 +61,5 @@ def load_rag_settings(env: Optional[Mapping[str, str]] = None) -> RagSettings:
         question_bank=_flag(env.get("RAG_QUESTION_BANK", ""), True),
         cooldown_s=cooldown,
         hybrid=_flag(env.get("RAG_HYBRID", ""), True),
+        turn_retrieval=_flag(env.get("RAG_TURN_RETRIEVAL", ""), True),
     )

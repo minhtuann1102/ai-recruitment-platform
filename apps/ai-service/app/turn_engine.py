@@ -25,6 +25,7 @@ from .rag.difficulty import difficulty_bucket
 from .rag.question_bank import kept_meaning, pick
 from .state_update import apply_action, record_evaluation
 from .time_budget import forced_transition, phase_deadline_s
+from .turn_reference_snippets import TurnChunks, turn_snippets
 
 _KIND = {"ask_main": "main", "follow_up": "follow_up", "hint": "hint", "clarify": "clarify",
          "wrap_up": "main", "end": "main"}  # next_topic / next_phase deu thanh ask_main sau apply_action
@@ -108,6 +109,13 @@ async def _answer_key(retriever, qa_id: Optional[str], collector: Optional[Usage
         return ""
 
 
+def _hint_source(action: str, key: str, extra: TurnChunks) -> str:
+    """Hint goi y cho dung cau vua hoi: dap an chuan (cau tu kho), khong co thi chunk theo luot cung topic_id."""
+    if action != "hint":
+        return ""
+    return key or extra.hint
+
+
 async def next_turn(req: NextTurnRequest, evaluator: Optional[Evaluator] = None,
                     collector: Optional[UsageCollector] = None, retriever=None) -> TurnResult:
     plan, state = req.plan, req.state.model_copy(deep=True)
@@ -122,11 +130,16 @@ async def next_turn(req: NextTurnRequest, evaluator: Optional[Evaluator] = None,
         raise ApiError(422, "invalid_request", "active_topic_id khong co trong plan")
     phase, topic = topics[pos]
 
-    key = await _answer_key(retriever or get_retriever(), state.current_qa_id, collector)
+    retriever = retriever or get_retriever()
+    key, extra = await asyncio.gather(  # Phase 02: chi mot trong hai chay (cau kho co dap an chuan thi bo qua)
+        _answer_key(retriever, state.current_qa_id, collector),
+        turn_snippets(retriever, req.track, phase=phase, topic=topic, difficulty=state.current_difficulty,
+                      question=req.question, answer=req.answer, has_answer_key=bool(state.current_qa_id),
+                      collector=collector))
     ev = await (evaluator or get_evaluator()).evaluate(EvaluationInput(
         level=req.level, phase=phase, topic=topic, difficulty=state.current_difficulty, turn_kind=req.turn_kind,
         turn_number=req.turn_number, question=req.question, answer=req.answer, topic_turns=req.topic_turns,
-        reference_answer=key), collector)
+        reference_answer=key, turn_snippets=extra.texts), collector)
     record_evaluation(state, ev, req.turn_number)
     if state.topic_started_s is None:  # state cu: chua biet topic bat dau luc nao
         state.topic_started_s = state.phase_started_s = req.elapsed_seconds
@@ -159,7 +172,7 @@ async def next_turn(req: NextTurnRequest, evaluator: Optional[Evaluator] = None,
                         asked_on_topic=[t.q for t in req.topic_turns] + [req.question] if action != "ask_main" else [],
                         time_hint=_time_hint(req.elapsed_seconds, plan, n_phase), avoid=list(state.asked_questions),
                         bank_question=bank.question if bank else None,
-                        reference_answer=key if action == "hint" else "")  # goi y cho dung cau vua hoi
+                        reference_answer=_hint_source(action, key, extra))
     state.turn_count += 1
     if n_topic:
         next(t for t in state.topics if t.id == n_topic.id).turns.append(req.turn_number + 1)

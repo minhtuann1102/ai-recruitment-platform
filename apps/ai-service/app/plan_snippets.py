@@ -27,7 +27,8 @@ _config_error: Optional[str] = None  # RAG bat nhung cau hinh sai: moi response 
 _breaker = CircuitBreaker(60)  # thay bang RAG_COOLDOWN_S khi nap cau hinh
 _loaded = False
 RAG_ERROR_MESSAGE = "RAG lỗi, lượt này chạy không có dữ liệu tham chiếu từ kho"
-RAG_DEGRADED_MESSAGE = "Một phần RAG lỗi (tìm từ khóa hoặc vector), kết quả lấy từ phần còn chạy được"
+RAG_DEGRADED_MESSAGE = ("Một phần RAG lỗi (tìm từ khóa, vector hoặc truy hồi theo lượt), "
+                        "kết quả lấy từ phần còn chạy được")
 
 
 def _load() -> None:

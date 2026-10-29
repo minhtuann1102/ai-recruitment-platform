@@ -256,6 +256,13 @@ trong catalog đã đưa; `cv_ref` tồn tại trong `cv_profile`; không trùng
 mỗi topic (query = `title + key_points`), lưu `reference_snippets` (≤ 600 token / topic) vào plan. Evaluator
 dùng lại ở các lượt sau, **không phải gọi RAG mỗi lượt** (§9.2).
 
+**Truy hồi theo lượt (2026-10-29, Phase 02, `app/turn_reference_snippets.py`):** mỗi `next-turn` không phải câu kho
+(follow-up, hint, câu AI tự đặt; không chạy ở intro) tìm thêm ≤ 3 chunk (≤ 600 token) bằng BM25 trong bộ nhớ trên câu
+vừa hỏi + 800 ký tự đầu câu trả lời, tăng điểm chunk cùng `topic_id`. Không viết lại, không embed, nên không thêm lời
+gọi LLM. Evaluator nhận các chunk này nối sau `reference_snippets` của topic (bỏ chunk trùng), prompt v3 không đổi. Hint
+không có đáp án chuẩn thì dùng chunk đầu cùng `topic_id` với topic đang hỏi làm `reference_answer` (chunk BM25 thuần
+có thể lạc đề). Cờ `RAG_TURN_RETRIEVAL` (mặc định bật, cần hybrid).
+
 **Ngân hàng câu hỏi từ kho (2026-10-24, `app/rag/question_bank.py`):** cùng lúc với snippet, mỗi topic `technical` có
 `catalog_ref` lấy tối đa 80 cặp Q&A theo `topic_id` (chunk `question` + `qa_pair` cùng `qa_id`), bỏ câu không đọc thành
 tiếng được (có code, nhiều dòng, > 200 ký tự), chỉ giữ câu có ít nhất một từ chung với topic (title, `key_points`,
