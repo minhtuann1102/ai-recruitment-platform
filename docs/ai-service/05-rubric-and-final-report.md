@@ -38,6 +38,7 @@ này trong phần tĩnh của prompt. Hệ quả: cùng một câu trả lời, 
 | Lượt sau gợi ý (`turn_kind = hint`) → mọi band ≤ 3 | ✔ | Kẹp `≤ 3` |
 | `dont_know` / `manipulation` → mọi band = 0 | ✔ | Ép về 0 |
 | Dài ≠ tốt | ✔ | Test case "lan man" trong golden set (§10) |
+| Trích nguồn (v4, 2026-10-29): mỗi ý covered ghi `source_ids` (`S1..Sn` snippet theo thứ tự gửi, `R` đáp án chuẩn) + `support` | ✔ | Bỏ id không có trong lượt; hết id thì `no_source`; `contradicted` có id hợp lệ → ý không được tính covered; chỉ khi đáp án chuẩn (`R`) bác bỏ mới thành `misconceptions` (kéo theo `technical_accuracy ≤ 1`), vì snippet / chunk BM25 chỉ gần đúng chủ đề; ý code kiểm đứng đầu, bỏ ý LLM gần trùng; `confidence = low` khi có tài liệu mà không ý nào `supported` (không hạ điểm) |
 
 ## 6.3 Tổng hợp điểm (code, không phải LLM)
 

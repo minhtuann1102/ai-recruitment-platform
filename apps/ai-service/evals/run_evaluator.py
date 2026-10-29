@@ -39,9 +39,12 @@ async def run_all(samples: List[dict], runs: int, prompt: str, collector: UsageC
         async with sem:
             raw, ev = await evaluator.evaluate_with_raw(to_input(s), collector)
         quotes = [c.quote for c in raw.covered] if raw else []
+        source_ids = [i for c in (raw.covered if raw else []) for i in getattr(c, "source_ids", [])]
         return {**ev.scores.model_dump(), "answer_type": ev.answer_type, "turn_score_10": ev.turn_score_10,
                 "degraded": ev.degraded, "llm": raw is not None, "quotes": len(quotes),
-                "valid_quotes": sum(quote_in_answer(q, s["answer"]) for q in quotes)}
+                "valid_quotes": sum(quote_in_answer(q, s["answer"]) for q in quotes),
+                # golden khong co tai lieu: moi id deu la id la (v4 phai tra no_source, source_ids rong)
+                "source_ids": len(source_ids)}
 
     results: Dict[str, List[dict]] = {s["id"]: [] for s in samples}
     for r in range(runs):
@@ -101,6 +104,7 @@ def summarize(samples: List[dict], all_results: Dict[str, List[dict]], labels: D
         # mau injection ma regex precheck khong bat, phai do LLM tu nhan ra
         "manipulation_caught_by_llm": rate([ok for ok, runs in zip(caught, manip_runs) if runs and runs[0]["llm"]]),
         "evidence_valid": round(valid / quotes, 3) if quotes else None,
+        "invented_source_ids": sum(r.get("source_ids", 0) for runs in results.values() for r in runs),
     }
 
 

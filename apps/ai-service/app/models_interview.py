@@ -149,9 +149,15 @@ class Scores10(BaseModel):
     relevance: float
 
 
+Support = Literal["supported", "contradicted", "no_source"]
+
+
 class Evidence(BaseModel):
     claim: str
     quote: str
+    # Evaluator v4 (Phase 03a): id tai lieu doi chieu trong luot (S1.. snippet, R dap an chuan); None = v3 / mock
+    source_ids: List[str] = Field(default_factory=list)
+    support: Optional[Support] = None
 
 
 class Evaluation(BaseModel):
@@ -168,6 +174,8 @@ class Evaluation(BaseModel):
     strength_tags: List[str] = Field(default_factory=list)
     gap_tags: List[str] = Field(default_factory=list)
     follow_up_focus: Optional[str] = None
+    # v4: low = luot co tai lieu nhung khong y covered nao duoc tai lieu ung ho (diem khong bam nguon); None = v3 / mock
+    confidence: Optional[Literal["high", "low"]] = None
 
 
 # --- Finalize ---

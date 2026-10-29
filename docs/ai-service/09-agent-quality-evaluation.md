@@ -68,6 +68,7 @@ nguyên văn từ `interview_qa` đã index.
 | Nhất quán | Chạy 3 lần, độ lệch chuẩn band trung bình | ≤ 0.3 |
 | Bắt manipulation | % mẫu injection có `answer_type = manipulation`, band 0 | 100% |
 | Evidence hợp lệ | % quote khớp câu trả lời trước hậu kiểm | ≥ 95% |
+| Id nguồn hợp lệ (v4) | Golden không có tài liệu nên mọi id đều là bịa (`invented_source_ids` của `run_evaluator`, mục tiêu 0); mô phỏng: phân bố `supported` / `contradicted` / `no_source` và tỉ lệ `confidence = low` (`grounding` của `evals.simulate`) | ≥ 95% id có thật |
 | `answer_type` đúng | Accuracy so với nhãn | ≥ 90% |
 
 **Đã cài (2026-10-22), bản v1 của golden set:** 48 mẫu trong `evals/evaluator_golden.jsonl`: 12 câu hỏi trải 6 track và 4 level (fresher 2, junior 4, middle 3, senior 3) × 3 mức (giỏi, trung bình, yếu), cộng 12 mẫu adversarial (injection trực tiếp, injection giả ghi chú hệ thống, injection tiếng Anh, 2 injection lời lẽ mềm mà regex không bắt để đo riêng khả năng của LLM, nhồi thuật ngữ, lan man, sai nhưng tự tin, đúng nhưng cực ngắn, trả lời câu khác, tiếng Anh, không dấu). Câu trả lời do AIE soạn với LLM hỗ trợ; **người gán nhãn sửa câu nào không tự nhiên trước khi chấm**. `intended_tier` là ý định của người soạn, **không phải nhãn**; nhãn chỉ đến từ người chấm. Mẫu injection có `expect.answer_type = manipulation` theo định nghĩa (BRU, FR-AI-032), không cần nhãn.

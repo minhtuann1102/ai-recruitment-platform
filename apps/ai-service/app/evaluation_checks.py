@@ -127,7 +127,8 @@ def build_evaluation(*, turn_number: int, answer_type: str, bands: Dict[str, int
                      covered_points: List[str] = (), missing_points: List[str] = (),
                      misconceptions: List[str] = (), evidence: List[Evidence] = (),
                      strength_tags: List[str] = (), gap_tags: List[str] = (),
-                     follow_up_focus: Optional[str] = None, degraded: bool = False) -> Evaluation:
+                     follow_up_focus: Optional[str] = None, degraded: bool = False,
+                     confidence: Optional[str] = None) -> Evaluation:
     """Dung Evaluation tu band da hau kiem: band x 2.5 -> thang 0-10, diem luot = trung binh (docs 05 muc 6.1)."""
     return Evaluation(
         turn_number=turn_number, answer_type=answer_type, covered_points=list(covered_points)[:3],
@@ -136,7 +137,7 @@ def build_evaluation(*, turn_number: int, answer_type: str, bands: Dict[str, int
         scores_10=Scores10(**{k: v * 2.5 for k, v in bands.items()}),
         turn_score_10=round(sum(bands.values()) / 4 * 2.5, 1), degraded=degraded,
         strength_tags=list(strength_tags)[:3], gap_tags=list(gap_tags)[:3],
-        follow_up_focus=(follow_up_focus or None) and follow_up_focus[:150])
+        follow_up_focus=(follow_up_focus or None) and follow_up_focus[:150], confidence=confidence)
 
 
 def slug_tags(points: Iterable[str], limit: int = 3) -> List[str]:

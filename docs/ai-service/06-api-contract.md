@@ -425,7 +425,7 @@ Event `done`:
     "turn_number": 4, "answer_type": "answered", "covered_points": ["..."], "missing_points": ["..."],
     "misconceptions": [], "evidence": [], "scores": { "technical_accuracy": 3, "completeness": 2, "extensibility": 2, "relevance": 4 },
     "scores_10": { "technical_accuracy": 7.5, "completeness": 5.0, "extensibility": 5.0, "relevance": 10.0 },
-    "turn_score_10": 6.5, "degraded": false
+    "turn_score_10": 6.5, "degraded": false, "confidence": "high"
   },
   "question": "Ok, vậy nếu method đó ném ra một checked exception thì transaction có rollback không?",
   "turn": { "turn_number": 5, "phase": "technical", "topic_id": "t2", "turn_kind": "follow_up", "action": "follow_up",
@@ -438,6 +438,11 @@ Event `done`:
                 "rag": { "status": "on" } }
 }
 ```
+
+`evaluation` (Evaluator v4, 2026-10-29, chỉ bổ sung): mỗi phần tử `evidence` có thêm `source_ids` (id tài liệu đối chiếu
+trong lượt: `S1..Sn` snippet của topic rồi chunk theo lượt, `R` đáp án chuẩn) và `support` (`supported` /
+`contradicted` / `no_source`); `confidence` = `low` khi lượt có tài liệu nhưng không ý nào được tài liệu ủng hộ,
+`high` khi có, `null` khi không có tài liệu, không có ý nào, hoặc Evaluator v3 / mock. Id chỉ có nghĩa trong lượt đó.
 
 `reasoning` do **code** sinh từ luật policy đã khớp (không phải LLM), lưu vào `agent_reasoning` để debug.
 `session_end = true` thì `question = null`.
