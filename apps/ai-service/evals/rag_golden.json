@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "draft - AIE soan 2026-10-22, cho DE duyet nhan (rag-design muc 9). Nhan tro vao qa_id cua bo canonical DE (PR #8, chua merge); doi qa_id thi phai sua file nay",
+  "status": "DE (minhtuann1102) duyet nhan 2026-10-28 (005 T041): 24/24 qa_id ton tai, category khop filters; g02 them de-qa-1016 (query khong noi ngon ngu, cap Node tra loi tuong duong cap Java); g21 viet lai query vi query cu mau thuan dap an de-qa-1000 (libuv threadpool bao hoa, khong phai event loop bi chan); query moi do DE viet nen chua co approved_by, cho AIE xac nhan. AIE soan 2026-10-22; doi qa_id thi phai sua file nay; AIE (thangp97) 2026-10-28: dong y g21 (approved_by), viet lai g22, g24 cho khong chep cau hoi goc (cho DE duyet lai)",
   "corpus": "de_interview_qa",
   "k": 5,
   "groups": {
@@ -11,29 +11,195 @@
     "vi_to_en": "Viet tim tai lieu Anh (textbook) - chua co du lieu textbook, de trong"
   },
   "queries": [
-    {"id": "g01", "group": "vi", "query": "Vì sao bảng băm trong Java chậm dần khi hàm băm của khóa phân bố kém", "relevant": ["de-qa-1100"], "filters": {"category": "Backend"}},
-    {"id": "g02", "group": "vi", "query": "Lỗi tràn bộ nhớ heap sau vài ngày chạy, cách tìm nguyên nhân rò rỉ", "relevant": ["de-qa-1104"], "filters": {}},
-    {"id": "g03", "group": "vi", "query": "Khách bị trừ tiền hai lần khi ứng dụng di động tự gửi lại yêu cầu thanh toán", "relevant": ["de-qa-1120"], "filters": {}},
-    {"id": "g04", "group": "vi", "query": "Phân trang bằng bỏ qua số dòng làm các trang cuối rất chậm", "relevant": ["de-qa-1109"], "filters": {}},
-    {"id": "g05", "group": "vi", "query": "Hai luồng cùng trừ tồn kho làm số lượng bị sai, xử lý cập nhật đồng thời thế nào", "relevant": ["de-qa-1111", "de-qa-1012"], "filters": {}},
-    {"id": "g06", "group": "vi", "query": "Mô hình đánh giá rất cao khi kiểm định chéo nhưng thất bại khi chạy thật, nghi rò rỉ dữ liệu", "relevant": ["de-qa-1183"], "filters": {"category": "AI"}},
-    {"id": "g07", "group": "mixed", "query": "Gọi self-invocation method có @Transactional REQUIRES_NEW nhưng không mở transaction mới", "relevant": ["de-qa-1110"], "filters": {}},
-    {"id": "g08", "group": "mixed", "query": "Promise.all với hàng chục nghìn request làm sập API, giới hạn concurrency thế nào", "relevant": ["de-qa-1001"], "filters": {"category": "Backend"}},
-    {"id": "g09", "group": "mixed", "query": "FastAPI endpoint async def gọi thư viện blocking làm throughput giảm", "relevant": ["de-qa-1053"], "filters": {}},
-    {"id": "g10", "group": "mixed", "query": "Rolling update trên Kubernetes bị 502 vài giây, cấu hình readiness probe và preStop", "relevant": ["de-qa-1204"], "filters": {"category": "DevOps"}},
-    {"id": "g11", "group": "mixed", "query": "Lỗi hydration mismatch trong Next.js khi render ngày giờ", "relevant": ["de-qa-1252"], "filters": {"category": "Frontend"}},
-    {"id": "g12", "group": "mixed", "query": "Chọn HNSW hay IVFFlat cho pgvector, vì sao filter làm thiếu kết quả", "relevant": ["de-qa-1163"], "filters": {"category": "AI"}},
-    {"id": "g13", "group": "mixed", "query": "Task Celery bị chạy hai lần sau khi worker restart, làm idempotent thế nào", "relevant": ["de-qa-1050"], "filters": {}},
-    {"id": "g14", "group": "en", "query": "Why is double-checked locking broken without volatile in the Java memory model", "relevant": ["de-qa-1102"], "filters": {}},
-    {"id": "g15", "group": "en", "query": "N+1 queries when listing orders with items in JPA, and pitfalls of fetch join with pagination", "relevant": ["de-qa-1106"], "filters": {}},
-    {"id": "g16", "group": "en", "query": "Distributed rate limiter with Redis across multiple Node.js instances", "relevant": ["de-qa-1008"], "filters": {}},
-    {"id": "g17", "group": "en", "query": "How do LoRA and QLoRA reduce GPU memory during fine-tuning", "relevant": ["de-qa-1167"], "filters": {"category": "AI"}},
-    {"id": "g18", "group": "en", "query": "Prometheus memory explodes after adding high-cardinality labels like user id", "relevant": ["de-qa-1213"], "filters": {}},
-    {"id": "g19", "group": "en", "query": "Biases of using an LLM as a judge to grade interview answers", "relevant": ["de-qa-1165"], "filters": {}},
-    {"id": "g20", "group": "no_diacritics", "query": "toi uu hashmap khi hashcode tra ve it gia tri khac nhau", "relevant": ["de-qa-1100"], "filters": {}},
-    {"id": "g21", "group": "no_diacritics", "query": "event loop bi chan lam latency p99 tang du cpu thap", "relevant": ["de-qa-1000"], "filters": {}},
-    {"id": "g22", "group": "no_diacritics", "query": "thiet ke access token va refresh token co the thu hoi phien", "relevant": ["de-qa-1020", "de-qa-1112"], "filters": {}},
-    {"id": "g23", "group": "no_diacritics", "query": "cach chong prompt injection gian tiep cho agent doc email", "relevant": ["de-qa-1195"], "filters": {}},
-    {"id": "g24", "group": "no_diacritics", "query": "test e2e playwright fail ngau nhien tren ci", "relevant": ["de-qa-1256"], "filters": {}}
+    {
+      "id": "g01",
+      "group": "vi",
+      "query": "Vì sao bảng băm trong Java chậm dần khi hàm băm của khóa phân bố kém",
+      "relevant": ["de-qa-1100"],
+      "filters": { "category": "Backend" },
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "g02",
+      "group": "vi",
+      "query": "Lỗi tràn bộ nhớ heap sau vài ngày chạy, cách tìm nguyên nhân rò rỉ",
+      "relevant": ["de-qa-1104", "de-qa-1016"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "g03",
+      "group": "vi",
+      "query": "Khách bị trừ tiền hai lần khi ứng dụng di động tự gửi lại yêu cầu thanh toán",
+      "relevant": ["de-qa-1120"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "g04",
+      "group": "vi",
+      "query": "Phân trang bằng bỏ qua số dòng làm các trang cuối rất chậm",
+      "relevant": ["de-qa-1109"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "g05",
+      "group": "vi",
+      "query": "Hai luồng cùng trừ tồn kho làm số lượng bị sai, xử lý cập nhật đồng thời thế nào",
+      "relevant": ["de-qa-1111", "de-qa-1012"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "g06",
+      "group": "vi",
+      "query": "Mô hình đánh giá rất cao khi kiểm định chéo nhưng thất bại khi chạy thật, nghi rò rỉ dữ liệu",
+      "relevant": ["de-qa-1183"],
+      "filters": { "category": "AI" },
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "g07",
+      "group": "mixed",
+      "query": "Gọi self-invocation method có @Transactional REQUIRES_NEW nhưng không mở transaction mới",
+      "relevant": ["de-qa-1110"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "g08",
+      "group": "mixed",
+      "query": "Promise.all với hàng chục nghìn request làm sập API, giới hạn concurrency thế nào",
+      "relevant": ["de-qa-1001"],
+      "filters": { "category": "Backend" },
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "g09",
+      "group": "mixed",
+      "query": "FastAPI endpoint async def gọi thư viện blocking làm throughput giảm",
+      "relevant": ["de-qa-1053"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "g10",
+      "group": "mixed",
+      "query": "Rolling update trên Kubernetes bị 502 vài giây, cấu hình readiness probe và preStop",
+      "relevant": ["de-qa-1204"],
+      "filters": { "category": "DevOps" },
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "g11",
+      "group": "mixed",
+      "query": "Lỗi hydration mismatch trong Next.js khi render ngày giờ",
+      "relevant": ["de-qa-1252"],
+      "filters": { "category": "Frontend" },
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "g12",
+      "group": "mixed",
+      "query": "Chọn HNSW hay IVFFlat cho pgvector, vì sao filter làm thiếu kết quả",
+      "relevant": ["de-qa-1163"],
+      "filters": { "category": "AI" },
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "g13",
+      "group": "mixed",
+      "query": "Task Celery bị chạy hai lần sau khi worker restart, làm idempotent thế nào",
+      "relevant": ["de-qa-1050"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "g14",
+      "group": "en",
+      "query": "Why is double-checked locking broken without volatile in the Java memory model",
+      "relevant": ["de-qa-1102"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "g15",
+      "group": "en",
+      "query": "N+1 queries when listing orders with items in JPA, and pitfalls of fetch join with pagination",
+      "relevant": ["de-qa-1106"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "g16",
+      "group": "en",
+      "query": "Distributed rate limiter with Redis across multiple Node.js instances",
+      "relevant": ["de-qa-1008"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "g17",
+      "group": "en",
+      "query": "How do LoRA and QLoRA reduce GPU memory during fine-tuning",
+      "relevant": ["de-qa-1167"],
+      "filters": { "category": "AI" },
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "g18",
+      "group": "en",
+      "query": "Prometheus memory explodes after adding high-cardinality labels like user id",
+      "relevant": ["de-qa-1213"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "g19",
+      "group": "en",
+      "query": "Biases of using an LLM as a judge to grade interview answers",
+      "relevant": ["de-qa-1165"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "g20",
+      "group": "no_diacritics",
+      "query": "toi uu hashmap khi hashcode tra ve it gia tri khac nhau",
+      "relevant": ["de-qa-1100"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "g21",
+      "group": "no_diacritics",
+      "query": "dich vu node gan nhu khong ton cpu ma cac yeu cau bam mat khau va mo tep van phai xep hang cho",
+      "relevant": ["de-qa-1000"],
+      "filters": {},
+      "approved_by": "thangp97"
+    },
+    {
+      "id": "g22",
+      "group": "no_diacritics",
+      "query": "nguoi dung bam thoat hoac bi cam thi moi phien dang mo phai mat quyen ngay, lam sao nhan ra chuoi gia han bi ke gian lay mat khi xac thuc bang jwt",
+      "relevant": ["de-qa-1020", "de-qa-1112"],
+      "filters": {}
+    },
+    {
+      "id": "g23",
+      "group": "no_diacritics",
+      "query": "cach chong prompt injection gian tiep cho agent doc email",
+      "relevant": ["de-qa-1195"],
+      "filters": {},
+      "approved_by": "minhtuann1102"
+    },
+    {
+      "id": "g24",
+      "group": "no_diacritics",
+      "query": "kich ban kiem thu trinh duyet tu dong luc qua luc truot tren may build nhung chay o may ca nhan luon qua, chua tan goc the nao thay vi ngu cho va chay lai",
+      "relevant": ["de-qa-1256"],
+      "filters": {}
+    }
   ]
 }
