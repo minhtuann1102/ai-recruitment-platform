@@ -100,3 +100,19 @@ def test_retriever_end_to_end_fallback(seeded):
     out = run(Retriever(seeded, embed).retrieve_for_topic(
         topic_id="node.core.streams", category="Backend", difficulty=4, query="Backend | Streams"))
     assert [c.dedup_key for c in out][:1] == ["it-2"] and len({c.dedup_key for c in out}) == len(out)
+
+
+def test_corpus_has_qa_pairs_and_textbook_only(seeded):
+    rows = run(seeded.load_corpus())
+    mine = [r for r in rows if r.content in {c for c, *_ in ROWS}]
+    assert {(r.source_type, r.chunk_type) for r in mine} == {("interview_qa", "qa_pair"), ("textbook", "section")}
+
+
+def test_bank_similarity_column(seeded):
+    rows = run(seeded.list_bank("node.core.event-loop", "medium", 5, onehot(0)))
+    assert [(r.qa_id, round(r.similarity, 3)) for r in rows] == [("it-1", 1.0)]
+
+
+def test_corpus_version_changes_only_with_corpus_rows(seeded):
+    before = run(seeded.corpus_version())
+    assert len(before) == 32 and run(seeded.corpus_version()) == before

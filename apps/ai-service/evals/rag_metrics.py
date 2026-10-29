@@ -8,11 +8,23 @@ def hit_at_k(retrieved: Sequence[str], relevant: Sequence[str], k: int) -> bool:
     return bool(set(retrieved[:k]) & set(relevant))
 
 
+def reciprocal_rank(retrieved: Sequence[str], relevant: Sequence[str], k: int) -> float:
+    """1 / hang cua qa_id dung dau tien trong top-k; khong co thi 0 (MRR do thu tu, recall chi do co/khong)."""
+    for i, key in enumerate(retrieved[:k], start=1):
+        if key in relevant:
+            return 1.0 / i
+    return 0.0
+
+
 def recall_by_group(results: List[Dict], k: int) -> Dict[str, Dict[str, float]]:
-    """results: [{group, retrieved: [qa_id...], relevant: [qa_id...]}] -> {group: {n, hits, recall}} + 'all'."""
-    buckets: Dict[str, List[bool]] = defaultdict(list)
+    """results: [{group, retrieved: [qa_id...], relevant: [qa_id...]}] -> {group: {n, hits, recall, mrr}} + 'all'."""
+    buckets: Dict[str, List[float]] = defaultdict(list)
     for r in results:
-        hit = hit_at_k(r["retrieved"], r["relevant"], k)
-        buckets[r["group"]].append(hit)
-        buckets["all"].append(hit)
-    return {g: {"n": len(h), "hits": sum(h), "recall": round(sum(h) / len(h), 3)} for g, h in buckets.items()}
+        rr = reciprocal_rank(r["retrieved"], r["relevant"], k)
+        buckets[r["group"]].append(rr)
+        buckets["all"].append(rr)
+    out = {}
+    for g, h in buckets.items():
+        hits = sum(1 for x in h if x > 0)
+        out[g] = {"n": len(h), "hits": hits, "recall": round(hits / len(h), 3), "mrr": round(sum(h) / len(h), 3)}
+    return out

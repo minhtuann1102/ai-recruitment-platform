@@ -27,5 +27,5 @@ def test_hit_and_recall_by_group():
         {"group": "vi", "retrieved": ["x"], "relevant": ["z"]},
         {"group": "en", "retrieved": ["z"], "relevant": ["z", "w"]},
     ], 5)
-    assert stats["vi"] == {"n": 2, "hits": 1, "recall": 0.5}
-    assert stats["en"]["recall"] == 1.0 and stats["all"] == {"n": 3, "hits": 2, "recall": 0.667}
+    assert stats["vi"] == {"n": 2, "hits": 1, "recall": 0.5, "mrr": 0.25}  # y o hang 2 -> 1/2, chia 2 truy van
+    assert stats["en"]["recall"] == 1.0 and stats["all"] == {"n": 3, "hits": 2, "recall": 0.667, "mrr": 0.5}

@@ -1,4 +1,5 @@
-"""Cau hinh RAG tu bien moi truong. RAG tat mac dinh: khong co ai_db thi ai-service van chay (FR-AI-022)."""
+"""Cau hinh RAG tu bien moi truong. RAG bat mac dinh; cau hinh sai hay ai_db loi thi phien chay khong co RAG va
+response bao loi trong metadata.rag (plan_snippets.rag_status), ai-service van chay (FR-AI-022)."""
 import os
 from dataclasses import dataclass
 from typing import Mapping, Optional
@@ -20,6 +21,8 @@ class RagSettings:
     textbook_enabled: bool = False  # bat khi DE da nap textbook vao knowledge_chunks
     query_rewrite: bool = True  # LLM viet lai truy van sang tieng Anh o duong vector (+~1.6 s, chi khi can vector)
     question_bank: bool = True  # cau hoi chinh phan technical lay tu kho interview_qa (app/rag/question_bank.py)
+    cooldown_s: int = 60  # RAG loi thi bo qua RAG trong N giay (app/rag/circuit_breaker.py); 0 = khong ngat
+    hybrid: bool = True  # tu khoa + vector + topic_id gop RRF (app/rag/hybrid_search.py); false: duong cu
 
 
 def stored_model_name(name: str) -> str:
@@ -29,10 +32,10 @@ def stored_model_name(name: str) -> str:
 
 def load_rag_settings(env: Optional[Mapping[str, str]] = None) -> RagSettings:
     env = os.environ if env is None else env
-    enabled = _flag(env.get("RAG_ENABLED", ""), False)
+    enabled = _flag(env.get("RAG_ENABLED", ""), True)
     db_url = (env.get("AI_DB_URL") or "").strip()
     if enabled and not db_url:
-        raise ConfigError("RAG_ENABLED=true nhung AI_DB_URL chua duoc dat")
+        raise ConfigError("RAG bat (mac dinh) nhung AI_DB_URL chua duoc dat; dat RAG_ENABLED=false de tat han")
     raw_timeout = env.get("AI_DB_CONNECT_TIMEOUT_S") or "3"
     try:
         timeout = int(raw_timeout)
@@ -40,6 +43,13 @@ def load_rag_settings(env: Optional[Mapping[str, str]] = None) -> RagSettings:
         timeout = 0
     if timeout <= 0:  # libpq coi 0 la cho vo han
         raise ConfigError(f"AI_DB_CONNECT_TIMEOUT_S phai la so nguyen duong, nhan '{raw_timeout}'")
+    raw_cooldown = env.get("RAG_COOLDOWN_S") or "60"
+    try:
+        cooldown = int(raw_cooldown)
+    except ValueError:
+        cooldown = -1
+    if cooldown < 0:
+        raise ConfigError(f"RAG_COOLDOWN_S phai la so nguyen >= 0, nhan '{raw_cooldown}'")
     return RagSettings(
         enabled=enabled,
         db_url=db_url,
@@ -48,4 +58,6 @@ def load_rag_settings(env: Optional[Mapping[str, str]] = None) -> RagSettings:
         textbook_enabled=_flag(env.get("RAG_TEXTBOOK_ENABLED", ""), False),
         query_rewrite=_flag(env.get("RAG_QUERY_REWRITE", ""), True),
         question_bank=_flag(env.get("RAG_QUESTION_BANK", ""), True),
+        cooldown_s=cooldown,
+        hybrid=_flag(env.get("RAG_HYBRID", ""), True),
     )

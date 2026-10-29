@@ -5,6 +5,7 @@ import asyncio
 from app.agents.evaluator import EvaluationInput, EvaluatorOutput, build_messages as eval_messages, postcheck
 from app.agents.interviewer import QuestionSpec, build_messages, fallback_question
 from app.agents.planner import MockPlanner
+from app.llm.usage import UsageCollector
 from app.models_interview import BankQuestion, Evaluation, NextTurnRequest, StartRequest
 from app.rag.question_bank import AnswerCache, BankEntry, pick, plain, rank, spoken_ok
 from app.rag.retriever import Retriever
@@ -65,7 +66,9 @@ def test_retriever_bank_caches_answers_and_reads_db_on_miss():
     assert [e.qa_id for e in run(r.bank_for_topic("t", 2, ["HashMap"]))] == ["q1"]
     assert run(r.answer_key("q1")) == "HashMap là gì?\n\nĐáp án q1."  # tu cache, khong goi DB
     assert run(r.answer_key("q9")) == "Q9?\n\nĐáp án 9" and ("pair", "q9") in repo.calls  # truot cache
-    assert run(Retriever(BankRepo([], fail=OSError()), FakeEmbed()).bank_for_topic("t", 2, [])) == []
+    collector = UsageCollector()
+    assert run(Retriever(BankRepo([], fail=OSError()), FakeEmbed()).bank_for_topic("t", 2, [], collector=collector)) == []
+    assert collector.rag_errors == ["rag_bank_failed"]  # loi DB duoc bao ve metadata.rag, khong im lang
 
 
 class FakeRetriever:
@@ -75,10 +78,10 @@ class FakeRetriever:
     async def plan_snippets(self, **_):
         return []
 
-    async def bank_for_topic(self, topic_id, difficulty, terms, generic=(), n=3):
+    async def bank_for_topic(self, topic_id, difficulty, terms, generic=(), n=3, collector=None, query=""):
         return [entry(f"{topic_id}#1", f"`{topic_id}` hoạt động thế nào?"), entry(f"{topic_id}#2", "Câu thứ hai?")]
 
-    async def answer_key(self, qa_id):
+    async def answer_key(self, qa_id, collector=None):
         self.asked.append(qa_id)
         return f"Đáp án chuẩn {qa_id}"
 

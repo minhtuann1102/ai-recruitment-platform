@@ -2,8 +2,10 @@
 
 Mock dung quy tac thay cho LLM de FSD tich hop truoc; hinh dang request/response/SSE la that.
 """
+import asyncio
 import logging
 import time
+from contextlib import asynccontextmanager
 from typing import Callable, Optional
 
 from fastapi import FastAPI, File, Form, Request, UploadFile
@@ -20,6 +22,7 @@ from .models_jd import JdParseRequest, JdParseResponse
 from .models_interview import FinalizeRequest, NextTurnRequest, StartRequest
 from .agents.reporter import get_reporter
 from .agents.interviewer import get_interviewer
+from .plan_snippets import close_rag, note_rag_errors, rag_status, warm_rag
 from .question_stream import QuestionStream
 from .dev_play_page import router as dev_play_router
 from .security import internal_token_middleware
@@ -28,7 +31,17 @@ from .turn_engine import TurnResult, finish_turn, next_turn, start_session
 
 MODEL = "mock-v2"
 log = logging.getLogger("ai_service")
-app = FastAPI(title="AI Interview Service (Mock)", version="0.2.0")
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    warm = asyncio.ensure_future(warm_rag())  # khong chan khoi dong: nap corpus BM25 o nen
+    yield
+    warm.cancel()
+    await close_rag()
+
+
+app = FastAPI(title="AI Interview Service (Mock)", version="0.2.0", lifespan=lifespan)
 app.middleware("http")(internal_token_middleware)
 app.include_router(dev_play_router)  # GET /dev/play: trang phong van thu cho dev
 
@@ -50,7 +63,8 @@ async def validation_error_handler(_: Request, exc: RequestValidationError):
 
 @app.get("/api/health")
 def health():
-    return {"status": "healthy", "version": MODEL, "model_loaded": False}
+    # RAG tuy chon: loi RAG khong lam service unhealthy (van 200), chi bao trong `rag`. Khong ping ai_db o day.
+    return {"status": "healthy", "version": MODEL, "model_loaded": False, "rag": rag_status()}
 
 
 @app.post("/api/cv/parse", response_model=CvParseResponse)
@@ -68,9 +82,15 @@ async def jd_parse(req: JdParseRequest):
 def _usage_meta(started: float, collector: Optional[UsageCollector] = None) -> dict:
     total = int((time.perf_counter() - started) * 1000)
     if collector is None or not collector.records:
-        return {"usage": {}, "latency_ms": {"total": total}, "prompt_versions": {"mock": MODEL}, "fallbacks": []}
-    meta = collector.to_metadata()
-    meta["latency_ms"]["total"] = total  # tong thoi gian request, khong chi thoi gian goi LLM
+        meta = {"usage": {}, "latency_ms": {"total": total}, "prompt_versions": {"mock": MODEL}, "fallbacks": []}
+    else:
+        meta = collector.to_metadata()
+        meta["latency_ms"]["total"] = total  # tong thoi gian request, khong chi thoi gian goi LLM
+    # RAG bat mac dinh: loi thi phien chay khong co RAG, bao o day (status error + fallback rag_unavailable)
+    meta["rag"] = rag_status(collector)
+    note_rag_errors(collector)  # sau khi bao: ngat RAG tam thoi cho cac request sau
+    if meta["rag"]["status"] == "error":
+        meta["fallbacks"].append("rag_unavailable")
     return meta
 
 

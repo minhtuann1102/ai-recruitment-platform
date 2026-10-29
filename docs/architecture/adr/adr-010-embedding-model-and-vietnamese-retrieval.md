@@ -19,7 +19,7 @@ Viết lại bằng `gpt-4o-mini`: P50 1.6 s, P95 2.2 s, ~250 token vào mỗi l
 
 ## Quyết định
 
-1. **(Đã cài)** Đường tìm vector của ai-service dùng **truy vấn gốc + bản tiếng Anh do LLM viết lại** (`RAG_QUERY_REWRITE`, mặc định bật; lỗi thì dùng từ điển). Không đổi dữ liệu hay contract. Chỉ chạy khi topic có < 2 cặp Q&A theo `topic_id` (đường chính không đổi), nên không làm chậm `/api/start` khi kho đủ dữ liệu (đo: gắn snippet vẫn ~0.47 s).
+1. **(Đã cài)** Đường tìm vector của ai-service dùng **truy vấn gốc + bản tiếng Anh do LLM viết lại** (`RAG_QUERY_REWRITE`, mặc định bật; lỗi thì dùng từ điển). Không đổi dữ liệu hay contract. Chỉ chạy khi topic có < 2 cặp Q&A theo `topic_id` (đường chính không đổi), nên không làm chậm `/api/start` khi kho đủ dữ liệu (đo: gắn snippet vẫn ~0.47 s). **Cập nhật 2026-10-29:** với hybrid search (`RAG_HYBRID`, mặc định bật; `docs/architecture/rag-design.md`) mọi topic đều viết lại + embed, dùng chung cho vector và BM25, có hạn 3.5 s (quá hạn thì topic chỉ còn `topic_id` + BM25, báo `degraded`). Gắn snippet khi chưa có cache: 3.8–4.7 s.
 2. **(Đề xuất, chờ DE + team)** Chuyển kho sang `text-embedding-3-large` với `dimensions=1536`: **giữ nguyên schema** `vector(1536)` (CMP06), chỉ đổi giá trị cột `embedding_model` và DE index lại. Lợi ích chính: đạt 0.812 **không cần gọi LLM** (bỏ được 1.6 s viết lại nếu muốn), hoặc 1.000 khi kết hợp viết lại.
 
 ## Hệ quả

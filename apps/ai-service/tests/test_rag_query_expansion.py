@@ -30,7 +30,7 @@ def test_retriever_embedding_usage_reaches_collector():
     client = FakeOpenAI([embedding_reply([[0.1] * 1536], prompt_tokens=12)])
     gw = LlmGateway(load_llm_settings({"LLM_API_KEY": "k"}), client, env={})
     retriever = build_retriever(load_rag_settings({"RAG_ENABLED": "1", "AI_DB_URL": "postgresql://x/y",
-                                                   "RAG_QUERY_REWRITE": "0"}), gw)
+                                                   "RAG_QUERY_REWRITE": "0", "RAG_HYBRID": "0"}), gw)
     retriever._repo = FakeKnowledgeRepo()
     col = UsageCollector()
     asyncio.run(retriever.retrieve_for_topic(topic_id=None, category="Backend", difficulty=2,
@@ -90,7 +90,9 @@ def test_snippet_attach_has_deadline(monkeypatch):
     r = Retriever(FakeKnowledgeRepo(), FakeEmbed())
     monkeypatch.setattr(r, "plan_snippets", slow)
     monkeypatch.setattr(ps, "SNIPPET_DEADLINE_S", 0.05)
-    assert asyncio.run(ps.attach_reference_snippets(plan, load_track("java_backend"), r)) is plan
+    collector = UsageCollector()
+    assert asyncio.run(ps.attach_reference_snippets(plan, load_track("java_backend"), r, collector)) is plan
+    assert "rag_timeout" in collector.rag_errors
 
 
 def test_copy_corpus_refuses_non_local_target(monkeypatch):
