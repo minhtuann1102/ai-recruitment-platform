@@ -19,9 +19,14 @@ class CallRecord:
 @dataclass
 class UsageCollector:
     records: List[CallRecord] = field(default_factory=list)
+    rag_errors: List[str] = field(default_factory=list)  # ma loi RAG trong request (rag_db_error, rag_timeout...)
 
     def add(self, record: CallRecord) -> None:
         self.records.append(record)
+
+    def rag_error(self, code: str) -> None:
+        if code not in self.rag_errors:
+            self.rag_errors.append(code)
 
     def total_tokens(self) -> int:
         return sum(r.input_tokens + r.output_tokens for r in self.records)

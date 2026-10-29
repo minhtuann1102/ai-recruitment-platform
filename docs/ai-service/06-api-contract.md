@@ -371,8 +371,26 @@ SSE: `meta`, `token`…, `done`. Event `done` nội bộ chứa đủ dữ liệ
   "state": { "...": "candidate state §5.2" },
   "metadata": { "usage": { "planner": { "input_tokens": 2600, "output_tokens": 1400 }, "interviewer": { "input_tokens": 1200, "output_tokens": 60 } },
                 "latency_ms": { "planner": 9800, "interviewer_ttft": 600, "total": 11200 },
-                "prompt_versions": { "planner": "v1", "interviewer": "v1" }, "fallbacks": [] }
+                "prompt_versions": { "planner": "v1", "interviewer": "v1" }, "fallbacks": [],
+                "rag": { "status": "on" } }
 }
+```
+
+`metadata.rag` (start và next-turn, 2026-10-29): RAG **bật mặc định**. `status`:
+- `on`: RAG chạy bình thường.
+- `off`: tắt hẳn bằng `RAG_ENABLED=false`.
+- `error`: RAG lỗi, phiên **vẫn chạy tiếp không có RAG** (không snippet, không câu từ kho, chấm không có đáp án chuẩn).
+  Kèm `errors` (mã: `rag_config_error` thiếu `AI_DB_URL`; `rag_retrieve_failed`, `rag_bank_failed`,
+  `rag_reference_failed` lỗi ai_db / embedding; `rag_timeout` quá hạn 5 s lúc start hoặc 2 s đáp án chuẩn) và
+  `message` tiếng Việt để interview-service hiển thị hoặc log; `fallbacks` có thêm `rag_unavailable`.
+- **Ngắt tạm:** sau một request có lỗi RAG, ai-service bỏ qua RAG trong `RAG_COOLDOWN_S` giây (mặc định 60, `0` = không
+  ngắt) để request sau không phải chờ hết hạn. Trong lúc đó `errors = ["rag_cooldown"]`, có thêm `last_errors` (lỗi gây
+  ngắt). Hết hạn thì request sau thử lại.
+- `GET /api/health` trả thêm `rag` cùng dạng (không có lỗi theo request, không ping ai_db). RAG lỗi **không** làm health
+  thất bại: vẫn `200`, `status = "healthy"`.
+
+```jsonc
+{ "status": "error", "errors": ["rag_bank_failed"], "message": "RAG lỗi, lượt này chạy không có dữ liệu tham chiếu từ kho" }
 ```
 
 ### POST /api/next-turn
@@ -413,7 +431,8 @@ Event `done`:
   "session_end": false,
   "metadata": { "usage": { "evaluator": { "input_tokens": 2350, "output_tokens": 290 }, "interviewer": { "input_tokens": 1500, "output_tokens": 55 } },
                 "latency_ms": { "evaluator": 2100, "interviewer_ttft": 550, "total": 3600 },
-                "prompt_versions": { "evaluator": "v3", "interviewer": "v2" }, "fallbacks": [] }
+                "prompt_versions": { "evaluator": "v3", "interviewer": "v2" }, "fallbacks": [],
+                "rag": { "status": "on" } }
 }
 ```
 

@@ -2,7 +2,8 @@
 
 Thu tu: interview_qa theo topic_id truoc; duoi MIN_TOPIC_HITS ket qua thi bo sung vector search loc
 category + difficulty (ca interview_qa[qa_pair] va textbook). Khu trung theo qa_id, cat theo ngan sach token.
-RAG la tuy chon: loi DB hay embedding chi ghi log va tra rong, buoi phong van khong chet.
+RAG la tuy chon: loi DB hay embedding ghi log, ghi ma loi vao collector (bao ve trong metadata.rag) va tra rong,
+buoi phong van khong chet.
 """
 import logging
 import math
@@ -62,6 +63,11 @@ def trim_to_budget(chunks: Sequence[Chunk], budget: int) -> List[Chunk]:
     return out
 
 
+def _record(collector: Optional[UsageCollector], code: str) -> None:
+    if collector is not None:
+        collector.rag_error(code)
+
+
 def build_query(category: Optional[str], title: str, extra: str = "") -> str:
     """rag-design muc 4: category + topic + tom tat ngan; khong dua ca lich su vao query."""
     return " | ".join(p for p in (category, title, extra.strip()[:300]) if p)
@@ -108,6 +114,7 @@ class Retriever:
                 found = dedup([*found, *hits])
         except Exception as err:  # RAG tuy chon (FR-AI-022): khong de loi DB/embedding lam hong phien
             log.warning("rag_retrieve_failed topic=%s error=%s", topic_id, type(err).__name__)
+            _record(collector, "rag_retrieve_failed")
             return []
         result = trim_to_budget(found[:k], budget)
         # NFR-AI-OBS04: log id + diem, khong log noi dung
@@ -124,22 +131,25 @@ class Retriever:
                                                collector=collector)
         return [c.content for c in chunks]
 
-    async def reference_answer(self, qa_id: str) -> Optional[Chunk]:
+    async def reference_answer(self, qa_id: str, collector: Optional[UsageCollector] = None) -> Optional[Chunk]:
         """Evaluator: cau hoi tu ngan hang thi tra thang theo qa_id, khong tim tuong dong (rag-design muc 4)."""
         try:
             return await self._repo.get_pair_by_qa_id(qa_id)
         except Exception as err:
             log.warning("rag_reference_failed qa_id=%s error=%s", qa_id, type(err).__name__)
+            _record(collector, "rag_reference_failed")
             return None
 
     async def bank_for_topic(self, topic_id: str, difficulty: int, topic_terms: Sequence[str],
-                             generic: Sequence[str] = (), n: int = 3) -> List[BankEntry]:
+                             generic: Sequence[str] = (), n: int = 3,
+                            collector: Optional[UsageCollector] = None) -> List[BankEntry]:
         """Cau hoi tu kho cho topic (question_bank.rank); dap an vao cache cho Evaluator. Loi thi tra rong."""
         bucket = difficulty_bucket(difficulty)
         try:
             entries = await self._repo.list_bank(topic_id, bucket, BANK_FETCH)
         except Exception as err:
             log.warning("rag_bank_failed topic=%s error=%s", topic_id, type(err).__name__)
+            _record(collector, "rag_bank_failed")
             return []
         chosen = rank(entries, topic_terms, bucket, n, generic)
         for e in chosen:
@@ -147,12 +157,12 @@ class Retriever:
         log.info("rag_bank topic=%s fetched=%d chosen=%s", topic_id, len(entries), " ".join(e.qa_id for e in chosen))
         return chosen
 
-    async def answer_key(self, qa_id: str) -> Optional[str]:
+    async def answer_key(self, qa_id: str, collector: Optional[UsageCollector] = None) -> Optional[str]:
         """Dap an chuan (cap Q&A) theo qa_id: cache truoc, truot thi doc ai_db; loi thi None (cham khong co dap an)."""
         cached = self.answers.get(qa_id)
         if cached is not None:
             return cached
-        chunk = await self.reference_answer(qa_id)
+        chunk = await self.reference_answer(qa_id, collector)
         if chunk is None:
             return None
         self.answers.put(qa_id, chunk.content)

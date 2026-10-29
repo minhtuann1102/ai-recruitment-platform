@@ -22,23 +22,30 @@ def test_difficulty_bucket_out_of_range(level):
         difficulty_bucket(level)
 
 
-def test_settings_default_disabled_and_strip_provider_prefix():
-    s = load_rag_settings({"EMBEDDING_MODEL": "openai/text-embedding-3-small"})
-    assert not s.enabled and s.embedding_model == "text-embedding-3-small" and s.connect_timeout_s == 3
+def test_settings_default_enabled_and_strip_provider_prefix():
+    s = load_rag_settings({"AI_DB_URL": "postgresql://ro@h/ai_db", "EMBEDDING_MODEL": "openai/text-embedding-3-small"})
+    assert s.enabled and s.embedding_model == "text-embedding-3-small" and s.connect_timeout_s == 3
+    assert not load_rag_settings({"RAG_ENABLED": "false"}).enabled  # tat han chi khi dat ro
     assert stored_model_name("text-embedding-3-small") == "text-embedding-3-small"
 
 
 def test_settings_enabled_requires_db_url():
-    with pytest.raises(ConfigError):
-        load_rag_settings({"RAG_ENABLED": "true"})
+    for env in ({}, {"RAG_ENABLED": "true"}):  # mac dinh bat: thieu AI_DB_URL la loi cau hinh
+        with pytest.raises(ConfigError):
+            load_rag_settings(env)
     assert load_rag_settings({"RAG_ENABLED": "1", "AI_DB_URL": "postgresql://ro@h/ai_db"}).enabled
     for bad in ("0", "abc", "-1"):
         with pytest.raises(ConfigError):
-            load_rag_settings({"AI_DB_CONNECT_TIMEOUT_S": bad})
+            load_rag_settings({"AI_DB_URL": "postgresql://ro@h/ai_db", "AI_DB_CONNECT_TIMEOUT_S": bad})
+    url = {"AI_DB_URL": "postgresql://ro@h/ai_db"}
+    assert load_rag_settings(url).cooldown_s == 60 and load_rag_settings({**url, "RAG_COOLDOWN_S": "0"}).cooldown_s == 0
+    for bad in ("abc", "-1"):
+        with pytest.raises(ConfigError):
+            load_rag_settings({**url, "RAG_COOLDOWN_S": bad})
 
 
 def test_build_retriever_none_when_disabled():
-    assert build_retriever(load_rag_settings({})) is None
+    assert build_retriever(load_rag_settings({"RAG_ENABLED": "false"})) is None
 
 
 def test_search_sql_filters_and_params():

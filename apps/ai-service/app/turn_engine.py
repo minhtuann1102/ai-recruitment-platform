@@ -94,14 +94,17 @@ async def start_session(req: StartRequest, planner=None, collector: Optional[Usa
     return TurnResult(spec, turn, state, plan, None, False, _meta(first_phase, 1, len(topics), "ask_main", 1))
 
 
-async def _answer_key(retriever, qa_id: Optional[str]) -> str:
-    """Dap an chuan cua cau vua hoi neu cau do lay tu kho; RAG tat, loi hay qua han thi chuoi rong."""
+async def _answer_key(retriever, qa_id: Optional[str], collector: Optional[UsageCollector] = None) -> str:
+    """Dap an chuan cua cau vua hoi neu cau do lay tu kho; RAG tat, loi hay qua han thi chuoi rong (loi, qua han
+    ghi vao collector de response bao metadata.rag)."""
     if not qa_id or retriever is None:
         return ""
     try:
-        return await asyncio.wait_for(retriever.answer_key(qa_id), timeout=ANSWER_KEY_TIMEOUT_S) or ""
+        return await asyncio.wait_for(retriever.answer_key(qa_id, collector), timeout=ANSWER_KEY_TIMEOUT_S) or ""
     except asyncio.TimeoutError:
         log.warning("answer_key_timeout qa_id=%s", qa_id)
+        if collector is not None:
+            collector.rag_error("rag_timeout")
         return ""
 
 
@@ -119,7 +122,7 @@ async def next_turn(req: NextTurnRequest, evaluator: Optional[Evaluator] = None,
         raise ApiError(422, "invalid_request", "active_topic_id khong co trong plan")
     phase, topic = topics[pos]
 
-    key = await _answer_key(retriever or get_retriever(), state.current_qa_id)
+    key = await _answer_key(retriever or get_retriever(), state.current_qa_id, collector)
     ev = await (evaluator or get_evaluator()).evaluate(EvaluationInput(
         level=req.level, phase=phase, topic=topic, difficulty=state.current_difficulty, turn_kind=req.turn_kind,
         turn_number=req.turn_number, question=req.question, answer=req.answer, topic_turns=req.topic_turns,

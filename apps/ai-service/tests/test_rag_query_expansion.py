@@ -90,7 +90,9 @@ def test_snippet_attach_has_deadline(monkeypatch):
     r = Retriever(FakeKnowledgeRepo(), FakeEmbed())
     monkeypatch.setattr(r, "plan_snippets", slow)
     monkeypatch.setattr(ps, "SNIPPET_DEADLINE_S", 0.05)
-    assert asyncio.run(ps.attach_reference_snippets(plan, load_track("java_backend"), r)) is plan
+    collector = UsageCollector()
+    assert asyncio.run(ps.attach_reference_snippets(plan, load_track("java_backend"), r, collector)) is plan
+    assert "rag_timeout" in collector.rag_errors
 
 
 def test_copy_corpus_refuses_non_local_target(monkeypatch):

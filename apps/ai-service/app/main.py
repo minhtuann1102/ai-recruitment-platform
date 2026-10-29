@@ -20,6 +20,7 @@ from .models_jd import JdParseRequest, JdParseResponse
 from .models_interview import FinalizeRequest, NextTurnRequest, StartRequest
 from .agents.reporter import get_reporter
 from .agents.interviewer import get_interviewer
+from .plan_snippets import note_rag_errors, rag_status
 from .question_stream import QuestionStream
 from .dev_play_page import router as dev_play_router
 from .security import internal_token_middleware
@@ -50,7 +51,8 @@ async def validation_error_handler(_: Request, exc: RequestValidationError):
 
 @app.get("/api/health")
 def health():
-    return {"status": "healthy", "version": MODEL, "model_loaded": False}
+    # RAG tuy chon: loi RAG khong lam service unhealthy (van 200), chi bao trong `rag`. Khong ping ai_db o day.
+    return {"status": "healthy", "version": MODEL, "model_loaded": False, "rag": rag_status()}
 
 
 @app.post("/api/cv/parse", response_model=CvParseResponse)
@@ -68,9 +70,15 @@ async def jd_parse(req: JdParseRequest):
 def _usage_meta(started: float, collector: Optional[UsageCollector] = None) -> dict:
     total = int((time.perf_counter() - started) * 1000)
     if collector is None or not collector.records:
-        return {"usage": {}, "latency_ms": {"total": total}, "prompt_versions": {"mock": MODEL}, "fallbacks": []}
-    meta = collector.to_metadata()
-    meta["latency_ms"]["total"] = total  # tong thoi gian request, khong chi thoi gian goi LLM
+        meta = {"usage": {}, "latency_ms": {"total": total}, "prompt_versions": {"mock": MODEL}, "fallbacks": []}
+    else:
+        meta = collector.to_metadata()
+        meta["latency_ms"]["total"] = total  # tong thoi gian request, khong chi thoi gian goi LLM
+    # RAG bat mac dinh: loi thi phien chay khong co RAG, bao o day (status error + fallback rag_unavailable)
+    meta["rag"] = rag_status(collector)
+    note_rag_errors(collector)  # sau khi bao: ngat RAG tam thoi cho cac request sau
+    if meta["rag"]["status"] == "error":
+        meta["fallbacks"].append("rag_unavailable")
     return meta
 
 

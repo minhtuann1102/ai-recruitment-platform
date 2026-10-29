@@ -96,7 +96,7 @@ Quy tắc chung:
 
 ```
 apps/ai-service/app/rag/
-├── settings.py       # RAG_ENABLED (mặc định tắt), AI_DB_URL, tên embedding_model bỏ tiền tố provider
+├── settings.py       # RAG_ENABLED (mặc định bật từ 2026-10-29), AI_DB_URL, tên embedding_model bỏ tiền tố provider
 ├── difficulty.py     # độ khó 1–5 -> easy/medium/hard
 ├── models.py         # Chunk, SearchFilters
 ├── repository.py     # psycopg 3 async, phiên read-only: list_by_topic_id, search (cosine + filter), get_pair_by_qa_id
@@ -105,7 +105,7 @@ apps/ai-service/app/rag/
 apps/ai-service/evals/ # rag_golden.json (bản nháp), rag_metrics.py, run_rag.py (recall@5 theo nhóm)
 ```
 
-Khác thiết kế ban đầu: **không có `embedder.py`, `chunking.py` và upsert** trong ai-service, vì spec 005 giao toàn bộ đường ghi (chunk, embed, upsert) cho DE (`apps/data-pipeline`). Embed truy vấn dùng `LlmGateway.embed` (Phase 02). Hai bên dùng chung **contract** `specs/005-rag-knowledge-base-qa/contracts/knowledge-chunks-io.md` thay vì chung module. RAG lỗi (DB tắt, embedding lỗi) thì retriever ghi log và trả rỗng, phiên vẫn chạy chỉ với `key_points`.
+Khác thiết kế ban đầu: **không có `embedder.py`, `chunking.py` và upsert** trong ai-service, vì spec 005 giao toàn bộ đường ghi (chunk, embed, upsert) cho DE (`apps/data-pipeline`). Embed truy vấn dùng `LlmGateway.embed` (Phase 02). Hai bên dùng chung **contract** `specs/005-rag-knowledge-base-qa/contracts/knowledge-chunks-io.md` thay vì chung module. RAG lỗi (DB tắt, embedding lỗi, quá hạn, thiếu `AI_DB_URL`) thì retriever ghi log và trả rỗng, phiên vẫn chạy chỉ với `key_points`, và response start / next-turn báo lỗi trong `metadata.rag` (`status = error`, mã lỗi, thông báo; xem `docs/ai-service/06-api-contract.md` mục start). Từ 2026-10-29 RAG **bật mặc định**; chỉ tắt hẳn khi đặt `RAG_ENABLED=false`. Lỗi lúc chạy thì ngắt RAG tạm `RAG_COOLDOWN_S` giây (`app/rag/circuit_breaker.py`, mặc định 60) rồi thử lại; trạng thái xem ở `GET /api/health` (`rag`).
 
 ## 7. Cách đánh giá (bắt đầu Sprint 1)
 
