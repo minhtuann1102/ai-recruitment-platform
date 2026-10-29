@@ -1,5 +1,6 @@
 """Chon Evaluator theo AGENT_EVALUATOR_MODE: mock (mac dinh, CI khong can khoa) hoac llm."""
 import logging
+import os
 from typing import Optional, Protocol
 
 from .. import mock_evaluator
@@ -45,8 +46,9 @@ def get_evaluator() -> Evaluator:
         return MockEvaluator()
     if _llm is None:
         try:
-            _llm = LlmEvaluator(get_gateway())
-        except ConfigError as err:  # khong de loi cau hinh lam moi luot tra 500
+            # EVALUATOR_PROMPT_VERSION (vd v3) de A/B; trong = ban moi nhat
+            _llm = LlmEvaluator(get_gateway(), prompt_version=os.getenv("EVALUATOR_PROMPT_VERSION") or None)
+        except (ConfigError, FileNotFoundError) as err:  # thieu khoa / EVALUATOR_PROMPT_VERSION sai: khong tra 500
             log.error("evaluator_config_error error=%s", err)
             return MockEvaluator(degraded=True)
     return _llm

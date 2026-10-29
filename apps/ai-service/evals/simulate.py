@@ -22,7 +22,8 @@ from evals.cost_latency import load_pricing, ops_summary
 from evals.personas import all_personas
 from evals.sim_language import language
 from evals.sim_style import session_style
-from evals.sim_metrics import adaptation, constraints, discrimination, injection, question_bank, report_quality
+from evals.sim_metrics import (adaptation, constraints, discrimination, grounding, injection, question_bank,
+                               report_quality)
 from evals.simulate_session import run_session
 from evals.simulator import LlmSimulator, RuleSimulator
 
@@ -48,7 +49,7 @@ def summarize(sessions: Dict[str, Dict], personas, pricing: Dict) -> Dict:
             "adaptation": adaptation(sessions, personas), "constraints": constraints(sessions, personas),
             "report": report_quality(sessions, personas), "injection": injection(sessions, personas),
             "language": language(sessions), "question_bank": question_bank(sessions), "style": session_style(sessions),
-            "ops": ops_summary(sessions, pricing)}
+            "grounding": grounding(sessions), "ops": ops_summary(sessions, pricing)}
 
 
 async def run_all(ids, simulator, base_url=None, duration=20, concurrency=4) -> Dict[str, Dict]:

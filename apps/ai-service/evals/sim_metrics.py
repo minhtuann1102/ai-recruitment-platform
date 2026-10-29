@@ -120,3 +120,14 @@ def question_bank(sessions: Dict[str, Dict]) -> Dict:
     return {"technical_main_turns": len(main), "from_bank": _rate([t.get("question_source") == "bank" for t in main]),
             "fallback": _rate([t.get("question_source") == "fallback" for t in main]),
             "topics_with_bank": _rate([bool(t.get("bank_questions")) for t in topics])}
+
+
+def grounding(sessions: Dict[str, Dict]) -> Dict:
+    """Evaluator v4 (Phase 03a): ti le y covered duoc tai lieu ung ho / bac bo / khong co nguon, va luot diem khong
+    bam nguon (confidence = low). v3 / mock khong co support nen bi bo qua."""
+    evals = [t["evaluation"] for s in sessions.values() for t in s["turns"] if t.get("evaluation")]
+    support = [e["support"] for ev in evals for e in ev.get("evidence", []) if e.get("support")]
+    rated = [ev["confidence"] for ev in evals if ev.get("confidence")]
+    return {"points": len(support), **{k: _rate([x == k for x in support])
+                                       for k in ("supported", "contradicted", "no_source")},
+            "turns_rated": len(rated), "low_confidence": _rate([c == "low" for c in rated])}

@@ -35,6 +35,9 @@ def llm_json(**over):
             "scores": {"technical_accuracy": 3, "completeness": 3, "extensibility": 2, "relevance": 3},
             "strength_tags": ["db-index-btree"], "gap_tags": ["composite-index"], "follow_up_focus": "leftmost prefix"}
     body.update(over)
+    for c in body["covered"]:  # schema v4 (ban moi nhat): moi y covered co trich nguon
+        c.setdefault("source_ids", ["S1"])
+        c.setdefault("support", "supported")
     return reply(json.dumps(body, ensure_ascii=False))
 
 
@@ -57,7 +60,7 @@ def test_happy_path_keeps_verified_points_and_records_usage():
     ev = run(ev_agent.evaluate(inp(), col))
     assert ev.answer_type == "answered" and not ev.degraded
     assert ev.scores.completeness == 3 and len(ev.evidence) == 2  # ceil(4*2/3)=3, khong bi ha
-    assert col.records[0].agent == "evaluator" and col.records[0].prompt_version == "v3"
+    assert col.records[0].agent == "evaluator" and col.records[0].prompt_version == "v4"
     assert ev.strength_tags and all(" " not in t for t in ev.strength_tags)  # tag do code sinh tu y da kiem
     assert client.calls[0]["response_format"]["type"] == "json_schema"
 
@@ -115,7 +118,7 @@ def test_next_turn_route_uses_llm_evaluator_and_reports_usage(client, monkeypatc
             "state": done["state"], "turn_number": 1, "question": done["question"], "answer": ANSWER}
     nd = parse_sse(client.post("/api/next-turn", json=body).text)[-1][1]
     assert nd["evaluation"]["evidence"] and nd["metadata"]["usage"]["evaluator"]["input_tokens"] == 10
-    assert nd["metadata"]["prompt_versions"] == {"evaluator": "v3"}
+    assert nd["metadata"]["prompt_versions"] == {"evaluator": "v4"}
 
 
 def test_trivial_quotes_cannot_inflate_completeness():
