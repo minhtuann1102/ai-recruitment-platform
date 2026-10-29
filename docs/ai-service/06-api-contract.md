@@ -367,7 +367,7 @@ SSE: `meta`, `token`…, `done`. Event `done` nội bộ chứa đủ dữ liệ
   "question": "Chào bạn, mình bắt đầu nhé. ...",
   "turn": { "turn_number": 1, "phase": "intro", "topic_id": "t1", "turn_kind": "main", "action": "ask_main",
             "agent_decision": "switch_topic", "difficulty": 2, "question_source": "ai" },
-  "plan": { "...": "InterviewPlan + reference_snippets + bank_questions (câu hỏi từ kho, mỗi topic technical ≤ 3)" },
+  "plan": { "...": "InterviewPlan + reference_snippets + reference_sources + bank_questions (câu hỏi từ kho, mỗi topic technical ≤ 3)" },
   "state": { "...": "candidate state §5.2" },
   "metadata": { "usage": { "planner": { "input_tokens": 2600, "output_tokens": 1400 }, "interviewer": { "input_tokens": 1200, "output_tokens": 60 } },
                 "latency_ms": { "planner": 9800, "interviewer_ttft": 600, "total": 11200 },
@@ -443,6 +443,10 @@ Event `done`:
 trong lượt: `S1..Sn` snippet của topic rồi chunk theo lượt, `R` đáp án chuẩn) và `support` (`supported` /
 `contradicted` / `no_source`); `confidence` = `low` khi lượt có tài liệu nhưng không ý nào được tài liệu ủng hộ,
 `high` khi có, `null` khi không có tài liệu, không có ý nào, hoặc Evaluator v3 / mock. Id chỉ có nghĩa trong lượt đó.
+`evaluation.sources` (2026-10-29, Phase 03b): tài liệu các ý đã trích, `[{id, ref, title, url, support}]` (`ref` =
+`qa_id` / id chunk, bền qua lượt; nguồn bác bỏ trước). Lấy từ `plan.topics[].reference_sources` (cùng thứ tự
+`reference_snippets`, `{ref, title, url}`) và chunk theo lượt; interview-service lưu nguyên `evaluation` và `plan` như
+cũ để finalize dựng `study_plan.resources`. Thiếu `reference_sources` thì `sources` rỗng, không lỗi.
 
 `reasoning` do **code** sinh từ luật policy đã khớp (không phải LLM), lưu vào `agent_reasoning` để debug.
 `session_end = true` thì `question = null`.

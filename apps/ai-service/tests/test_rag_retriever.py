@@ -62,7 +62,7 @@ def test_plan_snippets_max_three_and_600_tokens():
     snippets = run(Retriever(FakeKnowledgeRepo(by_topic=chunks), FakeEmbed()).plan_snippets(
         topic_id=TOPIC, category="Backend", difficulty=2, query="q"))
     assert 1 <= len(snippets) <= 3
-    assert sum(estimate_tokens(s) for s in snippets) <= 600
+    assert sum(estimate_tokens(s.content) for s in snippets) <= 600
 
 
 @pytest.mark.parametrize("repo,embed", [

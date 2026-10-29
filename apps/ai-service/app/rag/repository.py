@@ -28,7 +28,7 @@ POOL_MAX_IDLE_S = 60  # dong ket noi ranh (tren min_size) truoc khi pooler cat
 POOL_MAX_LIFETIME_S = 600
 
 _COLS = ("id::text, content, source_type, topic_id, category, difficulty, "
-         "metadata->>'qa_id', metadata->>'chunk_type'")
+         "metadata->>'qa_id', metadata->>'chunk_type', metadata->>'source_url'")
 
 # Q&A theo topic_id (khop chinh xac); uu tien dung muc do kho roi theo qa_id cho on dinh
 TOPIC_SQL = (f"SELECT {_COLS}, NULL::float8 FROM knowledge_chunks "
@@ -95,10 +95,10 @@ def build_bank_sql(topic_id: str, model: str, difficulty: Optional[str], limit: 
 
 
 def row_to_chunk(row: Sequence[Any]) -> Chunk:
-    cid, content, source_type, topic_id, category, difficulty, qa_id, chunk_type, score = row
+    cid, content, source_type, topic_id, category, difficulty, qa_id, chunk_type, source_url, score = row
     return Chunk(id=cid, content=content, source_type=source_type, topic_id=topic_id, category=category,
                  difficulty=difficulty, qa_id=qa_id, chunk_type=chunk_type,
-                 score=None if score is None else float(score))
+                 score=None if score is None else float(score), source_url=source_url)
 
 
 class PgKnowledgeRepository:

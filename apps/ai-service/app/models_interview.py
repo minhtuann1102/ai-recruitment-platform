@@ -1,11 +1,33 @@
 """Models cho /api/start, /api/next-turn, /api/finalize (docs/ai-service/06 muc 7.4)."""
+import re
 from typing import List, Literal, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from .models_common import Action, AgentDecision, AnswerType, Level, Phase, TurnKind
 from .models_cv import CvProfile
 from .models_jd import JdProfile
+
+
+_HTTP_URL = re.compile(r"https?://\S+")
+
+
+class SourceRef(BaseModel):
+    """Tai lieu doi chieu ben vung qua luot (Phase 03b): ref = qa_id / id chunk, title = dong dau (cau hoi), url DE."""
+    ref: str
+    title: str
+    url: Optional[str] = None
+
+    @field_validator("url")
+    @classmethod
+    def _http_only(cls, url: Optional[str]) -> Optional[str]:
+        # plan / evaluation do interview-service gui lai: kiem ca luc vao lai, khong chi luc tao tu chunk
+        return url if url and _HTTP_URL.fullmatch(url) else None
+
+    @field_validator("title")
+    @classmethod
+    def _short_title(cls, title: str) -> str:
+        return title[:150]
 
 
 # --- Plan (Planner, 1 lan dau buoi) ---
@@ -28,6 +50,7 @@ class PlanTopic(BaseModel):
     opening_hint: str
     backup_question: str
     reference_snippets: List[str] = Field(default_factory=list)
+    reference_sources: List[SourceRef] = Field(default_factory=list)  # cung thu tu reference_snippets (03b)
     bank_questions: List[BankQuestion] = Field(default_factory=list)  # <= 3, chi topic co catalog_ref, RAG bat
 
 
@@ -152,6 +175,12 @@ class Scores10(BaseModel):
 Support = Literal["supported", "contradicted", "no_source"]
 
 
+class CitedSource(SourceRef):
+    """Tai lieu Evaluator v4 trich trong luot: id theo vi tri (S1.., R) + muc ung ho cua y trich no."""
+    id: str
+    support: Support
+
+
 class Evidence(BaseModel):
     claim: str
     quote: str
@@ -176,6 +205,7 @@ class Evaluation(BaseModel):
     follow_up_focus: Optional[str] = None
     # v4: low = luot co tai lieu nhung khong y covered nao duoc tai lieu ung ho (diem khong bam nguon); None = v3 / mock
     confidence: Optional[Literal["high", "low"]] = None
+    sources: List[CitedSource] = Field(default_factory=list)  # 03b: Reporter lay tai lieu cho study_plan tu day
 
 
 # --- Finalize ---

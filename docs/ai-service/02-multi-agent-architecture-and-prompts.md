@@ -414,7 +414,8 @@ lấy từ kho, khối untrusted, chỉ gửi cho `hint`) để chọn hướng 
 ```
 
 Code kiểm: mọi `evidence_turns` tồn tại; `resource_ids` thuộc danh sách đã đưa (link do code tra từ catalog,
-Reporter không bao giờ viết URL); `topic_id` hợp lệ. Report cuối = điểm (code) + narrative (§6.4).
+Reporter không bao giờ viết URL); `topic_id` hợp lệ. **Đã cài (2026-10-29, Reporter v2):** `resources` hiện là các câu
+Q&A Evaluator đã trích (`r1..`, xem `05` mục 6.4), chưa có catalog. Report cuối = điểm (code) + narrative (§6.4).
 
 ## 3.4 Cấu trúc prompt
 

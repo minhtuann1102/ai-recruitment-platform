@@ -67,7 +67,7 @@ def test_llm_comments_merged_scores_untouched(session):
     t2 = next(t for t in rep["topics"] if t["topic_id"] == "t2")  # nhan xet tieng Anh tron cau bi bo, giu ban code
     assert t2["comment"] == next(t for t in base["topics"] if t["topic_id"] == "t2")["comment"]
     assert rep["turns"][0]["comment"] == base["turns"][0]["comment"]  # nhan xet nghi injection bi bo
-    assert rep["meta"]["prompt_versions"]["reporter"] == "v1"
+    assert rep["meta"]["prompt_versions"]["reporter"] == "v2"
     sent = client.calls[0]["messages"][1]["content"]
     assert all(t.answer not in sent for t in session.turns if len(t.answer) > 30)  # khong nhan nguyen van
 

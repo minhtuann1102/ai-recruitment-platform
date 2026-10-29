@@ -150,12 +150,11 @@ class Retriever:
 
     async def plan_snippets(self, *, topic_id: Optional[str], category: Optional[str], difficulty: int,
                             query: str, include_qa: bool = True,
-                            collector: Optional[UsageCollector] = None) -> List[str]:
-        """FR-AI-022: toi da 3 chunk, <= 600 token moi topic, luu vao PlanTopic.reference_snippets."""
-        chunks = await self.retrieve_for_topic(topic_id=topic_id, category=category, difficulty=difficulty,
-                                               query=query, include_qa=include_qa, k=3, token_budget=600,
-                                               collector=collector)
-        return [c.content for c in chunks]
+                            collector: Optional[UsageCollector] = None) -> List[Chunk]:
+        """FR-AI-022: toi da 3 chunk, <= 600 token moi topic (PlanTopic.reference_snippets + reference_sources)."""
+        return await self.retrieve_for_topic(topic_id=topic_id, category=category, difficulty=difficulty,
+                                             query=query, include_qa=include_qa, k=3, token_budget=600,
+                                             collector=collector)
 
     async def reference_answer(self, qa_id: str, collector: Optional[UsageCollector] = None) -> Optional[Chunk]:
         """Evaluator: cau hoi tu ngan hang thi tra thang theo qa_id, khong tim tuong dong (rag-design muc 4)."""
