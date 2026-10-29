@@ -7,12 +7,13 @@ buoi phong van khong chet.
 """
 import logging
 import math
-from typing import Awaitable, Callable, List, Optional, Protocol, Sequence
+from typing import Awaitable, Callable, List, Optional, Protocol, Sequence, Tuple
 
 from .difficulty import difficulty_bucket
 from ..llm.usage import UsageCollector
 from .models import Chunk, SearchFilters
 from .query_expansion import expand_query
+from .hybrid_search import PARTIAL_ERROR, HybridSearcher
 from .question_bank import AnswerCache, BankEntry, rank
 
 log = logging.getLogger("ai_service.rag")
@@ -75,21 +76,30 @@ def build_query(category: Optional[str], title: str, extra: str = "") -> str:
 
 class Retriever:
     def __init__(self, repo: KnowledgeRepository, embed: EmbedFn, *, k: int = 5, token_budget: int = 1500,
-                 textbook: bool = False, rewrite: Optional[RewriteFn] = None, question_bank: bool = True):
+                 textbook: bool = False, rewrite: Optional[RewriteFn] = None, question_bank: bool = True,
+                 hybrid: bool = False):
         """textbook=False (mac dinh, RAG_TEXTBOOK_ENABLED): kho chua co textbook nen khong tim (do 24/10: tim
         textbook cho scenario ton ~1.5 s ma luon rong). rewrite: LLM viet lai truy van sang tieng Anh cho duong
         vector (RAG_QUERY_REWRITE); do 24/10 tren 32 truy van thuan Viet: recall@5 0.594 -> 0.938."""
         self._repo, self._embed, self.k, self.token_budget = repo, embed, k, token_budget
         self.textbook, self._rewrite = textbook, rewrite
         self.answers, self.question_bank = AnswerCache(), question_bank
+        # hybrid (RAG_HYBRID, mac dinh bat qua factory): tu khoa + vector + topic_id gop RRF; False: duong cu
+        # (topic_id truoc, vector khi < MIN_TOPIC_HITS), giu de so sanh truoc/sau
+        self.hybrid = HybridSearcher(repo, embed, self._search_text) if hybrid else None
 
     async def search_text(self, query: str, collector: Optional[UsageCollector] = None) -> str:
         """Van ban dem embed: truy van goc + ban tieng Anh do LLM viet lai; khong co hoac loi thi dung tu dien."""
+        return (await self._search_text(query, collector))[0]
+
+    async def _search_text(self, query: str, collector: Optional[UsageCollector] = None) -> Tuple[str, bool]:
+        """(van ban, cache duoc): viet lai tra nguyen truy van (loi LLM hoac khong doi) thi khong cache."""
         if self._rewrite is not None:
             english = await self._rewrite(query, collector)
             if english and english.strip() != query.strip():
-                return f"{query}\n{english}"
-        return expand_query(query)
+                return f"{query}\n{english}", True
+            return expand_query(query), False
+        return expand_query(query), True
 
     async def retrieve_for_topic(self, *, topic_id: Optional[str], category: Optional[str], difficulty: int,
                                  query: str, include_qa: bool = True, k: Optional[int] = None,
@@ -104,6 +114,13 @@ class Retriever:
         via = "topic"
         try:
             bucket = difficulty_bucket(difficulty)
+            if self.hybrid is not None:
+                via = "hybrid"
+                by_topic = include_qa and topic_id
+                extra = [self._repo.list_by_topic_id(topic_id, bucket, k * OVERFETCH)] if by_topic else []
+                found = await self.hybrid.search(query, SearchFilters(types, category, bucket, chunk_type),
+                                                 k * OVERFETCH, collector, extra)
+                return self._finish(topic_id, via, found, k, budget)
             found = await self._repo.list_by_topic_id(topic_id, bucket, k) if include_qa and topic_id else []
             found = dedup(found)
             if len(found) < MIN_TOPIC_HITS:
@@ -116,6 +133,10 @@ class Retriever:
             log.warning("rag_retrieve_failed topic=%s error=%s", topic_id, type(err).__name__)
             _record(collector, "rag_retrieve_failed")
             return []
+        return self._finish(topic_id, via, found, k, budget)
+
+    @staticmethod
+    def _finish(topic_id: Optional[str], via: str, found: Sequence[Chunk], k: int, budget: int) -> List[Chunk]:
         result = trim_to_budget(found[:k], budget)
         # NFR-AI-OBS04: log id + diem, khong log noi dung
         log.info("rag_retrieve topic=%s via=%s hits=%s", topic_id, via,
@@ -142,11 +163,15 @@ class Retriever:
 
     async def bank_for_topic(self, topic_id: str, difficulty: int, topic_terms: Sequence[str],
                              generic: Sequence[str] = (), n: int = 3,
-                            collector: Optional[UsageCollector] = None) -> List[BankEntry]:
-        """Cau hoi tu kho cho topic (question_bank.rank); dap an vao cache cho Evaluator. Loi thi tra rong."""
+                             collector: Optional[UsageCollector] = None, query: str = "") -> List[BankEntry]:
+        """Cau hoi tu kho cho topic (question_bank.rank); dap an vao cache cho Evaluator. Loi thi tra rong.
+        Hybrid + co query: xep hang them theo do giong vector cua cau hoi voi truy van topic (cung vector voi
+        snippet, khong embed lai); embed loi thi chi xep theo tu trung."""
         bucket = difficulty_bucket(difficulty)
+        vector = await self._bank_vector(query, collector)
         try:
-            entries = await self._repo.list_bank(topic_id, bucket, BANK_FETCH)
+            entries = await (self._repo.list_bank(topic_id, bucket, BANK_FETCH, vector) if vector is not None
+                             else self._repo.list_bank(topic_id, bucket, BANK_FETCH))
         except Exception as err:
             log.warning("rag_bank_failed topic=%s error=%s", topic_id, type(err).__name__)
             _record(collector, "rag_bank_failed")
@@ -156,6 +181,16 @@ class Retriever:
             self.answers.put(e.qa_id, e.pair)
         log.info("rag_bank topic=%s fetched=%d chosen=%s", topic_id, len(entries), " ".join(e.qa_id for e in chosen))
         return chosen
+
+    async def _bank_vector(self, query: str, collector: Optional[UsageCollector]) -> Optional[List[float]]:
+        if self.hybrid is None or not query:
+            return None
+        try:
+            return await self.hybrid.query_vector(query, collector)
+        except Exception as err:
+            log.warning("rag_bank_vector_failed error=%s", type(err).__name__)
+            _record(collector, PARTIAL_ERROR)
+            return None
 
     async def answer_key(self, qa_id: str, collector: Optional[UsageCollector] = None) -> Optional[str]:
         """Dap an chuan (cap Q&A) theo qa_id: cache truoc, truot thi doc ai_db; loi thi None (cham khong co dap an)."""

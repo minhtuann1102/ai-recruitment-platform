@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from typing import Iterable, List, Optional, Sequence
 
 from ..text_similarity import words
+from .hybrid_fusion import RRF_K
 
 MAX_QUESTION_CHARS = 200
 ANSWER_KEY_CHARS = 1800  # ~600 token (uoc 3 ky tu/token), du cho mot dap an chuan
@@ -31,6 +32,7 @@ class BankEntry:
     question: str
     difficulty: Optional[str]
     pair: str  # cau hoi + dap an (noi dung chunk qa_pair)
+    similarity: Optional[float] = None  # cosine cau hoi ~ truy van topic (hybrid); None: chi xep theo tu trung
 
 
 def spoken_ok(question: str) -> bool:
@@ -52,10 +54,30 @@ def rank(entries: Sequence[BankEntry], topic_terms: Iterable[str], bucket: Optio
     dat cau."""
     stop = {w for t in generic for w in words(t)}
     terms = {w for t in topic_terms for w in words(t) if len(w) > 2} - stop  # bo hu tu ngan ("va", "la", "gi")
-    scored = [(len(words(e.question) & terms), e) for e in entries if spoken_ok(e.question)]
+    seen, unique = set(), []
+    for e in entries:  # join cua BANK_SQL co the lap qa_id: giu ban dau, khong cong diem vector hai lan
+        if e.qa_id not in seen:
+            seen.add(e.qa_id)
+            unique.append(e)
+    # Cau khong co tu nao chung voi topic bi loai du vector gan: chan cau DE gan nham topic_id lot vao ngan hang
+    scored = [(len(words(e.question) & terms), e) for e in unique if spoken_ok(e.question)]
     scored = [x for x in scored if x[0] > 0]
-    scored.sort(key=lambda x: (gap(x[1].difficulty, bucket), -x[0], x[1].qa_id))
+    fused = _fused_rank(scored)
+    scored.sort(key=lambda x: (gap(x[1].difficulty, bucket), -fused[x[1].qa_id], x[1].qa_id))
     return [e for _, e in scored[:n]]
+
+
+def _fused_rank(scored: Sequence) -> dict:
+    """Hybrid (Phase 01): RRF cua hang theo so tu trung va hang theo do giong vector (neu co). Chi co tu trung thi
+    giu thu tu cu (nhieu tu trung hon dung truoc)."""
+    # hang canh tranh: cung so tu trung thi cung hang (khong de qa_id quyet dinh thay cho vector)
+    distinct = sorted({overlap for overlap, _ in scored}, reverse=True)
+    position = {v: 1 + sum(1 for o, _ in scored if o > v) for v in distinct}
+    fused = {e.qa_id: 1.0 / (RRF_K + position[o]) for o, e in scored}
+    with_sim = sorted((x for x in scored if x[1].similarity is not None), key=lambda x: (-x[1].similarity, x[1].qa_id))
+    for i, (_, e) in enumerate(with_sim, start=1):
+        fused[e.qa_id] += 1.0 / (RRF_K + i)
+    return fused
 
 
 KEEP_MEANING_MIN = 0.5

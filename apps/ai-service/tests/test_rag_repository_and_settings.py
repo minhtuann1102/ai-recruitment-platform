@@ -101,6 +101,7 @@ def test_repository_opens_read_only_session_and_maps_rows():
 
     settings = load_rag_settings({"RAG_ENABLED": "1", "AI_DB_URL": "postgresql://ro@h/ai_db"})
     chunk = asyncio.run(PgKnowledgeRepository(settings, connect).get_pair_by_qa_id("de-qa-1"))
-    assert seen["options"] == "-c default_transaction_read_only=on" and seen["connect_timeout"] == 3
+    assert seen["options"].startswith("-c default_transaction_read_only=on")
+    assert "statement_timeout" in seen["options"] and seen["keepalives"] == 1 and seen["connect_timeout"] == 3
     assert chunk.qa_id == "de-qa-1" and chunk.score is None and chunk.dedup_key == "de-qa-1"
     assert conn.executed[0][1] == ["de-qa-1", "text-embedding-3-small"]

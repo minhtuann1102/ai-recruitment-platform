@@ -267,7 +267,7 @@ theo `qa_id` (cache trong process, trượt thì đọc ai_db, hạn 2 s) và ch
 `key_points` của cả topic; code giới hạn `completeness` theo số ý có quote (1 ý → 2, 3 ý trở lên → 4). Interviewer lỗi
 thì câu dự phòng là nguyên văn câu trong kho (đã bỏ markdown). Topic không có câu phù hợp thì Interviewer tự đặt như cũ.
 Interviewer đổi sang ý khác (< 50% từ của câu gốc còn trong câu hỏi, `kept_meaning`) thì lượt đó coi là câu AI tự đặt,
-không chấm theo đáp án chuẩn. Cờ `RAG_QUESTION_BANK` (mặc định bật). Số đo trước/sau và A/B đáp án chuẩn:
+không chấm theo đáp án chuẩn. Khi bật hybrid (`RAG_HYBRID`, mặc định), câu kho xếp theo RRF của số từ trùng và độ giống vector của câu hỏi với truy vấn topic (cùng vector với snippet), vẫn loại câu không có từ chung nào. Cờ `RAG_QUESTION_BANK` (mặc định bật). Số đo trước/sau và A/B đáp án chuẩn:
 [eval-261024-1614-rag-question-bank.md](../../plans/reports/eval-261024-1614-rag-question-bank.md).
 
 ### 3.3.3 Evaluator

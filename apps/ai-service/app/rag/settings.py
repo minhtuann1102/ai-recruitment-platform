@@ -22,6 +22,7 @@ class RagSettings:
     query_rewrite: bool = True  # LLM viet lai truy van sang tieng Anh o duong vector (+~1.6 s, chi khi can vector)
     question_bank: bool = True  # cau hoi chinh phan technical lay tu kho interview_qa (app/rag/question_bank.py)
     cooldown_s: int = 60  # RAG loi thi bo qua RAG trong N giay (app/rag/circuit_breaker.py); 0 = khong ngat
+    hybrid: bool = True  # tu khoa + vector + topic_id gop RRF (app/rag/hybrid_search.py); false: duong cu
 
 
 def stored_model_name(name: str) -> str:
@@ -58,4 +59,5 @@ def load_rag_settings(env: Optional[Mapping[str, str]] = None) -> RagSettings:
         query_rewrite=_flag(env.get("RAG_QUERY_REWRITE", ""), True),
         question_bank=_flag(env.get("RAG_QUESTION_BANK", ""), True),
         cooldown_s=cooldown,
+        hybrid=_flag(env.get("RAG_HYBRID", ""), True),
     )

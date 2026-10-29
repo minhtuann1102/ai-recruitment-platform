@@ -16,9 +16,18 @@ def textbook(cid: str, content: str = "Node.js > Streams\nBackpressure ...", sco
 
 
 class FakeKnowledgeRepo:
-    def __init__(self, by_topic: Sequence[Chunk] = (), hits: Sequence[Chunk] = (), fail: Exception = None):
+    def __init__(self, by_topic: Sequence[Chunk] = (), hits: Sequence[Chunk] = (), fail: Exception = None,
+                 lexical: Sequence[Chunk] = (), lexical_fail: Exception = None):
         self.by_topic, self.hits, self.fail = list(by_topic), list(hits), fail
+        self.lexical, self.lexical_fail = list(lexical), lexical_fail
         self.calls: List[tuple] = []
+
+    async def load_corpus(self) -> List[Chunk]:
+        """Corpus cho BM25 (lexical = cac chunk co the tim theo tu khoa)."""
+        self.calls.append(("corpus",))
+        if self.fail or self.lexical_fail:
+            raise self.fail or self.lexical_fail
+        return list(self.lexical)
 
     async def list_by_topic_id(self, topic_id: str, difficulty: Optional[str], limit: int) -> List[Chunk]:
         self.calls.append(("topic", topic_id, difficulty, limit))

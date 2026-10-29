@@ -6,6 +6,7 @@ import time
 from typing import Callable, List, Sequence
 
 log = logging.getLogger("ai_service.rag")
+SOFT_ERRORS = frozenset({"rag_hybrid_partial"})  # mot duong hybrid loi, cac duong con lai van chay: khong ngat
 
 
 class CircuitBreaker:
@@ -21,6 +22,7 @@ class CircuitBreaker:
         return max(0, int(self._open_until - self._clock() + 0.999))
 
     def trip(self, errors: Sequence[str]) -> None:
+        errors = [e for e in errors if e not in SOFT_ERRORS]
         if self.cooldown_s <= 0 or not errors:
             return
         self._open_until = self._clock() + self.cooldown_s

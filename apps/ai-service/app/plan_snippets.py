@@ -14,7 +14,7 @@ from .catalog.models import TrackCatalog
 from .llm.errors import ConfigError
 from .llm.usage import UsageCollector
 from .models_interview import BankQuestion, InterviewPlan, PlanTopic
-from .rag.circuit_breaker import CircuitBreaker
+from .rag.circuit_breaker import SOFT_ERRORS, CircuitBreaker
 from .rag.factory import build_retriever
 from .rag.question_bank import plain
 from .rag.retriever import Retriever, build_query
@@ -27,6 +27,7 @@ _config_error: Optional[str] = None  # RAG bat nhung cau hinh sai: moi response 
 _breaker = CircuitBreaker(60)  # thay bang RAG_COOLDOWN_S khi nap cau hinh
 _loaded = False
 RAG_ERROR_MESSAGE = "RAG lỗi, lượt này chạy không có dữ liệu tham chiếu từ kho"
+RAG_DEGRADED_MESSAGE = "Một phần RAG lỗi (tìm từ khóa hoặc vector), kết quả lấy từ phần còn chạy được"
 
 
 def _load() -> None:
@@ -50,6 +51,28 @@ def get_retriever() -> Optional[Retriever]:
     return None if _breaker.is_open() else _retriever
 
 
+async def warm_rag() -> None:
+    """Luc khoi dong: nap corpus BM25 truoc (chay nen) de /api/start dau tien khong phai cho. Loi chi ghi log;
+    hybrid tu lui ve vector va bao degraded cho toi khi nap duoc."""
+    retriever = get_retriever()
+    if retriever is None or getattr(retriever, "hybrid", None) is None:
+        return
+    try:
+        await retriever.hybrid.bm25.index()
+    except Exception as err:
+        log.warning("rag_warm_failed error=%s", type(err).__name__)
+
+
+async def close_rag() -> None:
+    """Luc tat service: dong pool ket noi ai_db."""
+    close = getattr(getattr(_retriever, "_repo", None), "close", None)
+    if close is not None:
+        try:
+            await close()
+        except Exception as err:
+            log.warning("rag_close_failed error=%s", type(err).__name__)
+
+
 def note_rag_errors(collector: Optional[UsageCollector]) -> None:
     """Cuoi request: co loi RAG thi ngat RAG tam thoi (RAG_COOLDOWN_S) cho cac request sau."""
     if collector is not None and collector.rag_errors:
@@ -57,7 +80,8 @@ def note_rag_errors(collector: Optional[UsageCollector]) -> None:
 
 
 def rag_status(collector: Optional[UsageCollector] = None) -> Dict:
-    """metadata.rag (start, next-turn) va /api/health: on | off (RAG_ENABLED=false) | error (cau hinh sai, dang
+    """metadata.rag (start, next-turn) va /api/health: on | off (RAG_ENABLED=false) | degraded (mot duong hybrid
+    loi, van co ket qua) | error (cau hinh sai, dang
     ngat tam sau loi, hoac ai_db loi / qua han trong request nay; phien van chay tiep khong co RAG). Khong chua noi
     dung hay URL ket noi."""
     _load()
@@ -66,8 +90,10 @@ def rag_status(collector: Optional[UsageCollector] = None) -> Dict:
     if _retriever is None:
         return {"status": "off"}
     errors = list(collector.rag_errors) if collector is not None else []
-    if errors:
+    if any(e not in SOFT_ERRORS for e in errors):
         return {"status": "error", "errors": errors, "message": RAG_ERROR_MESSAGE}
+    if errors:  # chi loi nhe (mot duong hybrid): van co RAG, khong them fallback rag_unavailable
+        return {"status": "degraded", "errors": errors, "message": RAG_DEGRADED_MESSAGE}
     if _breaker.is_open():
         return {"status": "error", "errors": ["rag_cooldown"], "last_errors": _breaker.last_errors,
                 "message": f"RAG tạm tắt sau lỗi ai_db, thử lại sau {_breaker.remaining_s()} s"}
@@ -101,8 +127,9 @@ async def _bank(retriever: Retriever, phase: str, topic: PlanTopic, catalog: Tra
     entry = next((t for t in catalog.topics if t.id == topic.catalog_ref), None)
     terms = [topic.title, *topic.key_points, *(entry.key_concepts if entry else [])]
     generic = [catalog.title, catalog.track.replace("_", " "), entry.category if entry else ""]
+    query = build_query(None, topic.title, " ".join(topic.key_points))  # cung truy van voi snippet: dung chung vector
     entries = await retriever.bank_for_topic(topic.catalog_ref, topic.start_difficulty, terms, generic,
-                                             collector=collector)
+                                             collector=collector, query=query)
     return [BankQuestion(qa_id=e.qa_id, question=plain(e.question), difficulty=e.difficulty) for e in entries]
 
 

@@ -378,6 +378,8 @@ SSE: `meta`, `token`…, `done`. Event `done` nội bộ chứa đủ dữ liệ
 
 `metadata.rag` (start và next-turn, 2026-10-29): RAG **bật mặc định**. `status`:
 - `on`: RAG chạy bình thường.
+- `degraded`: một đường của hybrid search (từ khóa hoặc vector) lỗi hay quá hạn, kết quả lấy từ đường còn chạy được. `errors =
+  ["rag_hybrid_partial"]`. Không ngắt RAG, không thêm `rag_unavailable`.
 - `off`: tắt hẳn bằng `RAG_ENABLED=false`.
 - `error`: RAG lỗi, phiên **vẫn chạy tiếp không có RAG** (không snippet, không câu từ kho, chấm không có đáp án chuẩn).
   Kèm `errors` (mã: `rag_config_error` thiếu `AI_DB_URL`; `rag_retrieve_failed`, `rag_bank_failed`,

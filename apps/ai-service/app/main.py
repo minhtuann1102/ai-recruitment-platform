@@ -2,8 +2,10 @@
 
 Mock dung quy tac thay cho LLM de FSD tich hop truoc; hinh dang request/response/SSE la that.
 """
+import asyncio
 import logging
 import time
+from contextlib import asynccontextmanager
 from typing import Callable, Optional
 
 from fastapi import FastAPI, File, Form, Request, UploadFile
@@ -20,7 +22,7 @@ from .models_jd import JdParseRequest, JdParseResponse
 from .models_interview import FinalizeRequest, NextTurnRequest, StartRequest
 from .agents.reporter import get_reporter
 from .agents.interviewer import get_interviewer
-from .plan_snippets import note_rag_errors, rag_status
+from .plan_snippets import close_rag, note_rag_errors, rag_status, warm_rag
 from .question_stream import QuestionStream
 from .dev_play_page import router as dev_play_router
 from .security import internal_token_middleware
@@ -29,7 +31,17 @@ from .turn_engine import TurnResult, finish_turn, next_turn, start_session
 
 MODEL = "mock-v2"
 log = logging.getLogger("ai_service")
-app = FastAPI(title="AI Interview Service (Mock)", version="0.2.0")
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    warm = asyncio.ensure_future(warm_rag())  # khong chan khoi dong: nap corpus BM25 o nen
+    yield
+    warm.cancel()
+    await close_rag()
+
+
+app = FastAPI(title="AI Interview Service (Mock)", version="0.2.0", lifespan=lifespan)
 app.middleware("http")(internal_token_middleware)
 app.include_router(dev_play_router)  # GET /dev/play: trang phong van thu cho dev
 

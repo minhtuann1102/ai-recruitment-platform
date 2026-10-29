@@ -78,7 +78,7 @@ class FakeRetriever:
     async def plan_snippets(self, **_):
         return []
 
-    async def bank_for_topic(self, topic_id, difficulty, terms, generic=(), n=3, collector=None):
+    async def bank_for_topic(self, topic_id, difficulty, terms, generic=(), n=3, collector=None, query=""):
         return [entry(f"{topic_id}#1", f"`{topic_id}` hoạt động thế nào?"), entry(f"{topic_id}#2", "Câu thứ hai?")]
 
     async def answer_key(self, qa_id, collector=None):

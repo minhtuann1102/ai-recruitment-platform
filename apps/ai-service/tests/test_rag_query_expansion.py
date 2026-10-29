@@ -30,7 +30,7 @@ def test_retriever_embedding_usage_reaches_collector():
     client = FakeOpenAI([embedding_reply([[0.1] * 1536], prompt_tokens=12)])
     gw = LlmGateway(load_llm_settings({"LLM_API_KEY": "k"}), client, env={})
     retriever = build_retriever(load_rag_settings({"RAG_ENABLED": "1", "AI_DB_URL": "postgresql://x/y",
-                                                   "RAG_QUERY_REWRITE": "0"}), gw)
+                                                   "RAG_QUERY_REWRITE": "0", "RAG_HYBRID": "0"}), gw)
     retriever._repo = FakeKnowledgeRepo()
     col = UsageCollector()
     asyncio.run(retriever.retrieve_for_topic(topic_id=None, category="Backend", difficulty=2,
