@@ -5,16 +5,17 @@ Mock dung quy tac thay cho LLM de FSD tich hop truoc; hinh dang request/response
 import asyncio
 import logging
 import time
-from contextlib import asynccontextmanager, contextmanager
+from contextlib import aclosing, asynccontextmanager, contextmanager
 from typing import Callable, Optional
 
+import anyio
 from fastapi import FastAPI, File, Form, Request, UploadFile
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, StreamingResponse
 
 from .api_error import ApiError
 from .llm.usage import UsageCollector
-from .logging_setup import bind_request, configure_logging
+from .logging_setup import bind_request, configure_logging, safe_session_id
 from .agents.cv_parser import get_cv_parser
 from .agents.jd_parser import get_jd_parser
 from .mock_planner import load_track
@@ -28,19 +29,26 @@ from .question_stream import QuestionStream
 from .dev_play_page import router as dev_play_router
 from .security import internal_token_middleware
 from .sse import SSE_HEADERS, event
+from . import tracing
 from .turn_engine import TurnResult, finish_turn, next_turn, start_session
 
 MODEL = "mock-v2"
+TRACE_FLUSH_TIMEOUT_S = 5.0
 configure_logging()  # truoc moi log: uvicorn khong cau hinh logger ai_service
 log = logging.getLogger("ai_service")
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    tracing.warm()
     warm = asyncio.ensure_future(warm_rag())  # khong chan khoi dong: nap corpus BM25 o nen
     yield
     warm.cancel()
     await close_rag()
+    try:  # flush trace co the treo neu Langfuse khong toi duoc: khong giu service luc tat
+        await asyncio.wait_for(asyncio.to_thread(tracing.shutdown), TRACE_FLUSH_TIMEOUT_S)
+    except asyncio.TimeoutError:
+        log.warning("tracing_flush_timeout timeout_s=%s", TRACE_FLUSH_TIMEOUT_S)
 
 
 app = FastAPI(title="AI Interview Service (Mock)", version="0.2.0", lifespan=lifespan)
@@ -72,13 +80,23 @@ def health():
 @app.post("/api/cv/parse", response_model=CvParseResponse)
 async def cv_parse(file: UploadFile = File(...), track: str = Form(...)):
     load_track(track)  # 422 neu track khong co trong catalog
-    return await get_cv_parser().parse(await file.read(), track)
+    tracing.start_request("cv_parse", tags=[track])
+    started, collector = time.perf_counter(), UsageCollector()
+    with _logged_failure(started, collector, rag="-"):
+        result = await get_cv_parser().parse(await file.read(), track)
+    _finish_request(started, collector, "ok", rag="-")
+    return result
 
 
 @app.post("/api/jd/parse", response_model=JdParseResponse)
 async def jd_parse(req: JdParseRequest):
     """FR-AI-017: JD cua job trong application -> jd_profile cho Planner (JD khong vao RAG)."""
-    return await get_jd_parser().parse(req.jd_text, load_track(req.track))
+    tracing.start_request("jd_parse", tags=[req.track])
+    started, collector = time.perf_counter(), UsageCollector()
+    with _logged_failure(started, collector, rag="-"):
+        result = await get_jd_parser().parse(req.jd_text, load_track(req.track))
+    _finish_request(started, collector, "ok", rag="-")
+    return result
 
 
 def _usage_meta(started: float, collector: Optional[UsageCollector] = None) -> dict:
@@ -96,14 +114,16 @@ def _usage_meta(started: float, collector: Optional[UsageCollector] = None) -> d
     return meta
 
 
-def _log_request_done(started: float, collector: UsageCollector, status: str, error: str = "-",
-                      rag: Optional[str] = None) -> None:
-    """Mot dong tong ket moi request, ca khi loi (lam so lieu TTFT / fallback / RAG tu log). Chi so do va ma.
+def _finish_request(started: float, collector: UsageCollector, status: str, error: str = "-",
+                    rag: Optional[str] = None) -> None:
+    """Dong tong ket moi request, ca khi loi (lam so lieu TTFT / fallback / RAG tu log; chi so do va ma) + dong trace.
     `rag`: trang thai da bao trong metadata (giu dung gia tri do); None thi tinh lai tu collector."""
     fallbacks = ",".join(r.fallback for r in collector.records if r.fallback) or "-"
-    log.info("request_done status=%s error=%s ms=%d tokens=%d fallbacks=%s rag=%s", status, error,
-             (time.perf_counter() - started) * 1000, collector.total_tokens(), fallbacks,
-             rag or rag_status(collector)["status"])
+    rag = rag or rag_status(collector)["status"]
+    log.info("request_done status=%s error=%s ms=%d tokens=%d fallbacks=%s rag=%s trace=%s", status, error,
+             (time.perf_counter() - started) * 1000, collector.total_tokens(), fallbacks, rag,
+             tracing.trace_id() or "-")
+    tracing.finish_request(status, error, fallbacks=fallbacks, rag=rag)
 
 
 @contextmanager
@@ -113,39 +133,61 @@ def _logged_failure(started: float, collector: UsageCollector, rag: Optional[str
         yield
     except BaseException as err:
         status = "cancelled" if isinstance(err, asyncio.CancelledError) else "error"
-        _log_request_done(started, collector, status, type(err).__name__, rag)
+        _finish_request(started, collector, status, type(err).__name__, rag)
         raise
+
+
+class _TurnStream(StreamingResponse):
+    """Client ngat: Starlette huy task stream ma khong dong generator (chi GC dong, trong context bat ky, co khi cua
+    request khac). Dong generator va tong ket request ngay tai day, trong context cua chinh request nay; generator
+    chua kip chay cung qua day."""
+
+    def __init__(self, content, on_close: Callable[[], None]):
+        super().__init__(content, media_type="text/event-stream", headers=SSE_HEADERS)
+        self._on_close = on_close
+
+    async def __call__(self, scope, receive, send) -> None:
+        try:
+            await super().__call__(scope, receive, send)
+        finally:
+            try:
+                with anyio.CancelScope(shield=True):
+                    await self.body_iterator.aclose()
+            finally:
+                self._on_close()
 
 
 def _stream(result: TurnResult, build_done: Callable[[TurnResult], dict], collector: UsageCollector,
             started: float):
     """meta -> token... (Interviewer stream, co the replace) -> done. `done` dung SAU khi biet cau hoi cuoi."""
+    outcome = {"status": "cancelled", "error": "-", "rag": None}  # client ngat: khong qua hai nhanh gan ben duoi
+
     async def gen():
-        status, error, rag = "cancelled", "-", None  # client ngat giua chung: generator dong o yield, khong qua except
         try:
             if result.meta:
                 yield event("meta", result.meta)
             if result.spec is not None:
                 qs = QuestionStream(result.spec, get_interviewer(), result.state.asked_questions, collector)
-                async for name, data in qs.events():
-                    yield event(name, data)
+                async with aclosing(qs.events()) as events:
+                    async for name, data in events:
+                        yield event(name, data)
                 finish_turn(result, qs.question, qs.source)
             done = build_done(result)
-            status, rag = "ok", done["metadata"]["rag"]["status"]
+            outcome.update(status="ok", rag=done["metadata"]["rag"]["status"])
+            tracing.set_output(done.get("question"))
             yield event("done", done)
         except Exception as err:  # loi ngoai du kien: bao error de interview-service cho gui lai (FR-AI-039)
-            status, error = "error", type(err).__name__
+            outcome.update(status="error", error=type(err).__name__)
             log.exception("stream_failed")
             yield event("error", {"errorCode": "AI_SERVICE_ERROR", "message": "AI tạm thời không phản hồi",
                                   "retryable": True})
-        finally:
-            _log_request_done(started, collector, status, error, rag)
-    return StreamingResponse(gen(), media_type="text/event-stream", headers=SSE_HEADERS)
+    return _TurnStream(gen(), lambda: _finish_request(started, collector, **outcome))
 
 
 @app.post("/api/start")
 async def start(req: StartRequest):
     bind_request(req.session_id)
+    tracing.start_request("start", session_id=safe_session_id(req.session_id), tags=[req.track, req.level])
     started, collector = time.perf_counter(), UsageCollector()
     with _logged_failure(started, collector):
         r = await start_session(req, collector=collector)
@@ -157,6 +199,8 @@ async def start(req: StartRequest):
 @app.post("/api/next-turn")
 async def next_turn_route(req: NextTurnRequest):
     bind_request(req.session_id, req.turn_number)
+    tracing.start_request("next_turn", session_id=safe_session_id(req.session_id), turn_number=req.turn_number,
+                          tags=[req.track, req.level], input={"question": req.question, "answer": req.answer})
     started, collector = time.perf_counter(), UsageCollector()
     with _logged_failure(started, collector):
         r = await next_turn(req, collector=collector)
@@ -170,12 +214,15 @@ async def next_turn_route(req: NextTurnRequest):
 async def finalize(req: FinalizeRequest):
     """Code tinh diem -> Reporter viet nhan xet; Reporter loi thi status = partial (van 200, FR-AI-054)."""
     bind_request(req.session_id)
+    tracing.start_request("finalize", session_id=safe_session_id(req.session_id), tags=[req.track, req.level])
     started, collector = time.perf_counter(), UsageCollector()
     with _logged_failure(started, collector, rag="-"):  # finalize khong dung RAG
         report = await get_reporter().report(req, collector)
-    usage = collector.to_metadata()
-    report.setdefault("meta", {})["fallbacks"] = usage["fallbacks"]
-    # FR-AI-080: token cua Reporter de tinh chi phi ca phien (start + next-turn + finalize)
-    report["metadata"] = {**report.get("metadata", {}), "usage": usage["usage"], "latency_ms_by_agent": usage["latency_ms"]}
-    _log_request_done(started, collector, "ok", rag="-")
+        usage = collector.to_metadata()
+        report.setdefault("meta", {})["fallbacks"] = usage["fallbacks"]
+        # FR-AI-080: token cua Reporter de tinh chi phi ca phien (start + next-turn + finalize)
+        report["metadata"] = {**report.get("metadata", {}), "usage": usage["usage"],
+                              "latency_ms_by_agent": usage["latency_ms"]}
+        tracing.set_output(report.get("overall"))
+    _finish_request(started, collector, "ok", rag="-")
     return report

@@ -19,7 +19,7 @@ MAX_CHARS = 15_000
 
 _ZERO_WIDTH = re.compile("[​-‏⁠﻿]")
 _CONTROL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
-_EMAIL = re.compile(r"[\w.+-]+@[\w-]+(\.[\w-]+)+")
+_EMAIL = re.compile(r"(?<![\w.+-])[\w.+-]+@[\w-]+(\.[\w-]+)+")  # lookbehind: chuoi dai khong co @ khong bi quet O(n^2)
 _URL = re.compile(r"(https?://|www\.)\S+|\b(linkedin|github|facebook)\.com/\S+", re.I)
 _PHONE = re.compile(r"(\+84|0)[\s.-]?(3|5|7|8|9)([\s.-]?\d){8}")
 _DOB = re.compile(r"((ngày sinh|dob|birth)[^\n\d]{0,15})(\d{1,2}[/.-]\d{1,2}[/.-]\d{2,4})", re.I)

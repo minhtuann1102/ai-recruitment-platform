@@ -30,6 +30,7 @@ Thang: **Tác động** / **Khả năng** = Cao · TB · Thấp.
 | P9 | **Đọc CV của người khác** qua `cvApplicationId` | Cao | TB | job-service bắt buộc kiểm application thuộc `candidateId` trong pattern `application.getCvFile` (§7.3); có test cho trường hợp id của người khác |
 | P10 | Ứng viên xóa CV ở job-service nhưng `cv_profile` vẫn còn ở phiên cũ | Thấp | TB | Ghi trong consent; xóa phiên xóa `cv_profile`; nếu cần chặt hơn: job-service phát event khi xóa CV để interview-service xóa `cv_profile` tương ứng (ngoài phạm vi 8 tuần) |
 | P3 | **Rò rỉ qua log** | Cao | TB | ai-service không log nội dung (§8.6); `LOG_LLM_IO` mặc định tắt; không gửi body request vào error tracking |
+| P11 | **Rò rỉ qua tracing:** Langfuse giữ prompt, câu trả lời, CV đã redact | Cao | TB | `mask_pii` che email / SĐT / URL; khóa và quyền xem Langfuse giới hạn; `LANGFUSE_TRACING_ENABLED=false` để dừng; nếu dùng Langfuse Cloud cần nêu trong consent và chính sách lưu trữ (§8.6, §11) |
 | P4 | **Người khác xem phiên** | Cao | Thấp | Chỉ chủ phiên truy cập (`SESSION_NOT_YOURS`); Employer không xem phiên luyện tập trong MVP |
 | P5 | **ai-service bị gọi trực tiếp** qua route `/ai/*` public | Cao | TB | Chỉ expose `/ai/api/health`; `X-Internal-Token` (§7.1) |
 | P6 | Không xóa được dữ liệu khi người dùng yêu cầu | TB | Thấp | `DELETE /sessions/:id` hard delete; xóa tài khoản xóa mọi phiên; job xóa phiên bỏ dở sau 30 ngày (§8.5) |

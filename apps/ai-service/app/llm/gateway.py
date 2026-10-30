@@ -13,6 +13,7 @@ from typing import AsyncIterator, List, Mapping, Optional, Type, Union
 from openai import AsyncOpenAI
 from pydantic import BaseModel
 
+from ..tracing import observation
 from .errors import LlmOutputError
 from .retry import call_with_retry
 from .settings import LlmSettings, agent_settings, load_llm_settings
@@ -26,6 +27,16 @@ log = logging.getLogger("ai_service.llm")
 class LlmResult:
     data: Union[BaseModel, str]
     record: CallRecord
+
+
+def _trace_fields(cfg, prompt_version: str) -> dict:
+    return {"model": cfg.model, "version": prompt_version or None,
+            "model_parameters": {"temperature": cfg.temperature, "max_tokens": cfg.max_tokens}}
+
+
+def _trace_usage(rec: CallRecord) -> dict:
+    return {"usage_details": {"input": rec.input_tokens, "output": rec.output_tokens},
+            "metadata": {"attempts": rec.attempts, "repaired": rec.repaired, "fallback": rec.fallback}}
 
 
 def build_client(llm: LlmSettings) -> AsyncOpenAI:
@@ -45,6 +56,14 @@ class LlmGateway:
     async def complete(self, agent: str, messages: List[dict], schema: Optional[Type[BaseModel]] = None,
                        *, prompt_version: str = "", collector: Optional[UsageCollector] = None) -> LlmResult:
         cfg = agent_settings(agent, self.llm, self._env)
+        with observation(agent, "generation", input=messages, **_trace_fields(cfg, prompt_version)) as gen:
+            result = await self._complete(agent, cfg, messages, schema, prompt_version, collector)
+            data = result.data
+            gen.update(output=data.model_dump() if isinstance(data, BaseModel) else data, **_trace_usage(result.record))
+        return result
+
+    async def _complete(self, agent: str, cfg, messages: List[dict], schema: Optional[Type[BaseModel]],
+                        prompt_version: str, collector: Optional[UsageCollector]) -> LlmResult:
         base = {"model": cfg.model, "temperature": cfg.temperature, "max_tokens": cfg.max_tokens,
                 "timeout": cfg.timeout_s}
         if cfg.seed is not None:
@@ -99,36 +118,44 @@ class LlmGateway:
                   "timeout": cfg.timeout_s, "messages": messages, "stream": True,
                   "stream_options": {"include_usage": True}}
         rec, started = CallRecord(agent, cfg.model, prompt_version=prompt_version), time.perf_counter()
-        try:
-            resp, rec.attempts = await self._retry(lambda: self.client.chat.completions.create(**params),
-                                                   cfg.retry_budget_s)
-            async for chunk in resp:
-                usage = getattr(chunk, "usage", None)
-                if usage:
-                    rec.input_tokens = getattr(usage, "prompt_tokens", 0) or 0
-                    rec.output_tokens = getattr(usage, "completion_tokens", 0) or 0
-                choices = getattr(chunk, "choices", None) or []
-                text = choices[0].delta.content if choices and getattr(choices[0], "delta", None) else None
-                if text:
-                    yield text
-        finally:
-            rec.latency_ms = int((time.perf_counter() - started) * 1000)
-            log.info("llm_stream agent=%s model=%s in=%d out=%d ms=%d", agent, cfg.model, rec.input_tokens,
-                     rec.output_tokens, rec.latency_ms)
-            if collector is not None:
-                collector.add(rec)
+        parts: List[str] = []
+        with observation(agent, "generation", input=messages, **_trace_fields(cfg, prompt_version)) as gen:
+            try:
+                resp, rec.attempts = await self._retry(lambda: self.client.chat.completions.create(**params),
+                                                       cfg.retry_budget_s)
+                async for chunk in resp:
+                    usage = getattr(chunk, "usage", None)
+                    if usage:
+                        rec.input_tokens = getattr(usage, "prompt_tokens", 0) or 0
+                        rec.output_tokens = getattr(usage, "completion_tokens", 0) or 0
+                    choices = getattr(chunk, "choices", None) or []
+                    text = choices[0].delta.content if choices and getattr(choices[0], "delta", None) else None
+                    if text:
+                        if not parts:
+                            gen.first_token()
+                        parts.append(text)
+                        yield text
+            finally:
+                rec.latency_ms = int((time.perf_counter() - started) * 1000)
+                log.info("llm_stream agent=%s model=%s in=%d out=%d ms=%d", agent, cfg.model, rec.input_tokens,
+                         rec.output_tokens, rec.latency_ms)
+                gen.update(output="".join(parts), **_trace_usage(rec))  # ca khi stream dut: phan da nhan
+                if collector is not None:
+                    collector.add(rec)
 
     async def embed(self, texts: List[str], *, collector: Optional[UsageCollector] = None) -> List[List[float]]:
         started = time.perf_counter()
-        resp, attempts = await self._retry(
-            lambda: self.client.embeddings.create(model=self.llm.embedding_model, input=texts))
-        vectors = [d.embedding for d in resp.data]
-        if any(len(v) != self.llm.embedding_dimensions for v in vectors):
-            raise LlmOutputError(f"So chieu embedding khong khop {self.llm.embedding_dimensions}")
-        usage = getattr(resp, "usage", None)
+        with observation("embedding", "embedding", input=texts, model=self.llm.embedding_model) as obs:
+            resp, attempts = await self._retry(
+                lambda: self.client.embeddings.create(model=self.llm.embedding_model, input=texts))
+            vectors = [d.embedding for d in resp.data]
+            if any(len(v) != self.llm.embedding_dimensions for v in vectors):
+                raise LlmOutputError(f"So chieu embedding khong khop {self.llm.embedding_dimensions}")
+            usage = getattr(resp, "usage", None)
+            tokens = getattr(usage, "prompt_tokens", 0) or 0
+            obs.update(output={"vectors": len(vectors)}, usage_details={"input": tokens})
         if collector is not None:
-            collector.add(CallRecord("embedding", self.llm.embedding_model,
-                                     input_tokens=getattr(usage, "prompt_tokens", 0) or 0,
+            collector.add(CallRecord("embedding", self.llm.embedding_model, input_tokens=tokens,
                                      latency_ms=int((time.perf_counter() - started) * 1000), attempts=attempts))
         return vectors
 
