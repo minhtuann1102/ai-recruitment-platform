@@ -18,6 +18,10 @@ cuối. JSON (gitignored): `plans/reports/eval-evaluator-03a-*.json`, `eval-sim-
 
 ## Mô phỏng (vòng 2)
 
+> Đính chính 30/10 ([đo nền Phase 05](eval-261030-1640-phase-05-baseline.md)): chạy in-process nên "TTFT" dưới đây là tổng
+> thời gian lượt. Cột v4 có 35/98 lượt RAG lỗi còn cột v3 sạch, nên `no_source` 0.53 cao giả và hai cột không cân. Số
+> "0 contradicted" là sai: chỉ số đọc `evidence`, mà ý bị bác bỏ không nằm trong đó.
+
 | Chỉ số | v3 | v4 |
 |---|---|---|
 | Evaluator p50 / p95 (ms) | 2595 / 4081 | 3007 / 4404 |
