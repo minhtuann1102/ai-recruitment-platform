@@ -5,7 +5,7 @@ Mock dung quy tac thay cho LLM de FSD tich hop truoc; hinh dang request/response
 import asyncio
 import logging
 import time
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, contextmanager
 from typing import Callable, Optional
 
 from fastapi import FastAPI, File, Form, Request, UploadFile
@@ -14,6 +14,7 @@ from fastapi.responses import JSONResponse, StreamingResponse
 
 from .api_error import ApiError
 from .llm.usage import UsageCollector
+from .logging_setup import bind_request, configure_logging
 from .agents.cv_parser import get_cv_parser
 from .agents.jd_parser import get_jd_parser
 from .mock_planner import load_track
@@ -30,6 +31,7 @@ from .sse import SSE_HEADERS, event
 from .turn_engine import TurnResult, finish_turn, next_turn, start_session
 
 MODEL = "mock-v2"
+configure_logging()  # truoc moi log: uvicorn khong cau hinh logger ai_service
 log = logging.getLogger("ai_service")
 
 
@@ -94,9 +96,32 @@ def _usage_meta(started: float, collector: Optional[UsageCollector] = None) -> d
     return meta
 
 
-def _stream(result: TurnResult, build_done: Callable[[TurnResult], dict], collector: UsageCollector):
+def _log_request_done(started: float, collector: UsageCollector, status: str, error: str = "-",
+                      rag: Optional[str] = None) -> None:
+    """Mot dong tong ket moi request, ca khi loi (lam so lieu TTFT / fallback / RAG tu log). Chi so do va ma.
+    `rag`: trang thai da bao trong metadata (giu dung gia tri do); None thi tinh lai tu collector."""
+    fallbacks = ",".join(r.fallback for r in collector.records if r.fallback) or "-"
+    log.info("request_done status=%s error=%s ms=%d tokens=%d fallbacks=%s rag=%s", status, error,
+             (time.perf_counter() - started) * 1000, collector.total_tokens(), fallbacks,
+             rag or rag_status(collector)["status"])
+
+
+@contextmanager
+def _logged_failure(started: float, collector: UsageCollector, rag: Optional[str] = None):
+    """Loi truoc khi stream (ApiError 409/422, loi ngoai du kien): van ghi request_done roi nem tiep."""
+    try:
+        yield
+    except BaseException as err:
+        status = "cancelled" if isinstance(err, asyncio.CancelledError) else "error"
+        _log_request_done(started, collector, status, type(err).__name__, rag)
+        raise
+
+
+def _stream(result: TurnResult, build_done: Callable[[TurnResult], dict], collector: UsageCollector,
+            started: float):
     """meta -> token... (Interviewer stream, co the replace) -> done. `done` dung SAU khi biet cau hoi cuoi."""
     async def gen():
+        status, error, rag = "cancelled", "-", None  # client ngat giua chung: generator dong o yield, khong qua except
         try:
             if result.meta:
                 yield event("meta", result.meta)
@@ -105,40 +130,52 @@ def _stream(result: TurnResult, build_done: Callable[[TurnResult], dict], collec
                 async for name, data in qs.events():
                     yield event(name, data)
                 finish_turn(result, qs.question, qs.source)
-            yield event("done", build_done(result))
-        except Exception:  # loi ngoai du kien: bao error de interview-service cho gui lai (FR-AI-039)
+            done = build_done(result)
+            status, rag = "ok", done["metadata"]["rag"]["status"]
+            yield event("done", done)
+        except Exception as err:  # loi ngoai du kien: bao error de interview-service cho gui lai (FR-AI-039)
+            status, error = "error", type(err).__name__
             log.exception("stream_failed")
             yield event("error", {"errorCode": "AI_SERVICE_ERROR", "message": "AI tạm thời không phản hồi",
                                   "retryable": True})
+        finally:
+            _log_request_done(started, collector, status, error, rag)
     return StreamingResponse(gen(), media_type="text/event-stream", headers=SSE_HEADERS)
 
 
 @app.post("/api/start")
 async def start(req: StartRequest):
+    bind_request(req.session_id)
     started, collector = time.perf_counter(), UsageCollector()
-    r = await start_session(req, collector=collector)
+    with _logged_failure(started, collector):
+        r = await start_session(req, collector=collector)
     return _stream(r, lambda x: {"question": x.question, "turn": x.turn.model_dump(), "plan": x.plan.model_dump(),
                                  "state": x.state.model_dump(), "metadata": _usage_meta(started, collector)},
-                   collector)
+                   collector, started)
 
 
 @app.post("/api/next-turn")
 async def next_turn_route(req: NextTurnRequest):
+    bind_request(req.session_id, req.turn_number)
     started, collector = time.perf_counter(), UsageCollector()
-    r = await next_turn(req, collector=collector)
+    with _logged_failure(started, collector):
+        r = await next_turn(req, collector=collector)
     return _stream(r, lambda x: {
         "evaluation": x.evaluation.model_dump() if x.evaluation else None, "question": x.question,
         "turn": x.turn.model_dump() if x.turn else None, "state": x.state.model_dump(),
-        "session_end": x.session_end, "metadata": _usage_meta(started, collector)}, collector)
+        "session_end": x.session_end, "metadata": _usage_meta(started, collector)}, collector, started)
 
 
 @app.post("/api/finalize")
 async def finalize(req: FinalizeRequest):
     """Code tinh diem -> Reporter viet nhan xet; Reporter loi thi status = partial (van 200, FR-AI-054)."""
-    collector = UsageCollector()
-    report = await get_reporter().report(req, collector)
+    bind_request(req.session_id)
+    started, collector = time.perf_counter(), UsageCollector()
+    with _logged_failure(started, collector, rag="-"):  # finalize khong dung RAG
+        report = await get_reporter().report(req, collector)
     usage = collector.to_metadata()
     report.setdefault("meta", {})["fallbacks"] = usage["fallbacks"]
     # FR-AI-080: token cua Reporter de tinh chi phi ca phien (start + next-turn + finalize)
     report["metadata"] = {**report.get("metadata", {}), "usage": usage["usage"], "latency_ms_by_agent": usage["latency_ms"]}
+    _log_request_done(started, collector, "ok", rag="-")
     return report

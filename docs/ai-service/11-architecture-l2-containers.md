@@ -363,7 +363,7 @@ flowchart LR
 |---|---|---|
 | Đóng gói ai-service | `apps/ai-service/Dockerfile`, `python:3.12-slim`, `uvicorn app.main:app` cổng 8000, healthcheck `curl /api/health` | Catalog YAML nằm trong image; chưa build lại với thư viện CV mới |
 | Tên container, network | `nest_turbo_*`, `nest-turbo-network` trong nhánh này | Nhánh `chore/rename-project-scope` (DE) đổi sang `ai_recruit_*` và `ai-recruit-network`; khối `ai-service` phải đổi theo sau khi nhánh đó merge |
-| Biến môi trường ai-service | `LLM_API_KEY`, `LLM_BASE_URL`, `LLM_MODEL`, `EMBEDDING_MODEL`, `EMBEDDING_DIMENSIONS`, `LLM_STRUCTURED_OUTPUTS`, `LOG_LLM_IO`, `LLM_MODEL_<AGENT>`, `AGENT_<AGENT>_MODE`, `MOCK_STREAM_DELAY_MS` | Cần thêm: `X-Internal-Token`, kết nối `ai_db` |
+| Biến môi trường ai-service | `LLM_API_KEY`, `LLM_BASE_URL`, `LLM_MODEL`, `EMBEDDING_MODEL`, `EMBEDDING_DIMENSIONS`, `LLM_STRUCTURED_OUTPUTS`, `LOG_LLM_IO`, `LOG_LEVEL`, `LOG_FORMAT`, `LLM_MODEL_<AGENT>`, `AGENT_<AGENT>_MODE`, `MOCK_STREAM_DELAY_MS` | Cần thêm: `X-Internal-Token`, kết nối `ai_db` |
 | Gateway | Route `/ai/*` trong `config/apisix/conf/apisix-dev.yaml`; chỉ `/ai/api/health` công khai | Chưa kiểm chứng SSE qua gateway |
 | Scale | Thêm instance ai-service sau gateway hoặc load balancer; không cần sticky session vì stateless | Quy mô demo khoảng 20 phiên đồng thời |
 | Staging | Docker Compose trên VPS hoặc cloud có HTTPS | Thuộc DE (feature 014) |

@@ -146,6 +146,18 @@ Thời hạn là **đề xuất**, nhóm chốt cùng chính sách quyền riên
 
 - ai-service log JSON mỗi lượt: `session_id`, `turn_number`, agent, model, prompt version, token in/out,
   latency, `finish_reason`, retry, fallback. **Không log** CV text, câu trả lời, câu hỏi, output LLM.
+- **Đã cài (2026-10-30, `app/logging_setup.py`):** handler cho logger `ai_service` (trước đó không ai cấu hình nên
+  log INFO bị bỏ dưới uvicorn). Mỗi dòng: `ts` (UTC), `level`, `logger`, `event` (từ đầu message, vd `llm_call`,
+  `rag_turn`, `request_done`), `msg`, `session_id`, `turn_number`; log có exception thêm `exc_type` và `exc` (chỉ vị
+  trí code, **không** có message của exception: vd `ValidationError` chép lại `input_value`).
+  - Route `/api/start`, `/api/next-turn`, `/api/finalize` gán `session_id` (và `turn_number` của lượt vừa trả lời)
+    vào contextvar: mọi log trong request, kể cả lúc stream SSE, tự mang theo. `session_id` do client gửi chỉ giữ
+    `[A-Za-z0-9_.:-]`, ≤ 64 ký tự (chống giả dòng log).
+  - Cuối mỗi request, kể cả khi lỗi: `request_done status=ok|error|cancelled error=<tên lỗi> ms=… tokens=…
+    fallbacks=… rag=…` (một dòng, làm số liệu độ trễ / tỉ lệ lỗi / fallback / RAG; `cancelled` = client ngắt stream).
+  - `LOG_LLM_IO=true` chỉ có tác dụng khi `APP_ENV` không phải staging / production (code bỏ qua cờ ở đó).
+  - Env: `LOG_LEVEL` (mặc định `INFO`, sai thì `INFO` + cảnh báo), `LOG_FORMAT` = `json` (mặc định) | `text`
+    (đọc trên máy dev). Log của uvicorn (access) giữ định dạng của uvicorn, không có `session_id`.
 - Debug nội dung: đọc từ `interview_db` (đã có kiểm soát truy cập), không bật log nội dung ở staging/production.
   Môi trường dev có thể bật `LOG_LLM_IO=true` (mặc định `false`).
 - Chi phí phiên = tổng `ai_meta.usage` × đơn giá (§9.4); cảnh báo khi phiên > $0.10 (S3-AIE-5).
