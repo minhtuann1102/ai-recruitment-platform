@@ -31,7 +31,7 @@ async def internal_token_middleware(request: Request, call_next):
                                                       "details": None})
     if not expected:
         if not _warned:
-            log.warning("AI_SERVICE_INTERNAL_TOKEN chua dat: ai-service dang nhan request khong xac thuc (chi dung cho dev)")
+            log.warning("internal_token_unset AI_SERVICE_INTERNAL_TOKEN chua dat: ai-service dang nhan request khong xac thuc (chi dung cho dev)")
             _warned = True
         return await call_next(request)
     if request.url.path in OPEN_PATHS:

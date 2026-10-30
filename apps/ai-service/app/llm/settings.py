@@ -5,6 +5,7 @@ from typing import Mapping, Optional
 
 from dotenv import load_dotenv
 
+from ..security import STRICT_ENVS
 from .errors import ConfigError
 
 load_dotenv()
@@ -67,7 +68,8 @@ def load_llm_settings(env: Optional[Mapping[str, str]] = None) -> LlmSettings:
         embedding_model=env.get("EMBEDDING_MODEL") or "openai/text-embedding-3-small",
         embedding_dimensions=int(env.get("EMBEDDING_DIMENSIONS") or 1536),
         structured_outputs=_flag(env.get("LLM_STRUCTURED_OUTPUTS", ""), True),
-        log_io=_flag(env.get("LOG_LLM_IO", ""), False),
+        # noi dung prompt / output chi duoc ghi log o may dev (docs 07 muc 8.6): staging / production bo qua co nay
+        log_io=_flag(env.get("LOG_LLM_IO", ""), False) and env.get("APP_ENV", "dev").lower() not in STRICT_ENVS,
     )
 
 
