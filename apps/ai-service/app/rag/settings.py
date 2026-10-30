@@ -21,7 +21,7 @@ class RagSettings:
     textbook_enabled: bool = False  # bat khi DE da nap textbook vao knowledge_chunks
     query_rewrite: bool = True  # LLM viet lai truy van sang tieng Anh o duong vector (+~1.6 s, chi khi can vector)
     question_bank: bool = True  # cau hoi chinh phan technical lay tu kho interview_qa (app/rag/question_bank.py)
-    cooldown_s: int = 60  # RAG loi thi bo qua RAG trong N giay (app/rag/circuit_breaker.py); 0 = khong ngat
+    cooldown_s: int = 60  # RAG loi lap lai thi khong goi ai_db trong N giay (rag/circuit_breaker.py); 0 = khong ngat
     hybrid: bool = True  # tu khoa + vector + topic_id gop RRF (app/rag/hybrid_search.py); false: duong cu
     turn_retrieval: bool = True  # moi next-turn tim them chunk BM25 theo cau hoi + tra loi (can hybrid)
 

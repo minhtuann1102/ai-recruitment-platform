@@ -34,6 +34,10 @@ def bind_request(session_id: Optional[str], turn_number: Optional[int] = None) -
     _turn_number.set(turn_number)
 
 
+def bound_session_id() -> Optional[str]:
+    return _session_id.get()
+
+
 class RequestContextFilter(logging.Filter):
     def filter(self, record: logging.LogRecord) -> bool:
         record.session_id = _session_id.get()

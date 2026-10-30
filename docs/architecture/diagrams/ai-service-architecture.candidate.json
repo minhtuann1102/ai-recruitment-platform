@@ -1,0 +1,742 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Kiến trúc ai-service (AI Interview Service)",
+    "output": "docs/architecture/diagrams/ai-service-architecture.html",
+    "quality_profile": "showcase",
+    "locale": "vi",
+    "repository": {
+      "url": "https://github.com/minhtuann1102/ai-recruitment-platform.git",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "6ea55e40d11d2879d1a21d1af0d2385ab74aeea0"
+    }
+  },
+  "components": [
+    {
+      "id": "isvc",
+      "type": "external",
+      "label": "interview-service",
+      "sublabel": "NestJS · REST client",
+      "pos": [
+        40,
+        40
+      ],
+      "size": [
+        160,
+        64
+      ],
+      "sources": [
+        {
+          "path": "docs/service-communication.md",
+          "line": 27,
+          "end_line": 43,
+          "label": "REST client of ai-service"
+        }
+      ]
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "FastAPI app :8000",
+      "sublabel": "5 route + token middleware",
+      "tag": "X-Internal-Token",
+      "pos": [
+        40,
+        170
+      ],
+      "size": [
+        160,
+        734
+      ],
+      "sources": [
+        {
+          "path": "apps/ai-service/app/main.py",
+          "line": 41,
+          "end_line": 228,
+          "label": "lifespan, _TurnStream, routes"
+        },
+        {
+          "path": "apps/ai-service/app/security.py",
+          "line": 22,
+          "end_line": 43,
+          "label": "internal token check"
+        },
+        {
+          "path": "apps/ai-service/app/logging_setup.py",
+          "line": 27,
+          "end_line": 86,
+          "label": "log JSON, session_id, LOG_LEVEL"
+        }
+      ]
+    },
+    {
+      "id": "aidb",
+      "type": "database",
+      "label": "ai_db (Postgres)",
+      "sublabel": "knowledge_chunks · pgvector",
+      "pos": [
+        330,
+        40
+      ],
+      "size": [
+        160,
+        64
+      ],
+      "sources": [
+        {
+          "path": "apps/ai-service/app/rag/repository.py",
+          "line": 104,
+          "end_line": 187,
+          "label": "pool, read-only, statement_timeout"
+        }
+      ]
+    },
+    {
+      "id": "retr",
+      "type": "backend",
+      "label": "RAG Retriever (hybrid)",
+      "sublabel": "topic · BM25 · vector → RRF",
+      "tag": "RAG_ENABLED · RAG_HYBRID",
+      "pos": [
+        330,
+        170
+      ],
+      "size": [
+        160,
+        64
+      ],
+      "sources": [
+        {
+          "path": "apps/ai-service/app/rag/retriever.py",
+          "line": 109,
+          "end_line": 150,
+          "label": "retrieve_for_topic"
+        },
+        {
+          "path": "apps/ai-service/app/rag/hybrid_search.py",
+          "line": 91,
+          "end_line": 112,
+          "label": "parallel paths, weighted RRF"
+        },
+        {
+          "path": "apps/ai-service/app/plan_snippets.py",
+          "line": 138,
+          "end_line": 161,
+          "label": "snippets + sources, hạn 5 s, giữ topic đã xong"
+        }
+      ]
+    },
+    {
+      "id": "bm25",
+      "type": "backend",
+      "label": "BM25 index",
+      "sublabel": "in-memory · ~4.5k qa_pair",
+      "tag": "warm at startup",
+      "pos": [
+        640,
+        170
+      ],
+      "size": [
+        160,
+        64
+      ],
+      "sources": [
+        {
+          "path": "apps/ai-service/app/rag/bm25_index.py",
+          "line": 52,
+          "end_line": 141,
+          "label": "Okapi BM25 + TTL/fingerprint reload"
+        }
+      ]
+    },
+    {
+      "id": "turnretr",
+      "type": "backend",
+      "label": "Truy hồi theo lượt",
+      "sublabel": "BM25 + tăng điểm topic",
+      "tag": "SQL topic_id ≤1 s · ≤3 chunk",
+      "pos": [
+        640,
+        300
+      ],
+      "size": [
+        160,
+        64
+      ],
+      "sources": [
+        {
+          "path": "apps/ai-service/app/turn_reference_snippets.py",
+          "line": 104,
+          "end_line": 126,
+          "label": "turn_snippets"
+        },
+        {
+          "path": "apps/ai-service/app/turn_reference_snippets.py",
+          "line": 63,
+          "end_line": 103,
+          "label": "SQL topic_id: shield, cooldown 30 s"
+        },
+        {
+          "path": "apps/ai-service/app/source_refs.py",
+          "line": 11,
+          "end_line": 18,
+          "label": "ref bền: qa_id, tiêu đề, source_url"
+        }
+      ]
+    },
+    {
+      "id": "engine",
+      "type": "backend",
+      "label": "Turn engine",
+      "sublabel": "policy · time budget · state",
+      "tag": "pure code",
+      "pos": [
+        330,
+        290
+      ],
+      "size": [
+        160,
+        244
+      ],
+      "sources": [
+        {
+          "path": "apps/ai-service/app/turn_engine.py",
+          "line": 79,
+          "end_line": 199,
+          "label": "start_session / next_turn"
+        },
+        {
+          "path": "apps/ai-service/app/policy.py",
+          "line": 31,
+          "end_line": 60,
+          "label": "decide next action"
+        },
+        {
+          "path": "apps/ai-service/app/time_budget.py",
+          "line": 41,
+          "end_line": 59,
+          "label": "forced transitions"
+        }
+      ]
+    },
+    {
+      "id": "qstream",
+      "type": "backend",
+      "label": "QuestionStream",
+      "sublabel": "token/replace + guard",
+      "pos": [
+        330,
+        560
+      ],
+      "size": [
+        160,
+        64
+      ],
+      "sources": [
+        {
+          "path": "apps/ai-service/app/question_stream.py",
+          "line": 43,
+          "end_line": 108,
+          "label": "fallback + violation checks"
+        }
+      ]
+    },
+    {
+      "id": "parsers",
+      "type": "backend",
+      "label": "CV / JD Parser",
+      "sublabel": "PDF/DOCX → profile",
+      "tag": "mock | llm",
+      "pos": [
+        330,
+        660
+      ],
+      "size": [
+        160,
+        64
+      ],
+      "sources": [
+        {
+          "path": "apps/ai-service/app/agents/cv_parser.py",
+          "line": 89,
+          "end_line": 127
+        },
+        {
+          "path": "apps/ai-service/app/agents/jd_parser.py",
+          "line": 40,
+          "end_line": 79
+        }
+      ]
+    },
+    {
+      "id": "reporter",
+      "type": "backend",
+      "label": "Reporter v2",
+      "sublabel": "điểm code + nhận xét + tài liệu",
+      "tag": "mock | llm",
+      "pos": [
+        330,
+        760
+      ],
+      "size": [
+        160,
+        64
+      ],
+      "sources": [
+        {
+          "path": "apps/ai-service/app/agents/reporter.py",
+          "line": 115,
+          "end_line": 143,
+          "label": "chọn resource_ids, code đổi ra {title,url}"
+        },
+        {
+          "path": "apps/ai-service/app/report_resources.py",
+          "line": 15,
+          "end_line": 41,
+          "label": "nguồn đã trích → bù nguồn topic"
+        },
+        {
+          "path": "apps/ai-service/app/report_scoring.py",
+          "line": 57,
+          "end_line": 110,
+          "label": "deterministic scoring"
+        }
+      ]
+    },
+    {
+      "id": "planner",
+      "type": "backend",
+      "label": "Planner",
+      "sublabel": "plan + validate + repair",
+      "tag": "mock | llm",
+      "pos": [
+        640,
+        390
+      ],
+      "size": [
+        160,
+        60
+      ],
+      "sources": [
+        {
+          "path": "apps/ai-service/app/agents/planner.py",
+          "line": 97,
+          "end_line": 136,
+          "label": "fallback to rule plan"
+        }
+      ]
+    },
+    {
+      "id": "evaluator",
+      "type": "backend",
+      "label": "Evaluator v4",
+      "sublabel": "bands + trích nguồn S1…/R",
+      "tag": "mock | llm",
+      "pos": [
+        640,
+        470
+      ],
+      "size": [
+        160,
+        64
+      ],
+      "sources": [
+        {
+          "path": "apps/ai-service/app/agents/evaluator.py",
+          "line": 136,
+          "end_line": 211,
+          "label": "postcheck + LLM call"
+        },
+        {
+          "path": "apps/ai-service/app/evaluator_source_checks.py",
+          "line": 35,
+          "end_line": 68,
+          "label": "kiểm id, contradicted, confidence"
+        },
+        {
+          "path": "apps/ai-service/app/agents/evaluator_provider.py",
+          "line": 42,
+          "end_line": 52,
+          "label": "mode select, degraded"
+        }
+      ]
+    },
+    {
+      "id": "interviewer",
+      "type": "backend",
+      "label": "Interviewer",
+      "sublabel": "phrase question (stream)",
+      "tag": "mock | llm",
+      "pos": [
+        640,
+        560
+      ],
+      "size": [
+        160,
+        64
+      ],
+      "sources": [
+        {
+          "path": "apps/ai-service/app/agents/interviewer.py",
+          "line": 50,
+          "end_line": 103
+        }
+      ]
+    },
+    {
+      "id": "gateway",
+      "type": "backend",
+      "label": "LlmGateway",
+      "sublabel": "retry · schema · repair",
+      "tag": "usage tracking",
+      "pos": [
+        950,
+        170
+      ],
+      "size": [
+        160,
+        734
+      ],
+      "sources": [
+        {
+          "path": "apps/ai-service/app/llm/gateway.py",
+          "line": 47,
+          "end_line": 163,
+          "label": "complete, stream, embed + generation"
+        },
+        {
+          "path": "apps/ai-service/app/agents/registry.py",
+          "line": 15,
+          "end_line": 59,
+          "label": "AGENT_*_MODE registry"
+        }
+      ]
+    },
+    {
+      "id": "llm",
+      "type": "external",
+      "label": "OpenRouter",
+      "sublabel": "gpt-4o-mini · embeddings",
+      "pos": [
+        950,
+        40
+      ],
+      "size": [
+        160,
+        64
+      ],
+      "sources": [
+        {
+          "path": "apps/ai-service/.env.example",
+          "line": 1,
+          "end_line": 8,
+          "label": "LLM_BASE_URL / models"
+        }
+      ]
+    },
+    {
+      "id": "tracing",
+      "type": "backend",
+      "label": "Tracing",
+      "sublabel": "trace · generation · che PII",
+      "tag": "tùy chọn",
+      "pos": [
+        640,
+        840
+      ],
+      "size": [
+        160,
+        64
+      ],
+      "sources": [
+        {
+          "path": "apps/ai-service/app/tracing.py",
+          "line": 41,
+          "end_line": 50,
+          "label": "mask_pii"
+        },
+        {
+          "path": "apps/ai-service/app/tracing.py",
+          "line": 104,
+          "end_line": 141,
+          "label": "start_request, observation"
+        },
+        {
+          "path": "apps/ai-service/.env.example",
+          "line": 18,
+          "end_line": 21,
+          "label": "LANGFUSE_*"
+        }
+      ]
+    },
+    {
+      "id": "langfuse",
+      "type": "external",
+      "label": "Langfuse",
+      "sublabel": "trace theo session · có nội dung",
+      "pos": [
+        640,
+        980
+      ],
+      "size": [
+        160,
+        64
+      ],
+      "sources": [
+        {
+          "path": "docs/ai-service/07-data-storage.md",
+          "line": 145,
+          "end_line": 170,
+          "label": "phạm vi nội dung gửi đi"
+        }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "ai-service container (Python · FastAPI)",
+      "wraps": [
+        "api",
+        "retr",
+        "bm25",
+        "turnretr",
+        "engine",
+        "qstream",
+        "parsers",
+        "reporter",
+        "planner",
+        "evaluator",
+        "interviewer",
+        "gateway",
+        "tracing"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "isvc-api",
+      "from": "isvc",
+      "to": "api",
+      "label": "REST + SSE",
+      "variant": "emphasis"
+    },
+    {
+      "id": "api-engine",
+      "from": "api",
+      "to": "engine",
+      "label": "start/next-turn",
+      "variant": "emphasis"
+    },
+    {
+      "id": "api-qstream",
+      "from": "api",
+      "to": "qstream",
+      "label": "SSE stream"
+    },
+    {
+      "id": "api-parsers",
+      "from": "api",
+      "to": "parsers",
+      "label": "cv/jd parse"
+    },
+    {
+      "id": "api-reporter",
+      "from": "api",
+      "to": "reporter",
+      "label": "finalize"
+    },
+    {
+      "id": "engine-planner",
+      "from": "engine",
+      "to": "planner",
+      "label": "plan (start)"
+    },
+    {
+      "id": "engine-evaluator",
+      "from": "engine",
+      "to": "evaluator",
+      "label": "evaluate"
+    },
+    {
+      "id": "engine-retr",
+      "from": "engine",
+      "to": "retr",
+      "label": "snippets · bank · đáp án chuẩn"
+    },
+    {
+      "id": "engine-turnretr",
+      "from": "engine",
+      "to": "turnretr",
+      "label": "chunk theo lượt"
+    },
+    {
+      "id": "turnretr-bm25",
+      "from": "turnretr",
+      "to": "bm25",
+      "label": "BM25 hỏi + đáp"
+    },
+    {
+      "id": "retr-aidb",
+      "from": "retr",
+      "to": "aidb",
+      "label": "SQL read-only · pool",
+      "variant": "security"
+    },
+    {
+      "id": "retr-bm25",
+      "from": "retr",
+      "to": "bm25",
+      "label": "keyword search"
+    },
+    {
+      "id": "bm25-aidb",
+      "from": "bm25",
+      "to": "aidb",
+      "label": "load corpus",
+      "variant": "dashed"
+    },
+    {
+      "id": "retr-gateway",
+      "from": "retr",
+      "to": "gateway",
+      "label": "embed · rewrite query",
+      "variant": "dashed"
+    },
+    {
+      "id": "qstream-interviewer",
+      "from": "qstream",
+      "to": "interviewer",
+      "label": "stream question"
+    },
+    {
+      "id": "planner-gateway",
+      "from": "planner",
+      "to": "gateway",
+      "label": "JSON schema"
+    },
+    {
+      "id": "evaluator-gateway",
+      "from": "evaluator",
+      "to": "gateway",
+      "label": "JSON schema"
+    },
+    {
+      "id": "interviewer-gateway",
+      "from": "interviewer",
+      "to": "gateway",
+      "label": "stream"
+    },
+    {
+      "id": "parsers-gateway",
+      "from": "parsers",
+      "to": "gateway",
+      "label": "JSON schema"
+    },
+    {
+      "id": "reporter-gateway",
+      "from": "reporter",
+      "to": "gateway",
+      "label": "JSON schema"
+    },
+    {
+      "id": "gateway-llm",
+      "from": "gateway",
+      "to": "llm",
+      "label": "HTTPS · OpenAI SDK"
+    },
+    {
+      "id": "api-tracing",
+      "from": "api",
+      "to": "tracing",
+      "label": "mở / đóng trace"
+    },
+    {
+      "id": "gateway-tracing",
+      "from": "gateway",
+      "to": "tracing",
+      "label": "generation"
+    },
+    {
+      "id": "tracing-langfuse",
+      "from": "tracing",
+      "to": "langfuse",
+      "label": "gửi nền · đã che PII",
+      "variant": "security"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Một lượt /api/next-turn",
+      "items": [
+        "Song song: đáp án chuẩn (câu từ kho) hoặc truy hồi theo lượt (BM25 câu hỏi + trả lời, ≤3 chunk, hạn 1 s)",
+        "Evaluator v4 ghi nguồn S1…Sn / R cho mỗi ý; code bỏ id lạ, chỉ R bác bỏ mới chặn điểm",
+        "record_evaluation cập nhật state; forced_transition (hết giờ, turn cap) ưu tiên",
+        "policy.decide chọn follow_up / hint / clarify / next_topic; hint dùng đáp án chuẩn hoặc chunk cùng topic",
+        "Interviewer stream câu hỏi qua SSE: meta → token… → done"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "RAG hybrid (lúc /api/start)",
+      "items": [
+        "Mỗi topic chạy song song: tra topic_id, BM25 trong bộ nhớ, vector pgvector",
+        "Gộp RRF (k=60, từ khóa 0.5); topic_id chỉ tăng điểm, không lọc cứng",
+        "Viết lại + embed dùng chung cho snippet và câu kho, hạn 3.5 s",
+        "Đo 29/10: MRR held-out 0.823 → 0.875; gắn snippet 1.0–4.7 s (hạn 5 s)"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Tài liệu trong báo cáo",
+      "items": [
+        "Evaluation.sources: ref bền (qa_id), tiêu đề, URL từ metadata DE",
+        "Mỗi topic ≤3: nguồn bác bỏ → nguồn ủng hộ → bù bằng nguồn của topic",
+        "Reporter v2 chỉ chọn id r1…; code đổi ra {title, url}, LLM không thấy URL"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Quan sát",
+      "items": [
+        "Log JSON có session_id, turn_number, không có nội dung; request_done có status, ms, token, trace id",
+        "Langfuse có nội dung: mỗi request một trace theo session, mỗi lần gọi LLM một generation",
+        "rag_plan, rag_turn ghi id chunk; TTFT lấy từ generation của Interviewer",
+        "Thiếu khóa thì tắt; Langfuse lỗi không ảnh hưởng lượt phỏng vấn"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Stateless",
+      "items": [
+        "plan + state do interview-service giữ và gửi lại mỗi lượt",
+        "ai-service không có DB ghi; ai_db chỉ đọc (read-only)"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Fallback ở mọi tầng",
+      "items": [
+        "AGENT_*_MODE mặc định mock; thiếu key → mock/degraded",
+        "Planner sai 2 lần → plan rule-based",
+        "Interviewer lỗi/vi phạm → câu dự phòng (replace)",
+        "Reporter lỗi → status partial, vẫn 200",
+        "RAG lỗi → phiên chạy không RAG, metadata.rag = error; một đường hybrid lỗi/quá hạn → degraded",
+        "/api/start quá hạn → giữ topic đã xong (rag_start_partial, degraded)",
+        "3 request RAG lỗi trong 2 phút → ngắt 60 s toàn service; next-turn vẫn dùng BM25 + đáp án đã cache (rag_memory_only), start không có RAG",
+        "SQL topic_id theo lượt lỗi / quá hạn → chỉ BM25, nghỉ 30 s (metadata.rag = degraded)"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "An toàn",
+      "items": [
+        "X-Internal-Token so sánh hằng thời gian; staging/prod thiếu token → 503",
+        "CV/JD bọc untrusted, lọc injection; không lộ điểm trong câu hỏi"
+      ]
+    }
+  ]
+}

@@ -163,7 +163,7 @@ def test_bank_rank_uses_vector_similarity_as_tiebreak_signal():
 
 
 def test_partial_error_is_degraded_and_does_not_trip_breaker(monkeypatch):
-    breaker = CircuitBreaker(60)
+    breaker = CircuitBreaker(60, threshold=1)
     monkeypatch.setattr(ps, "_loaded", True)
     monkeypatch.setattr(ps, "_retriever", object())
     monkeypatch.setattr(ps, "_config_error", None)

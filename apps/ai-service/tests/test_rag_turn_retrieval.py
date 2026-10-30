@@ -129,7 +129,7 @@ def test_topic_sql_failure_keeps_bm25_results_as_soft_error(monkeypatch):
     collector = UsageCollector()
     out = snippets(retriever(fail=OSError("db")), collector=collector)
     assert HASHMAP in out and collector.rag_errors == ["rag_turn_failed"]
-    breaker = CircuitBreaker(60)
+    breaker = CircuitBreaker(60, threshold=1)
     for name, value in (("_loaded", True), ("_retriever", object()), ("_config_error", None), ("_breaker", breaker)):
         monkeypatch.setattr(ps, name, value)
     assert ps.rag_status(collector)["status"] == "degraded"

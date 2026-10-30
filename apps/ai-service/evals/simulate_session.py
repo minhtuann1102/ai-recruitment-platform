@@ -17,7 +17,7 @@ MAX_TURNS = 40
 
 
 async def call_sse(client: httpx.AsyncClient, path: str, body: Dict) -> Tuple[List[Tuple[str, Dict]], Dict]:
-    """-> (events, timing {ttft_s, total_s}). Loi HTTP thi nem RuntimeError kem body."""
+    """-> (events, timing {ttft_s | None, total_s}). Loi HTTP thi nem RuntimeError kem body."""
     events, first, started, buf = [], None, time.perf_counter(), ""
     async with client.stream("POST", path, json=body) as resp:
         if resp.status_code != 200:
@@ -33,7 +33,8 @@ async def call_sse(client: httpx.AsyncClient, path: str, body: Dict) -> Tuple[Li
                     first = time.perf_counter()
                 events.append((name, data))
     total = time.perf_counter() - started
-    return events, {"ttft_s": round((first or time.perf_counter()) - started, 3), "total_s": round(total, 3)}
+    # luot khong co token (vua tra loi cau wrap_up, khong goi LLM): ttft_s None de khong keo percentile xuong
+    return events, {"ttft_s": round(first - started, 3) if first else None, "total_s": round(total, 3)}
 
 
 def _done(events: List[Tuple[str, Dict]], path: str) -> Dict:

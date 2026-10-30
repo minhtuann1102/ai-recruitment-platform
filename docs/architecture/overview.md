@@ -2,6 +2,8 @@
 
 > Hệ thống tuyển dụng trực tuyến ngành CNTT tích hợp AI Agentic phỏng vấn.
 
+Sơ đồ tương tác của ai-service (mở bằng trình duyệt, nguồn là file `.candidate.json` cùng thư mục): [kiến trúc](diagrams/ai-service-architecture.html), [luồng một buổi phỏng vấn](diagrams/interview-session-sequence.html).
+
 ## 1. C4 — Context Diagram
 
 ```mermaid

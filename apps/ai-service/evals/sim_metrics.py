@@ -1,4 +1,5 @@
 """Chi so tang 3 tu cac phien gia lap (design 09 muc 10.2, NFR-AI-QUAL09..12, 15). Ham thuan, khong goi mang."""
+from collections import Counter
 from statistics import mean
 from typing import Dict, List, Optional
 
@@ -122,12 +123,45 @@ def question_bank(sessions: Dict[str, Dict]) -> Dict:
             "topics_with_bank": _rate([bool(t.get("bank_questions")) for t in topics])}
 
 
+def _support_rates(support: List[str]) -> Dict:
+    return {"points": len(support), **{k: _rate([x == k for x in support]) for k in ("supported", "no_source")}}
+
+
 def grounding(sessions: Dict[str, Dict]) -> Dict:
-    """Evaluator v4 (Phase 03a): ti le y covered duoc tai lieu ung ho / bac bo / khong co nguon, va luot diem khong
-    bam nguon (confidence = low). v3 / mock khong co support nen bi bo qua."""
+    """Evaluator v4 (Phase 03a): ti le y da giu duoc tai lieu ung ho / khong co nguon, va luot diem khong bam nguon
+    (confidence = low). v3 / mock khong co support nen bi bo qua. Y bi tai lieu bac bo KHONG nam trong `evidence`
+    (postcheck bo khoi covered) nen `points` khong gom chung; dem qua `sources`, la can duoi: bo trung theo id, bo id
+    khong co ref. So dung: log `evaluator_sources contradicted=N`."""
     evals = [t["evaluation"] for s in sessions.values() for t in s["turns"] if t.get("evaluation")]
-    support = [e["support"] for ev in evals for e in ev.get("evidence", []) if e.get("support")]
     rated = [ev["confidence"] for ev in evals if ev.get("confidence")]
-    return {"points": len(support), **{k: _rate([x == k for x in support])
-                                       for k in ("supported", "contradicted", "no_source")},
+    refuted = [x for ev in evals for x in ev.get("sources", []) if x.get("support") == "contradicted"]
+    return {**_support_rates([e["support"] for ev in evals for e in ev.get("evidence", []) if e.get("support")]),
+            "contradicted_sources": len(refuted), "refuted_by_reference": sum(x["id"] == "R" for x in refuted),
             "turns_rated": len(rated), "low_confidence": _rate([c == "low" for c in rated])}
+
+
+def grounding_breakdown(sessions: Dict[str, Dict]) -> Dict:
+    """Tach y covered theo phase / loai luot / nguon cau hoi. Khi co `documents` (turn_source_recorder), tach them y
+    no_source theo luot co tai lieu hay khong: khong co thi LLM khong the trich, co ma khong trich moi can xem tiep."""
+    points = [(t, e["support"]) for s in sessions.values() for t in s["turns"]
+              for e in (t.get("evaluation") or {}).get("evidence", []) if e.get("support")]
+
+    def by(key: str) -> Dict:
+        groups: Dict[str, List[str]] = {}
+        for t, support in points:
+            groups.setdefault(str(t.get(key)), []).append(support)
+        return {k: _support_rates(v) for k, v in sorted(groups.items())}
+
+    missing = [t for t, support in points if support == "no_source"]
+    known = [t for t in missing if "documents" in t]
+    return {"phase": by("phase"), "turn_kind": by("turn_kind"), "question_source": by("question_source"),
+            "no_source": {"no_documents": sum(not t["documents"] for t in known),
+                          "with_documents": sum(bool(t["documents"]) for t in known),
+                          "unrecorded": len(missing) - len(known)}}
+
+
+def rag_health(sessions: Dict[str, Dict]) -> Dict[str, int]:
+    """So request theo metadata.rag.status. Co `error` thi grounding cua lan chay khong dung lam moc: RAG tat giua
+    chung lam luot khong co tai lieu, no_source tang gia."""
+    return dict(Counter(c["metadata"]["rag"]["status"] for s in sessions.values() for c in s["calls"]
+                        if (c.get("metadata") or {}).get("rag")))

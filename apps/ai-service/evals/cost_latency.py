@@ -44,8 +44,8 @@ def session_cost(usage: Dict[str, Dict[str, int]], pricing: Dict) -> float:
 
 
 def ops_summary(sessions: Dict[str, Dict], pricing: Dict) -> Dict:
-    ttft = [c["ttft_s"] for s in sessions.values() for c in s["calls"] if c["path"] == "next-turn"]
-    full = [c["total_s"] for s in sessions.values() for c in s["calls"] if c["path"] == "next-turn"]
+    streamed = [c for s in sessions.values() for c in s["calls"] if c["path"] == "next-turn" and c.get("ttft_s")]
+    ttft, full = [c["ttft_s"] for c in streamed], [c["total_s"] for c in streamed]
     server: Dict[str, List[int]] = {}
     fallback_calls = calls = 0
     for s in sessions.values():

@@ -16,7 +16,7 @@ from .catalog.models import TrackCatalog
 from .mock_planner import load_track
 from .llm.usage import UsageCollector
 from .models_interview import PlanTopic, SourceRef
-from .plan_snippets import main_category
+from .plan_snippets import main_category, swallow_task_result
 from .rag.difficulty import difficulty_bucket
 from .rag.hybrid_fusion import rrf
 from .rag.models import Chunk, SearchFilters
@@ -47,11 +47,6 @@ def _known(content: str, known: Sequence[str]) -> bool:
     return any(content == k or (k.endswith(" ...") and content.startswith(k[:-4])) for k in known)
 
 
-def _swallow(task: asyncio.Future) -> None:
-    if not task.cancelled():
-        task.exception()
-
-
 def _filters(retriever: Retriever, phase: str, topic: PlanTopic, catalog: TrackCatalog) -> Optional[SearchFilters]:
     textbook = ("textbook",) if retriever.textbook else ()
     if phase == "scenario":  # nhu luc start: scenario khong lay interview_qa
@@ -72,7 +67,7 @@ async def _topic_list(retriever: Retriever, topic: PlanTopic, bucket: Optional[s
             # tiep o nen (giu 1 ket noi pool toi statement_timeout) thay vi giu luot qua han
             return await asyncio.wait_for(asyncio.shield(task), TURN_DEADLINE_S)
         except Exception as err:  # gom ca TimeoutError: chi mat phan tang diem, van dung ket qua BM25
-            task.add_done_callback(_swallow)
+            task.add_done_callback(swallow_task_result)
             _sql_off_until = time.monotonic() + SQL_COOLDOWN_S
             err_name = type(err).__name__
     log.warning("rag_turn_failed topic=%s error=%s", topic.catalog_ref, err_name)
@@ -82,7 +77,7 @@ async def _topic_list(retriever: Retriever, topic: PlanTopic, bucket: Optional[s
 
 
 async def _search(retriever: Retriever, filters: SearchFilters, topic: PlanTopic, difficulty: int, query: str,
-                  known: Sequence[str], collector: Optional[UsageCollector]) -> List[Chunk]:
+                  known: Sequence[str], collector: Optional[UsageCollector], memory_only: bool) -> List[Chunk]:
     index = retriever.hybrid.bm25.ready()
     if index is None:  # corpus chua nap xong (vua khoi dong): khong cho
         log.info("rag_turn_skipped reason=corpus_not_loaded")
@@ -93,7 +88,7 @@ async def _search(retriever: Retriever, filters: SearchFilters, topic: PlanTopic
     if not lexical:
         return []
     by_topic: List[Chunk] = []
-    if topic.catalog_ref and "interview_qa" in filters.source_types:
+    if topic.catalog_ref and "interview_qa" in filters.source_types and not memory_only:
         by_topic = await _topic_list(retriever, topic, bucket, collector)
     found = {c.dedup_key for c in lexical}
     fused = [c for c in rrf([lexical, by_topic], [1.0, TOPIC_BOOST])
@@ -103,8 +98,9 @@ async def _search(retriever: Retriever, filters: SearchFilters, topic: PlanTopic
 
 async def turn_snippets(retriever: Optional[Retriever], track: str, *, phase: str, topic: PlanTopic,
                         difficulty: int, question: str, answer: str, has_answer_key: bool,
-                        collector: Optional[UsageCollector] = None) -> TurnChunks:
-    """Chunk theo luot (<= 3, <= 600 token), khong trung snippet cua topic; rong khi bo qua, loi hay qua han."""
+                        collector: Optional[UsageCollector] = None, memory_only: bool = False) -> TurnChunks:
+    """Chunk theo luot (<= 3, <= 600 token), khong trung snippet cua topic; rong khi bo qua, loi hay qua han.
+    memory_only (RAG dang ngat): chi BM25, khong doc ai_db."""
     if (getattr(retriever, "hybrid", None) is None or not getattr(retriever, "turn_retrieval", False)
             or phase == "intro" or has_answer_key or not 1 <= difficulty <= 5):  # do kho ngoai 1-5: state hong
         return TurnChunks()
@@ -113,7 +109,8 @@ async def turn_snippets(retriever: Optional[Retriever], track: str, *, phase: st
         filters = _filters(retriever, phase, topic, load_track(track))
         if filters is None:
             return TurnChunks()
-        chunks = await _search(retriever, filters, topic, difficulty, query, topic.reference_snippets, collector)
+        chunks = await _search(retriever, filters, topic, difficulty, query, topic.reference_snippets, collector,
+                               memory_only)
     except Exception as err:  # tuy chon: loi bat ngo thi luot van cham voi snippet cua topic
         log.warning("rag_turn_failed topic=%s error=%s", topic.catalog_ref, type(err).__name__)
         if collector is not None:

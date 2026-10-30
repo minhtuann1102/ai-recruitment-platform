@@ -380,15 +380,21 @@ SSE: `meta`, `token`…, `done`. Event `done` nội bộ chứa đủ dữ liệ
 - `on`: RAG chạy bình thường.
 - `degraded`: một đường của hybrid search (từ khóa hoặc vector) lỗi hay quá hạn, kết quả lấy từ đường còn chạy được. `errors =
   ["rag_hybrid_partial"]`. Next-turn: tra `topic_id` của truy hồi theo lượt lỗi hay quá hạn 1 s (vẫn dùng kết quả BM25)
-  thì `errors = ["rag_turn_failed"]`; 30 s sau đó các lượt bỏ qua SQL, chỉ dùng BM25, và báo cùng mã. Không ngắt RAG, không thêm `rag_unavailable`.
+  thì `errors = ["rag_turn_failed"]`; 30 s sau đó các lượt bỏ qua SQL, chỉ dùng BM25, và báo cùng mã. Start quá hạn 5 s
+  nhưng đã có kết quả cho một số topic: giữ các topic đó, `errors = ["rag_start_partial"]`, topic chưa xong không có snippet
+  và câu kho. Next-turn trong lúc ngắt tạm: `errors = ["rag_memory_only"]` (xem **Ngắt tạm**). Các lỗi này không tính vào
+  ngắt, không thêm `rag_unavailable`.
 - `off`: tắt hẳn bằng `RAG_ENABLED=false`.
 - `error`: RAG lỗi, phiên **vẫn chạy tiếp không có RAG** (không snippet, không câu từ kho, chấm không có đáp án chuẩn).
   Kèm `errors` (mã: `rag_config_error` thiếu `AI_DB_URL`; `rag_retrieve_failed`, `rag_bank_failed`,
-  `rag_reference_failed` lỗi ai_db / embedding; `rag_timeout` quá hạn 5 s lúc start hoặc 2 s đáp án chuẩn) và
+  `rag_reference_failed` lỗi ai_db / embedding; `rag_timeout` quá hạn 5 s lúc start mà không topic nào có kết quả, hoặc
+  quá hạn 2 s đáp án chuẩn) và
   `message` tiếng Việt để interview-service hiển thị hoặc log; `fallbacks` có thêm `rag_unavailable`.
-- **Ngắt tạm:** sau một request có lỗi RAG, ai-service bỏ qua RAG trong `RAG_COOLDOWN_S` giây (mặc định 60, `0` = không
-  ngắt) để request sau không phải chờ hết hạn. Trong lúc đó `errors = ["rag_cooldown"]`, có thêm `last_errors` (lỗi gây
-  ngắt). Hết hạn thì request sau thử lại.
+- **Ngắt tạm (đổi 2026-10-30):** 3 request lỗi RAG (`status = error`) trong 2 phút thì ai-service không gọi ai_db trong
+  `RAG_COOLDOWN_S` giây (mặc định 60, `0` = không ngắt) để request sau không phải chờ hết hạn; một lỗi đơn lẻ không ngắt.
+  Trong lúc đó start không có RAG (`status = error`, `errors = ["rag_cooldown"]`, có thêm `last_errors`, phiên này không có
+  snippet và câu kho), còn next-turn vẫn dùng BM25 trong bộ nhớ và đáp án chuẩn đã cache (`status = degraded`,
+  `errors = ["rag_memory_only"]`). Hết hạn thì request sau thử lại.
 - `GET /api/health` trả thêm `rag` cùng dạng (không có lỗi theo request, không ping ai_db). RAG lỗi **không** làm health
   thất bại: vẫn `200`, `status = "healthy"`.
 

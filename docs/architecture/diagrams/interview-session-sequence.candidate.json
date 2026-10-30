@@ -1,0 +1,482 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Luồng một buổi phỏng vấn qua ai-service",
+    "output": "docs/architecture/diagrams/interview-session-sequence.html",
+    "quality_profile": "showcase",
+    "locale": "vi",
+    "repository": {
+      "url": "https://github.com/minhtuann1102/ai-recruitment-platform.git",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "6ea55e40d11d2879d1a21d1af0d2385ab74aeea0"
+    }
+  },
+  "participants": [
+    {
+      "id": "isvc",
+      "type": "external",
+      "label": "interview-svc",
+      "sublabel": "giữ plan + state",
+      "sources": [
+        {
+          "path": "docs/service-communication.md",
+          "line": 27,
+          "end_line": 43
+        }
+      ]
+    },
+    {
+      "id": "orch",
+      "type": "backend",
+      "label": "Orchestrator",
+      "sublabel": "FastAPI · engine",
+      "sources": [
+        {
+          "path": "apps/ai-service/app/main.py",
+          "line": 140,
+          "end_line": 211,
+          "label": "_TurnStream, routes + SSE"
+        },
+        {
+          "path": "apps/ai-service/app/turn_engine.py",
+          "line": 79,
+          "end_line": 199,
+          "label": "start / next_turn"
+        },
+        {
+          "path": "apps/ai-service/app/agents/cv_parser.py",
+          "line": 89,
+          "end_line": 127
+        }
+      ]
+    },
+    {
+      "id": "planner",
+      "type": "backend",
+      "label": "Planner",
+      "sublabel": "agent",
+      "sources": [
+        {
+          "path": "apps/ai-service/app/agents/planner.py",
+          "line": 97,
+          "end_line": 136
+        }
+      ]
+    },
+    {
+      "id": "retr",
+      "type": "database",
+      "label": "RAG / ai_db",
+      "sublabel": "hybrid retriever + PG",
+      "sources": [
+        {
+          "path": "apps/ai-service/app/plan_snippets.py",
+          "line": 110,
+          "end_line": 161,
+          "label": "snippets + sources + bank, 5 s deadline"
+        },
+        {
+          "path": "apps/ai-service/app/turn_reference_snippets.py",
+          "line": 104,
+          "end_line": 126,
+          "label": "chunk theo lượt, hạn 1 s"
+        },
+        {
+          "path": "apps/ai-service/app/rag/retriever.py",
+          "line": 168,
+          "end_line": 188,
+          "label": "bank_for_topic"
+        }
+      ]
+    },
+    {
+      "id": "evaluator",
+      "type": "backend",
+      "label": "Evaluator",
+      "sublabel": "agent · prompt v4",
+      "sources": [
+        {
+          "path": "apps/ai-service/app/agents/evaluator.py",
+          "line": 136,
+          "end_line": 211,
+          "label": "postcheck + LLM call"
+        },
+        {
+          "path": "apps/ai-service/app/evaluator_source_checks.py",
+          "line": 35,
+          "end_line": 68,
+          "label": "kiểm source_ids"
+        },
+        {
+          "path": "apps/ai-service/app/evaluation_checks.py",
+          "line": 37,
+          "end_line": 56,
+          "label": "precheck_answer"
+        }
+      ]
+    },
+    {
+      "id": "interviewer",
+      "type": "backend",
+      "label": "Interviewer",
+      "sublabel": "+ QuestionStream",
+      "sources": [
+        {
+          "path": "apps/ai-service/app/question_stream.py",
+          "line": 43,
+          "end_line": 108
+        },
+        {
+          "path": "apps/ai-service/app/agents/interviewer.py",
+          "line": 50,
+          "end_line": 103
+        }
+      ]
+    },
+    {
+      "id": "reporter",
+      "type": "backend",
+      "label": "Reporter",
+      "sublabel": "agent · prompt v2",
+      "sources": [
+        {
+          "path": "apps/ai-service/app/agents/reporter.py",
+          "line": 115,
+          "end_line": 143
+        },
+        {
+          "path": "apps/ai-service/app/report_resources.py",
+          "line": 15,
+          "end_line": 41,
+          "label": "resource_catalog"
+        },
+        {
+          "path": "apps/ai-service/app/report_scoring.py",
+          "line": 57,
+          "end_line": 110
+        }
+      ]
+    },
+    {
+      "id": "gw",
+      "type": "cloud",
+      "label": "LlmGateway",
+      "sublabel": "→ OpenRouter",
+      "sources": [
+        {
+          "path": "apps/ai-service/app/llm/gateway.py",
+          "line": 47,
+          "end_line": 163
+        },
+        {
+          "path": "apps/ai-service/.env.example",
+          "line": 1,
+          "end_line": 8
+        },
+        {
+          "path": "apps/ai-service/app/tracing.py",
+          "line": 104,
+          "end_line": 141,
+          "label": "trace + generation lên Langfuse"
+        }
+      ]
+    }
+  ],
+  "segments": [
+    {
+      "from": 165,
+      "to": 300,
+      "label": "0 · Chuẩn bị: parse CV / JD"
+    },
+    {
+      "from": 360,
+      "to": 770,
+      "label": "1 · /api/start: lập plan + câu hỏi đầu"
+    },
+    {
+      "from": 820,
+      "to": 1302,
+      "label": "2 · /api/next-turn: lặp mỗi lượt"
+    },
+    {
+      "from": 1342,
+      "to": 1547,
+      "label": "3 · /api/finalize: báo cáo"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m1",
+      "from": "isvc",
+      "to": "orch",
+      "y": 180,
+      "label": "POST cv/parse + jd/parse"
+    },
+    {
+      "id": "m2",
+      "from": "orch",
+      "to": "gw",
+      "y": 210,
+      "label": "CV/JD Parser → LLM JSON",
+      "note": "che PII, cờ injection trước khi gửi"
+    },
+    {
+      "id": "m5",
+      "from": "orch",
+      "to": "isvc",
+      "y": 280,
+      "label": "cv_profile / jd_profile",
+      "variant": "return"
+    },
+    {
+      "id": "m6",
+      "from": "isvc",
+      "to": "orch",
+      "y": 375,
+      "label": "POST /api/start",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m7",
+      "from": "orch",
+      "to": "planner",
+      "y": 405,
+      "label": "plan(track, level, cv, jd)",
+      "note": "khung phase + số topic do code tính (plan_template)"
+    },
+    {
+      "id": "m8",
+      "from": "planner",
+      "to": "gw",
+      "y": 465,
+      "label": "LLM chọn topic, key_points"
+    },
+    {
+      "id": "m9",
+      "from": "planner",
+      "to": "orch",
+      "y": 495,
+      "label": "InterviewPlan",
+      "variant": "return",
+      "note": "sai 2 lần / lỗi → plan rule-based"
+    },
+    {
+      "id": "m10",
+      "from": "orch",
+      "to": "retr",
+      "y": 550,
+      "label": "snippets + bank_questions",
+      "note": "1 lần/phiên · topic_id + BM25 + vector gộp RRF · ≤3 câu/topic"
+    },
+    {
+      "id": "m11",
+      "from": "retr",
+      "to": "gw",
+      "y": 620,
+      "label": "rewrite + embed (hạn 3.5 s)",
+      "variant": "dashed"
+    },
+    {
+      "id": "m12",
+      "from": "retr",
+      "to": "orch",
+      "y": 650,
+      "label": "plan + snippets + nguồn + bank",
+      "variant": "return"
+    },
+    {
+      "id": "m13",
+      "from": "orch",
+      "to": "interviewer",
+      "y": 680,
+      "label": "QuestionSpec(ask_main)",
+      "note": "topic đầu = intro: hỏi dự án trong CV"
+    },
+    {
+      "id": "m14",
+      "from": "interviewer",
+      "to": "gw",
+      "y": 728,
+      "label": "stream"
+    },
+    {
+      "id": "m15",
+      "from": "orch",
+      "to": "isvc",
+      "y": 758,
+      "label": "SSE meta → token → done",
+      "variant": "return"
+    },
+    {
+      "id": "m16",
+      "from": "isvc",
+      "to": "orch",
+      "y": 855,
+      "label": "POST /api/next-turn",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m17",
+      "from": "orch",
+      "to": "retr",
+      "y": 885,
+      "label": "đáp án chuẩn | chunk theo lượt",
+      "note": "câu kho → answer_key; còn lại → BM25 (≤1 s)"
+    },
+    {
+      "id": "m18",
+      "from": "retr",
+      "to": "orch",
+      "y": 955,
+      "label": "đáp án chuẩn | ≤3 chunk + ref",
+      "variant": "return"
+    },
+    {
+      "id": "m19",
+      "from": "orch",
+      "to": "evaluator",
+      "y": 985,
+      "label": "evaluate(answer, key, chunks)",
+      "note": "precheck bằng code: manipulation / dont_know → 0 điểm, không gọi LLM"
+    },
+    {
+      "id": "m20",
+      "from": "evaluator",
+      "to": "gw",
+      "y": 1043,
+      "label": "LLM chấm bands + source_ids"
+    },
+    {
+      "id": "m21",
+      "from": "evaluator",
+      "to": "orch",
+      "y": 1073,
+      "label": "Evaluation",
+      "variant": "return",
+      "note": "bỏ id lạ; chỉ R bác bỏ mới chặn điểm; lưu sources"
+    },
+    {
+      "id": "m22",
+      "from": "orch",
+      "to": "interviewer",
+      "y": 1132,
+      "label": "QuestionSpec(action, focus)",
+      "note": "policy chọn follow_up / hint / next_topic; hint dùng đáp án chuẩn hoặc chunk cùng topic"
+    },
+    {
+      "id": "m23",
+      "from": "interviewer",
+      "to": "gw",
+      "y": 1202,
+      "label": "stream"
+    },
+    {
+      "id": "m24",
+      "from": "interviewer",
+      "to": "orch",
+      "y": 1232,
+      "label": "câu hỏi | câu dự phòng",
+      "variant": "return",
+      "note": "vi phạm (lặp, lộ điểm, quá dài) → replace"
+    },
+    {
+      "id": "m25",
+      "from": "orch",
+      "to": "isvc",
+      "y": 1290,
+      "label": "SSE token → done",
+      "variant": "return",
+      "note": "client ngắt → status=cancelled"
+    },
+    {
+      "id": "m26",
+      "from": "isvc",
+      "to": "orch",
+      "y": 1377,
+      "label": "POST /api/finalize",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m27",
+      "from": "orch",
+      "to": "reporter",
+      "y": 1407,
+      "label": "report(turns)",
+      "note": "điểm do code; tài liệu r1…: nguồn đã trích, bù nguồn topic"
+    },
+    {
+      "id": "m28",
+      "from": "reporter",
+      "to": "gw",
+      "y": 1455,
+      "label": "LLM viết nhận xét, chọn resource_ids"
+    },
+    {
+      "id": "m29",
+      "from": "reporter",
+      "to": "orch",
+      "y": 1485,
+      "label": "report",
+      "variant": "return",
+      "note": "code đổi id → {title, url}; LLM lỗi → partial"
+    },
+    {
+      "id": "m30",
+      "from": "orch",
+      "to": "isvc",
+      "y": 1533,
+      "label": "report JSON (200)",
+      "variant": "return"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Câu hỏi lấy từ đâu",
+      "items": [
+        "Câu chính topic technical: kho interview_qa (ai_db), Interviewer diễn đạt lại",
+        "Topic không có câu kho, intro, scenario: Interviewer tự đặt từ topic/key_points",
+        "Follow-up / hint / clarify: Interviewer sinh từ câu trả lời + focus của Evaluator",
+        "reference_snippets (lúc start) + chunk theo lượt: Evaluator đối chiếu, hint dùng chunk cùng topic"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Nguồn và tài liệu",
+      "items": [
+        "Evaluator v4 gán id S1…Sn (snippet topic, rồi chunk theo lượt) và R (đáp án chuẩn)",
+        "Evaluation.sources giữ ref bền (qa_id, tiêu đề, URL metadata DE)",
+        "Reporter v2 chỉ chọn id; URL do code tra, LLM không thấy URL"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Quan sát mỗi request",
+      "items": [
+        "Route mở trace Langfuse theo session_id; đóng khi stream xong hoặc client ngắt",
+        "Mỗi mũi tên tới LlmGateway là một generation (prompt, output, token), gửi nền, đã che PII",
+        "Log JSON không có nội dung; request_done có status, ms, token, trace id"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Bật / tắt",
+      "items": [
+        "AGENT_*_MODE mặc định mock: không gọi LLM",
+        "RAG_ENABLED mặc định true; lỗi → phiên chạy không RAG, metadata.rag = error | degraded",
+        "Start quá hạn → giữ topic đã xong; 3 request lỗi trong 2 phút → ngắt 60 s, next-turn còn BM25 + đáp án đã cache"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Kết thúc phiên",
+      "items": [
+        "Hết giờ / chạm turn cap → câu wrap_up",
+        "Quá hạn cứng (+3 phút) → end ngay",
+        "Ứng viên bấm kết thúc → interview-service gọi finalize"
+      ]
+    }
+  ]
+}
