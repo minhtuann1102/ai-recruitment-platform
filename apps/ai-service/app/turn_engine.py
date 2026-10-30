@@ -24,6 +24,7 @@ from .policy import Decision, decide
 from .rag.difficulty import difficulty_bucket
 from .rag.question_bank import kept_meaning, pick
 from .state_update import apply_action, record_evaluation
+from .tracing import observation
 from .time_budget import forced_transition, phase_deadline_s
 from .source_refs import title_of
 from .turn_reference_snippets import TurnChunks, turn_snippets
@@ -80,7 +81,9 @@ async def start_session(req: StartRequest, planner=None, collector: Optional[Usa
     """Planner (LLM hoac mock, co plan du phong) -> gan reference_snippets (RAG, neu bat) -> cau hoi dau."""
     planner = planner or get_planner()
     plan = await planner.plan(req.track, req.level, req.duration_minutes, req.cv_profile, req.jd_profile, collector)
-    plan = await attach_reference_snippets(plan, load_track(req.track), retriever or get_retriever(), collector)
+    with observation("rag_plan", "retriever", nest=True) as obs:
+        plan = await attach_reference_snippets(plan, load_track(req.track), retriever or get_retriever(), collector)
+        obs.update(output={t.id: [s.ref for s in t.reference_sources] for ph in plan.phases for t in ph.topics})
     topics = flat_topics(plan)
     lo, hi = LEVEL_CONFIG[req.level]["bounds"]
     first_phase, first = topics[0]
@@ -140,11 +143,13 @@ async def next_turn(req: NextTurnRequest, evaluator: Optional[Evaluator] = None,
     phase, topic = topics[pos]
 
     retriever = retriever or get_retriever()
-    key, extra = await asyncio.gather(  # Phase 02: chi mot trong hai chay (cau kho co dap an chuan thi bo qua)
-        _answer_key(retriever, state.current_qa_id, collector),
-        turn_snippets(retriever, req.track, phase=phase, topic=topic, difficulty=state.current_difficulty,
-                      question=req.question, answer=req.answer, has_answer_key=bool(state.current_qa_id),
-                      collector=collector))
+    with observation("rag_turn", "retriever", nest=True, input={"qa_id": state.current_qa_id}) as obs:
+        key, extra = await asyncio.gather(  # Phase 02: chi mot trong hai chay (cau kho co dap an chuan thi bo qua)
+            _answer_key(retriever, state.current_qa_id, collector),
+            turn_snippets(retriever, req.track, phase=phase, topic=topic, difficulty=state.current_difficulty,
+                          question=req.question, answer=req.answer, has_answer_key=bool(state.current_qa_id),
+                          collector=collector))
+        obs.update(output={"answer_key": bool(key), "chunks": [s.ref for s in extra.sources]})
     ev = await (evaluator or get_evaluator()).evaluate(EvaluationInput(
         level=req.level, phase=phase, topic=topic, difficulty=state.current_difficulty, turn_kind=req.turn_kind,
         turn_number=req.turn_number, question=req.question, answer=req.answer, topic_turns=req.topic_turns,

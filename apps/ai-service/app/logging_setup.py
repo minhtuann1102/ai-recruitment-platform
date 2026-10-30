@@ -24,9 +24,13 @@ _turn_number: ContextVar[Optional[int]] = ContextVar("log_turn_number", default=
 TEXT_FORMAT = "%(asctime)s %(levelname)s %(name)s [session=%(session_id)s turn=%(turn_number)s] %(message)s"
 
 
+def safe_session_id(session_id: Optional[str]) -> Optional[str]:
+    return _UNSAFE.sub("_", session_id)[:SESSION_CHARS] if session_id else None
+
+
 def bind_request(session_id: Optional[str], turn_number: Optional[int] = None) -> None:
     """Gan id phien / luot cho moi log trong request hien tai (task cua request, khong lan sang request khac)."""
-    _session_id.set(_UNSAFE.sub("_", session_id)[:SESSION_CHARS] if session_id else None)
+    _session_id.set(safe_session_id(session_id))
     _turn_number.set(turn_number)
 
 

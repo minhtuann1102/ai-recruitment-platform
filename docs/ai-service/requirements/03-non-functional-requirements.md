@@ -172,7 +172,7 @@ Lưu ý phương pháp:
 | ID | Yêu cầu | Chỉ tiêu | Căn cứ | Kiểm chứng | Nguồn |
 |---|---|---|---|---|---|
 | NFR-AI-OBS01 | Mỗi response `done` có `metadata`: token vào/ra từng agent, độ trễ (TTFT, tổng), phiên bản prompt, danh sách fallback | Đủ trường theo contract | Ràng buộc | T1 | D06 §7.4 |
-| NFR-AI-OBS02 | Log có cấu trúc kèm `session_id`, `turn_number`, agent; **không** có nội dung | Rà log; T1 `test_structured_logging.py` | Ràng buộc | Rev + T1 | D07 §8.6 |
+| NFR-AI-OBS02 | Log có cấu trúc kèm `session_id`, `turn_number`, agent; **không** có nội dung (trace Langfuse thì có, xem D07 §8.6) | Rà log; T1 `test_structured_logging.py` | Ràng buộc | Rev + T1 | D07 §8.6 |
 | NFR-AI-OBS03 | Theo dõi được TTFT P50 và P95, tỉ lệ fallback, lỗi format, chi phí mỗi phiên | Bảng tổng hợp từ `ai_meta` sau mỗi lần chạy T3 | Đề xuất | T3 | D09 §10.2 |
 | NFR-AI-OBS04 | Log similarity score và id chunk của mỗi lần truy xuất RAG để chọn ngưỡng dựa trên dữ liệu | Có trong log (`rag_retrieve topic=… hits=qa_id:score`, không log nội dung) | Đề xuất | Rev + T1 (`test_rag_retriever.py`) | rag-design §4 |
 | NFR-AI-OBS05 | **(GĐ2)** Log độ trễ theo thành phần mỗi lượt (hết lượt nói, STT, Evaluator, Interviewer, TTS) kèm `session_id`, không kèm nội dung | Có trong `metadata` hoặc log | Đề xuất | T3 | BRD D4 |

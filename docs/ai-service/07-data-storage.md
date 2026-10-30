@@ -158,7 +158,17 @@ Thời hạn là **đề xuất**, nhóm chốt cùng chính sách quyền riên
   - `LOG_LLM_IO=true` chỉ có tác dụng khi `APP_ENV` không phải staging / production (code bỏ qua cờ ở đó).
   - Env: `LOG_LEVEL` (mặc định `INFO`, sai thì `INFO` + cảnh báo), `LOG_FORMAT` = `json` (mặc định) | `text`
     (đọc trên máy dev). Log của uvicorn (access) giữ định dạng của uvicorn, không có `session_id`.
-- Debug nội dung: đọc từ `interview_db` (đã có kiểm soát truy cập), không bật log nội dung ở staging/production.
+- **Tracing Langfuse (2026-10-30, `app/tracing.py`, owner chốt có gửi nội dung):** mỗi request là một trace (`start`,
+  `next_turn`, `finalize`, `cv_parse`, `jd_parse`), gom theo `session_id`; mỗi lần gọi LLM là một generation (prompt đầy
+  đủ, output, model, token, `prompt_version`, TTFT của stream), embedding có input, `rag_plan` / `rag_turn` ghi id chunk.
+  - **Khác với log:** log vẫn không có nội dung; **Langfuse có** (prompt chứa CV đã redact, câu hỏi, câu trả lời, nhận
+    xét). `mask_pii` thay email, số điện thoại, URL trong mọi input / output trước khi rời service; tên hay chi tiết
+    khác ứng viên tự nói ra thì không che được.
+  - Bật bằng `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, `LANGFUSE_BASE_URL`; thiếu khóa hoặc
+    `LANGFUSE_TRACING_ENABLED=false` thì tắt hẳn (cũng là cách dừng gửi nội dung khẩn cấp). Environment lấy từ `APP_ENV`.
+  - Tùy chọn: SDK gửi nền theo lô, Langfuse lỗi không ảnh hưởng lượt phỏng vấn. Dòng `request_done` có `trace=<id>` để
+    từ log tìm ra trace. Evals gọi agent trực tiếp (ngoài request) không tạo trace.
+- Debug nội dung: đọc từ Langfuse hoặc `interview_db` (đã có kiểm soát truy cập), không bật log nội dung ở staging/production.
   Môi trường dev có thể bật `LOG_LLM_IO=true` (mặc định `false`).
 - Chi phí phiên = tổng `ai_meta.usage` × đơn giá (§9.4); cảnh báo khi phiên > $0.10 (S3-AIE-5).
 
