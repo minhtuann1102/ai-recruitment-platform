@@ -14,7 +14,7 @@ from .catalog.models import TrackCatalog
 from .llm.errors import ConfigError
 from .llm.usage import UsageCollector
 from .models_interview import BankQuestion, InterviewPlan, PlanTopic
-from .rag.circuit_breaker import SOFT_ERRORS, CircuitBreaker
+from .rag.circuit_breaker import SOFT_ERRORS, START_PARTIAL_ERROR, CircuitBreaker
 from .rag.factory import build_retriever
 from .rag.question_bank import plain
 from .rag.retriever import Retriever, build_query
@@ -22,14 +22,19 @@ from .rag.settings import load_rag_settings
 from .source_refs import source_ref
 
 log = logging.getLogger("ai_service.rag")
-SNIPPET_DEADLINE_S = 5.0  # do 24/10: binh thuong ~0.5 s (topic_id), co viet lai truy van ~2 s
+SNIPPET_DEADLINE_S = 5.0  # han chung luc start; do 30/10: viet lai truy van p50 4.4-6 s khi nhieu phien cung start
 _retriever: Optional[Retriever] = None
 _config_error: Optional[str] = None  # RAG bat nhung cau hinh sai: moi response bao loi nay trong metadata.rag
 _breaker = CircuitBreaker(60)  # thay bang RAG_COOLDOWN_S khi nap cau hinh
 _loaded = False
 RAG_ERROR_MESSAGE = "RAG lỗi, lượt này chạy không có dữ liệu tham chiếu từ kho"
-RAG_DEGRADED_MESSAGE = ("Một phần RAG lỗi (tìm từ khóa, vector hoặc truy hồi theo lượt), "
-                        "kết quả lấy từ phần còn chạy được")
+RAG_DEGRADED_MESSAGE = "Một phần RAG lỗi, kết quả lấy từ phần còn chạy được"
+
+
+def swallow_task_result(task: asyncio.Future) -> None:
+    """Done callback cua task bi bo lai: lay ket qua de asyncio khong bao 'exception was never retrieved'."""
+    if not task.cancelled():
+        task.exception()
 
 
 def _load() -> None:
@@ -51,6 +56,13 @@ def get_retriever() -> Optional[Retriever]:
     key_points)."""
     _load()
     return None if _breaker.is_open() else _retriever
+
+
+def memory_retriever() -> Optional[Retriever]:
+    """Retriever ca khi dang ngat, chi de dung phan trong bo nho (BM25, cache dap an): khong can ai_db, ma ngat vi
+    ai_db / embedding loi. RAG tat hoac cau hinh sai thi None."""
+    _load()
+    return _retriever
 
 
 async def warm_rag() -> None:
@@ -76,16 +88,15 @@ async def close_rag() -> None:
 
 
 def note_rag_errors(collector: Optional[UsageCollector]) -> None:
-    """Cuoi request: co loi RAG thi ngat RAG tam thoi (RAG_COOLDOWN_S) cho cac request sau."""
+    """Cuoi request: ghi loi RAG; lap lai trong thoi gian ngan thi ngat tam (RAG_COOLDOWN_S) cho cac request sau."""
     if collector is not None and collector.rag_errors:
-        _breaker.trip(collector.rag_errors)
+        _breaker.record(collector.rag_errors)
 
 
 def rag_status(collector: Optional[UsageCollector] = None) -> Dict:
-    """metadata.rag (start, next-turn) va /api/health: on | off (RAG_ENABLED=false) | degraded (mot duong hybrid
-    loi, van co ket qua) | error (cau hinh sai, dang
-    ngat tam sau loi, hoac ai_db loi / qua han trong request nay; phien van chay tiep khong co RAG). Khong chua noi
-    dung hay URL ket noi."""
+    """metadata.rag (start, next-turn) va /api/health: on | off (RAG_ENABLED=false) | degraded (mot phan RAG loi, van
+    co ket qua, ke ca luot chi dung phan trong bo nho luc dang ngat) | error (cau hinh sai, dang ngat tam, hoac ai_db
+    loi / qua han trong request nay; phien van chay tiep khong co RAG). Khong chua noi dung hay URL ket noi."""
     _load()
     if _config_error:
         return {"status": "error", "errors": ["rag_config_error"], "message": f"RAG đã tắt: {_config_error}"}
@@ -135,27 +146,43 @@ async def _bank(retriever: Retriever, phase: str, topic: PlanTopic, catalog: Tra
     return [BankQuestion(qa_id=e.qa_id, question=plain(e.question), difficulty=e.difficulty) for e in entries]
 
 
+async def _topic_references(retriever: Retriever, phase: str, topic: PlanTopic, catalog: TrackCatalog,
+                            collector: Optional[UsageCollector] = None):
+    return await asyncio.gather(_snippets(retriever, phase, topic, catalog, collector),
+                                _bank(retriever, phase, topic, catalog, collector))
+
+
 async def attach_reference_snippets(plan: InterviewPlan, catalog: TrackCatalog, retriever: Optional[Retriever],
                                     collector: Optional[UsageCollector] = None) -> InterviewPlan:
-    """Gan reference_snippets va bank_questions cho moi topic (chay song song, chung mot han)."""
+    """Gan reference_snippets va bank_questions cho moi topic (chay song song, chung mot han). Snippet chi gan luc
+    start, dung ca phien, nen qua han thi giu topic da xong; khong topic nao co ket qua moi la loi."""
     if retriever is None:
         return plan
-    pairs = [(ph, t) for ph in plan.phases for t in ph.topics]
-    try:
-        # han tong cho RAG luc start: tuy chon, qua han thi plan khong co snippet / cau tu kho (khong cham start)
-        results = await asyncio.wait_for(asyncio.gather(
-            asyncio.gather(*(_snippets(retriever, ph.phase, t, catalog, collector) for ph, t in pairs)),
-            asyncio.gather(*(_bank(retriever, ph.phase, t, catalog, collector) for ph, t in pairs))),
-            timeout=SNIPPET_DEADLINE_S)
-    except asyncio.TimeoutError:
-        log.warning("rag_snippets_timeout deadline_s=%s", SNIPPET_DEADLINE_S)
-        if collector is not None:
-            collector.rag_error("rag_timeout")
-        return plan
     out = plan.model_copy(deep=True)
-    flat = [t for ph in out.phases for t in ph.topics]
-    for topic, chunks, bank in zip(flat, *results):
+    flat = [(ph.phase, t) for ph in out.phases for t in ph.topics]
+    tasks = [asyncio.ensure_future(_topic_references(retriever, phase, t, catalog, collector)) for phase, t in flat]
+    try:
+        _, pending = await asyncio.wait(tasks, timeout=SNIPPET_DEADLINE_S)
+    finally:
+        for task in tasks:  # khong cho huy xong: huy truy van psycopg co the mat toi 5 s, giu start qua han
+            task.cancel()
+            task.add_done_callback(swallow_task_result)
+    found = 0
+    for task, (_, topic) in zip(tasks, flat):
+        if task in pending or task.cancelled():
+            continue
+        if task.exception() is not None:  # RAG tuy chon: mot topic loi khong lam hong topic khac hay ca start
+            log.warning("rag_topic_failed topic=%s error=%s", topic.catalog_ref, type(task.exception()).__name__)
+            if collector is not None:
+                collector.rag_error("rag_retrieve_failed")
+            continue
+        chunks, bank = task.result()
+        found += bool(chunks or bank)
         topic.reference_snippets = [c.content for c in chunks]
         topic.reference_sources = [source_ref(c) for c in chunks]
         topic.bank_questions = bank
-    return out
+    if pending:
+        log.warning("rag_snippets_timeout deadline_s=%s pending=%d found=%d", SNIPPET_DEADLINE_S, len(pending), found)
+        if collector is not None:
+            collector.rag_error(START_PARTIAL_ERROR if found else "rag_timeout")
+    return out if found or not pending else plan

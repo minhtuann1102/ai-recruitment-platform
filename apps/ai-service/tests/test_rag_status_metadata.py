@@ -67,7 +67,7 @@ def test_start_reports_rag_error_in_metadata_and_session_runs(monkeypatch):
 
 def test_breaker_skips_rag_after_error_then_retries(monkeypatch):
     clock, retriever = Clock(), object()
-    _set(monkeypatch, retriever=retriever, breaker=CircuitBreaker(60, clock))
+    _set(monkeypatch, retriever=retriever, breaker=CircuitBreaker(60, clock, threshold=1))
     collector = UsageCollector()
     collector.rag_error("rag_timeout")
     ps.note_rag_errors(collector)
@@ -80,7 +80,7 @@ def test_breaker_skips_rag_after_error_then_retries(monkeypatch):
 
 
 def test_breaker_disabled_with_zero_cooldown(monkeypatch):
-    _set(monkeypatch, retriever=object(), breaker=CircuitBreaker(0))
+    _set(monkeypatch, retriever=object(), breaker=CircuitBreaker(0, threshold=1))
     collector = UsageCollector()
     collector.rag_error("rag_bank_failed")
     ps.note_rag_errors(collector)
