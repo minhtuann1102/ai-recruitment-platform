@@ -43,15 +43,28 @@ Phân loại 66 ý `no_source` khác nhau ngoài `intro`:
 - Phiếu mỗi dòng đúng một tài liệu, id mờ, để số tài liệu và tên persona không lộ nhãn.
 - Review độc lập phát hiện phiếu `supported` có thể hiện tài liệu khác tài liệu judge xét, `triage` đếm trùng ý (75 → 66) và lỗi `triage` làm mất kết quả đã trả phí; đã sửa và chạy lại, số trên là của bản sửa.
 
+## So với nhãn LLM thứ hai (chưa phải nhãn người)
+AIE nhờ Claude (Fable 5.1, không xem kết quả judge) chấm 60 cặp của phiếu: `evals/support_labels/claude.json`. Đây là LLM so LLM, **không thay nhãn người**, chỉ để tìm hướng sửa judge.
+
+| | n | Đồng ý | Kappa | Dùng được |
+|---|---|---|---|---|
+| judge v1 vs `claude` | 60 | 0.70 | 0.40 | Không (ngưỡng 0.8 / 0.6) |
+
+Ma trận (`claude` → judge): ủng hộ→ủng hộ 23, không liên quan→không liên quan 19, **không liên quan→ủng hộ 10**, **ủng hộ→không liên quan 8**. Không bên nào dùng `contradicted`.
+- **10 ca judge dễ:** tài liệu chỉ nhắc tên khái niệm hoặc nói một phần (ý về unhandled rejection, tài liệu chỉ nói try/catch; ý phân biệt abstract class và interface, tài liệu nhắc hai chữ đó trong một dòng). Đây là chỗ prompt v2 cần siết.
+- **8 ca bị loại nhầm:** judge trả `entailed` đúng nhưng `doc_quote` chép lại lời ứng viên, không chép tài liệu, nên bước kiểm căn cứ hạ xuống `unrelated`. Bước kiểm làm đúng; prompt v2 phải ép chép từ tài liệu (thêm ví dụ sai/đúng). Nghĩa là số 0.60 đang thấp hơn thực tế, còn 0.79 cao hơn thực tế.
+- 14 cặp `claude` phân vân đều xoay quanh một quy tắc chưa chốt: ý chỉ nêu tên khái niệm thì tài liệu nhắc tên là đủ hay phải giải thích. Hướng dẫn chấm cho người cần nói rõ điểm này.
+
 ## Điều kiện dùng số
 `evals.support_set agree` cần đủ cả ba: ≥ 30 nhãn, đồng ý ≥ 0.8, kappa ≥ 0.6. Thêm kappa vì judge luôn trả một nhãn vẫn có thể đạt 0.8 trên mẫu lệch. Mẫu 45 `supported` và 15 `no_source` lấy trên ý khác nhau.
 
 Giới hạn: phiếu cho người xem một tài liệu (tài liệu judge đã dùng làm căn cứ, nếu có), judge xét cả lượt. Khi judge trả `unrelated` với ý có nhiều tài liệu, người không thấy các tài liệu còn lại, nên độ đồng ý có thể cao hơn thực tế ở nhóm này.
 
 ## Việc tiếp theo
-1. Người chấm 60 cặp (`support-sheet-261031.csv`), rồi `evals.support_set import --rater <tên>` và `agree`.
-2. Đạt thì ghi số `supported`. Không đạt thì sửa prompt judge (v2), trước hết phần `contradicted`.
+1. Judge prompt v2: ép `doc_quote` chép từ tài liệu (ví dụ), siết "nhắc tên chưa đủ", xem lại `contradicted`. Đo lại với `claude.json` trước, rồi mới nhờ người chấm.
+2. Người chấm 60 cặp (trang chấm riêng của AIE, hoặc `support-sheet-261031.csv`), rồi `evals.support_set import --rater <tên>` và `agree`. Hướng dẫn chấm cần chốt quy tắc ý chỉ nêu tên khái niệm.
 3. Sau khi có số: sửa cách Evaluator gán `support`, ưu tiên ý trích tài liệu không nói tới.
 
 ## Câu hỏi còn mở
-- Ai chấm 60 cặp: DE (đã chấm golden trước) hay AIE?
+- Ai chấm 60 cặp cho nhãn người: DE (đã chấm golden trước) hay AIE? AIE đã xem kết quả judge nên nhãn có thể lệch.
+- Ý chỉ nêu tên khái niệm ("Giải thích polymorphism"): tài liệu nhắc tên là `entailed` hay phải giải thích?
