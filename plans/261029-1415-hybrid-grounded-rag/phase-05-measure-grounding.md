@@ -85,7 +85,7 @@ golden có tài liệu (20 mẫu, có câu sai cố ý) ──► run_evaluator:
 - [x] Hiệu chỉnh judge với nhãn LLM thứ hai (v2 + repair: 0.85 / kappa 0.70)
 - [ ] *Tùy chọn, nếu kịp trước 06/12:* nhãn người 60 cặp, chạy lại `agree`
 - [x] Phân loại `no_source` (tạm, chờ hiệu chỉnh: `eval-261031-1700-judge-support.md`)
-- [ ] Golden có tài liệu 20 mẫu, chờ nhãn người; chỉ số support trong `run_evaluator`
+- [x] Golden có tài liệu 20 mẫu tự viết (`evals/evaluator_golden_sourced.jsonl`, `evals/run_evaluator_sourced.py`): `contradicted` qua R 0/9 vì model không cite R; tài liệu không liên quan vẫn `supported` 7/12 (`eval-261031-1730-evaluator-sourced-golden.md`)
 - [ ] Báo cáo, cập nhật `docs/ai-service/09`, review độc lập
 
 ## Success Criteria

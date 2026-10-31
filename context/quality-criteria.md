@@ -5,6 +5,7 @@
 | Bộ | Đo gì | Kích thước | Trạng thái |
 |---|---|---|---|
 | `evals/evaluator_golden.jsonl` | Evaluator chấm đúng band (mốc ±1 band ≥ 80%, tuần 09–15/11) | 48 mẫu (12 câu × 3 mức + 12 adversarial) | **Nhãn 1 người chấm** (`rater_a` = `final.json`, 43 mẫu, PR #46; nhãn người thứ hai bị loại vì không qua kiểm tra nội dung). Đã đo 2026-10-28, xem dưới |
+| `evals/evaluator_golden_sourced.jsonl` | Evaluator gán `support` đúng theo tài liệu (precision / recall từng nhãn) | 20 mẫu tự viết | AIE viết mẫu và nhãn kỳ vọng; v5: supported P 0.81, contradicted qua R 0/9, no_source bị cite 7/12 |
 | `evals/rag_golden.json` + `rag_golden_holdout.json` | Truy hồi đúng tài liệu (recall@5) | 24 + 32 truy vấn | AIE gán nhãn; **chưa có query nào được duyệt trên `main`** (PR #49 chưa merge). Số đo gần nhất đo trên nhánh PR #49 (2026-10-28): 1.000 / 0.906, xem báo cáo Phase 05 cho số held-out trên `main` |
 | `evals/question_golden.jsonl` | Câu hỏi của AI: đúng level, tự nhiên, đúng hành động (Q5) | 60 câu (mỗi level 6 ask_main, 4 follow_up, 4 hint, 1 wrap_up; 45 AI tự đặt, 15 từ kho) | Dựng 2026-10-24 từ `eval-sim-bank-after2` (Interviewer v2); **nhãn 1 người chấm** (`question_labels/rater_a.json`). Đã đo 2026-10-28 |
 
