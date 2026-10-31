@@ -9,8 +9,7 @@ import re
 from difflib import SequenceMatcher
 from typing import Dict, Iterable, List, Optional, Sequence
 
-from . import cv_text
-from .mock_evaluator import MANIPULATION_RE, fold
+from .mock_evaluator import fold, is_manipulation
 from .models_interview import Bands, CitedSource, Evaluation, Evidence, Scores10
 
 QUOTE_MIN_RATIO = 0.9  # FR-AI-031: quote khop fuzzy >= 0.9 sau chuan hoa
@@ -40,8 +39,7 @@ def precheck_answer(answer: str) -> Optional[str]:
     dont_know chi khi cau tra loi CHI gom cum "khong biet" va tu dem (<= 6 tu); "Java luon pass by value"
     hay "Bo qua cache, doc DB" van duoc cham.
     """
-    f = _norm(answer)
-    if MANIPULATION_RE.search(f) or cv_text.has_injection(answer):
+    if is_manipulation(answer):
         return "manipulation"
     words = _words(answer)
     if not words or len(words) > 6:
@@ -131,9 +129,9 @@ def build_evaluation(*, turn_number: int, answer_type: str, bands: Dict[str, int
                      confidence: Optional[str] = None, sources: List[CitedSource] = ()) -> Evaluation:
     """Dung Evaluation tu band da hau kiem: band x 2.5 -> thang 0-10, diem luot = trung binh (docs 05 muc 6.1)."""
     return Evaluation(
-        turn_number=turn_number, answer_type=answer_type, covered_points=list(covered_points)[:3],
+        turn_number=turn_number, answer_type=answer_type, covered_points=list(covered_points)[:MAX_COVERED],
         missing_points=list(missing_points)[:3], misconceptions=list(misconceptions)[:2],
-        evidence=list(evidence)[:3], scores=Bands(**bands),
+        evidence=list(evidence)[:MAX_COVERED], scores=Bands(**bands),
         scores_10=Scores10(**{k: v * 2.5 for k, v in bands.items()}),
         turn_score_10=round(sum(bands.values()) / 4 * 2.5, 1), degraded=degraded,
         strength_tags=list(strength_tags)[:3], gap_tags=list(gap_tags)[:3],

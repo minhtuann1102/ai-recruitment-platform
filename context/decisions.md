@@ -13,6 +13,7 @@ Nguồn chi tiết: `docs/ai-service/requirements/01-brd.md` §0.2 (D1–D12), �
 
 - **Ngân hàng câu hỏi từ kho (2026-10-24, PR #39):** giữ như hiện tại (`RAG_QUESTION_BANK` bật). Chưa chỉnh độ khó câu kho (vd hỏi cao hơn một bậc) cho đến khi golden set có người chấm.
 - **Ngôn ngữ (2026-10-24, PR #38):** câu tiếng Việt, giữ thuật ngữ tiếng Anh; không đổi prompt, chặn bằng code ở đầu ra.
+- **Chấm ngôn ngữ (2026-10-31, Evaluator v5):** câu trả lời tiếng Anh hoặc không dấu chấm như tiếng Việt, theo nhãn người; không trừ điểm giao tiếp.
 
 ## Mặc định của kế hoạch, chờ owner xác nhận
 - D7 JD vào Planner (không vào RAG); D8 voice tùy chọn A (theo `main`, DE sở hữu, TTS + STT bấm-để-nói); D9 phiên riêng tư; D10 6 track; D11 DE sở hữu đường ghi RAG, AIE đường đọc; D12 thời lượng 15–20 phút, mặc định 20, turn cap 16.

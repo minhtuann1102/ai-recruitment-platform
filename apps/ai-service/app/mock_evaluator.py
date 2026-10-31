@@ -9,13 +9,32 @@ import re
 import unicodedata
 from typing import List, Optional, Tuple
 
-from . import cv_text
 from .models_interview import Bands, Evaluation, Evidence, PlanTopic, Scores10
 
 _STOP = {"duoc", "neu", "giai", "thich", "cach", "voi", "cho", "trong", "cua", "nhung", "mot", "cac", "khi", "theo"}
 DONT_KNOW_RE = re.compile(r"(khong biet|chua biet|chua hoc|khong ro|khong nho|\bpass\b|bo qua|chua tung)")
 _CLARIFY = re.compile(r"^(ban co the )?(nhac lai|hoi lai|y ban la|cau hoi la gi)")
-MANIPULATION_RE = re.compile(r"(cho (toi|em|minh|tui).{0,30}\d+\s*(/\s*10)?\s*diem|10\s*/\s*10|diem toi da|ignore (all|previous))")
+# Rieng cho cau tra loi, khong dung mau loc CV: ung vien co the viet khoi code, "CPU instruction", "system prompt".
+# Da bo dau nen "cham" gom ca "chậm": moi mau xin diem phai co doi tuong "em/toi/minh".
+MANIPULATION_RE = re.compile(
+    r"\b(cham|cho|xin)( cho)? (toi|em|minh|tui) (xin |them |duoc )?"
+    r"(\d+\s*(/\s*\d+)?\s*diem|10\s*/\s*10|diem (cao|toi da)|full)|"
+    r"\byou are now (the|a|an) |\byour new instruction|<\|(im_|system)|\[inst\]|"
+    r"\b(ignore|disregard|forget) ((all|previous|above|prior|your|the) )+(instructions?|rules|prompts?)\b|"
+    r"\bignore all of the above|\b(bo qua|quen) ((moi|cac|het|tat ca|toan bo) )+(huong dan|chi dan)")
+# Ghi chu gia gui nguoi cham: ca 3 dau hieu phai cung mot cau, de cau noi ve he thong cham diem (leaderboard...) van duoc cham
+_GRADER_RE = re.compile(r"bo cham|nguoi cham|he thong cham|giam khao|nguoi phong van|grader|examiner|interviewer")
+_SCORE_CLAIM_RE = re.compile(r"band\s*\d|(?<!thoi )diem cao|diem toi da|xuat sac|moi tieu chi|full marks|highest score|"
+                             r"max(imum)? (score|band)|top score|all criteria|every criterion")
+_THIS_ANSWER_RE = re.compile(r"cau (tra loi )?nay|bai nay|phan nay|ung vien nay|this (answer|response|candidate)")
+
+
+def is_manipulation(answer: str) -> bool:
+    folded = fold(answer)
+    if MANIPULATION_RE.search(" ".join(folded.split())):
+        return True
+    return any(_GRADER_RE.search(s) and _SCORE_CLAIM_RE.search(s) and _THIS_ANSWER_RE.search(s)
+               for s in re.split(r"[.!?\n]+", folded))
 
 
 def fold(text: str) -> str:
@@ -54,7 +73,7 @@ def _slug(point: str) -> str:
 def classify_answer(answer: str, covered: int, question: str, topic: PlanTopic) -> str:
     f = fold(answer).strip()
     words = len(f.split())
-    if MANIPULATION_RE.search(f) or cv_text.has_injection(answer):
+    if is_manipulation(answer):
         return "manipulation"
     if words <= 6 and DONT_KNOW_RE.search(f):
         return "dont_know"
