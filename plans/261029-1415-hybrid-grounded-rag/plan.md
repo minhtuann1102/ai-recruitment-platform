@@ -1,6 +1,6 @@
 ---
 title: Hybrid RAG + chấm/hỏi có trích nguồn (kiểu NotebookLM) trên dữ liệu DE
-status: in-progress (Phase 01–03 xong, chờ Phase 04–05)
+status: in-progress (Phase 01–03 xong, Phase 05 đang làm, Phase 04 chờ DE)
 priority: P1
 created: 2026-10-29
 owner: AIE (thang)
@@ -29,11 +29,11 @@ branch: mỗi phase một nhánh, đã merge tới PR #56
 
 | # | Phase | Nội dung chính | Phụ thuộc | Trạng thái |
 |---|---|---|---|---|
-| 01 | [Hybrid retrieval](phase-01-hybrid-retrieval.md) | Chạy song song 3 đường: BM25 trong bộ nhớ (thay Postgres FTS, đo kém hơn vector), vector, và khớp `topic_id`. Gộp bằng RRF (k=60, từ khóa trọng số 0.5); `topic_id` chỉ để tăng điểm, không lọc cứng. Pool kết nối ai_db. Xếp hạng câu kho bằng điểm hybrid, thay cho đếm từ | Golden RAG (DE đã duyệt) | **Xong, merge PR #52** (MRR held-out 0.823 → 0.875) |
+| 01 | [Hybrid retrieval](phase-01-hybrid-retrieval.md) | Chạy song song 3 đường: BM25 trong bộ nhớ (thay Postgres FTS, đo kém hơn vector), vector, và khớp `topic_id`. Gộp bằng RRF (k=60, từ khóa trọng số 0.5); `topic_id` chỉ để tăng điểm, không lọc cứng. Pool kết nối ai_db. Xếp hạng câu kho bằng điểm hybrid, thay cho đếm từ | Golden RAG (DE duyệt ở PR #49, chưa merge) | **Xong, merge PR #52** (MRR held-out 0.823 → 0.875) |
 | 02 | [Truy hồi theo lượt](phase-02-per-turn-retrieval.md) | Mỗi `next-turn`: truy vấn = câu hỏi + ý chính của câu trả lời + `missing_points` → top 3–5 chunk cho Evaluator và cho follow-up/hint. Hạn 1.5 s, có cache. Lỗi thì đi qua `metadata.rag` và bộ ngắt | 01 | Xong, merge PR #53 (BM25 theo lượt + tăng điểm `topic_id`, hạn 1 s; không embed để giữ TTFT) |
 | 03 | Hợp đồng trích nguồn | Evaluator v4: mỗi ý covered có `source_ids` + `support` (`supported` / `contradicted` / `no_source`); code hậu kiểm id và quote; `no_source` thì giới hạn độ tin cậy. Interviewer: follow-up ghi `focus_source` (chunk/ý của đáp án). Reporter: điểm mạnh/lỗ hổng trích lượt + chunk; `study_plan.resources` lấy từ chunk được trích | 02 | 03a (Evaluator) xong, merge PR #55 ([phase-03a](phase-03a-evaluator-evidence-contract.md)); 03b (tham chiếu bền + `study_plan.resources`) xong, merge PR #56 ([phase-03b](phase-03b-report-sources.md)); `focus_source` để sau |
 | 04 | Dữ liệu DE | Cắt chunk > 4k ký tự; `interview_style`; gán lại topic; lọc license; câu `hard` cho senior; textbook cho scenario/system design | DE (Phase B `context/next-phase-plan.md`) | Cần DE xác nhận |
-| 05 | [Đo](phase-05-measure-grounding.md) | recall@k, MRR; tỉ lệ trích dẫn hợp lệ; độ hỗ trợ (LLM-judge hiệu chỉnh theo nhãn người); phân loại `no_source`; nhánh `contradicted` trên golden có tài liệu; Evaluator ±1 band so cùng lúc với v3; TTFT và chi phí | 01–03 | Chưa bắt đầu, chờ owner duyệt |
+| 05 | [Đo](phase-05-measure-grounding.md) | recall@k, MRR; tỉ lệ trích dẫn hợp lệ; độ hỗ trợ (LLM-judge hiệu chỉnh theo nhãn người); phân loại `no_source`; nhánh `contradicted` trên golden có tài liệu; Evaluator ±1 band so cùng lúc với v3; TTFT và chi phí | 01–03 | Đang làm, đo nền xong (PR #59) |
 
 Phase file viết just-in-time khi bắt đầu từng phase (`phase-0N-*.md`).
 
