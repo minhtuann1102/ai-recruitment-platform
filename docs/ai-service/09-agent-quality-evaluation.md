@@ -147,6 +147,8 @@ dễ hơn). Vì vậy **golden set có nhãn người (tầng 2) là thước đ
 
 **Golden có tài liệu (2026-10-31):** `python -m evals.run_evaluator_sourced --runs 3` chạy 20 mẫu tự viết có tài liệu kèm nhãn `support` kỳ vọng (10 supported, 6 contradicted, 4 no_source), đo output thô trước hậu kiểm. Evaluator v5: `supported` recall 1.0 / precision 0.81, `contradicted` precision 1.0 / recall 0.5 (qua snippet 9/9, qua đáp án chuẩn `R` 0/9 vì model không ghi `R` vào `source_ids`, nên luật chặn điểm khi R bác bỏ chưa từng kích hoạt), tài liệu không liên quan vẫn bị cite `supported` 7/12. Dùng làm hồi quy khi đổi prompt Evaluator. Báo cáo: `plans/reports/eval-261031-1730-evaluator-sourced-golden.md`.
 
+**Evaluator v6 (2026-10-31):** luật 12 bắt ghi `R` vào `source_ids` khi đáp án chuẩn xác nhận hay bác bỏ; golden có tài liệu: `contradicted` qua R 0/9 → 9/9, nên luật chặn điểm khi R bác bỏ lần đầu có hiệu lực. Điểm trên golden thường không đổi (±1 band 0.971 vs 0.969). Cite tài liệu không liên quan vẫn 8/12 ở mức model ghi, prompt không sửa được; v6 còn ghi `R` khi không có đáp án chuẩn (code bỏ, theo dõi qua `invented_source_id_values`). Báo cáo: `plans/reports/eval-261031-1800-evaluator-v6.md`.
+
 **Evaluator v5 (2026-10-31, 1 người chấm, golden 51 mẫu):** ±1 band 0.963, lệch −0.27, thứ tự 1.0, bắt injection 6/8; so cùng lúc với v4: 0.919, −0.467, 0.917, 6/8. Prompt được chỉnh trên chính golden này nên cần bộ held-out có nhãn. Báo cáo: `plans/reports/eval-261031-1456-evaluator-v5.md`.
 
 ## 10.3 Quy trình

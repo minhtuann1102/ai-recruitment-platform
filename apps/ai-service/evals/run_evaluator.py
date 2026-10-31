@@ -8,6 +8,7 @@ import argparse
 import asyncio
 import json
 import sys
+from collections import Counter
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List
@@ -44,7 +45,7 @@ async def run_all(samples: List[dict], runs: int, prompt: str, collector: UsageC
                 "degraded": ev.degraded, "llm": raw is not None, "quotes": len(quotes),
                 "valid_quotes": sum(quote_in_answer(q, s["answer"]) for q in quotes),
                 # golden khong co tai lieu: moi id deu la id la (v4 phai tra no_source, source_ids rong)
-                "source_ids": len(source_ids)}
+                "source_ids": len(source_ids), "source_id_values": source_ids}
 
     results: Dict[str, List[dict]] = {s["id"]: [] for s in samples}
     for r in range(runs):
@@ -105,6 +106,9 @@ def summarize(samples: List[dict], all_results: Dict[str, List[dict]], labels: D
         "manipulation_caught_by_llm": rate([ok for ok, runs in zip(caught, manip_runs) if runs and runs[0]["llm"]]),
         "evidence_valid": round(valid / quotes, 3) if quotes else None,
         "invented_source_ids": sum(r.get("source_ids", 0) for runs in results.values() for r in runs),
+        # chuoi id bia hay gap: "R" khi khong co dap an chuan, hay chu "no_source" ghi nham vao source_ids
+        "invented_source_id_values": dict(Counter(i for runs in results.values() for r in runs
+                                                  for i in r.get("source_id_values", [])).most_common(5)),
     }
 
 
