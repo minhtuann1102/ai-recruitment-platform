@@ -36,7 +36,7 @@ Xong khi: ai_db được index lại; harness + golden set chạy lại cho số
 Xong khi: harness full + golden set + judge đều đạt ngưỡng trong `context/quality-criteria.md`.
 
 ## Hybrid RAG và trích nguồn (bổ sung 2026-10-29, AIE)
-Kế hoạch riêng: `plans/261029-1415-hybrid-grounded-rag/plan.md`. Phase 01–03 đã merge (PR #52–#56), Phase 05 đang đo (`plans/reports/eval-261030-1640-phase-05-baseline.md`), Phase 04 phụ thuộc Phase B của DE.
+Kế hoạch riêng: `plans/261029-1415-hybrid-grounded-rag/plan.md`. Phase 01–03 đã merge (PR #52–#56), Phase 05 đang đo (`plans/reports/eval-261030-1640-phase-05-baseline.md`, `eval-261031-1700-judge-support.md`), chờ người chấm 60 cặp, Phase 04 phụ thuộc Phase B của DE.
 
 ## Phase D: dữ liệu ngoài kho Q&A (song song, DE)
 - JD thật (spec 009, đang Draft): cần cho JD Parser và khối `requirements` của báo cáo; tạo golden set JD → topic.

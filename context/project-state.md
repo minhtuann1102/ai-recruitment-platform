@@ -23,7 +23,7 @@ Sau khi sửa ngắt mạch (3 vòng, kể cả tải gấp đôi): RAG `error` 
 **TTFT trong các báo cáo trước 30/10 là tổng thời gian lượt**, không so trực tiếp với số trên.
 
 ## Đang làm
-- Kế hoạch `plans/261029-1415-hybrid-grounded-rag/`: Phase 01–03 xong (`focus_source` để sau), Phase 05 đang làm (đo nền xong; còn `judge_support`, phân loại `no_source`, golden có tài liệu cho `contradicted`), Phase 04 chờ DE.
+- Kế hoạch `plans/261029-1415-hybrid-grounded-rag/`: Phase 01–03 xong (`focus_source` để sau), Phase 05 đang làm (đo nền và `judge_support` v2 + repair xong; so nhãn LLM thứ hai đồng ý 0.85, kappa 0.70; `supported` đúng ~0.64, câu AI tự đặt 0.53, dưới ngưỡng 0.80; còn 60 nhãn người để chốt, golden có tài liệu cho `contradicted`), Phase 04 chờ DE.
 - Evaluator v5 (nhánh `thang/evaluator-v5`, 31/10): ±1 band 0.963, lệch −0.27, thứ tự 1.0, injection 6/8; so với v4 0.919, −0.467, 0.917, 6/8. Nhồi thuật ngữ a04 đã chặn bằng code (3.1–3.8). Còn lọt injection không từ khóa; mẫu không dấu a10 chưa ổn định. Báo cáo `plans/reports/eval-261031-1456-evaluator-v5.md`.
 - PR #49 (DE duyệt golden RAG): **chưa merge, đang conflict** ở `03-non-functional-requirements.md`; chờ DE duyệt lại g22/g24/h29/h30. Trên `main` chưa query nào có `approved_by`.
 

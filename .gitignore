@@ -38,3 +38,4 @@ plans/reports/*.json
 
 .archify
 .omc
+plans/reports/support-*.csv
