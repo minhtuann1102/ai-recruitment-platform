@@ -13,6 +13,7 @@ Nguồn chi tiết: `docs/ai-service/requirements/01-brd.md` §0.2 (D1–D12), �
 
 - **Ngân hàng câu hỏi từ kho (2026-10-24, PR #39):** giữ như hiện tại (`RAG_QUESTION_BANK` bật). Chưa chỉnh độ khó câu kho (vd hỏi cao hơn một bậc) cho đến khi golden set có người chấm.
 - **Ngôn ngữ (2026-10-24, PR #38):** câu tiếng Việt, giữ thuật ngữ tiếng Anh; không đổi prompt, chặn bằng code ở đầu ra.
+- **Hiệu chỉnh judge_support (2026-10-31):** số `supported` dùng judge v2 đã hiệu chỉnh với nhãn của Claude (Fable 5.1, `evals/support_labels/claude.json`), không chờ nhãn người; mọi báo cáo ghi rõ "hiệu chỉnh với LLM thứ hai, chưa với người". Nhãn người là tùy chọn nếu kịp trước 06/12.
 - **Chấm ngôn ngữ (2026-10-31, Evaluator v5):** câu trả lời tiếng Anh hoặc không dấu chấm như tiếng Việt, theo nhãn người; không trừ điểm giao tiếp.
 
 ## Mặc định của kế hoạch, chờ owner xác nhận

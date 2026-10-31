@@ -65,7 +65,8 @@ Ma trận bản chốt (`claude` → judge): ủng hộ→ủng hộ 27, không 
 Giới hạn: phiếu cho người xem một tài liệu (tài liệu judge đã dùng làm căn cứ, nếu có), judge xét cả lượt. Khi judge trả `unrelated` với ý có nhiều tài liệu, người không thấy các tài liệu còn lại, nên độ đồng ý có thể cao hơn thực tế ở nhóm này.
 
 ## Việc tiếp theo
-1. Người chấm 60 cặp (trang chấm riêng của AIE, hoặc `support-sheet-261031.csv`), rồi `evals.support_set import --rater <tên>` và `agree`. Hướng dẫn chấm cần chốt quy tắc ý chỉ nêu tên khái niệm.
+Owner chốt 31/10: hiệu chỉnh với LLM thứ hai là đủ cho đồ án, nhãn người là tùy chọn.
+1. *(Tùy chọn)* Người chấm 60 cặp (trang chấm riêng của AIE, hoặc `support-sheet-261031.csv`), rồi `evals.support_set import --rater <tên>` và `agree`. Hướng dẫn chấm cần chốt quy tắc ý chỉ nêu tên khái niệm.
 2. Đạt thì ghi số `supported`. Không đạt thì judge v3, trước hết phần ý mơ hồ và `contradicted`.
 3. Sau khi có số: sửa cách Evaluator gán `support`, ưu tiên ý trích tài liệu không nói tới, nhất là ở câu AI tự đặt.
 
