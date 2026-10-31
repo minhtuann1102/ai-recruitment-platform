@@ -2,15 +2,15 @@
 
 LLM chi de xuat; code quyet dinh: quote khong co trong cau tra loi thi y do bi xoa, completeness bi chan
 theo ti le key point co bang chung, misconception -> technical_accuracy <= 1, sau hint -> moi band <= 3,
-dont_know / manipulation -> moi band = 0, off_topic -> relevance = 0.
+dont_know / manipulation -> moi band = 0, off_topic -> relevance = 0, chi liet ke thuat ngu -> completeness va
+extensibility <= 1, relevance <= 2.
 """
 import math
 import re
 from difflib import SequenceMatcher
 from typing import Dict, Iterable, List, Optional, Sequence
 
-from . import cv_text
-from .mock_evaluator import MANIPULATION_RE, fold
+from .mock_evaluator import fold, is_manipulation
 from .models_interview import Bands, CitedSource, Evaluation, Evidence, Scores10
 
 QUOTE_MIN_RATIO = 0.9  # FR-AI-031: quote khop fuzzy >= 0.9 sau chuan hoa
@@ -18,6 +18,7 @@ QUOTE_MIN_WORDS = 3  # quote 1-2 tu ("Index", "khong") khong du lam bang chung c
 POINT_MIN_RATIO = 0.8  # y LLM ghi la covered phai gan trung mot key point moi tinh vao completeness
 MAX_COVERED = 4  # chan so y can kiem (moi y mot lan quet fuzzy) de khong chan event loop
 ZERO_TYPES = ("dont_know", "manipulation")
+TERM_LIST_MIN_ITEMS, TERM_MAX_WORDS, TERM_LIST_RATIO = 6, 3, 0.8  # luat 5: nhoi thuat ngu, khong co cau giai thich
 
 # Cum "khong biet" va tu dem; dont_know chi khi bo het nhung tu nay thi khong con gi (FR-AI-032)
 _DONT_KNOW_PHRASES = ("khong biet", "chua biet", "chua hoc", "khong ro", "khong nho", "chua tung hoc",
@@ -40,8 +41,7 @@ def precheck_answer(answer: str) -> Optional[str]:
     dont_know chi khi cau tra loi CHI gom cum "khong biet" va tu dem (<= 6 tu); "Java luon pass by value"
     hay "Bo qua cache, doc DB" van duoc cham.
     """
-    f = _norm(answer)
-    if MANIPULATION_RE.search(f) or cv_text.has_injection(answer):
+    if is_manipulation(answer):
         return "manipulation"
     words = _words(answer)
     if not words or len(words) > 6:
@@ -106,8 +106,15 @@ def matched_key_points(points: Sequence[str], key_points: Sequence[str]) -> int:
     return sum(1 for k in key_points if any(_similar(p, k) >= POINT_MIN_RATIO for p in points))
 
 
+def is_term_list(answer: str) -> bool:
+    """Cau tra loi chi liet ke ten: phan lon doan ngan cach boi dau phay chi 1-3 tu, khong co cau giai thich."""
+    items = [i for i in re.split(r"[,;\n]+", answer) if i.strip()]
+    short = sum(1 for i in items if len(i.split()) <= TERM_MAX_WORDS)
+    return len(items) >= TERM_LIST_MIN_ITEMS and short >= TERM_LIST_RATIO * len(items)
+
+
 def apply_caps(bands: Dict[str, int], *, answer_type: str, verified_key_points: int, total_key_points: int,
-               has_misconception: bool, turn_kind: str) -> Dict[str, int]:
+               has_misconception: bool, turn_kind: str, term_list: bool = False) -> Dict[str, int]:
     """Ap cac tran cua luat khat khe; tra ve dict band moi (khong sua dau vao)."""
     out = {k: max(0, min(4, int(v))) for k, v in bands.items()}
     if answer_type in ZERO_TYPES:
@@ -118,6 +125,9 @@ def apply_caps(bands: Dict[str, int], *, answer_type: str, verified_key_points: 
         out["completeness"] = min(out["completeness"], math.ceil(4 * verified_key_points / total_key_points))
     if has_misconception:
         out["technical_accuracy"] = min(out["technical_accuracy"], 1)
+    if term_list:
+        out = {**out, "completeness": min(out["completeness"], 1), "extensibility": min(out["extensibility"], 1),
+               "relevance": min(out["relevance"], 2)}
     if turn_kind == "hint":
         out = {k: min(v, 3) for k, v in out.items()}
     return out
@@ -131,9 +141,9 @@ def build_evaluation(*, turn_number: int, answer_type: str, bands: Dict[str, int
                      confidence: Optional[str] = None, sources: List[CitedSource] = ()) -> Evaluation:
     """Dung Evaluation tu band da hau kiem: band x 2.5 -> thang 0-10, diem luot = trung binh (docs 05 muc 6.1)."""
     return Evaluation(
-        turn_number=turn_number, answer_type=answer_type, covered_points=list(covered_points)[:3],
+        turn_number=turn_number, answer_type=answer_type, covered_points=list(covered_points)[:MAX_COVERED],
         missing_points=list(missing_points)[:3], misconceptions=list(misconceptions)[:2],
-        evidence=list(evidence)[:3], scores=Bands(**bands),
+        evidence=list(evidence)[:MAX_COVERED], scores=Bands(**bands),
         scores_10=Scores10(**{k: v * 2.5 for k, v in bands.items()}),
         turn_score_10=round(sum(bands.values()) / 4 * 2.5, 1), degraded=degraded,
         strength_tags=list(strength_tags)[:3], gap_tags=list(gap_tags)[:3],

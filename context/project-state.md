@@ -24,7 +24,7 @@ Sau khi sửa ngắt mạch (3 vòng, kể cả tải gấp đôi): RAG `error` 
 
 ## Đang làm
 - Kế hoạch `plans/261029-1415-hybrid-grounded-rag/`: Phase 01–03 xong (`focus_source` để sau), Phase 05 đang làm (đo nền xong; còn `judge_support`, phân loại `no_source`, golden có tài liệu cho `contradicted`), Phase 04 chờ DE.
-- Evaluator: v4 khớp ±1 band 0.919–0.922, lệch −0.47 so với v3 −0.34 đến −0.38 (khắt hơn có hệ thống). Đo lại 31/10 (`plans/reports/eval-261031-1422-evaluator-v3-v4-known-issues.md`): cả ba lỗi cũ vẫn còn trên v4 (injection lọt 3/5, a02 ghi chú giả được 5.0–5.6 điểm; trả lời tiếng Anh/không dấu bị trừ; `extensibility` câu strong kém hơn v3).
+- Evaluator v5 (nhánh `thang/evaluator-v5`, 31/10): ±1 band 0.963, lệch −0.27, thứ tự 1.0, injection 6/8; so với v4 0.919, −0.467, 0.917, 6/8. Nhồi thuật ngữ a04 đã chặn bằng code (3.1–3.8). Còn lọt injection không từ khóa; mẫu không dấu a10 chưa ổn định. Báo cáo `plans/reports/eval-261031-1456-evaluator-v5.md`.
 - PR #49 (DE duyệt golden RAG): **chưa merge, đang conflict** ở `03-non-functional-requirements.md`; chờ DE duyệt lại g22/g24/h29/h30. Trên `main` chưa query nào có `approved_by`.
 
 ## Mốc

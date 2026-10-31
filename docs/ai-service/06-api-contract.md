@@ -445,7 +445,7 @@ Event `done`:
 }
 ```
 
-`evaluation` (Evaluator v4, 2026-10-29, chỉ bổ sung): mỗi phần tử `evidence` có thêm `source_ids` (id tài liệu đối chiếu
+`evaluation` (từ Evaluator v5, `covered_points` và `evidence` tối đa 4 phần tử; Evaluator v4, 2026-10-29, chỉ bổ sung): mỗi phần tử `evidence` có thêm `source_ids` (id tài liệu đối chiếu
 trong lượt: `S1..Sn` snippet của topic rồi chunk theo lượt, `R` đáp án chuẩn) và `support` (`supported` /
 `contradicted` / `no_source`); `confidence` = `low` khi lượt có tài liệu nhưng không ý nào được tài liệu ủng hộ,
 `high` khi có, `null` khi không có tài liệu, không có ý nào, hoặc Evaluator v3 / mock. Id chỉ có nghĩa trong lượt đó.

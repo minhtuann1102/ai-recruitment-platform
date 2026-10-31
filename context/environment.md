@@ -3,6 +3,7 @@
 ## Chạy test
 - Local (Python 3.9, có sẵn venv): `cd apps/ai-service && .venv/bin/python -m pytest -q`
 - **Venv cục bộ Python 3.9 không cài được `requirements.txt` hiện tại** (`langfuse==5.0.4`, `psycopg-pool==3.3.3`, ghi nhận 2026-10-31): `import app` lỗi nếu chưa xử lý.
+- Không có Docker thì dựng Python 3.11 bằng `uv venv --python 3.11` rồi `uv pip install -r requirements-dev.txt`.
 - Đúng bản CI (Python 3.11) bằng Docker:
   `docker run --rm -v "$PWD":/w -w /w/apps/ai-service python:3.11-slim sh -c "pip install -q -r requirements-dev.txt && python -m pytest -q"`
 - Tài liệu: `python apps/ai-service/scripts/check_docs.py` (thoát 1 nếu lệch)

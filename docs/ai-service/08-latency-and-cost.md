@@ -46,7 +46,7 @@ regex (§4.5) bỏ qua Evaluator: ~1 s.
 
 | # | Kỹ thuật | Hiệu quả |
 |---|---|---|
-| 1 | **Evaluator output gọn**: không viết đoạn lập luận; giới hạn `covered ≤ 3`, `missing ≤ 3`, `misconceptions ≤ 2`, `evidence ≤ 3` (quote ≤ 100 ký tự); key JSON ngắn; `max_tokens = 300` (prompt v2: bỏ tag, quote 3–12 từ, `covered ≤ 3`, `missing ≤ 2`; tag do code sinh) | Output token quyết định latency; mục tiêu ~200 token. Đo 22/10 trước khi đổi: Evaluator P50 4.8 s |
+| 1 | **Evaluator output gọn**: không viết đoạn lập luận; giới hạn `covered ≤ 4` (v5), `missing ≤ 3`, `misconceptions ≤ 2`, `evidence ≤ 4` (quote ≤ 100 ký tự); key JSON ngắn; `max_tokens = 300` (prompt v2: bỏ tag, quote 3–12 từ, `covered ≤ 3`, `missing ≤ 2`; tag do code sinh) | Output token quyết định latency; mục tiêu ~200 token. Đo 22/10 trước khi đổi: Evaluator P50 4.8 s |
 | 2 | Evaluator chỉ nhận **lượt của topic hiện tại**, không cả transcript | Input nhỏ, ổn định ~2.5k token dù phiên dài |
 | 3 | **RAG lấy trước 1 lần lúc plan**, lưu `reference_snippets` trong plan | Bỏ ~0.3 s embed + query mỗi lượt |
 | 4 | **Prompt caching**: phần tĩnh (vai trò, rubric, few-shot) đặt đầu, ≥ 1024 token | Giảm TTFT và giá input (OpenAI cache tự động theo prefix; qua OpenRouter cần kiểm chứng) |

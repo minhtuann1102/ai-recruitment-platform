@@ -21,8 +21,8 @@ TOPIC = PlanTopic(id="t1", title="Database index", source="catalog", objective="
 ANSWER = "DB dùng B-tree nên không phải quét cả bảng. Nhưng insert sẽ chậm hơn vì phải cập nhật index."
 
 
-def inp(answer=ANSWER, turn_kind="main"):
-    return EvaluationInput(level="junior", phase="technical", topic=TOPIC, difficulty=2, turn_kind=turn_kind,
+def inp(answer=ANSWER, turn_kind="main", phase="technical"):
+    return EvaluationInput(level="junior", phase=phase, topic=TOPIC, difficulty=2, turn_kind=turn_kind,
                            turn_number=2, question="Index hoạt động thế nào?", answer=answer,
                            topic_turns=[TopicTurn(q="Q trước", a="A trước")])
 
@@ -60,7 +60,7 @@ def test_happy_path_keeps_verified_points_and_records_usage():
     ev = run(ev_agent.evaluate(inp(), col))
     assert ev.answer_type == "answered" and not ev.degraded
     assert ev.scores.completeness == 3 and len(ev.evidence) == 2  # ceil(4*2/3)=3, khong bi ha
-    assert col.records[0].agent == "evaluator" and col.records[0].prompt_version == "v4"
+    assert col.records[0].agent == "evaluator" and col.records[0].prompt_version == "v5"
     assert ev.strength_tags and all(" " not in t for t in ev.strength_tags)  # tag do code sinh tu y da kiem
     assert client.calls[0]["response_format"]["type"] == "json_schema"
 
@@ -118,7 +118,7 @@ def test_next_turn_route_uses_llm_evaluator_and_reports_usage(client, monkeypatc
             "state": done["state"], "turn_number": 1, "question": done["question"], "answer": ANSWER}
     nd = parse_sse(client.post("/api/next-turn", json=body).text)[-1][1]
     assert nd["evaluation"]["evidence"] and nd["metadata"]["usage"]["evaluator"]["input_tokens"] == 10
-    assert nd["metadata"]["prompt_versions"] == {"evaluator": "v4"}
+    assert nd["metadata"]["prompt_versions"] == {"evaluator": "v5"}
 
 
 def test_trivial_quotes_cannot_inflate_completeness():
@@ -137,3 +137,12 @@ def test_missing_api_key_degrades_instead_of_500(monkeypatch):
     col = UsageCollector()
     ev = run(evaluator_provider.get_evaluator().evaluate(inp(), col))
     assert ev.degraded and col.to_metadata()["fallbacks"] == ["evaluator_config_error"]
+
+
+def test_term_list_is_capped_outside_intro_only():
+    stack = "Spring Boot, PostgreSQL, Redis, Kafka, Docker, Kubernetes, Nginx"
+    scores = {"technical_accuracy": 3, "completeness": 3, "extensibility": 3, "relevance": 3}
+    ev = run(make([llm_json(covered=[], scores=scores)])[0].evaluate(inp(answer=stack, phase="technical")))
+    assert ev.scores.extensibility == 1 and ev.scores.relevance == 2
+    ev = run(make([llm_json(covered=[], scores=scores)])[0].evaluate(inp(answer=stack, phase="intro")))
+    assert ev.scores.extensibility == 3 and ev.scores.relevance == 3

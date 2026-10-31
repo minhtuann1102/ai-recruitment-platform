@@ -22,7 +22,7 @@ def test_defaults_and_flags():
 def test_agent_table_matches_design():
     llm = load_llm_settings(ENV)
     ev = agent_settings("evaluator", llm, {})
-    assert (ev.temperature, ev.max_tokens, ev.timeout_s, ev.seed, ev.retry_budget_s) == (0.0, 300, 8.0, 7, 10.0)
+    assert (ev.temperature, ev.max_tokens, ev.timeout_s, ev.seed, ev.retry_budget_s) == (0.0, 400, 8.0, 7, 10.0)
     iv = agent_settings("interviewer", llm, {})
     assert (iv.temperature, iv.max_tokens, iv.timeout_s) == (0.7, 200, 5.0)
     assert agent_settings("planner", llm, {}).max_tokens == 1500

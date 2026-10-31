@@ -16,8 +16,8 @@ from pydantic import BaseModel
 from .. import mock_evaluator
 from ..evaluator_source_checks import (SourcedPoint, check_sources, confidence, label, merge_misconceptions,
                                       refuted_by_reference, source_blocks)
-from ..evaluation_checks import (MAX_COVERED, apply_caps, build_evaluation, matched_key_points, precheck_answer,
-                                 quote_in_answer, slug_tags, supports_point, zero_evaluation)
+from ..evaluation_checks import (MAX_COVERED, apply_caps, build_evaluation, is_term_list, matched_key_points,
+                                 precheck_answer, quote_in_answer, slug_tags, supports_point, zero_evaluation)
 from ..llm.errors import ConfigError, LlmError
 from ..llm.gateway import LlmGateway
 from ..llm.usage import CallRecord, UsageCollector
@@ -162,7 +162,8 @@ def postcheck(out: EvaluatorOutput, inp: EvaluationInput) -> Evaluation:
         total_kp = len(inp.topic.key_points)
     bands = apply_caps(out.scores.model_dump(), answer_type=out.answer_type, verified_key_points=verified_kp,
                        total_key_points=total_kp, has_misconception=bool(misconceptions),
-                       turn_kind=inp.turn_kind)
+                       turn_kind=inp.turn_kind,
+                       term_list=inp.phase != "intro" and is_term_list(inp.answer))  # intro duoc liet ke stack
     return build_evaluation(
         turn_number=inp.turn_number, answer_type=out.answer_type, bands=bands,
         covered_points=[c.point for c in verified], missing_points=out.missing_points,
