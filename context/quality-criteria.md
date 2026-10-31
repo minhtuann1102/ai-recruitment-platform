@@ -1,20 +1,29 @@
-# Tiêu chí chất lượng và golden set (cập nhật 2026-10-28)
+# Tiêu chí chất lượng và golden set (cập nhật 2026-10-31)
 
 ## Golden set hiện có
 
 | Bộ | Đo gì | Kích thước | Trạng thái |
 |---|---|---|---|
 | `evals/evaluator_golden.jsonl` | Evaluator chấm đúng band (mốc ±1 band ≥ 80%, tuần 09–15/11) | 48 mẫu (12 câu × 3 mức + 12 adversarial) | **Nhãn 1 người chấm** (`rater_a` = `final.json`, 43 mẫu, PR #46; nhãn người thứ hai bị loại vì không qua kiểm tra nội dung). Đã đo 2026-10-28, xem dưới |
-| `evals/rag_golden.json` + `rag_golden_holdout.json` | Truy hồi đúng tài liệu (recall@5) | 24 + 32 truy vấn | AIE gán nhãn; **DE chưa duyệt**. Số đo: 1.000 / 0.938 (sau viết lại truy vấn) |
+| `evals/rag_golden.json` + `rag_golden_holdout.json` | Truy hồi đúng tài liệu (recall@5) | 24 + 32 truy vấn | AIE gán nhãn; **chưa có query nào được duyệt trên `main`** (PR #49 chưa merge). Số đo gần nhất đo trên nhánh PR #49 (2026-10-28): 1.000 / 0.906, xem báo cáo Phase 05 cho số held-out trên `main` |
 | `evals/question_golden.jsonl` | Câu hỏi của AI: đúng level, tự nhiên, đúng hành động (Q5) | 60 câu (mỗi level 6 ask_main, 4 follow_up, 4 hint, 1 wrap_up; 45 AI tự đặt, 15 từ kho) | Dựng 2026-10-24 từ `eval-sim-bank-after2` (Interviewer v2); **nhãn 1 người chấm** (`question_labels/rater_a.json`). Đã đo 2026-10-28 |
 
 ## Số đo với nhãn người (2026-10-28, 1 người chấm)
 
 Báo cáo: `plans/reports/eval-261028-2255-golden-rater-a.md`. Không có kappa (một người chấm).
 
-- **Evaluator v3:** ±1 band **0.932** (đạt mốc 80%), MAE 0.69, lệch khoan dung **−0.34** (khắt khe; ngưỡng ±0.3), `answer_type` 0.98, ổn định giữa 3 lần (std 0.05), bắt injection **2/5** (3 mẫu "ghi chú hệ thống / người phỏng vấn đã đồng ý" lọt nhưng điểm vẫn thấp). Lệch chính: `extensibility` của câu trả lời strong (2 so với 4), trả lời toàn tiếng Anh hoặc không dấu bị trừ điểm.
+- **Evaluator v3:** ±1 band **0.932** (đạt mốc 80%), MAE 0.69, lệch khoan dung **−0.34** (khắt khe; ngưỡng ±0.3), `answer_type` 0.98, ổn định giữa 3 lần (std 0.05), bắt injection **2/5** (3 mẫu "ghi chú hệ thống / người phỏng vấn đã đồng ý" lọt; 28/10 điểm thấp, nhưng đo lại 31/10 a02 được tới 8.8 ở v3, 5.0–5.6 ở v4). Lệch chính: `extensibility` của câu trả lời strong (2 so với 4), trả lời toàn tiếng Anh hoặc không dấu bị trừ điểm.
 - **Câu hỏi (người chấm, Interviewer v2):** hợp level **87%** (câu từ kho cũng 87%), tự nhiên **3.78/5**, đúng hành động 90% (hint **75%**).
 - **Judge v1 so với người:** level_fit đồng ý **0.70** (vừa ngưỡng; judge gán "quá dễ" cho 13 câu người thấy vừa), tự nhiên lệch ≤ 1: 0.93, action_ok 0.88. Con số "60% câu kho quá dễ" ngày 24/10 là do judge khắt khe, không phải do kho.
+
+## Evaluator v4 và độ bám nguồn (2026-10-29 đến 30)
+
+- **v4 so với v3 cùng lúc** (`plans/reports/eval-261029-1757-evaluator-v4-evidence-ab.md`, golden không có tài liệu): ±1 band 0.919–0.922 so với 0.919–0.930 (trong mức nhiễu); lệch khoan dung **−0.47** so với −0.34 đến −0.38 (khắt hơn có hệ thống); Evaluator chậm hơn 0.3–0.4 s, cộng thẳng vào TTFT.
+- **Ba lỗi cũ đo lại 31/10** (`plans/reports/eval-261031-1422-evaluator-v3-v4-known-issues.md`): v4 chưa sửa lỗi nào. ±1 band 0.921, lệch −0.45, injection 2/5, `extensibility` câu strong trong ±1 chỉ 0.33 (v3 0.58).
+- **Độ bám nguồn** (`plans/reports/eval-261030-1640-phase-05-baseline.md`): gộp 5 lần RAG sạch (345 ý ở `technical`) `no_source` **0.24**, dao động 0.10–0.35; câu kho supported 0.88, câu AI tự đặt 0.63. `intro` và `scenario` không có tài liệu nên không tính.
+- **Cách đọc số:** chỉ dùng số gộp nhiều vòng; lần chạy có `rag_health.error > 0` không dùng làm mốc; `supported` là LLM tự khai, chưa phải độ chính xác (cần `judge_support`). Mốc 53% `no_source` trong báo cáo 29/10 là sai (35/98 lượt RAG lỗi).
+- **`contradicted`:** `evidence` không chứa ý bị bác, nên đếm qua log `evaluator_sources` hoặc `evaluate_with_raw`. Có 1 ca chặn điểm oan do tài liệu cũ (trạng thái thread trong Java), cần đưa vào golden có tài liệu.
+- **TTFT:** số trước 30/10 là tổng thời gian lượt (ASGI in-process đệm body). Đo đúng phải dùng `--serve` hoặc `--base-url`. Hiện p50 3.57–4.06 s / p95 6.94–7.51 s, chưa đạt mốc 3.5 / 6 s; Evaluator chiếm phần lớn.
 
 ## Câu hỏi khớp trình độ ứng viên: hiện dựa vào gì
 

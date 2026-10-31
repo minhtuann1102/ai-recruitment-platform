@@ -20,4 +20,5 @@ Nguồn chi tiết: `docs/ai-service/requirements/01-brd.md` §0.2 (D1–D12), �
 ## Quy ước kỹ thuật đã chốt
 - LLM qua API OpenAI-compatible (OpenRouter), model mặc định `gpt-4o-mini`; embedding `text-embedding-3-small` 1536 chiều.
 - Điểm do code tổng hợp; Evaluator chấm mỗi lượt; ứng viên không thấy điểm giữa phiên (ADR-008).
+- RAG bật mặc định (PR #52): truy hồi kết hợp BM25 trong bộ nhớ, vector và tăng điểm `topic_id`, gộp bằng RRF; thiếu `AI_DB_URL` hay ai_db lỗi thì phiên chạy không có RAG.
 - Biên độ độ khó theo `docs/ai-service/01` §2.1 (Fresher 1–3, Junior 1–4, Middle 2–4, Senior 2–5); có test đối chiếu.

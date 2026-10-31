@@ -15,7 +15,7 @@ Cơ sở: `context/quality-criteria.md`, `context/de-data-assessment.md`, `plans
 3. LLM-judge cho Interviewer (Q5): hiệu chỉnh theo nhãn người ở bước 2 (đồng ý ≥ 0.7) rồi đưa vào harness.
 4. Chỉ số văn phong bằng code trong harness: tỉ lệ khuôn "Bạn có thể ... không?", độ dài, độ đa dạng mở đầu.
 Xong khi: có số đo thật cho Evaluator, level-fit và tự nhiên.
-**Tiến độ 2026-10-28:** đã đo với nhãn **1 người chấm** (người thứ hai bị loại): Evaluator ±1 band 0.932, câu hỏi hợp level 87%, judge level_fit 0.70; xem `context/quality-criteria.md`. Không có kappa.
+**Tiến độ 2026-10-28:** đã đo với nhãn **1 người chấm** (người thứ hai bị loại): Evaluator ±1 band 0.932, câu hỏi hợp level 87%, judge level_fit 0.70; xem `context/quality-criteria.md`. Không có kappa. Q2 còn mở nếu báo cáo cần kappa.
 
 ## Phase B: làm sạch dữ liệu DE (27/10 – 09/11, DE chính, AIE hỗ trợ công cụ)
 1. Giấy phép theo Q1 (DE lọc trong pipeline, ghi rõ trong NOTICE).
@@ -30,10 +30,13 @@ Xong khi: ai_db được index lại; harness + golden set chạy lại cho số
 1. Interviewer v3 (tự nhiên hơn): bỏ khuôn "Bạn có thể ... không?", ≤ 25 từ, mở đầu đa dạng; hint lấy từ đáp án chuẩn (gợi ý đúng câu đang hỏi, không đổi câu). **Xong 2026-10-28** (ba ngưỡng văn phong đạt; còn `follow_up` theo khuôn 68%).
 2. Follow-up theo đáp án chuẩn: focus lấy từ ý chính của đáp án mà ứng viên chưa nêu (Evaluator v3 đã trả `missing_points` theo đáp án).
 3. Planner chọn topic theo độ phủ kho ở level (tránh topic không có câu phù hợp level).
-4. Reporter: `study_plan.resources` = câu hỏi liên quan trong kho + nguồn (chỉ nguồn có giấy phép cho phép).
+4. Reporter: `study_plan.resources` = câu hỏi liên quan trong kho + nguồn (chỉ nguồn có giấy phép cho phép). **Xong phần lấy từ chunk được trích (PR #56);** lọc giấy phép chờ Q1.
 5. Scenario: DE thu thập tình huống / system design (vd system-design-primer, CC-BY) làm `textbook` → bật `RAG_TEXTBOOK_ENABLED`.
 6. Thử câu kho cao hơn một bậc (junior hỏi medium) **chỉ khi** golden set cho thấy chấm ổn (quyết định 2026-10-24).
 Xong khi: harness full + golden set + judge đều đạt ngưỡng trong `context/quality-criteria.md`.
+
+## Hybrid RAG và trích nguồn (bổ sung 2026-10-29, AIE)
+Kế hoạch riêng: `plans/261029-1415-hybrid-grounded-rag/plan.md`. Phase 01–03 đã merge (PR #52–#56), Phase 05 đang đo (`plans/reports/eval-261030-1640-phase-05-baseline.md`), Phase 04 phụ thuộc Phase B của DE.
 
 ## Phase D: dữ liệu ngoài kho Q&A (song song, DE)
 - JD thật (spec 009, đang Draft): cần cho JD Parser và khối `requirements` của báo cáo; tạo golden set JD → topic.
