@@ -32,7 +32,7 @@
 - `Evaluation.sources` map `S1..` / `R` → `ref` bền, nên file JSON mô phỏng + `get_pair_by_qa_id` đủ dựng cặp (ý, chunk) cho
   ý **đã trích**. Chunk **không được trích** trong lượt thì không có trong response: câu hỏi 2 cần ghi thêm ở harness.
 - Mô phỏng đã có `turn_kind`, `question_source`, `qa_id`, nên tách `no_source` theo loại lượt không tốn LLM.
-- Judge cùng họ model với agent nên có thể thiên vị: chưa hiệu chỉnh với nhãn người thì **không dùng làm số đo**.
+- Judge cùng họ model với agent nên có thể thiên vị. Owner chốt 2026-10-31: hiệu chỉnh bằng LLM mạnh hơn (Claude) là đủ cho đồ án; nhãn người là tùy chọn. Báo cáo phải ghi rõ "hiệu chỉnh với LLM thứ hai, chưa với người".
 
 ## Requirements
 - Chạy lại được bằng một lệnh, kết quả ghi vào `plans/reports/`, JSON gitignored.
@@ -81,8 +81,9 @@ golden có tài liệu (20 mẫu, có câu sai cố ý) ──► run_evaluator:
 - [x] Ghi tài liệu theo lượt trong harness, breakdown `grounding`, `rag_health`, `--serve`
 - [x] Đo nền trên main (bước 1)
 - [x] `judge_support` + prompt v2 + repair + test (`evals/judge_support.py`; hiệu chỉnh với nhãn LLM 0.85 / 0.70, chưa với người)
-- [ ] Phiếu 60 cặp đã xuất (`evals/support_set.py`), chờ nhãn người
-- [ ] Hiệu chỉnh judge với nhãn người
+- [x] Phiếu 60 cặp đã xuất (`evals/support_set.py`); Claude (Fable 5.1) chấm thay, `evals/support_labels/claude.json`
+- [x] Hiệu chỉnh judge với nhãn LLM thứ hai (v2 + repair: 0.85 / kappa 0.70)
+- [ ] *Tùy chọn, nếu kịp trước 06/12:* nhãn người 60 cặp, chạy lại `agree`
 - [x] Phân loại `no_source` (tạm, chờ hiệu chỉnh: `eval-261031-1700-judge-support.md`)
 - [ ] Golden có tài liệu 20 mẫu, chờ nhãn người; chỉ số support trong `run_evaluator`
 - [ ] Báo cáo, cập nhật `docs/ai-service/09`, review độc lập
