@@ -21,8 +21,8 @@ TOPIC = PlanTopic(id="t1", title="Database index", source="catalog", objective="
 ANSWER = "DB dùng B-tree nên không phải quét cả bảng. Nhưng insert sẽ chậm hơn vì phải cập nhật index."
 
 
-def inp(answer=ANSWER, turn_kind="main"):
-    return EvaluationInput(level="junior", phase="technical", topic=TOPIC, difficulty=2, turn_kind=turn_kind,
+def inp(answer=ANSWER, turn_kind="main", phase="technical"):
+    return EvaluationInput(level="junior", phase=phase, topic=TOPIC, difficulty=2, turn_kind=turn_kind,
                            turn_number=2, question="Index hoạt động thế nào?", answer=answer,
                            topic_turns=[TopicTurn(q="Q trước", a="A trước")])
 
@@ -137,3 +137,12 @@ def test_missing_api_key_degrades_instead_of_500(monkeypatch):
     col = UsageCollector()
     ev = run(evaluator_provider.get_evaluator().evaluate(inp(), col))
     assert ev.degraded and col.to_metadata()["fallbacks"] == ["evaluator_config_error"]
+
+
+def test_term_list_is_capped_outside_intro_only():
+    stack = "Spring Boot, PostgreSQL, Redis, Kafka, Docker, Kubernetes, Nginx"
+    scores = {"technical_accuracy": 3, "completeness": 3, "extensibility": 3, "relevance": 3}
+    ev = run(make([llm_json(covered=[], scores=scores)])[0].evaluate(inp(answer=stack, phase="technical")))
+    assert ev.scores.extensibility == 1 and ev.scores.relevance == 2
+    ev = run(make([llm_json(covered=[], scores=scores)])[0].evaluate(inp(answer=stack, phase="intro")))
+    assert ev.scores.extensibility == 3 and ev.scores.relevance == 3

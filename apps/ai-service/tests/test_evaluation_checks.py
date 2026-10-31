@@ -1,7 +1,7 @@
 """Luat hau kiem Evaluation bang code (FR-AI-031, 032): moi luat co it nhat mot test."""
 import pytest
 
-from app.evaluation_checks import (apply_caps, build_evaluation, matched_key_points, precheck_answer, supports_point,
+from app.evaluation_checks import (apply_caps, build_evaluation, is_term_list, matched_key_points, precheck_answer, supports_point,
                                    quote_in_answer, zero_evaluation)
 
 FULL = {"technical_accuracy": 4, "completeness": 4, "extensibility": 4, "relevance": 4}
@@ -152,3 +152,22 @@ def test_precheck_catches_notes_addressed_to_the_grader(answer):
 ])
 def test_precheck_keeps_answers_that_only_mention_grading(answer):
     assert precheck_answer(answer) is None
+
+
+TERM_LIST = "Cache-aside, write-through, TTL, LRU, cache stampede, mutex lock, SETNX, jitter, hot key, sharding."
+
+
+def test_term_list_caps_bands_set_by_the_llm():
+    caps = {"answer_type": "answered", "verified_key_points": 3, "total_key_points": 4, "has_misconception": False,
+            "turn_kind": "main"}
+    bands = {"technical_accuracy": 2, "completeness": 3, "extensibility": 2, "relevance": 3}
+    assert is_term_list(TERM_LIST)
+    assert apply_caps(bands, **caps, term_list=True) == {"technical_accuracy": 2, "completeness": 1,
+                                                         "extensibility": 1, "relevance": 2}
+    assert apply_caps(bands, **caps) == bands
+
+
+def test_explained_answer_with_many_commas_is_not_a_term_list():
+    assert not is_term_list("Đọc thì GET key, miss thì đọc DB, ghi lại cache kèm TTL, khi ghi thì update DB, "
+                            "sau đó DEL key, thêm jitter vào TTL để tránh stampede, chấp nhận cửa sổ dữ liệu cũ.")
+

@@ -23,7 +23,7 @@ Band 3 nghĩa là "đạt chuẩn của level đó". Cùng một câu trả lờ
 
 ## Luật khắt khe (code sẽ kiểm lại, vi phạm thì ý bị xóa)
 
-1. **Chỉ công nhận ý ứng viên nói rõ.** Mỗi mục trong `covered` phải có `quote` chép **nguyên văn** một đoạn ngắn (3 đến 12 từ) từ câu trả lời, nói đúng ý đó. Không suy diễn "chắc ứng viên biết". Không tìm được quote thì không đưa ý đó vào.
+1. **Chỉ công nhận ý ứng viên nói rõ.** Mỗi mục trong `covered` phải có `quote` chép **nguyên văn** một đoạn ngắn (3 đến 12 từ) từ câu trả lời, nói đúng ý đó. Không suy diễn "chắc ứng viên biết". Danh sách tên thuật ngữ không phải quote của một ý. Không tìm được quote thì không đưa ý đó vào.
 2. `covered[].point`: nếu ý khớp một key point thì **chép đúng câu chữ của key point đó** (kể cả khi ứng viên trả lời bằng tiếng Anh hay không dấu); ý đúng khác thì ghi ngắn gọn.
 3. `completeness` không được cao hơn tỉ lệ key_points có quote (khi có `reference_answer` thì theo luật 11).
 4. Có hiểu sai nghiêm trọng (ghi vào `misconceptions`) thì `technical_accuracy ≤ 1`.
