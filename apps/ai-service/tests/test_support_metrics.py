@@ -94,7 +94,17 @@ def test_failed_item_is_counted_separately_and_does_not_stop_the_run():
     items = [item("a"), item("b")]
     results = asyncio.run(judge_items(items, Gateway([verdict("entailed"), RuntimeError("x")])))
     assert rates(items, results) == {"n": 1, "failed": 1, "entailed": 1.0, "contradicted": 0.0, "unrelated": 0.0,
-                                     "raw_entailed": 1.0}
+                                     "repaired": 0, "raw_entailed": 1.0}
+
+
+def test_quote_copied_from_candidate_is_asked_again_once():
+    copied = verdict("entailed", quote="Redis nhanh vì RAM")
+    one = {**item("a"), "quote": "Redis nhanh vì RAM", "claim": "Redis nhanh"}
+    gateway = Gateway([copied, verdict("entailed")])
+    result = asyncio.run(judge_items([one], gateway))["a"]
+    assert result["verdict"] == "entailed" and result["repaired"] and result["first_verdict"] == "entailed"
+    gateway = Gateway([copied, copied])  # lan hai van chep -> unrelated, khong hoi them
+    assert asyncio.run(judge_items([one], gateway))["a"]["verdict"] == "unrelated" and not gateway.answers
 
 
 def test_triage_counts_a_repeated_point_once_and_contradicted_as_covered():

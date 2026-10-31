@@ -42,6 +42,10 @@ class SupportVerdict(BaseModel):
     reason: str
 
 
+REPAIR = ("`doc_quote` bạn vừa chép là lời ứng viên (`quote` / `claim`), không phải câu trong `documents`. Hãy tìm "
+          "trong `documents` câu nói đúng ý đó và chép nguyên văn vào `doc_quote`; không có câu nào thì trả `unrelated`.")
+
+
 def items_from_sessions(sessions: Dict[str, Dict], run: str = "") -> List[dict]:
     """`supported`: tai lieu da trich. `no_source`: moi tai lieu cua luot; luot khong co tai lieu van giu de tim toan kho
     (y o intro la chuyen du an cua ung vien, kho khong the co nen `triage` bo qua)."""
@@ -100,16 +104,31 @@ def checked(item: dict, out: SupportVerdict) -> dict:
     return {**out.model_dump(), "raw_verdict": out.verdict, "verdict": verdict, "doc_id": best["id"] if valid else None}
 
 
-async def judge_items(items: List[dict], gateway=None, concurrency: int = 6) -> Dict[str, dict]:
+def copied_candidate(item: dict, result: dict) -> bool:
+    """`doc_quote` chep lai loi ung vien: 100% doan bi loai o lan do dau deu thuoc dang nay, prompt khong sua duoc."""
+    return (result["raw_verdict"] in COVERED and result["verdict"] == "unrelated"
+            and coverage(result["doc_quote"], item["quote"] + " " + item["claim"]) >= QUOTE_COVERAGE)
+
+
+async def judge_items(items: List[dict], gateway=None, concurrency: int = 6,
+                      prompt_version: Optional[str] = None) -> Dict[str, dict]:
     """Loi mot muc (het retry) -> verdict None, khong bo ca lan chay da tra phi."""
-    gateway, prompt, sem = gateway or get_gateway(), PROMPTS.get("judge_support"), asyncio.Semaphore(concurrency)
+    gateway, sem = gateway or get_gateway(), asyncio.Semaphore(concurrency)
+    prompt = PROMPTS.get("judge_support", prompt_version)
 
     async def one(item):
+        """Sua mot lan khi judge chep loi ung vien lam can cu; ket qua lan hai la ket qua cuoi (`repaired`)."""
         try:
             async with sem:
-                result = await gateway.complete("judge", build_messages(item, prompt.text), SupportVerdict,
-                                                prompt_version=prompt.version)
-            return item["id"], checked(item, result.data)
+                messages = build_messages(item, prompt.text)
+                first = await gateway.complete("judge", messages, SupportVerdict, prompt_version=prompt.version)
+                result = checked(item, first.data)
+                if copied_candidate(item, result):
+                    messages += [{"role": "assistant", "content": first.data.model_dump_json()},
+                                 {"role": "user", "content": REPAIR}]
+                    second = await gateway.complete("judge", messages, SupportVerdict, prompt_version=prompt.version)
+                    result = {**checked(item, second.data), "repaired": True, "first_verdict": first.data.verdict}
+            return item["id"], result
         except Exception as err:
             return item["id"], {"verdict": None, "raw_verdict": None, "doc_id": None, "reason": type(err).__name__}
 
@@ -123,10 +142,12 @@ def rates(items: List[dict], results: Dict[str, dict]) -> Dict:
     counts = Counter(r["verdict"] for r in done)
     return {"n": len(done), "failed": len(judged) - len(done),
             **{v: round(counts[v] / len(done), 3) if done else None for v in VERDICTS},
+            "repaired": sum(bool(r.get("repaired")) for r in done),
             "raw_entailed": round(sum(r["raw_verdict"] == "entailed" for r in done) / len(done), 3) if done else None}
 
 
-async def triage(items: List[dict], results: Dict[str, dict], search: Search, gateway=None) -> Dict:
+async def triage(items: List[dict], results: Dict[str, dict], search: Search, gateway=None,
+                 prompt_version: Optional[str] = None) -> Dict:
     """Y `no_source` khac nhau ngoai intro -> not_cited (tai lieu cua luot co noi toi), retrieval_miss (chi tim toan kho
     moi thay), corpus_gap (toan kho khong thay; la can tren vi tim toan kho cung co the truot), unknown (judge / tim loi).
     `contradicted` cung tinh la co noi toi: kho phu y do, chi la judge thay nguoc chieu."""
@@ -148,7 +169,7 @@ async def triage(items: List[dict], results: Dict[str, dict], search: Search, ga
     outcome.update({i["id"]: "corpus_gap" for i, chunks in found if chunks == []})
     searched = [{**i, "docs": [{"id": f"K{n}", "text": c[:MAX_DOC_CHARS]} for n, c in enumerate(chunks, 1)]}
                 for i, chunks in found if chunks]
-    corpus = await judge_items(searched, gateway)
+    corpus = await judge_items(searched, gateway, prompt_version=prompt_version)
     for key, r in corpus.items():
         outcome[key] = ("unknown" if not r["verdict"] else "retrieval_miss" if r["verdict"] in COVERED else "corpus_gap")
     by_item = {i["id"]: i for i in missing}
@@ -174,6 +195,7 @@ def main() -> None:
     parser.add_argument("runs", nargs="+", type=Path, help="file phien gia lap co `documents`")
     parser.add_argument("--control", action="store_true", help="doi chung: y ghep tai lieu cua topic khac")
     parser.add_argument("--triage", action="store_true", help="phan loai no_source, can ai_db")
+    parser.add_argument("--prompt", default=None, help="vd v1; mac dinh ban moi nhat")
     parser.add_argument("--out", type=Path)
     args = parser.parse_args()
     items = [i for run in args.runs
@@ -186,11 +208,11 @@ def main() -> None:
 
     async def run() -> dict:
         judged = [i for i in items if i["docs"]]
-        results = await judge_items(judged)
+        results = await judge_items(judged, prompt_version=args.prompt)
         by = lambda key, group: {v: rates([i for i in group if i[key] == v], results)  # noqa: E731
                                  for v in sorted({i[key] for i in group})}
         supported = [i for i in judged if i["support"] == "supported"]
-        report = {"runs": [r.stem for r in args.runs], "prompt": PROMPTS.get("judge_support").version,
+        report = {"runs": [r.stem for r in args.runs], "prompt": PROMPTS.get("judge_support", args.prompt).version,
                   "uncalibrated": True, "by_support": by("support", judged),
                   "by_support_unique": by("support", unique(judged)),
                   "supported_by_question_source": by("question_source", supported),
@@ -199,13 +221,14 @@ def main() -> None:
         save(report)  # moi buoc ghi ngay: buoc sau loi khong mat ket qua da tra phi
         if args.control:
             controls = control_items(items)
-            report["control"] = {**rates(controls, c := await judge_items(controls)), "results": c}
+            c = await judge_items(controls, prompt_version=args.prompt)
+            report["control"] = {**rates(controls, c), "results": c}
             save(report)
         if args.triage:
             try:
                 retriever = memory_retriever()
                 await retriever.hybrid.bm25.index()  # nap corpus truoc: tim co gioi han RESOLVE_BUDGET_S se tinh la loi
-                report["triage"] = await triage(items, results, corpus_search(retriever))
+                report["triage"] = await triage(items, results, corpus_search(retriever), prompt_version=args.prompt)
             except Exception as err:  # RAG tat (retriever None) hay khong nap duoc corpus
                 report["triage"] = {"error": repr(err)}
         return report

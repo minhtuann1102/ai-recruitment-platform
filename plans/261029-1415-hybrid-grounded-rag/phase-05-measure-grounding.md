@@ -80,7 +80,7 @@ golden có tài liệu (20 mẫu, có câu sai cố ý) ──► run_evaluator:
 ## Todo List
 - [x] Ghi tài liệu theo lượt trong harness, breakdown `grounding`, `rag_health`, `--serve`
 - [x] Đo nền trên main (bước 1)
-- [x] `judge_support` + prompt + test (`evals/judge_support.py`, chưa hiệu chỉnh)
+- [x] `judge_support` + prompt v2 + repair + test (`evals/judge_support.py`; hiệu chỉnh với nhãn LLM 0.85 / 0.70, chưa với người)
 - [ ] Phiếu 60 cặp đã xuất (`evals/support_set.py`), chờ nhãn người
 - [ ] Hiệu chỉnh judge với nhãn người
 - [x] Phân loại `no_source` (tạm, chờ hiệu chỉnh: `eval-261031-1700-judge-support.md`)
