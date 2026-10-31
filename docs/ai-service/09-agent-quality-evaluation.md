@@ -143,6 +143,8 @@ dễ hơn). Vì vậy **golden set có nhãn người (tầng 2) là thước đ
 
 **Đo độ bám nguồn (2026-10-30, Phase 05):** `python -m evals.simulate --serve` chạy service qua socket trong cùng tiến trình: TTFT đo thật (in-process, ASGI đệm cả body nên `ttft_s` bằng tổng thời gian lượt), có lifespan, và mỗi lượt có `documents` (mọi tài liệu Evaluator thấy, `evals/turn_source_recorder.py`). Báo cáo có `grounding_breakdown` (theo phase, loại lượt, nguồn câu hỏi; `no_source` ở lượt có / không có tài liệu) và `rag_health` (số request theo `metadata.rag.status`). Lần chạy có `rag_health.error > 0` không dùng làm mốc. `no_source` đọc riêng ở `technical`: intro và scenario hiện không có tài liệu. Ý bị tài liệu bác bỏ không nằm trong `evidence` (bị bỏ khỏi covered): đếm qua `contradicted_sources` (cận dưới) hoặc log `evaluator_sources`.
 
+**`judge_support` (2026-10-31, chưa hiệu chỉnh):** `python -m evals.judge_support <file eval-sim> --control --triage` xét từng ý `supported` / `no_source` với tài liệu đã thấy, judge phải chép đoạn căn cứ và code kiểm đoạn đó có trong tài liệu. `python -m evals.support_set export|import|agree` tạo phiếu 60 cặp cho người chấm. Trên 3 vòng v5: `supported` đúng 0.60 (đã kiểm căn cứ) đến 0.79 (chưa kiểm), ngưỡng 0.80; 66 ý `no_source` khác nhau có 40 `corpus_gap` (cận trên), 16 `retrieval_miss`, 10 không trích. Chỉ ghi số sau khi đồng ý với người ≥ 0.8 và kappa ≥ 0.6. Báo cáo: `plans/reports/eval-261031-1700-judge-support.md`.
+
 **Evaluator v5 (2026-10-31, 1 người chấm, golden 51 mẫu):** ±1 band 0.963, lệch −0.27, thứ tự 1.0, bắt injection 6/8; so cùng lúc với v4: 0.919, −0.467, 0.917, 6/8. Prompt được chỉnh trên chính golden này nên cần bộ held-out có nhãn. Báo cáo: `plans/reports/eval-261031-1456-evaluator-v5.md`.
 
 ## 10.3 Quy trình

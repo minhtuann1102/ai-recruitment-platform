@@ -80,10 +80,10 @@ golden có tài liệu (20 mẫu, có câu sai cố ý) ──► run_evaluator:
 ## Todo List
 - [x] Ghi tài liệu theo lượt trong harness, breakdown `grounding`, `rag_health`, `--serve`
 - [x] Đo nền trên main (bước 1)
-- [ ] `judge_support` + prompt + test (mẫu hỏng, id không map được, chunk đã xóa khỏi kho)
-- [ ] Phiếu 60 cặp, chờ nhãn người
+- [x] `judge_support` + prompt + test (`evals/judge_support.py`, chưa hiệu chỉnh)
+- [ ] Phiếu 60 cặp đã xuất (`evals/support_set.py`), chờ nhãn người
 - [ ] Hiệu chỉnh judge với nhãn người
-- [ ] Phân loại `no_source`
+- [x] Phân loại `no_source` (tạm, chờ hiệu chỉnh: `eval-261031-1700-judge-support.md`)
 - [ ] Golden có tài liệu 20 mẫu, chờ nhãn người; chỉ số support trong `run_evaluator`
 - [ ] Báo cáo, cập nhật `docs/ai-service/09`, review độc lập
 
