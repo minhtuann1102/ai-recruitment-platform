@@ -16,6 +16,7 @@ Cơ sở: `context/quality-criteria.md`, `context/de-data-assessment.md`, `plans
 4. Chỉ số văn phong bằng code trong harness: tỉ lệ khuôn "Bạn có thể ... không?", độ dài, độ đa dạng mở đầu.
 Xong khi: có số đo thật cho Evaluator, level-fit và tự nhiên.
 **Tiến độ 2026-10-28:** đã đo với nhãn **1 người chấm** (người thứ hai bị loại): Evaluator ±1 band 0.932, câu hỏi hợp level 87%, judge level_fit 0.70; xem `context/quality-criteria.md`. Không có kappa. Q2 còn mở nếu báo cáo cần kappa.
+**Xong 2026-11-02 (owner chốt):** tiêu chí "có số đo thật" đã đạt, gồm Evaluator ±1 band 0.961 (v6), hợp level 87%, tự nhiên 3.78/5 (nhãn người, Interviewer v2). Phase A chỉ yêu cầu có số đo, không yêu cầu đạt ngưỡng: tự nhiên vẫn dưới đích 4.0 và chưa đo lại bằng nhãn người trên v3, đích κ ≥ 0.6 chưa đo được vì chỉ có 1 người chấm.
 
 ## Phase B: làm sạch dữ liệu DE (27/10 – 09/11, DE chính, AIE hỗ trợ công cụ)
 1. Giấy phép theo Q1 (DE lọc trong pipeline, ghi rõ trong NOTICE).
@@ -27,7 +28,7 @@ Xong khi: có số đo thật cho Evaluator, level-fit và tự nhiên.
 Xong khi: ai_db được index lại; harness + golden set chạy lại cho số đo trước/sau.
 
 ## Phase C: AIE tận dụng kho đã làm sạch (03/11 – 22/11)
-1. Interviewer v3 (tự nhiên hơn): bỏ khuôn "Bạn có thể ... không?", ≤ 25 từ, mở đầu đa dạng; hint lấy từ đáp án chuẩn (gợi ý đúng câu đang hỏi, không đổi câu). **Xong 2026-10-28** (ba ngưỡng văn phong đạt; còn `follow_up` theo khuôn 68%).
+1. Interviewer v3 (tự nhiên hơn): bỏ khuôn "Bạn có thể ... không?", ≤ 25 từ, mở đầu đa dạng; hint lấy từ đáp án chuẩn (gợi ý đúng câu đang hỏi, không đổi câu). **Xong 2026-10-28** (ba ngưỡng văn phong đạt; còn `follow_up` theo khuôn 68%). v4 ngày 02/11: khuôn 8.6%, hint đúng hành động 88% theo Fable, chưa có nhãn người.
 2. Follow-up theo đáp án chuẩn: focus lấy từ ý chính của đáp án mà ứng viên chưa nêu (Evaluator v3 đã trả `missing_points` theo đáp án).
 3. Planner chọn topic theo độ phủ kho ở level (tránh topic không có câu phù hợp level).
 4. Reporter: `study_plan.resources` = câu hỏi liên quan trong kho + nguồn (chỉ nguồn có giấy phép cho phép). **Xong phần lấy từ chunk được trích (PR #56);** lọc giấy phép chờ Q1.
@@ -46,7 +47,7 @@ Kế hoạch riêng: `plans/261029-1415-hybrid-grounded-rag/plan.md`. Phase 01�
 | Ngày | Mốc |
 |---|---|
 | 27/10 | Chốt Q1–Q3 |
-| 07/11 | Phase A xong: có số đo Evaluator, level-fit, tự nhiên |
+| 07/11 | Phase A xong: có số đo Evaluator, level-fit, tự nhiên. **Đạt 02/11** |
 | 09/11 | Phase B xong, ai_db index lại |
 | 09–15/11 | Mốc Evaluator ±1 band ≥ 80% |
 | 22/11 | Phase C xong; gate voice |

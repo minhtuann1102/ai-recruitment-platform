@@ -367,6 +367,12 @@ trùng. Lượt `hint` giữ nguyên câu đang hỏi và nhận thêm `referenc
 lấy từ kho, khối untrusted, chỉ gửi cho `hint`) để chọn hướng gợi ý; code chặn gợi ý chép ≥ 6 chữ liền từ đáp án
 (`violation` → `answer_leak`, thay bằng câu dự phòng). Có `bank_question` thì `topic` chỉ gửi `title` (bỏ `opening_hint`, `objective`) để Interviewer không bỏ câu kho; `kept_meaning` bỏ từ khuôn câu hỏi khi so. Số đo trước/sau: `plans/reports/eval-261028-2306-interviewer-v3.md`.
 
+**Prompt v4 (2026-11-02, `interviewer.v4.md`):** `focus` là ghi chú nội bộ, không đọc lại; `follow_up`, `hint`, `clarify` không nhắc lại tên
+chủ đề nếu không cần; cấm cả "Vậy bạn có thể", "Thế bạn có thể"; tránh từ văn viết; `scenario` nói bối cảnh ngắn (câu dẫn tới 15
+từ) rồi hỏi cách làm; `hint` được nói lại câu hỏi ngắn hơn và phải có chỗ bám; câu kho có danh sách thì giữ đủ mục, giới hạn từ
+không áp dụng nếu làm mất ý câu kho. Đầu vào không đổi. Câu dự phòng đặt `focus` sau dấu hai chấm vì `focus` có thể là cả câu.
+Số đo: `plans/reports/eval-261102-1815-interviewer-v4.md`.
+
 ### 3.3.5 Reporter
 
 **Input** (điểm đã được code tính, §6.3)

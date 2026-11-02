@@ -2,7 +2,6 @@
 chep dap an. LLM gia chi kiem dieu phoi; chat luong van phong do bang evals.sim_style va judge."""
 from app.agents.interviewer import QuestionSpec, build_messages, recent_openers
 from app.policy import Decision
-from app.prompts.store import PromptStore
 from app.question_stream import copies_answer, violation
 from app.rag.question_bank import kept_meaning
 from app.models_interview import NextTurnRequest, StartRequest
@@ -15,10 +14,6 @@ from fakes.fake_llm import FakeStream
 KEY = "HashMap băm key bằng hashCode rồi đặt vào bucket theo chỉ số, va chạm thì nối thành danh sách liên kết"
 HINT = QuestionSpec("hint", "technical", TOPIC, 2, focus="xử lý va chạm", last_question="HashMap lưu key thế nào?",
                     reference_answer=KEY)
-
-
-def test_latest_prompt_is_v3():
-    assert PromptStore().get("interviewer").version == "v3"
 
 
 def test_recent_openers_dedup_last_four():
