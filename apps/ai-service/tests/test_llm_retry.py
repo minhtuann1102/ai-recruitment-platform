@@ -2,6 +2,7 @@ import asyncio
 
 import pytest
 
+from app.llm.errors import LlmTimeoutError
 from app.llm.retry import call_with_retry, is_retryable, retry_after_seconds
 from fakes.fake_llm import status_error, timeout_error
 
@@ -86,3 +87,39 @@ def test_budget_stops_retrying_early():
         run(call_with_retry(fn, sleep=lambda d: asyncio.sleep(0), rng=lambda: 0.0, budget_s=2.0,
                             clock=lambda: next(clock)))
     assert fn.calls == 2
+
+
+def test_llm_timeout_is_retryable():
+    assert is_retryable(LlmTimeoutError("qua han"))
+
+
+def test_call_over_timeout_raises_llm_timeout():
+    async def hang():
+        await asyncio.sleep(1.0)
+
+    with pytest.raises(LlmTimeoutError):
+        run(call_with_retry(hang, max_retries=0, timeout_s=0.02))
+
+
+def limits_seen(monkeypatch):
+    seen = []
+
+    async def record(awaitable, timeout):
+        seen.append(timeout)
+        return await awaitable
+
+    monkeypatch.setattr("app.llm.retry.asyncio.wait_for", record)
+    return seen
+
+
+def test_retry_only_gets_what_is_left_of_the_budget(monkeypatch):
+    seen, clock = limits_seen(monkeypatch), iter([0.0, 8.0, 8.5])  # lan dau het 8 s, backoff 0.5 s
+    (_, attempts), _ = retry(Seq([LlmTimeoutError("qua han"), "ok"]), timeout_s=8.0, budget_s=10.0,
+                             clock=lambda: next(clock))
+    assert attempts == 2 and seen == [8.0, pytest.approx(1.5)]
+
+
+def test_first_attempt_keeps_full_timeout_when_budget_is_zero(monkeypatch):
+    seen = limits_seen(monkeypatch)
+    retry(Seq(["ok"]), timeout_s=3.0, budget_s=0.0)
+    assert seen == [3.0]

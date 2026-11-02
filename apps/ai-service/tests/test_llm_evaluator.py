@@ -10,7 +10,7 @@ from app.llm.gateway import LlmGateway
 from app.llm.settings import load_llm_settings
 from app.llm.usage import UsageCollector
 from app.models_interview import PlanTopic, TopicTurn
-from fakes.fake_llm import FakeOpenAI, reply, status_error
+from fakes.fake_llm import FakeOpenAI, Slow, limit_agent, reply, status_error
 
 TOPIC = PlanTopic(id="t1", title="Database index", source="catalog", objective="Hiểu index",
                   key_points=["Index (thường là B-tree) giúp tìm kiếm nhanh thay vì quét toàn bảng",
@@ -93,6 +93,14 @@ def test_code_precheck_skips_llm():
 
 def test_llm_failure_falls_back_to_mock_marked_degraded():
     agent, _ = make([status_error(500), status_error(500), status_error(500)])
+    col = UsageCollector()
+    ev = run(agent.evaluate(inp(), col))
+    assert ev.degraded and col.to_metadata()["fallbacks"] == ["evaluator_mock_heuristic"]
+
+
+def test_llm_hang_ends_in_degraded_instead_of_blocking_the_turn(monkeypatch):
+    limit_agent(monkeypatch, "evaluator", 0.02)
+    agent, _ = make([Slow(1.0, llm_json())] * 3)
     col = UsageCollector()
     ev = run(agent.evaluate(inp(), col))
     assert ev.degraded and col.to_metadata()["fallbacks"] == ["evaluator_mock_heuristic"]

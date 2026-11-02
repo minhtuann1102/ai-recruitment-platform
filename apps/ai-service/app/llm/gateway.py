@@ -2,6 +2,7 @@
 
 Quy tac (docs/ai-service/03 muc 4.6): retry loi tam thoi toi da 2 lan; sai schema thi repair 1 lan;
 finish_reason=length thi thu lai 1 lan voi max_tokens x1.5. Khong log noi dung tru khi LOG_LLM_IO=true.
+Moi lan goi bi cat o timeout_s (LlmTimeoutError); param `timeout` gui cho httpx chi la han tung lan doc.
 """
 import asyncio
 import logging
@@ -56,8 +57,8 @@ class LlmGateway:
         self.llm, self.client, self._env = llm, client or build_client(llm), env
         self._sleep, self._rng = sleep, rng
 
-    async def _retry(self, fn, budget_s: Optional[float] = None):
-        return await call_with_retry(fn, budget_s=budget_s, sleep=self._sleep, rng=self._rng)
+    async def _retry(self, fn, timeout_s: Optional[float] = None, budget_s: Optional[float] = None):
+        return await call_with_retry(fn, timeout_s=timeout_s, budget_s=budget_s, sleep=self._sleep, rng=self._rng)
 
     async def complete(self, agent: str, messages: List[dict], schema: Optional[Type[BaseModel]] = None,
                        *, prompt_version: str = "", collector: Optional[UsageCollector] = None) -> LlmResult:
@@ -81,8 +82,12 @@ class LlmGateway:
         async def chat(msgs: List[dict], **override):
             nonlocal calls
             params = {**base, **override, "messages": msgs}
+            timeout_s, budget_s = cfg.timeout_s, cfg.retry_budget_s
+            if calls and budget_s is not None:  # repair / length dung chung ngan sach voi lan goi dau
+                budget_s -= time.perf_counter() - started
+                timeout_s = min(timeout_s, max(budget_s, 0.0))
             resp, attempts = await self._retry(lambda: self.client.chat.completions.create(**params),
-                                               cfg.retry_budget_s)
+                                               timeout_s, budget_s)
             calls += attempts
             usage = getattr(resp, "usage", None)
             rec.input_tokens += getattr(usage, "prompt_tokens", 0) or 0
@@ -129,7 +134,7 @@ class LlmGateway:
         with observation(agent, "generation", input=messages, **_trace_fields(cfg, prompt_version)) as gen:
             try:
                 resp, rec.attempts = await self._retry(lambda: self.client.chat.completions.create(**params),
-                                                       cfg.retry_budget_s)
+                                                       cfg.timeout_s, cfg.retry_budget_s)
                 async for chunk in resp:
                     usage = getattr(chunk, "usage", None)
                     if usage:
