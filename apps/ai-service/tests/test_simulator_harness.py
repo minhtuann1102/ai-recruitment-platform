@@ -33,9 +33,11 @@ def test_math_helpers():
     assert slope([1, 2, 3]) == 1.0 and slope([3, 2, 1]) == -1.0 and slope([2]) == 0.0
     assert percentile([1, 2, 3, 4], 50) == 2 and percentile([1, 2, 3, 4], 95) == 4 and percentile([], 50) is None
     assert percentile(list(range(1, 21)), 95) == 19 and percentile(list(range(1, 375)), 50) == 187
-    session = {"calls": [{"metadata": {"usage": {"evaluator": {"input_tokens": 1_000_000, "output_tokens": 0}}}},
+    session = {"calls": [{"metadata": {"usage": {"evaluator": {"input_tokens": 1_000_000, "output_tokens": 0,
+                                                               "cached_tokens": 1024}}}},
                          {"metadata": {"usage": {"evaluator": {"input_tokens": 0, "output_tokens": 1_000_000}}}}]}
-    assert session_usage(session) == {"evaluator": {"input_tokens": 1_000_000, "output_tokens": 1_000_000}}
+    assert session_usage(session) == {"evaluator": {"input_tokens": 1_000_000, "output_tokens": 1_000_000,
+                                                    "cached_tokens": 1024}}
     assert session_cost(session_usage(session), load_pricing()) == pytest.approx(0.75)
 
 

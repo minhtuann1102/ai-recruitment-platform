@@ -369,7 +369,7 @@ SSE: `meta`, `token`…, `done`. Event `done` nội bộ chứa đủ dữ liệ
             "agent_decision": "switch_topic", "difficulty": 2, "question_source": "ai" },
   "plan": { "...": "InterviewPlan + reference_snippets + reference_sources + bank_questions (câu hỏi từ kho, mỗi topic technical ≤ 3)" },
   "state": { "...": "candidate state §5.2" },
-  "metadata": { "usage": { "planner": { "input_tokens": 2600, "output_tokens": 1400 }, "interviewer": { "input_tokens": 1200, "output_tokens": 60 } },
+  "metadata": { "usage": { "planner": { "input_tokens": 2600, "output_tokens": 1400, "cached_tokens": 1792 }, "interviewer": { "input_tokens": 1200, "output_tokens": 60 } },
                 "latency_ms": { "planner": 9800, "interviewer_ttft": 600, "total": 11200 },
                 "prompt_versions": { "planner": "v1", "interviewer": "v1" }, "fallbacks": [],
                 "rag": { "status": "on" } }
@@ -446,7 +446,7 @@ Event `done`:
             "agent_decision": "deepen", "difficulty": 3, "question_source": "ai", "reasoning": "ok + missing_points → follow_up (luật 8)" },
   "state": { "...": "candidate state mới" },
   "session_end": false,
-  "metadata": { "usage": { "evaluator": { "input_tokens": 2350, "output_tokens": 290 }, "interviewer": { "input_tokens": 1500, "output_tokens": 55 } },
+  "metadata": { "usage": { "evaluator": { "input_tokens": 4550, "output_tokens": 290, "cached_tokens": 3072 }, "interviewer": { "input_tokens": 1500, "output_tokens": 55 } },
                 "latency_ms": { "evaluator": 2100, "interviewer_ttft": 550, "total": 3600 },
                 "prompt_versions": { "evaluator": "v3", "interviewer": "v2" }, "fallbacks": [],
                 "rag": { "status": "on" } }
@@ -457,6 +457,9 @@ Event `done`:
 trong lượt: `S1..Sn` snippet của topic rồi chunk theo lượt, `R` đáp án chuẩn) và `support` (`supported` /
 `contradicted` / `no_source`); `confidence` = `low` khi lượt có tài liệu nhưng không ý nào được tài liệu ủng hộ,
 `high` khi có, `null` khi không có tài liệu, không có ý nào, hoặc Evaluator v3 / mock. Id chỉ có nghĩa trong lượt đó. Từ Evaluator v6 `supported` khắt hơn nên `low` chiếm khoảng một nửa lượt có tài liệu, và `no_source` không có nghĩa là chắc chắn không có tài liệu nói ý đó.
+`metadata.usage.<agent>.cached_tokens` (2026-11-02): phần của `input_tokens` đọc từ prompt cache của provider. `0` khi không
+có cache hit hoặc provider không trả trường này.
+
 `evaluation.prompt_version` (2026-11-02): bản prompt đã chấm lượt này, `null` khi không qua LLM (mock, luật code,
 `degraded`). `evaluation.reference_missing` (2026-11-02): `true` khi câu trong kho nhưng không lấy được đáp án chuẩn lúc
 chấm (ai_db lỗi, quá hạn) nên lượt được chấm không có `R`; không đặt ở lượt `dont_know`, `manipulation`,

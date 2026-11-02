@@ -175,3 +175,8 @@ flowchart TD
 
 Câu trả lời của ứng viên cũng là input không tin cậy, nhưng đi vào Evaluator và Interviewer mỗi lượt; cách xử
 lý ở §3.4 (prompt) và §5 (`answer_type = "manipulation"`).
+
+Code bọc dữ liệu không tin cậy bằng `wrap_untrusted`: bỏ các ký tự vô hình phổ biến và ký tự điều khiển, escape thẻ đóng kể cả khi đổi hoa
+thường, thêm khoảng trắng, thuộc tính hoặc thiếu `>`. Thẻ viết bằng ký tự fullwidth và một số ký tự filler hiếm chưa được xử lý. Regex `is_manipulation`
+chỉ là lớp đầu: một lần khớp là 0 điểm và không gọi LLM, nên mẫu xin điểm không có "em/tôi" chỉ khớp khi là cả câu ra lệnh, ưu tiên không bắt nhầm hơn bắt đủ. Câu tách toàn bộ từng
+chữ, lệnh sau dấu `:` hoặc sau xuống dòng, và câu mềm hơn do LLM và hậu kiểm quote xử lý.

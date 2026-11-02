@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from types import SimpleNamespace
 
 import pytest
 from pydantic import BaseModel
@@ -8,7 +9,7 @@ from app.llm.errors import LlmOutputError
 from app.llm.gateway import LlmGateway, build_client
 from app.llm.settings import load_llm_settings
 from app.llm.usage import UsageCollector
-from fakes.fake_llm import FakeOpenAI, embedding_reply, reply, status_error, timeout_error
+from fakes.fake_llm import FakeOpenAI, embedding_reply, reply, status_error, timeout_error, usage_with_cache
 
 MSGS = [{"role": "user", "content": "noi dung bi mat"}]
 
@@ -98,13 +99,36 @@ def test_length_twice_raises():
     assert len(client.calls) == 2
 
 
+def test_cached_tokens_summed_over_repair_and_logged(caplog):
+    bad, good = usage_with_cache(1000, 5, 0), usage_with_cache(1200, 5, 1024)
+    gw, _, _ = make([reply("khong phai json", usage=bad), reply('{"answer": "ok"}', usage=good)])
+    col = UsageCollector()
+    with caplog.at_level(logging.INFO, logger="ai_service"):
+        res = run(gw.complete("evaluator", MSGS, Out, collector=col))
+    assert res.record.cached_tokens == 1024 and res.record.input_tokens == 2200
+    assert col.to_metadata()["usage"]["evaluator"]["cached_tokens"] == 1024
+    assert "cached=1024" in caplog.text
+
+
+def test_cached_tokens_summed_over_length_retry():
+    first = reply("cut", finish_reason="length", usage=usage_with_cache(1000, 5, 512))
+    gw, _, _ = make([first, reply('{"answer": "ok"}', usage=usage_with_cache(1000, 5, 1024))])
+    assert run(gw.complete("evaluator", MSGS, Out)).record.cached_tokens == 1536
+
+
+def test_provider_without_cache_details_counts_zero():
+    usage = SimpleNamespace(prompt_tokens=10, completion_tokens=5, prompt_tokens_details=None)
+    gw, _, _ = make([reply('{"answer": "ok"}', usage=usage)])
+    assert run(gw.complete("evaluator", MSGS, Out)).record.cached_tokens == 0
+
+
 def test_usage_collector_receives_metadata_without_content():
     gw, _, _ = make([reply('{"answer": "ok"}'), reply('{"answer": "ok"}')])
     col = UsageCollector()
     run(gw.complete("evaluator", MSGS, Out, prompt_version="v1", collector=col))
     run(gw.complete("evaluator", MSGS, Out, prompt_version="v1", collector=col))
     meta = col.to_metadata()
-    assert meta["usage"]["evaluator"] == {"input_tokens": 20, "output_tokens": 10}
+    assert meta["usage"]["evaluator"] == {"input_tokens": 20, "output_tokens": 10, "cached_tokens": 0}
     assert meta["prompt_versions"] == {"evaluator": "v1"} and meta["fallbacks"] == []
     assert "bi mat" not in str(meta)
 
