@@ -8,10 +8,16 @@ import openai
 _REQ = httpx.Request("POST", "http://fake/v1/chat/completions")
 
 
-def reply(content: str, finish_reason: str = "stop", prompt_tokens: int = 10, completion_tokens: int = 5):
+def usage_with_cache(prompt_tokens: int, completion_tokens: int, cached_tokens: int):
+    return SimpleNamespace(prompt_tokens=prompt_tokens, completion_tokens=completion_tokens,
+                           prompt_tokens_details=SimpleNamespace(cached_tokens=cached_tokens))
+
+
+def reply(content: str, finish_reason: str = "stop", prompt_tokens: int = 10, completion_tokens: int = 5,
+          usage=None):
     return SimpleNamespace(
         choices=[SimpleNamespace(message=SimpleNamespace(content=content), finish_reason=finish_reason)],
-        usage=SimpleNamespace(prompt_tokens=prompt_tokens, completion_tokens=completion_tokens))
+        usage=usage or SimpleNamespace(prompt_tokens=prompt_tokens, completion_tokens=completion_tokens))
 
 
 def embedding_reply(vectors: List[List[float]], prompt_tokens: int = 7):
@@ -56,8 +62,8 @@ class FakeOpenAI:
 class FakeStream:
     """Stream gia: tra lan luot cac manh text, chunk cuoi co usage; fail_after=n thi nem loi sau n manh."""
 
-    def __init__(self, parts: List[str], fail_after: int = None, delay: float = 0.0):
-        self.parts, self.fail_after, self.delay = parts, fail_after, delay
+    def __init__(self, parts: List[str], fail_after: int = None, delay: float = 0.0, usage=None):
+        self.parts, self.fail_after, self.delay, self.usage = parts, fail_after, delay, usage
 
     def __aiter__(self):
         return self._gen()
@@ -70,4 +76,5 @@ class FakeStream:
             if self.delay:
                 await asyncio.sleep(self.delay)
             yield SimpleNamespace(choices=[SimpleNamespace(delta=SimpleNamespace(content=part))], usage=None)
-        yield SimpleNamespace(choices=[], usage=SimpleNamespace(prompt_tokens=20, completion_tokens=len(self.parts)))
+        yield SimpleNamespace(choices=[], usage=self.usage or SimpleNamespace(prompt_tokens=20,
+                                                                              completion_tokens=len(self.parts)))

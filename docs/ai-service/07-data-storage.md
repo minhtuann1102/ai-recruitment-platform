@@ -81,9 +81,9 @@ erDiagram
     interview_results {
         uuid id PK
         uuid session_id FK "unique"
-        varchar status "MỚI: complete|partial"
-        float overall_score
-        varchar verdict "MỚI: exceeds|meets|near|below"
+        varchar status "MỚI: complete|partial|unscored"
+        float overall_score "nullable: null khi unscored"
+        varchar verdict "MỚI: exceeds|meets|near|below, null khi unscored"
         varchar confidence "MỚI: high|medium|low"
         jsonb criteria_averages
         jsonb strengths

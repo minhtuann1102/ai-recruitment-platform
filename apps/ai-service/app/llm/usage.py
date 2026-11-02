@@ -14,6 +14,7 @@ class CallRecord:
     attempts: int = 1
     repaired: bool = False
     fallback: Optional[str] = None
+    cached_tokens: int = 0  # phan cua input_tokens doc tu prompt cache cua provider
 
 
 @dataclass
@@ -36,9 +37,10 @@ class UsageCollector:
         usage: Dict[str, Dict[str, int]] = {}
         latency: Dict[str, int] = {}
         for r in self.records:
-            u = usage.setdefault(r.agent, {"input_tokens": 0, "output_tokens": 0})
+            u = usage.setdefault(r.agent, {"input_tokens": 0, "output_tokens": 0, "cached_tokens": 0})
             u["input_tokens"] += r.input_tokens
             u["output_tokens"] += r.output_tokens
+            u["cached_tokens"] += r.cached_tokens
             latency[r.agent] = latency.get(r.agent, 0) + r.latency_ms
         latency["total"] = sum(r.latency_ms for r in self.records)
         return {

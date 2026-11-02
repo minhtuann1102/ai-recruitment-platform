@@ -10,8 +10,10 @@ function listBlock(title, items, line) {
 function renderReport(r, root) {
   const o = r.overall, s = r.session;
   const partial = r.status === "partial" ? ' <span class="warn">· partial (Reporter lỗi, nhận xét là bản mẫu)</span>' : "";
+  const result = o.score === null ? '<span class="score">Chưa chấm được</span>'
+    : `<span class="score">${esc(o.score)}/10</span> · ${esc(o.verdict)}`;
   let html = `<h2>Báo cáo${partial}</h2>
-    <div><span class="score">${esc(o.score)}/10</span> · ${esc(o.verdict)} · độ tin cậy ${esc(s.confidence)}
+    <div>${result} · độ tin cậy ${esc(s.confidence)}
       <span class="muted">· ${esc(s.evaluated_turns)} lượt được chấm · kết thúc: ${esc(s.end_reason)}</span></div>
     <p>${esc(o.summary)}</p>`;
   html += `<h2>Theo phần</h2><table><tr><th>Phần</th><th>Điểm</th><th>Trọng số</th></tr>${r.sections

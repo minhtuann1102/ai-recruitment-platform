@@ -14,9 +14,10 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, StreamingResponse
 
 from .api_error import ApiError
-from .llm.usage import UsageCollector
+from .llm.usage import CallRecord, UsageCollector
 from .logging_setup import bind_request, configure_logging, safe_session_id
 from .agents.cv_parser import get_cv_parser
+from .agents.registry import agent_status, check_agent_config
 from .agents.jd_parser import get_jd_parser
 from .mock_planner import load_track
 from .models_cv import CvParseResponse
@@ -40,6 +41,7 @@ log = logging.getLogger("ai_service")
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    check_agent_config()  # staging/production thieu cau hinh LLM: khong khoi dong
     tracing.warm()
     warm = asyncio.ensure_future(warm_rag())  # khong chan khoi dong: nap corpus BM25 o nen
     yield
@@ -74,7 +76,10 @@ async def validation_error_handler(_: Request, exc: RequestValidationError):
 @app.get("/api/health")
 def health():
     # RAG tuy chon: loi RAG khong lam service unhealthy (van 200), chi bao trong `rag`. Khong ping ai_db o day.
-    return {"status": "healthy", "version": MODEL, "model_loaded": False, "rag": rag_status()}
+    # Agent thieu cau hinh: service van tra loi duoc nhung bang mock nen `degraded`, van 200 (bao o `agents`).
+    agents = agent_status()
+    status = "degraded" if "config_error" in agents.values() else "healthy"
+    return {"status": status, "version": MODEL, "model_loaded": False, "rag": rag_status(), "agents": agents}
 
 
 @app.post("/api/cv/parse", response_model=CvParseResponse)
@@ -84,6 +89,7 @@ async def cv_parse(file: UploadFile = File(...), track: str = Form(...)):
     started, collector = time.perf_counter(), UsageCollector()
     with _logged_failure(started, collector, rag="-"):
         result = await get_cv_parser().parse(await file.read(), track)
+        _note_parser_fallbacks("cv_parser", result, collector)
     _finish_request(started, collector, "ok", rag="-")
     return result
 
@@ -95,8 +101,15 @@ async def jd_parse(req: JdParseRequest):
     started, collector = time.perf_counter(), UsageCollector()
     with _logged_failure(started, collector, rag="-"):
         result = await get_jd_parser().parse(req.jd_text, load_track(req.track))
+        _note_parser_fallbacks("jd_parser", result, collector)
     _finish_request(started, collector, "ok", rag="-")
     return result
+
+
+def _note_parser_fallbacks(agent: str, result, collector: UsageCollector) -> None:
+    """CV/JD Parser bao fallback trong metadata cua response; dua vao collector de co trong log request_done."""
+    for code in result.metadata.fallbacks:
+        collector.add(CallRecord(agent, result.metadata.model, fallback=code))
 
 
 def _usage_meta(started: float, collector: Optional[UsageCollector] = None) -> dict:

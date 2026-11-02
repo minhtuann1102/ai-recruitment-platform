@@ -16,7 +16,7 @@ from ..llm.gateway import LlmGateway
 from ..models_cv import CvParseMetadata
 from ..models_jd import JdFlags, JdParseResponse, JdProfile
 from ..prompts.store import UNTRUSTED_NOTICE, PromptStore, wrap_untrusted
-from .registry import agent_mode, cached_llm_agent
+from .registry import agent_mode, cached_llm_agent, config_fallback
 
 log = logging.getLogger("ai_service.jd_parser")
 
@@ -55,7 +55,9 @@ class LlmJdParser:
                                                   prompt_version=self._prompt.version)
         except (LlmError, ConfigError, openai.APIError) as err:
             log.warning("jd_parser_fallback error=%s", type(err).__name__)
-            return mock_jd_parser.parse_jd_text(jd_text, catalog)
+            fallback = mock_jd_parser.parse_jd_text(jd_text, catalog)
+            fallback.metadata.fallbacks.append("jd_parser_fallback")
+            return fallback
         out, rec = result.data, result.record
         reqs = mock_jd_parser.finalize_requirements([(r.text, r.kind, r.topic_ids) for r in out.requirements],
                                                     catalog)
@@ -69,11 +71,17 @@ class LlmJdParser:
 
 
 class MockJdParser:
+    def __init__(self, config_error: bool = False):  # True: dung thay LLM vi thieu cau hinh
+        self.config_error = config_error
+
     async def parse(self, jd_text: str, catalog: TrackCatalog) -> JdParseResponse:
-        return mock_jd_parser.parse_jd_text(jd_text, catalog)
+        result = mock_jd_parser.parse_jd_text(jd_text, catalog)
+        if self.config_error:
+            result.metadata.fallbacks.append(config_fallback(LlmJdParser.agent))
+        return result
 
 
 def get_jd_parser():
     if agent_mode("jd_parser") == "mock":
         return MockJdParser()
-    return cached_llm_agent("jd_parser", LlmJdParser) or MockJdParser()
+    return cached_llm_agent("jd_parser", LlmJdParser) or MockJdParser(config_error=True)

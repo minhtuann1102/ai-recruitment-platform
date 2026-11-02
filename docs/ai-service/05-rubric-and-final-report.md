@@ -70,8 +70,14 @@ sau clarify mới được chấm).
 | 7.0 – 8.4 | `meets` | Đạt kỳ vọng level |
 | 5.0 – 6.9 | `near` | Gần đạt |
 | < 5.0 | `below` | Chưa đạt |
+| không có lượt tính điểm | `null` | Chưa chấm được (`status = "unscored"`, 2026-11-02) |
 
-**Độ tin cậy (`confidence`):** `low` nếu < 6 lượt được chấm, hoặc > 20% lượt degraded, hoặc thiếu nguyên một
+Mọi lượt đều không tính điểm (degraded, `asks_clarification`, hoặc kết thúc trước khi có câu trả lời) là lỗi hệ thống hay
+thiếu dữ liệu, không phải kết luận về ứng viên: `overall.score`, `overall.verdict` và từng tiêu chí là `null`. Lượt
+`dont_know` vẫn được chấm, nên cả buổi `dont_know` vẫn là `0.0`, `below`.
+
+**Độ tin cậy (`confidence`):** `low` nếu < 6 lượt được chấm, hoặc > 20% lượt degraded hoặc thiếu đáp án chuẩn
+(`evaluation.reference_missing`, câu trong kho nhưng không lấy được đáp án khi chấm), hoặc thiếu nguyên một
 phase (kết thúc sớm); `medium` nếu 6–9 lượt; `high` nếu ≥ 10 lượt. Report `low` hiển thị cảnh báo rõ.
 
 Ngưỡng verdict và trọng số là **giả định ban đầu**, chỉnh sau khi chạy ứng viên giả lập (§10).
@@ -85,7 +91,8 @@ Lưu ở `interview_results.report` (JSONB, §8); các cột cũ (`overall_score
 ```jsonc
 {
   "schema_version": 1,
-  "status": "complete",                         // complete | partial (Reporter lỗi, chỉ có điểm)
+  "status": "complete",                         // complete | partial (Reporter lỗi hoặc thiếu cấu hình, chỉ có điểm)
+                                                // | unscored (không lượt nào chấm được: score, verdict = null, sections rỗng)
   "session": {
     "track": "java_backend", "level": "junior", "duration_s": 1790,
     "end_reason": "plan_complete", "evaluated_turns": 14, "confidence": "high"
@@ -132,7 +139,8 @@ Lưu ở `interview_results.report` (JSONB, §8); các cột cũ (`overall_score
   ],
   "meta": {
     "difficulty_trajectory": [2, 2, 3, 3, 3, 2, 2, 3],
-    "degraded_turns": [], "prompt_versions": { "evaluator": "v3", "reporter": "v2" },
+    "degraded_turns": [], "reference_missing_turns": [],
+    "prompt_versions": { "evaluator": "v3", "reporter": "v2" },  // đổi prompt giữa buổi: "v5,v6"; không lượt nào qua LLM: "mock"
     "disclaimer": "Điểm do AI chấm, mang tính tham khảo cho việc luyện tập."
   }
 }
@@ -174,3 +182,4 @@ Reporter v2 chọn `resource_ids` (`r1..`) trong `input.resources` (chỉ id, `t
   nhận xét, điểm mạnh, cần cải thiện, lộ trình học.
 - Luôn hiển thị `disclaimer` và mức `confidence`.
 - Report `partial` hiển thị điểm + thông báo "nhận xét chi tiết đang lỗi, bấm để tạo lại".
+- Report `unscored` không hiển thị điểm hay kết luận, chỉ báo buổi này chưa chấm được và cho làm lại; không tính vào thống kê điểm.

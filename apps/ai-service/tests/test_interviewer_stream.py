@@ -12,7 +12,7 @@ from app.llm.settings import load_llm_settings
 from app.llm.usage import UsageCollector
 from app.models_interview import PlanTopic
 from app.question_stream import QuestionStream, is_repeat, violation
-from fakes.fake_llm import FakeOpenAI, FakeStream, status_error
+from fakes.fake_llm import FakeOpenAI, FakeStream, status_error, usage_with_cache
 
 TOPIC = PlanTopic(id="t2", title="Spring @Transactional", source="catalog", objective="Hiểu transaction",
                   key_points=["a", "b", "c"], start_difficulty=2, opening_hint="Hỏi về ghi 2 bảng",
@@ -46,7 +46,12 @@ def test_happy_stream_tokens_join_to_question_and_usage_recorded():
     events, qs, col = run_stream([FakeStream(["Vậy khi ", "A gọi B ", "cùng class thì sao?"])])
     assert [n for n, _ in events] == ["token"] * 3 and qs.source == "ai"
     assert "".join(d["t"] for _, d in events) == qs.question == "Vậy khi A gọi B cùng class thì sao?"
-    assert col.to_metadata()["usage"]["interviewer"] == {"input_tokens": 20, "output_tokens": 3}
+    assert col.to_metadata()["usage"]["interviewer"] == {"input_tokens": 20, "output_tokens": 3, "cached_tokens": 0}
+
+
+def test_stream_records_cached_tokens():
+    _, _, col = run_stream([FakeStream(["Vậy khi ", "A gọi B?"], usage=usage_with_cache(1900, 2, 1792))])
+    assert col.to_metadata()["usage"]["interviewer"]["cached_tokens"] == 1792
 
 
 def test_error_before_first_token_sends_fallback_tokens():

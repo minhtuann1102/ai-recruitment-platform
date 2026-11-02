@@ -36,7 +36,13 @@ def _trace_fields(cfg, prompt_version: str) -> dict:
 
 def _trace_usage(rec: CallRecord) -> dict:
     return {"usage_details": {"input": rec.input_tokens, "output": rec.output_tokens},
-            "metadata": {"attempts": rec.attempts, "repaired": rec.repaired, "fallback": rec.fallback}}
+            "metadata": {"attempts": rec.attempts, "repaired": rec.repaired, "fallback": rec.fallback,
+                         "cached_tokens": rec.cached_tokens}}
+
+
+def _cached_tokens(usage) -> int:
+    """Token input doc tu prompt cache; provider khong tra thi 0, nen 0 khong khang dinh la khong co cache."""
+    return getattr(getattr(usage, "prompt_tokens_details", None), "cached_tokens", 0) or 0
 
 
 def build_client(llm: LlmSettings) -> AsyncOpenAI:
@@ -81,6 +87,7 @@ class LlmGateway:
             usage = getattr(resp, "usage", None)
             rec.input_tokens += getattr(usage, "prompt_tokens", 0) or 0
             rec.output_tokens += getattr(usage, "completion_tokens", 0) or 0
+            rec.cached_tokens += _cached_tokens(usage)
             choice = resp.choices[0]
             if choice.finish_reason == "length" and "max_tokens" not in override:
                 return await chat(msgs, **{**override, "max_tokens": int(cfg.max_tokens * 1.5)})
@@ -101,8 +108,8 @@ class LlmGateway:
                 except ValueError as err2:
                     raise LlmOutputError(f"Dau ra khong hop le sau repair ({type(err2).__name__})") from err2
         rec.attempts, rec.latency_ms = calls, int((time.perf_counter() - started) * 1000)
-        log.info("llm_call agent=%s model=%s in=%d out=%d ms=%d attempts=%d repaired=%s", agent, cfg.model,
-                 rec.input_tokens, rec.output_tokens, rec.latency_ms, rec.attempts, rec.repaired)
+        log.info("llm_call agent=%s model=%s in=%d cached=%d out=%d ms=%d attempts=%d repaired=%s", agent, cfg.model,
+                 rec.input_tokens, rec.cached_tokens, rec.output_tokens, rec.latency_ms, rec.attempts, rec.repaired)
         if self.llm.log_io:
             log.debug("llm_io agent=%s messages=%s output=%s", agent, messages, content)
         if collector is not None:
@@ -128,6 +135,7 @@ class LlmGateway:
                     if usage:
                         rec.input_tokens = getattr(usage, "prompt_tokens", 0) or 0
                         rec.output_tokens = getattr(usage, "completion_tokens", 0) or 0
+                        rec.cached_tokens = _cached_tokens(usage)
                     choices = getattr(chunk, "choices", None) or []
                     text = choices[0].delta.content if choices and getattr(choices[0], "delta", None) else None
                     if text:
@@ -137,8 +145,8 @@ class LlmGateway:
                         yield text
             finally:
                 rec.latency_ms = int((time.perf_counter() - started) * 1000)
-                log.info("llm_stream agent=%s model=%s in=%d out=%d ms=%d", agent, cfg.model, rec.input_tokens,
-                         rec.output_tokens, rec.latency_ms)
+                log.info("llm_stream agent=%s model=%s in=%d cached=%d out=%d ms=%d", agent, cfg.model,
+                         rec.input_tokens, rec.cached_tokens, rec.output_tokens, rec.latency_ms)
                 gen.update(output="".join(parts), **_trace_usage(rec))  # ca khi stream dut: phan da nhan
                 if collector is not None:
                     collector.add(rec)

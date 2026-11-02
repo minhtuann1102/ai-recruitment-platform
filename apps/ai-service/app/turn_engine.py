@@ -34,6 +34,7 @@ _KIND = {"ask_main": "main", "follow_up": "follow_up", "hint": "hint", "clarify"
          "wrap_up": "main", "end": "main"}  # next_topic / next_phase deu thanh ask_main sau apply_action
 _AGENT = {"follow_up": "deepen", "hint": "keep_difficulty", "clarify": "keep_difficulty"}
 ANSWER_KEY_TIMEOUT_S = 2.0  # cache truot -> doc ai_db; qua han thi cham khong co dap an chuan
+NO_REFERENCE_NEEDED = ("dont_know", "manipulation", "asks_clarification")  # cham khong dung dap an chuan
 log = logging.getLogger("ai_service.turn_engine")
 
 
@@ -162,6 +163,8 @@ async def next_turn(req: NextTurnRequest, evaluator: Optional[Evaluator] = None,
         turn_number=req.turn_number, question=req.question, answer=req.answer, topic_turns=req.topic_turns,
         reference_answer=key, turn_snippets=extra.texts, turn_sources=extra.sources,
         reference_source=_reference_source(topic, state.current_qa_id, key)), collector)
+    if state.current_qa_id and not key and ev.answer_type not in NO_REFERENCE_NEEDED:
+        ev = ev.model_copy(update={"reference_missing": True})
     record_evaluation(state, ev, req.turn_number)
     if state.topic_started_s is None:  # state cu: chua biet topic bat dau luc nao
         state.topic_started_s = state.phase_started_s = req.elapsed_seconds

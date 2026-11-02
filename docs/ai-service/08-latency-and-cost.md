@@ -47,15 +47,31 @@ regex (§4.5) bỏ qua Evaluator: ~1 s.
 | # | Kỹ thuật | Hiệu quả |
 |---|---|---|
 | 1 | **Evaluator output gọn**: không viết đoạn lập luận; giới hạn `covered ≤ 4` (v5), `missing ≤ 3`, `misconceptions ≤ 2`, `evidence ≤ 4` (quote ≤ 100 ký tự); key JSON ngắn; `max_tokens = 300` (prompt v2: bỏ tag, quote 3–12 từ, `covered ≤ 3`, `missing ≤ 2`; tag do code sinh) | Output token quyết định latency; mục tiêu ~200 token. Đo 22/10 trước khi đổi: Evaluator P50 4.8 s |
-| 2 | Evaluator chỉ nhận **lượt của topic hiện tại**, không cả transcript | Input nhỏ, ổn định ~2.5k token dù phiên dài |
+| 2 | Evaluator chỉ nhận **lượt của topic hiện tại**, không cả transcript | Input ổn định dù phiên dài (~2.5k token thời v3; đo v6 2026-11-02: ~4.6k) |
 | 3 | **RAG lấy trước 1 lần lúc plan**, lưu `reference_snippets` trong plan | Bỏ ~0.3 s embed + query mỗi lượt |
-| 4 | **Prompt caching**: phần tĩnh (vai trò, rubric, few-shot) đặt đầu, ≥ 1024 token | Giảm TTFT và giá input (OpenAI cache tự động theo prefix; qua OpenRouter cần kiểm chứng) |
+| 4 | **Prompt caching**: phần tĩnh (vai trò, rubric, few-shot) đặt đầu, ≥ 1024 token | Giảm TTFT và giá input (OpenAI cache tự động theo prefix; đã kiểm chứng qua OpenRouter 2026-11-02, xem dưới bảng) |
 | 5 | **Structured outputs strict** | Gần như không phải repair retry |
 | 6 | Bỏ qua Evaluator khi không cần: wrap-up, câu trả lời **chỉ gồm** cụm "không biết" (regex neo cả câu; có nội dung khác thì vẫn chấm) | ~1 s thay vì ~3.6 s |
 | 7 | 1 `AsyncOpenAI` client dùng chung (HTTP keep-alive), FastAPI async | Bỏ chi phí bắt tay TLS mỗi call |
 | 8 | Interviewer `max_tokens = 200`, ≤ 80 từ | Câu hỏi xong nhanh |
 | 9 | Planner / Reporter ngoài đường nóng; report bất đồng bộ | Không chặn trải nghiệm |
 | 10 | UI hiện "đang gõ…" ngay khi gửi câu trả lời, stream từng token | Giảm độ trễ cảm nhận |
+
+**Đo prompt caching (2026-11-02, LLM thật, quick matrix `--serve`, 10 phiên, `openai/gpt-4o-mini` qua OpenRouter, Evaluator v6):**
+provider tự cache, code không đặt `cache_control`. Số lấy từ `metadata.usage.<agent>.cached_tokens`.
+
+| Agent | Lần gọi | Input token | Cached | Tỉ lệ cached | Lần gọi có hit |
+|---|---|---|---|---|---|
+| Evaluator | 69 | 314 400 | 206 592 | 65.7% | 63/69 |
+| Interviewer | 94 | 149 898 | 108 544 | 72.4% | 89/94 |
+| Planner | 10 | 18 130 | 8 832 | 48.7% | 5/10 |
+| Reporter | 10 | 26 971 | 6 144 | 22.8% | 6/10 |
+| query_rewriter | 10 | 6 357 | 0 | 0% | 0/10 |
+| **Tất cả** (gồm embedding) | | 517 530 | 330 112 | **63.8%** | |
+
+Planner và Reporter vẫn có hit dù system prompt ngắn hơn 1024 token, vì phần đầu user message giống nhau giữa các phiên.
+Chưa làm: `session_cost` chưa trừ phần cached nên mức ~$0.0094 / phiên là cận trên. Nếu input cached bằng 50% giá (giả định, chưa
+kiểm bảng giá OpenRouter) thì thấp hơn ~26%. Chưa đo tác động lên TTFT vì không có lần chạy tắt cache để so.
 
 Dự phòng nếu đo thực tế vượt mục tiêu (chưa làm, theo thứ tự thử):
 

@@ -56,6 +56,7 @@ class CvParseMetadata(BaseModel):
     input_tokens: int
     output_tokens: int
     latency_ms: int
+    fallbacks: List[str] = Field(default_factory=list)  # vd cv_parser_config_error: da ve parser quy tac
 
 
 class CvParseResponse(BaseModel):

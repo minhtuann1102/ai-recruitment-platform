@@ -29,9 +29,10 @@ def session_usage(session: Dict) -> Dict[str, Dict[str, int]]:
     total: Dict[str, Dict[str, int]] = {}
     for call in session["calls"]:
         for agent, u in (call.get("metadata") or {}).get("usage", {}).items():
-            t = total.setdefault(agent, {"input_tokens": 0, "output_tokens": 0})
+            t = total.setdefault(agent, {"input_tokens": 0, "output_tokens": 0, "cached_tokens": 0})
             t["input_tokens"] += u.get("input_tokens", 0)
             t["output_tokens"] += u.get("output_tokens", 0)
+            t["cached_tokens"] += u.get("cached_tokens", 0)
     return total
 
 

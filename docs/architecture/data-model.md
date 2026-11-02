@@ -213,7 +213,7 @@ erDiagram
         uuid session_id FK "unique, 1-1"
         jsonb strengths "['Hieu biet OOP tot', 'Giai thich ro rang']"
         jsonb improvements "['Can hoc them ve testing', 'Thieu kien thuc DB']"
-        float overall_score "0.0 - 10.0"
+        float overall_score "0.0 - 10.0, null khi report unscored"
         jsonb criteria_averages "{technical: 7.5, relevance: 8.0, ...}"
         text ai_summary "Tong hop tu AI (tuong lai)"
         timestamp created_at

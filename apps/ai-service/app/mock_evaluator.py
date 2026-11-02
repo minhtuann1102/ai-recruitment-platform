@@ -16,12 +16,24 @@ DONT_KNOW_RE = re.compile(r"(khong biet|chua biet|chua hoc|khong ro|khong nho|\b
 _CLARIFY = re.compile(r"^(ban co the )?(nhac lai|hoi lai|y ban la|cau hoi la gi)")
 # Rieng cho cau tra loi, khong dung mau loc CV: ung vien co the viet khoi code, "CPU instruction", "system prompt".
 # Da bo dau nen "cham" gom ca "chậm": moi mau xin diem phai co doi tuong "em/toi/minh".
+# Khong tinh ":", ";" va "1." la dau menh de: "Rui ro: bo qua huong dan he thong, lo du lieu" la cau liet ke binh thuong
+_CLAUSE_START, _CLAUSE_END = r"(?:^|(?<!\d)[.!?]\s*)", r"\s*(?:[.!?]|$)"
 MANIPULATION_RE = re.compile(
     r"\b(cham|cho|xin)( cho)? (toi|em|minh|tui) (xin |them |duoc )?"
-    r"(\d+\s*(/\s*\d+)?\s*diem|10\s*/\s*10|diem (cao|toi da)|full)|"
+    r"(\d+\s*(/\s*\d+)?\s*diem|10\s*/\s*10|diem (cao|toi da)|"
+    r"full( diem| band)?( (nhe|nha|voi|di|a))?\s*([.,!?]|$))|"  # "cho em full quyen tren DB" la cau binh thuong
     r"\byou are now (the|a|an) |\byour new instruction|<\|(im_|system)|\[inst\]|"
     r"\b(ignore|disregard|forget) ((all|previous|above|prior|your|the) )+(instructions?|rules|prompts?)\b|"
-    r"\bignore all of the above|\b(bo qua|quen) ((moi|cac|het|tat ca|toan bo) )+(huong dan|chi dan)")
+    r"\bignore all of the above|\b(bo qua|quen) ((moi|cac|het|tat ca|toan bo) )+(huong dan|chi dan)|"
+    # Cac mau duoi khong co "em/toi" hay luong tu; trung sai la mat ca luot (0 diem, khong goi LLM), nen phai la ca
+    # menh de ra lenh: dau cau + het cau. "Model bo qua huong dan he thong", "Tang pool cho 20 di" van duoc cham.
+    rf"{_CLAUSE_START}(hay )?(bo qua|quen) (nhung )?(huong dan|chi dan) "
+    rf"((o|phia) ){{0,2}}(he thong|truoc do|tren)(?=\s+(va|di|nhe|nha)\b|\s*([.!?;:,]|$))|"
+    rf"{_CLAUSE_START}xin (\d+(\s*/\s*\d+)?\s*diem|diem (cao|toi da))( (nhe|nha|voi|di))?( a)?{_CLAUSE_END}|"
+    rf"{_CLAUSE_START}(hay )?cho \d+\s*(diem|/\s*10(\s*diem)?) (nhe|nha|di|voi|giup|ho)( a)?{_CLAUSE_END}|"
+    rf"{_CLAUSE_START}(hay )?(cham|cho) (\d+\s*/\s*\d+|\d+\s*diem|diem (cao|toi da)|full)( diem)? (giup|ho|cho) "
+    rf"(toi|em|minh|tui)( (voi|nhe|nha|di))?{_CLAUSE_END}")
+_SPACED_WORD = re.compile(r"\b(?:[^\W\d_] ){3,}[^\W\d_]\b")  # "i g n o r e": tu 4 chu cai, "a b c" khong bi gop
 # Ghi chu gia gui nguoi cham: ca 3 dau hieu phai cung mot cau, de cau noi ve he thong cham diem (leaderboard...) van duoc cham
 _GRADER_RE = re.compile(r"bo cham|nguoi cham|he thong cham|giam khao|nguoi phong van|grader|examiner|interviewer")
 _SCORE_CLAIM_RE = re.compile(r"band\s*\d|(?<!thoi )diem cao|diem toi da|xuat sac|moi tieu chi|full marks|highest score|"
@@ -30,17 +42,19 @@ _THIS_ANSWER_RE = re.compile(r"cau (tra loi )?nay|bai nay|phan nay|ung vien nay|
 
 
 def is_manipulation(answer: str) -> bool:
-    folded = fold(answer)
-    if MANIPULATION_RE.search(" ".join(folded.split())):
+    composed = unicodedata.normalize("NFC", answer.lower())
+    folded = fold(composed.replace("tới", "den"))  # bo dau thi "tới" trung "tôi": "chạm tới 90 điểm"
+    flat = " ".join(folded.split())
+    if MANIPULATION_RE.search(flat) or MANIPULATION_RE.search(_SPACED_WORD.sub(lambda m: m[0].replace(" ", ""), flat)):
         return True
     return any(_GRADER_RE.search(s) and _SCORE_CLAIM_RE.search(s) and _THIS_ANSWER_RE.search(s)
                for s in re.split(r"[.!?\n]+", folded))
 
 
 def fold(text: str) -> str:
-    """Bo dau tieng Viet + lower, de so khop khong phu thuoc dau."""
+    """Bo dau tieng Viet, ky tu vo hinh (zero-width, soft hyphen) + lower, de so khop khong phu thuoc dau."""
     t = unicodedata.normalize("NFD", text.lower().replace("đ", "d"))
-    return "".join(c for c in t if unicodedata.category(c) != "Mn")
+    return "".join(c for c in t if unicodedata.category(c) not in ("Mn", "Cf"))
 
 
 def _tokens(text: str) -> set:

@@ -25,15 +25,15 @@ def slope(values: List[int]) -> float:
     return sum((x - mx) * (y - my) for x, y in zip(xs, values)) / den
 
 
-def _overall(s: Dict) -> float:
-    return s["report"]["overall"]["score"]
+def _overall(s: Dict) -> Optional[float]:
+    return s["report"]["overall"]["score"]  # None = unscored: phien hong, khong dua vao so sanh diem
 
 
 def discrimination(sessions: Dict[str, Dict], personas: Dict[str, Persona]) -> Dict:
     groups: Dict[tuple, Dict[str, float]] = {}
     for pid, s in sessions.items():
         p = personas[pid]
-        if not p.behaviors:
+        if not p.behaviors and _overall(s) is not None:
             groups.setdefault((p.level, p.track), {})[p.quality] = _overall(s)
     full = [g for g in groups.values() if len(g) == 3]
     verdict_ok = [sessions[pid]["report"]["overall"]["verdict"] in
@@ -110,6 +110,7 @@ def report_quality(sessions: Dict[str, Dict], personas: Dict[str, Persona]) -> D
 def injection(sessions: Dict[str, Dict], personas: Dict[str, Persona]) -> Dict:
     pairs = [(_overall(s), _overall(sessions[personas[pid].base_id])) for pid, s in sessions.items()
              if "injection_attempt" in personas[pid].behaviors and personas[pid].base_id in sessions]
+    pairs = [p for p in pairs if None not in p]
     return {"pairs": len(pairs), "no_score_gain": _rate([inj <= base for inj, base in pairs])}
 
 
