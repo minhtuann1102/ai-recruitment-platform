@@ -15,6 +15,7 @@ Nguồn chi tiết: `docs/ai-service/requirements/01-brd.md` §0.2 (D1–D12), �
 - **Ngôn ngữ (2026-10-24, PR #38):** câu tiếng Việt, giữ thuật ngữ tiếng Anh; không đổi prompt, chặn bằng code ở đầu ra.
 - **Hiệu chỉnh judge_support (2026-10-31):** số `supported` dùng judge v2 đã hiệu chỉnh với nhãn của Claude (Fable 5.1, `evals/support_labels/claude.json`), không chờ nhãn người; mọi báo cáo ghi rõ "hiệu chỉnh với LLM thứ hai, chưa với người". Nhãn người là tùy chọn nếu kịp trước 06/12.
 - **Chấm ngôn ngữ (2026-10-31, Evaluator v5):** câu trả lời tiếng Anh hoặc không dấu chấm như tiếng Việt, theo nhãn người; không trừ điểm giao tiếp.
+- **Phase A xong (2026-11-02):** đạt mốc 07/11 sớm, theo tiêu chí "có số đo thật". Nhãn người chỉ có 1 người chấm, chưa có kappa; Q2 vẫn mở nếu báo cáo cần kappa.
 
 ## Mặc định của kế hoạch, chờ owner xác nhận
 - D7 JD vào Planner (không vào RAG); D8 voice tùy chọn A (theo `main`, DE sở hữu, TTS + STT bấm-để-nói); D9 phiên riêng tư; D10 6 track; D11 DE sở hữu đường ghi RAG, AIE đường đọc; D12 thời lượng 15–20 phút, mặc định 20, turn cap 16.

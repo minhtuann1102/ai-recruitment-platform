@@ -7,7 +7,7 @@
 | `evals/evaluator_golden.jsonl` | Evaluator chấm đúng band (mốc ±1 band ≥ 80%, tuần 09–15/11) | 48 mẫu (12 câu × 3 mức + 12 adversarial) | **Nhãn 1 người chấm** (`rater_a` = `final.json`, 43 mẫu, PR #46; nhãn người thứ hai bị loại vì không qua kiểm tra nội dung). Đã đo 2026-10-28, xem dưới |
 | `evals/evaluator_golden_sourced.jsonl` | Evaluator gán `support` đúng theo tài liệu (precision / recall từng nhãn) | 47 mẫu tự viết | AIE viết mẫu và nhãn kỳ vọng; v5 / v6: supported P 0.79 / 0.98, contradicted qua R 0.08 / 0.92. Thêm 12 mẫu ngày 02/11 (câu đúng có `R`, `R` không nói tới, tài liệu dài) và nhóm `long_s` 15 mẫu (không `R`, tài liệu ~900 ký tự, có lịch sử). Đọc recall tài liệu ở `per_label_by_cohort`, không ở số gộp |
 | `evals/rag_golden.json` + `rag_golden_holdout.json` | Truy hồi đúng tài liệu (recall@5) | 24 + 32 truy vấn | AIE gán nhãn; **chưa có query nào được duyệt trên `main`** (PR #49 chưa merge). Số đo gần nhất đo trên nhánh PR #49 (2026-10-28): 1.000 / 0.906, xem báo cáo Phase 05 cho số held-out trên `main` |
-| `evals/question_golden.jsonl` | Câu hỏi của AI: đúng level, tự nhiên, đúng hành động (Q5) | 60 câu (mỗi level 6 ask_main, 4 follow_up, 4 hint, 1 wrap_up; 45 AI tự đặt, 15 từ kho) | Dựng 2026-10-24 từ `eval-sim-bank-after2` (Interviewer v2); **nhãn 1 người chấm** (`question_labels/rater_a.json`). Đã đo 2026-10-28 |
+| `evals/question_golden.jsonl` | Câu hỏi của AI: đúng level, tự nhiên, đúng hành động (Q5) | 60 câu (mỗi level 6 ask_main, 4 follow_up, 4 hint, 1 wrap_up; 45 AI tự đặt, 15 từ kho) | Dựng 2026-10-24 từ `eval-sim-bank-after2` (Interviewer v2); **nhãn 1 người chấm** (`question_labels/rater_a.json`). Đã đo 2026-10-28. Nhãn Fable cho bộ này và hai bộ v3, v4 ở `question_labels_llm/`; hai bộ sau không commit vì có câu từ kho DE |
 
 ## Số đo với nhãn người (2026-10-28, 1 người chấm)
 
@@ -88,6 +88,8 @@ Judge v1 trên 60 câu (`plans/reports/judge-interviewer-261024-1658.json`, khô
 Văn phong bằng code (harness full, 286 câu): khuôn "Bạn có thể ... không?" 76% (ngưỡng ≤ 40%), 31.5 từ (≤ 25), mở đầu "Giờ mình sang" 20% (≤ 15%): **cả ba chưa đạt**.
 
 **Interviewer v3 (2026-10-28, `plans/reports/eval-261028-2306-interviewer-v3.md`):** khuôn 33%, 16.6 từ, mở đầu phổ biến nhất 15%: **cả ba đạt** (dao động giữa các lần chạy: khuôn 28–38%). Câu kho 100%, thứ tự strong > average > weak 7/8. Còn lại: `follow_up` vẫn 68% theo khuôn; chưa có nhãn người cho câu v3.
+
+**Interviewer v4 (2026-11-02, `plans/reports/eval-261102-1815-interviewer-v4.md`):** so với v3 cùng ngày: khuôn 25.2% → 8.6%, câu kho 97.2% → 97.1%, 15.9 → 17.6 từ, câu > 25 từ 4.6% → 10.2%. Fable chấm mù (`evals/question_labels_llm/fable.json`, **nhãn LLM, không phải người**): `natural` 3.25 → 3.37 (+0.12, CI −0.20 đến +0.45, chưa chứng minh được), hint đúng hành động 62% → 88%. Fable không thay được người: trên 60 câu v2 trùng điểm 35%, không chọn cùng câu yếu. Chưa có nhãn người cho câu v4, nên chưa biết đạt 4.0 theo người. Còn lại: `follow_up` vẫn chép `key_point`, "Khi" thành khuôn mở đầu mới của `follow_up` và `hint` (28%).
 
 ## Tiêu chí đề xuất (giai đoạn tiếp theo, xem `context/next-phase-plan.md`)
 
