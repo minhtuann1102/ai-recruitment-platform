@@ -448,7 +448,7 @@ Event `done`:
 `evaluation` (từ Evaluator v5, `covered_points` và `evidence` tối đa 4 phần tử; Evaluator v4, 2026-10-29, chỉ bổ sung): mỗi phần tử `evidence` có thêm `source_ids` (id tài liệu đối chiếu
 trong lượt: `S1..Sn` snippet của topic rồi chunk theo lượt, `R` đáp án chuẩn) và `support` (`supported` /
 `contradicted` / `no_source`); `confidence` = `low` khi lượt có tài liệu nhưng không ý nào được tài liệu ủng hộ,
-`high` khi có, `null` khi không có tài liệu, không có ý nào, hoặc Evaluator v3 / mock. Id chỉ có nghĩa trong lượt đó.
+`high` khi có, `null` khi không có tài liệu, không có ý nào, hoặc Evaluator v3 / mock. Id chỉ có nghĩa trong lượt đó. Từ Evaluator v6 `supported` khắt hơn nên `low` chiếm khoảng một nửa lượt có tài liệu, và `no_source` không có nghĩa là chắc chắn không có tài liệu nói ý đó.
 `evaluation.sources` (2026-10-29, Phase 03b): tài liệu các ý đã trích, `[{id, ref, title, url, support}]` (`ref` =
 `qa_id` / id chunk, bền qua lượt; nguồn bác bỏ trước). Lấy từ `plan.topics[].reference_sources` (cùng thứ tự
 `reference_snippets`, `{ref, title, url}`) và chunk theo lượt; interview-service lưu nguyên `evaluation` và `plan` như

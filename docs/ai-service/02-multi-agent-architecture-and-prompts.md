@@ -329,6 +329,8 @@ không chấm theo đáp án chuẩn. Khi bật hybrid (`RAG_HYBRID`, mặc đ�
 
 **Prompt v5 (2026-10-31, `evaluator.v5.md`):** mỗi tiêu chí chấm riêng, không theo bộ điểm của mẫu neo; neo rõ `extensibility` ≥ 3 khi có trade-off hoặc lỗi thực tế kèm cách xử lý; tiếng Anh và không dấu chấm như tiếng Việt; `covered ≤ 4`, `max_tokens` 400. Ghi chú giả gửi người chấm được tính là `manipulation`. Câu trả lời chỉ liệt kê tên (ngoài phase `intro`) bị code chặn `completeness`, `extensibility` ≤ 1 và `relevance` ≤ 2 (`is_term_list`). Tiền kiểm câu trả lời có regex riêng (`mock_evaluator.is_manipulation`), không còn dùng mẫu lọc CV (trước đó câu có khối code, "instruction", "you are" bị cho 0 điểm). Số đo: `plans/reports/eval-261031-1456-evaluator-v5.md`.
 
+**Prompt v6 (2026-11-02, `evaluator.v6.md`):** so `quote` với tài liệu thay vì so key point; `R` là một id phải ghi vào `source_ids`; diễn đạt khác vẫn `supported`, cùng chủ đề chưa đủ; ý đáp án mà ứng viên chưa nêu là `missing_points`, không phải `contradicted` hay `misconceptions`. Hậu kiểm bỏ khỏi `misconceptions` câu gần như nguyên văn trong `reference_answer`, trừ khi có từ phủ định quanh câu đó (`restates_reference`), áp dụng cho mọi prompt có đáp án chuẩn; ý bị `R` bác ghi `quote` của ứng viên thay vì `point`. Số đo: `plans/reports/eval-261102-1109-evaluator-v6.md`.
+
 Code hậu kiểm (§4.6, §11): mọi `quote` phải xuất hiện trong `answer` (so khớp sau chuẩn hóa, fuzzy ≥ 0.9);
 `answer_type = dont_know` thì mọi band = 0; band `completeness` bị chặn trên theo tỉ lệ key point có bằng
 chứng (§6.3). Band lưu DB được quy đổi `× 2.5` sang thang 0–10 của `interview_turns.scores`.

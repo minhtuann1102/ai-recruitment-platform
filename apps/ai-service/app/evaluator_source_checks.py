@@ -6,12 +6,19 @@ id khong co trong luot bi bo, het id thi `no_source`; `contradicted` co id hop l
 va chi khi dap an chuan (R) bac bo thi moi thanh hieu sai (luat 4, chan technical_accuracy): snippet / chunk theo
 luot chi gan dung chu de (BM25), mot chunk lech khong du de chan diem.
 """
+import unicodedata
 from difflib import SequenceMatcher
 from dataclasses import dataclass
 from typing import List, Optional, Sequence, Tuple
 
+from .mock_evaluator import fold
+
 REFERENCE_ID = "R"
 MAX_SOURCE_IDS = 3
+MIN_RESTATED_WORDS = 6  # cum ngan de trung tinh co; model chep nguyen cau dap an nen khong can khop mo
+NEGATOR_WINDOW = 3
+_NEGATORS = frozenset({"không", "chưa", "chẳng", "đừng", "tránh", "thay", "sai", "lầm", "nhầm", "trước", "not",
+                       "never", "cannot", "no", "t", "without", "avoid", "wrong"})
 
 
 def source_blocks(snippets: Sequence[str], reference_answer: str) -> List[Tuple[str, str]]:
@@ -47,8 +54,11 @@ def check_sources(points: Sequence[SourcedPoint], valid_ids: Sequence[str]
     return kept, contradicted, invalid
 
 
-def refuted_by_reference(contradicted: Sequence[SourcedPoint]) -> List[str]:
-    return [p.point for p in contradicted if REFERENCE_ID in p.source_ids]
+def refuted_by_reference(contradicted: Sequence[SourcedPoint], reference_answer: str) -> List[str]:
+    """Dieu ung vien noi sai: `quote` da kiem trong cau tra loi, vi `point` thuong chep y dung cua R du prompt dan khac.
+    `point` chep nguyen cau cua R la y ung vien chua neu, khong phai bac bo."""
+    return [p.quote for p in contradicted
+            if REFERENCE_ID in p.source_ids and not restates_reference(p.point, reference_answer)]
 
 
 def merge_misconceptions(refuted: Sequence[str], llm: Sequence[str], min_ratio: float = 0.8) -> List[str]:
@@ -59,6 +69,24 @@ def merge_misconceptions(refuted: Sequence[str], llm: Sequence[str], min_ratio: 
                    for r in out):
             out.append(m)
     return out
+
+
+def _tokens(text: str) -> List[str]:
+    return "".join(c if c.isalnum() else " " for c in unicodedata.normalize("NFC", text.lower())).split()
+
+
+def restates_reference(text: str, reference_answer: str) -> bool:
+    """Cau gan nhu nguyen van trong dap an chuan la y dung cua dap an, khong phai dieu ung vien hieu sai: model hay chep
+    y ung vien chua neu cua R vao misconceptions (mo phong 02/11). Co tu phu dinh quanh bat ky lan xuat hien nao (R co
+    the dang bac bo chinh cau do, vd "khong khoa toan bo map") thi coi la chua chac, giu lai de khong bo sot hieu sai."""
+    phrase, words = [fold(w) for w in _tokens(text)], _tokens(reference_answer)
+    folded, size = [fold(w) for w in words], len(phrase)
+    hits = [i for i in range(len(words) - size + 1) if folded[i:i + size] == phrase]
+    if size < MIN_RESTATED_WORDS or not hits:
+        return False
+    # so tren tu con dau: neu bo dau, dai tu "no" va dong tu "chua" (chứa) se trung tu phu dinh
+    around = (words[max(0, i - NEGATOR_WINDOW):i] + words[i + size:i + size + NEGATOR_WINDOW] for i in hits)
+    return not any(_NEGATORS.intersection(window) for window in around)
 
 
 def confidence(kept: Sequence[SourcedPoint], has_sources: bool) -> Optional[str]:

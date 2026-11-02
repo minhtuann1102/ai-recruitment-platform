@@ -73,7 +73,7 @@ golden có tài liệu (20 mẫu, có câu sai cố ý) ──► run_evaluator:
    - Có chunk ủng hộ → **lỗi trích** (sửa prompt).
    - Không có, nhưng tìm toàn kho (BM25 theo ý) thì có → **lỗi truy hồi** (sửa truy vấn).
    - Toàn kho không có → **kho thiếu** (việc của Phase 04).
-5. **Golden có tài liệu:** 20 mẫu có tài liệu + nhãn người: ~10 ủng hộ, ~6 câu trả lời sai ngược tài liệu (có `R` và chỉ có
+5. **Golden có tài liệu:** 20 mẫu ban đầu (32 từ 02/11) có tài liệu + nhãn người: ~10 ủng hộ, ~6 câu trả lời sai ngược tài liệu (có `R` và chỉ có
    snippet), ~4 tài liệu không liên quan. Đo precision / recall của `supported`, `contradicted`.
 6. **Tổng hợp:** báo cáo `eval-*-phase-05-grounding.md` kèm đề xuất cho câu hỏi mở số 4 và độ khắt của v4.
 
@@ -86,7 +86,10 @@ golden có tài liệu (20 mẫu, có câu sai cố ý) ──► run_evaluator:
 - [ ] *Tùy chọn, nếu kịp trước 06/12:* nhãn người 60 cặp, chạy lại `agree`
 - [x] Phân loại `no_source` (tạm, chờ hiệu chỉnh: `eval-261031-1700-judge-support.md`)
 - [x] Golden có tài liệu 20 mẫu tự viết (`evals/evaluator_golden_sourced.jsonl`, `evals/run_evaluator_sourced.py`): `contradicted` qua R 0/9 vì model không cite R; tài liệu không liên quan vẫn `supported` 7/12 (`eval-261031-1730-evaluator-sourced-golden.md`)
-- [ ] Báo cáo, cập nhật `docs/ai-service/09`, review độc lập
+- [x] Evaluator v6 và golden 32 mẫu, đo trên golden, mô phỏng, judge (`eval-261102-1109-evaluator-v6.md`); chờ owner chốt
+- [x] Golden thêm nhóm `long_s` 15 mẫu, runner tách số theo nhóm (`eval-261102-1159-evaluator-v6-recall-deep-dive.md`)
+- [ ] Sửa `R` chặn điểm oan trên dữ liệu thật: mục kho `cr-lz-python-basics-8979143a`, quyết định giữ hay bỏ luật
+- [ ] Báo cáo tổng hợp Phase 05
 
 ## Success Criteria
 Ngưỡng dưới đây là **đề xuất, chờ owner chốt**.
@@ -95,10 +98,10 @@ Ngưỡng dưới đây là **đề xuất, chờ owner chốt**.
 |---|---|---|
 | Id nguồn LLM ghi hợp lệ (mô phỏng) | 0.91–0.94 (id bịa bị code bỏ, không lọt ra) | ≥ 95% |
 | RAG lỗi trong lần đo | 0 / 318 (3 vòng sau khi sửa) | 0 (không thì lần đo không dùng làm mốc) |
-| Precision của `supported` (theo judge đã hiệu chỉnh) | chưa đo | ≥ 0.80 |
+| Precision của `supported` (theo judge đã hiệu chỉnh với LLM) | v5 0.56–0.77, v6 0.96 (recall ~0.58) | ≥ 0.80 |
 | Đồng ý judge – người | chưa đo | ≥ 0.80 thì mới dùng số của judge |
-| Recall của `contradicted` trên golden có tài liệu | chưa đo | ≥ 0.70 |
-| Precision của `contradicted` (bác oan chặn điểm) | chưa đo | ≥ 0.90 |
+| Recall của `contradicted` trên golden có tài liệu | v5 0.48, v6 0.81 (32 mẫu cũ); v6 trên 47 mẫu: `short` 0.76, `long_s` 0.11–0.20 | ≥ 0.70 trên nhóm `short`; `long_s` chỉ 3 mẫu nên chưa đặt ngưỡng |
+| Precision của `contradicted` (bác oan chặn điểm) | Golden 1.0; mô phỏng qua `R` 0/9 ở cả v5 và v6, **chưa đạt** | ≥ 0.90 |
 | `no_source` ở `technical`, gộp ≥ 150 ý | 0.243 (345 ý) | Chưa đặt tới khi phân loại xong (không tính toàn phiên: intro + scenario không có tài liệu) |
 | Evaluator ±1 band | 0.919–0.922 | ≥ 0.90 và không thấp hơn v3 quá 0.02 khi chạy **cùng lúc** (thay cho 0.93) |
 | Leniency bias | −0.47 | Trong [−0.3, +0.3], hoặc owner chấp nhận khắt hơn |
