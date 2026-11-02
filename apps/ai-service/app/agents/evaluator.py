@@ -15,7 +15,7 @@ from pydantic import BaseModel
 
 from .. import mock_evaluator
 from ..evaluator_source_checks import (SourcedPoint, check_sources, confidence, label, merge_misconceptions,
-                                      refuted_by_reference, source_blocks)
+                                      refuted_by_reference, restates_reference, source_blocks)
 from ..evaluation_checks import (MAX_COVERED, apply_caps, build_evaluation, is_term_list, matched_key_points,
                                  precheck_answer, quote_in_answer, slug_tags, supports_point, zero_evaluation)
 from ..llm.errors import ConfigError, LlmError
@@ -142,6 +142,12 @@ def postcheck(out: EvaluatorOutput, inp: EvaluationInput) -> Evaluation:
     if dropped:
         log.info("evaluator_quote_dropped turn=%d dropped=%d", inp.turn_number, dropped)
     misconceptions = [m for m in out.misconceptions if m.strip()]
+    if inp.reference_answer:  # truoc khi gop: cau dung cua dap an khong duoc chan technical_accuracy (luat 4)
+        kept = [m for m in misconceptions if not restates_reference(m, inp.reference_answer)]
+        if len(kept) < len(misconceptions):
+            log.info("evaluator_reference_restated turn=%d dropped=%d", inp.turn_number,
+                     len(misconceptions) - len(kept))
+        misconceptions = kept
     sourced = isinstance(out, EvaluatorOutputV4)
     contradicted: List[SourcedPoint] = []
     ids = [i for i, _ in source_blocks(all_snippets(inp), inp.reference_answer)]
@@ -149,7 +155,7 @@ def postcheck(out: EvaluatorOutput, inp: EvaluationInput) -> Evaluation:
         verified, contradicted, invalid = check_sources(verified, ids)
         # dap an chuan bac bo: hieu sai (luat 4 chan technical_accuracy); quote sai lam roi y nay thi LLM van
         # ghi no trong misconceptions (prompt v4 luat 12), code chi bo trung
-        misconceptions = merge_misconceptions(refuted_by_reference(contradicted), misconceptions)
+        misconceptions = merge_misconceptions(refuted_by_reference(contradicted, inp.reference_answer), misconceptions)
         if invalid or contradicted:
             log.info("evaluator_sources turn=%d invalid_ids=%d contradicted=%d", inp.turn_number, invalid,
                      len(contradicted))

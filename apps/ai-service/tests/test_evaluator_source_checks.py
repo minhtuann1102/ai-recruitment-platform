@@ -3,8 +3,10 @@ LLM gia, khong do chat luong cham."""
 import app.agents.evaluator_provider as provider
 from app.agents.evaluator import (EvaluationInput, EvaluatorOutput, EvaluatorOutputV4, build_messages, postcheck,
                                   uses_sources)
-from app.evaluator_source_checks import SourcedPoint, check_sources, confidence, merge_misconceptions, source_blocks
-from app.models_interview import PlanTopic
+from app.evaluator_source_checks import (SourcedPoint, check_sources, confidence, merge_misconceptions,
+                                         refuted_by_reference, restates_reference, source_blocks)
+from app.models_interview import CitedSource, PlanTopic, SourceRef
+from evals.run_evaluator_sourced import blocked_by_reference
 
 KP = ["Index B-tree giúp tìm nhanh thay vì quét toàn bảng", "Index làm chậm thao tác ghi",
       "Composite index theo leftmost prefix"]
@@ -50,7 +52,7 @@ def test_unknown_ids_dropped_and_supported_without_valid_id_becomes_no_source():
 
 def test_reference_answer_contradiction_becomes_misconception_and_caps_accuracy():
     ev = postcheck(out(GOOD, {**WRONG, "source_ids": ["R"]}), inp(ref="Index làm chậm thao tác ghi"))
-    assert ev.covered_points == [KP[0]] and ev.misconceptions == ["Index làm ghi nhanh hơn"]
+    assert ev.covered_points == [KP[0]] and ev.misconceptions == [WRONG["quote"]]  # loi cua ung vien, khong phai point
     assert ev.scores.technical_accuracy == 1  # luat 4
     assert ev.evidence[0].source_ids == ["S1"] and ev.evidence[0].support == "supported"
     assert ev.confidence == "high"
@@ -67,7 +69,7 @@ def test_misconceptions_put_code_checked_first_and_drop_near_duplicates():
                                   ["Cho rằng index làm ghi nhanh hơn", "Cho rằng B-tree là hash", "Nghĩ index không tốn bộ nhớ"])
     assert merged == ["Index làm ghi nhanh hơn", "Cho rằng B-tree là hash", "Nghĩ index không tốn bộ nhớ"]
     ev = postcheck(out({**WRONG, "source_ids": ["R"]}, misconceptions=["Cho rằng B-tree là hash", "Nghĩ index không tốn bộ nhớ"]), inp(ref="đáp án"))
-    assert ev.misconceptions[0] == "Index làm ghi nhanh hơn"  # khong bi cat khi chi giu 2
+    assert ev.misconceptions[0] == WRONG["quote"]  # khong bi cat khi chi giu 2
 
 
 def test_reference_only_turn_uses_r_and_rates_confidence():
@@ -101,3 +103,71 @@ def test_v3_output_keeps_old_behaviour():
     v3 = {k: GOOD[k] for k in ("point", "quote")}
     ev = postcheck(out(v3, cls=EvaluatorOutput), inp())
     assert ev.confidence is None and ev.evidence[0].support is None and ev.evidence[0].source_ids == []
+
+
+REFERENCE = ("Lớp java.lang.Throwable là lớp gốc của hệ thống phân cấp Exception trong Java. "
+             "ConcurrentHashMap từ Java 8 khóa theo từng bucket, không khóa toàn bộ map trong mỗi lần ghi dữ liệu.")
+
+
+def test_sentence_copied_from_reference_is_not_a_misconception():
+    assert restates_reference("Lớp java.lang.Throwable là lớp gốc của hệ thống phân cấp Exception", REFERENCE)
+    assert restates_reference("**Lớp java.lang.Throwable** là lớp gốc của hệ thống phân cấp Exception.", REFERENCE)
+
+
+def test_real_misconceptions_survive_even_when_their_words_are_in_the_reference():
+    assert not restates_reference("khóa toàn bộ map trong mỗi lần ghi dữ liệu", REFERENCE)  # R noi "khong khoa ..."
+    assert not restates_reference("ConcurrentHashMap khóa toàn bộ map", REFERENCE)
+    assert not restates_reference("lớp gốc là Throwable", REFERENCE)  # cum ngan
+    assert not restates_reference("Lớp java.lang.Object là lớp gốc của hệ thống phân cấp Exception", REFERENCE)
+
+
+def test_reference_that_debunks_a_sentence_never_counts_as_restating_it():
+    wrong = "khóa toàn bộ map mỗi lần ghi"
+    for ref in (f"Nó không phải {wrong}.", f"Nó không bao giờ {wrong}.", f"Nó doesn't {wrong}.",
+                f"Sai lầm thường gặp: {wrong}.", f"Dùng bucket thay vì {wrong}.", f"Tránh {wrong}.",
+                f"{wrong} là sai lầm phổ biến.", f"Trước Java 8 {wrong}, nay thì khác.",
+                f"Hashtable {wrong}, còn ConcurrentHashMap không {wrong}."):
+        assert not restates_reference(wrong, ref), ref
+
+
+def test_pronoun_and_verb_are_not_mistaken_for_negation():
+    # "no" va "chua" sau khi bo dau: fold bien "nó", "chứa" thanh tu phu dinh
+    reference = "Cluster chứa nó, mỗi replica giữ một bản dữ liệu đầy đủ."
+    assert restates_reference("mỗi replica giữ một bản dữ liệu đầy đủ", reference)
+
+
+def test_refuted_text_is_what_the_candidate_said_not_the_correct_side():
+    point = SourcedPoint("Dùng khóa theo bucket", "khóa cả map khi ghi", ["R"], "contradicted")
+    assert refuted_by_reference([point], REFERENCE) == ["khóa cả map khi ghi"]
+
+
+def test_point_copying_a_reference_sentence_is_not_a_refutation():
+    copied = SourcedPoint("Lớp java.lang.Throwable là lớp gốc của hệ thống phân cấp Exception", "New Runnable Blocked",
+                          ["R"], "contradicted")
+    assert refuted_by_reference([copied], REFERENCE) == []
+
+
+def test_reference_sentence_listed_as_misconception_does_not_cap_accuracy():
+    ev = postcheck(out(GOOD, misconceptions=["Lớp java.lang.Throwable là lớp gốc của hệ thống phân cấp Exception"]),
+                   inp(ref=REFERENCE))
+    assert ev.misconceptions == [] and ev.scores.technical_accuracy == 3
+
+
+def test_candidate_misconception_still_caps_accuracy_with_reference():
+    ev = postcheck(out(GOOD, misconceptions=["Index làm ghi nhanh hơn"]), inp(ref=REFERENCE))
+    assert ev.misconceptions == ["Index làm ghi nhanh hơn"] and ev.scores.technical_accuracy == 1
+
+
+def test_refuted_point_keeps_the_cap_and_shows_the_candidate_words():
+    wrong = {**WRONG, "point": "Index làm chậm ghi", "source_ids": ["R"]}  # point chep y dung cua R, ngan
+    ev = postcheck(out(GOOD, wrong), inp(ref="Index làm chậm ghi."))
+    assert ev.misconceptions == [WRONG["quote"]] and ev.scores.technical_accuracy == 1
+
+
+def test_blocked_by_reference_needs_the_cap_to_have_run():
+    ref = SourceRef(ref="q", title="q")
+    ev = postcheck(out(GOOD), inp(ref=REFERENCE))
+    cited = [CitedSource(**ref.model_dump(), id="R", support="contradicted")]
+    assert not blocked_by_reference(ev.model_copy(update={"sources": cited}))
+    assert blocked_by_reference(ev.model_copy(update={"sources": cited, "misconceptions": ["x"]}))
+    assert not blocked_by_reference(ev.model_copy(update={"misconceptions": ["x"]}))
