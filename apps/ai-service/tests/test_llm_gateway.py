@@ -5,11 +5,12 @@ from types import SimpleNamespace
 import pytest
 from pydantic import BaseModel
 
-from app.llm.errors import LlmOutputError
+from app.llm.errors import LlmOutputError, LlmTimeoutError
 from app.llm.gateway import LlmGateway, build_client
 from app.llm.settings import load_llm_settings
 from app.llm.usage import UsageCollector
-from fakes.fake_llm import FakeOpenAI, embedding_reply, reply, status_error, timeout_error, usage_with_cache
+from fakes.fake_llm import (FakeOpenAI, FakeStream, Slow, embedding_reply, limit_agent, reply, status_error,
+                            timeout_error, usage_with_cache)
 
 MSGS = [{"role": "user", "content": "noi dung bi mat"}]
 
@@ -155,6 +156,63 @@ def test_embed_checks_dimensions_and_retries():
     gw_bad, _, _ = make([embedding_reply([[0.1] * 10])])
     with pytest.raises(LlmOutputError):
         run(gw_bad.embed(["a"]))
+
+
+def test_slow_call_is_cut_at_timeout_s_then_retried(monkeypatch):
+    limit_agent(monkeypatch, "evaluator", 0.02)
+    gw, client, sleeps = make([Slow(1.0, reply('{"answer": "cham"}')), reply('{"answer": "ok"}')])
+    res = run(gw.complete("evaluator", MSGS, Out))
+    assert res.data == Out(answer="ok") and res.record.attempts == 2 and sleeps == [0.5] and len(client.calls) == 2
+
+
+def test_timeout_on_every_attempt_raises_llm_timeout(monkeypatch):
+    limit_agent(monkeypatch, "reporter", 0.02)
+    gw, client, _ = make([Slow(1.0, reply('{"answer": "cham"}'))] * 3)
+    with pytest.raises(LlmTimeoutError):
+        run(gw.complete("reporter", MSGS, Out))
+    assert len(client.calls) == 3
+
+
+def test_retry_budget_still_decides_whether_a_timeout_is_retried(monkeypatch):
+    limit_agent(monkeypatch, "query_rewriter", 0.02, 0.0)
+    gw, client, sleeps = make([Slow(1.0, reply("cham")), reply("khong duoc goi")])
+    with pytest.raises(LlmTimeoutError):
+        run(gw.complete("query_rewriter", MSGS))
+    assert len(client.calls) == 1 and sleeps == []
+
+
+def test_repair_shares_the_budget_of_the_first_call(monkeypatch):
+    limit_agent(monkeypatch, "evaluator", 0.5, 0.02)
+    gw, client, _ = make([Slow(0.03, reply("khong phai json")), reply('{"answer": "ok"}')])
+    with pytest.raises(LlmTimeoutError):
+        run(gw.complete("evaluator", MSGS, Out))
+    assert len(client.calls) == 1
+
+
+def test_length_retry_shares_the_budget_of_the_first_call(monkeypatch):
+    limit_agent(monkeypatch, "evaluator", 0.5, 0.02)
+    gw, client, _ = make([Slow(0.03, reply("cut", finish_reason="length")), reply('{"answer": "ok"}')])
+    with pytest.raises(LlmTimeoutError):
+        run(gw.complete("evaluator", MSGS, Out))
+    assert len(client.calls) == 1
+
+
+def test_repair_within_budget_still_runs(monkeypatch):
+    limit_agent(monkeypatch, "evaluator", 0.5, 5.0)
+    gw, client, _ = make([reply("khong phai json"), reply('{"answer": "ok"}')])
+    assert run(gw.complete("evaluator", MSGS, Out)).record.repaired and len(client.calls) == 2
+
+
+def test_opening_a_stream_is_capped_too(monkeypatch):
+    limit_agent(monkeypatch, "interviewer", 0.02)
+    gw, client, _ = make([Slow(1.0, FakeStream(["cham"]))] * 3)
+
+    async def consume():
+        return [t async for t in gw.stream("interviewer", MSGS)]
+
+    with pytest.raises(LlmTimeoutError):
+        run(consume())
+    assert len(client.calls) == 3
 
 
 def test_sdk_client_has_its_own_retries_disabled():

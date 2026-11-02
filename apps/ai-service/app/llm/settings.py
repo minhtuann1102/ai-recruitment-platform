@@ -15,14 +15,16 @@ AGENTS = ("cv_parser", "jd_parser", "planner", "evaluator", "interviewer", "repo
 EVAL_AGENTS = ("simulator",)
 
 # agent -> (temperature, max_tokens, timeout_s, seed, tong ngan sach retry s)
+# timeout_s: han tong moi lan goi, gateway cat bang asyncio. Agent duoc interview-service cho toi da N s (docs 06)
+# phai co ngan sach < N, neu khong retry chay qua han do va fallback khong ve kip. Ngan sach tinh ca repair va length.
 # Theo bang design 08 muc 9.3. jd_parser chua co trong design: dung thong so nhu cv_parser (gia dinh).
 _DEFAULTS = {
-    "cv_parser": (0.0, 1200, 20.0, None, None),
-    "jd_parser": (0.0, 1200, 20.0, None, None),
+    "cv_parser": (0.0, 1200, 20.0, None, 28.0),
+    "jd_parser": (0.0, 1200, 20.0, None, 28.0),
     "planner": (0.4, 1500, 25.0, None, None),  # 1500: planner.v2 khong viet hint/backup (do 22/10: P50 13 s)
     "evaluator": (0.0, 400, 8.0, 7, 10.0),  # v5 cho phep 4 y covered kem nguon; 400 de khong bi cat
     "interviewer": (0.7, 200, 5.0, None, None),
-    "reporter": (0.3, 2000, 60.0, None, None),
+    "reporter": (0.3, 2000, 60.0, None, 80.0),
     "simulator": (0.8, 500, 20.0, None, None),  # 350 cat cau tra loi tieng Anh dai (persona english_answers, 24/10)
     "judge": (0.0, 300, 20.0, 7, None),  # evals: LLM-as-judge cho cau hoi Interviewer (evals/judge_interviewer.py)
     "query_rewriter": (0.0, 60, 3.0, None, 0.0),  # viet lai truy van RAG (ADR-010): 3 s, khong retry; loi -> tu dien

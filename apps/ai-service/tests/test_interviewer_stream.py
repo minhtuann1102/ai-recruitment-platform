@@ -36,9 +36,9 @@ def collect(stream_obj):
     return asyncio.run(run())
 
 
-def run_stream(script, spec=SPEC, asked=(), timeout=5.0):
+def run_stream(script, spec=SPEC, asked=(), timeout=5.0, total=15.0):
     col = UsageCollector()
-    qs = QuestionStream(spec, make(script), list(asked), col, first_token_timeout=timeout)
+    qs = QuestionStream(spec, make(script), list(asked), col, first_token_timeout=timeout, total_timeout=total)
     return collect(qs), qs, col
 
 
@@ -64,6 +64,18 @@ def test_error_before_first_token_sends_fallback_tokens():
 def test_first_token_timeout_uses_fallback():
     events, qs, _ = run_stream([FakeStream(["chậm"], delay=0.2)], timeout=0.05)
     assert qs.source == "fallback" and "".join(d["t"] for _, d in events) == fallback_question(SPEC)
+
+
+def test_stream_over_total_timeout_sends_replace():
+    events, qs, col = run_stream([FakeStream(["Vậy khi ", "A gọi B", " thì sao?"], delay=0.04)], total=0.06)
+    assert [n for n, _ in events][-1] == "replace" and events[-1][1]["question"] == fallback_question(SPEC)
+    assert "token" in [n for n, _ in events] and qs.source == "fallback"
+    assert col.to_metadata()["fallbacks"] == ["interviewer_fallback"]
+
+
+def test_stream_within_total_timeout_is_untouched():
+    events, qs, _ = run_stream([FakeStream(["Vậy khi ", "A gọi B?"], delay=0.01)], total=5.0)
+    assert [n for n, _ in events] == ["token", "token"] and qs.source == "ai"
 
 
 def test_mid_stream_error_sends_replace():

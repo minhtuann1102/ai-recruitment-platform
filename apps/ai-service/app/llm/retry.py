@@ -6,13 +6,15 @@ from typing import Awaitable, Callable, Optional, Sequence, Tuple, TypeVar
 
 from openai import APIConnectionError, APIStatusError
 
+from .errors import LlmTimeoutError
+
 T = TypeVar("T")
 DELAYS = (0.5, 1.5)
 
 
 def is_retryable(exc: BaseException) -> bool:
     """Timeout, loi mang, 429, 5xx thi retry; 400/401/403 va loi khac thi khong (retry vo ich)."""
-    if isinstance(exc, APIConnectionError):  # gom ca APITimeoutError
+    if isinstance(exc, (APIConnectionError, LlmTimeoutError)):  # gom ca APITimeoutError
         return True
     if isinstance(exc, APIStatusError):
         return exc.status_code == 429 or exc.status_code >= 500
@@ -29,22 +31,37 @@ def retry_after_seconds(exc: BaseException) -> Optional[float]:
         return None
 
 
+async def _within(fn: Callable[[], Awaitable[T]], limit_s: Optional[float]) -> T:
+    if limit_s is None:
+        return await fn()
+    try:
+        return await asyncio.wait_for(fn(), limit_s)
+    except asyncio.TimeoutError as err:
+        raise LlmTimeoutError(f"Lan goi LLM qua {limit_s:.1f} s") from err
+
+
 async def call_with_retry(
     fn: Callable[[], Awaitable[T]],
     *,
     max_retries: int = 2,
     delays: Sequence[float] = DELAYS,
     jitter: float = 0.2,
+    timeout_s: Optional[float] = None,
     budget_s: Optional[float] = None,
     sleep: Callable[[float], Awaitable[None]] = asyncio.sleep,
     clock: Callable[[], float] = time.monotonic,
     rng: Callable[[], float] = random.random,
 ) -> Tuple[T, int]:
-    """Tra ve (ket qua, so lan goi). `budget_s`: tong thoi gian toi da cho retry (het ngan sach thi nem loi ngay)."""
+    """Tra ve (ket qua, so lan goi). `budget_s`: tong thoi gian toi da cho retry (het ngan sach thi nem loi ngay).
+    `timeout_s`: han tong cua moi lan goi. Lan dau luon du `timeout_s`, ke ca khi budget 0 (nghia la khong retry);
+    lan retry chi con phan du cua ngan sach."""
     start, attempt = clock(), 0
     while True:
+        limit_s = timeout_s
+        if attempt and timeout_s is not None and budget_s is not None:
+            limit_s = min(timeout_s, max(budget_s - (clock() - start), 0.0))
         try:
-            return await fn(), attempt + 1
+            return await _within(fn, limit_s), attempt + 1
         except Exception as exc:
             if not is_retryable(exc) or attempt >= max_retries:
                 raise

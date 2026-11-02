@@ -30,6 +30,12 @@ def test_agent_table_matches_design():
     assert set(AGENTS) == {"cv_parser", "jd_parser", "planner", "evaluator", "interviewer", "reporter"}
 
 
+@pytest.mark.parametrize("agent,http_timeout_s", [("cv_parser", 30), ("jd_parser", 30), ("reporter", 90)])
+def test_retries_end_before_interview_service_gives_up(agent, http_timeout_s):
+    cfg = agent_settings(agent, load_llm_settings(ENV), {})  # bang timeout: docs/ai-service/06 muc endpoint
+    assert cfg.timeout_s <= cfg.retry_budget_s < http_timeout_s
+
+
 def test_model_override_per_agent_only_affects_that_agent():
     llm = load_llm_settings(ENV)
     env = {"LLM_MODEL_EVALUATOR": "x/strong"}

@@ -1,4 +1,5 @@
 """LLM gia theo kich ban, CHI de kiem logic dieu phoi (retry, repair, fallback), khong khang dinh chat luong cham."""
+import asyncio
 from types import SimpleNamespace
 from typing import Any, Dict, List
 
@@ -36,6 +37,20 @@ def timeout_error() -> openai.APITimeoutError:
     return openai.APITimeoutError(request=_REQ)
 
 
+class Slow:
+    """Phan tu kich ban tra ve sau `delay` giay: provider giu ket noi, httpx cua client gia khong het han."""
+
+    def __init__(self, delay: float, item: Any):
+        self.delay, self.item = delay, item
+
+
+def limit_agent(monkeypatch, agent: str, timeout_s: float, budget_s: float = None) -> None:
+    """Ha timeout cua agent de test khong phai cho that."""
+    from app.llm import settings
+    temperature, max_tokens, _, seed, _ = settings._DEFAULTS[agent]
+    monkeypatch.setitem(settings._DEFAULTS, agent, (temperature, max_tokens, timeout_s, seed, budget_s))
+
+
 class _Endpoint:
     def __init__(self, owner: "FakeOpenAI", kind: str):
         self._owner, self._kind = owner, kind
@@ -45,6 +60,9 @@ class _Endpoint:
         if not self._owner.script:
             raise AssertionError("het kich ban cua FakeOpenAI")
         item = self._owner.script.pop(0)
+        if isinstance(item, Slow):
+            await asyncio.sleep(item.delay)
+            item = item.item
         if isinstance(item, BaseException):
             raise item
         return item

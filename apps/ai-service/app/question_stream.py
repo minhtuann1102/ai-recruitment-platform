@@ -1,13 +1,14 @@
 """Stream cau hoi cua Interviewer thanh event SSE kem fallback va kiem bang code (FR-AI-037..039, 071).
 
 - Loi truoc token dau (hoac qua FIRST_TOKEN_TIMEOUT_S): gui cau du phong qua event `token`.
-- Loi giua stream: gui `replace` chua cau du phong day du.
+- Loi giua stream (hoac qua STREAM_TOTAL_TIMEOUT_S): gui `replace` chua cau du phong day du.
 - Stream xong ma cau vi pham (rong, qua dai, lo diem, chep dap an chuan khi goi y, lap cau da hoi - Jaccard >= 0.8, sai ngon ngu): `replace` bang cau du phong.
 Moi lan dung cau du phong ghi `interviewer_fallback` vao metadata.fallbacks.
 """
 import asyncio
 import logging
 import re
+import time
 from typing import AsyncIterator, List, Optional, Tuple
 
 from .agents.interviewer import QuestionSpec, fallback_question
@@ -19,6 +20,7 @@ from .text_similarity import is_repeat
 
 log = logging.getLogger("ai_service.interviewer")
 FIRST_TOKEN_TIMEOUT_S = 5.0
+STREAM_TOTAL_TIMEOUT_S = 15.0  # do 02/11: 1 095 stream, dai nhat 5.3 s; chi de chan stream treo giua chung
 MAX_WORDS = 120  # prompt yeu cau <= 80; de du phong cho cau dan
 _LEAK = re.compile(r"\d+([.,]\d+)?\s*/\s*10\b|\bband\s*\d|diem (cua ban|so)|dap an (la|dung)")
 _MARKDOWN = re.compile(r"[*_#`>]+")
@@ -58,9 +60,10 @@ def violation(question: str, asked: List[str], reference: str = "", allowed: str
 
 class QuestionStream:
     def __init__(self, spec: QuestionSpec, interviewer, asked: List[str],
-                 collector: Optional[UsageCollector] = None, first_token_timeout: float = FIRST_TOKEN_TIMEOUT_S):
+                 collector: Optional[UsageCollector] = None, first_token_timeout: float = FIRST_TOKEN_TIMEOUT_S,
+                 total_timeout: float = STREAM_TOTAL_TIMEOUT_S):
         self.spec, self.interviewer, self.asked, self.collector = spec, interviewer, asked, collector
-        self.first_token_timeout = first_token_timeout
+        self.first_token_timeout, self.total_timeout = first_token_timeout, total_timeout
         self.question, self.source = "", "ai"
 
     def _fallback(self, reason: str) -> str:
@@ -74,11 +77,14 @@ class QuestionStream:
     async def events(self) -> AsyncIterator[Tuple[str, dict]]:
         parts: List[str] = []
         gen = self.interviewer.stream(self.spec, self.collector).__aiter__()
+        deadline = time.monotonic() + self.total_timeout
         try:
             first = await asyncio.wait_for(gen.__anext__(), timeout=self.first_token_timeout)
             parts.append(first)
             yield "token", {"t": first}
-            async for piece in gen:
+            while True:
+                # wait_for tung manh, khong boc ca vong lap: khong duoc giu han tong qua cac lan yield
+                piece = await asyncio.wait_for(gen.__anext__(), timeout=deadline - time.monotonic())
                 parts.append(piece)
                 yield "token", {"t": piece}
         except StopAsyncIteration:

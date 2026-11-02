@@ -8,3 +8,7 @@ class LlmError(RuntimeError):
 
 class LlmOutputError(LlmError):
     """Dau ra LLM khong dung dinh dang (cat cut hoac sai schema sau repair)."""
+
+
+class LlmTimeoutError(LlmError):
+    """Mot lan goi LLM vuot timeout_s. Timeout cua httpx chi tinh tung lan doc nen khong chan duoc loi nay."""

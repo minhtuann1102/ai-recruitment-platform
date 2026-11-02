@@ -16,7 +16,7 @@ from app.models_interview import CandidateState, Evaluation, FinalizeRequest, Pl
 from app.models_jd import JdProfile, JdRequirement
 from app.policy import decide
 from app.report_scoring import build_report
-from fakes.fake_llm import FakeOpenAI, reply, status_error
+from fakes.fake_llm import FakeOpenAI, Slow, limit_agent, reply, status_error
 
 
 @pytest.fixture(scope="module")
@@ -87,6 +87,12 @@ def test_reporter_error_returns_partial_with_same_scores(session, client):
     rep = asyncio.run(make([status_error(500)] * 3)[0].report(session, col))
     assert rep["status"] == "partial" and rep["overall"]["score"] == build_report(session)["overall"]["score"]
     assert col.to_metadata()["fallbacks"] == ["reporter_partial"]
+
+
+def test_reporter_hang_returns_partial(session, monkeypatch):
+    limit_agent(monkeypatch, "reporter", 0.02)
+    rep = asyncio.run(make([Slow(1.0, output(session))] * 3)[0].report(session))
+    assert rep["status"] == "partial"
 
 
 def test_requirements_block(session, client):
