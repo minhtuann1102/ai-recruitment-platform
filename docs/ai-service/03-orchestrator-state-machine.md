@@ -191,16 +191,16 @@ async def run_turn(req: NextTurnRequest) -> AsyncIterator[SseEvent]:
 
 | Lỗi | Phát hiện | Xử lý | Ảnh hưởng tới ứng viên |
 |---|---|---|---|
-| Timeout / 429 / 5xx | Exception từ SDK | Retry 2 lần (chính sách trên) | Chậm thêm vài giây |
+| Timeout / 429 / 5xx | Exception từ SDK, hoặc `LlmTimeoutError` khi một lần gọi quá `timeout_s` | Retry 2 lần (chính sách trên), trong ngân sách của agent | Chậm thêm vài giây |
 | JSON không parse được / sai schema | `ValidationError` | Repair retry 1 lần | Chậm ~1–2 s |
 | Evaluator: quote không có trong câu trả lời | Hậu kiểm fuzzy match | Xóa evidence + covered_point tương ứng; > 50% evidence sai → repair retry | Không |
 | Evaluator: mâu thuẫn nội tại (`dont_know` mà band > 0; band ngoài 0–4) | Validator | Code sửa theo luật (`dont_know` → band 0) | Không |
 | **Evaluator thất bại hẳn** | Hết retry / ngân sách | `Evaluation.degraded()`: `answer_type = "unknown"`, không có band. Policy coi như `ok` không có `missing_points` → `next_topic` nếu đã ≥ 1 follow-up, ngược lại `follow_up` theo key point chưa hỏi. Lượt này **loại khỏi tính điểm**, report ghi chú | Không nhận ra |
 | **Interviewer lỗi trước token đầu** | Exception / không có token trong 5 s | Retry 1 lần; vẫn lỗi → dùng câu `backup_question` của topic (action `ask_main`) hoặc câu từ `question_bank` theo category + difficulty. Gửi nguyên câu trong 1 event `token`, `question_source = "fallback"` | Câu hỏi kém "dính" ngữ cảnh hơn |
-| **Interviewer lỗi giữa stream** | Exception sau khi đã gửi token | Gửi event `replace` chứa câu fallback đầy đủ; client thay toàn bộ nội dung câu hỏi | Thấy câu hỏi đổi |
+| **Interviewer lỗi giữa stream** | Exception sau khi đã gửi token, hoặc cả stream quá 15 s | Gửi event `replace` chứa câu fallback đầy đủ; client thay toàn bộ nội dung câu hỏi | Thấy câu hỏi đổi |
 | Planner lỗi / plan không hợp lệ sau repair | Hết retry / validator | **Plan dự phòng bằng code**: chọn ngẫu nhiên có trọng số các topic catalog theo level, intro generic | Plan kém cá nhân hóa |
 | CV Parser lỗi | Hết retry | Session tiếp tục không CV, `cvStatus = "failed"` | Thông báo "Không đọc được CV, buổi phỏng vấn sẽ không dựa trên CV" |
-| Reporter lỗi | Hết retry (timeout 60 s) | Report **chỉ có điểm** (code) + nhận xét mẫu theo template, `report.status = "partial"`; ứng viên có thể bấm tạo lại | Báo cáo ít nhận xét |
+| Reporter lỗi | Hết retry (60 s mỗi lần, tổng ≤ 80 s) | Report **chỉ có điểm** (code) + nhận xét mẫu theo template, `report.status = "partial"`; ứng viên có thể bấm tạo lại | Báo cáo ít nhận xét |
 | State không hợp lệ (`schema_version` lạ, phase sai) | Pydantic | 422 `invalid_state`; interview-service log lỗi, không tự sửa | Lỗi hiển thị, phiên dừng |
 | Gửi trùng câu trả lời / 2 tab cùng lúc | interview-service: Redis lock `interview:lock:{sessionId}` (TTL 60 s) + `turnNumber` mong đợi | Request trùng `turnNumber` đã xử lý → trả lại câu hỏi đã lưu; đang xử lý → 409 `TURN_CONFLICT` | Không hỏi trùng |
 | Client mất kết nối giữa stream | interview-service phát hiện socket đóng | interview-service **vẫn đọc hết stream** từ ai-service và lưu câu hỏi + state; client vào lại gọi `GET /sessions/{id}` để lấy câu hỏi hiện tại | Không mất lượt |

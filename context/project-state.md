@@ -29,6 +29,7 @@ Sau khi sửa ngắt mạch (3 vòng, kể cả tải gấp đôi): RAG `error` 
 - Tín hiệu lỗi luồng AI (nhánh `thang/report-failure-signals`, 02/11, **chưa merge, chờ owner**): báo cáo `unscored` khi không chấm được, bỏ `[Mock]`; `/api/health` có `agents`, staging/production thiếu cấu hình LLM thì không khởi động; `prompt_versions` thật; cờ `reference_missing`. Nguồn: `plans/reports/audit-261102-1539-ai-flow-errors-controls-evaluation.md`.
 - Vá chống injection và đo prompt cache (02/11, **cùng nhánh trên, chưa merge**): `wrap_untrusted` escape mọi biến thể thẻ đóng, bỏ ký tự vô hình; `is_manipulation` bắt thêm dạng lách, bỏ bắt nhầm "cho em full quyền...", quét 2 671 câu có sẵn: 470 lượt bắt trước và sau, không thêm không mất; `cached_tokens` trong `metadata.usage`. Đo 10 phiên LLM thật: 63.8% input là cached (docs 08).
 - PR #49 (DE duyệt golden RAG): **chưa merge, đang conflict** ở `03-non-functional-requirements.md`; chờ DE duyệt lại g22/g24/h29/h30. Trên `main` chưa query nào có `approved_by`.
+- Hạn tổng cho lần gọi LLM (02/11, PR đang chờ merge): `timeout_s` nay cắt thật mỗi lần gọi, quá hạn vào `degraded`/`partial`; thêm ngân sách retry CV/JD Parser 28 s, Reporter 80 s để fallback về trước timeout của interview-service; stream Interviewer có hạn tổng 15 s. Chỉ kiểm bằng test fake, chưa đo LLM thật. Ước tính từ log: ~1.8% lượt Evaluator chuyển thành `degraded` (trước đây các lượt này chờ 8–180 s). Chi tiết: docs 08 §9.3.
 
 ## Mốc
 Feature freeze 06/12/2026; Sprint 5 07–21/12. Gate voice 22/11. Mốc Evaluator ±1 band ≥ 80% ở tuần 09–15/11.

@@ -83,20 +83,24 @@ Dự phòng nếu đo thực tế vượt mục tiêu (chưa làm, theo thứ t�
 
 ## 9.3 Chọn model cho từng agent
 
-> **Cài đặt (Phase 02):** bảng dưới là nguồn của `app/llm/settings.py`. Env `LLM_MODEL_<AGENT>` đổi model từng agent; thông số khác cố định theo bảng. Ngân sách retry của Evaluator 10 s. Test `tests/test_llm_settings.py` giữ bảng và code khớp.
+> **Cài đặt (Phase 02):** bảng dưới là nguồn của `app/llm/settings.py`. Env `LLM_MODEL_<AGENT>` đổi model từng agent; thông số khác cố định theo bảng. Test `tests/test_llm_settings.py` giữ bảng và code khớp.
+>
+> **Timeout là hạn tổng của mỗi lần gọi (từ 2026-11-02).** Gateway cắt bằng `asyncio.wait_for`, vì timeout của httpx chỉ tính từng lần đọc: đo 02/11 có Evaluator 8 s chạy 180 s, Reporter 60 s chạy 170 s. Quá hạn nhận `LlmTimeoutError`, đi vào retry và fallback sẵn có. "tổng ≤ N s" là ngân sách dùng chung cho retry, repair và thử lại vì `finish_reason=length`: lần gọi đầu luôn đủ timeout, các lần sau chỉ còn phần dư. Agent có timeout phía interview-service (docs 06) phải có ngân sách nhỏ hơn timeout đó, nếu không fallback về không kịp. Agent không có ngân sách (Planner có hạn tổng riêng) thì mỗi lần gọi vẫn bị cắt ở timeout. Trong log 02/11 có 0/2 443 lần gọi cần repair, nên dùng chung ngân sách không làm mất lượt đo được. `embed` không dùng hạn này.
+>
+> **Tác động ước tính từ log 02/11 (không đo lại):** 17/930 lần gọi Evaluator (1.8%) dài hơn 8 s. Các lần này giờ bị cắt, lần retry chỉ còn ~1.5 s trong khi P50 là 3 s, nên gần như đều thành `degraded`. Query rewriter 10/282 lần quá 3 s, giữ truy vấn gốc. Reporter 1/115 lần quá 60 s. Planner không có lần nào quá hạn.
 
 Tất cả qua cùng một endpoint OpenAI-compatible. Env riêng từng agent; không đặt thì dùng `LLM_MODEL` (mặc định
 `openai/gpt-4o-mini`, như `config.py` hiện có).
 
 | Agent | Env | Mặc định | `temperature` | `max_tokens` | Output | Timeout / lần | Ghi chú |
 |---|---|---|---|---|---|---|---|
-| JD Parser | `LLM_MODEL_JD_PARSER` | gpt-4o-mini | 0 | 1200 | JSON strict | 20 s | **Giả định** như CV Parser (S2-AIE-6) |
-| CV Parser | `LLM_MODEL_CV_PARSER` | gpt-4o-mini | 0 | 1200 | JSON strict | 20 s | Trích xuất, model nhỏ đủ |
+| JD Parser | `LLM_MODEL_JD_PARSER` | gpt-4o-mini | 0 | 1200 | JSON strict | 20 s, tổng ≤ 28 s | **Giả định** như CV Parser (S2-AIE-6) |
+| CV Parser | `LLM_MODEL_CV_PARSER` | gpt-4o-mini | 0 | 1200 | JSON strict | 20 s, tổng ≤ 28 s | Trích xuất, model nhỏ đủ |
 | Planner | `LLM_MODEL_PLANNER` | gpt-4o-mini | 0.4 | 1500 (từ 2026-10-22, prompt v2: code sinh `opening_hint`, `backup_question`, bù `key_points` thiếu; P50 13 s → 8.2 s) | JSON strict | 25 s (hạn tổng 22 s) | 1 lần/phiên: ứng viên dùng model mạnh hơn nếu eval cho thấy plan kém (chi phí tăng không đáng kể) |
 | **Evaluator** | `LLM_MODEL_EVALUATOR` | gpt-4o-mini | 0 (+ `seed` cố định) | 300 (từ 2026-10-22, prompt v2; đo output P95 ~200 token, P50 3.6 s) | JSON strict | 8 s, tổng ≤ 10 s | **Nhỏ, nhanh**, nằm trên đường nóng. Độ khắt khe đến từ rubric + luật code, không từ model to |
-| Interviewer | `LLM_MODEL_INTERVIEWER` | gpt-4o-mini | 0.7 | 200 | Text stream | TTFT 5 s | Nhiệt độ cao hơn để câu hỏi tự nhiên, không rập khuôn |
+| Interviewer | `LLM_MODEL_INTERVIEWER` | gpt-4o-mini | 0.7 | 200 | Text stream | TTFT 5 s, cả stream 15 s | Nhiệt độ cao hơn để câu hỏi tự nhiên, không rập khuôn. Hạn 15 s chặn stream treo sau token đầu (đo 02/11: 1 095 stream, dài nhất 5.3 s), quá hạn thì gửi `replace` bằng câu dự phòng |
 | Query rewriter (RAG) | `LLM_MODEL_QUERY_REWRITER` | gpt-4o-mini | 0 | 60 | Text | 3 s, không retry | Chỉ khi tìm vector (topic < 2 cặp Q&A); đo 24/10 P50 1.6 s (ADR-010) |
-| Reporter | `LLM_MODEL_REPORTER` | gpt-4o-mini | 0.3 | 2000 | JSON strict | 60 s | 1 lần/phiên: ứng viên dùng model mạnh hơn để nhận xét sâu hơn |
+| Reporter | `LLM_MODEL_REPORTER` | gpt-4o-mini | 0.3 | 2000 | JSON strict | 60 s, tổng ≤ 80 s | 1 lần/phiên: ứng viên dùng model mạnh hơn để nhận xét sâu hơn. `/api/finalize` có timeout 90 s |
 
 Đổi model của Evaluator **chỉ khi** chạy lại golden set (§10) và độ khớp với người chấm không giảm quá 5 điểm %.
 Đổi model embedding là thay đổi contract dữ liệu (constitution IV), không thuộc phạm vi này.
