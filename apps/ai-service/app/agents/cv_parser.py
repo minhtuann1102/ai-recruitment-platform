@@ -17,7 +17,7 @@ from ..llm.gateway import LlmGateway
 from ..models_cv import (CvEducation, CvExperience, CvFlags, CvParseMetadata, CvParseResponse, CvProfile,
                          CvProject, CvSkill)
 from ..prompts.store import UNTRUSTED_NOTICE, PromptStore, wrap_untrusted
-from .registry import agent_mode, cached_llm_agent
+from .registry import agent_mode, cached_llm_agent, config_fallback
 
 log = logging.getLogger("ai_service.cv_parser")
 _YM = re.compile(r"^(19|20)\d{2}-(0[1-9]|1[0-2])$")
@@ -106,7 +106,9 @@ class LlmCvParser:
                                                   prompt_version=self._prompt.version)
         except (LlmError, ConfigError, openai.APIError) as err:
             log.warning("cv_parser_fallback error=%s", type(err).__name__)
-            return mock_cv_parser.parse_cv_bytes(data, track)  # parser quy tac: van ra CvProfile hop le
+            result = mock_cv_parser.parse_cv_bytes(data, track)  # parser quy tac: van ra CvProfile hop le
+            result.metadata.fallbacks.append("cv_parser_fallback")
+            return result
         rec = result.record
         return CvParseResponse(
             cv_profile=to_profile(result.data, injection=injection, truncated=truncated),
@@ -116,12 +118,18 @@ class LlmCvParser:
 
 
 class MockCvParser:
+    def __init__(self, config_error: bool = False):  # True: dung thay LLM vi thieu cau hinh
+        self.config_error = config_error
+
     async def parse(self, data: bytes, track: str) -> CvParseResponse:
-        return mock_cv_parser.parse_cv_bytes(data, track)
+        result = mock_cv_parser.parse_cv_bytes(data, track)
+        if self.config_error:
+            result.metadata.fallbacks.append(config_fallback(LlmCvParser.agent))
+        return result
 
 
 def get_cv_parser():
-    """AGENT_CV_PARSER_MODE=llm thi dung LLM; thieu cau hinh LLM thi ve parser quy tac (khong loi 500)."""
+    """AGENT_CV_PARSER_MODE=llm thi dung LLM; thieu cau hinh LLM thi ve parser quy tac (khong 500, co fallbacks)."""
     if agent_mode("cv_parser") == "mock":
         return MockCvParser()
-    return cached_llm_agent("cv_parser", LlmCvParser) or MockCvParser()
+    return cached_llm_agent("cv_parser", LlmCvParser) or MockCvParser(config_error=True)

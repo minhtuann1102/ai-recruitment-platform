@@ -21,7 +21,7 @@ from ..prompts.store import UNTRUSTED_NOTICE, PromptStore, wrap_untrusted
 from ..report_resources import MAX_RESOURCES, plan_sources, resource_catalog
 from ..report_scoring import build_report, scored_turns
 from ..models_interview import FinalizeRequest
-from .registry import agent_mode, cached_llm_agent
+from .registry import agent_mode, cached_llm_agent, record_config_fallback
 
 log = logging.getLogger("ai_service.reporter")
 STRENGTH_MIN_SCORE = 6.0  # luot dan chung cho diem manh phai dat it nhat muc nay (chong "diem manh sai")
@@ -121,6 +121,10 @@ class LlmReporter:
 
     async def report(self, req: FinalizeRequest, collector: Optional[UsageCollector] = None) -> Dict:
         base = build_report(req)
+        if base["status"] == "unscored":  # khong co gi de nhan xet: khong ton LLM
+            return base
+        versions = {**base["meta"]["prompt_versions"], "reporter": self._prompt.version}
+        base = {**base, "meta": {**base["meta"], "prompt_versions": versions}}
         resources = resource_catalog(scored_turns(req), [t["topic_id"] for t in base["topics"]],
                                      plan_sources(req.plan))
         data = json.dumps(reporter_input(base, req, resources), ensure_ascii=False)
@@ -135,18 +139,25 @@ class LlmReporter:
                 collector.add(CallRecord(self.agent, "rule-based", fallback="reporter_partial"))
             return {**base, "status": "partial"}
         report = merge_comments(base, result.data, resources)
-        report["meta"] = {**report["meta"], "prompt_versions": {**report["meta"]["prompt_versions"],
-                                                                "reporter": self._prompt.version}}
         report["metadata"] = {"model": result.record.model, "latency_ms": result.record.latency_ms}
         return report
 
 
 class MockReporter:
+    """config_error=True: dung thay LLM vi thieu cau hinh, nhan xet la ban mau nen bao partial nhu khi Reporter loi."""
+
+    def __init__(self, config_error: bool = False):
+        self.config_error = config_error
+
     async def report(self, req: FinalizeRequest, collector: Optional[UsageCollector] = None) -> Dict:
-        return build_report(req)
+        report = build_report(req)
+        if not self.config_error:
+            return report
+        record_config_fallback(LlmReporter.agent, collector)
+        return report if report["status"] == "unscored" else {**report, "status": "partial"}
 
 
 def get_reporter():
     if agent_mode("reporter") == "mock":
         return MockReporter()
-    return cached_llm_agent("reporter", LlmReporter) or MockReporter()
+    return cached_llm_agent("reporter", LlmReporter) or MockReporter(config_error=True)

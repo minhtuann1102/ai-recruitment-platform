@@ -206,6 +206,8 @@ class Evaluation(BaseModel):
     # v4: low = luot co tai lieu nhung khong y covered nao duoc tai lieu ung ho (diem khong bam nguon); None = v3 / mock
     confidence: Optional[Literal["high", "low"]] = None
     sources: List[CitedSource] = Field(default_factory=list)  # 03b: Reporter lay tai lieu cho study_plan tu day
+    prompt_version: Optional[str] = None  # ban prompt da cham; None = khong qua LLM (mock, luat code, degraded)
+    reference_missing: bool = False  # cau trong kho nhung khong lay duoc dap an chuan luc cham (ai_db loi / qua han)
 
 
 # --- Finalize ---

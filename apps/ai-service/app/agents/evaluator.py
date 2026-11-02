@@ -215,4 +215,5 @@ class LlmEvaluator:
                                          fallback="evaluator_mock_heuristic"))
             fallback = mock_evaluator.evaluate(inp.answer, inp.question, inp.topic, inp.turn_kind, inp.turn_number)
             return None, fallback.model_copy(update={"degraded": True})
-        return result.data, await asyncio.to_thread(postcheck, result.data, inp)
+        ev = await asyncio.to_thread(postcheck, result.data, inp)
+        return result.data, ev.model_copy(update={"prompt_version": self._prompt.version})

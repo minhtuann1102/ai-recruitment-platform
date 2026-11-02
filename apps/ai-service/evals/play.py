@@ -49,7 +49,8 @@ class HumanCandidate:
 def print_report(report: dict) -> None:
     o = report["overall"]
     print(f"\n\033[1m=== Báo cáo ({report['status']}) ===\033[0m")
-    print(f"Điểm tổng: {o['score']}/10 · {o['verdict']} · độ tin cậy {report['session']['confidence']}")
+    score = "chưa chấm được" if o["score"] is None else f"{o['score']}/10 · {o['verdict']}"
+    print(f"Điểm tổng: {score} · độ tin cậy {report['session']['confidence']}")
     print(o["summary"])
     print("Theo phần: " + ", ".join(f"{s['phase']} {s['score']}" for s in report["sections"]))
     print("Theo tiêu chí: " + ", ".join(f"{k} {v}" for k, v in report["criteria"].items()))

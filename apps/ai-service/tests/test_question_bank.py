@@ -86,6 +86,11 @@ class FakeRetriever:
         return f"Đáp án chuẩn {qa_id}"
 
 
+class NoKeyRetriever(FakeRetriever):
+    async def answer_key(self, qa_id, collector=None):  # ai_db loi / het han: _answer_key cung tra chuoi rong nhu vay
+        return ""
+
+
 class CaptureEvaluator:
     def __init__(self):
         self.inputs = []
@@ -96,6 +101,11 @@ class CaptureEvaluator:
                           scores={k: 2 for k in ("technical_accuracy", "completeness", "extensibility", "relevance")},
                           scores_10={k: 5.0 for k in ("technical_accuracy", "completeness", "extensibility",
                                                       "relevance")}, turn_score_10=5.0)
+
+
+class DontKnowEvaluator(CaptureEvaluator):
+    async def evaluate(self, inp, collector=None):
+        return (await super().evaluate(inp, collector)).model_copy(update={"answer_type": "dont_know"})
 
 
 def test_engine_asks_bank_question_and_evaluator_gets_answer_key():
@@ -130,6 +140,21 @@ def test_engine_asks_bank_question_and_evaluator_gets_answer_key():
                            answer="Em trả lời câu hỏi trong kho.", elapsed_seconds=600)
     run(next_turn(nreq, evaluator=evaluator, retriever=retr))
     assert evaluator.inputs[-1].reference_answer == f"Đáp án chuẩn {qa_id}" and retr.asked == [qa_id]
+    assert run(next_turn(nreq, evaluator=evaluator, retriever=retr)).evaluation.reference_missing is False
+    assert run(next_turn(nreq, evaluator=evaluator, retriever=NoKeyRetriever())).evaluation.reference_missing is True
+    no_answer = run(next_turn(nreq, evaluator=DontKnowEvaluator(), retriever=NoKeyRetriever())).evaluation
+    assert no_answer.reference_missing is False  # dont_know khong dung dap an chuan, khong lam giam do tin cay
+
+
+def test_turn_without_bank_question_is_not_reference_missing():
+    r = run(start_session(StartRequest(session_id="s", track="java_backend", level="junior", duration_minutes=20),
+                          planner=MockPlanner(), retriever=NoKeyRetriever()))
+    finish_turn(r, "Giới thiệu bản thân?", "ai")
+    nreq = NextTurnRequest(session_id="s", level="junior", track="java_backend", plan=r.plan, state=r.state,
+                           turn_number=r.turn.turn_number, question=r.question, turn_kind=r.turn.turn_kind,
+                           answer="Em trả lời có nội dung kỹ thuật.", elapsed_seconds=60)
+    ev = run(next_turn(nreq, evaluator=CaptureEvaluator(), retriever=NoKeyRetriever())).evaluation
+    assert ev.reference_missing is False
 
 
 def test_drifted_rephrase_is_not_graded_with_answer_key():

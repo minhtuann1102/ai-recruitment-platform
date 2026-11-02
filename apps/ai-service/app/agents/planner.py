@@ -21,7 +21,7 @@ from ..models_jd import JdProfile
 from ..plan_template import PlanTemplate, build_template
 from ..plan_validator import validate_plan
 from ..prompts.store import UNTRUSTED_NOTICE, PromptStore, wrap_untrusted
-from .registry import agent_mode, cached_llm_agent
+from .registry import agent_mode, cached_llm_agent, record_config_fallback
 
 log = logging.getLogger("ai_service.planner")
 
@@ -137,11 +137,16 @@ class LlmPlanner:
 
 
 class MockPlanner:
+    def __init__(self, config_error: bool = False):  # True: dung thay LLM vi thieu cau hinh
+        self.config_error = config_error
+
     async def plan(self, track, level, duration, cv, jd, collector=None) -> InterviewPlan:
+        if self.config_error:
+            record_config_fallback(LlmPlanner.agent, collector)
         return mock_planner.build_plan(track, level, duration, cv, jd)
 
 
 def get_planner():
     if agent_mode("planner") == "mock":
         return MockPlanner()
-    return cached_llm_agent("planner", LlmPlanner) or MockPlanner()
+    return cached_llm_agent("planner", LlmPlanner) or MockPlanner(config_error=True)

@@ -1,6 +1,7 @@
 """Tong hop diem va bao cao cuoi buoi (docs/ai-service/05 muc 6.3-6.4). DIEM do code tinh.
 
-Phan nhan xet la MOCK (template); se thay bang Reporter LLM. Reporter that khong duoc sua diem.
+Phan nhan xet o day la mau do code viet, Reporter LLM thay vao sau va khong duoc sua diem. Mau co the toi nguoi dung
+(Reporter loi, summary bi loai), nen khong duoc nhac toi mock hay Reporter.
 """
 import time
 from typing import Dict, List
@@ -17,6 +18,9 @@ PHASE_WEIGHTS = {
     "senior": {"intro": 0.20, "technical": 0.35, "scenario": 0.45},
 }
 CRITERIA = ["technical_accuracy", "completeness", "extensibility", "relevance"]
+VERDICT_LABELS = {"exceeds": "vượt kỳ vọng level", "meets": "đạt kỳ vọng level", "near": "gần đạt", "below": "chưa đạt"}
+UNSCORED_SUMMARY = ("Buổi này chưa có điểm: không có lượt trả lời nào chấm được, "
+                    "nên kết quả không phản ánh năng lực ứng viên.")
 
 
 def verdict(overall: float) -> str:
@@ -32,11 +36,25 @@ def _scored(turns: List[FinalizeTurn]) -> List[FinalizeTurn]:
 
 
 def _confidence(req: FinalizeRequest, scored: List[FinalizeTurn], phases_scored: int) -> str:
-    degraded = sum(1 for t in req.turns if t.evaluation and t.evaluation.degraded)
-    evaluated = sum(1 for t in req.turns if t.evaluation)
-    if len(scored) < 6 or (evaluated and degraded / evaluated > 0.2) or phases_scored < 3:
+    evaluations = [t.evaluation for t in req.turns if t.evaluation]
+    shaky = sum(1 for e in evaluations if e.degraded or e.reference_missing)  # diem kem tin cay hoac khong tinh duoc
+    if len(scored) < 6 or (evaluations and shaky / len(evaluations) > 0.2) or phases_scored < 3:
         return "low"
     return "medium" if len(scored) <= 9 else "high"
+
+
+def _evaluator_prompts(turns: List[FinalizeTurn]) -> str:
+    """Ban prompt Evaluator da cham buoi nay; doi prompt giua buoi thi noi dau phay. Khong luot nao qua LLM: mock."""
+    return ",".join(sorted({t.evaluation.prompt_version for t in turns
+                            if t.evaluation and t.evaluation.prompt_version})) or "mock"
+
+
+def _overall_block(sections: List[Dict], score: float) -> Dict:
+    """Khong co phan nao co diem thi khong co ket luan: 0.0 / below la danh gia ung vien, con day la loi he thong."""
+    if not sections:
+        return {"score": None, "verdict": None, "summary": UNSCORED_SUMMARY}
+    v = verdict(score)
+    return {"score": score, "verdict": v, "summary": f"Kết quả tổng thể {score}/10: {VERDICT_LABELS[v]}."}
 
 
 def _turn_comment(t: FinalizeTurn) -> str:
@@ -74,20 +92,18 @@ def build_report(req: FinalizeRequest) -> Dict:
                  "weight": weights[ph]} for ph in weights if any(t["phase"] == ph for t in topics)]
     total_w = sum(s["weight"] for s in sections) or 1
     overall = round(sum(s["score"] * s["weight"] for s in sections) / total_w, 1)
-    criteria = {c: _avg([getattr(t.evaluation.scores_10, c) for t in scored]) for c in CRITERIA}
+    criteria = {c: _avg([getattr(t.evaluation.scores_10, c) for t in scored]) if sections else None for c in CRITERIA}
     good = [t for t in topics if t["score"] >= 7.0]
     weak = sorted([t for t in topics if t["score"] < 5.0], key=lambda t: t["score"])
     kp = {t.id: t.key_points for ph in req.plan.phases for t in ph.topics}
     fallback = plan_sources(req.plan)
-    v = verdict(overall)
     requirements = requirements_block(req.jd_profile, req.plan, scored, req.turns)
     return {
-        "schema_version": 1, "status": "complete",
+        "schema_version": 1, "status": "complete" if sections else "unscored",
         "session": {"track": req.track, "level": req.level, "duration_s": req.duration_s,
                     "end_reason": req.end_reason, "evaluated_turns": len(scored),
                     "confidence": _confidence(req, scored, len(sections))},
-        "overall": {"score": overall, "verdict": v,
-                    "summary": f"[Mock] Kết quả tổng thể: {v}. Nhận xét chi tiết sẽ do Reporter LLM viết."},
+        "overall": _overall_block(sections, overall),
         "sections": sections, "criteria": criteria,
         "topics": [{k: v for k, v in t.items() if k != "_turns"} for t in topics],
         "strengths": [{"point": f"Nắm tốt {t['title']}", "evidence_turns": t["_turns"]} for t in good[:3]],
@@ -104,7 +120,8 @@ def build_report(req: FinalizeRequest) -> Dict:
                    "comment": _turn_comment(t)} for t in scored],
         "meta": {"difficulty_trajectory": [t.difficulty for t in scored], "degraded_turns":
                  [t.turn_number for t in req.turns if t.evaluation and t.evaluation.degraded],
-                 "prompt_versions": {"evaluator": "mock", "reporter": "mock"},
+                 "reference_missing_turns": [t.turn_number for t in scored if t.evaluation.reference_missing],
+                 "prompt_versions": {"evaluator": _evaluator_prompts(req.turns), "reporter": "mock"},
                  "disclaimer": "Điểm do AI chấm, mang tính tham khảo cho việc luyện tập."},
         "metadata": {"model": "mock-rule-based", "latency_ms": int((time.perf_counter() - started) * 1000)},
     }

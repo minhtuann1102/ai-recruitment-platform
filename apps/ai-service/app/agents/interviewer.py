@@ -17,7 +17,7 @@ from ..models_interview import PlanTopic
 from ..prompts.store import UNTRUSTED_NOTICE, PromptStore, wrap_untrusted
 from ..sse import chunk_tokens
 from ..text_similarity import is_repeat
-from .registry import agent_mode, cached_llm_agent
+from .registry import agent_mode, cached_llm_agent, record_config_fallback
 
 
 @dataclass
@@ -95,7 +95,12 @@ class LlmInterviewer:
 
 
 class MockInterviewer:
+    def __init__(self, config_error: bool = False):  # True: dung thay LLM vi thieu cau hinh
+        self.config_error = config_error
+
     async def stream(self, spec: QuestionSpec, collector: Optional[UsageCollector] = None) -> AsyncIterator[str]:
+        if self.config_error:
+            record_config_fallback(LlmInterviewer.agent, collector)
         delay = float(os.getenv("MOCK_STREAM_DELAY_MS", "0")) / 1000  # mo phong do tre de thu qua APISIX
         for tok in chunk_tokens(fallback_question(spec)):
             if delay:
@@ -106,4 +111,4 @@ class MockInterviewer:
 def get_interviewer():
     if agent_mode("interviewer") == "mock":
         return MockInterviewer()
-    return cached_llm_agent("interviewer", LlmInterviewer) or MockInterviewer()
+    return cached_llm_agent("interviewer", LlmInterviewer) or MockInterviewer(config_error=True)
