@@ -8,7 +8,7 @@ from app.llm.gateway import LlmGateway
 from app.llm.settings import load_llm_settings
 from evals.judge_interviewer import agreement, judge_items, summarize
 from evals.label_sheet import blind_id
-from evals.question_set import QUOTA, export_sheet, items_from_sessions, parse_sheet, stratified
+from evals.question_set import QUOTA, export_sheet, items_from_sessions, load_many, parse_sheet, stratified, tagged
 from evals.sim_style import style
 from fakes.fake_llm import FakeOpenAI, reply
 
@@ -63,6 +63,30 @@ def test_sheet_roundtrip_is_blind_and_validates(tmp_path):
     bad.write_text("id,level_fit,natural,action_ok\n" + f"{first},rat de,9,y\n", encoding="utf-8")
     with pytest.raises(ValueError):
         parse_sheet(bad, {i["id"] for i in items})
+
+
+def test_mixed_sheet_keeps_versions_apart_and_hides_them(tmp_path):
+    a, b = tagged(items_from_sessions(session()), "v3"), tagged(items_from_sessions(session()), "v4")
+    items_id = items_from_sessions(session())[0]["id"]
+    golden_a, golden_b = tmp_path / "a.jsonl", tmp_path / "b.jsonl"
+    for path, items in ((golden_a, a), (golden_b, b)):
+        path.write_text("".join(json.dumps(x, ensure_ascii=False) + "\n" for x in items), encoding="utf-8")
+    mixed = load_many([golden_a, golden_b])
+    assert len({i["id"] for i in mixed}) == 16 and tagged(a, "") == a  # cung persona#luot van la hai cau khac nhau
+    sheet = tmp_path / "s.csv"
+    export_sheet(mixed, sheet)
+    text = sheet.read_text(encoding="utf-8")
+    assert "v3:" not in text and "v4:" not in text
+    filled = tmp_path / "f.csv"
+    filled.write_text(f"id,level_fit,natural,action_ok\n{blind_id('v4:' + items_id)},vua,5,y\n", encoding="utf-8")
+    assert list(parse_sheet(filled, {i["id"] for i in mixed})) == ["v4:" + items_id]
+
+
+def test_load_many_refuses_duplicate_ids(tmp_path):
+    path = tmp_path / "a.jsonl"
+    path.write_text('{"id": "x"}\n', encoding="utf-8")
+    with pytest.raises(ValueError):
+        load_many([path, path])
 
 
 def test_judge_items_summary_and_agreement():

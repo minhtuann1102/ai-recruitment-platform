@@ -6,6 +6,12 @@ bank/ai de khong bi moi): level_fit (de/vua/kho), natural (1-5), action_ok (y/n)
   python -m evals.question_set build --run ../../plans/reports/eval-sim-bank-after2.json
   python -m evals.question_set export --out /tmp/question_sheet_a.csv
   python -m evals.question_set import --rater rater_a /tmp/question_sheet_a.csv
+So nhieu ban prompt: moi ban mot bo rieng (--tag, --golden), xuat chung mot phieu tron lan de nguoi cham khong biet ban:
+  python -m evals.question_set build --run <phien v4>.json --tag v4 --golden ../../plans/reports/question-set-v4.json
+  python -m evals.question_set export --golden evals/question_golden.jsonl <bo v3> <bo v4> --out /tmp/sheet.csv
+  python -m evals.question_set import --rater fable /tmp/sheet.csv --labels-dir evals/question_labels_llm \
+      --golden <cung danh sach luc export>
+Bo moi co cau tu kho DE nen de trong plans/reports/*.json (khong commit); nhan LLM de rieng, khong tron voi nhan nguoi.
 """
 import argparse
 import csv
@@ -60,6 +66,19 @@ def load(path: Path = GOLDEN) -> List[dict]:
     return [json.loads(x) for x in path.read_text(encoding="utf-8").splitlines() if x.strip()]
 
 
+def load_many(paths: List[Path]) -> List[dict]:
+    items = [item for path in paths for item in load(path)]
+    ids = [i["id"] for i in items]
+    if len(set(ids)) != len(ids):  # bao som: phieu da cham xong moi phat hien thi mat cong nguoi cham
+        raise ValueError("id trung giua cac bo cau hoi, dung --tag khac nhau khi build")
+    return items
+
+
+def tagged(items: List[dict], tag: str) -> List[dict]:
+    """Them ban prompt vao id: cung persona#luot o hai ban phai la hai cau khac nhau trong mot phieu."""
+    return [{**i, "id": f"{tag}:{i['id']}"} for i in items] if tag else items
+
+
 def export_sheet(items: List[dict], out: Path, seed: int = 11) -> None:
     rows = list(items)
     random.Random(seed).shuffle(rows)
@@ -101,23 +120,29 @@ def main() -> None:
     sub = parser.add_subparsers(dest="cmd", required=True)
     b = sub.add_parser("build")
     b.add_argument("--run", type=Path, required=True)
+    b.add_argument("--tag", default="")
+    b.add_argument("--golden", type=Path, default=GOLDEN)
     e = sub.add_parser("export")
     e.add_argument("--out", type=Path, required=True)
+    e.add_argument("--golden", type=Path, nargs="+", default=[GOLDEN])
     i = sub.add_parser("import")
     i.add_argument("--rater", required=True)
+    i.add_argument("--golden", type=Path, nargs="+", default=[GOLDEN])
+    i.add_argument("--labels-dir", type=Path, default=LABELS_DIR)
     i.add_argument("sheet", type=Path)
     args = parser.parse_args()
     if args.cmd == "build":
         items = stratified(items_from_sessions(json.loads(args.run.read_text(encoding="utf-8"))["sessions"]))
-        GOLDEN.write_text("".join(json.dumps(x, ensure_ascii=False) + "\n" for x in items), encoding="utf-8")
-        print(f"Da ghi {len(items)} cau vao {GOLDEN}")
+        items = tagged(items, args.tag)
+        args.golden.write_text("".join(json.dumps(x, ensure_ascii=False) + "\n" for x in items), encoding="utf-8")
+        print(f"Da ghi {len(items)} cau vao {args.golden}")
     elif args.cmd == "export":
-        export_sheet(load(), args.out)
+        export_sheet(load_many(args.golden), args.out)
         print(f"Da ghi phieu {args.out}")
     else:
-        labels = parse_sheet(args.sheet, {x["id"] for x in load()})
-        LABELS_DIR.mkdir(exist_ok=True)
-        (LABELS_DIR / f"{args.rater}.json").write_text(json.dumps(labels, ensure_ascii=False, indent=1), "utf-8")
+        labels = parse_sheet(args.sheet, {x["id"] for x in load_many(args.golden)})
+        args.labels_dir.mkdir(exist_ok=True)
+        (args.labels_dir / f"{args.rater}.json").write_text(json.dumps(labels, ensure_ascii=False, indent=1), "utf-8")
         print(f"Da nhap {len(labels)} nhan cua {args.rater}")
 
 

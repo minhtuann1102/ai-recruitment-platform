@@ -9,10 +9,12 @@ from .models_interview import PlanTopic
 WRAP_UP = "Cảm ơn bạn, buổi phỏng vấn đến đây là kết thúc. Bạn còn câu hỏi nào dành cho mình không?"
 _PHASE_INTRO = {"technical": "Giờ mình chuyển sang phần kiến thức chuyên môn nhé. ",
                 "scenario": "Tiếp theo là một tình huống thực tế. "}
-_FOLLOW_UP = ("Ok. Bạn nói rõ hơn giúp mình về {f}?", "Mình muốn đi sâu thêm một chút: {f} thì sao?",
-              "Với {f}, bạn giải thích kỹ hơn giúp mình nhé?")
-_HINT = ("Mình gợi ý nhé: hãy nghĩ tới {f}. Bạn thử trả lời lại xem?",
-         "Gợi ý nhỏ: thử nghĩ theo hướng {f}. Bạn trả lời lại nhé?")
+# focus co the la ca cau ("Mo ta cac pha ..."), nen dat sau dau hai cham thay vi noi tiep vao cau mau
+_FOLLOW_UP = ("Mình muốn đi sâu thêm ý này: {f}. Bạn nói rõ hơn giúp mình nhé?",
+              "Mình hỏi kỹ hơn một chút nhé: {f}. Bạn nghĩ sao?",
+              "Còn ý này thì sao: {f}. Bạn giải thích kỹ hơn giúp mình nhé?")
+_HINT = ("Mình gợi ý một hướng nhé: {f}. Bạn thử trả lời lại xem?",
+         "Thử nghĩ theo hướng này nhé: {f}. Bạn trả lời lại nhé?")
 _CLARIFY = ("Mình hỏi lại cho rõ nhé: {q}", "Có thể mình hỏi chưa rõ. Ý mình là: {q}")
 
 
@@ -20,7 +22,7 @@ def candidates(action: str, topic: Optional[PlanTopic], phase: str, focus: Optio
                last_question: str, first_turn: bool, phase_changed: bool) -> List[str]:
     if action == "wrap_up" or topic is None:
         return [WRAP_UP]
-    f = focus or topic.title
+    f = (focus or "").rstrip(" .!?;:,…") or topic.title  # dau cau cua focus khong duoc nam giua cau mau
     if action == "hint":
         return [h.format(f=f) for h in _HINT]
     if action == "clarify":
