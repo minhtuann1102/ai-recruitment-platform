@@ -1,4 +1,4 @@
-# Trạng thái dự án (cập nhật 2026-10-31)
+# Trạng thái dự án (cập nhật 2026-11-02)
 
 ## Kế hoạch
 - Kế hoạch gốc: `plans/20261019-1100-ai-interview-brd-implementation/` (9 phase). Phase 01–06 xong code và đã merge; Phase 07 (harness, đo LLM thật) xong phần AIE.
@@ -25,6 +25,7 @@ Sau khi sửa ngắt mạch (3 vòng, kể cả tải gấp đôi): RAG `error` 
 ## Đang làm
 - Kế hoạch `plans/261029-1415-hybrid-grounded-rag/`: Phase 01–03 xong (`focus_source` để sau), Phase 05 đang làm (đo nền và `judge_support` v2 + repair xong; so nhãn LLM thứ hai đồng ý 0.85, kappa 0.70; `supported` đúng ~0.64, câu AI tự đặt 0.53, dưới ngưỡng 0.80; nhãn người 60 cặp là tùy chọn theo quyết định owner 31/10; golden có tài liệu xong: Evaluator không cite `R` nên `contradicted` qua đáp án chuẩn 0/9, tài liệu không liên quan vẫn `supported` 7/12, cần Evaluator v6), Phase 04 chờ DE.
 - Evaluator v5 (nhánh `thang/evaluator-v5`, 31/10): ±1 band 0.963, lệch −0.27, thứ tự 1.0, injection 6/8; so với v4 0.919, −0.467, 0.917, 6/8. Nhồi thuật ngữ a04 đã chặn bằng code (3.1–3.8). Còn lọt injection không từ khóa; mẫu không dấu a10 chưa ổn định. Báo cáo `plans/reports/eval-261031-1456-evaluator-v5.md`.
+- Evaluator v6 (nhánh `thang/evaluator-v6`, 02/11, **chưa merge, chờ owner**): `R` được cite, `supported` judge 0.964 nhưng recall ~0.58; đạt 4/5 ngưỡng đặt trước, đã qua review độc lập. Lộ lỗi có sẵn trên `main`: `R` chặn điểm oan trên mô phỏng (0/9 đúng), 5/6 ca của v6 từ mục `cr-lz-python-basics-8979143a`, cần DE sửa. Báo cáo `plans/reports/eval-261102-1109-evaluator-v6.md`.
 - PR #49 (DE duyệt golden RAG): **chưa merge, đang conflict** ở `03-non-functional-requirements.md`; chờ DE duyệt lại g22/g24/h29/h30. Trên `main` chưa query nào có `approved_by`.
 
 ## Mốc
@@ -32,7 +33,7 @@ Feature freeze 06/12/2026; Sprint 5 07–21/12. Gate voice 22/11. Mốc Evaluato
 
 ## Phụ thuộc đang chờ người khác
 - **Người chấm:** chỉ có 1 người (nhãn người thứ hai bị loại, PR #46); cần người thứ hai nếu báo cáo cần kappa.
-- **DE:** duyệt lại golden RAG (PR #49); quyết định giấy phép (CC-BY-NC-ND, `unknown`); remap topic, nhãn độ khó, câu hard, duyệt bản dịch, textbook (Phase 04); JD (PR #50 draft); xem `context/de-data-assessment.md`.
+- **DE:** sửa hoặc loại mục kho `cr-lz-python-basics-8979143a` (mô hình thread cũ, nhãn sai); duyệt lại golden RAG (PR #49); quyết định giấy phép (CC-BY-NC-ND, `unknown`); remap topic, nhãn độ khó, câu hard, duyệt bản dịch, textbook (Phase 04); JD (PR #50 draft); xem `context/de-data-assessment.md`.
 - **FSD:** `interview-service`, giao diện, TCP `getCvFile`/`getJobDescription`.
 - **Owner:** D7–D12 (đặc biệt D8 voice, D12 thời lượng); Q1–Q3 trong `context/next-phase-plan.md`.
 
