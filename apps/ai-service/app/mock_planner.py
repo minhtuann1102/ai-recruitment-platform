@@ -68,7 +68,7 @@ def default_key_points(source: str, catalog_ref: Optional[str], catalog) -> List
     return list(INTRO_CV_POINTS if source == "cv" else INTRO_GENERIC_POINTS)
 
 
-def _catalog_topic(tid: str, t: Topic, level: str) -> PlanTopic:
+def catalog_topic(tid: str, t: Topic, level: str) -> PlanTopic:
     return PlanTopic(
         id=tid, title=t.title, source="catalog", catalog_ref=t.id,
         objective=f"Đánh giá hiểu biết về {t.title} ở mức {level}",
@@ -131,7 +131,7 @@ def build_plan(track: str, level: str, duration_minutes: int, cv: Optional[CvPro
 
     tid = iter(range(1, 100))
     intro = _intro_topic(f"t{next(tid)}", level, cv)
-    tech = [_catalog_topic(f"t{next(tid)}", t, level) for t in topics]
+    tech = [catalog_topic(f"t{next(tid)}", t, level) for t in topics]
     scn = _scenario_topic(f"t{next(tid)}", scenarios[0], level)
     note = None
     if cv and cv.total_years_experience >= 5 and level in ("fresher", "junior"):

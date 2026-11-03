@@ -7,7 +7,7 @@ buoi phong van khong chet.
 """
 import logging
 import math
-from typing import Awaitable, Callable, List, Optional, Protocol, Sequence, Tuple
+from typing import Awaitable, Callable, Dict, List, Optional, Protocol, Sequence, Tuple
 
 from .difficulty import difficulty_bucket
 from ..llm.usage import UsageCollector
@@ -32,6 +32,7 @@ class KnowledgeRepository(Protocol):
     async def search(self, vector: Sequence[float], filters: SearchFilters, limit: int) -> List[Chunk]: ...
     async def get_pair_by_qa_id(self, qa_id: str) -> Optional[Chunk]: ...
     async def list_bank(self, topic_id: str, difficulty: Optional[str], limit: int) -> List[BankEntry]: ...
+    async def count_bank(self, topic_ids: Sequence[str]) -> Dict[str, Dict[Optional[str], int]]: ...
 
 
 def estimate_tokens(text: str) -> int:
