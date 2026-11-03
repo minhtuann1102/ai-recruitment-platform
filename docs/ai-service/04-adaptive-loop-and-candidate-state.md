@@ -64,7 +64,7 @@ nguyên văn ở lượt sau. Kích thước điển hình 2–4 KB.
   "asked_questions": [                         // ≤ 30 câu gần nhất, đã chuẩn hóa, để chống lặp
     "kể về dự án order service và vai trò của bạn"
   ],
-  "end_reason": null                           // candidate_ended|time_up|time_hard_limit|turn_cap|plan_complete|abandoned
+  "end_reason": null                           // candidate_ended|time_up|time_hard_limit|turn_cap|plan_complete|low_performance|abandoned
 }
 ```
 

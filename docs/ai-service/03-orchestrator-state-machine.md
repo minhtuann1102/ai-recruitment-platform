@@ -109,6 +109,7 @@ Kiểm theo **thứ tự ưu tiên** dưới đây sau mỗi lượt (trong `tra
 | 1 | Ứng viên gọi `POST /end` | Bỏ qua wrap_up → `reporting` (`end_reason = "candidate_ended"`) |
 | 2 | `elapsed ≥ duration + 3'` (quá hạn cứng) | `end` ngay, không hỏi thêm → `reporting` (`end_reason = "time_hard_limit"`) |
 | 3 | `elapsed ≥ duration` **hoặc** `turn_count ≥ 24` | Sang `wrap_up` (`end_reason = "time_up"` / `"turn_cap"`) |
+| 3b | Đang đóng topic (`next_topic` / `next_phase`), level middle/senior, 3 topic technical có điểm gần nhất (plan ít hơn 3, vd 15–20 phút có 2, thì tất cả topic technical) đều `score_band < 1.5` **và** ≥ 6 lượt được chấm | Sang `wrap_up` sớm, bỏ phần còn lại (`end_reason = "low_performance"`) |
 | 4 | Phase hiện tại hết topic **hoặc** `phase_elapsed ≥ phase_budget + 1'` | Sang phase kế tiếp, `action = ask_main` cho topic đầu của phase mới |
 | 5 | Topic hiện tại đạt điều kiện đóng (bảng dưới) | Topic kế tiếp trong phase, `action = ask_main` |
 | 6 | Còn lại | Policy §5 chọn `follow_up` / `hint` / `clarify` trong topic hiện tại, hoặc `next_topic` |
@@ -122,6 +123,11 @@ Kiểm theo **thứ tự ưu tiên** dưới đây sau mỗi lượt (trong `tra
 Ngoài ra policy ở ưu tiên 6 (§5.4) cũng có thể trả `next_topic` (trả lời tốt đủ, hoặc yếu sau khi đã gợi ý); khi đó orchestrator đóng topic và xử lý giống ưu tiên 5.
 
 **Đã cài (2026-10-22):** `app/time_budget.py` (điều kiện ưu tiên 2–5) và `app/state_update.py` (áp dụng hành động). Turn cap = `round(24 × thời lượng / 30)` (16 cho 20 phút). Ngân sách topic = ngân sách phase / số topic của phase. Thời điểm bắt đầu phase và topic lưu trong state (`phase_started_s`, `topic_started_s`, tính theo `elapsed_seconds` interview-service gửi). Quá hạn cứng thì lượt đó vẫn được chấm, `done` có `question = null`, `session_end = true`, `end_reason = time_hard_limit`.
+
+**Kết thúc sớm vì yếu (ưu tiên 3b, 2026-11-03):** `app/early_stop.py`, gọi trong `next_turn` sau policy. Luật chỉ
+ghi đè hành động đóng topic, nên ứng viên vẫn được gợi ý trước khi topic bị đánh giá yếu. Topic không có điểm (bị bỏ
+qua) không cắt chuỗi "liên tiếp". Fresher/junior không áp dụng (đi hết plan). Câu wrap-up giữ trung tính, không nói
+lý do dừng. Ngưỡng 1.5 / 3 topic / 6 lượt là giả định, chỉnh sau khi chạy simulator.
 
 **Mượn thời gian:** phase xong sớm thì thời gian dư cộng vào phase sau. Phase cuối (`scenario`) xong sớm thì
 vào `wrap_up` sớm; **không** thêm topic ngoài plan (buổi thật cũng có khi kết thúc sớm).

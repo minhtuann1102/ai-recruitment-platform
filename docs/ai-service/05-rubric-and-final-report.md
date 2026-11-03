@@ -79,6 +79,12 @@ thiếu dữ liệu, không phải kết luận về ứng viên: `overall.score
 **Độ tin cậy (`confidence`):** `low` nếu < 6 lượt được chấm, hoặc > 20% lượt degraded hoặc thiếu đáp án chuẩn
 (`evaluation.reference_missing`, câu trong kho nhưng không lấy được đáp án khi chấm), hoặc thiếu nguyên một
 phase (kết thúc sớm); `medium` nếu 6–9 lượt; `high` nếu ≥ 10 lượt. Report `low` hiển thị cảnh báo rõ.
+Phiên `end_reason = "low_performance"` (design 03 §4.4, ưu tiên 3b) bỏ phase scenario nên luôn có confidence `low`.
+
+**Gợi ý level (`level_signal`, 2026-11-03):** độ khó bị chặn ở trần của level (`LEVEL_CONFIG.bounds`), nên ứng viên
+giỏi chọn level thấp chỉ nhận `exceeds`. Code (`app/report_level_signal.py`, Reporter không sửa) bật cờ
+`above_level` khi đủ cả bốn điều kiện: level khác senior, `overall ≥ 8.5`, confidence khác `low`, và ≥ 3 lượt được
+chấm ở độ khó trần với `turn_score_10 ≥ 7.0`. Không đủ thì `level_signal = null`. Ngưỡng là giả định.
 
 Ngưỡng verdict và trọng số là **giả định ban đầu**, chỉnh sau khi chạy ứng viên giả lập (§10).
 
@@ -101,6 +107,8 @@ Lưu ở `interview_results.report` (JSONB, §8); các cột cũ (`overall_score
     "score": 5.7, "verdict": "near",
     "summary": "Nền tảng REST và SQL tốt; cơ chế transaction của Spring còn hời hợt, cần ôn trước khi phỏng vấn Junior thật."
   },
+  "level_signal": null,                          // hoặc { "type": "above_level", "current_level": "junior",
+                                                 //   "suggested_level": "middle", "evidence_turns": [5, 7, 9], "note": "..." }
   "sections": [                                  // điểm từng phần (phase)
     { "phase": "intro",     "score": 7.0, "weight": 0.15 },
     { "phase": "technical", "score": 5.2, "weight": 0.55 },

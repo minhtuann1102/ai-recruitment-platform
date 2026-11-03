@@ -493,7 +493,7 @@ cũ để finalize dựng `study_plan.resources`. Thiếu `reference_sources` th
 }
 ```
 
-Response 200: report theo §6.4 (snake_case) + `metadata` (usage, latency, prompt version của Reporter). Reporter lỗi vẫn trả 200 với `status = "partial"` (chỉ có điểm và nhận xét mẫu); `meta.fallbacks` ghi `reporter_partial`, hoặc `reporter_config_error` nếu thiếu cấu hình. Không lượt nào chấm được thì vẫn 200 với `status = "unscored"`, `overall.score`, `overall.verdict` và các tiêu chí là `null`, không gọi Reporter LLM. Có `jd_profile` thì report có khối `requirements` (design 05 §6.4).
+Response 200: report theo §6.4 (snake_case) + `metadata` (usage, latency, prompt version của Reporter). Reporter lỗi vẫn trả 200 với `status = "partial"` (chỉ có điểm và nhận xét mẫu); `meta.fallbacks` ghi `reporter_partial`, hoặc `reporter_config_error` nếu thiếu cấu hình. Không lượt nào chấm được thì vẫn 200 với `status = "unscored"`, `overall.score`, `overall.verdict` và các tiêu chí là `null`, không gọi Reporter LLM. Có `jd_profile` thì report có khối `requirements` (design 05 §6.4). Report luôn có `level_signal` (`null` hoặc cờ `above_level` gợi ý thử level cao hơn, design 05 §6.3, thêm 2026-11-03). `end_reason` có thêm giá trị `low_performance` (ai-service tự wrap-up sớm khi ứng viên middle/senior yếu 3 topic technical liên tiếp, hoặc tất cả nếu plan ít hơn 3, design 03 §4.4).
 
 ### Interface phía NestJS
 
