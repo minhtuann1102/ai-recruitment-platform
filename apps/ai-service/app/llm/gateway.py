@@ -17,7 +17,7 @@ from pydantic import BaseModel
 from ..tracing import observation
 from .errors import LlmOutputError
 from .retry import call_with_retry
-from .settings import LlmSettings, agent_settings, load_llm_settings
+from .settings import LlmSettings, agent_settings, load_llm_settings, reasoning_body
 from .structured_output import parse_output, repair_messages, response_format
 from .usage import CallRecord, UsageCollector
 
@@ -75,6 +75,7 @@ class LlmGateway:
                 "timeout": cfg.timeout_s}
         if cfg.seed is not None:
             base["seed"] = cfg.seed
+        base.update(reasoning_body(cfg.reasoning))
         if schema is not None:
             base["response_format"] = response_format(schema, self.llm.structured_outputs)
         rec, calls, started = CallRecord(agent, cfg.model, prompt_version=prompt_version), 0, time.perf_counter()
@@ -128,7 +129,7 @@ class LlmGateway:
         cfg = agent_settings(agent, self.llm, self._env)
         params = {"model": cfg.model, "temperature": cfg.temperature, "max_tokens": cfg.max_tokens,
                   "timeout": cfg.timeout_s, "messages": messages, "stream": True,
-                  "stream_options": {"include_usage": True}}
+                  "stream_options": {"include_usage": True}, **reasoning_body(cfg.reasoning)}
         rec, started = CallRecord(agent, cfg.model, prompt_version=prompt_version), time.perf_counter()
         parts: List[str] = []
         with observation(agent, "generation", input=messages, **_trace_fields(cfg, prompt_version)) as gen:
