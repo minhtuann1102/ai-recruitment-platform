@@ -1,8 +1,8 @@
-# Trạng thái dự án (cập nhật 2026-11-02)
+# Trạng thái dự án (cập nhật 2026-11-03)
 
 ## Kế hoạch
 - Kế hoạch gốc: `plans/20261019-1100-ai-interview-brd-implementation/` (9 phase). Phase 01–06 xong code và đã merge; Phase 07 (harness, đo LLM thật) xong phần AIE.
-- **Giai đoạn tiếp theo:** `context/next-phase-plan.md` (đo chất lượng + làm sạch và tận dụng dữ liệu DE). Phase A xong 02/11 (owner chốt); Phase B đang chờ DE, mốc 09/11.
+- **Giai đoạn tiếp theo:** `context/next-phase-plan.md` (đo chất lượng + làm sạch và tận dụng dữ liệu DE). Phase A xong 02/11 (owner chốt); Phase B đang chờ DE, mốc 09/11, **có nguy cơ trễ**: tính đến 03/11 chưa có tiến triển (PR #49, #50 vẫn draft từ 28/10) và Q1 giấy phép chưa chốt.
 
 ## Đã merge gần đây
 | PR | Ngày | Nội dung |
@@ -16,6 +16,8 @@
 | #59 | 30/10 | Một lỗi RAG không còn tắt RAG của mọi phiên; đo nền Phase 05 |
 | #65 | 02/11 | Evaluator v6 cite đáp án chuẩn, siết `supported`, golden thêm nhóm `long_s` |
 | #66 | 02/11 | Báo cáo `unscored`, health `degraded`, vá lỗ thoát `<untrusted>`, đo prompt cache |
+| #68 | 02/11 | Interviewer v4: khuôn "Bạn có thể" 8.6%, hint đúng hành động 88% (nhãn LLM); ghi nhận Phase A xong |
+| #69 | 02/11 | Hạn tổng thời gian mỗi lần gọi LLM, ngân sách retry CV/JD Parser 28 s, Reporter 80 s, stream 15 s |
 
 Quy ước merge của owner: merge commit (không squash). Tiêu đề PR dạng `[scope] type: mô tả`.
 
@@ -30,9 +32,9 @@ Sau khi sửa ngắt mạch (3 vòng, kể cả tải gấp đôi): RAG `error` 
 - Evaluator v6 (PR #65, đã merge 02/11): `R` được cite, `supported` judge 0.964 nhưng recall ~0.58; đạt 4/5 ngưỡng đặt trước, đã qua review độc lập. Lộ lỗi có sẵn trên `main`: `R` chặn điểm oan trên mô phỏng (0/9 đúng), 5/6 ca của v6 từ mục `cr-lz-python-basics-8979143a`, cần DE sửa. Báo cáo `plans/reports/eval-261102-1109-evaluator-v6.md`.
 - Tín hiệu lỗi luồng AI (PR #66, đã merge 02/11): báo cáo `unscored` khi không chấm được, bỏ `[Mock]`; `/api/health` có `agents`, staging/production thiếu cấu hình LLM thì không khởi động; `prompt_versions` thật; cờ `reference_missing`. Nguồn: `plans/reports/audit-261102-1539-ai-flow-errors-controls-evaluation.md`.
 - Vá chống injection và đo prompt cache (PR #66, đã merge 02/11): `wrap_untrusted` escape mọi biến thể thẻ đóng, bỏ ký tự vô hình; `is_manipulation` bắt thêm dạng lách, bỏ bắt nhầm "cho em full quyền...", quét 2 671 câu có sẵn: 470 lượt bắt trước và sau, không thêm không mất; `cached_tokens` trong `metadata.usage`. Đo 10 phiên LLM thật: 63.8% input là cached (docs 08).
-- Interviewer v4 (nhánh `thang/interviewer-v4`, 02/11, PR đang chờ merge, xếp trên PR #67): khuôn "Bạn có thể" 25.2% → 8.6%, hint đúng hành động 62% → 88%, câu kho giữ 97%; Fable chấm `natural` 3.25 → 3.37, chưa chứng minh được và không thay được người chấm. Báo cáo `plans/reports/eval-261102-1815-interviewer-v4.md`.
+- Interviewer v4 (PR #68, đã merge 02/11): khuôn "Bạn có thể" 25.2% → 8.6%, hint đúng hành động 62% → 88%, câu kho giữ 97%; Fable chấm `natural` 3.25 → 3.37, chưa chứng minh được và không thay được người chấm. Báo cáo `plans/reports/eval-261102-1815-interviewer-v4.md`.
 - PR #49 (DE duyệt golden RAG): **chưa merge, đang conflict** ở `03-non-functional-requirements.md`; chờ DE duyệt lại g22/g24/h29/h30. Trên `main` chưa query nào có `approved_by`.
-- Hạn tổng cho lần gọi LLM (02/11, PR đang chờ merge): `timeout_s` nay cắt thật mỗi lần gọi, quá hạn vào `degraded`/`partial`; thêm ngân sách retry CV/JD Parser 28 s, Reporter 80 s để fallback về trước timeout của interview-service; stream Interviewer có hạn tổng 15 s. Chỉ kiểm bằng test fake, chưa đo LLM thật. Ước tính từ log: ~1.8% lượt Evaluator chuyển thành `degraded` (trước đây các lượt này chờ 8–180 s). Chi tiết: docs 08 §9.3.
+- Hạn tổng cho lần gọi LLM (PR #69, đã merge 02/11): `timeout_s` nay cắt thật mỗi lần gọi, quá hạn vào `degraded`/`partial`; thêm ngân sách retry CV/JD Parser 28 s, Reporter 80 s để fallback về trước timeout của interview-service; stream Interviewer có hạn tổng 15 s. Chỉ kiểm bằng test fake, chưa đo LLM thật. Ước tính từ log: ~1.8% lượt Evaluator chuyển thành `degraded` (trước đây các lượt này chờ 8–180 s). Chi tiết: docs 08 §9.3.
 
 ## Mốc
 Feature freeze 06/12/2026; Sprint 5 07–21/12. Gate voice 22/11. Mốc Evaluator ±1 band ≥ 80% ở tuần 09–15/11.
@@ -41,7 +43,7 @@ Feature freeze 06/12/2026; Sprint 5 07–21/12. Gate voice 22/11. Mốc Evaluato
 - **Người chấm:** chỉ có 1 người (nhãn người thứ hai bị loại, PR #46); cần người thứ hai nếu báo cáo cần kappa.
 - **DE:** sửa hoặc loại mục kho `cr-lz-python-basics-8979143a` (mô hình thread cũ, nhãn sai); duyệt lại golden RAG (PR #49); quyết định giấy phép (CC-BY-NC-ND, `unknown`); remap topic, nhãn độ khó, câu hard, duyệt bản dịch, textbook (Phase 04); JD (PR #50 draft); xem `context/de-data-assessment.md`.
 - **FSD:** `interview-service`, giao diện, TCP `getCvFile`/`getJobDescription`. Từ PR #66 cần xác nhận `interview-service` nhận `overall.score` và `verdict` bằng `null` khi `status = "unscored"`, và lưu rồi gửi lại đầy đủ `evaluation` ở finalize.
-- **Owner:** D7–D12 (đặc biệt D8 voice, D12 thời lượng); Q1–Q3 trong `context/next-phase-plan.md`.
+- **Owner:** D7–D12 (đặc biệt D8 voice, D12 thời lượng); Q1–Q3 trong `context/next-phase-plan.md` (hạn 27/10, **quá hạn**; Q1 chặn Phase B, lọc giấy phép ở Phase C và Hybrid RAG Phase 04).
 
 ## Công cụ chạy thử
 `/dev/play` và `evals.play`: xem `context/environment.md`. Sơ đồ ai-service và phiên phỏng vấn: `docs/architecture/diagrams/`.
