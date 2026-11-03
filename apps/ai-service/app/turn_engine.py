@@ -16,6 +16,7 @@ from .mock_evaluator import fold
 from .agents.interviewer import QuestionSpec, safe_focus
 from .agents.planner import get_planner
 from .mock_planner import load_track
+from .plan_bank_coverage import prefer_covered, settle, start_coverage
 from .plan_snippets import attach_reference_snippets, get_retriever, memory_retriever
 from .rag.circuit_breaker import MEMORY_ONLY_ERROR
 from .models_common import LEVEL_CONFIG
@@ -80,11 +81,16 @@ def _meta(phase: str, topic_pos: int, total: int, action: str, turn_number: int)
 
 async def start_session(req: StartRequest, planner=None, collector: Optional[UsageCollector] = None,
                         retriever=None) -> TurnResult:
-    """Planner (LLM hoac mock, co plan du phong) -> gan reference_snippets (RAG, neu bat) -> cau hoi dau."""
+    """Planner (LLM hoac mock, co plan du phong) -> doi topic khong co cau trong kho (dem song song voi Planner)
+    -> gan reference_snippets (RAG, neu bat) -> cau hoi dau."""
     planner = planner or get_planner()
+    catalog = load_track(req.track)
+    counting = start_coverage(retriever or get_retriever(), catalog, req.level)
     plan = await planner.plan(req.track, req.level, req.duration_minutes, req.cv_profile, req.jd_profile, collector)
-    with observation("rag_plan", "retriever", nest=True) as obs:
-        plan = await attach_reference_snippets(plan, load_track(req.track), retriever or get_retriever(), collector)
+    keep = req.jd_profile.priority_topic_ids() if req.jd_profile else ()
+    plan = prefer_covered(plan, catalog, req.level, await settle(counting), keep=keep)
+    with observation("rag_plan", "retriever", nest=True) as obs:  # doc lai: ngat mach co the vua mo trong luc Planner
+        plan = await attach_reference_snippets(plan, catalog, retriever or get_retriever(), collector)
         obs.update(output={t.id: [s.ref for s in t.reference_sources] for ph in plan.phases for t in ph.topics})
     topics = flat_topics(plan)
     lo, hi = LEVEL_CONFIG[req.level]["bounds"]

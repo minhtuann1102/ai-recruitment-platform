@@ -277,6 +277,20 @@ Interviewer đổi sang ý khác (< 50% từ của câu gốc còn trong câu h�
 không chấm theo đáp án chuẩn. Khi bật hybrid (`RAG_HYBRID`, mặc định), câu kho xếp theo RRF của số từ trùng và độ giống vector của câu hỏi với truy vấn topic (cùng vector với snippet), vẫn loại câu không có từ chung nào. Cờ `RAG_QUESTION_BANK` (mặc định bật). Số đo trước/sau và A/B đáp án chuẩn:
 [eval-261024-1614-rag-question-bank.md](../../plans/reports/eval-261024-1614-rag-question-bank.md).
 
+**Planner ưu tiên topic có câu trong kho (2026-11-03, `app/plan_bank_coverage.py`, Phase C mục 3):** lúc start, song
+song với Planner, một truy vấn (`COVERAGE_SQL`, ~0.2 s) đếm số câu hỏi đọc được (cùng điều kiện với
+`spoken_ok`; không kiểm cặp Q&A cùng `qa_id` vì không có index, mất 0.5–4.9 s, số đếm như nhau) theo `topic_id` và độ khó cho mọi topic catalog của level; kết quả cache 10 phút theo tập topic. Sau khi có
+plan (LLM hay plan dự phòng), topic `technical` có `source = "catalog"` mà kho không có câu nào lệch tối đa một bậc so
+với `start_difficulty` (cùng luật với `pick`) thì đổi sang topic chưa dùng của level có câu: cùng `category` trước, rồi
+nhiều câu hơn, rồi thứ tự catalog. Topic mới dựng lại từ catalog (title, objective, `key_points`, hint) nhưng giữ `id` và
+`start_difficulty`. Không đổi: topic JD (`priority_topic_ids`), topic không thuộc `topics_for(level)`, topic CV/scenario.
+Đếm lỗi, RAG tắt, `RAG_QUESTION_BANK=false` hay chưa xong sau `COVERAGE_WAIT_S` = 1 s kể từ khi Planner xong thì giữ
+plan như cũ, chỉ ghi log (`bank_coverage_failed`, `bank_coverage_timeout`), không tính là lỗi RAG của phiên;
+truy vấn quá hạn chờ không bị hủy mà chạy xong ở nền để nạp cache cho lần start sau. Mỗi lần
+đổi ghi log `planner_bank_swap`. Số đếm là cận trên: chưa áp điều kiện "có từ chung với topic" của `rank`, nên topic
+đếm > 0 vẫn có thể không có câu nào được chọn. Đổi topic có thể bỏ một topic khớp CV; ưu tiên cùng nhóm để giảm ảnh
+hưởng. Chưa đo trước/sau bằng LLM thật.
+
 ### 3.3.3 Evaluator
 
 **Input**

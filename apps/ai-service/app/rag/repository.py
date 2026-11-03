@@ -5,13 +5,13 @@ Tim theo tu khoa (hybrid) chay BM25 trong bo nho (app/rag/bm25_index.py) tren co
 """
 import asyncio
 import logging
-from typing import Any, Callable, List, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 import psycopg
 from psycopg_pool import AsyncConnectionPool, PoolTimeout
 
 from .models import Chunk, SearchFilters
-from .question_bank import BankEntry
+from .question_bank import MAX_QUESTION_CHARS, BankEntry
 from .settings import RagSettings
 
 log = logging.getLogger("ai_service.rag")
@@ -57,6 +57,18 @@ BANK_SQL = ("SELECT q.metadata->>'qa_id', q.content, q.difficulty, p.content, {s
             "WHERE q.source_type = 'interview_qa' AND q.topic_id = %s AND q.embedding_model = %s "
             "AND q.metadata->>'chunk_type' = 'question' "
             "ORDER BY (q.difficulty = %s) DESC NULLS LAST, q.metadata->>'qa_id' LIMIT %s")
+
+
+# Dem cau hoi theo topic va do kho cho Planner (app/plan_bank_coverage.py): cung dieu kien voi question_bank.spoken_ok
+# (mot dong, khong khoi code, <= MAX_QUESTION_CHARS ky tu sau khi bo khoang trang hai dau). Khong kiem cap Q&A cung
+# qa_id nhu BANK_SQL: khong co index tren metadata->>'qa_id' nen EXISTS mat 0.5-4.9 s (do 03/11), so dem van
+# giong het vi pipeline DE luon ghi ca hai chunk; bo di con ~0.2 s.
+COVERAGE_SQL = ("SELECT q.topic_id, q.difficulty, count(*) FROM knowledge_chunks q "
+                "WHERE q.source_type = 'interview_qa' AND q.metadata->>'chunk_type' = 'question' "
+                "AND q.embedding_model = %s AND q.topic_id = ANY(%s) "
+                "AND strpos(btrim(q.content, E' \\t\\r\\n'), E'\\n') = 0 AND strpos(q.content, '```') = 0 "
+                "AND char_length(btrim(q.content, E' \\t\\r\\n')) BETWEEN 1 AND %s "
+                "GROUP BY q.topic_id, q.difficulty")
 
 
 def vector_literal(vector: Sequence[float]) -> str:
@@ -181,6 +193,14 @@ class PgKnowledgeRepository:
         sql, params = build_bank_sql(topic_id, self._settings.embedding_model, difficulty, limit, vector)
         return await self._fetch(sql, params, lambda r: BankEntry(
             qa_id=r[0], question=r[1], difficulty=r[2], pair=r[3], similarity=None if r[4] is None else float(r[4])))
+
+    async def count_bank(self, topic_ids: Sequence[str]) -> Dict[str, Dict[Optional[str], int]]:
+        rows = await self._fetch(COVERAGE_SQL, [self._settings.embedding_model, list(topic_ids), MAX_QUESTION_CHARS],
+                                 tuple)
+        out: Dict[str, Dict[Optional[str], int]] = {}
+        for topic_id, difficulty, n in rows:
+            out.setdefault(topic_id, {})[difficulty] = int(n)
+        return out
 
     async def get_pair_by_qa_id(self, qa_id: str) -> Optional[Chunk]:
         rows = await self._fetch(PAIR_SQL, [qa_id, self._settings.embedding_model])

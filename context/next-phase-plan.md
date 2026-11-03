@@ -30,7 +30,7 @@ Xong khi: ai_db được index lại; harness + golden set chạy lại cho số
 ## Phase C: AIE tận dụng kho đã làm sạch (03/11 – 22/11)
 1. Interviewer v3 (tự nhiên hơn): bỏ khuôn "Bạn có thể ... không?", ≤ 25 từ, mở đầu đa dạng; hint lấy từ đáp án chuẩn (gợi ý đúng câu đang hỏi, không đổi câu). **Xong 2026-10-28** (ba ngưỡng văn phong đạt; còn `follow_up` theo khuôn 68%). v4 ngày 02/11: khuôn 8.6%, hint đúng hành động 88% theo Fable, chưa có nhãn người.
 2. Follow-up theo đáp án chuẩn: focus lấy từ ý chính của đáp án mà ứng viên chưa nêu (Evaluator v3 đã trả `missing_points` theo đáp án).
-3. Planner chọn topic theo độ phủ kho ở level (tránh topic không có câu phù hợp level).
+3. Planner chọn topic theo độ phủ kho ở level (tránh topic không có câu phù hợp level). **Code xong 2026-11-03** (`app/plan_bank_coverage.py`, docs 02 mục 3.3.2): topic catalog không có câu gần độ khó bắt đầu thì đổi sang topic cùng nhóm có câu, giữ topic JD; chỉ kiểm bằng test fake, chưa đo LLM thật, nên đo sau Phase B vì remap topic và nhãn độ khó sẽ đổi số đếm.
 4. Reporter: `study_plan.resources` = câu hỏi liên quan trong kho + nguồn (chỉ nguồn có giấy phép cho phép). **Xong phần lấy từ chunk được trích (PR #56);** lọc giấy phép chờ Q1.
 5. Scenario: DE thu thập tình huống / system design (vd system-design-primer, CC-BY) làm `textbook` → bật `RAG_TEXTBOOK_ENABLED`.
 6. Thử câu kho cao hơn một bậc (junior hỏi medium) **chỉ khi** golden set cho thấy chấm ổn (quyết định 2026-10-24).
