@@ -11,6 +11,7 @@ from typing import Dict, List, Optional, Tuple
 from .agents.evaluator import EvaluationInput
 from .agents.evaluator_provider import Evaluator, get_evaluator
 from .api_error import ApiError
+from .early_stop import low_performance_stop
 from .llm.usage import UsageCollector
 from .mock_evaluator import fold
 from .agents.interviewer import QuestionSpec, safe_focus
@@ -188,6 +189,9 @@ async def next_turn(req: NextTurnRequest, evaluator: Optional[Evaluator] = None,
         # covered: y da neu trong ca topic (record_evaluation da gop ca luot nay), de khong hoi lai y da tra loi
         ts = next(t for t in state.topics if t.id == topic.id)
         dec = decide(ev, state, req.level, phase == "scenario", topic, ts.focus_used, ts.covered)
+    if dec.action in ("next_topic", "next_phase") and low_performance_stop(state, topics, pos, req.level, dec.action):
+        state.end_reason = "low_performance"
+        dec = Decision("wrap_up", 0, None, "low_performance -> wrap_up (3 topic technical yếu liên tiếp)")
 
     focus = safe_focus(dec.focus)  # chi luu va dung focus da qua kiem (khong giu chuoi nghi injection trong state)
     action, phase_changed, next_pos = apply_action(state, topics, pos, dec.action, dec.difficulty_delta,

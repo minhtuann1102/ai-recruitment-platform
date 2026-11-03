@@ -62,7 +62,9 @@ def constraints(sessions: Dict[str, Dict], personas: Dict[str, Persona]) -> Dict
     for pid, s in sessions.items():
         plan = InterviewPlan.model_validate(s["plan"])
         over_cap += len(s["turns"]) > turn_cap(plan)
-        if "end_early" not in personas[pid].behaviors and s["report"]["session"]["end_reason"] != "time_hard_limit":
+        # het gio cung hoac ket thuc som vi yeu (low_performance) thi khong doi du 4 phase
+        if "end_early" not in personas[pid].behaviors and \
+                s["report"]["session"]["end_reason"] not in ("time_hard_limit", "low_performance"):
             seen = {t["phase"] for t in s["turns"]}
             phases_ok.append({"intro", "technical", "scenario", "wrap_up"} <= seen)  # 4 phase (design 09)
         qs = [t["question"] for t in s["turns"]]

@@ -32,9 +32,9 @@ def test_start_validation_errors_use_contract_shape(client):
     assert r.status_code == 422 and r.json()["error"] == "invalid_request"
 
 
-def play(client, level, answer_for, max_turns=40):
+def play(client, level, answer_for, max_turns=40, **start_extra):
     done = parse_sse(client.post("/api/start", json={"session_id": "s", "track": "java_backend",
-                                                     "level": level}).text)[-1][1]
+                                                     "level": level, **start_extra}).text)[-1][1]
     plan, state, question, turn_no = done["plan"], done["state"], done["question"], 1
     topics = {t["id"]: t for ph in plan["phases"] for t in ph["topics"]}
     turns, events_per_turn = [], []
