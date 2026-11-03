@@ -34,7 +34,7 @@ Docker Desktop cài ở `/Applications/Docker.app`; nếu shell không thấy `d
 - **`gh` 2.102.0** cài ở `~/.local/bin/gh` (tải từ bản phát hành chính thức, đã đối chiếu SHA-256, ngày 2026-10-19). Không có `glab`, `brew`. Owner tự chạy `gh auth login` (HTTPS, trình duyệt); khi `gh auth status` báo đã đăng nhập thì mở PR bằng `gh pr create --base main --head <nhánh>`. Chưa đăng nhập thì dùng link `pull/new/<nhánh>`.
 
 ## Biến môi trường ai-service (`apps/ai-service/.env`, không commit)
-`LLM_API_KEY`, `LLM_BASE_URL` (mặc định OpenRouter), `LLM_MODEL`, `EMBEDDING_MODEL`, `EMBEDDING_DIMENSIONS`, `LLM_STRUCTURED_OUTPUTS`, `LOG_LLM_IO`, `LOG_LEVEL`, `LOG_FORMAT`, `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, `LANGFUSE_BASE_URL`, `LANGFUSE_TRACING_ENABLED`, `LLM_MODEL_<AGENT>`, `AGENT_<AGENT>_MODE`, `MOCK_STREAM_DELAY_MS`. Khóa do owner giữ; **không đọc, không in, không commit**.
+`LLM_API_KEY`, `LLM_BASE_URL` (mặc định OpenRouter), `LLM_MODEL`, `EMBEDDING_MODEL`, `EMBEDDING_DIMENSIONS`, `LLM_STRUCTURED_OUTPUTS`, `LOG_LLM_IO`, `LOG_LEVEL`, `LOG_FORMAT`, `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, `LANGFUSE_BASE_URL`, `LANGFUSE_TRACING_ENABLED`, `LLM_MODEL_<AGENT>`, `LLM_REASONING_<AGENT>`, `AGENT_<AGENT>_MODE`, `MOCK_STREAM_DELAY_MS`. Khóa do owner giữ; **không đọc, không in, không commit**.
 
 ## ai_db dùng chung (RAG)
 DE dựng trên Supabase (PR #32, 9.006 bản ghi). ai-service đọc bằng role `aie_reader`; URI Session pooler (cổng 5432) owner giữ trong `apps/ai-service/.env` (`AI_DB_URL`), cùng `AI_DB_CONNECT_TIMEOUT_S=10`; `RAG_ENABLED` mặc định bật (PR #52). Cờ khác xem `apps/ai-service/.env.example`: `RAG_HYBRID`, `RAG_TURN_RETRIEVAL`, `RAG_COOLDOWN_S`. python-dotenv lấy giá trị **đầu tiên** của biến trùng trong `.env`. Đo recall: `python -m evals.run_rag`.

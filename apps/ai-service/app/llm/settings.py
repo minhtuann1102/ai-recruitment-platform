@@ -29,6 +29,9 @@ _DEFAULTS = {
     "judge": (0.0, 300, 20.0, 7, None),  # evals: LLM-as-judge cho cau hoi Interviewer (evals/judge_interviewer.py)
     "query_rewriter": (0.0, 60, 3.0, None, 0.0),  # viet lai truy van RAG (ADR-010): 3 s, khong retry; loi -> tu dien
 }
+# LLM_REASONING_<AGENT>: model co reasoning (gpt-5-nano, gpt-6-luna...) mac dinh tu suy nghi, ton token ra va bi cat
+# max_tokens (do 03/11). off = tat han, con lai la effort cua OpenRouter. Khong dat thi khong gui gi (nhu cu).
+REASONING_LEVELS = ("off", "minimal", "low", "medium", "high")
 
 
 @dataclass(frozen=True)
@@ -51,6 +54,7 @@ class AgentSettings:
     timeout_s: float
     seed: Optional[int]
     retry_budget_s: Optional[float]
+    reasoning: Optional[str] = None
 
 
 def _flag(value: str, default: bool) -> bool:
@@ -81,4 +85,15 @@ def agent_settings(agent: str, llm: LlmSettings, env: Optional[Mapping[str, str]
     env = os.environ if env is None else env
     temperature, max_tokens, timeout_s, seed, budget = _DEFAULTS[agent]
     model = env.get(f"LLM_MODEL_{agent.upper()}") or llm.default_model
-    return AgentSettings(agent, model, temperature, max_tokens, timeout_s, seed, budget)
+    reasoning = (env.get(f"LLM_REASONING_{agent.upper()}") or "").strip().lower() or None
+    if reasoning is not None and reasoning not in REASONING_LEVELS:
+        raise ConfigError(f"LLM_REASONING_{agent.upper()} khong hop le: {reasoning} "
+                          f"(chon {'/'.join(REASONING_LEVELS)})")
+    return AgentSettings(agent, model, temperature, max_tokens, timeout_s, seed, budget, reasoning)
+
+
+def reasoning_body(level: Optional[str]) -> dict:
+    """Tham so `reasoning` cua OpenRouter (gui qua extra_body); rong khi khong cau hinh."""
+    if level is None:
+        return {}
+    return {"extra_body": {"reasoning": {"enabled": False} if level == "off" else {"effort": level}}}

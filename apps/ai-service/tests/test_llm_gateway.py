@@ -218,3 +218,14 @@ def test_opening_a_stream_is_capped_too(monkeypatch):
 def test_sdk_client_has_its_own_retries_disabled():
     client = build_client(load_llm_settings({"LLM_API_KEY": "k"}))
     assert client.max_retries == 0
+
+
+def test_reasoning_sent_only_when_configured():
+    gw, client, _ = make([reply('{"answer": "ok"}')])
+    run(gw.complete("evaluator", MSGS, Out))
+    assert "extra_body" not in client.calls[0]  # mac dinh: request nhu truoc
+    for level, body in (("off", {"enabled": False}), ("minimal", {"effort": "minimal"})):
+        client = FakeOpenAI([reply('{"answer": "ok"}')])
+        gw = LlmGateway(load_llm_settings({"LLM_API_KEY": "k"}), client, env={"LLM_REASONING_EVALUATOR": level})
+        run(gw.complete("evaluator", MSGS, Out))
+        assert client.calls[0]["extra_body"] == {"reasoning": body}

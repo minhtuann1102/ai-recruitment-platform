@@ -46,3 +46,13 @@ def test_model_override_per_agent_only_affects_that_agent():
 def test_unknown_agent_rejected():
     with pytest.raises(ConfigError):
         agent_settings("nobody", load_llm_settings(ENV), {})
+
+
+def test_reasoning_per_agent_is_optional_and_validated():
+    llm = load_llm_settings(ENV)
+    assert agent_settings("evaluator", llm, {}).reasoning is None
+    env = {"LLM_REASONING_EVALUATOR": " OFF "}
+    assert agent_settings("evaluator", llm, env).reasoning == "off"
+    assert agent_settings("planner", llm, env).reasoning is None
+    with pytest.raises(ConfigError):
+        agent_settings("evaluator", llm, {"LLM_REASONING_EVALUATOR": "max"})
