@@ -85,6 +85,23 @@ class IndexSettings:
         return canonical_embedding_model(self.embedding_model)
 
 
+@dataclass(frozen=True)
+class SeedSettings:
+    user_db_url: str
+    job_db_url: str
+
+
+def require_seed_settings() -> SeedSettings:
+    """Cau hinh cho seed-jobs (spec 009 US4): hai DB cua user-service va job-service, khong can key."""
+    urls = {name: os.getenv(name, "").strip() for name in ("USER_DB_URL", "JOB_DB_URL")}
+    missing = [name for name, value in urls.items() if not value]
+    if missing:
+        raise ConfigError(
+            f"thieu bien moi truong: {', '.join(missing)}. Copy .env.example thanh .env va dien gia tri."
+        )
+    return SeedSettings(user_db_url=urls["USER_DB_URL"], job_db_url=urls["JOB_DB_URL"])
+
+
 def require_index_settings() -> IndexSettings:
     """Doc cau hinh cho index / search / eval; thieu key hoac DB thi bao loi ro (FR-019).
 

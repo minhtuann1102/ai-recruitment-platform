@@ -51,5 +51,10 @@ synth-jd ──► Synthetic JD ─┴─► process-jd ──► Normalized JD 
 | `salary_min`, `salary_max`, `salary_currency` | như tên, chỉ khi là số |
 | `experience_level_id` | tra `experience_levels.name = level`; JD không có `level` → không chọn vào seed |
 | `status` | `open` |
-| `job_skills` | tra `skills.slug ∈ skills[]`; thiếu thì thêm từ danh mục |
+| `job_skills` | tra `skills.slug ∈ skills[]`; chưa có slug thì tra theo `name` (job-service có thể đã có kỹ năng cùng tên khác slug) và dùng lại; không có nữa mới thêm từ danh mục. Kiểm trước khi thêm nên chạy lại không tạo bản trùng |
+| `id`, `created_at`, `updated_at` (mọi bảng seed ghi; `skills` chỉ `created_at`) | seed sinh `uuid4` + giờ chạy (UTC): bảng MikroORM không có default, ORM tự điền (thấy ở migration `users` của user-service) |
 | (không có cột) | `jd_id`, `synthetic` → Seed Manifest |
+
+Preflight (`job_db_seed_preflight.py`) dừng trước khi ghi nếu thiếu bảng / cột ở trên, hoặc bảng seed ghi có cột NOT NULL
+không default nằm ngoài bảng này (seed không có giá trị); `experience_levels` seed chỉ đọc nên không kiểm cột bắt buộc. Selector bỏ JD trùng khóa posting (Employer theo slug công ty,
+`title`, `description` ghép; 2 JD chỉ khác `requirements` → 1 posting) để `--count` posting chọn ra là posting khác nhau.
