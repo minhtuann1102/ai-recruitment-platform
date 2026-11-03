@@ -8,6 +8,7 @@ from typing import Dict, List
 
 from .mock_evaluator import is_scored
 from .models_interview import FinalizeRequest, FinalizeTurn
+from .report_level_signal import level_signal
 from .report_resources import MAX_RESOURCES, plan_sources, resource, topic_sources
 from .requirements_coverage import requirements_block
 
@@ -98,12 +99,14 @@ def build_report(req: FinalizeRequest) -> Dict:
     kp = {t.id: t.key_points for ph in req.plan.phases for t in ph.topics}
     fallback = plan_sources(req.plan)
     requirements = requirements_block(req.jd_profile, req.plan, scored, req.turns)
+    confidence = _confidence(req, scored, len(sections))
     return {
         "schema_version": 1, "status": "complete" if sections else "unscored",
         "session": {"track": req.track, "level": req.level, "duration_s": req.duration_s,
                     "end_reason": req.end_reason, "evaluated_turns": len(scored),
-                    "confidence": _confidence(req, scored, len(sections))},
+                    "confidence": confidence},
         "overall": _overall_block(sections, overall),
+        "level_signal": level_signal(req.level, scored, overall if sections else None, confidence),
         "sections": sections, "criteria": criteria,
         "topics": [{k: v for k, v in t.items() if k != "_turns"} for t in topics],
         "strengths": [{"point": f"Nắm tốt {t['title']}", "evidence_turns": t["_turns"]} for t in good[:3]],
