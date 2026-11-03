@@ -124,7 +124,44 @@ Chạy lại Reporter (prompt v2) trên 28 phiên đã lưu của lần mô ph�
 - Rẻ hơn ít (−11%) vì viết dài hơn. Lý do đổi là chất lượng, không phải tiền. Reporter chạy lúc kết thúc phiên, không nằm trên đường TTFT.
 - Giới hạn: không có nhãn người cho chất lượng báo cáo; chỉ đọc tay vài báo cáo và dùng `gap_recall` (heuristic, 23 lỗ hổng được hỏi).
 
+## Interviewer: gpt-6-luna so với gpt-4o-mini (03/11)
+Hai mô phỏng full 28 phiên chạy **cùng lúc**, cùng code (`main` sau PR #72, Evaluator v7), Reporter ép gpt-4o-mini ở cả hai; chỉ khác `LLM_MODEL_INTERVIEWER`. Câu hỏi chấm bằng `evals/judge_interviewer.py` (judge gpt-4o-mini). JSON: `eval-sim-interviewer-{base-4omini,luna}-261103.json`, `judge-interviewer-{base-4omini,luna}-261103.json`.
+
+| Chỉ số | gpt-4o-mini | gpt-6-luna |
+|---|---|---|
+| Khuôn "Bạn có thể" / lặp lại câu ứng viên | 8.1% / 1.9% | **0% / 0%** |
+| Câu chính lấy từ kho | 95.8% | **100%** |
+| Số từ TB / p90 | 16.6 / 24 | 19.0 / 27 |
+| `interviewer_fallback` (câu dự phòng) | 3 | **0** |
+| TTFT p50 / p95 | 4.12 / 6.91 s | 4.04 / 6.70 s |
+| Interviewer p50 / p95 | 1427 / 2028 ms | 1411 / 2554 ms |
+| Chi phí Interviewer/phiên | $0.00194 | **$0.00060 (−69%)** |
+| Chi phí thật/phiên | $0.00728 | **$0.00579 (−20%)** |
+| Câu sai ngôn ngữ, lặp câu | 0, 0 | 0, 0 |
+| Judge: `natural` TB (hint) | 4.20 (4.03) | 4.07 (3.85) |
+| Judge: `level_fit` ok / `action_ok` / một câu hỏi | 0.767 / 0.930 / 0.842 | 0.727 / 0.928 / 0.852 |
+| Thứ tự persona, strong − weak | 8/8, 3.88 | 8/8, 3.71 |
+
+- Số tự động nghiêng hẳn về luna: hết khuôn câu, hết câu dự phòng, giữ đủ câu kho, TTFT như cũ, rẻ hơn 2/3. Rẻ chủ yếu nhờ 85% input là cached, giá cache read $0.01.
+- Judge cho luna thấp hơn chút (`natural` −0.13, `level_fit` ok −4 điểm %), nhưng judge **là chính gpt-4o-mini**, dễ thiên vị văn phong của nó; đợt 02/11 đã thấy judge LLM không chọn cùng câu yếu với người.
+- Đọc tay (junior-java-weak): hint của luna bám đúng ý còn thiếu ("Thử hình dung cây kế thừa bắt đầu từ Throwable; hai nhánh con của nó là gì"), hint của gpt-4o-mini hay lạc ("Kể mình nghe về tên…", "bạn xử lý ngoại lệ thế nào"). Điểm cần để ý ở luna: hint lộ nhiều từ khóa hơn ("khi nào bucket chuyển thành tree"), câu chính hay ghép hai ý ("…, và Error khác gì Exception?").
+- Chỉ số Evaluator/Reporter hai bên tương đương (cùng model), nên khác biệt là do Interviewer.
+
+## CV Parser: gpt-6-luna so với gpt-4o-mini (03/11)
+10 CV giả trong `evals/cv_samples`, 2 lần mỗi model, kiểm cứng của `run_cv_samples.py`. JSON: `eval-cv-ab-{4omini,luna}-261103.json`.
+
+| Chỉ số | gpt-4o-mini | gpt-6-luna |
+|---|---|---|
+| Lộ PII, lọt injection, thiếu cờ injection | 0 | 0 |
+| `track_relevance` CV React cho track `frontend_react` | low (sai, 2/2) | **high** (2/2) |
+| Chi phí/CV | $0.00034 | $0.00027 (−22%) |
+| Độ trễ p50 / max | 3.1 / 5.1 s | 3.4 / 4.5 s |
+| Profile giống hệt giữa 2 lần | 3/10 | 0/10 (khác câu chữ headline, summary; relevance, số năm, cờ giữ nguyên) |
+
+- Luna đạt và đúng hơn ở 1 CV; mẫu chỉ 10 CV. JD Parser chưa có bộ mẫu để đo, Planner để sau Phase B (owner 03/11), nên chưa đo hai agent này.
+
 ## Câu hỏi còn mở
-- Đổi Reporter sang gpt-6-luna (`LLM_MODEL_REPORTER=openai/gpt-6-luna`, `LLM_REASONING_REPORTER=off`)? Cần người đọc vài báo cáo xác nhận trước.
+- Owner chốt 03/11: Reporter, Interviewer, CV Parser dùng gpt-6-luna (`.env.example`). Interviewer vẫn nên có người đọc ~20 câu (nhất là hint lộ từ khóa) vì judge hiện là gpt-4o-mini.
+- JD Parser: chưa có bộ mẫu để đo; vẫn dùng `LLM_MODEL` (gpt-4o-mini).
 - Câu "đoán mò kèm từ khóa đúng" nên là `dont_know` hay `answered` điểm thấp? Cần người chấm quyết để làm nhãn golden.
 - `partial` cho câu yếu: nhãn golden `answered` có đúng không, hay luna đúng hơn?
