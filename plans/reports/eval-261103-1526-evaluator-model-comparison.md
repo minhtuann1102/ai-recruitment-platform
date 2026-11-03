@@ -160,8 +160,71 @@ Hai mô phỏng full 28 phiên chạy **cùng lúc**, cùng code (`main` sau PR 
 
 - Luna đạt và đúng hơn ở 1 CV; mẫu chỉ 10 CV. JD Parser chưa có bộ mẫu để đo, Planner để sau Phase B (owner 03/11), nên chưa đo hai agent này.
 
+## Planner, JD Parser, query rewriter: gpt-6-luna so với gpt-4o-mini (03/11)
+Gọi thẳng agent, hai model chạy cùng lúc, luna `reasoning=off`. Script và bộ JD mẫu ở scratchpad (`planner_ab.py`, `jd_ab.py`, `jd_samples.json`), không commit. JSON: `eval-{planner,jd,rewrite}-ab-{4omini,luna}-261103.json`.
+
+**Planner**: 12 ca (java/node × 4 level, 2 ca có CV, 2 ca có JD; CV và JD lấy từ lần parse của gpt-4o-mini), 2 lần, 20 phút.
+
+| Chỉ số | gpt-4o-mini | gpt-6-luna |
+|---|---|---|
+| Rơi về plan dự phòng | 1/24 (timeout 22 s) | **0/24** |
+| Repair | 0 | 0 |
+| Topic LLM viết < 3 `key_points` (code phải bù) | 35.6% | **0%** |
+| `key_points` LLM viết TB/topic | 2.21 | 3.44 |
+| Topic `must` của JD có trong plan | 0.83 | 0.83 |
+| Dùng project trong CV (`cv_ref`) | 4/4 | 4/4 |
+| Cùng danh sách topic giữa 2 lần | 9/12 | 6/12 |
+| Độ trễ p50 / lượt chậm nhất | 5.5 / 22.0 s | 5.7 / 20.1 s |
+| Chi phí/plan | $0.00041 | $0.00031 (−24%) |
+
+- Luna tự viết đủ ý chính, dạng câu khẳng định có nội dung ("hashCode xác định bucket, equals xác định khóa bằng nhau"); gpt-4o-mini hay bỏ trống để code bù, hoặc viết dạng yêu cầu ("Biết cách sử dụng hashCode và equals"). `key_points` là đầu vào của Evaluator và focus follow-up, nên đây là khác biệt có hệ quả.
+- Cả hai có đuôi chậm gần hạn 22 s (luna 1 lượt 20 s, gpt-4o-mini 1 lượt 17 s và 1 lượt quá hạn). Luna đổi topic giữa các lần nhiều hơn (nhiệt độ 0.4).
+- Chưa thay được đo Planner LLM sau Phase B (owner 03/11): chưa chạy mô phỏng full với Planner luna, chưa đo độ phủ câu kho.
+
+**Planner, mô phỏng full** (03/11, 2 lần chạy cùng lúc, 28 phiên; Interviewer, Reporter luna, Evaluator gpt-4o-mini ở cả hai, chỉ khác `LLM_MODEL_PLANNER`). JSON: `eval-sim-planner-{base-4omini,luna}-261103.json`.
+
+| Chỉ số | Planner gpt-4o-mini | Planner gpt-6-luna |
+|---|---|---|
+| Topic technical có câu kho / câu chính từ kho | 98.6% / 97.2% | 94.6% / 93.1% |
+| Phiên RAG lúc start quá hạn 5 s (`rag_start_partial`) | 1 | 4 |
+| Từ trong truy vấn RAG (title + `key_points`)/plan | 66 | 99.6 |
+| Thứ tự persona, strong − weak | 8/8, 3.66 | 7/8, 3.60 |
+| `gap_recall` báo cáo | 0.958 | 0.885 |
+| Planner p50 / p95 | 4.9 / 11.1 s | 5.6 / 7.0 s |
+| TTFT câu đầu p50 / max | 9.8 / 21.1 s | 10.3 / 16.3 s |
+| Chi phí Planner / cả phiên | $0.00038 / $0.00582 | $0.00027 / $0.00600 |
+
+- **Không thắng ở mức phiên.** `key_points` dài hơn làm truy vấn RAG lúc start dài hơn 50%, nhiều phiên quá hạn 5 s hơn và mất câu kho (cả 4 ca đều là topic `java.core.oop-solid`). Thứ tự persona và `gap_recall` tụt nhẹ, có thể là nhiễu (1 lần chạy, 24–26 lỗ hổng). Chi phí phiên không giảm vì Planner chỉ chiếm ~5%.
+- Đuôi độ trễ Planner tốt hơn (p95 11.1 → 7.0 s).
+- **Giữ gpt-4o-mini cho Planner.** Muốn dùng luna thì sửa truy vấn RAG lúc start trước (không ghép nguyên `key_points`, hoặc cắt độ dài), rồi đo lại cùng đợt đo Planner sau Phase B.
+
+**JD Parser**: 7 JD tự soạn có nhãn topic `must`/`nice` (2 JD có injection, 1 JD tiếng Anh, 1 JD ngoài catalog), 3 lần.
+
+| Chỉ số | gpt-4o-mini | gpt-6-luna |
+|---|---|---|
+| Recall topic `must` / `nice` | 1.0 / 1.0 | 1.0 / 1.0 |
+| Precision topic (theo nhãn) | 1.0 | 0.94 |
+| Đủ số yêu cầu `out_of_catalog` | 18/21 | 18/21 |
+| Đặt cờ injection đúng | 21/21 | 21/21 |
+| Chi phí/JD, p50 | $0.00028, 2.4 s | $0.00021 (−27%), 2.4 s |
+
+- Hòa. Topic thừa của luna phần lớn hợp lý ("2+ năm làm Spring Boot" → `java.spring.boot-autoconfig`, "middleware xác thực" → `node.web.api-auth-jwt`); nhãn do mình đặt, chặt. Cả hai không đánh `out_of_catalog` cho "Figma" ở JD frontend.
+
+**Query rewriter**: `evals/retrieval_experiment.py`, 24 truy vấn golden chính + 32 held-out, recall@5 embedding small.
+
+| Chỉ số | gpt-4o-mini | gpt-6-luna |
+|---|---|---|
+| Recall `raw+rewrite` chính / held-out | 1.0 / 0.938 | 0.958 / 0.875 |
+| Recall chỉ `rewrite` held-out | 0.875 | 0.906 |
+| Timeout (hạn 3 s) | 2 | 2 |
+| Độ trễ p50 / p95 | 1232 / 1880 ms | 1337 / 2189 ms |
+| Token ra (56 truy vấn) | 689 | 1074 |
+
+- Hòa trong nhiễu: 2/3 truy vấn luna trượt là lượt timeout (giữ nguyên truy vấn tiếng Việt), gpt-4o-mini cũng timeout 2 lần ở câu khác. Luna dài hơn và p95 chậm hơn 0.3 s, sát hạn 3 s hơn; chi phí cả hai không đáng kể (~$0.0001/phiên). **Giữ gpt-4o-mini.**
+
 ## Câu hỏi còn mở
 - Owner chốt 03/11: Reporter, Interviewer, CV Parser dùng gpt-6-luna (`.env.example`). Interviewer vẫn nên có người đọc ~20 câu (nhất là hint lộ từ khóa) vì judge hiện là gpt-4o-mini.
-- JD Parser: chưa có bộ mẫu để đo; vẫn dùng `LLM_MODEL` (gpt-4o-mini).
+- Planner: giữ gpt-4o-mini (mô phỏng full: mất câu kho do truy vấn RAG dài). Sửa cách dựng truy vấn RAG lúc start rồi đo lại sau Phase B?
+- JD Parser: hòa, chỉ rẻ hơn 27%; đổi hay giữ là lựa chọn cấu hình, không có lợi về chất lượng.
 - Câu "đoán mò kèm từ khóa đúng" nên là `dont_know` hay `answered` điểm thấp? Cần người chấm quyết để làm nhãn golden.
 - `partial` cho câu yếu: nhãn golden `answered` có đúng không, hay luna đúng hơn?
