@@ -241,7 +241,7 @@ Số liệu đếm bằng script từ cột "Trạng thái". Khối lượng cò
 6. ~~FR-AI-112: xác nhận diễn giải A-6~~ **Đã xác nhận 19/10**: "video chỉ hiển thị" là tự xem cục bộ, không gửi đi, không lưu.
 7. FR-AI-001, 003, 035: thời lượng mặc định trong 15 đến 20 phút; công thức số topic và turn cap 16 là đề xuất chưa kiểm chứng.
 8. FR-AI-120: chọn hạ tầng voice-agent cụ thể và khảo sát chất lượng tiếng Việt xen thuật ngữ Anh trước khi quyết định làm giai đoạn 2.
-9. FR-AI-130: có thêm sớm cột `learning_consent_at` (và `media_consent_at`) vào migration `interview_db` của giai đoạn 1 không (FSD)?
+9. FR-AI-130: có thêm sớm cột `learning_consent_at` (và `media_consent_at`) vào migration `interview_db` của giai đoạn 1 không (FSD)? AIE đề xuất có, kèm 4 câu hỏi mở (camera, phiên bản thông báo, thu hồi, endpoint): `plans/20261019-1100-ai-interview-brd-implementation/reports/consent-columns-proposal.md`.
 10. FR-AI-100 đến 105: ai thực hiện giao diện phòng họp và trang báo cáo (đề xuất FSD)?
 11. FR-AI-016, 017, 023, 056: cần FSD xác nhận S2-FSD-11 (TCP lấy JD theo application) và S3-FSD-8 (gắn CV + JD vào phiên).
 12. FR-AI-062: DE sở hữu đường ghi (spec 005); AIE xác nhận phạm vi đường đọc ở Phase 03.

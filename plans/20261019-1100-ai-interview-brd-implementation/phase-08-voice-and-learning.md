@@ -34,7 +34,7 @@ B (ngoài kế hoạch): thêm container voice-gateway, xem [L2 §3, §8.4](../.
 ## Todo List
 - [ ] Gate 22/11 có biên bản
 - [ ] (A) prompt + golden set nhiễu STT
-- [ ] Đề xuất cột consent cho FSD
+- [x] Đề xuất cột consent cho FSD (04/11, chờ FSD quyết): [reports/consent-columns-proposal.md](reports/consent-columns-proposal.md)
 - [ ] (B) chỉ khi owner xác nhận: ADR-009 + khảo sát
 
 ## Success Criteria
