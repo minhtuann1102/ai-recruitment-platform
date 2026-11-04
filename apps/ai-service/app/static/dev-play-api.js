@@ -7,16 +7,19 @@ function headers(json) {
   return h;
 }
 
-async function errorText(resp) {
+// Loi API thanh Error; code + serverMessage de trang xu ly rieng loi co ma (vd 422 voice_no_speech)
+async function apiError(resp) {
   const body = await resp.text();
-  try { const j = JSON.parse(body); return `${resp.status} ${j.error}: ${j.message}`; } catch { return `${resp.status}: ${body.slice(0, 200)}`; }
+  let j;
+  try { j = JSON.parse(body); } catch { return new Error(`${resp.status}: ${body.slice(0, 200)}`); }
+  return Object.assign(new Error(`${resp.status} ${j.error}: ${j.message}`), { code: j.error, serverMessage: j.message });
 }
 
 async function postJson(path, body, isForm) {
   const tr = traceStart(path);
   try {
     const resp = await fetch(path, { method: "POST", headers: headers(!isForm), body: isForm ? body : JSON.stringify(body) });
-    if (!resp.ok) throw new Error(await errorText(resp));
+    if (!resp.ok) throw await apiError(resp);
     const data = await resp.json();
     traceLine(tr, `200 OK`);
     traceAgents(tr, data.metadata?.model ? data.metadata : null);
@@ -39,7 +42,7 @@ function traceFinalize(tr, r) {
 // POST + doc SSE (EventSource khong ho tro POST). Tra data cua event `done`; event `error` nem loi.
 async function postSse(path, body, onEvent) {
   const resp = await fetch(path, { method: "POST", headers: headers(true), body: JSON.stringify(body) });
-  if (!resp.ok) throw new Error(await errorText(resp));
+  if (!resp.ok) throw await apiError(resp);
   const reader = resp.body.getReader(), decoder = new TextDecoder();
   let buf = "", done = null;
   for (;;) {

@@ -33,7 +33,7 @@ B (ngoài kế hoạch): thêm container voice-gateway, xem [L2 §3, §8.4](../.
 
 ## Todo List
 - [ ] Gate 22/11 có biên bản
-- [x] (A) prompt + golden set nhiễu STT (PR #77, 04/11); bảng tra chỉ cho lượt voice, hỏi lại khi `stt_confidence` thấp, `GET /api/stt/phrases` (04/11, nhánh `thang/stt-voice-hardening`)
+- [x] (A) prompt + golden set nhiễu STT (PR #77, 04/11); bảng tra chỉ cho lượt voice, hỏi lại khi `stt_confidence` thấp, `GET /api/stt/phrases` (04/11, PR #79); `/dev/play` thử voice bằng Web Speech API của trình duyệt (nhánh `thang/dev-play-voice`)
 - [x] Đề xuất cột consent cho FSD (04/11, chờ FSD quyết): [reports/consent-columns-proposal.md](reports/consent-columns-proposal.md)
 - [ ] (B) chỉ khi owner xác nhận: ADR-009 + khảo sát
 

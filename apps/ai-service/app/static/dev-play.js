@@ -1,6 +1,6 @@
 // Trang dev /dev/play: dong vai interview-service (giu plan/state/turns giua cac luot) va goi API that cua ai-service.
 // Luong: [cv/parse] [jd/parse] -> start (SSE) -> next-turn (SSE) ... -> finalize. Bao cao render o dev-play-report.js,
-// bang "Luong he thong" o dev-play-trace.js, goi HTTP/SSE o dev-play-api.js.
+// bang "Luong he thong" o dev-play-trace.js, goi HTTP/SSE o dev-play-api.js, giong noi o dev-play-voice.js.
 const $ = (id) => document.getElementById(id);
 const ACTION_TAG = { hint: "gợi ý", clarify: "hỏi lại", follow_up: "hỏi sâu", wrap_up: "kết thúc", ask_main: "câu chính" };
 let S = null; // phien hien tai
@@ -71,6 +71,7 @@ async function streamQuestion(path, body) {
   S.liveBubble = null;
   if (!done.turn) { div.remove(); return done; } // phien ket thuc, khong co cau hoi
   text.textContent = done.question;
+  voiceSpeak(done.question);
   if (done.plan) S.plan = done.plan; // /api/start: plan chi co trong done
   const title = topicTitle(done.turn.topic_id);
   if (title) div.querySelector(".tag").textContent += ` · ${title}`;
@@ -83,7 +84,7 @@ async function streamQuestion(path, body) {
 }
 
 function setBusy(busy, status) {
-  for (const id of ["sendBtn", "endBtn", "answer"]) $(id).disabled = busy;
+  for (const id of ["sendBtn", "endBtn", "answer", "micBtn"]) $(id).disabled = busy;
   $("chatStatus").textContent = status || "";
   $("chatStatus").className = "status";
 }
@@ -131,19 +132,24 @@ async function startSession() {
 }
 
 async function sendAnswer() {
-  const answer = $("answer").value.trim();
-  if (!answer) return;
-  const turn = S.turn;
-  S.pending = { answer, me: bubble("me", answer), body: {
+  const answer = $("answer").value.trim(), voice = voiceFields(answer);
+  if (!answer && voice.answer_source !== "voice") return; // voice rong van gui: ai-service tra voice_no_speech
+  voiceReset();
+  const turn = S.turn, simBefore = S.simElapsed;
+  S.pending = { answer, voice, simBefore, me: bubble("me", answer), body: {
     session_id: S.sid, level: S.level, track: S.track, plan: S.plan, state: S.state, turn_number: turn.turn_number,
     question: S.question, turn_kind: turn.turn_kind, answer, elapsed_seconds: elapsedSeconds(answer),
-    topic_turns: (S.history[turn.topic_id] || []).slice(-5) } };
+    topic_turns: (S.history[turn.topic_id] || []).slice(-5), ...voice } };
+  if (voice.answer_source === "voice") {
+    S.pending.me.querySelector(".tag").textContent = "giọng nói" +
+      (voice.stt_confidence == null ? " · không gửi độ tin cậy" : ` · độ tin cậy ${voice.stt_confidence}`);
+  }
   $("answer").value = "";
   await runNextTurn();
 }
 
 async function runNextTurn() {
-  const { answer, me, body } = S.pending, turn = S.turn;
+  const { answer, voice, me, body } = S.pending, turn = S.turn;
   $("retryBtn").classList.add("hidden");
   setBusy(true, "AI đang chấm và chọn câu tiếp theo…");
   try {
@@ -151,7 +157,7 @@ async function runNextTurn() {
     const ev = done.evaluation;
     S.turns.push({ turn_number: turn.turn_number, phase: turn.phase, topic_id: turn.topic_id, turn_kind: turn.turn_kind,
                    difficulty: turn.difficulty, question: S.question, answer, evaluation: ev });
-    (S.history[turn.topic_id] ||= []).push({ q: S.question, a: answer });
+    (S.history[turn.topic_id] ||= []).push({ q: S.question, a: answer, source: voice.answer_source });
     if (ev) setDebug(me, `điểm lượt ${ev.turn_score_10}/10 · ${ev.answer_type}${ev.degraded ? " · degraded" : ""}` +
       (ev.covered_points.length ? `\nđã nêu: ${ev.covered_points.join("; ")}` : "") +
       (ev.missing_points.length ? `\nthiếu: ${ev.missing_points.join("; ")}` : ""));
@@ -164,13 +170,23 @@ async function runNextTurn() {
   } catch (err) {
     S.liveBubble?.remove();
     setBusy(false);
+    $("answer").value = answer;
+    if (voiceRejected(err, answer)) { // luot khong luu: noi lai / go chat roi gui lai, elapsed_seconds tinh lai luc gui
+      me.remove();
+      S.simElapsed = S.pending.simBefore;
+      S.pending = null;
+      return;
+    }
+    $("answer").value = "";
     $("sendBtn").disabled = true;
+    $("micBtn").disabled = true; // dang cho gui lai dung body cu: khong ghi lan moi
     $("retryBtn").classList.remove("hidden");
     showError("chatStatus", err);
   }
 }
 
 async function finalizeSession(byCandidate) {
+  voiceReset();
   setBusy(true, "Đang viết báo cáo…");
   $("retryBtn").classList.add("hidden");
   if (byCandidate) S.state.end_reason = "candidate_ended";
@@ -212,4 +228,5 @@ $("retryBtn").onclick = runNextTurn;
 $("endBtn").onclick = () => finalizeSession(true);
 $("downloadBtn").onclick = download;
 $("resetBtn").onclick = () => location.reload();
+voiceSetup();
 $("answer").addEventListener("keydown", (e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) sendAnswer(); });
