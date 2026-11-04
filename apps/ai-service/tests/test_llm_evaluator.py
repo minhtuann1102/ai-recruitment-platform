@@ -21,10 +21,10 @@ TOPIC = PlanTopic(id="t1", title="Database index", source="catalog", objective="
 ANSWER = "DB dùng B-tree nên không phải quét cả bảng. Nhưng insert sẽ chậm hơn vì phải cập nhật index."
 
 
-def inp(answer=ANSWER, turn_kind="main", phase="technical"):
+def inp(answer=ANSWER, turn_kind="main", phase="technical", spoken=False):
     return EvaluationInput(level="junior", phase=phase, topic=TOPIC, difficulty=2, turn_kind=turn_kind,
                            turn_number=2, question="Index hoạt động thế nào?", answer=answer,
-                           topic_turns=[TopicTurn(q="Q trước", a="A trước")])
+                           topic_turns=[TopicTurn(q="Q trước", a="A trước")], spoken=spoken)
 
 
 def llm_json(**over):
@@ -160,7 +160,15 @@ def test_stt_terms_are_normalized_before_llm_and_quote_check():
     spoken = "đê bê dùng bi tri nên không phải quét cả bảng nhưng in sớt sẽ chậm hơn vì phải cập nhật in đếch"
     covered = [{"point": TOPIC.key_points[1], "quote": "insert sẽ chậm hơn vì phải cập nhật index"}]
     ev_agent, client = make([llm_json(covered=covered)])
-    ev = run(ev_agent.evaluate(inp(answer=spoken)))
+    ev = run(ev_agent.evaluate(inp(answer=spoken, spoken=True)))
     sent = client.calls[0]["messages"][1]["content"]
     assert "DB dùng bi tri" in sent and "cập nhật index" in sent and "in đếch" not in sent
-    assert len(ev.evidence) == 1  # quote theo ban da chuan hoa van qua hau kiem
+    # quote qua hau kiem theo ban da doi, roi tra ve nguyen van ban ghi de bao cao trich dung loi ung vien
+    assert [e.quote for e in ev.evidence] == ["in sớt sẽ chậm hơn vì phải cập nhật in đếch"]
+
+
+def test_typed_answer_is_not_normalized():
+    typed = "đê bê dùng bi tri nên không phải quét cả bảng nhưng in sớt sẽ chậm hơn vì phải cập nhật in đếch"
+    ev_agent, client = make([llm_json()])
+    run(ev_agent.evaluate(inp(answer=typed)))  # answer_source = text (mac dinh): cau go tay giu nguyen
+    assert "cập nhật in đếch" in client.calls[0]["messages"][1]["content"]

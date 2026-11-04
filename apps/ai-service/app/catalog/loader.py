@@ -1,4 +1,5 @@
 """Doc topic catalog tu cac file YAML cung thu muc."""
+import re
 from functools import lru_cache
 from pathlib import Path
 from typing import List
@@ -8,6 +9,7 @@ import yaml
 from .models import TrackCatalog
 
 CATALOG_DIR = Path(__file__).resolve().parent
+_TRACK_NAME = re.compile(r"[a-z]+(_[a-z]+)*")  # khop TrackCatalog.track
 
 
 class CatalogError(RuntimeError):
@@ -21,7 +23,7 @@ def list_tracks() -> List[str]:
 @lru_cache(maxsize=None)
 def load_catalog(track: str) -> TrackCatalog:
     path = CATALOG_DIR / f"{track}.yaml"
-    if not path.is_file():
+    if not _TRACK_NAME.fullmatch(track) or not path.is_file():  # "../x" khong doc file ngoai catalog
         raise CatalogError(f"track khong ton tai: {track}")
     data = yaml.safe_load(path.read_text(encoding="utf-8"))
     catalog = TrackCatalog.model_validate(data)

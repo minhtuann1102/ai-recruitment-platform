@@ -1,8 +1,8 @@
 """Evaluator LLM (FR-AI-030..032): cham mot cau tra loi theo rubric, roi code hau kiem (evaluation_checks).
 
-Luong: precheck bang code (dont_know ngan, manipulation) -> doi thuat ngu STT phien am (stt_terms) -> goi LLM qua
-LlmGateway (structured output) -> hau kiem quote / tran band -> Evaluation. LLM loi sau retry thi dung mock
-heuristic va danh dau degraded (luot khong tinh diem, BRU-05) de phien khong chet.
+Luong: precheck bang code (dont_know ngan, manipulation) -> luot voice: doi thuat ngu STT phien am (stt_terms)
+-> goi LLM qua LlmGateway (structured output) -> hau kiem quote / tran band -> Evaluation. LLM loi sau retry thi
+dung mock heuristic va danh dau degraded (luot khong tinh diem, BRU-05) de phien khong chet.
 """
 import asyncio
 import json
@@ -24,7 +24,7 @@ from ..llm.usage import CallRecord, UsageCollector
 from ..models_common import AnswerType
 from ..models_interview import CitedSource, Evaluation, Evidence, PlanTopic, SourceRef, TopicTurn
 from ..prompts.store import UNTRUSTED_NOTICE, PromptStore, wrap_untrusted
-from ..stt_terms import normalize_stt_terms
+from ..stt_terms import normalize_stt_terms_with_map, restore_quote
 
 log = logging.getLogger("ai_service.evaluator")
 
@@ -81,6 +81,7 @@ class EvaluationInput:
     turn_snippets: List[str] = field(default_factory=list)  # Phase 02: chunk theo cau vua hoi + cau tra loi
     turn_sources: List[SourceRef] = field(default_factory=list)  # 03b: cung thu tu turn_snippets
     reference_source: Optional[SourceRef] = None  # 03b: cau tu kho cua reference_answer
+    spoken: bool = False  # answer la ban ghi STT (answer_source = voice): doi thuat ngu phien am truoc khi cham
 
 
 def build_messages(system_prompt: str, inp: EvaluationInput, with_ids: bool = False) -> List[dict]:
@@ -204,8 +205,9 @@ class LlmEvaluator:
         if code_type:  # FR-AI-032: khong goi LLM
             return None, zero_evaluation(inp.turn_number, code_type)
         # QUAL17: thuat ngu STT phien am ve dang dung; LLM, hau kiem quote va fallback cung thay mot ban
-        normalized = normalize_stt_terms(inp.answer)
-        if normalized != inp.answer:
+        raw_answer = inp.answer
+        normalized, replaced = normalize_stt_terms_with_map(inp.answer) if inp.spoken else (inp.answer, [])
+        if replaced:
             log.info("evaluator_stt_terms turn=%d", inp.turn_number)
             inp = replace(inp, answer=normalized)
         try:
@@ -222,4 +224,7 @@ class LlmEvaluator:
             fallback = mock_evaluator.evaluate(inp.answer, inp.question, inp.topic, inp.turn_kind, inp.turn_number)
             return None, fallback.model_copy(update={"degraded": True})
         ev = await asyncio.to_thread(postcheck, result.data, inp)
+        if replaced:  # evidence.quote trich nguyen van ban ghi, khong phai ban da doi thuat ngu
+            ev.evidence = [e.model_copy(update={"quote": restore_quote(e.quote, raw_answer, replaced)})
+                           for e in ev.evidence]
         return result.data, ev.model_copy(update={"prompt_version": self._prompt.version})

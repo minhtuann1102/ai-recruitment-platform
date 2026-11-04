@@ -302,6 +302,7 @@ Giữ tên `start / next-turn / finalize` theo constitution IV; **nội dung** �
 | POST | `/api/next-turn` | Evaluator → policy → Interviewer | SSE | 45 s (event đầu ≤ 15 s) |
 | POST | `/api/finalize` | (code tính điểm) → Reporter | JSON | 90 s |
 | GET | `/api/health` | — | JSON | 5 s |
+| GET | `/api/stt/phrases` | — (code) | JSON | 5 s |
 
 Ngoài contract: `GET /dev/play` là trang HTML tĩnh cho dev tự phỏng vấn thử (đóng vai interview-service, gọi các endpoint trên). Không qua token, tự trả 404 khi `APP_ENV` là staging/production; interview-service không dùng.
 
@@ -424,12 +425,38 @@ SSE: `meta`, `token`…, `done`. Event `done` nội bộ chứa đủ dữ liệ
   "turn_kind": "main",
   "answer": "Em đặt @Transactional ở service layer, nếu lỗi giữa chừng thì cả hai bảng đều rollback ạ.",
   "topic_turns": [],
-  "elapsed_seconds": 610
+  "elapsed_seconds": 610,
+  "answer_source": "text",   // tùy chọn (2026-11-04): "text" (mặc định) | "voice"
+  "stt_confidence": null     // tùy chọn: 0..1, độ tin cậy dịch vụ STT trả cho bản ghi; chỉ có nghĩa khi voice
 }
 ```
 
 `topic_turns` = các lượt **trước** trong topic hiện tại (`{ "q", "a" }`, tối đa 5), interview-service lấy theo
 `topic_id`. Không gửi cả transcript: Evaluator chỉ cần ngữ cảnh topic, giữ prompt nhỏ (§9).
+
+`answer_source` / `stt_confidence` (2026-11-04, voice tùy chọn A, NFR-AI-QUAL17). Hai trường đều tùy chọn; client cũ
+không gửi thì hành vi như trước (`text`). Giá trị viết thường (`"VOICE"` bị 422). Mỗi phần tử `topic_turns` có thể
+kèm `source` (`text` / `voice`); không có thì coi như cùng nguồn với lượt hiện tại.
+- `voice`: `answer` là bản ghi STT. ai-service đổi thuật ngữ phiên âm ("đốc cơ" → Docker, `app/stt_terms.py`) cho
+  Evaluator, truy vấn RAG theo lượt, `topic_turns` và Interviewer; `evidence.quote` vẫn trích nguyên văn bản ghi.
+  `text` không đổi chữ nào.
+- `stt_confidence` < `STT_MIN_CONFIDENCE` (env, mặc định 0.6, **giả định**, chốt khi chọn dịch vụ STT): lượt **không
+  chấm** (không gọi Evaluator / RAG), `evaluation.transcript_low_confidence = true`, không tính vào điểm topic hay báo
+  cáo. Lần đầu trong topic: `turn.action = clarify`, `question` là câu cố định "Xin lỗi, mình chưa nghe rõ…" kèm
+  nguyên câu vừa hỏi, giữ `turn_kind` (hint vẫn là hint, để trần band còn áp), `qa_id` và độ khó (`question_source =
+  bank` nếu câu từ kho, không thì `fallback` dù Interviewer không lỗi). Lần thứ hai trong cùng topic: **422
+  `voice_unclear`** ("Mình vẫn chưa nghe rõ câu trả lời. Bạn thử gõ câu trả lời vào khung chat nhé."), cùng cách xử lý
+  với `voice_no_speech` bên dưới, để ứng viên không mất topic vì micro hoặc môi trường ồn. Đã đến điều kiện ưu tiên
+  (hết giờ, turn cap…) thì không chặn: lượt đi tiếp, không chấm. Ứng viên đã sửa transcript thì interview-service **không gửi** `stt_confidence` (độ tin cậy chỉ đúng
+  với bản STT gốc). Thiếu `stt_confidence` thì luôn chấm.
+- Micro không thu được tiếng: lượt `voice` có `answer` rỗng hoặc chỉ có âm đệm ("ừm", "à", "ờ") thì trả ngay
+  **422 `voice_no_speech`** (JSON, không mở SSE), `details = {retryable: true, suggest_chat: true}`, `message` đọc
+  được cho ứng viên ("Micro
+  chưa thu được tiếng. Bạn kiểm tra micro rồi nói lại, hoặc chuyển sang gõ chat nhé."). Không gọi LLM, không chấm,
+  **state không đổi**: interview-service hiện thông báo, không lưu lượt, cho ứng viên nói lại hoặc gõ rồi gửi lại
+  **cùng** `turn_number` và `state`, với `elapsed_seconds` **tính lại theo giờ hiện tại** (để hết giờ thì phiên vẫn
+  đi tiếp). Câu trả lời cho câu wrap-up và lượt đã đến điều kiện ưu tiên (hết giờ, turn cap…) không bị chặn: lượt đi
+  tiếp, không chấm. Lượt `text` có `answer` rỗng vẫn là 422 `invalid_request` như cũ.
 
 Event `done`:
 
@@ -469,10 +496,30 @@ chấm (ai_db lỗi, quá hạn) nên lượt được chấm không có `R`; kh
 `evaluation.sources` (2026-10-29, Phase 03b): tài liệu các ý đã trích, `[{id, ref, title, url, support}]` (`ref` =
 `qa_id` / id chunk, bền qua lượt; nguồn bác bỏ trước). Lấy từ `plan.topics[].reference_sources` (cùng thứ tự
 `reference_snippets`, `{ref, title, url}`) và chunk theo lượt; interview-service lưu nguyên `evaluation` và `plan` như
-cũ để finalize dựng `study_plan.resources`. Thiếu `reference_sources` thì `sources` rỗng, không lỗi.
+cũ để finalize dựng `study_plan.resources`. Thiếu `reference_sources` thì `sources` rỗng, không lỗi. Từ 2026-11-04 mỗi
+nguồn (và `bank_questions[]`) có thêm `license` (giấy phép DE ghi ở `metadata.license`, có thể `null`) để finalize lọc
+tài liệu đưa cho ứng viên (05 §6). `evaluation.sources` vẫn gồm cả nguồn chưa được phép chia sẻ (để debug, đối
+chiếu): interview-service **không hiển thị** trường này cho ứng viên, chỉ hiển thị `study_plan.resources`.
 
 `reasoning` do **code** sinh từ luật policy đã khớp (không phải LLM), lưu vào `agent_reasoning` để debug.
 `session_end = true` thì `question = null`.
+
+`evaluation.transcript_low_confidence` (2026-11-04): `true` khi lượt voice có `stt_confidence` dưới ngưỡng (ở trên);
+band 0 nhưng không tính điểm, báo cáo coi như lượt kém tin cậy (`confidence` tổng giảm như `degraded`).
+interview-service lưu điểm của lượt này như lượt `degraded` (null, không phải 0).
+
+### GET /api/stt/phrases?track=java_backend
+
+(2026-11-04, NFR-AI-QUAL16/17) Thuật ngữ gợi ý cho dịch vụ STT (phrase list của Google / Azure, prompt của Whisper)
+để ghi đúng thuật ngữ Anh ngay từ đầu. Không gọi LLM, cần `X-Internal-Token` như các endpoint khác, nên trình duyệt
+lấy qua interview-service.
+
+```jsonc
+{ "track": "java_backend", "phrases": ["Java Collections", "HashMap", "ConcurrentHashMap", "thread pool", "..."] }
+```
+
+Thứ tự: cụm chữ Latin trong `title` + `key_concepts` của catalog track (theo thứ tự catalog), rồi thuật ngữ chung của
+bảng tra; không trùng. Dịch vụ giới hạn số cụm thì cắt đuôi. Track không có: 422 `invalid_request`.
 
 ### POST /api/finalize
 

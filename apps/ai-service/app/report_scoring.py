@@ -38,7 +38,8 @@ def _scored(turns: List[FinalizeTurn]) -> List[FinalizeTurn]:
 
 def _confidence(req: FinalizeRequest, scored: List[FinalizeTurn], phases_scored: int) -> str:
     evaluations = [t.evaluation for t in req.turns if t.evaluation]
-    shaky = sum(1 for e in evaluations if e.degraded or e.reference_missing)  # diem kem tin cay hoac khong tinh duoc
+    # diem kem tin cay hoac khong tinh duoc (ban ghi STT kem cung vay)
+    shaky = sum(1 for e in evaluations if e.degraded or e.reference_missing or e.transcript_low_confidence)
     if len(scored) < 6 or (evaluations and shaky / len(evaluations) > 0.2) or phases_scored < 3:
         return "low"
     return "medium" if len(scored) <= 9 else "high"

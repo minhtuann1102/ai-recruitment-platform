@@ -21,6 +21,8 @@ def _tag(items: List[Tagged], tags: List[str], turn: int) -> None:
 
 
 def record_evaluation(state: CandidateState, ev: Evaluation, turn_no: int) -> None:
+    if ev.transcript_low_confidence:  # khong biet ung vien noi gi: khong doi diem, tag, dem dont_know
+        return
     ts = next(t for t in state.topics if t.id == state.active_topic_id)
     if is_scored(ev):
         ts.n_scored += 1

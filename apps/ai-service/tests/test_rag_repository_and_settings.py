@@ -93,7 +93,7 @@ class _Conn:
 
 def test_repository_opens_read_only_session_and_maps_rows():
     row = ("uuid-1", "Q\n\nA", "interview_qa", "node.x", "Backend", "hard", "de-qa-1", "qa_pair", "https://x.dev/a",
-           None)
+           "MIT", None)
     conn, seen = _Conn([row]), {}
 
     async def connect(dsn, **kw):
@@ -105,5 +105,16 @@ def test_repository_opens_read_only_session_and_maps_rows():
     assert seen["options"].startswith("-c default_transaction_read_only=on")
     assert "statement_timeout" in seen["options"] and seen["keepalives"] == 1 and seen["connect_timeout"] == 3
     assert chunk.qa_id == "de-qa-1" and chunk.score is None and chunk.dedup_key == "de-qa-1"
-    assert chunk.source_url == "https://x.dev/a"
+    assert chunk.source_url == "https://x.dev/a" and chunk.license == "MIT"
     assert conn.executed[0][1] == ["de-qa-1", "text-embedding-3-small"]
+
+
+def test_bank_rows_carry_license():
+    row = ("de-qa-1", "HashMap là gì?", "easy", "HashMap là gì?\n\nBảng băm.", 0.8, "CC-BY-NC-ND-3.0")
+
+    async def connect(dsn, **kw):
+        return _Conn([row])
+
+    settings = load_rag_settings({"RAG_ENABLED": "1", "AI_DB_URL": "postgresql://ro@h/ai_db"})
+    entry, = asyncio.run(PgKnowledgeRepository(settings, connect).list_bank("java.x", "easy", 3))
+    assert (entry.qa_id, entry.similarity, entry.license) == ("de-qa-1", 0.8, "CC-BY-NC-ND-3.0")

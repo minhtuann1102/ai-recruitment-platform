@@ -100,6 +100,17 @@ Nội dung phase `scenario` theo level:
 
 `hint` và `clarify` **tính vào** số follow-up, để một topic không kéo dài quá `1 + max_follow_up` lượt.
 
+**Micro không thu tiếng** (2026-11-04): lượt voice rỗng hoặc chỉ có âm đệm → 422 `voice_no_speech` trước mọi bước,
+state không đổi, không tốn lượt (06 §7.4).
+
+**Hỏi lại vì bản ghi giọng nói kém** (2026-11-04, NFR-AI-QUAL17, `app/voice_turn.py`): lượt `answer_source = voice`
+có `stt_confidence` < `STT_MIN_CONFIDENCE` (mặc định 0.6, giả định) thì **không gọi Evaluator / RAG**, trả
+`Evaluation` có `transcript_low_confidence = true` (không tính điểm, không đổi tag, không đếm `dont_know`). Lần đầu
+trong topic (`counters.stt_reasks` < 1) và không có điều kiện ưu tiên §4.4: hỏi lại nguyên câu bằng câu cố định của
+code (`action = clarify`, không gọi Interviewer), giữ `turn_kind`, độ khó và `qa_id`, **không tính** vào
+follow-up. Lần thứ hai trong topic: 422 `voice_unclear` gợi ý gõ chat, state không đổi (06 §7.4). Đã đến điều kiện
+ưu tiên: lượt đi tiếp theo điều kiện đó, không chấm. Lượt hỏi lại vẫn tính vào turn cap.
+
 ## 4.4 Điều kiện chuyển trạng thái
 
 Kiểm theo **thứ tự ưu tiên** dưới đây sau mỗi lượt (trong `transition()`), điều kiện đầu tiên khớp thắng.

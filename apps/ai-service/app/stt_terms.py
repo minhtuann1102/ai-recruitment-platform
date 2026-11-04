@@ -6,12 +6,14 @@ golden (evals/evaluator_golden_stt.jsonl) de so do khong lac quan.
 
 Moi dang phien am phai >= 2 am tiet: am tiet don ("cát", "sét", "nốt", "ghét") trung tu tieng Viet thuong gap nen
 khong doi; cum 2 am tiet trung tieng Viet ("con bách thú", "gia va" = "gia vị" go khong dau)
-cung bi bo. ai-service khong biet cau tra loi den tu chat hay giong noi, nen bang ap cho moi luot; test kiem cau
-go tay trong golden khong bi doi chu nao.
+cung bi bo. Chi ap cho luot answer_source = voice (app/voice_turn.py), cau go tay giu nguyen; test van kiem cau
+go tay trong golden khong bi doi chu nao, phong khi ung vien sua transcript bang tay.
 """
 import re
 import unicodedata
-from typing import Dict, Tuple
+from typing import Dict, List, Tuple
+
+from .evaluation_checks import quote_in_answer
 
 STT_TERMS: Dict[str, Tuple[str, ...]] = {
     # dong thoi, Java
@@ -164,10 +166,31 @@ _PATTERN = re.compile(r"(?<!\w)(" + "|".join(re.escape(v).replace(r"\ ", r"\s+")
                       re.IGNORECASE)
 
 
+def normalize_stt_terms_with_map(text: str) -> Tuple[str, List[Tuple[str, str]]]:
+    """-> (van ban da doi, [(thuat ngu, doan ban ghi goc)]); khong doi duoc cho nao thi tra nguyen van ban."""
+    replaced: List[Tuple[str, str]] = []
+
+    def sub(m: re.Match) -> str:
+        # IGNORECASE khop rong hon lower() ("ſ" ~ "s", "İ" ~ "i"): khoa khong co trong bang thi giu nguyen doan do
+        term = _LOOKUP.get(" ".join(_nfc(m.group(0)).split()))
+        if term is None:
+            return m.group(0)
+        replaced.append((term, m.group(0)))
+        return term
+
+    out = _PATTERN.sub(sub, unicodedata.normalize("NFC", text))
+    return (out, replaced) if replaced else (text, [])
+
+
 def normalize_stt_terms(text: str) -> str:
     """Thay dang phien am bang thuat ngu; van ban khong co dang nao trong bang giu nguyen tung ky tu."""
-    nfc = unicodedata.normalize("NFC", text)
-    if not _PATTERN.search(nfc):
-        return text
-    # IGNORECASE khop rong hon lower() ("ſ" ~ "s", "İ" ~ "i"): khoa khong co trong bang thi giu nguyen doan do
-    return _PATTERN.sub(lambda m: _LOOKUP.get(" ".join(_nfc(m.group(0)).split()), m.group(0)), nfc)
+    return normalize_stt_terms_with_map(text)[0]
+
+
+def restore_quote(quote: str, raw_answer: str, replaced: List[Tuple[str, str]]) -> str:
+    """Quote Evaluator trich tren ban da doi -> nguyen van ban ghi STT, de bao cao trich dung loi ung vien.
+    Ban khoi phuc khong khop cau goc (LLM chep lech, ung vien noi ca hai dang) thi giu quote da doi."""
+    out = quote
+    for term, spoken in sorted(replaced, key=lambda r: len(r[0]), reverse=True):  # "thread pool" truoc "thread"
+        out = re.sub(rf"(?<!\w){re.escape(term)}(?!\w)", lambda _, sp=spoken: sp, out, count=1, flags=re.IGNORECASE)
+    return out if out != quote and quote_in_answer(out, raw_answer) else quote
