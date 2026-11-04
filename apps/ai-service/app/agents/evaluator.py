@@ -1,13 +1,13 @@
 """Evaluator LLM (FR-AI-030..032): cham mot cau tra loi theo rubric, roi code hau kiem (evaluation_checks).
 
-Luong: precheck bang code (dont_know ngan, manipulation) -> goi LLM qua LlmGateway (structured output)
--> hau kiem quote / tran band -> Evaluation. LLM loi sau retry thi dung mock heuristic va danh dau
-degraded (luot khong tinh diem, BRU-05) de phien khong chet.
+Luong: precheck bang code (dont_know ngan, manipulation) -> doi thuat ngu STT phien am (stt_terms) -> goi LLM qua
+LlmGateway (structured output) -> hau kiem quote / tran band -> Evaluation. LLM loi sau retry thi dung mock
+heuristic va danh dau degraded (luot khong tinh diem, BRU-05) de phien khong chet.
 """
 import asyncio
 import json
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import List, Literal, Optional, Tuple
 
 import openai
@@ -24,6 +24,7 @@ from ..llm.usage import CallRecord, UsageCollector
 from ..models_common import AnswerType
 from ..models_interview import CitedSource, Evaluation, Evidence, PlanTopic, SourceRef, TopicTurn
 from ..prompts.store import UNTRUSTED_NOTICE, PromptStore, wrap_untrusted
+from ..stt_terms import normalize_stt_terms
 
 log = logging.getLogger("ai_service.evaluator")
 
@@ -202,6 +203,11 @@ class LlmEvaluator:
         code_type = precheck_answer(inp.answer)
         if code_type:  # FR-AI-032: khong goi LLM
             return None, zero_evaluation(inp.turn_number, code_type)
+        # QUAL17: thuat ngu STT phien am ve dang dung; LLM, hau kiem quote va fallback cung thay mot ban
+        normalized = normalize_stt_terms(inp.answer)
+        if normalized != inp.answer:
+            log.info("evaluator_stt_terms turn=%d", inp.turn_number)
+            inp = replace(inp, answer=normalized)
         try:
             sourced = uses_sources(self._prompt.version)
             result = await self._gateway.complete(self.agent, build_messages(self._prompt.text, inp, sourced),

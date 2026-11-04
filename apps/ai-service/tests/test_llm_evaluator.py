@@ -60,7 +60,7 @@ def test_happy_path_keeps_verified_points_and_records_usage():
     ev = run(ev_agent.evaluate(inp(), col))
     assert ev.answer_type == "answered" and not ev.degraded
     assert ev.scores.completeness == 3 and len(ev.evidence) == 2  # ceil(4*2/3)=3, khong bi ha
-    assert col.records[0].agent == "evaluator" and col.records[0].prompt_version == "v7"
+    assert col.records[0].agent == "evaluator" and col.records[0].prompt_version == "v8"
     assert ev.strength_tags and all(" " not in t for t in ev.strength_tags)  # tag do code sinh tu y da kiem
     assert client.calls[0]["response_format"]["type"] == "json_schema"
 
@@ -126,7 +126,7 @@ def test_next_turn_route_uses_llm_evaluator_and_reports_usage(client, monkeypatc
             "state": done["state"], "turn_number": 1, "question": done["question"], "answer": ANSWER}
     nd = parse_sse(client.post("/api/next-turn", json=body).text)[-1][1]
     assert nd["evaluation"]["evidence"] and nd["metadata"]["usage"]["evaluator"]["input_tokens"] == 10
-    assert nd["metadata"]["prompt_versions"] == {"evaluator": "v7"}
+    assert nd["metadata"]["prompt_versions"] == {"evaluator": "v8"}
 
 
 def test_trivial_quotes_cannot_inflate_completeness():
@@ -154,3 +154,13 @@ def test_term_list_is_capped_outside_intro_only():
     assert ev.scores.extensibility == 1 and ev.scores.relevance == 2
     ev = run(make([llm_json(covered=[], scores=scores)])[0].evaluate(inp(answer=stack, phase="intro")))
     assert ev.scores.extensibility == 3 and ev.scores.relevance == 3
+
+
+def test_stt_terms_are_normalized_before_llm_and_quote_check():
+    spoken = "đê bê dùng bi tri nên không phải quét cả bảng nhưng in sớt sẽ chậm hơn vì phải cập nhật in đếch"
+    covered = [{"point": TOPIC.key_points[1], "quote": "insert sẽ chậm hơn vì phải cập nhật index"}]
+    ev_agent, client = make([llm_json(covered=covered)])
+    ev = run(ev_agent.evaluate(inp(answer=spoken)))
+    sent = client.calls[0]["messages"][1]["content"]
+    assert "DB dùng bi tri" in sent and "cập nhật index" in sent and "in đếch" not in sent
+    assert len(ev.evidence) == 1  # quote theo ban da chuan hoa van qua hau kiem
