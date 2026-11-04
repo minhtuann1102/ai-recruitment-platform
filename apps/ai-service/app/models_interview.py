@@ -2,7 +2,7 @@
 import re
 from typing import List, Literal, Optional
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from .models_common import Action, AgentDecision, AnswerType, Level, Phase, TurnKind
 from .models_cv import CvProfile
@@ -17,6 +17,7 @@ class SourceRef(BaseModel):
     ref: str
     title: str
     url: Optional[str] = None
+    license: Optional[str] = None  # giay phep cua chunk / cau tu kho; None = chua biet (khong dua cho ung vien)
 
     @field_validator("url")
     @classmethod
@@ -36,6 +37,7 @@ class BankQuestion(BaseModel):
     qa_id: str
     question: str
     difficulty: Optional[str] = None
+    license: Optional[str] = None  # giay phep cua cap Q&A (DE): tai lieu hoc chi lay nguon cho phep chia se
 
 
 class PlanTopic(BaseModel):
@@ -84,6 +86,7 @@ class Counters(BaseModel):
     hints: int = 0
     clarifies: int = 0
     consecutive_dont_know: int = 0
+    stt_reasks: int = 0  # NFR-AI-QUAL17: so lan hoi lai vi ban ghi giong noi kem trong topic (toi da 1)
 
 
 class Tagged(BaseModel):
@@ -141,6 +144,7 @@ class StartRequest(BaseModel):
 class TopicTurn(BaseModel):
     q: str
     a: str
+    source: Optional[Literal["text", "voice"]] = None  # None: cung nguon voi luot hien tai (answer_source)
 
 
 class NextTurnRequest(BaseModel):
@@ -152,9 +156,19 @@ class NextTurnRequest(BaseModel):
     turn_number: int = Field(ge=1)
     question: str
     turn_kind: TurnKind = "main"
-    answer: str = Field(min_length=1, max_length=4000)
+    answer: str = Field(max_length=4000)  # voice duoc rong (micro khong thu tieng): turn_engine tra voice_no_speech
     topic_turns: List[TopicTurn] = Field(default_factory=list, max_length=5)
     elapsed_seconds: int = Field(default=0, ge=0)
+    # NFR-AI-QUAL17: voice = answer la ban ghi STT (doi thuat ngu phien am truoc khi cham); stt_confidence do
+    # dich vu STT tra (0-1), thap hon nguong thi luot khong duoc cham
+    answer_source: Literal["text", "voice"] = "text"
+    stt_confidence: Optional[float] = Field(default=None, ge=0, le=1)
+
+    @model_validator(mode="after")
+    def _typed_answer_not_empty(self):
+        if self.answer_source == "text" and not self.answer:
+            raise ValueError("answer khong duoc rong")
+        return self
 
 
 # --- Evaluation ---
@@ -208,6 +222,7 @@ class Evaluation(BaseModel):
     sources: List[CitedSource] = Field(default_factory=list)  # 03b: Reporter lay tai lieu cho study_plan tu day
     prompt_version: Optional[str] = None  # ban prompt da cham; None = khong qua LLM (mock, luat code, degraded)
     reference_missing: bool = False  # cau trong kho nhung khong lay duoc dap an chuan luc cham (ai_db loi / qua han)
+    transcript_low_confidence: bool = False  # ban ghi STT duoi nguong tin cay: khong cham, khong tinh diem
 
 
 # --- Finalize ---

@@ -37,6 +37,7 @@ class QuestionSpec:
     avoid: List[str] = field(default_factory=list)  # cau da hoi trong phien (da chuan hoa), cau du phong phai khac
     bank_question: Optional[str] = None  # ask_main: cau da kiem chung trong kho, Interviewer dien dat lai
     reference_answer: str = ""  # hint: dap an chuan cua cau dang hoi (cau trong kho) de chon huong goi y
+    fixed_question: Optional[str] = None  # cau co dinh bang code (hoi lai khi ban ghi STT kem): khong goi LLM
 
 
 def safe_focus(focus: Optional[str]) -> Optional[str]:

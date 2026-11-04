@@ -143,7 +143,8 @@ async def _bank(retriever: Retriever, phase: str, topic: PlanTopic, catalog: Tra
     query = build_query(None, topic.title, " ".join(topic.key_points))  # cung truy van voi snippet: dung chung vector
     entries = await retriever.bank_for_topic(topic.catalog_ref, topic.start_difficulty, terms, generic,
                                              collector=collector, query=query)
-    return [BankQuestion(qa_id=e.qa_id, question=plain(e.question), difficulty=e.difficulty) for e in entries]
+    return [BankQuestion(qa_id=e.qa_id, question=plain(e.question), difficulty=e.difficulty, license=e.license)
+            for e in entries]
 
 
 async def _topic_references(retriever: Retriever, phase: str, topic: PlanTopic, catalog: TrackCatalog,

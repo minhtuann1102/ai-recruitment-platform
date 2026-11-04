@@ -2,7 +2,7 @@
 import json
 import unicodedata
 
-from app.stt_terms import STT_TERMS, normalize_stt_terms
+from app.stt_terms import STT_TERMS, normalize_stt_terms, normalize_stt_terms_with_map, restore_quote
 from evals.label_sheet import load_golden
 from evals.stt_noise import STT_GOLDEN
 
@@ -45,3 +45,15 @@ def test_noisy_golden_contains_table_terms():
     # bang lay tu catalog va tu vung chung; ghi lai do phu tren bo nhieu de bao cao, khong ep bang khop bo nhieu
     rows = [json.loads(line) for line in STT_GOLDEN.read_text(encoding="utf-8").splitlines() if line.strip()]
     assert any(normalize_stt_terms(r["answer"]) != r["answer"] for r in rows)
+
+
+def test_quote_is_restored_to_spoken_transcript():
+    raw = "dùng thờ rét pun thay vì tạo thờ rét mới cho mỗi request"
+    norm, replaced = normalize_stt_terms_with_map(raw)
+    assert norm == "dùng thread pool thay vì tạo thread mới cho mỗi request"
+    assert replaced == [("thread pool", "thờ rét pun"), ("thread", "thờ rét")]
+    restored = restore_quote("dùng thread pool thay vì tạo thread mới", raw, replaced)
+    assert restored == "dùng thờ rét pun thay vì tạo thờ rét mới"
+    # khoi phuc khong khop ban ghi (LLM viet lai cau) thi giu quote da doi
+    assert restore_quote("thread pool tái sử dụng luồng", raw, replaced) == "thread pool tái sử dụng luồng"
+    assert normalize_stt_terms_with_map("không có thuật ngữ") == ("không có thuật ngữ", [])

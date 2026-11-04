@@ -30,6 +30,7 @@ from .question_stream import QuestionStream
 from .dev_play_page import router as dev_play_router
 from .security import internal_token_middleware
 from .sse import SSE_HEADERS, event
+from .stt_phrase_hints import track_phrases
 from . import tracing
 from .turn_engine import TurnResult, finish_turn, next_turn, start_session
 
@@ -195,6 +196,12 @@ def _stream(result: TurnResult, build_done: Callable[[TurnResult], dict], collec
             yield event("error", {"errorCode": "AI_SERVICE_ERROR", "message": "AI tạm thời không phản hồi",
                                   "retryable": True})
     return _TurnStream(gen(), lambda: _finish_request(started, collector, **outcome))
+
+
+@app.get("/api/stt/phrases")
+async def stt_phrases(track: str):
+    """Thuat ngu goi y cho dich vu STT theo track (phrase list / prompt), khong goi LLM."""
+    return {"track": track, "phrases": list(track_phrases(track))}
 
 
 @app.post("/api/start")

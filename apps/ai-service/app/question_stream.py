@@ -75,6 +75,11 @@ class QuestionStream:
         return self.question
 
     async def events(self) -> AsyncIterator[Tuple[str, dict]]:
+        if self.spec.fixed_question:  # cau code dat san (voice_turn.reask_spec): khong goi Interviewer, khong kiem
+            self.question, self.source = self.spec.fixed_question, "fallback"
+            for tok in chunk_tokens(self.question):
+                yield "token", {"t": tok}
+            return
         parts: List[str] = []
         gen = self.interviewer.stream(self.spec, self.collector).__aiter__()
         deadline = time.monotonic() + self.total_timeout

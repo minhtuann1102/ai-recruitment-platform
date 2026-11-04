@@ -91,8 +91,8 @@ def _with_sources(req, topic_id, sources, score=None):
     return req.model_copy(update={"turns": turns})
 
 
-def _cited(ref, support="supported", url=None):
-    return CitedSource(id="S1", ref=ref, title=f"Tiêu đề {ref}", url=url, support=support)
+def _cited(ref, support="supported", url=None, license="MIT"):
+    return CitedSource(id="S1", ref=ref, title=f"Tiêu đề {ref}", url=url, support=support, license=license)
 
 
 def test_topic_sources_put_contradicted_first_and_dedupe_by_ref(session):  # noqa: F811
@@ -126,7 +126,33 @@ def test_llm_reporter_maps_resource_ids_and_never_takes_urls(session):  # noqa: 
 
 def test_topic_without_cited_sources_falls_back_to_plan_sources_after_cited(session):  # noqa: F811
     topic_id = next(t.topic_id for t in session.turns if t.evaluation and t.phase == "technical")
-    plan_refs = [SourceRef(ref="p1", title="Câu của topic?", url="https://github.com/p"), SourceRef(ref="y", title="Y")]
+    plan_refs = [SourceRef(ref="p1", title="Câu của topic?", url="https://github.com/p", license="CC-BY-4.0"),
+                 SourceRef(ref="y", title="Y", license="MIT")]
     assert [s.ref for s in topic_sources(session.turns, topic_id, plan_refs)] == ["p1", "y"]  # khong trich: bu
     req = _with_sources(session, topic_id, [_cited("y", "contradicted")])
     assert [s.ref for s in topic_sources(req.turns, topic_id, plan_refs)] == ["y", "p1"]  # trich truoc, bo trung
+
+
+def test_sources_without_shareable_license_never_reach_study_plan(session):  # noqa: F811
+    topic_id = next(t.topic_id for t in session.turns if t.evaluation and t.phase == "technical")
+    cited = [_cited("nd", license="CC-BY-NC-ND-3.0"), _cited("unk", license="unknown"), _cited("old", license=None),
+             _cited("ok", license="Apache-2.0")]
+    plan_refs = [SourceRef(ref="p-nd", title="Câu ND?", license="CC-BY-NC-ND-3.0")]
+    req = _with_sources(session, topic_id, cited)
+    assert [s.ref for s in topic_sources(req.turns, topic_id, plan_refs)] == ["ok"]
+
+
+def test_old_unlicensed_copy_does_not_hide_shareable_copy_of_same_ref(session):  # noqa: F811
+    topic_id = next(t.topic_id for t in session.turns if t.evaluation and t.phase == "technical")
+    req = _with_sources(session, topic_id, [_cited("x", license=None)])  # danh gia luu truoc khi co license
+    plan_refs = [SourceRef(ref="x", title="X", license="MIT")]
+    assert [(s.ref, s.license) for s in topic_sources(req.turns, topic_id, plan_refs)] == [("x", "MIT")]
+
+
+def test_reference_source_takes_license_of_bank_question():
+    from app.models_interview import BankQuestion
+    from app.turn_evaluation import reference_source
+    topic = build_plan("java_backend", "junior", 20, None).phases[1].topics[0].model_copy(
+        update={"bank_questions": [BankQuestion(qa_id="q1", question="HashMap?", license="MIT")]})
+    assert reference_source(topic, "q1", "đáp án").license == "MIT"
+    assert reference_source(topic, "q2", "đáp án").license is None  # khong co trong plan: chua biet

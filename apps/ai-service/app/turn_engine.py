@@ -2,13 +2,11 @@
 
 Luong moi luot (docs/ai-service/03): Evaluator cham -> cap nhat state -> policy chon action -> Interviewer dien dat.
 """
-import asyncio
 import logging
 import re
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
-from .agents.evaluator import EvaluationInput
 from .agents.evaluator_provider import Evaluator, get_evaluator
 from .api_error import ApiError
 from .early_stop import low_performance_stop
@@ -18,24 +16,24 @@ from .agents.interviewer import QuestionSpec, safe_focus
 from .agents.planner import get_planner
 from .mock_planner import load_track
 from .plan_bank_coverage import prefer_covered, settle, start_coverage
-from .plan_snippets import attach_reference_snippets, get_retriever, memory_retriever
-from .rag.circuit_breaker import MEMORY_ONLY_ERROR
+from .plan_snippets import attach_reference_snippets, get_retriever
 from .models_common import LEVEL_CONFIG
-from .models_interview import (CandidateState, Evaluation, InterviewPlan, NextTurnRequest, PlanTopic, SourceRef,
-                               StartRequest, TopicState, TurnInfo)
+from .models_interview import (CandidateState, Evaluation, InterviewPlan, NextTurnRequest, PlanTopic, StartRequest,
+                               TopicState, TurnInfo)
 from .policy import Decision, decide
 from .rag.difficulty import difficulty_bucket
 from .rag.question_bank import kept_meaning, pick
 from .state_update import apply_action, record_evaluation
 from .tracing import observation
 from .time_budget import forced_transition, phase_deadline_s
-from .source_refs import title_of
-from .turn_reference_snippets import TurnChunks, turn_snippets
+from .turn_evaluation import evaluate_turn
+from .turn_reference_snippets import TurnChunks
+from .voice_turn import MAX_REASKS, heard_answer, low_confidence, no_speech, \
+    reask_spec, reject_no_speech, reject_unclear, unclear_evaluation
 
 _KIND = {"ask_main": "main", "follow_up": "follow_up", "hint": "hint", "clarify": "clarify",
          "wrap_up": "main", "end": "main"}  # next_topic / next_phase deu thanh ask_main sau apply_action
 _AGENT = {"follow_up": "deepen", "hint": "keep_difficulty", "clarify": "keep_difficulty"}
-ANSWER_KEY_TIMEOUT_S = 2.0  # cache truot -> doc ai_db; qua han thi cham khong co dap an chuan
 NO_REFERENCE_NEEDED = ("dont_know", "manipulation", "asks_clarification")  # cham khong dung dap an chuan
 log = logging.getLogger("ai_service.turn_engine")
 
@@ -56,7 +54,10 @@ def finish_turn(result: TurnResult, question: str, source: str) -> None:
     """Ghi cau hoi da gui vao state (chong lap, FR-AI-038) va nguon cau hoi (ai | fallback)."""
     result.question = question
     result.state.asked_questions = (result.state.asked_questions + [_norm(question)])[-30:]
-    if result.turn is not None:
+    if result.turn is not None and result.spec is not None and result.spec.fixed_question:
+        # hoi lai nguyen cau (ban ghi STT kem): van la cau trong kho neu co, dap an chuan con dung
+        result.turn.question_source = "bank" if result.turn.qa_id else source
+    elif result.turn is not None:
         # Interviewer dien dat lai cau trong kho (hoac Interviewer loi, dung nguyen van cau trong kho): nguon "bank"
         # Interviewer doi sang y khac thi dap an chuan khong con khop: coi la cau AI tu dat
         bank_q = result.spec.bank_question if result.spec is not None else None
@@ -108,36 +109,27 @@ async def start_session(req: StartRequest, planner=None, collector: Optional[Usa
     return TurnResult(spec, turn, state, plan, None, False, _meta(first_phase, 1, len(topics), "ask_main", 1))
 
 
-async def _answer_key(retriever, qa_id: Optional[str], collector: Optional[UsageCollector] = None,
-                      cached_only: bool = False) -> str:
-    """Dap an chuan cua cau vua hoi neu cau do lay tu kho; RAG tat, loi hay qua han thi chuoi rong (loi, qua han
-    ghi vao collector de response bao metadata.rag). cached_only: dang ngat RAG, khong doc ai_db."""
-    if not qa_id or retriever is None:
-        return ""
-    if cached_only:
-        return retriever.answers.get(qa_id) or ""
-    try:
-        return await asyncio.wait_for(retriever.answer_key(qa_id, collector), timeout=ANSWER_KEY_TIMEOUT_S) or ""
-    except asyncio.TimeoutError:
-        log.warning("answer_key_timeout qa_id=%s", qa_id)
-        if collector is not None:
-            collector.rag_error("rag_timeout")
-        return ""
-
-
-def _reference_source(topic: PlanTopic, qa_id: Optional[str], key: str) -> Optional[SourceRef]:
-    """Cau tu kho: tieu de la cau hoi trong plan (khong co thi dong dau dap an); 03b dua vao study_plan."""
-    if not key or not qa_id:
-        return None
-    question = next((b.question for b in topic.bank_questions if b.qa_id == qa_id), "")
-    return SourceRef(ref=qa_id, title=title_of(question or key))
-
-
 def _hint_source(action: str, key: str, extra: TurnChunks) -> str:
     """Hint goi y cho dung cau vua hoi: dap an chuan (cau tu kho), khong co thi chunk theo luot cung topic_id."""
     if action != "hint":
         return ""
     return key or extra.hint
+
+
+def _reask(req: NextTurnRequest, state: CandidateState, plan: InterviewPlan, phase: str, topic: PlanTopic,
+           pos: int, total: int) -> TurnResult:
+    """Ban ghi STT kem lan dau trong topic: hoi lai nguyen cau, khong cham, giu do kho va cau trong kho (qa_id)."""
+    log.info("voice_reask turn=%d confidence=%s", req.turn_number, req.stt_confidence)
+    state.counters.stt_reasks += 1
+    state.turn_count += 1
+    next(t for t in state.topics if t.id == topic.id).turns.append(req.turn_number + 1)
+    # turn_kind giu nguyen (hint van bi tran band, prompt v8 luat 7); action = clarify cho biet day la hoi lai
+    info = TurnInfo(turn_number=req.turn_number + 1, phase=phase, topic_id=topic.id, turn_kind=req.turn_kind,
+                    action="clarify", agent_decision="keep_difficulty", difficulty=state.current_difficulty,
+                    reasoning="transcript_low_confidence -> clarify (hỏi lại một lần)", qa_id=state.current_qa_id)
+    return TurnResult(reask_spec(req, phase, topic, state.current_difficulty), info, state, plan,
+                      unclear_evaluation(req.turn_number), False, _meta(phase, pos + 1, total, "clarify",
+                                                                        info.turn_number))
 
 
 async def next_turn(req: NextTurnRequest, evaluator: Optional[Evaluator] = None,
@@ -154,23 +146,20 @@ async def next_turn(req: NextTurnRequest, evaluator: Optional[Evaluator] = None,
         raise ApiError(422, "invalid_request", "active_topic_id khong co trong plan")
     phase, topic = topics[pos]
 
-    live = retriever or get_retriever()
-    retriever = live or memory_retriever()  # dang ngat: van con BM25 va cache dap an trong bo nho
-    if live is None and retriever is not None and collector is not None:
-        collector.rag_error(MEMORY_ONLY_ERROR)
-    with observation("rag_turn", "retriever", nest=True, input={"qa_id": state.current_qa_id}) as obs:
-        key, extra = await asyncio.gather(  # Phase 02: chi mot trong hai chay (cau kho co dap an chuan thi bo qua)
-            _answer_key(retriever, state.current_qa_id, collector, cached_only=live is None),
-            turn_snippets(retriever, req.track, phase=phase, topic=topic, difficulty=state.current_difficulty,
-                          question=req.question, answer=req.answer, has_answer_key=bool(state.current_qa_id),
-                          collector=collector, memory_only=live is None))
-        obs.update(output={"answer_key": bool(key), "chunks": [s.ref for s in extra.sources]})
-    ev = await (evaluator or get_evaluator()).evaluate(EvaluationInput(
-        level=req.level, phase=phase, topic=topic, difficulty=state.current_difficulty, turn_kind=req.turn_kind,
-        turn_number=req.turn_number, question=req.question, answer=req.answer, topic_turns=req.topic_turns,
-        reference_answer=key, turn_snippets=extra.texts, turn_sources=extra.sources,
-        reference_source=_reference_source(topic, state.current_qa_id, key)), collector)
-    if state.current_qa_id and not key and ev.answer_type not in NO_REFERENCE_NEEDED:
+    answer, silent, unclear = heard_answer(req), no_speech(req), low_confidence(req)
+    if (silent or unclear) and not forced_transition(req.elapsed_seconds, state, plan, phase):
+        if silent:
+            reject_no_speech()  # 422 voice_no_speech: micro khong thu tieng, state giu nguyen de gui lai cung luot
+        if state.counters.stt_reasks < MAX_REASKS:
+            return _reask(req, state, plan, phase, topic, pos, len(topics))
+        log.info("voice_unclear turn=%d confidence=%s", req.turn_number, req.stt_confidence)
+        reject_unclear()  # 422 voice_unclear: state giu nguyen, ung vien go chat roi gui lai cung luot
+    if silent or unclear:  # het gio / het luot: khong cham, khong goi RAG / Evaluator, dieu kien uu tien quyet tiep
+        key, extra, ev = "", TurnChunks(), unclear_evaluation(req.turn_number)
+    else:
+        key, extra, ev = await evaluate_turn(req, state, phase, topic, answer, evaluator or get_evaluator(),
+                                             collector, retriever)
+    if state.current_qa_id and not key and not (silent or unclear) and ev.answer_type not in NO_REFERENCE_NEEDED:
         ev = ev.model_copy(update={"reference_missing": True})
     record_evaluation(state, ev, req.turn_number)
     if state.topic_started_s is None:  # state cu: chua biet topic bat dau luc nao
@@ -203,7 +192,7 @@ async def next_turn(req: NextTurnRequest, evaluator: Optional[Evaluator] = None,
     if bank:
         state.used_qa_ids = (state.used_qa_ids + [bank.qa_id])[-30:]
     spec = QuestionSpec(action, n_phase, n_topic, state.current_difficulty, focus=focus,
-                        last_question=req.question, last_answer=req.answer, phase_changed=phase_changed,
+                        last_question=req.question, last_answer=answer, phase_changed=phase_changed,
                         asked_on_topic=[t.q for t in req.topic_turns] + [req.question] if action != "ask_main" else [],
                         time_hint=_time_hint(req.elapsed_seconds, plan, n_phase), avoid=list(state.asked_questions),
                         bank_question=bank.question if bank else None,

@@ -8,6 +8,7 @@ r1.. trong danh sach nay; code tra ra title + url.
 from typing import Dict, List, Sequence
 
 from .models_interview import FinalizeTurn, SourceRef
+from .source_refs import shareable
 
 MAX_RESOURCES = 3
 
@@ -16,10 +17,10 @@ def topic_sources(turns: List[FinalizeTurn], topic_id: str, plan_sources: Sequen
                   ) -> List[SourceRef]:
     cited = [s for t in turns if t.topic_id == topic_id and t.evaluation for s in t.evaluation.sources]
     out: Dict[str, SourceRef] = {}
-    for s in sorted(cited, key=lambda s: s.support != "contradicted"):  # sort on dinh: giu thu tu luot
-        out.setdefault(s.ref, s)
-    for s in plan_sources:
-        out.setdefault(s.ref, s)
+    # loc truoc khi bo trung: ban cu khong co license khong che ban cung ref co giay phep cho phep
+    for s in [*sorted(cited, key=lambda s: s.support != "contradicted"), *plan_sources]:  # sort on dinh: thu tu luot
+        if shareable(s):  # giay phep chua ro / cam ban dich: khong dua cho ung vien
+            out.setdefault(s.ref, s)
     return list(out.values())
 
 

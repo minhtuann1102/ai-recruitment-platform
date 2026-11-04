@@ -28,7 +28,7 @@ POOL_MAX_IDLE_S = 60  # dong ket noi ranh (tren min_size) truoc khi pooler cat
 POOL_MAX_LIFETIME_S = 600
 
 _COLS = ("id::text, content, source_type, topic_id, category, difficulty, "
-         "metadata->>'qa_id', metadata->>'chunk_type', metadata->>'source_url'")
+         "metadata->>'qa_id', metadata->>'chunk_type', metadata->>'source_url', metadata->>'license'")
 
 # Q&A theo topic_id (khop chinh xac); uu tien dung muc do kho roi theo qa_id cho on dinh
 TOPIC_SQL = (f"SELECT {_COLS}, NULL::float8 FROM knowledge_chunks "
@@ -51,7 +51,8 @@ CORPUS_VERSION_SQL = ("SELECT md5(string_agg(md5(ROW(id, content_hash, source_ty
 
 # Ngan hang cau hoi: cau hoi (chunk question) + cap Q&A cung qa_id theo topic_id; uu tien dung do kho.
 # Cot thu 5: do giong (cosine) cua cau hoi voi truy van topic khi co vector (hybrid xep hang), khong thi NULL.
-BANK_SQL = ("SELECT q.metadata->>'qa_id', q.content, q.difficulty, p.content, {sim} FROM knowledge_chunks q "
+BANK_SQL = ("SELECT q.metadata->>'qa_id', q.content, q.difficulty, p.content, {sim}, q.metadata->>'license' "
+            "FROM knowledge_chunks q "
             "JOIN knowledge_chunks p ON p.metadata->>'qa_id' = q.metadata->>'qa_id' "
             "AND p.metadata->>'chunk_type' = 'qa_pair' AND p.embedding_model = q.embedding_model "
             "WHERE q.source_type = 'interview_qa' AND q.topic_id = %s AND q.embedding_model = %s "
@@ -107,10 +108,10 @@ def build_bank_sql(topic_id: str, model: str, difficulty: Optional[str], limit: 
 
 
 def row_to_chunk(row: Sequence[Any]) -> Chunk:
-    cid, content, source_type, topic_id, category, difficulty, qa_id, chunk_type, source_url, score = row
+    cid, content, source_type, topic_id, category, difficulty, qa_id, chunk_type, source_url, license, score = row
     return Chunk(id=cid, content=content, source_type=source_type, topic_id=topic_id, category=category,
                  difficulty=difficulty, qa_id=qa_id, chunk_type=chunk_type,
-                 score=None if score is None else float(score), source_url=source_url)
+                 score=None if score is None else float(score), source_url=source_url, license=license)
 
 
 class PgKnowledgeRepository:
@@ -192,7 +193,8 @@ class PgKnowledgeRepository:
                         vector: Optional[Sequence[float]] = None) -> List[BankEntry]:
         sql, params = build_bank_sql(topic_id, self._settings.embedding_model, difficulty, limit, vector)
         return await self._fetch(sql, params, lambda r: BankEntry(
-            qa_id=r[0], question=r[1], difficulty=r[2], pair=r[3], similarity=None if r[4] is None else float(r[4])))
+            qa_id=r[0], question=r[1], difficulty=r[2], pair=r[3], similarity=None if r[4] is None else float(r[4]),
+            license=r[5]))
 
     async def count_bank(self, topic_ids: Sequence[str]) -> Dict[str, Dict[Optional[str], int]]:
         rows = await self._fetch(COVERAGE_SQL, [self._settings.embedding_model, list(topic_ids), MAX_QUESTION_CHARS],

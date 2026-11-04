@@ -31,7 +31,8 @@ def to_input(s: dict) -> EvaluationInput:
     topic = PlanTopic(id=s["qid"], title=s["topic"]["title"], source="catalog", objective=s["topic"]["objective"],
                       key_points=s["topic"]["key_points"], start_difficulty=2, opening_hint="-", backup_question="-")
     return EvaluationInput(level=s["level"], phase=s["phase"], topic=topic, difficulty=2, turn_kind=s["turn_kind"],
-                           turn_number=1, question=s["question"], answer=s["answer"])
+                           turn_number=1, question=s["question"], answer=s["answer"],
+                           spoken="stt_of" in s)  # ban nhieu / plain la ban ghi giong noi
 
 
 async def run_all(samples: List[dict], runs: int, prompt: str, collector: UsageCollector,

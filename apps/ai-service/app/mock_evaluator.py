@@ -140,5 +140,5 @@ def turn_score(ev: Evaluation) -> float:
 
 
 def is_scored(ev: Evaluation) -> bool:
-    """Luot clarify va degraded khong tinh diem (docs 05 muc 6.3)."""
-    return ev.answer_type != "asks_clarification" and not ev.degraded
+    """Luot clarify, degraded va ban ghi STT kem khong tinh diem (docs 05 muc 6.3, NFR-AI-QUAL17)."""
+    return ev.answer_type != "asks_clarification" and not ev.degraded and not ev.transcript_low_confidence
