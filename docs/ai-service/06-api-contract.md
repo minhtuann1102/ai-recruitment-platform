@@ -304,7 +304,7 @@ Giữ tên `start / next-turn / finalize` theo constitution IV; **nội dung** �
 | GET | `/api/health` | — | JSON | 5 s |
 | GET | `/api/stt/phrases` | — (code) | JSON | 5 s |
 
-Ngoài contract: `GET /dev/play` là trang HTML tĩnh cho dev tự phỏng vấn thử (đóng vai interview-service, gọi các endpoint trên). Không qua token, tự trả 404 khi `APP_ENV` là staging/production; interview-service không dùng.
+Ngoài contract: `GET /dev/play` là trang HTML tĩnh cho dev tự phỏng vấn thử (đóng vai interview-service, gọi các endpoint trên). Không qua token, tự trả 404 khi `APP_ENV` là staging/production; interview-service không dùng. Từ 04/11 trang có ô Giọng nói (Web Speech API của trình duyệt) gửi `answer_source`, `stt_confidence` như §7.4 để thử luồng voice; đây không phải lựa chọn nhà cung cấp STT/TTS.
 
 ### POST /api/cv/parse
 
