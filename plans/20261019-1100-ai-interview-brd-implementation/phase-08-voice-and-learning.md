@@ -8,7 +8,7 @@
 - Hai hướng voice mâu thuẫn nhau giữa BRD v0.3 và `main`. Mặc định theo `main` (tùy chọn A). Học từ dữ liệu hoãn, chỉ chuẩn bị tiền đề.
 
 ## Key Insights
-- **Tùy chọn A (`main`, 15/10):** DE sở hữu (feature 015, S4-DE-5). TTS đọc `done.question` (không đọc theo token vì có `replace`); STT bấm-để-nói gửi transcript qua `/answer`; lưu bản STT gốc và bản đã sửa; không lưu audio; **ai-service không biết có voice**.
+- **Tùy chọn A (`main`, 15/10):** DE sở hữu (feature 015, S4-DE-5). TTS đọc `done.question` (không đọc theo token vì có `replace`); STT bấm-để-nói gửi transcript qua `/answer`; lưu bản STT gốc và bản đã sửa; không lưu audio; **ai-service không biết có voice** (từ 04/11: interview-service gửi thêm `answer_source`, `stt_confidence` tùy chọn để ai-service đổi thuật ngữ phiên âm và hỏi lại khi bản ghi kém, docs 06 §7.4).
 - **Tùy chọn B (BRD v0.3):** hội thoại realtime qua voice-gateway. `main` ghi rõ ngoài phạm vi vì TTFT ≈ 3.6 s và phải thiết kế lại turn-taking. Chỉ làm nếu owner xác nhận bằng văn bản; cần ADR-009.
 - Học từ dữ liệu: constitution V và docs `main` đều chưa cho phép; cần consent, ẩn danh, tách golden set.
 
@@ -33,7 +33,7 @@ B (ngoài kế hoạch): thêm container voice-gateway, xem [L2 §3, §8.4](../.
 
 ## Todo List
 - [ ] Gate 22/11 có biên bản
-- [ ] (A) prompt + golden set nhiễu STT
+- [x] (A) prompt + golden set nhiễu STT (PR #77, 04/11); bảng tra chỉ cho lượt voice, hỏi lại khi `stt_confidence` thấp, `GET /api/stt/phrases` (04/11, nhánh `thang/stt-voice-hardening`)
 - [x] Đề xuất cột consent cho FSD (04/11, chờ FSD quyết): [reports/consent-columns-proposal.md](reports/consent-columns-proposal.md)
 - [ ] (B) chỉ khi owner xác nhận: ADR-009 + khảo sát
 

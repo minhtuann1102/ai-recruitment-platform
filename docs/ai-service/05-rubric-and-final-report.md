@@ -182,6 +182,16 @@ nên ít nguồn được trích (đo 29/10: không bù thì 5/10 phiên không 
 Reporter v2 chọn `resource_ids` (`r1..`) trong `input.resources` (chỉ id, `topic_id`, `title`); báo cáo mock lấy 3 nguồn
 đầu của topic yếu. Khi DE bổ sung catalog `resources` / textbook thì thêm vào cùng danh sách.
 
+**Lọc giấy phép (2026-11-04, mặc định của AIE, chờ owner / DE chốt Q1):** chỉ nguồn có `license` trong danh sách cho
+phép chia sẻ (`CC0-1.0`, `MIT`, `Apache-2.0`, `CC-BY-4.0`, `CC-BY-SA-4.0`, `CC-BY-SA-2.5`, khớp `LICENSE_ALLOWLIST` của
+data-pipeline; `app/source_refs.py`) mới vào `study_plan.resources`. `CC-BY-NC-ND-3.0` (cấm bản dịch), `unknown` và
+nguồn không có `license` (plan lưu trước ngày này) bị bỏ. Chỉ lọc tài liệu đưa cho ứng viên; câu hỏi và đáp án chuẩn
+vẫn dùng trong phỏng vấn và chấm điểm, bỏ khỏi kho hay không là quyết định Q1 của owner và DE. Lọc trước khi bỏ trùng
+(bản cũ không có `license` không che bản có giấy phép). Khi triển khai: phiên bắt đầu trước khi có trường này có
+`study_plan.resources` rỗng; chunk `textbook` cũng rỗng cho tới khi pipeline textbook ghi giấy phép SPDX. Câu hỏi mở cho
+owner: ghi chú do team viết (`license: "own-work"` trong `data/seeds/tech_notes_seed.json`) có được coi là chia sẻ
+được không; CC-BY / CC-BY-SA cần ghi công, `resources` hiện chỉ có `title` + `url`, có đủ không.
+
 ## 6.5 Quy tắc hiển thị
 
 - **Trong phiên:** ứng viên chỉ thấy câu hỏi, tiến độ (phase, topic x/y, thời gian còn lại). Không thấy điểm hay
