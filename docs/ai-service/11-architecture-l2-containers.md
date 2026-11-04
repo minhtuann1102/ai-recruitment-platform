@@ -414,7 +414,7 @@ flowchart LR
 | G10 | Constitution | Amendment IV, V | Constitution đang Proposed | Cả team duyệt |
 | G11 | Image Docker | Build với thư viện CV mới | Chưa build lại | Build khi Docker chạy |
 | G12 | Phòng họp (Web App) | Có, theo FR-AI-100..105 | Chưa tồn tại | FSD, chưa xác nhận người thực hiện |
-| G13 | Lưu cờ đồng ý | `media_consent_at`, `learning_consent_at` trong `interview_db` | Chưa có | FSD xác nhận migration |
+| G13 | Lưu cờ đồng ý | `media_consent_at`, `learning_consent_at` trong `interview_db` | Chưa có; AIE đã gửi đề xuất 04/11 | FSD xác nhận migration (`plans/20261019-1100-ai-interview-brd-implementation/reports/consent-columns-proposal.md`) |
 | G14 | Thời lượng 15 đến 20 phút | Planner và policy theo công thức mới | Mock vẫn nhận 15 đến 45 phút | FR-AI-001, 003, 035 |
 | G15 | voice-gateway | Có (GĐ2) | Chưa chọn hạ tầng voice-agent, chưa có ADR | Khảo sát, ADR-009 (chỉ khi giai đoạn 1 ổn) |
 | G16 | JD Parser và TCP lấy JD | Có (S2-AIE-6, S2-FSD-11) | Chưa | Phase 04; FSD xác nhận S2-FSD-11 |
