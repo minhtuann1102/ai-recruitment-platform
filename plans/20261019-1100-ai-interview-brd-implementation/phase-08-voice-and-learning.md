@@ -21,7 +21,7 @@ A: `FE (TTS/STT) ⇄ interview-service /answer (+trường tùy chọn STT gốc
 B (ngoài kế hoạch): thêm container voice-gateway, xem [L2 §3, §8.4](../../docs/ai-service/11-architecture-l2-containers.md).
 
 ## Related Code Files
-- **Sửa (A):** `app/prompts/evaluator.v1.md` (ghi chú transcript STT), `evals/evaluator_golden.jsonl` (mẫu nhiễu), docs contract (trường tùy chọn của `/answer`, tên chốt ở spec 015).
+- **Sửa (A):** `app/prompts/evaluator.v8.md` (ghi chú transcript STT), `evals/evaluator_golden_stt.jsonl` + `evals/stt_noise.py` (mẫu nhiễu, cờ `--stt`), docs contract (trường tùy chọn của `/answer`, tên chốt ở spec 015).
 - **Chưa tạo (B):** voice-gateway, ADR-009.
 - **Học từ dữ liệu:** chỉ đề xuất cho FSD thêm cột `learning_consent_at` (nullable) và `media_consent_at` khi viết migration `interview_db`.
 
