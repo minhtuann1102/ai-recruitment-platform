@@ -81,11 +81,14 @@
   </section>
 
   <section id="chat" class="panel hidden">
-    <div class="row" style="margin:0 0 10px"><span id="progress" class="status"></span></div>
+    <div class="row" style="margin:0 0 10px"><span id="progress" class="status"></span>
+      <label class="muted"><input id="voice" type="checkbox" style="width:auto"> Giọng nói (Web Speech API: Chrome gửi âm thanh tới Google)</label>
+      <span id="voiceNote" class="status warn"></span></div>
     <div id="log"></div>
     <div id="answerBox" style="margin-top:12px">
       <textarea id="answer" rows="4" placeholder="Câu trả lời của bạn (Ctrl/⌘ + Enter để gửi)"></textarea>
       <div class="row">
+        <button id="micBtn" class="hidden">🎤 Nói</button>
         <button id="sendBtn" class="primary">Gửi</button>
         <button id="endBtn">Kết thúc buổi</button>
         <button id="retryBtn" class="hidden">Gửi lại</button>
@@ -110,6 +113,7 @@
 <script src="/dev/dev-play-report.js"></script>
 <script src="/dev/dev-play-trace.js"></script>
 <script src="/dev/dev-play-api.js"></script>
+<script src="/dev/dev-play-voice.js"></script>
 <script src="/dev/dev-play.js"></script>
 </body>
 </html>
