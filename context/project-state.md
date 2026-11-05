@@ -26,6 +26,8 @@
 | #76 | 03/11 | Đo gpt-6-luna cho Planner, JD Parser, query rewriter: giữ gpt-4o-mini |
 | #77 | 04/11 | Evaluator chấm bản ghi giọng nói: golden nhiễu STT, prompt v8, bảng tra thuật ngữ phiên âm |
 | #78 | 04/11 | Đề xuất cột `media_consent_at`, `learning_consent_at` cho FSD |
+| #79 | 04/11 | Voice: `voice_no_speech`, hỏi lại / `voice_unclear` khi bản ghi kém, `GET /api/stt/phrases`; `study_plan.resources` lọc theo giấy phép |
+| #80 | 05/11 | `/dev/play` thử voice bằng Web Speech API của trình duyệt |
 
 Quy ước merge của owner: merge commit (không squash). Tiêu đề PR dạng `[scope] type: mô tả`.
 

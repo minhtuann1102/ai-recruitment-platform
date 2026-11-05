@@ -31,7 +31,7 @@ from .dev_play_page import router as dev_play_router
 from .security import internal_token_middleware
 from .sse import SSE_HEADERS, event
 from .stt_phrase_hints import track_phrases
-from . import tracing
+from . import metrics, tracing
 from .turn_engine import TurnResult, finish_turn, next_turn, start_session
 
 MODEL = "mock-v2"
@@ -56,6 +56,7 @@ async def lifespan(_: FastAPI):
 
 app = FastAPI(title="AI Interview Service (Mock)", version="0.2.0", lifespan=lifespan)
 app.middleware("http")(internal_token_middleware)
+app.middleware("http")(metrics.metrics_middleware)  # dang ky sau = boc ngoai: dem ca 401 cua token
 app.include_router(dev_play_router)  # GET /dev/play: trang phong van thu cho dev
 
 
@@ -88,10 +89,10 @@ async def cv_parse(file: UploadFile = File(...), track: str = Form(...)):
     load_track(track)  # 422 neu track khong co trong catalog
     tracing.start_request("cv_parse", tags=[track])
     started, collector = time.perf_counter(), UsageCollector()
-    with _logged_failure(started, collector, rag="-"):
+    with _logged_failure("cv_parse", started, collector, rag="-"):
         result = await get_cv_parser().parse(await file.read(), track)
         _note_parser_fallbacks("cv_parser", result, collector)
-    _finish_request(started, collector, "ok", rag="-")
+    _finish_request("cv_parse", started, collector, "ok", rag="-")
     return result
 
 
@@ -100,10 +101,10 @@ async def jd_parse(req: JdParseRequest):
     """FR-AI-017: JD cua job trong application -> jd_profile cho Planner (JD khong vao RAG)."""
     tracing.start_request("jd_parse", tags=[req.track])
     started, collector = time.perf_counter(), UsageCollector()
-    with _logged_failure(started, collector, rag="-"):
+    with _logged_failure("jd_parse", started, collector, rag="-"):
         result = await get_jd_parser().parse(req.jd_text, load_track(req.track))
         _note_parser_fallbacks("jd_parser", result, collector)
-    _finish_request(started, collector, "ok", rag="-")
+    _finish_request("jd_parse", started, collector, "ok", rag="-")
     return result
 
 
@@ -128,26 +129,29 @@ def _usage_meta(started: float, collector: Optional[UsageCollector] = None) -> d
     return meta
 
 
-def _finish_request(started: float, collector: UsageCollector, status: str, error: str = "-",
-                    rag: Optional[str] = None) -> None:
-    """Dong tong ket moi request, ca khi loi (lam so lieu TTFT / fallback / RAG tu log; chi so do va ma) + dong trace.
-    `rag`: trang thai da bao trong metadata (giu dung gia tri do); None thi tinh lai tu collector."""
+def _finish_request(endpoint: str, started: float, collector: UsageCollector, status: str, error: str = "-",
+                    rag: Optional[str] = None, error_code: Optional[str] = None) -> None:
+    """Dong tong ket moi request, ca khi loi (lam so lieu TTFT / fallback / RAG tu log; chi so do va ma) + dong trace
+    + so lieu Prometheus. `rag`: trang thai da bao trong metadata (giu dung gia tri do); None thi tinh lai tu
+    collector. `error_code`: ma loi API (voice_no_speech...) cho nhan so lieu, log van ghi ten loi."""
     fallbacks = ",".join(r.fallback for r in collector.records if r.fallback) or "-"
     rag = rag or rag_status(collector)["status"]
+    seconds = time.perf_counter() - started
     log.info("request_done status=%s error=%s ms=%d tokens=%d fallbacks=%s rag=%s trace=%s", status, error,
-             (time.perf_counter() - started) * 1000, collector.total_tokens(), fallbacks, rag,
-             tracing.trace_id() or "-")
+             seconds * 1000, collector.total_tokens(), fallbacks, rag, tracing.trace_id() or "-")
     tracing.finish_request(status, error, fallbacks=fallbacks, rag=rag)
+    metrics.record_request(endpoint, status, error_code or error, seconds, collector, rag)
 
 
 @contextmanager
-def _logged_failure(started: float, collector: UsageCollector, rag: Optional[str] = None):
+def _logged_failure(endpoint: str, started: float, collector: UsageCollector, rag: Optional[str] = None):
     """Loi truoc khi stream (ApiError 409/422, loi ngoai du kien): van ghi request_done roi nem tiep."""
     try:
         yield
     except BaseException as err:
         status = "cancelled" if isinstance(err, asyncio.CancelledError) else "error"
-        _finish_request(started, collector, status, type(err).__name__, rag)
+        code = err.error if isinstance(err, ApiError) else None
+        _finish_request(endpoint, started, collector, status, type(err).__name__, rag, error_code=code)
         raise
 
 
@@ -171,7 +175,7 @@ class _TurnStream(StreamingResponse):
                 self._on_close()
 
 
-def _stream(result: TurnResult, build_done: Callable[[TurnResult], dict], collector: UsageCollector,
+def _stream(endpoint: str, result: TurnResult, build_done: Callable[[TurnResult], dict], collector: UsageCollector,
             started: float):
     """meta -> token... (Interviewer stream, co the replace) -> done. `done` dung SAU khi biet cau hoi cuoi."""
     outcome = {"status": "cancelled", "error": "-", "rag": None}  # client ngat: khong qua hai nhanh gan ben duoi
@@ -182,9 +186,14 @@ def _stream(result: TurnResult, build_done: Callable[[TurnResult], dict], collec
                 yield event("meta", result.meta)
             if result.spec is not None:
                 qs = QuestionStream(result.spec, get_interviewer(), result.state.asked_questions, collector)
+                ttft = None  # chu dau tien cua cau hoi toi client; ghi sau stream khi da biet nguon cau hoi
                 async with aclosing(qs.events()) as events:
                     async for name, data in events:
+                        if ttft is None and name in ("token", "replace"):
+                            ttft = time.perf_counter() - started
                         yield event(name, data)
+                if ttft is not None:
+                    metrics.observe_ttft(endpoint, qs.source, ttft)
                 finish_turn(result, qs.question, qs.source)
             done = build_done(result)
             outcome.update(status="ok", rag=done["metadata"]["rag"]["status"])
@@ -195,7 +204,13 @@ def _stream(result: TurnResult, build_done: Callable[[TurnResult], dict], collec
             log.exception("stream_failed")
             yield event("error", {"errorCode": "AI_SERVICE_ERROR", "message": "AI tạm thời không phản hồi",
                                   "retryable": True})
-    return _TurnStream(gen(), lambda: _finish_request(started, collector, **outcome))
+    return _TurnStream(gen(), lambda: _finish_request(endpoint, started, collector, **outcome))
+
+
+@app.get("/metrics", include_in_schema=False)
+def prometheus_metrics():
+    """So lieu Prometheus (app/metrics.py); can X-Internal-Token nhu cac endpoint khac."""
+    return metrics.metrics_endpoint()
 
 
 @app.get("/api/stt/phrases")
@@ -209,11 +224,11 @@ async def start(req: StartRequest):
     bind_request(req.session_id)
     tracing.start_request("start", session_id=safe_session_id(req.session_id), tags=[req.track, req.level])
     started, collector = time.perf_counter(), UsageCollector()
-    with _logged_failure(started, collector):
+    with _logged_failure("start", started, collector):
         r = await start_session(req, collector=collector)
-    return _stream(r, lambda x: {"question": x.question, "turn": x.turn.model_dump(), "plan": x.plan.model_dump(),
-                                 "state": x.state.model_dump(), "metadata": _usage_meta(started, collector)},
-                   collector, started)
+    return _stream("start", r, lambda x: {
+        "question": x.question, "turn": x.turn.model_dump(), "plan": x.plan.model_dump(),
+        "state": x.state.model_dump(), "metadata": _usage_meta(started, collector)}, collector, started)
 
 
 @app.post("/api/next-turn")
@@ -222,12 +237,15 @@ async def next_turn_route(req: NextTurnRequest):
     tracing.start_request("next_turn", session_id=safe_session_id(req.session_id), turn_number=req.turn_number,
                           tags=[req.track, req.level], input={"question": req.question, "answer": req.answer})
     started, collector = time.perf_counter(), UsageCollector()
-    with _logged_failure(started, collector):
+    with _logged_failure("next_turn", started, collector):
         r = await next_turn(req, collector=collector)
-    return _stream(r, lambda x: {
-        "evaluation": x.evaluation.model_dump() if x.evaluation else None, "question": x.question,
-        "turn": x.turn.model_dump() if x.turn else None, "state": x.state.model_dump(),
-        "session_end": x.session_end, "metadata": _usage_meta(started, collector)}, collector, started)
+
+    def done(x: TurnResult) -> dict:  # chi goi khi stream toi done: luot loi / bi ngat khong vao ai_turns
+        metrics.record_turn(req.answer_source, x.evaluation)
+        return {"evaluation": x.evaluation.model_dump() if x.evaluation else None, "question": x.question,
+                "turn": x.turn.model_dump() if x.turn else None, "state": x.state.model_dump(),
+                "session_end": x.session_end, "metadata": _usage_meta(started, collector)}
+    return _stream("next_turn", r, done, collector, started)
 
 
 @app.post("/api/finalize")
@@ -236,7 +254,7 @@ async def finalize(req: FinalizeRequest):
     bind_request(req.session_id)
     tracing.start_request("finalize", session_id=safe_session_id(req.session_id), tags=[req.track, req.level])
     started, collector = time.perf_counter(), UsageCollector()
-    with _logged_failure(started, collector, rag="-"):  # finalize khong dung RAG
+    with _logged_failure("finalize", started, collector, rag="-"):  # finalize khong dung RAG
         report = await get_reporter().report(req, collector)
         usage = collector.to_metadata()
         report.setdefault("meta", {})["fallbacks"] = usage["fallbacks"]
@@ -244,5 +262,5 @@ async def finalize(req: FinalizeRequest):
         report["metadata"] = {**report.get("metadata", {}), "usage": usage["usage"],
                               "latency_ms_by_agent": usage["latency_ms"]}
         tracing.set_output(report.get("overall"))
-    _finish_request(started, collector, "ok", rag="-")
+    _finish_request("finalize", started, collector, "ok", rag="-")
     return report

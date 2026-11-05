@@ -367,6 +367,7 @@ flowchart LR
 | Gateway | Route `/ai/*` trong `config/apisix/conf/apisix-dev.yaml`; chỉ `/ai/api/health` công khai | Chưa kiểm chứng SSE qua gateway |
 | Scale | Thêm instance ai-service sau gateway hoặc load balancer; không cần sticky session vì stateless | Quy mô demo khoảng 20 phiên đồng thời |
 | Staging | Docker Compose trên VPS hoặc cloud có HTTPS | Thuộc DE (feature 014) |
+| Giám sát | ai-service mở `GET /metrics` (Prometheus, cần `X-Internal-Token`, 06 §7.4); Langfuse cho từng trace | **Chưa có Prometheus, Grafana** trong compose: DE/infra dựng, scrape `ai-service:8000/metrics` kèm header token |
 | voice-gateway *(GĐ2)* | Container riêng chạy hạ tầng voice-agent đã chọn; cổng và tên chờ ADR-009 | Không đụng tới ai-service; có thể tắt hẳn mà chat vẫn chạy |
 
 ## 11. Chiến thuật kiến trúc cho thuộc tính chất lượng
