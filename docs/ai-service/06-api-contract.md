@@ -303,6 +303,28 @@ Giữ tên `start / next-turn / finalize` theo constitution IV; **nội dung** �
 | POST | `/api/finalize` | (code tính điểm) → Reporter | JSON | 90 s |
 | GET | `/api/health` | — | JSON | 5 s |
 | GET | `/api/stt/phrases` | — (code) | JSON | 5 s |
+| GET | `/metrics` | — (code) | text Prometheus | 5 s |
+
+**`GET /metrics` (2026-11-05, `app/metrics.py`, NFR-AI-OBS03):** số liệu Prometheus cho Grafana. Cần `X-Internal-Token` như các endpoint khác. Prometheus scrape thẳng `ai-service:8000` trong network nội bộ, không qua APISIX: gateway chỉ mở `/ai/api/health`. Không có nội dung hay `session_id`; nhãn chỉ là mã có ít giá trị.
+
+| Metric | Nhãn | Ý nghĩa |
+|---|---|---|
+| `ai_requests_total` | `endpoint` (start, next_turn, finalize, cv_parse, jd_parse), `status` (ok, error, cancelled), `error` (mã lỗi API như `voice_no_speech`, `session_ended`, hoặc tên lỗi; `-` khi ok) | Request AI đã xong, đếm một lần mỗi request |
+| `ai_request_duration_seconds` | `endpoint` | Thời gian cả request; với SSE thì tính tới hết stream |
+| `ai_ttft_seconds` | `endpoint`, `source` (`ai` Interviewer viết, `fallback` câu dự phòng / câu hỏi lại cố định) | Từ lúc nhận request tới token câu hỏi đầu tiên (start, next_turn); xem P95 theo `source="ai"` |
+| `ai_agent_calls_total` | `agent`, `fallback` (`none` hoặc mã fallback) | Lần gọi agent; tỉ lệ fallback = phần `fallback != "none"` |
+| `ai_agent_latency_seconds` | `agent` | Độ trễ một lần gọi LLM |
+| `ai_tokens_total` | `agent`, `kind` (input, output, cached) | Token; nhân với bảng giá để ra chi phí |
+| `ai_rag_requests_total`, `ai_rag_errors_total` | `status` / `code` | Trạng thái RAG trong `metadata.rag`, mã lỗi RAG |
+| `ai_turns_total` | `answer_source` (text, voice), `outcome` (`answer_type`, `degraded`, `low_confidence`) | Kết quả chấm mỗi lượt next-turn stream xong; lượt wrap-up không chấm thì không đếm |
+| `ai_http_responses_total` | `route` (mẫu route, lạ thì `other`), `code` | Mọi response, kể cả 401/422 bị chặn trước route và 500 lỗi ngoài dự kiến. SSE đếm 200 lúc gửi header; kết quả stream (lỗi, client ngắt) xem `ai_requests_total` |
+
+Kèm số liệu process mặc định của `prometheus_client` (CPU, RAM, file mở). Dockerfile chạy một process uvicorn; chạy nhiều worker thì phải chuyển sang chế độ multiprocess. Ví dụ PromQL cho Grafana:
+
+- TTFT P95 lượt: `histogram_quantile(0.95, sum by (le) (rate(ai_ttft_seconds_bucket{endpoint="next_turn",source="ai"}[5m])))`
+- Tỉ lệ fallback Evaluator: `sum(rate(ai_agent_calls_total{agent="evaluator",fallback!="none"}[15m])) / sum(rate(ai_agent_calls_total{agent="evaluator"}[15m]))`
+- Tỉ lệ lỗi: `sum by (endpoint) (rate(ai_requests_total{status="error"}[5m])) / sum by (endpoint) (rate(ai_requests_total[5m]))`
+- Token mỗi giờ theo agent: `sum by (agent, kind) (increase(ai_tokens_total[1h]))`
 
 Ngoài contract: `GET /dev/play` là trang HTML tĩnh cho dev tự phỏng vấn thử (đóng vai interview-service, gọi các endpoint trên). Không qua token, tự trả 404 khi `APP_ENV` là staging/production; interview-service không dùng. Từ 04/11 trang có ô Giọng nói (Web Speech API của trình duyệt) gửi `answer_source`, `stt_confidence` như §7.4 để thử luồng voice; đây không phải lựa chọn nhà cung cấp STT/TTS.
 
