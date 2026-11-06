@@ -62,4 +62,4 @@ Feature freeze 06/12/2026; Sprint 5 07–21/12. Gate voice 22/11. Mốc Evaluato
 - **Owner:** D7–D12 (đặc biệt D8 voice, D12 thời lượng); Q1–Q3 trong `context/next-phase-plan.md` (hạn 27/10, **quá hạn**; Q1 chặn Phase B, lọc giấy phép ở Phase C và Hybrid RAG Phase 04).
 
 ## Công cụ chạy thử
-`/dev/play` và `evals.play`: xem `context/environment.md`. Sơ đồ ai-service và phiên phỏng vấn: `docs/architecture/diagrams/`.
+`/dev/play` và `evals.play`: xem `context/environment.md`. Sơ đồ ai-service và phiên phỏng vấn: `docs/architecture/diagrams/` (cập nhật 06/11 theo main 77c9b8d: voice, dừng sớm, lọc license, /metrics).
