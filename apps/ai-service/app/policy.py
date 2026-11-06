@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import Optional, Sequence
 
 from .models_common import LEVEL_CONFIG
-from .focus import clean_point, deepen_focus, gap_focus
+from .focus import deepen_focus, gap_focus, hint_focus
 from .models_interview import CandidateState, Evaluation, PlanTopic
 from .mock_evaluator import turn_score
 
@@ -48,7 +48,7 @@ def decide(ev: Evaluation, state: CandidateState, level: str, is_scenario: bool,
     if kind in ("dont_know", "weak"):
         rule = 4 if kind == "dont_know" else 6
         if not hinted and left > 0:
-            return d("hint", -1, rule, gap or clean_point(topic.key_points[0]))
+            return d("hint", -1, rule, hint_focus(ev, used_focus, covered))
         return d("next_topic", -1, rule + 1)
     if kind == "ok_degraded":
         return d("next_topic", 0, 9)

@@ -78,3 +78,11 @@ def test_bank_question_hides_opening_hint():
     user = build_messages("SYS", QuestionSpec("ask_main", "technical", TOPIC, 2, bank_question="Proxy là gì?"))[1]
     assert "opening_hint" not in user["content"] and "Spring @Transactional" in user["content"]
     assert "opening_hint" in build_messages("SYS", QuestionSpec("ask_main", "technical", TOPIC, 2))[1]["content"]
+
+
+def test_recent_forms_lists_polite_forms_of_the_last_two_questions():
+    from app.agents.interviewer import recent_forms
+    avoid = ["theo ban thi a the nao", "vay ban co the noi ve b cho minh khong", "ban giai thich giup minh c nhe"]
+    assert recent_forms(avoid) == ["bạn có thể", "giúp mình"]
+    assert '"recent_forms": ["bạn có thể", "giúp mình"]' in build_messages("SYS", QuestionSpec(
+        "ask_main", "technical", TOPIC, 2, avoid=avoid))[1]["content"]

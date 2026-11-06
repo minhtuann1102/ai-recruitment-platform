@@ -34,6 +34,6 @@ def test_follow_up_does_not_glue_a_sentence_focus_into_the_template():
     assert ": Vì nó lấy snapshot của mảng khi tạo iterator." in q and "về Vì nó" not in q
 
 
-def test_v4_is_the_default_prompt_and_v3_stays_available():
+def test_v5_is_the_default_prompt_and_v4_stays_available():
     store = PromptStore()
-    assert store.get("interviewer").version == "v4" and store.get("interviewer", "v3").version == "v3"
+    assert store.get("interviewer").version == "v5" and store.get("interviewer", "v4").version == "v4"
