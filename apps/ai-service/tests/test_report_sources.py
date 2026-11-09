@@ -133,20 +133,13 @@ def test_topic_without_cited_sources_falls_back_to_plan_sources_after_cited(sess
     assert [s.ref for s in topic_sources(req.turns, topic_id, plan_refs)] == ["y", "p1"]  # trich truoc, bo trung
 
 
-def test_sources_without_shareable_license_never_reach_study_plan(session):  # noqa: F811
+def test_sources_reach_study_plan_whatever_their_license(session):  # noqa: F811
+    # owner bo Q1 (09/11): NC-ND, unknown, chua co license deu dua cho ung vien nhu nguon khac
     topic_id = next(t.topic_id for t in session.turns if t.evaluation and t.phase == "technical")
-    cited = [_cited("nd", license="CC-BY-NC-ND-3.0"), _cited("unk", license="unknown"), _cited("old", license=None),
-             _cited("ok", license="Apache-2.0")]
+    cited = [_cited("nd", license="CC-BY-NC-ND-3.0"), _cited("unk", license="unknown"), _cited("old", license=None)]
     plan_refs = [SourceRef(ref="p-nd", title="Câu ND?", license="CC-BY-NC-ND-3.0")]
     req = _with_sources(session, topic_id, cited)
-    assert [s.ref for s in topic_sources(req.turns, topic_id, plan_refs)] == ["ok"]
-
-
-def test_old_unlicensed_copy_does_not_hide_shareable_copy_of_same_ref(session):  # noqa: F811
-    topic_id = next(t.topic_id for t in session.turns if t.evaluation and t.phase == "technical")
-    req = _with_sources(session, topic_id, [_cited("x", license=None)])  # danh gia luu truoc khi co license
-    plan_refs = [SourceRef(ref="x", title="X", license="MIT")]
-    assert [(s.ref, s.license) for s in topic_sources(req.turns, topic_id, plan_refs)] == [("x", "MIT")]
+    assert [s.ref for s in topic_sources(req.turns, topic_id, plan_refs)] == ["nd", "unk", "old", "p-nd"]
 
 
 def test_reference_source_takes_license_of_bank_question():

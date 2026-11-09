@@ -17,7 +17,7 @@ class SourceRef(BaseModel):
     ref: str
     title: str
     url: Optional[str] = None
-    license: Optional[str] = None  # giay phep cua chunk / cau tu kho; None = chua biet (khong dua cho ung vien)
+    license: Optional[str] = None  # giay phep cua chunk / cau tu kho (metadata DE, chi de tra cuu); None = chua biet
 
     @field_validator("url")
     @classmethod
@@ -37,7 +37,7 @@ class BankQuestion(BaseModel):
     qa_id: str
     question: str
     difficulty: Optional[str] = None
-    license: Optional[str] = None  # giay phep cua cap Q&A (DE): tai lieu hoc chi lay nguon cho phep chia se
+    license: Optional[str] = None  # giay phep cua cap Q&A (DE), chuyen sang SourceRef; khong dung de loc
 
 
 class PlanTopic(BaseModel):

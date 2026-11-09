@@ -33,7 +33,7 @@ class BankEntry:
     difficulty: Optional[str]
     pair: str  # cau hoi + dap an (noi dung chunk qa_pair)
     similarity: Optional[float] = None  # cosine cau hoi ~ truy van topic (hybrid); None: chi xep theo tu trung
-    license: Optional[str] = None  # metadata.license cua cau hoi (source_refs.shareable)
+    license: Optional[str] = None  # metadata.license cua cau hoi (chi de tra cuu)
 
 
 def spoken_ok(question: str) -> bool:

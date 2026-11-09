@@ -15,7 +15,7 @@ class Chunk:
     chunk_type: Optional[str]  # question | qa_pair (interview_qa); textbook tuy pipeline
     score: Optional[float] = None  # cosine similarity; None khi lay theo topic_id (khong qua tim tuong dong)
     source_url: Optional[str] = None  # metadata.source_url cua DE (Phase 03b: tai lieu trong study_plan)
-    license: Optional[str] = None  # metadata.license cua DE (SPDX, "unknown"): loc tai lieu dua cho ung vien
+    license: Optional[str] = None  # metadata.license cua DE (SPDX, "unknown"): chi de tra cuu, khong loc
 
     @property
     def dedup_key(self) -> str:
