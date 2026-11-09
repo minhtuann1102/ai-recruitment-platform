@@ -57,8 +57,10 @@ class LlmGateway:
         self.llm, self.client, self._env = llm, client or build_client(llm), env
         self._sleep, self._rng = sleep, rng
 
-    async def _retry(self, fn, timeout_s: Optional[float] = None, budget_s: Optional[float] = None):
-        return await call_with_retry(fn, timeout_s=timeout_s, budget_s=budget_s, sleep=self._sleep, rng=self._rng)
+    async def _retry(self, fn, timeout_s: Optional[float] = None, budget_s: Optional[float] = None,
+                     hedge_after_s: Optional[float] = None):
+        return await call_with_retry(fn, timeout_s=timeout_s, budget_s=budget_s, sleep=self._sleep, rng=self._rng,
+                                     hedge_after_s=hedge_after_s)
 
     async def complete(self, agent: str, messages: List[dict], schema: Optional[Type[BaseModel]] = None,
                        *, prompt_version: str = "", collector: Optional[UsageCollector] = None) -> LlmResult:
@@ -84,11 +86,12 @@ class LlmGateway:
             nonlocal calls
             params = {**base, **override, "messages": msgs}
             timeout_s, budget_s = cfg.timeout_s, cfg.retry_budget_s
+            hedge_after_s = None if calls else cfg.hedge_after_s  # chi hedge lan goi dau, khong hedge repair / length
             if calls and budget_s is not None:  # repair / length dung chung ngan sach voi lan goi dau
                 budget_s -= time.perf_counter() - started
                 timeout_s = min(timeout_s, max(budget_s, 0.0))
             resp, attempts = await self._retry(lambda: self.client.chat.completions.create(**params),
-                                               timeout_s, budget_s)
+                                               timeout_s, budget_s, hedge_after_s)
             calls += attempts
             usage = getattr(resp, "usage", None)
             rec.input_tokens += getattr(usage, "prompt_tokens", 0) or 0

@@ -197,6 +197,9 @@ async def run_turn(req: NextTurnRequest) -> AsyncIterator[SseEvent]:
    tôn trọng `Retry-After`. Không retry lỗi 400/401/403 (cấu hình sai, retry vô ích).
 3. **Ngân sách thời gian mỗi lượt:** tổng retry của Evaluator ≤ 10 s; hết ngân sách thì fallback, không retry
    tiếp. Ứng viên chờ 20 s là phiên phỏng vấn đã hỏng trải nghiệm.
+   **Hedge (2026-11-09, mặc định tắt):** đặt `LLM_HEDGE_<AGENT>=N` thì lần gọi đầu quá N s chưa xong, gateway gửi thêm
+   một request giống hệt, lấy kết quả về trước và hủy request kia. Request hedge dùng chung ngân sách (Evaluator 10 s).
+   Chỉ hedge lần gọi đầu, không hedge retry, repair hay thử lại `length`. Đo 09/11 chưa thấy lợi ích, xem docs 08 §9.2.
 4. **Repair retry** (lỗi format / ngữ nghĩa): 1 lần, gửi lại cùng prompt + message ngắn:
    *"Output trước không hợp lệ: `scores.completeness` phải là số nguyên 0–4. Trả lại JSON đúng schema."*
    `temperature = 0`.

@@ -1,4 +1,5 @@
 """Cau hinh LLM tu bien moi truong: ket noi chung + tham so theo agent (docs/ai-service/08 muc 9.3)."""
+import math
 import os
 from dataclasses import dataclass
 from typing import Mapping, Optional
@@ -29,6 +30,8 @@ _DEFAULTS = {
     "judge": (0.0, 300, 20.0, 7, None),  # evals: LLM-as-judge cho cau hoi Interviewer (evals/judge_interviewer.py)
     "query_rewriter": (0.0, 60, 3.0, None, 0.0),  # viet lai truy van RAG (ADR-010): 3 s, khong retry; loi -> tu dien
 }
+# Hedge (docs 08 muc 9.2): LLM_HEDGE_<AGENT> = so giay; sau N s chua co ket qua thi gui them mot request, lay ket qua ve
+# truoc. Mac dinh tat: do 09/11 Evaluator hedge sau 5 s ban 9/176 lan goi, cuu duoc 0 (luot treo thi ca hai cung treo).
 # LLM_REASONING_<AGENT>: model co reasoning (gpt-5-nano, gpt-6-luna...) mac dinh tu suy nghi, ton token ra va bi cat
 # max_tokens (do 03/11). off = tat han, con lai la effort cua OpenRouter. Khong dat thi khong gui gi (nhu cu).
 REASONING_LEVELS = ("off", "minimal", "low", "medium", "high")
@@ -55,6 +58,7 @@ class AgentSettings:
     seed: Optional[int]
     retry_budget_s: Optional[float]
     reasoning: Optional[str] = None
+    hedge_after_s: Optional[float] = None
 
 
 def _flag(value: str, default: bool) -> bool:
@@ -89,7 +93,21 @@ def agent_settings(agent: str, llm: LlmSettings, env: Optional[Mapping[str, str]
     if reasoning is not None and reasoning not in REASONING_LEVELS:
         raise ConfigError(f"LLM_REASONING_{agent.upper()} khong hop le: {reasoning} "
                           f"(chon {'/'.join(REASONING_LEVELS)})")
-    return AgentSettings(agent, model, temperature, max_tokens, timeout_s, seed, budget, reasoning)
+    return AgentSettings(agent, model, temperature, max_tokens, timeout_s, seed, budget, reasoning,
+                         _hedge_after(agent, env))
+
+
+def _hedge_after(agent: str, env: Mapping[str, str]) -> Optional[float]:
+    raw = (env.get(f"LLM_HEDGE_{agent.upper()}") or "").strip().lower()
+    if raw in ("", "0", "off"):
+        return None
+    try:
+        value = float(raw)
+    except ValueError:
+        value = -1.0
+    if not math.isfinite(value) or value <= 0:
+        raise ConfigError(f"LLM_HEDGE_{agent.upper()} khong hop le: {raw} (so giay > 0, hoac 0 / off de tat)")
+    return value
 
 
 def reasoning_body(level: Optional[str]) -> dict:
