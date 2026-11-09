@@ -42,7 +42,7 @@ Nguồn: `knowledge_chunks` trên Supabase (đọc bằng `aie_reader`), pipelin
 ## Việc duyệt và giấy phép
 
 - `data/reviews/translation-review.csv`: 440 dòng mẫu để duyệt bản dịch, **0/440 đã có verdict**. Tức là bản dịch và nhãn của 4.359 cặp crawl **chưa có người kiểm**.
-- Giấy phép theo từng cặp: `unknown` 2.147, **CC-BY-NC-ND-3.0 1.145**, MIT 886, CC-BY-4.0 292, CC-BY-SA-4.0 33. ND (No Derivatives) không cho phép bản dịch; `unknown` chưa rõ quyền dùng. Cần DE và owner quyết định trước khi demo hoặc công bố.
+- Giấy phép theo từng cặp: `unknown` 2.147, **CC-BY-NC-ND-3.0 1.145**, MIT 886, CC-BY-4.0 292, CC-BY-SA-4.0 33. ND (No Derivatives) không cho phép bản dịch; `unknown` chưa rõ quyền dùng. Owner chốt 09/11: bỏ qua, không lọc theo giấy phép (Q1 trong `context/next-phase-plan.md`).
 
 ## Kết luận: đã đủ chưa
 
