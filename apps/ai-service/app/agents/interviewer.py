@@ -64,6 +64,18 @@ def recent_openers(avoid: List[str], n: int = 4) -> List[str]:
     return list(dict.fromkeys(o for o in out if o))
 
 
+# Dang hoi lich su cua prompt v5 (tren cau da chuan hoa, bo dau): code bao dang nao vua dung de model xoay vong,
+# vi chi dan "khong dung mot dang hai cau lien nhau" trong prompt khong du (06/11: "ban co the" 42%, 15 cap lien)
+POLITE_FORMS = {"bạn có thể": r"\bban co the\b", "giúp mình": r"\bgiup minh\b", "theo bạn": r"\btheo ban\b",
+                "kể mình nghe": r"\bke (cho )?minh nghe\b", "nói thử": r"\bnoi thu\b", "kể thử": r"\bke thu\b",
+                "thử nghĩ / thử hình dung": r"\bthu (nghi|hinh dung)\b"}
+
+
+def recent_forms(avoid: List[str], n: int = 2) -> List[str]:
+    """Dang lich su co trong n cau gan nhat cua phien: Interviewer v5 khong dung lai."""
+    return [form for form, pattern in POLITE_FORMS.items() if any(re.search(pattern, q) for q in avoid[-n:])]
+
+
 def build_messages(system: str, spec: QuestionSpec) -> List[dict]:
     topic = spec.topic
     data = {"action": spec.action, "phase": spec.phase, "difficulty": spec.difficulty,
@@ -74,7 +86,7 @@ def build_messages(system: str, spec: QuestionSpec) -> List[dict]:
             if topic else None,
             "transition": {"phase_changed": spec.phase_changed} if spec.action == "ask_main" else None,
             "last_question": spec.last_question, "asked_questions_on_topic": spec.asked_on_topic[-5:],
-            "recent_openers": recent_openers(spec.avoid)}
+            "recent_openers": recent_openers(spec.avoid), "recent_forms": recent_forms(spec.avoid)}
     blocks = [json.dumps(data, ensure_ascii=False), wrap_untrusted("focus", spec.focus or "(không có)"),
               wrap_untrusted("bank_question", spec.bank_question or "(không có)")]
     if spec.action == "hint" and spec.reference_answer:  # chi hint can dap an chuan; hanh dong khac khong nhan

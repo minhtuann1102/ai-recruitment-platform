@@ -56,6 +56,14 @@ def gap_focus(ev: Evaluation, topic: PlanTopic, used: Sequence[str], covered: Se
     return pick([*missing, ev.follow_up_focus, *_uncovered(topic, known)], used)
 
 
+def hint_focus(ev: Evaluation, used: Sequence[str], covered: Sequence[str] = ()) -> Optional[str]:
+    """Hint bam cau vua hoi: huong Evaluator goi y cho cau do truoc, roi y con thieu. Khong lay key point cua ca topic:
+    key point thuong gop nhieu khai niem ("encapsulation va polymorphism"), Interviewer se goi y sang khai niem khac.
+    Khong co thi None: Interviewer goi y tu chinh cau vua hoi va dap an chuan."""
+    missing = [m for m in ev.missing_points if not any(covers(c, m) for c in [*covered, *ev.covered_points])]
+    return pick([ev.follow_up_focus, *missing], used)
+
+
 def deepen_focus(ev: Evaluation, topic: PlanTopic, used: Sequence[str], covered: Sequence[str] = ()) -> Optional[str]:
     """Luat 10 (tra loi tot): key point chua neu trong ca topic, roi cac huong dao sau gan ten topic."""
     return pick([*_uncovered(topic, [*covered, *ev.covered_points]), *(d.format(t=topic.title) for d in DEPTH)],

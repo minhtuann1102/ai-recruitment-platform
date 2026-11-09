@@ -93,6 +93,8 @@ Sau mỗi `Evaluation` hợp lệ (không degraded):
 
 > **Cập nhật 2026-10-22 (`app/focus.py`):** `focus` không còn cố định. Luật 8 và `hint` chọn ý còn thiếu **chưa hỏi** trong topic (theo `missing_points`, gợi ý của Evaluator, rồi key point chưa nêu); luật 10 chọn key point chưa nêu, rồi các hướng đào sâu gắn tên topic (trade-off, edge case, cơ chế bên trong, khi scale). Hết ý mới thì `next_topic`. Focus đã hỏi lưu ở `topics[].focus_used` (tối đa 6, chỉ focus đã qua kiểm injection), hai focus coi là trùng khi Jaccard ≥ 0.8. Ý ứng viên đã nêu được gộp theo cả topic ở `topics[].covered` (tối đa 10) để không hỏi lại ý đã trả lời ở lượt trước; một ý coi là đã nêu khi chứa ≥ 50% từ nội dung của key point.
 
+> **Cập nhật 2026-11-06 (`hint_focus`):** focus của `hint` (luật 4, 6) chỉ lấy hướng Evaluator gợi ý cho câu vừa hỏi (`follow_up_focus`), rồi `missing_points` chưa hỏi; **không** lấy key point của cả topic nữa. Key point thường gộp nhiều khái niệm ("encapsulation và polymorphism") nên Interviewer gợi ý sang khái niệm khác thay vì giúp ứng viên trả lời câu đang hỏi. Không có ý nào thì `focus` rỗng, Interviewer gợi ý từ `last_question` và đáp án chuẩn.
+
 Chạy sau khi các điều kiện ưu tiên 1–5 ở §4.4 (hết giờ, hết phase, đóng topic) không khớp. Đọc từ trên
 xuống, luật đầu tiên khớp thắng. `F` = follow-up còn lại của topic (`max_follow_up − counters.follow_ups`).
 
@@ -101,9 +103,9 @@ xuống, luật đầu tiên khớp thắng. `F` = follow-up còn lại của to
 | 1 | `manipulation` | `follow_up` (nếu `F > 0`) hoặc `next_topic` | giữ | Câu hỏi gốc, diễn đạt lại; ghi nhận như lượt `weak` |
 | 2 | `off_topic` hoặc `asks_clarification`, chưa clarify | `clarify` | giữ | Câu hỏi vừa rồi, rõ hơn |
 | 3 | `off_topic` / `asks_clarification`, đã clarify | `next_topic` | giữ | — |
-| 4 | `dont_know`, chưa hint, `F > 0` | `hint` | `−1` | `missing_points[0]` hoặc key point đầu chưa đạt |
+| 4 | `dont_know`, chưa hint, `F > 0` | `hint` | `−1` | `hint_focus`: `follow_up_focus` rồi `missing_points` chưa hỏi; không có thì rỗng |
 | 5 | `dont_know`, đã hint hoặc `F = 0` | `next_topic` | topic sau `−1` | — |
-| 6 | `weak`, chưa hint, `F > 0` | `hint` | `−1` | `follow_up_focus` |
+| 6 | `weak`, chưa hint, `F > 0` | `hint` | `−1` | `hint_focus` (như luật 4) |
 | 7 | `weak`, đã hint hoặc `F = 0` | `next_topic` | topic sau `−1` | — |
 | 8 | `ok`, `F > 0`, có `missing_points` | `follow_up` | giữ | `missing_points[0]` |
 | 9 | `ok`, còn lại | `next_topic` | giữ | — |

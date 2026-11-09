@@ -112,3 +112,15 @@ def test_state_keeps_topic_coverage_and_only_safe_focus(client):
     nd = parse_sse(client.post("/api/next-turn", json=body).text)[-1][1]
     ts = next(t for t in nd["state"]["topics"] if t["id"] == topic["id"])
     assert ts["covered"] and all("ignore" not in f.lower() for f in ts["focus_used"])
+
+
+def test_hint_focus_follows_the_asked_question_not_other_topic_key_points():
+    from app.focus import hint_focus
+    from app.models_interview import Evaluation
+    base = dict(turn_number=1, answer_type="dont_know", covered_points=[], misconceptions=[], evidence=[],
+                scores={"technical_accuracy": 0, "completeness": 0, "extensibility": 0, "relevance": 0},
+                scores_10={"technical_accuracy": 0, "completeness": 0, "extensibility": 0, "relevance": 0},
+                turn_score_10=0, degraded=False, strength_tags=[], gap_tags=[])
+    ev = Evaluation(**base, missing_points=["Giải thích IoC container"], follow_up_focus="Các loại bean scope")
+    assert hint_focus(ev, []) == "Các loại bean scope"  # huong Evaluator goi y cho cau vua hoi di truoc
+    assert hint_focus(Evaluation(**base, missing_points=[], follow_up_focus=None), []) is None  # khong lay key point

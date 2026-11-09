@@ -91,6 +91,8 @@ Văn phong bằng code (harness full, 286 câu): khuôn "Bạn có thể ... kh�
 
 **Interviewer v4 (2026-11-02, `plans/reports/eval-261102-1815-interviewer-v4.md`):** so với v3 cùng ngày: khuôn 25.2% → 8.6%, câu kho 97.2% → 97.1%, 15.9 → 17.6 từ, câu > 25 từ 4.6% → 10.2%. Fable chấm mù (`evals/question_labels_llm/fable.json`, **nhãn LLM, không phải người**): `natural` 3.25 → 3.37 (+0.12, CI −0.20 đến +0.45, chưa chứng minh được), hint đúng hành động 62% → 88%. Fable không thay được người: trên 60 câu v2 trùng điểm 35%, không chọn cùng câu yếu. Chưa có nhãn người cho câu v4, nên chưa biết đạt 4.0 theo người. Còn lại: `follow_up` vẫn chép `key_point`, "Khi" thành khuôn mở đầu mới của `follow_up` và `hint` (28%).
 
+**Interviewer v5 (2026-11-06, `plans/reports/eval-261106-1231-interviewer-v5.md`):** đổi mục tiêu giọng sang thân thiện, lịch sự (cho phép "Bạn có thể", xoay vòng dạng cùng nghĩa). Harness quick 10 phiên: khuôn 21.7%, 21.0 từ, mở đầu phổ biến nhất "Vậy bạn có" **19.6% (vượt ngưỡng 15%)**; hint lệch khái niệm 1/11 (trước `hint_focus` 2/10). Judge v1 trên câu AI tự đặt: `natural` 4.12 = v4, `action_ok` 92.9% (v4 90.7%), mẫu nhỏ. Judge v1 chấm khuôn "Bạn có thể" là 3 điểm và không bắt được hint lộ đáp án, nên chưa đo được mục tiêu giọng mới. Còn lại: chốt lại ngưỡng mở đầu theo giọng mới, hint còn lộ một phần đáp án.
+
 ## Tiêu chí đề xuất (giai đoạn tiếp theo, xem `context/next-phase-plan.md`)
 
 | Tiêu chí | Cách đo | Ngưỡng |

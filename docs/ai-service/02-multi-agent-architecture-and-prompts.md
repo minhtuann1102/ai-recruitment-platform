@@ -393,6 +393,12 @@ từ) rồi hỏi cách làm; `hint` được nói lại câu hỏi ngắn hơn 
 không áp dụng nếu làm mất ý câu kho. Đầu vào không đổi. Câu dự phòng đặt `focus` sau dấu hai chấm vì `focus` có thể là cả câu.
 Số đo: `plans/reports/eval-261102-1815-interviewer-v4.md`.
 
+**Prompt v5 (2026-11-06, `interviewer.v5.md`):** giọng thân thiện, lịch sự theo yêu cầu sản phẩm: được dùng "Vậy bạn có thể ... cho
+mình không?" nhưng xoay vòng với các dạng cùng nghĩa ("giải thích giúp mình", "theo bạn", "kể mình nghe", "nói thử"); đầu vào thêm
+`recent_forms` (dạng lịch sự ở 2 câu gần nhất, code tính) và prompt cấm dùng lại. Câu chuyển phần nói đúng `phase`, chỉ khi
+`phase_changed`; "mình" luôn là người phỏng vấn. `hint` dạng "Thế bạn kể thử / thử nghĩ xem ...", giữ ý `last_question`, một câu hỏi,
+chỗ bám không được là chính đáp án. `focus` của hint đổi sang `hint_focus` (04 §5.4). Số đo: `plans/reports/eval-261106-1231-interviewer-v5.md`.
+
 ### 3.3.5 Reporter
 
 **Input** (điểm đã được code tính, §6.3)
