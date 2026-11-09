@@ -21,7 +21,7 @@ Không cần interview-service hay giao diện: `evals/play.py` gọi ai-service
 `cd apps/ai-service`, rồi: `python -m evals.sim_style <file phiên>` (văn phong), `python -m evals.question_set export --out <csv>` (phiếu người chấm), `python -m evals.judge_interviewer` (LLM-judge, cần `LLM_API_KEY`). Chi tiết: `context/quality-criteria.md`.
 
 ## Đo TTFT
-Chạy in-process thì `ttft_s` bằng tổng thời gian lượt (ASGI đệm body). Đo TTFT phải dùng `python -m evals.simulate --serve` hoặc `--base-url`.
+Chạy in-process thì `ttft_s` bằng tổng thời gian lượt (ASGI đệm body). Đo TTFT phải dùng `python -m evals.simulate --serve` hoặc `--base-url`. Tách TTFT theo chặng (Evaluator, `other`, lượt fallback) trên file đã lưu, không gọi LLM: `python -m evals.ttft_breakdown <file phiên>`; nhiều file thì in thêm dòng `pooled`.
 
 ## Hook của repo
 Repo có hook Node trong `.claude/hooks/` (chỉ chạy khi máy có Node; Node v24 cài ở `~/.local/node` từ 2026-10-24). `scout-block` chặn đường dẫn trong `.claude/config/adf-ignore.txt`; đã thêm `!.venv` để chạy được Python của ai-service.

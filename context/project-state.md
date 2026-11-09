@@ -31,6 +31,7 @@
 | #81 | 05/11 | `GET /metrics` cho Prometheus: độ trễ, TTFT, fallback, token, RAG, kết quả lượt |
 | #82 | 09/11 | Interviewer v5: giọng "mình – bạn", dạng lịch sự xoay vòng, hint bám câu vừa hỏi |
 | #83 | 09/11 | Sơ đồ Archify ai-service và phiên phỏng vấn theo `main` 77c9b8d |
+| #84 | 09/11 | Bỏ lọc giấy phép ở `study_plan.resources` theo quyết định Q1 |
 
 Quy ước merge của owner: merge commit (không squash). Tiêu đề PR dạng `[scope] type: mô tả`.
 
@@ -38,6 +39,24 @@ Quy ước merge của owner: merge commit (không squash). Tiêu đề PR dạn
 Sau khi sửa ngắt mạch (3 vòng, kể cả tải gấp đôi): RAG `error` 0, phiên mất kho 0/10, TTFT p50 3.57–4.06 s / p95 6.94–7.51 s (**chưa đạt** 3.5 / 6 s), $0.0086–0.0092/phiên. Gộp 5 lần RAG sạch: `no_source` ở `technical` 0.24 (dao động 0.10–0.35), câu kho supported 0.88, câu AI tự đặt 0.63. Chi tiết: `plans/reports/eval-261030-1640-phase-05-baseline.md`.
 
 **TTFT trong các báo cáo trước 30/10 là tổng thời gian lượt**, không so trực tiếp với số trên.
+
+**Tách TTFT theo chặng (09/11, đọc lại log 03/11, không gọi LLM):** 880 lượt, TTFT p50 3.97 s / p95 6.73 s.
+- Evaluator chiếm 70% (p50 2.73 s).
+- 2.3% lượt Evaluator hết hạn mất ~11 s mỗi lượt. Bỏ nhóm này thì p95 còn 6.00 s.
+- Đề xuất cắt đuôi hết hạn trước (hedge request hoặc hạ timeout), sau đó mới tách Evaluator hai pha nếu cần p50 ≤ 3.5 s.
+- Đã cài cùng nhánh `thang/ttft-breakdown`, chưa test tay:
+  - Hedge request: sau N s gửi thêm một request, env `LLM_HEDGE_<AGENT>`, **mặc định tắt** (owner chốt 09/11 sau đo).
+  - Evaluator fallback ghi thời gian chờ vào `latency_ms`.
+  - Đo quick `--serve` bật / tắt hedge (09/11, 65 lượt mỗi bản): không bản nào có lượt hết hạn nên chưa đo được lợi ích,
+    không thấy hồi quy; hedge bắn 1/65 lần.
+  - Full matrix 09/11 dừng ở 10–11/28 phiên vì key OpenRouter chạm hạn mức tổng $10. Hedge bắn 8/111 lần, cứu 0;
+    1 lượt treo thì cả hai request cùng hết hạn. Chưa có bằng chứng hedge giúp được.
+  - Chạy lại full sau khi nâng hạn mức key, đủ 28/28 phiên mỗi bản:
+    - Bật / tắt: TTFT p95 6.10 / 6.20 s, lượt hết hạn 1 / 2.
+    - Hedge bắn 6.8% lần gọi, có thể cứu 3 lần.
+    - Tác động nhỏ hơn mức dao động, nên giữ tắt mặc định.
+
+Báo cáo: `plans/reports/eval-261109-1648-ttft-breakdown.md`.
 
 ## Đang làm
 - Kế hoạch `plans/261029-1415-hybrid-grounded-rag/`: Phase 01–03 xong (`focus_source` để sau), Phase 05 đang làm (đo nền và `judge_support` v2 + repair xong; so nhãn LLM thứ hai đồng ý 0.85, kappa 0.70; `supported` đúng ~0.64, câu AI tự đặt 0.53, dưới ngưỡng 0.80; nhãn người 60 cặp là tùy chọn theo quyết định owner 31/10; golden có tài liệu xong: Evaluator không cite `R` nên `contradicted` qua đáp án chuẩn 0/9, tài liệu không liên quan vẫn `supported` 7/12, cần Evaluator v6), Phase 04 chờ DE.

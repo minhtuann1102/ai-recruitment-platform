@@ -506,6 +506,9 @@ Event `done`:
 trong lượt: `S1..Sn` snippet của topic rồi chunk theo lượt, `R` đáp án chuẩn) và `support` (`supported` /
 `contradicted` / `no_source`); `confidence` = `low` khi lượt có tài liệu nhưng không ý nào được tài liệu ủng hộ,
 `high` khi có, `null` khi không có tài liệu, không có ý nào, hoặc Evaluator v3 / mock. Id chỉ có nghĩa trong lượt đó. Từ Evaluator v6 `supported` khắt hơn nên `low` chiếm khoảng một nửa lượt có tài liệu, và `no_source` không có nghĩa là chắc chắn không có tài liệu nói ý đó.
+`metadata.latency_ms.evaluator` khi `fallbacks` có `evaluator_mock_heuristic` (2026-11-09): thời gian đã chờ Evaluator
+trước khi chấm heuristic, thường ~10 s. Trước đó trường này là `0`. Khi bật hedge (`LLM_HEDGE_<AGENT>`, mặc định tắt, docs 08 §9.2), có thể có hai request cho một
+lần gọi Evaluator; `usage` chỉ tính token của request về trước, token của request bị hủy không có trong metadata.
 `metadata.usage.<agent>.cached_tokens` (2026-11-02): phần của `input_tokens` đọc từ prompt cache của provider. `0` khi không
 có cache hit hoặc provider không trả trường này.
 

@@ -81,6 +81,45 @@ Dự phòng nếu đo thực tế vượt mục tiêu (chưa làm, theo thứ t�
    stream, xong trước khi lưu lượt. Thêm 1 call/lượt (~+40% token input), giảm ~1.5 s.
 3. Gửi trước câu dẫn trung tính cố định ("Mình hiểu rồi.") ngay khi nhận câu trả lời. Chỉ cải thiện cảm nhận.
 
+**Tách TTFT theo chặng (2026-11-09, không gọi LLM):** `python -m evals.ttft_breakdown <file phiên --serve>` tách TTFT
+từng lượt thành Evaluator, query_rewriter + embedding và `other` (TTFT Interviewer + truy vấn DB RAG + overhead). Lượt
+fallback được tách riêng. Gộp 880 lượt của 4 lần chạy full ngày 03/11:
+- TTFT p50 3.97 s, p95 6.73 s. Evaluator chiếm 70%: p50 2.73 s, ~1.18 s cố định + 10.6 ms/token output, ~156 token.
+  `other` có p50 1.10 s.
+- **2.3% lượt Evaluator hết hạn** (timeout 8 s, ngân sách retry 10 s), mỗi lượt mất ~11 s. Bỏ nhóm này thì p95 còn 6.00 s.
+- Khi fallback, `latency_ms.evaluator` ghi 0, nên thời gian chờ không xuất hiện trong metadata hay `/metrics`.
+
+Vì vậy, nên cắt đuôi hết hạn trước (hedge request sau ~4.5–5 s hoặc hạ timeout), rồi mới tách hai pha nếu vẫn cần
+p50 ≤ 3.5 s. Ước tính hai pha (lạc quan): p50 2.92 s, p95 4.27 s. Báo cáo:
+`plans/reports/eval-261109-1648-ttft-breakdown.md`.
+
+**Hedge request (2026-11-09, `app/llm/retry.py`, mặc định tắt):** đã cài và đo với Evaluator sau 5 s, chưa thấy lợi
+ích (số đo bên dưới), nên để tắt; bật bằng `LLM_HEDGE_EVALUATOR=5` khi cần đo lại.
+- Cơ chế (ví dụ bật với 5 s): lần gọi đầu quá 5 s chưa xong thì gửi thêm một request giống hệt (cùng `seed`), lấy kết quả về trước, hủy
+  request kia. Request hedge dùng phần còn lại của ngân sách 10 s, nên tối đa 5 s. Lượt bị request đầu treo ước tính
+  còn ~5 + 2.7 s thay vì ~10 s chờ rồi fallback. Retry, repair và thử lại `length` không được hedge.
+  Agent không có ngân sách thì request hedge phải xong trong timeout của lần gọi; hết thời gian thì không hedge.
+  Một request lỗi 4xx thì báo lỗi đó, không retry tiếp.
+- Chi phí: đo 09/11 thêm 5–7% request Evaluator (ước tính trước từ log 03/11 là 3.3%). Request bị hủy vẫn có thể
+  bị tính tiền, nhưng `metadata.usage` không ghi token của nó; `attempts` trong log `llm_call` tính cả request hedge.
+- Cấu hình: env `LLM_HEDGE_<AGENT>` (giây; để trống / `0` / `off` = tắt). Mặc định tắt cho mọi agent.
+- Từ cùng ngày, Evaluator fallback ghi thời gian đã chờ vào `latency_ms.evaluator` và `ai_agent_latency_seconds`.
+  Trước đó là 0, nên `/metrics` không thấy các lượt chờ ~10 s. Hệ quả: p95 latency Evaluator trên dashboard sẽ tăng,
+  và không so được với số trước 09/11.
+- Đo 09/11 bằng LLM thật: hai quick `--serve` chạy cùng lúc, bật và tắt hedge, mỗi bản 65 lượt.
+  - Cả hai bản không có lượt Evaluator hết hạn nên **chưa đo được lợi ích**. TTFT p95 5.99 / 5.70 s, trong mức dao động.
+  - Hedge chỉ bắn 1/65 lần gọi, và lần đó lãng phí vì output dài (357 token): request đầu vẫn về sau 5.07 s.
+  - Không có lỗi, không có repair, chi phí như cũ.
+  - Muốn đo được lợi ích cần full matrix cho mỗi bản. Báo cáo: `plans/reports/eval-261109-1648-ttft-breakdown.md`.
+- Full matrix 09/11 bật / tắt hedge (dừng ở 10–11/28 phiên vì key OpenRouter chạm hạn mức $10):
+  - Hedge bắn 8/111 lần (7.2%), cả 8 lần request đầu vẫn thắng.
+  - Lượt treo duy nhất thì cả hai request cùng hết hạn (11.2 s).
+  - Gộp cả quick: hedge bắn 9/176 lần, cứu được 0. **Chưa có bằng chứng hedge giúp được**, mà tốn thêm 5–7% lần gọi.
+- Full matrix chạy lại 09/11 (đủ 28/28 phiên mỗi bản, concurrency 2):
+  - TTFT p95 bật / tắt: 6.10 / 6.20 s. Lượt hết hạn: 1 / 2.
+  - Hedge bắn 15/221 lần (6.8%). Có thể cứu 3 lần (xong sau 7.5–7.8 s), còn lại request đầu vẫn thắng.
+  - Tác động nhỏ hơn mức dao động, nên giữ tắt mặc định.
+
 ## 9.3 Chọn model cho từng agent
 
 > **Cài đặt (Phase 02):** bảng dưới là nguồn của `app/llm/settings.py`. Env `LLM_MODEL_<AGENT>` đổi model từng agent; thông số khác cố định theo bảng. Test `tests/test_llm_settings.py` giữ bảng và code khớp.
