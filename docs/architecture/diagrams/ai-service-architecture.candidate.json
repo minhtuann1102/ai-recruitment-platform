@@ -182,7 +182,7 @@
           "path": "apps/ai-service/app/source_refs.py",
           "line": 10,
           "end_line": 27,
-          "label": "ref bền + license chia sẻ được"
+          "label": "ref bền + tiêu đề + URL"
         }
       ]
     },
@@ -295,7 +295,7 @@
           "path": "apps/ai-service/app/report_resources.py",
           "line": 16,
           "end_line": 42,
-          "label": "lọc license → ≤3 nguồn/topic"
+          "label": "≤3 nguồn/topic"
         },
         {
           "path": "apps/ai-service/app/report_scoring.py",
@@ -765,7 +765,7 @@
       "title": "Tài liệu trong báo cáo",
       "items": [
         "Evaluation.sources: ref bền (qa_id), tiêu đề, URL, license từ metadata DE",
-        "Chỉ nguồn CC0 / MIT / Apache-2.0 / CC-BY(-SA); license chưa rõ hoặc NC-ND bị bỏ",
+        "Không lọc theo license (owner bỏ Q1 09/11); trích trước, bù bằng câu kho của topic",
         "Mỗi topic ≤3: nguồn bác bỏ → nguồn ủng hộ → bù bằng nguồn của topic",
         "Reporter chỉ chọn id r1…; code đổi ra {title, url}, LLM không thấy URL"
       ]

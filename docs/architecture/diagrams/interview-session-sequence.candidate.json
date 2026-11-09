@@ -158,7 +158,7 @@
           "path": "apps/ai-service/app/report_resources.py",
           "line": 16,
           "end_line": 42,
-          "label": "tài liệu: lọc license, ≤3/topic"
+          "label": "tài liệu: ≤3 nguồn/topic"
         },
         {
           "path": "apps/ai-service/app/report_scoring.py",
@@ -432,7 +432,7 @@
       "to": "reporter",
       "y": 1660,
       "label": "report(turns)",
-      "note": "điểm do code; tài liệu chỉ lấy nguồn có license chia sẻ được"
+      "note": "điểm do code; tài liệu lấy từ nguồn Evaluator đã trích"
     },
     {
       "id": "m28",

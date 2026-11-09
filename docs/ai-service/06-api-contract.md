@@ -519,9 +519,9 @@ chấm (ai_db lỗi, quá hạn) nên lượt được chấm không có `R`; kh
 `qa_id` / id chunk, bền qua lượt; nguồn bác bỏ trước). Lấy từ `plan.topics[].reference_sources` (cùng thứ tự
 `reference_snippets`, `{ref, title, url}`) và chunk theo lượt; interview-service lưu nguyên `evaluation` và `plan` như
 cũ để finalize dựng `study_plan.resources`. Thiếu `reference_sources` thì `sources` rỗng, không lỗi. Từ 2026-11-04 mỗi
-nguồn (và `bank_questions[]`) có thêm `license` (giấy phép DE ghi ở `metadata.license`, có thể `null`) để finalize lọc
-tài liệu đưa cho ứng viên (05 §6). `evaluation.sources` vẫn gồm cả nguồn chưa được phép chia sẻ (để debug, đối
-chiếu): interview-service **không hiển thị** trường này cho ứng viên, chỉ hiển thị `study_plan.resources`.
+nguồn (và `bank_questions[]`) có thêm `license` (giấy phép DE ghi ở `metadata.license`, có thể `null`), chỉ để tra
+cứu: từ 2026-11-09 finalize không lọc theo trường này (05 §6). interview-service **không hiển thị** `evaluation.sources`
+cho ứng viên (để debug, đối chiếu), chỉ hiển thị `study_plan.resources`.
 
 `reasoning` do **code** sinh từ luật policy đã khớp (không phải LLM), lưu vào `agent_reasoning` để debug.
 `session_end = true` thì `question = null`.
