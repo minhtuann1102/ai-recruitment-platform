@@ -7,6 +7,7 @@ dung mock heuristic va danh dau degraded (luot khong tinh diem, BRU-05) de phien
 import asyncio
 import json
 import logging
+import time
 from dataclasses import dataclass, field, replace
 from typing import List, Literal, Optional, Tuple
 
@@ -210,6 +211,7 @@ class LlmEvaluator:
         if replaced:
             log.info("evaluator_stt_terms turn=%d", inp.turn_number)
             inp = replace(inp, answer=normalized)
+        started = time.perf_counter()
         try:
             sourced = uses_sources(self._prompt.version)
             result = await self._gateway.complete(self.agent, build_messages(self._prompt.text, inp, sourced),
@@ -219,8 +221,10 @@ class LlmEvaluator:
         except (LlmError, ConfigError, openai.APIError) as err:  # openai.APIError: loi API con lai sau khi het retry
             log.warning("evaluator_degraded turn=%d error=%s", inp.turn_number, type(err).__name__)
             if collector is not None:
+                # thoi gian cho truoc khi fallback (het han ~10 s): khong ghi thi latency_ms va /metrics bao 0
                 collector.add(CallRecord(self.agent, "mock-heuristic", prompt_version=self._prompt.version,
-                                         fallback="evaluator_mock_heuristic"))
+                                         fallback="evaluator_mock_heuristic",
+                                         latency_ms=int((time.perf_counter() - started) * 1000)))
             fallback = mock_evaluator.evaluate(inp.answer, inp.question, inp.topic, inp.turn_kind, inp.turn_number)
             return None, fallback.model_copy(update={"degraded": True})
         ev = await asyncio.to_thread(postcheck, result.data, inp)
