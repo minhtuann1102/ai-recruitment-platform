@@ -10,7 +10,7 @@
       "url": "https://github.com/minhtuann1102/ai-recruitment-platform.git",
       "provider": "github",
       "link_mode": "web",
-      "revision": "6ea55e40d11d2879d1a21d1af0d2385ab74aeea0"
+      "revision": "77c9b8dbe9f7af998a7a1eb1f22e9b495376e440"
     }
   },
   "components": [
@@ -40,7 +40,7 @@
       "id": "api",
       "type": "backend",
       "label": "FastAPI app :8000",
-      "sublabel": "5 route + token middleware",
+      "sublabel": "7 route · token · metrics",
       "tag": "X-Internal-Token",
       "pos": [
         40,
@@ -53,21 +53,21 @@
       "sources": [
         {
           "path": "apps/ai-service/app/main.py",
-          "line": 41,
-          "end_line": 228,
-          "label": "lifespan, _TurnStream, routes"
+          "line": 43,
+          "end_line": 60,
+          "label": "lifespan, middleware"
+        },
+        {
+          "path": "apps/ai-service/app/main.py",
+          "line": 132,
+          "end_line": 249,
+          "label": "request_done, SSE, routes"
         },
         {
           "path": "apps/ai-service/app/security.py",
           "line": 22,
           "end_line": 43,
           "label": "internal token check"
-        },
-        {
-          "path": "apps/ai-service/app/logging_setup.py",
-          "line": 27,
-          "end_line": 86,
-          "label": "log JSON, session_id, LOG_LEVEL"
         }
       ]
     },
@@ -110,9 +110,9 @@
       "sources": [
         {
           "path": "apps/ai-service/app/rag/retriever.py",
-          "line": 109,
-          "end_line": 150,
-          "label": "retrieve_for_topic"
+          "line": 168,
+          "end_line": 188,
+          "label": "bank_for_topic"
         },
         {
           "path": "apps/ai-service/app/rag/hybrid_search.py",
@@ -122,8 +122,8 @@
         },
         {
           "path": "apps/ai-service/app/plan_snippets.py",
-          "line": 138,
-          "end_line": 161,
+          "line": 156,
+          "end_line": 189,
           "label": "snippets + sources, hạn 5 s, giữ topic đã xong"
         }
       ]
@@ -168,21 +168,21 @@
       "sources": [
         {
           "path": "apps/ai-service/app/turn_reference_snippets.py",
-          "line": 104,
-          "end_line": 126,
+          "line": 99,
+          "end_line": 123,
           "label": "turn_snippets"
         },
         {
-          "path": "apps/ai-service/app/turn_reference_snippets.py",
-          "line": 63,
-          "end_line": 103,
-          "label": "SQL topic_id: shield, cooldown 30 s"
+          "path": "apps/ai-service/app/turn_evaluation.py",
+          "line": 24,
+          "end_line": 71,
+          "label": "đáp án chuẩn ‖ chunk theo lượt → Evaluator"
         },
         {
           "path": "apps/ai-service/app/source_refs.py",
-          "line": 11,
-          "end_line": 18,
-          "label": "ref bền: qa_id, tiêu đề, source_url"
+          "line": 10,
+          "end_line": 27,
+          "label": "ref bền + license chia sẻ được"
         }
       ]
     },
@@ -190,7 +190,7 @@
       "id": "engine",
       "type": "backend",
       "label": "Turn engine",
-      "sublabel": "policy · time budget · state",
+      "sublabel": "policy · thời gian · voice",
       "tag": "pure code",
       "pos": [
         330,
@@ -203,21 +203,21 @@
       "sources": [
         {
           "path": "apps/ai-service/app/turn_engine.py",
-          "line": 79,
-          "end_line": 199,
+          "line": 84,
+          "end_line": 207,
           "label": "start_session / next_turn"
         },
         {
-          "path": "apps/ai-service/app/policy.py",
-          "line": 31,
-          "end_line": 60,
-          "label": "decide next action"
+          "path": "apps/ai-service/app/voice_turn.py",
+          "line": 36,
+          "end_line": 77,
+          "label": "voice: no_speech, unclear, hỏi lại"
         },
         {
-          "path": "apps/ai-service/app/time_budget.py",
-          "line": 41,
-          "end_line": 59,
-          "label": "forced transitions"
+          "path": "apps/ai-service/app/early_stop.py",
+          "line": 18,
+          "end_line": 31,
+          "label": "dừng sớm khi yếu kéo dài"
         }
       ]
     },
@@ -237,9 +237,9 @@
       "sources": [
         {
           "path": "apps/ai-service/app/question_stream.py",
-          "line": 43,
-          "end_line": 108,
-          "label": "fallback + violation checks"
+          "line": 61,
+          "end_line": 120,
+          "label": "fallback + violation checks, câu cố định"
         }
       ]
     },
@@ -261,12 +261,12 @@
         {
           "path": "apps/ai-service/app/agents/cv_parser.py",
           "line": 89,
-          "end_line": 127
+          "end_line": 119
         },
         {
           "path": "apps/ai-service/app/agents/jd_parser.py",
           "line": 40,
-          "end_line": 79
+          "end_line": 72
         }
       ]
     },
@@ -293,14 +293,14 @@
         },
         {
           "path": "apps/ai-service/app/report_resources.py",
-          "line": 15,
-          "end_line": 41,
-          "label": "nguồn đã trích → bù nguồn topic"
+          "line": 16,
+          "end_line": 42,
+          "label": "lọc license → ≤3 nguồn/topic"
         },
         {
           "path": "apps/ai-service/app/report_scoring.py",
-          "line": 57,
-          "end_line": 110,
+          "line": 77,
+          "end_line": 131,
           "label": "deterministic scoring"
         }
       ]
@@ -308,8 +308,8 @@
     {
       "id": "planner",
       "type": "backend",
-      "label": "Planner",
-      "sublabel": "plan + validate + repair",
+      "label": "Planner v2",
+      "sublabel": "plan + đổi topic thiếu kho",
       "tag": "mock | llm",
       "pos": [
         640,
@@ -322,17 +322,23 @@
       "sources": [
         {
           "path": "apps/ai-service/app/agents/planner.py",
-          "line": 97,
-          "end_line": 136,
+          "line": 89,
+          "end_line": 137,
           "label": "fallback to rule plan"
+        },
+        {
+          "path": "apps/ai-service/app/plan_bank_coverage.py",
+          "line": 72,
+          "end_line": 103,
+          "label": "ưu tiên topic có câu kho"
         }
       ]
     },
     {
       "id": "evaluator",
       "type": "backend",
-      "label": "Evaluator v4",
-      "sublabel": "bands + trích nguồn S1…/R",
+      "label": "Evaluator v8",
+      "sublabel": "bands + nguồn · voice",
       "tag": "mock | llm",
       "pos": [
         640,
@@ -345,28 +351,28 @@
       "sources": [
         {
           "path": "apps/ai-service/app/agents/evaluator.py",
-          "line": 136,
-          "end_line": 211,
-          "label": "postcheck + LLM call"
+          "line": 187,
+          "end_line": 230,
+          "label": "precheck, LLM, hậu kiểm"
         },
         {
           "path": "apps/ai-service/app/evaluator_source_checks.py",
-          "line": 35,
-          "end_line": 68,
-          "label": "kiểm id, contradicted, confidence"
+          "line": 42,
+          "end_line": 56,
+          "label": "kiểm id, contradicted"
         },
         {
-          "path": "apps/ai-service/app/agents/evaluator_provider.py",
-          "line": 42,
-          "end_line": 52,
-          "label": "mode select, degraded"
+          "path": "apps/ai-service/app/stt_terms.py",
+          "line": 169,
+          "end_line": 196,
+          "label": "đổi thuật ngữ STT, trả quote gốc"
         }
       ]
     },
     {
       "id": "interviewer",
       "type": "backend",
-      "label": "Interviewer",
+      "label": "Interviewer v4",
       "sublabel": "phrase question (stream)",
       "tag": "mock | llm",
       "pos": [
@@ -380,8 +386,8 @@
       "sources": [
         {
           "path": "apps/ai-service/app/agents/interviewer.py",
-          "line": 50,
-          "end_line": 103
+          "line": 86,
+          "end_line": 111
         }
       ]
     },
@@ -389,7 +395,7 @@
       "id": "gateway",
       "type": "backend",
       "label": "LlmGateway",
-      "sublabel": "retry · schema · repair",
+      "sublabel": "retry · budget · schema",
       "tag": "usage tracking",
       "pos": [
         950,
@@ -402,14 +408,14 @@
       "sources": [
         {
           "path": "apps/ai-service/app/llm/gateway.py",
-          "line": 47,
-          "end_line": 163,
+          "line": 54,
+          "end_line": 179,
           "label": "complete, stream, embed + generation"
         },
         {
           "path": "apps/ai-service/app/agents/registry.py",
-          "line": 15,
-          "end_line": 59,
+          "line": 18,
+          "end_line": 100,
           "label": "AGENT_*_MODE registry"
         }
       ]
@@ -418,7 +424,7 @@
       "id": "llm",
       "type": "external",
       "label": "OpenRouter",
-      "sublabel": "gpt-4o-mini · embeddings",
+      "sublabel": "gpt-4o-mini · gpt-6-luna",
       "pos": [
         950,
         40
@@ -430,9 +436,9 @@
       "sources": [
         {
           "path": "apps/ai-service/.env.example",
-          "line": 1,
-          "end_line": 8,
-          "label": "LLM_BASE_URL / models"
+          "line": 4,
+          "end_line": 19,
+          "label": "LLM_BASE_URL, model từng agent"
         }
       ]
     },
@@ -460,13 +466,13 @@
         {
           "path": "apps/ai-service/app/tracing.py",
           "line": 104,
-          "end_line": 141,
+          "end_line": 155,
           "label": "start_request, observation"
         },
         {
           "path": "apps/ai-service/.env.example",
-          "line": 18,
-          "end_line": 21,
+          "line": 27,
+          "end_line": 30,
           "label": "LANGFUSE_*"
         }
       ]
@@ -478,7 +484,7 @@
       "sublabel": "trace theo session · có nội dung",
       "pos": [
         640,
-        980
+        1100
       ],
       "size": [
         160,
@@ -487,9 +493,60 @@
       "sources": [
         {
           "path": "docs/ai-service/07-data-storage.md",
-          "line": 145,
-          "end_line": 170,
+          "line": 161,
+          "end_line": 171,
           "label": "phạm vi nội dung gửi đi"
+        }
+      ]
+    },
+    {
+      "id": "metrics",
+      "type": "backend",
+      "label": "Metrics",
+      "sublabel": "GET /metrics · Prometheus",
+      "tag": "nhãn chỉ là mã",
+      "pos": [
+        330,
+        960
+      ],
+      "size": [
+        160,
+        64
+      ],
+      "sources": [
+        {
+          "path": "apps/ai-service/app/metrics.py",
+          "line": 25,
+          "end_line": 87,
+          "label": "counter, histogram, ghi khi request xong"
+        },
+        {
+          "path": "apps/ai-service/app/metrics.py",
+          "line": 89,
+          "end_line": 109,
+          "label": "middleware HTTP, endpoint"
+        }
+      ]
+    },
+    {
+      "id": "prom",
+      "type": "external",
+      "label": "Prometheus / Grafana",
+      "sublabel": "chưa dựng (DE/infra)",
+      "pos": [
+        330,
+        1100
+      ],
+      "size": [
+        160,
+        64
+      ],
+      "sources": [
+        {
+          "path": "docs/ai-service/11-architecture-l2-containers.md",
+          "line": 370,
+          "end_line": 370,
+          "label": "bảng triển khai: Giám sát"
         }
       ]
     }
@@ -511,7 +568,8 @@
         "evaluator",
         "interviewer",
         "gateway",
-        "tracing"
+        "tracing",
+        "metrics"
       ]
     }
   ],
@@ -665,6 +723,19 @@
       "to": "langfuse",
       "label": "gửi nền · đã che PII",
       "variant": "security"
+    },
+    {
+      "id": "api-metrics",
+      "from": "api",
+      "to": "metrics",
+      "label": "request_done · HTTP code"
+    },
+    {
+      "id": "prom-metrics",
+      "from": "prom",
+      "to": "metrics",
+      "label": "scrape + X-Internal-Token",
+      "variant": "security"
     }
   ],
   "cards": [
@@ -672,30 +743,31 @@
       "dot": "cyan",
       "title": "Một lượt /api/next-turn",
       "items": [
+        "Voice: đổi thuật ngữ phiên âm; không có tiếng → 422 voice_no_speech; bản ghi kém → hỏi lại một lần, lần hai 422 voice_unclear",
         "Song song: đáp án chuẩn (câu từ kho) hoặc truy hồi theo lượt (BM25 câu hỏi + trả lời, ≤3 chunk, hạn 1 s)",
-        "Evaluator v4 ghi nguồn S1…Sn / R cho mỗi ý; code bỏ id lạ, chỉ R bác bỏ mới chặn điểm",
-        "record_evaluation cập nhật state; forced_transition (hết giờ, turn cap) ưu tiên",
-        "policy.decide chọn follow_up / hint / clarify / next_topic; hint dùng đáp án chuẩn hoặc chunk cùng topic",
-        "Interviewer stream câu hỏi qua SSE: meta → token… → done"
+        "Evaluator v8 ghi nguồn S1…Sn / R cho mỗi ý; code bỏ id lạ, chỉ R bác bỏ mới chặn điểm",
+        "forced_transition (hết giờ, turn cap) ưu tiên; policy chọn follow_up / hint / clarify / next_topic",
+        "Middle, senior yếu 3 topic technical liên tiếp → wrap_up sớm",
+        "Interviewer v4 stream câu hỏi qua SSE: meta → token… → done"
       ]
     },
     {
       "dot": "cyan",
       "title": "RAG hybrid (lúc /api/start)",
       "items": [
-        "Mỗi topic chạy song song: tra topic_id, BM25 trong bộ nhớ, vector pgvector",
-        "Gộp RRF (k=60, từ khóa 0.5); topic_id chỉ tăng điểm, không lọc cứng",
-        "Viết lại + embed dùng chung cho snippet và câu kho, hạn 3.5 s",
-        "Đo 29/10: MRR held-out 0.823 → 0.875; gắn snippet 1.0–4.7 s (hạn 5 s)"
+        "Planner chạy song song với đếm câu kho; topic thiếu câu kho đổi sang topic cùng nhóm",
+        "Mỗi topic chạy song song: tra topic_id, BM25 trong bộ nhớ, vector pgvector; gộp RRF (từ khóa 0.5)",
+        "Viết lại + embed dùng chung cho snippet và câu kho, hạn 3.5 s; gắn snippet hạn 5 s"
       ]
     },
     {
       "dot": "cyan",
       "title": "Tài liệu trong báo cáo",
       "items": [
-        "Evaluation.sources: ref bền (qa_id), tiêu đề, URL từ metadata DE",
+        "Evaluation.sources: ref bền (qa_id), tiêu đề, URL, license từ metadata DE",
+        "Chỉ nguồn CC0 / MIT / Apache-2.0 / CC-BY(-SA); license chưa rõ hoặc NC-ND bị bỏ",
         "Mỗi topic ≤3: nguồn bác bỏ → nguồn ủng hộ → bù bằng nguồn của topic",
-        "Reporter v2 chỉ chọn id r1…; code đổi ra {title, url}, LLM không thấy URL"
+        "Reporter chỉ chọn id r1…; code đổi ra {title, url}, LLM không thấy URL"
       ]
     },
     {
@@ -704,8 +776,8 @@
       "items": [
         "Log JSON có session_id, turn_number, không có nội dung; request_done có status, ms, token, trace id",
         "Langfuse có nội dung: mỗi request một trace theo session, mỗi lần gọi LLM một generation",
-        "rag_plan, rag_turn ghi id chunk; TTFT lấy từ generation của Interviewer",
-        "Thiếu khóa thì tắt; Langfuse lỗi không ảnh hưởng lượt phỏng vấn"
+        "GET /metrics: request, TTFT, fallback theo agent, token, RAG, kết quả lượt, mã HTTP (không nội dung)",
+        "Thiếu khóa Langfuse thì tắt; lỗi số liệu hay Langfuse không ảnh hưởng lượt phỏng vấn"
       ]
     },
     {
@@ -734,8 +806,9 @@
       "dot": "rose",
       "title": "An toàn",
       "items": [
-        "X-Internal-Token so sánh hằng thời gian; staging/prod thiếu token → 503",
-        "CV/JD bọc untrusted, lọc injection; không lộ điểm trong câu hỏi"
+        "X-Internal-Token so sánh hằng thời gian (cả /metrics); staging/prod thiếu token → 503",
+        "CV/JD bọc untrusted, lọc injection; không lộ điểm trong câu hỏi",
+        "GET /api/stt/phrases: tên track theo whitelist, không đọc file ngoài catalog"
       ]
     }
   ]
