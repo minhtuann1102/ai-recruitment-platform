@@ -4,6 +4,8 @@ Xuat CSV KHONG co intended_tier / adversarial (tranh nguoi cham bi moi), nguoi c
 roi nhap lai thanh evals/evaluator_labels/<rater>.json.
   python -m evals.label_sheet export --out /tmp/sheet_a.csv
   python -m evals.label_sheet import --rater rater_a /tmp/sheet_a.csv
+--set holdout: bo held-out (evals/evaluator_golden_holdout.jsonl, nhan o evaluator_labels/holdout/), cau hoi moi khong
+dung de chinh prompt; chi chay mot lan cho moi ban prompt (docs 09 muc 10.2).
 """
 import argparse
 import csv
@@ -17,6 +19,9 @@ from evals.evaluator_metrics import CRITERIA
 
 GOLDEN = Path(__file__).with_name("evaluator_golden.jsonl")
 LABELS_DIR = Path(__file__).with_name("evaluator_labels")
+HOLDOUT = Path(__file__).with_name("evaluator_golden_holdout.jsonl")
+# bo mau -> (file golden, thu muc nhan); nhan held-out de rieng de khong lan voi nhan golden chinh
+SETS = {"main": (GOLDEN, LABELS_DIR), "holdout": (HOLDOUT, LABELS_DIR / "holdout")}
 ANSWER_TYPES = {"answered", "partial", "dont_know", "off_topic", "asks_clarification", "manipulation"}
 SHEET_FIELDS = ["id", "level", "phase", "turn_kind", "question", "key_points", "answer", *CRITERIA, "answer_type", "note"]
 
@@ -73,6 +78,7 @@ def parse_sheet(path: Path, known_ids: set) -> Dict[str, dict]:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--set", choices=sorted(SETS), default="main")
     sub = parser.add_subparsers(dest="cmd", required=True)
     exp = sub.add_parser("export")
     exp.add_argument("--out", type=Path, required=True)
@@ -80,14 +86,15 @@ def main() -> None:
     imp.add_argument("--rater", required=True)
     imp.add_argument("sheet", type=Path)
     args = parser.parse_args()
-    samples = load_golden()
+    golden, labels_dir = SETS[args.set]
+    samples = load_golden(golden)
     if args.cmd == "export":
         export_sheet(samples, args.out)
         print(f"Da xuat {sum(needs_label(s) for s in samples)} mau can cham ra {args.out}")
         return
     labels = parse_sheet(args.sheet, {s["id"] for s in samples})
-    LABELS_DIR.mkdir(exist_ok=True)
-    out = LABELS_DIR / f"{args.rater}.json"
+    labels_dir.mkdir(exist_ok=True)
+    out = labels_dir / f"{args.rater}.json"
     out.write_text(json.dumps(labels, ensure_ascii=False, indent=1, sort_keys=True), encoding="utf-8")
     print(f"Da ghi {len(labels)}/{sum(needs_label(s) for s in samples)} nhan vao {out}")
 
