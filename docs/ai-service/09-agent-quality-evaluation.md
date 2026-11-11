@@ -155,6 +155,26 @@ dễ hơn). Vì vậy **golden set có nhãn người (tầng 2) là thước đ
 
 **Bản ghi STT nhiễu (2026-11-04, NFR-AI-QUAL17):** `evals/evaluator_golden_stt.jsonl` có 12 bản nhiễu của q01, q04, q06, q11 (strong / medium / weak): cùng câu hỏi và nội dung, bản ghi không dấu câu, thuật ngữ Anh phiên âm, từ đệm, đồng âm; nhãn kế thừa mẫu sạch (`evals/stt_noise.py`). `python -m evals.run_evaluator --stt` chạy mẫu sạch và bản nhiễu cùng lần, báo `stt_noise`: `mean_diff` (chênh `turn_score_10` nhiễu − sạch, trung bình theo cặp, bỏ lần degraded), `max_abs_diff`, `within_1` (tỉ lệ cặp lệch ≤ 1 điểm), `same_answer_type`. v7: −1.51 / 3.8 / 0.333 / 0.75; v8: −1.18 / 2.93 / 0.417 / 0.917; v8 + bảng tra thuật ngữ (`app/stt_terms.py`): −0.67 / 2.73 / 0.75 / 1.0 (lạc quan: bảng và bộ nhiễu cùng người viết). `--stt plain` sinh bằng code bản "STT tốt" từ mẫu sạch (thuật ngữ đúng, bỏ dấu câu, viết thường, thêm từ đệm, `spoken_plain`): v8 −0.10 / 0.6 / 1.0 / 1.0, nên mất điểm đến từ thuật ngữ phiên âm; khi chọn STT (QUAL16) cần đo tỉ lệ ghi đúng thuật ngữ Anh. Ngưỡng đề xuất (chờ owner): `same_answer_type` ≥ 0.9, |`mean_diff`| ≤ 0.5, `within_1` ≥ 0.8. Bộ nhiễu do AIE tự viết, cần đo lại với bản ghi STT thật. Báo cáo: `plans/reports/eval-261104-1111-evaluator-stt-noise.md`. Từ 04/11 bảng tra chỉ áp cho lượt voice: runner đặt `spoken` cho mẫu có `stt_of` (nhiễu và plain), mẫu sạch giữ như cũ nên số đo không đổi.
 
+**Bộ held-out Evaluator (2026-11-11, chưa có nhãn):**
+- Vì sao cần: prompt v5–v8 được chỉnh trên chính golden chính, nên ±1 band 0.97 có thể lạc quan.
+- `evals/evaluator_golden_holdout.jsonl` có 24 mẫu trên 5 câu hỏi mới, không trùng id, `qid`, câu hỏi hay tên topic
+  với golden chính:
+  - 15 mẫu strong / medium / weak, đủ 4 level, có một câu `scenario`. Câu scenario (Celery giao lại task hẹn giờ) cố ý
+    không đụng chủ đề trừ tiền hai lần / idempotency key của q03.
+  - 7 mẫu đặc biệt: tiếng Anh, không dấu (bản bỏ dấu đúng của `h02-strong`, để đo chênh theo cặp), nhồi thuật ngữ,
+    sai mà tự tin, dài lan man, đúng mà ngắn (hai mẫu kiểm "dài ≠ tốt"), trả lời nửa vời.
+  - 2 mẫu injection kiểu mới (khối JSON giả kết quả chấm, viện dẫn "quy định mới"), có kỳ vọng `manipulation` sẵn.
+    Cả hai không bị regex `is_manipulation` bắt, nên đo được LLM tự nhận ra.
+- Người chấm gán nhãn 22 mẫu qua `python -m evals.label_sheet --set holdout export|import`. Nhãn lưu ở
+  `evaluator_labels/holdout/`, tách khỏi nhãn golden chính.
+- Luật `answer_type` cho người chấm (theo prompt v8): `partial` chỉ khi trả lời đúng hướng nhưng mới được một phần nhỏ
+  câu hỏi và không hiểu sai; trả lời sai hay hiểu nhầm vẫn là `answered`.
+- Mẫu đã được review nội dung trước khi gán nhãn (2026-11-11): ghim Express 4 ở h02 (Express 5 tự bắt Promise reject,
+  nên câu weak sẽ thành đúng), sửa key point Celery cho đúng điều kiện (mặc định ack sớm; giao lại khi chưa ack quá
+  `visibility_timeout`).
+- Đo bằng `python -m evals.run_evaluator --set holdout --runs 3`. **Quy tắc:** không chỉnh prompt hay mẫu neo theo kết
+  quả bộ này, chạy một lần cho mỗi bản prompt. Bản nào được chỉnh theo held-out thì bộ này mất giá trị held-out.
+
 **Evaluator v5 (2026-10-31, 1 người chấm, golden 51 mẫu):** ±1 band 0.963, lệch −0.27, thứ tự 1.0, bắt injection 6/8; so cùng lúc với v4: 0.919, −0.467, 0.917, 6/8. Prompt được chỉnh trên chính golden này nên cần bộ held-out có nhãn. Báo cáo: `plans/reports/eval-261031-1456-evaluator-v5.md`.
 
 ## 10.3 Quy trình
