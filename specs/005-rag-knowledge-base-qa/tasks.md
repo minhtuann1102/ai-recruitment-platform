@@ -224,8 +224,9 @@ mỏng (FR-026..FR-029, SC-010)
   bộ lọc 58/58. Mẫu SC-010: 100 cặp crawl ngẫu nhiên sau áp (seed 20261113, trừ mẫu 60) + 4 câu mồi gán sai topic
   khác track, worker Sonnet chấm mù main/related/off (không phải DE). Câu mồi 4/4 "off". 100 cặp thật: main 77,
   related 23, off 0 → **chưa đạt 85% nếu chỉ tính main** (main + related 100%); 9/23 related là câu JS cơ bản ở
-  `fe.js.core-closure-this` (catalog không có topic JS chung). Chờ DE chốt cách tính; DE chấm mẫu 60 trước đó cho
-  60/60 main nên thước của worker chặt hơn DE
+  `fe.js.core-closure-this` (catalog không có topic JS chung). luna cũng chấm related 21/23 cặp đó (relabel-apply
+  giữ topic cho related, chỉ chuyển off). **DE chốt 2026-11-13: SC-010 tính main + related → đạt (100/100)**. Còn lại
+  của T064: merge PR → `index` từ `main` (cần credit OpenAI) → báo AIE
 - [x] T065 [P] B5 (FR-029). **2026-11-08, đổi cách làm (DE chốt): tách đôi** mỗi câu hard dài thành 2 cặp ngắn, mỗi
   cặp chỉ giữ phần đáp án nó hỏi (chữ lấy từ đáp án gốc), nửa a giữ `qa_id` cũ, nửa b `qa_id` mới; DE duyệt lại
   `reviewed_by`; bảng ánh xạ cũ → 2 nửa để AIE cập nhật `relevant` trong `rag_golden*.json` (57 id hard đang là đáp

@@ -135,7 +135,8 @@ knowledge_chunks và verify retrieval relevant."
   ý cộng điểm của Evaluator.
 - 2026-11-13: 14 câu hard bù đã duyệt nội dung (worker Sonnet, skill `interview-qa-review`, câu mồi bị bắt): ok 13,
   sửa 1 (`de-qa-1323` viết lại để giữ hard); trích dẫn 101/101 found. Mẫu SC-010 ~100 cặp do **worker Sonnet chấm
-  mù** (DE chọn, thay cho DE tự chấm như SC-010 ghi): xem T064.
+  mù** (DE chọn): main 77, related 23, off 0 → đạt theo cách tính DE chốt (main + related). 222 nửa tách đôi chưa đọc giữ
+  nguyên rủi ro đã chấp nhận ở trên (DE không đủ thời gian duyệt).
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -401,7 +402,8 @@ tra, khoảng cách giữa các request ≥ mức cấu hình, không có email/
 - **SC-007**: Thành viên khác (AIE) chạy lại toàn bộ trên máy họ chỉ theo hướng dẫn, ≤ 5 lệnh, không cần hỏi DE.
 - **SC-008**: Crawler mẫu lưu ≥ 50 record từ 1 nguồn, 0 truy cập vào đường dẫn robots.txt cấm, 0 email/số điện thoại.
 - **SC-009**: Demo Sprint 1: AIE truy hồi được câu hỏi/đáp án mẫu liên quan cho ≥ 4/5 truy vấn demo.
-- **SC-010** *(Phase B, 2026-11-08)*: Sau khi áp relabel, mẫu mù DE (≈ 100 cặp mới) có ≥ 85% câu đúng trọng tâm topic;
+- **SC-010** *(Phase B, 2026-11-08; sửa 2026-11-13)*: Sau khi áp relabel, mẫu mù (≈ 100 cặp mới; DE chọn để worker
+  Sonnet chấm) có ≥ 85% câu main hoặc related với topic đang gán (DE chốt 2026-11-13: related vẫn tính là đúng);
   58/58 topic senior có ≥ 3 câu hard qua bộ lọc ngân hàng câu hỏi; 0 topic < 3 cặp.
 
 ## Assumptions
