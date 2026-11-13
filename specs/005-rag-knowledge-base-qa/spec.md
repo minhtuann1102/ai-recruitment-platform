@@ -371,6 +371,10 @@ tra, khoảng cách giữa các request ≥ mức cấu hình, không có email/
   trong catalog MUST có ≥ 3 cặp; 12 topic mỏng của B6 (10 topic AI, `java.spring.transaction`,
   `py.async.celery-queues`) MUST có ≥ 3 câu đọc được ở độ khó của từng level của topic đó. Các topic khác chưa đạt mức
   từng level (21 topic-level middle, 12 junior, 6 fresher, đo 2026-11-09) là việc sau Phase B.
+- **FR-030** *(2026-11-13)*: Pipeline MUST rà được mọi nửa câu tách đôi chưa duyệt: đáp án tách thành từng ý, mỗi ý
+  được judge xếp `asked` (câu hỏi hỏi tới) / `sibling` (thuộc nửa anh em) / `unasked`; chuẩn bị lô và gộp kết quả là
+  code tất định trong repo, judge (subagent hoặc API) ghi `.jsonl` theo một schema chung; kết quả chỉ được tin khi
+  câu mồi bị bắt và recall trên bộ hiệu chỉnh (40 nửa đã duyệt 2026-11-09) đủ cao.
 
 ### Key Entities
 

@@ -21,6 +21,10 @@ from .qa_relabel_agreement import REVIEW_CSV, run_relabel_score
 from .qa_relabel_apply_command import add_parser as add_relabel_apply_parser
 from .qa_relabel_apply_command import run_relabel_apply
 from .qa_relabel_command import run_relabel
+from .qa_scope_check_prepare import add_parser as add_scope_check_prepare_parser
+from .qa_scope_check_prepare import run_scope_check_prepare
+from .qa_scope_check_score import add_parser as add_scope_check_score_parser
+from .qa_scope_check_score import run_scope_check_score
 from .review_sample_command import run_review_sample
 from .seed_review_command import run_approve_seed, run_review_seed
 
@@ -47,6 +51,8 @@ HANDLERS: Dict[str, Handler] = {
     "relabel": run_relabel,
     "relabel-score": run_relabel_score,
     "relabel-apply": run_relabel_apply,
+    "scope-check-prepare": run_scope_check_prepare,
+    "scope-check-score": run_scope_check_score,
     "review-sample": run_review_sample,
     "review-seed": run_review_seed,
     "approve-seed": run_approve_seed,
@@ -118,6 +124,8 @@ def build_parser() -> argparse.ArgumentParser:
                        help="file judgments-*.jsonl (lap lai duoc); mac dinh moi file trong data/raw/relabel/")
     score.add_argument("--review-csv", default=str(REVIEW_CSV), metavar="FILE", help="decisions-all.csv cua duyet 27/10")
     add_relabel_apply_parser(sub)
+    add_scope_check_prepare_parser(sub)
+    add_scope_check_score_parser(sub)
 
     review = sub.add_parser("review-sample", help="lay mau cap da dich de duyet (ban goc canh ban dich)")
     review.add_argument("--per-source", type=int, default=10, metavar="N")

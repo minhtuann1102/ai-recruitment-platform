@@ -251,6 +251,10 @@ mỏng (FR-026..FR-029, SC-010)
   317/317 found. Duyệt từng cặp (câu mồi 2/2 bị bắt): ok 44, fix 8; worker sửa 38 cặp (MCP nêu cả revision
   2025-11-25 và 2026-07-28), trích dẫn 306/306 found. Gộp vào `ai.json` (45), `backend-java.json` (6),
   `backend-python.json` (3); `approve-seed` (DE chốt). Báo cáo `plans/reports/qa-review-261109-1624-phase-b-b5-b6.md`
+- [ ] T067 [P] FR-030 (2026-11-13, DE yêu cầu): lệnh `scope-check-prepare` / `scope-check-score`
+  (`pipeline/qa_scope_check_*.py`, test `tests/test_qa_scope_check.py`); hiệu chỉnh trên 40 nửa đã duyệt; chạy 222 nửa
+  chưa duyệt bằng worker Sonnet + câu mồi; sửa theo thứ tự chuyển khối sang nửa anh em → cắt khối → mở rộng câu hỏi
+  (≤ 200 ký tự); chấm lại, `validate --strict`, senior 58/58, `process`. Kế hoạch `plans/261113-1006-005-split-scope-check/`
 
 ---
 
