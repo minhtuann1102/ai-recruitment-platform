@@ -251,10 +251,17 @@ mỏng (FR-026..FR-029, SC-010)
   317/317 found. Duyệt từng cặp (câu mồi 2/2 bị bắt): ok 44, fix 8; worker sửa 38 cặp (MCP nêu cả revision
   2025-11-25 và 2026-07-28), trích dẫn 306/306 found. Gộp vào `ai.json` (45), `backend-java.json` (6),
   `backend-python.json` (3); `approve-seed` (DE chốt). Báo cáo `plans/reports/qa-review-261109-1624-phase-b-b5-b6.md`
-- [ ] T067 [P] FR-030 (2026-11-13, DE yêu cầu): lệnh `scope-check-prepare` / `scope-check-score`
+- [x] T067 [P] FR-030 (2026-11-13, DE yêu cầu): lệnh `scope-check-prepare` / `scope-check-score`
   (`pipeline/qa_scope_check_*.py`, test `tests/test_qa_scope_check.py`); hiệu chỉnh trên 40 nửa đã duyệt; chạy 222 nửa
   chưa duyệt bằng worker Sonnet + câu mồi; sửa theo thứ tự chuyển khối sang nửa anh em → cắt khối → mở rộng câu hỏi
   (≤ 200 ký tự); chấm lại, `validate --strict`, senior 58/58, `process`. Kế hoạch `plans/261113-1006-005-split-scope-check/`
+  **Kết quả 2026-11-13**: hiệu chỉnh prompt v2 recall 89%, precision 71%. 222 nửa: judge cờ 127, quét trùng với nửa
+  anh em thêm 5; câu mồi judge bắt 7/8, quét trùng 8/8. Worker sửa (`fixer-instructions.md`, chỉ xóa chữ, kiểm tất
+  định): 112 nửa đổi đáp án (2 nhận khối chuyển từ nửa anh em), bác 19 cờ, không đổi câu hỏi; đánh số lại 11 nửa.
+  Chấm lại các nửa đã đổi: 54 ý trong 40 nửa bị cờ = 31 ý lượt 1 đã cho `asked` (nhiễu judge) + 23 ý worker cố ý giữ;
+  0 trên chữ đã cắt → dừng, không vòng 2. Đọc tay 5 nửa cắt "không chắc": khôi phục 1318 (cắt ý được hỏi).
+  `validate --strict` 0 lỗi; câu hỏi/độ khó/topic không đổi nên senior 58/58 giữ nguyên; `process` 8.356 bản ghi.
+  Chưa `index`.
 
 ---
 
