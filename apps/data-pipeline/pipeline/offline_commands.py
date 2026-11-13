@@ -6,7 +6,9 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 
 from .qa_record_builder import build_records
+from .qa_relabel_decisions import DROP_RULE, apply_decisions, load_decisions
 from .qa_seed_loader import SeedError, load_seed_items
+from .qa_seed_rules import Issue
 from .qa_seed_validator import ValidationResult, validate_seed
 from .run_report import RunReport
 from .settings import CRAWLED_DATASET, CURATED_DATASET, ENRICHED_DIR, PROCESSED_DIR, SEEDS_DIR, catalog_dir
@@ -17,14 +19,31 @@ PROCESSED_FILE = "interview_qa.jsonl"
 MAX_ERRORS_SHOWN, MAX_WARNINGS_SHOWN = 50, 5
 
 
-def _load_inputs(args: argparse.Namespace, strict: bool, near_duplicates: bool) -> Tuple[Dict[str, str], ValidationResult]:
+def _load_inputs(args: argparse.Namespace, strict: bool, near_duplicates: bool,
+                 apply_relabel: bool = True) -> Tuple[Dict[str, str], ValidationResult]:
+    """apply_relabel: ap data/raw/relabel/decisions.json (Phase B) len cap crawl; cap bi bo thanh canh bao 'relabel'
+    nen nam trong records_rejected cua run report. Lenh relabel tat de cham tren nhan goc."""
     dirs = [catalog_dir()] + [Path(d) for d in getattr(args, "extra_catalog", [])]
     catalog = load_topics(dirs)
     topics = {t["id"]: t["category"] for t in catalog}
     items = load_seed_items([(SEEDS_DIR, CURATED_DATASET), (ENRICHED_DIR, CRAWLED_DATASET)])
-    return topics, validate_seed(
+    dropped: List[Tuple[str, str]] = []
+    if apply_relabel:
+        meta, decisions = load_decisions()
+        if decisions:  # in ro de khong vo tinh index nhan cua mot lan chay thu
+            print(f"ap quyet dinh Phase B: {len(decisions)} cap, model {meta.get('model', '?')}, "
+                  f"cham {meta.get('judged', '?')}, tao {meta.get('created_at', '?')} (data/raw/relabel/decisions.json)")
+        elif any(item.dataset == CRAWLED_DATASET for item in items):  # thieu file: quay ve nhan enrich, dua lai cap da bo
+            print("CANH BAO: khong co data/raw/relabel/decisions.json -> cap crawl dung nhan enrich (chua relabel, "
+                  "cap da bo o Phase B se quay lai kho). Khoi phuc file hoac chay relabel-apply truoc khi index.",
+                  file=sys.stderr)
+        items, dropped = apply_decisions(items, decisions)
+    result = validate_seed(
         items, topics, strict=strict, near_duplicates=near_duplicates, hard_topics=hard_topic_ids(catalog)
     )
+    result.issues.extend(Issue(qa_id, DROP_RULE, "warning", reason) for qa_id, reason in dropped)
+    result.report["pairs_in"] += len(dropped)  # records_in tinh ca cap bi bo, khop records_rejected
+    return topics, result
 
 
 def _print_validation(result: ValidationResult) -> None:

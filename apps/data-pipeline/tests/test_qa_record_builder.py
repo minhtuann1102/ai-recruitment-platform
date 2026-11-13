@@ -24,7 +24,9 @@ def test_each_pair_yields_question_and_qa_pair(make_pair, topics):
     assert question["content"] == make_pair(1)["question"]
     assert qa_pair["content"] == f"{make_pair(1)['question']}\n\n{make_pair(1)['answer']}"
     assert question["category"] == "Backend" and question["source_type"] == "interview_qa"
-    assert set(question["metadata"]) == {"qa_id", "chunk_type", "dataset", "tags", "source_url", "license", "synthetic"}
+    assert set(question["metadata"]) == {"qa_id", "chunk_type", "dataset", "tags", "source_url", "license", "synthetic",
+                                         "interview_style"}
+    assert question["metadata"]["interview_style"] is True  # mac dinh khi cap chua cham (Phase B, FR-028)
 
 
 def test_self_source_has_null_source_url(make_pair, topics):

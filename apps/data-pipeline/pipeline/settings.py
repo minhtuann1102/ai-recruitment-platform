@@ -16,6 +16,8 @@ PROCESSED_DIR = APP_DIR / "data" / "processed"
 RAW_DIR = APP_DIR / "data" / "raw"
 # Q&A crawl da dich + gan topic (lenh enrich); gitignore vi repo public (spec 005 Clarifications 2026-10-19)
 ENRICHED_DIR = RAW_DIR / "enriched_qa"
+# Phase B (spec 005 Session 2026-11-08): ket qua LLM cham lai topic / do kho / interview_style (lenh relabel)
+RELABEL_DIR = RAW_DIR / "relabel"
 
 # Spec 009 (JD): raw crawl + synthetic, JD chuan hoa, chunk, manifest seed deu nam ngoai git (FR-007);
 # chi skill_dictionary.yaml la seed commit duoc
@@ -69,6 +71,42 @@ def require_llm_settings() -> LlmSettings:
         api_key=api_key,
         base_url=os.getenv("LLM_BASE_URL", "https://openrouter.ai/api/v1"),
         llm_model=os.getenv("LLM_MODEL", "openai/gpt-4o-mini"),
+    )
+
+
+@dataclass(frozen=True)
+class RelabelSettings:
+    api_key: str
+    base_url: str
+    model: str
+    reasoning: str  # none | minimal | low | medium | high; "" = khong gui (model khong co reasoning)
+    max_tokens: int  # gom ca token reasoning
+
+    @property
+    def openrouter(self) -> bool:
+        return "openrouter.ai" in self.base_url
+
+
+REASONING_LEVELS = ("", "none", "minimal", "low", "medium", "high")
+
+
+def require_relabel_settings(model: str = "") -> RelabelSettings:
+    """Cau hinh lenh relabel. Mac dinh dung key OpenAI cua embedding (EMBEDDING_API_KEY, api.openai.com) va
+    gpt-6-luna; RELABEL_API_KEY / RELABEL_BASE_URL ghi de (vd OpenRouter). --model ghi de RELABEL_MODEL."""
+    api_key = os.getenv("RELABEL_API_KEY", "").strip() or os.getenv("EMBEDDING_API_KEY", "").strip()
+    if not api_key:
+        raise ConfigError("thieu bien moi truong: RELABEL_API_KEY hoac EMBEDDING_API_KEY (key OpenAI). Them vao .env.")
+    reasoning = os.getenv("RELABEL_REASONING", "low").strip().lower()
+    if reasoning not in REASONING_LEVELS:
+        raise ConfigError(f"RELABEL_REASONING khong hop le: {reasoning} (chon {', '.join(REASONING_LEVELS[1:])})")
+    base_url = (os.getenv("RELABEL_BASE_URL", "").strip() or os.getenv("EMBEDDING_BASE_URL", "").strip()
+                or "https://api.openai.com/v1")
+    return RelabelSettings(
+        api_key=api_key,
+        base_url=base_url,
+        model=model.strip() or os.getenv("RELABEL_MODEL", "gpt-6-luna").strip(),
+        reasoning=reasoning,
+        max_tokens=int(os.getenv("RELABEL_MAX_TOKENS", "2000")),
     )
 
 
