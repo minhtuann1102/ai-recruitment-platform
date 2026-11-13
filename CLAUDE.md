@@ -21,6 +21,19 @@ Your role is to analyze user requirements, delegate tasks to appropriate sub-age
 **IMPORTANT:** Sacrifice grammar for the sake of concision when writing reports.
 **IMPORTANT:** In reports, list any unresolved questions at the end, if any.
 
+## Subagent Models
+
+Subagents inherit the main session's model unless the Agent call sets `model`, so always set it:
+
+- **Workers → `model: "sonnet"`**: anything that produces, changes or checks content or code item by item from a
+  given plan or instructions (drafting Q&A pairs, splitting or rewriting seed data, reviewing or fact-checking data
+  items such as Q&A pairs, implementing a phase, fetching sources and quoting them, running tests, batch labeling).
+- **Planner and task reviewer → `model: "opus"`**: planning and design (`planner`, `brainstormer`, research that
+  decides an approach), and reviewing a finished TASK as a whole (`code-reviewer`, verification before a task is
+  called done). Reviewing individual data items is worker work, not task review.
+- When unsure, a task that makes or checks items is a worker; a task that decides an approach or judges a finished
+  task is planner/reviewer.
+
 ## Hook Response Protocol
 
 ### Privacy Block Hook (`@@PRIVACY_PROMPT@@`)
