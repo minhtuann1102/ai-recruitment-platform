@@ -59,4 +59,5 @@ Mapping original -> halves: ../../reviews/qa-split-map.json.
 Review level of Phase B pairs (reviewed_by filled by the owner's decision, Session 2026-11-09): 40 of the
 262 split halves were reviewed pair by pair (../../reviews/qa-split-reviewed.json), the other 222 were not
 read; the 54 easy/medium pairs were reviewed pair by pair with AI assistance and source quotes; the 14 new
-hard pairs in the second ranges had their source quotes checked but no content review yet.
+hard pairs in the second ranges were content-reviewed pair by pair on 2026-11-13 with AI assistance and
+source quotes (13 ok, de-qa-1323 rewritten; 101/101 quotes found).
