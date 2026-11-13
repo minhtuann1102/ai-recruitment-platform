@@ -218,7 +218,14 @@ mỏng (FR-026..FR-029, SC-010)
   177; còn cảnh báo `ai.llm.context-engineering` < 2 cặp (B6 bù) và 6 topic middle/senior thiếu hard (B5 bù)
 - [ ] T064 **Sau T065** (đã xong: `validate --strict` 0 lỗi 2026-11-09)
   `process` → mẫu mù ~100 cặp sau áp (SC-010) → báo AIE → `index` (DE đồng ý, từ checkout `main` mới nhất;
-  AIE khởi động lại ai-service để nạp lại BM25) → AIE thêm lọc `interview_style` ở ngân hàng câu hỏi
+  AIE khởi động lại ai-service để nạp lại BM25) → AIE thêm lọc `interview_style` ở ngân hàng câu hỏi.
+  **2026-11-13**: duyệt 14 câu hard bù (worker Sonnet, câu mồi `dns.lookup` bị bắt, critical): ok 13, sửa
+  `de-qa-1323`; trích dẫn 108/108 found; `validate --strict` 0 lỗi; `process` 8.356 bản ghi; senior ≥ 3 câu hard qua
+  bộ lọc 58/58. Mẫu SC-010: 100 cặp crawl ngẫu nhiên sau áp (seed 20261113, trừ mẫu 60) + 4 câu mồi gán sai topic
+  khác track, worker Sonnet chấm mù main/related/off (không phải DE). Câu mồi 4/4 "off". 100 cặp thật: main 77,
+  related 23, off 0 → **chưa đạt 85% nếu chỉ tính main** (main + related 100%); 9/23 related là câu JS cơ bản ở
+  `fe.js.core-closure-this` (catalog không có topic JS chung). Chờ DE chốt cách tính; DE chấm mẫu 60 trước đó cho
+  60/60 main nên thước của worker chặt hơn DE
 - [x] T065 [P] B5 (FR-029). **2026-11-08, đổi cách làm (DE chốt): tách đôi** mỗi câu hard dài thành 2 cặp ngắn, mỗi
   cặp chỉ giữ phần đáp án nó hỏi (chữ lấy từ đáp án gốc), nửa a giữ `qa_id` cũ, nửa b `qa_id` mới; DE duyệt lại
   `reviewed_by`; bảng ánh xạ cũ → 2 nửa để AIE cập nhật `relevant` trong `rag_golden*.json` (57 id hard đang là đáp

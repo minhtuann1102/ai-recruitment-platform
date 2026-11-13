@@ -133,6 +133,9 @@ knowledge_chunks và verify retrieval relevant."
   điền `reviewed_by = minhtuann1102` cho cả 330 cặp (`approve-seed`) để kho đạt SC-010; NOTICE ghi rõ mức duyệt
   này. Việc tiếp: duyệt 14 câu hard bù (6 topic senior phụ thuộc) và cân nhắc duyệt 222 nửa tùy câu trả lời của AIE về
   ý cộng điểm của Evaluator.
+- 2026-11-13: 14 câu hard bù đã duyệt nội dung (worker Sonnet, skill `interview-qa-review`, câu mồi bị bắt): ok 13,
+  sửa 1 (`de-qa-1323` viết lại để giữ hard); trích dẫn 108/108 found. Mẫu SC-010 ~100 cặp do **worker Sonnet chấm
+  mù** (DE chọn, thay cho DE tự chấm như SC-010 ghi): xem T064.
 
 ## User Scenarios & Testing *(mandatory)*
 
