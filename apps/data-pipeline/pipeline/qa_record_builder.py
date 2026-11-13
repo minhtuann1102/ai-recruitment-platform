@@ -40,6 +40,9 @@ def _records_for_pair(item: SeedItem, topics: Dict[str, str]) -> List[Dict]:
                     "source_url": None if pair["source"] == SELF_SOURCE else pair["source"],
                     "license": pair["license"],
                     "synthetic": pair["synthetic"],
+                    # Phase B (FR-028): false = cau do / trac nghiem / viet code dai -> ngan hang cau hoi bo qua,
+                    # van dung lam bang chung RAG. Seed curated va cap chua cham mac dinh true.
+                    "interview_style": pair.get("interview_style", True),
                 },
             }
         )

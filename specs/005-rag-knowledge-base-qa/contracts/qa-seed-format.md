@@ -21,7 +21,10 @@ Mỗi file là một mảng JSON; loader gộp mọi file theo thứ tự tên. 
 | `license` | string | có | thuộc danh sách cho phép (research R6). Cặp ngoài: giấy phép của nguồn; cặp `self`: giấy phép của bộ seed (khai trong `NOTICE`) |
 | `attribution` | string | khi `source ≠ "self"` | tác giả / dự án gốc, vd `"sudheerj/reactjs-interview-questions contributors"` |
 | `synthetic` | bool | có | `true` khi đáp án tự soạn (kể cả câu hỏi lấy từ nguồn công khai); `false` chỉ khi cả hỏi lẫn đáp lấy/chuyển thể từ nguồn có giấy phép. Quota 50% chỉ đếm `false` |
-| `reviewed_by` | string | có (mọi cặp) | người đã đọc đáp án; cặp dịch/chuyển thể phải được đối chiếu bản gốc. Chỉ điền sau khi đọc thật — bản nháp để trống nên `validate` thất bại cho tới khi duyệt. Ngoại lệ: cặp hard tự viết duyệt theo spec Clarification Session 2026-10-23 (đọc nhóm phải đọc + mẫu, phần còn lại chấp nhận theo báo cáo duyệt có bằng chứng) |
+| `reviewed_by` | string | có (mọi cặp) | người đã đọc đáp án; cặp dịch/chuyển thể phải được đối chiếu bản gốc. Chỉ điền sau khi đọc thật — bản nháp để trống nên `validate` thất bại cho tới khi duyệt. Ngoại lệ: cặp hard tự viết duyệt theo spec Clarification Session 2026-10-23 (đọc nhóm phải đọc + mẫu, phần còn lại chấp nhận theo báo cáo duyệt có bằng chứng); Phase B theo Session 2026-11-09 (DE chấp nhận rủi ro, ghi trong NOTICE) |
+| `interview_style` | bool | không | *(Phase B, 2026-11-08)* mặc định `true`; `false` khi không hợp để hỏi miệng |
+| `grounding_urls` | string[] | không | trang tài liệu chính thức mà cặp tự soạn bám theo (cặp hard, cặp Phase B) |
+| `split_from` | string | không | *(Phase B, 2026-11-09)* `qa_id` của cặp hard gốc khi cặp là một nửa của câu tách đôi; nửa a giữ đúng `qa_id` gốc. Ánh xạ đủ: `data/reviews/qa-split-map.json`. Không ghi vào metadata `knowledge_chunks` |
 
 `category` **không** có trong seed: suy ra từ catalog theo `topic_id`.
 
@@ -71,6 +74,14 @@ Sinh bởi `enrich` (quyết định 2026-10-19). Cùng các trường trên, kh
 (md5 của URL + câu hỏi gốc); `language = vi`; `source` là URL; `license` ghi nếu biết, còn lại `unknown` (không kiểm
 danh sách); `synthetic = false`; không cần `reviewed_by` từng cặp (review theo mẫu); thêm `source_lang`,
 `question_original`, `answer_original`, `truncated` để đối chiếu bản dịch. Luật topic, độ dài, PII, trùng như seed.
+
+### Quyết định Phase B: `data/raw/relabel/decisions.json` (KHÔNG commit, sinh bởi `relabel-apply`)
+
+`{"meta": {...}, "decisions": {qa_id: {"drop": lý do} | {"topic_id"?, "difficulty"?, "interview_style"?}}}`. Gộp
+`data/reviews/qa-drops.json` (commit, chỉ `qa_id` → lý do), duyệt crawl 27/10 (`decisions-all.csv`: drop, độ khó đề
+xuất) và `judgments-<model>.jsonl` (FR-028). `validate`/`process`/`index` áp khi load `de_crawled_qa`: cặp `drop` bị
+loại (cảnh báo `relabel`, có trong `records_rejected`); trường đổi giữ giá trị cũ ở `topic_id_enriched`,
+`difficulty_enriched`. File `enriched_qa/` không bị sửa (bản sao lưu); xóa `decisions.json` là về nhãn enrich.
 
 ## Golden set: `apps/data-pipeline/data/seeds/golden_set.json`
 

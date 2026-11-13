@@ -10,6 +10,9 @@
 | `collect [--only SOURCE] [--delay S]` | US1 | không | không | tải Q&A từ repo GitHub trong `crawlers/qa_sources.py` qua GitHub API → `data/raw/collected_qa/<nguồn>.jsonl` (làm sạch, xóa PII, cắt đáp án > 4000 ký tự) | 0 · 1 lỗi tải hoặc nguồn thu 0 cặp |
 | `enrich [--extra-catalog DIR] [--only SOURCE] [--per-source N] [--workers 8] [--retry-rejected]` | US1 | không | có | LLM dịch sang tiếng Việt + gán `topic_id` + độ khó → `data/raw/enriched_qa/<nguồn>.json` (định dạng seed, dataset `de_crawled_qa`) + `_rejected.jsonl`; chạy tiếp được | 0 · 2 thiếu key/catalog · 3 còn lỗi API |
 | `crawl react-docs [--max-pages N] [--delay S] [--render]` | US5 | không | không | crawl nguồn mẫu → `data/raw/react_docs/<timestamp>.jsonl` | 0 · 1 thu 0 record |
+| `relabel [--model M] [--ids FILE] [--limit N] [--workers 8] [--extra-catalog DIR]` | Phase B | không | có | LLM chấm lại `topic_fit` / topic đúng nhất / độ khó / `interview_style` cho cặp crawl hợp lệ (FR-026); không sửa `enriched_qa/`; cache `data/raw/relabel/judgments-<model>.jsonl`, chạy tiếp được; in token + chi phí (nếu provider trả) | 0 · 2 thiếu key/catalog · 3 còn lỗi API |
+| `relabel-score [--human PATH] [--judgments FILE] [--review-csv FILE]` | Phase B | không | không | so nhãn các model với nhãn người chấm mù và duyệt crawl 27/10 (FR-027) | 0 · 1 không có file judgments |
+| `relabel-apply [--model M] [--review-csv FILE]` | Phase B | không | không | gộp judgments của model đã chọn + duyệt 27/10 + `data/reviews/qa-drops.json` → `data/raw/relabel/decisions.json`; không bỏ cặp golden DE/AIE đang dùng (FR-028); `validate`/`process`/`index` tự áp | 0 · 1 chưa có judgments / `qa-drops.json` lỗi |
 
 `--extra-catalog` chỉ dùng khi soạn trước với YAML đề xuất; nghiệm thu không dùng (research R5).
 
@@ -42,3 +45,7 @@ cleanup           done | skipped (embed_errors > 0)
 | `LLM_MODEL` | `openai/gpt-4o-mini` | `enrich` |
 | `EMBEDDING_API_KEY`, `EMBEDDING_BASE_URL` | trống (dùng `LLM_*`) | `index`, `search`, `eval` khi key embedding khác key dịch (vd dịch DeepSeek, embed OpenAI) |
 | `GITHUB_TOKEN` | trống (tùy chọn, `gh auth token`) | `collect` (60 → 5000 request/giờ) |
+| `RELABEL_API_KEY`, `RELABEL_BASE_URL` | trống (dùng `EMBEDDING_API_KEY`, `EMBEDDING_BASE_URL`, mặc định `https://api.openai.com/v1`) | `relabel`; OpenRouter thì đặt base URL OpenRouter |
+| `RELABEL_MODEL` | `gpt-6-luna` | `relabel` (`--model` ghi đè) |
+| `RELABEL_REASONING` | `low` (`none` \| `minimal` \| `low` \| `medium` \| `high`; trống: không gửi) | `relabel`: OpenAI → `reasoning_effort`, OpenRouter → `reasoning` |
+| `RELABEL_MAX_TOKENS` | `2000` (gồm token reasoning) | `relabel` |

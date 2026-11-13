@@ -17,6 +17,14 @@ from .jd_crawl_command import run_crawl_jd
 from .jd_process_command import run_process_jd
 from .jd_synth_command import run_synth_jd
 from .offline_commands import run_process, run_validate
+from .qa_relabel_agreement import REVIEW_CSV, run_relabel_score
+from .qa_relabel_apply_command import add_parser as add_relabel_apply_parser
+from .qa_relabel_apply_command import run_relabel_apply
+from .qa_relabel_command import run_relabel
+from .qa_scope_check_prepare import add_parser as add_scope_check_prepare_parser
+from .qa_scope_check_prepare import run_scope_check_prepare
+from .qa_scope_check_score import add_parser as add_scope_check_score_parser
+from .qa_scope_check_score import run_scope_check_score
 from .review_sample_command import run_review_sample
 from .seed_review_command import run_approve_seed, run_review_seed
 
@@ -40,6 +48,11 @@ HANDLERS: Dict[str, Handler] = {
     "process": run_process,
     "collect": run_collect,
     "enrich": run_enrich,
+    "relabel": run_relabel,
+    "relabel-score": run_relabel_score,
+    "relabel-apply": run_relabel_apply,
+    "scope-check-prepare": run_scope_check_prepare,
+    "scope-check-score": run_scope_check_score,
     "review-sample": run_review_sample,
     "review-seed": run_review_seed,
     "approve-seed": run_approve_seed,
@@ -97,6 +110,22 @@ def build_parser() -> argparse.ArgumentParser:
     enrich.add_argument("--per-source", type=int, default=0, metavar="N", help="toi da N cap moi nguon (thu / mau review)")
     enrich.add_argument("--workers", type=int, default=8, help="so loi goi LLM song song")
     enrich.add_argument("--retry-rejected", action="store_true", help="thu lai cap da bi loai (vd sau khi catalog doi)")
+
+    relabel = sub.add_parser("relabel", help="LLM cham lai topic / do kho / interview_style cap crawl -> data/raw/relabel/")
+    _add_catalog_option(relabel)
+    relabel.add_argument("--model", default="", help="ghi de RELABEL_MODEL (vd gpt-6-luna)")
+    relabel.add_argument("--ids", metavar="FILE", help="chi cham cac qa_id trong file (mang JSON hoac moi dong mot id)")
+    relabel.add_argument("--limit", type=int, default=0, metavar="N", help="toi da N cap (chay thu)")
+    relabel.add_argument("--workers", type=int, default=8, help="so loi goi LLM song song")
+
+    score = sub.add_parser("relabel-score", help="so nhan cac model relabel voi nhan nguoi / duyet crawl 27/10")
+    score.add_argument("--human", metavar="PATH", help="nhan nguoi: thu muc <qa_id>.json hoac file JSON {qa_id: nhan}")
+    score.add_argument("--judgments", action="append", default=[], metavar="FILE",
+                       help="file judgments-*.jsonl (lap lai duoc); mac dinh moi file trong data/raw/relabel/")
+    score.add_argument("--review-csv", default=str(REVIEW_CSV), metavar="FILE", help="decisions-all.csv cua duyet 27/10")
+    add_relabel_apply_parser(sub)
+    add_scope_check_prepare_parser(sub)
+    add_scope_check_score_parser(sub)
 
     review = sub.add_parser("review-sample", help="lay mau cap da dich de duyet (ban goc canh ban dich)")
     review.add_argument("--per-source", type=int, default=10, metavar="N")

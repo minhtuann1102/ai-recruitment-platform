@@ -101,6 +101,43 @@ knowledge_chunks và verify retrieval relevant."
 - Q: Ai duyệt dữ liệu Q&A (bản dịch, gán lại topic, nhãn độ khó, câu hard)? → A: **DE duyệt toàn bộ**, gồm cả 440 dòng
   `data/reviews/translation-review.csv` (T053), không chia cho thành viên khác.
 
+### Session 2026-11-08 (Phase B, `context/next-phase-plan.md`)
+
+- Q: DE làm mục nào của Phase B? → A: **Bỏ B1** (giấy phép: đã chốt 2026-10-24, giữ hết, chỉ dùng nội bộ). **B4 coi
+  như xong**: đợt duyệt crawl 2026-10-27 (389 cặp ngẫu nhiên, ~9% kho, có trích nguồn) cho bản dịch ok 358, lỗi nhỏ
+  29, sai 2 (0,5% < đích 5%). **Làm B2** (gán lại topic), **B3** (độ khó + cờ `interview_style`), **B5** (câu hard
+  cho senior), **B6** (bù 12 topic < 3 cặp).
+- Q: Model nào chấm lại topic / độ khó cho 4.359 cặp crawl? → A: So **gpt-6-luna** (OpenAI API, key embedding) với
+  **Claude Haiku 5.5** (subagent Claude Code) cùng prompt `relabel-v1`, reasoning low, trên 60 cặp ngẫu nhiên (seed
+  2026) mà DE chấm mù (không thấy độ khó cũ hay kết quả model). Model khớp nhãn DE hơn chạy cả kho. Không dùng
+  DeepSeek (chính nó gán nhãn lúc enrich) và không lấy bộ duyệt 27/10 làm thước đo chính (do Claude duyệt, thiên về
+  Haiku).
+- Q: Cặp không thuộc topic nào (`none`)? → A: **Bỏ khỏi kho nhưng giữ backup**: file `data/raw/enriched_qa/` không bị
+  sửa; quyết định nằm ở file riêng, `process`/`index` loại cặp kèm lý do (index dọn khỏi `ai_db`). Trước khi bỏ, kiểm
+  golden set DE + AIE, cặp golden đang dùng thì giữ và gán tay.
+- Q: Kết quả duyệt crawl 27/10 (ok 118 / fix 219 / drop 52 = 50 đề xuất + 2 DE quyết riêng, chưa áp)? → A: Áp
+  **drop** (52 cặp) và **độ khó đề xuất** cho 389 cặp (ưu tiên hơn nhãn LLM); 219 chỉ dẫn sửa đáp án để sau. Cặp golden
+  DE/AIE đang dùng không bị bỏ dù nguồn nào đề xuất bỏ (giữ nguyên, DE xử lý tay).
+- Q: B5 làm thế nào khi 131/144 câu hard đã duyệt dài > 200 ký tự (ai-service bỏ qua)? → A: Ban đầu chốt rút gọn;
+  **đổi sang tách đôi (DE chốt 2026-11-08)**: mỗi câu dài thành 2 cặp ngắn ≤ 200 ký tự, đáp án mỗi nửa chép (gần
+  nguyên văn, chỉ đánh số lại) từ đáp án đã duyệt, nửa a giữ `qa_id`, nửa b `qa_id` mới, `split_from` trỏ về câu gốc.
+  Lý do: rút gọn không tăng số câu (senior vẫn 6/58). Nghiệm thu bằng chính bộ lọc ngân hàng câu hỏi của ai-service
+  (`spoken_ok` + phải có từ chung với topic). Duyệt lại: xem Session 2026-11-09.
+
+### Session 2026-11-09 (Phase B, chấp nhận rủi ro duyệt)
+
+- Q: Duyệt các cặp Phase B tới đâu trước khi điền `reviewed_by`? → A (DE chốt, **rủi ro đã biết**): 40/262 nửa câu
+  tách đôi được duyệt từng cặp và sửa (danh sách `data/reviews/qa-split-reviewed.json`); **222 nửa còn lại không ai
+  đọc** (mẫu ngẫu nhiên 20 nửa có 5 cần sửa, ước ~55/222 còn đáp án có ý câu hỏi không hỏi); 54 cặp B6 duyệt từng cặp
+  bằng subagent (có câu mồi) và đã sửa; **14 câu hard bù chỉ kiểm trích dẫn (78/78), chưa duyệt nội dung**. DE chọn
+  điền `reviewed_by = minhtuann1102` cho cả 330 cặp (`approve-seed`) để kho đạt SC-010; NOTICE ghi rõ mức duyệt
+  này. Việc tiếp: duyệt 14 câu hard bù (6 topic senior phụ thuộc) và cân nhắc duyệt 222 nửa tùy câu trả lời của AIE về
+  ý cộng điểm của Evaluator.
+- 2026-11-13: 14 câu hard bù đã duyệt nội dung (worker Sonnet, skill `interview-qa-review`, câu mồi bị bắt): ok 13,
+  sửa 1 (`de-qa-1323` viết lại để giữ hard); trích dẫn 101/101 found. Mẫu SC-010 ~100 cặp do **worker Sonnet chấm
+  mù** (DE chọn): main 77, related 23, off 0 → đạt theo cách tính DE chốt (main + related). 222 nửa tách đôi chưa đọc giữ
+  nguyên rủi ro đã chấp nhận ở trên (DE không đủ thời gian duyệt).
+
 ## User Scenarios & Testing *(mandatory)*
 
 Người dùng trực tiếp của feature là **các agent AI** (Interviewer cần câu hỏi mẫu gần chủ đề, Evaluator cần đáp án
@@ -319,6 +356,26 @@ tra, khoảng cách giữa các request ≥ mức cấu hình, không có email/
 - **FR-024**: Dữ liệu thô và đã xử lý MUST nằm ngoài git; chỉ seed curated được commit (constitution V).
 - **FR-025**: Crawler trả 0 record MUST báo lỗi.
 
+**Làm sạch kho (Phase B · Session 2026-11-08 · DE)**
+
+- **FR-026**: Lệnh `relabel` MUST chấm lại cho mỗi cặp crawl: `topic_fit` của topic đang gán (`main` | `related` |
+  `off`), topic đúng nhất trong catalog hoặc `none`, độ khó theo rubric neo (giống `evals/judge_bank.py` của AIE) và
+  `interview_style`; MUST NOT sửa `data/raw/enriched_qa/`; kết quả cache theo model, chạy tiếp được; key, model,
+  reasoning, giới hạn token cấu hình bằng env để so model cùng điều kiện.
+- **FR-027**: Lệnh `relabel-score` MUST so nhãn các model với nhãn người chấm mù và với bộ duyệt 27/10 (trùng topic 3
+  mức, giữ/đổi topic, topic đúng khi đổi, độ khó, `interview_style`), kèm dòng nhãn gốc lúc enrich làm mốc.
+- **FR-028**: Áp kết quả relabel MUST giữ nhãn gốc để hoàn tác; cặp `none` và cặp drop của duyệt 27/10 bị loại ở
+  `process`/`index` kèm lý do; `interview_style` MUST được ghi vào `metadata` của `knowledge_chunks` (khóa mới, báo AIE
+  để ngân hàng câu hỏi lọc).
+- **FR-029**: Mỗi topic có level `senior` MUST có ≥ 3 câu `hard` qua bộ lọc ngân hàng câu hỏi của ai-service; mỗi topic
+  trong catalog MUST có ≥ 3 cặp; 12 topic mỏng của B6 (10 topic AI, `java.spring.transaction`,
+  `py.async.celery-queues`) MUST có ≥ 3 câu đọc được ở độ khó của từng level của topic đó. Các topic khác chưa đạt mức
+  từng level (21 topic-level middle, 12 junior, 6 fresher, đo 2026-11-09) là việc sau Phase B.
+- **FR-030** *(2026-11-13)*: Pipeline MUST rà được mọi nửa câu tách đôi chưa duyệt: đáp án tách thành từng ý, mỗi ý
+  được judge xếp `asked` (câu hỏi hỏi tới) / `sibling` (thuộc nửa anh em) / `unasked`; chuẩn bị lô và gộp kết quả là
+  code tất định trong repo, judge (subagent hoặc API) ghi `.jsonl` theo một schema chung; kết quả chỉ được tin khi
+  câu mồi bị bắt và recall trên bộ hiệu chỉnh (40 nửa đã duyệt 2026-11-09) đủ cao.
+
 ### Key Entities
 
 - **Interview Q&A Item**: một cặp hỏi/đáp mẫu; định danh ổn định, `topic_id`, câu hỏi, đáp án, độ khó, ngôn ngữ, tags,
@@ -349,6 +406,9 @@ tra, khoảng cách giữa các request ≥ mức cấu hình, không có email/
 - **SC-007**: Thành viên khác (AIE) chạy lại toàn bộ trên máy họ chỉ theo hướng dẫn, ≤ 5 lệnh, không cần hỏi DE.
 - **SC-008**: Crawler mẫu lưu ≥ 50 record từ 1 nguồn, 0 truy cập vào đường dẫn robots.txt cấm, 0 email/số điện thoại.
 - **SC-009**: Demo Sprint 1: AIE truy hồi được câu hỏi/đáp án mẫu liên quan cho ≥ 4/5 truy vấn demo.
+- **SC-010** *(Phase B, 2026-11-08; sửa 2026-11-13)*: Sau khi áp relabel, mẫu mù (≈ 100 cặp mới; DE chọn để worker
+  Sonnet chấm) có ≥ 85% câu main hoặc related với topic đang gán (DE chốt 2026-11-13: related vẫn tính là đúng);
+  58/58 topic senior có ≥ 3 câu hard qua bộ lọc ngân hàng câu hỏi; 0 topic < 3 cặp.
 
 ## Assumptions
 

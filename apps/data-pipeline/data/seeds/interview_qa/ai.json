@@ -1,0 +1,778 @@
+[
+  {
+    "qa_id": "de-qa-0300",
+    "topic_id": "ai.llm.rag-pipeline",
+    "question": "Chunking trong pipeline RAG là gì, vì sao cần chunk tài liệu, và vì sao người ta thường cho các chunk gối lên nhau (chunk overlap)?",
+    "answer": "Chunking là bước chia tài liệu dài thành các đoạn nhỏ (chunk) trước khi tạo embedding và đánh index vào vector store. Lý do:\n- Embedding model và LLM đều có giới hạn số token đầu vào; chia nhỏ giúp không vượt giới hạn đó.\n- Mỗi chunk được truy hồi riêng lẻ, nên khi có câu hỏi, hệ thống chỉ đưa vài chunk liên quan vào prompt thay vì cả tài liệu.\n- Một tài liệu dài gói vào một vector duy nhất thường biểu diễn kém; chunk nhỏ hơn cho kết quả tìm kiếm sát hơn.\n\nChunk overlap là việc để hai chunk liền kề lặp lại một phần nội dung ở ranh giới, ví dụ chunk sau chứa lại vài câu cuối của chunk trước. Khi cắt theo kích thước cố định, một câu hay một ý có thể bị chia đôi ở ranh giới; overlap giúp giữ tính liên tục và ngữ cảnh giữa các chunk. Đổi lại, overlap tạo nội dung trùng lặp và tăng số token phải lưu và embed, nên chỉ nên overlap một phần nhỏ, thường bắt đầu khoảng 10-25% rồi thử nghiệm; mức phù hợp tuỳ loại nội dung.",
+    "difficulty": "easy",
+    "language": "vi",
+    "tags": ["rag", "chunking", "chunk-overlap"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.langchain.com/oss/python/integrations/splitters/index",
+      "https://learn.microsoft.com/en-us/azure/search/vector-search-how-to-chunk-documents",
+      "https://platform.openai.com/docs/guides/retrieval"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0301",
+    "topic_id": "ai.llm.rag-pipeline",
+    "question": "Hybrid search trong RAG là gì? Nó kết hợp những kiểu tìm kiếm nào và mỗi kiểu mạnh ở đâu?",
+    "answer": "Hybrid search là cách kết hợp hai kiểu tìm kiếm trong bước retrieval rồi hợp nhất kết quả thành một danh sách xếp hạng chung:\n- Lexical hay keyword search (full-text, thường là BM25): tìm theo khớp nguyên văn các từ trong truy vấn. Mạnh khi cần khớp chính xác như mã lỗi, tên riêng, tên hàm; nhưng không nhận ra từ đồng nghĩa, cách viết tắt hay lỗi chính tả.\n- Semantic search (dense retrieval bằng vector embedding): mã hoá truy vấn và tài liệu thành vector rồi lấy các tài liệu gần nhau trong không gian vector. Mạnh khi câu hỏi diễn đạt khác tài liệu, tìm được kết quả liên quan kể cả khi gần như không có từ khoá chung.\n\nKết hợp lại được cả hai: hiểu ngữ nghĩa nhờ vector và khớp từ chính xác nhờ BM25. Hai danh sách kết quả được hợp nhất thành một, ví dụ bằng Reciprocal Rank Fusion (RRF).",
+    "difficulty": "easy",
+    "language": "vi",
+    "tags": ["rag", "hybrid-search", "bm25", "dense-retrieval", "rrf"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://qdrant.tech/documentation/concepts/hybrid-queries/",
+      "https://www.sbert.net/examples/applications/retrieve_rerank/README.html",
+      "https://platform.openai.com/docs/guides/retrieval",
+      "https://www.elastic.co/docs/reference/elasticsearch/rest-apis/reciprocal-rank-fusion"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0302",
+    "topic_id": "ai.llm.rag-pipeline",
+    "question": "Vì sao RAG giúp giảm hallucination so với để LLM chỉ trả lời bằng kiến thức đã học sẵn? RAG có loại bỏ hoàn toàn hallucination không?",
+    "answer": "Hallucination là khi LLM sinh nội dung nghe có vẻ chính xác nhưng thực ra là bịa. Khi chỉ dựa vào kiến thức nằm trong tham số (parametric memory), model khó truy cập chính xác kiến thức, khó cập nhật kiến thức mới và không chỉ ra được nguồn cho câu trả lời.\n\nRAG bổ sung cho kiến thức trong tham số một kho tài liệu bên ngoài: trước khi sinh câu trả lời, hệ thống truy hồi các đoạn tài liệu liên quan từ kho tài liệu (nên là nguồn tin cậy, đã được kiểm chứng) và đưa vào prompt để model trả lời dựa trên chúng. Nhờ vậy:\n- Câu trả lời cụ thể và đúng sự thật hơn so với chỉ dùng kiến thức trong tham số.\n- Cập nhật kiến thức bằng cách cập nhật kho tài liệu, không cần train lại model.\n- Có thể dẫn nguồn để người dùng kiểm tra.\n\nRAG không loại bỏ hoàn toàn hallucination: retriever có thể lấy sai hoặc thiếu đoạn cần thiết, và model vẫn có thể suy diễn ngoài tài liệu. Kể cả khi yêu cầu model chỉ dùng thông tin trong tài liệu được cung cấp, các kỹ thuật này chỉ giảm mạnh chứ không xoá hẳn hallucination, nên thông tin quan trọng vẫn cần được kiểm chứng.",
+    "difficulty": "easy",
+    "language": "vi",
+    "tags": ["rag", "hallucination", "grounding"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://arxiv.org/abs/2005.11401",
+      "https://genai.owasp.org/llmrisk/llm092025-misinformation/",
+      "https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/reduce-hallucinations"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0303",
+    "topic_id": "ai.llm.rag-pipeline",
+    "question": "Giải thích mô hình retrieve rồi rerank hai giai đoạn trong RAG: vì sao không dùng cross-encoder chấm điểm toàn bộ kho tài liệu ngay từ đầu?",
+    "answer": "Pipeline hai giai đoạn:\n1. Retrieve: dùng retriever nhanh, có thể là lexical search (BM25) hoặc dense retrieval với bi-encoder, lấy ra một danh sách ứng viên khá lớn, ví dụ khoảng 100 đoạn có khả năng liên quan. Bi-encoder mã hoá truy vấn và tài liệu riêng rẽ, embedding tài liệu được tính sẵn khi index, nên tìm trên kho hàng triệu tài liệu vẫn nhanh. Đổi lại, danh sách có thể lẫn những đoạn không thực sự liên quan.\n2. Rerank: dùng cross-encoder chấm lại từng cặp (truy vấn, ứng viên). Cross-encoder đưa truy vấn và tài liệu cùng lúc vào transformer, attention qua lại giữa hai bên, rồi trả về một điểm liên quan; vì vậy chính xác hơn bi-encoder. Sau đó chỉ giữ vài đoạn điểm cao nhất để đưa vào prompt.\n\nVì sao không dùng cross-encoder cho toàn bộ kho: cross-encoder phải chạy model cho từng cặp (truy vấn, tài liệu) ngay lúc truy vấn, không tính trước được cho tài liệu. Chấm hàng nghìn hay hàng triệu cặp cho mỗi truy vấn sẽ quá chậm và tốn kém. Vì vậy retriever lo thu hẹp nhanh, cross-encoder chỉ chấm lại tập ứng viên nhỏ, kết hợp được tốc độ của giai đoạn 1 và độ chính xác của giai đoạn 2.",
+    "difficulty": "medium",
+    "language": "vi",
+    "tags": ["rag", "rerank", "cross-encoder", "bi-encoder", "retrieval"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://www.sbert.net/examples/applications/retrieve_rerank/README.html"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0304",
+    "topic_id": "ai.llm.rag-pipeline",
+    "question": "Làm sao đo context recall của retriever trong RAG? Nó khác context precision thế nào?",
+    "answer": "Context recall (theo định nghĩa của thư viện Ragas) đo bước retrieval có lấy về đủ thông tin cần thiết không: bao nhiêu tài liệu hoặc mẩu thông tin liên quan đã được truy hồi. Recall cao nghĩa là ít bỏ sót. Vì đo việc bỏ sót nên luôn cần một tham chiếu (ground truth) để so.\n\nChuẩn bị dữ liệu: một tập câu hỏi đánh giá đại diện cho truy vấn thực tế, mỗi câu kèm một trong hai loại tham chiếu:\n- ID của các chunk hoặc tài liệu đúng (reference context IDs), hoặc\n- câu trả lời tham chiếu (reference answer) do người viết hoặc duyệt.\n\nCách tính:\n- Theo ID, không cần LLM: recall = số reference ID có trong danh sách truy hồi / tổng số reference ID. Hợp khi tài liệu có hệ thống ID ổn định; không cần so nội dung. Đây chính là recall@k cổ điển trong IR: số tài liệu đúng lấy được trong k kết quả đầu / tổng số tài liệu đúng.\n- Theo câu trả lời tham chiếu, dùng LLM (cách tính của Ragas): tách câu trả lời tham chiếu thành các claim, kiểm tra từng claim có được context truy hồi hỗ trợ không; recall = số claim được hỗ trợ / tổng số claim. Cách này đỡ phải gán nhãn từng chunk, việc vốn rất tốn thời gian, nhưng phụ thuộc chất lượng của LLM chấm.\n\nKhác context precision: recall hỏi 'có bỏ sót gì quan trọng không', còn context precision đánh giá retriever có xếp các chunk liên quan lên trên các chunk không liên quan hay không (tính từ precision@k ở từng vị trí).",
+    "difficulty": "medium",
+    "language": "vi",
+    "tags": ["rag", "evaluation", "context-recall", "context-precision"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.ragas.io/en/stable/concepts/metrics/available_metrics/context_recall/",
+      "https://docs.ragas.io/en/stable/concepts/metrics/available_metrics/context_precision/",
+      "https://www.elastic.co/docs/reference/elasticsearch/rest-apis/search-rank-eval"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0305",
+    "topic_id": "ai.llm.rag-pipeline",
+    "question": "So sánh chunking theo độ dài cố định với chunking theo cấu trúc tài liệu như heading Markdown hay hàm trong code. Chunk quá to hoặc quá nhỏ gây hại gì?",
+    "answer": "So sánh hai cách chunking:\n- Theo độ dài cố định (đếm token hoặc ký tự, thường kèm overlap nhỏ): dễ làm, chunk đều kích thước và chắc chắn không vượt giới hạn đặt ra. Nhược điểm: bỏ qua cấu trúc tài liệu nên có thể cắt giữa một ý.\n- Theo cấu trúc tài liệu: dựa vào cấu trúc có sẵn như heading của Markdown hoặc HTML, phần tử JSON, hàm hay class trong code. Ưu điểm: các phần cùng chủ đề thường nằm chung một chunk, giữ được tổ chức logic nên retrieval tốt hơn. Nhược điểm: kích thước chunk không đều, section quá dài vẫn phải chia tiếp.\n\nChunk quá nhỏ: mỗi chunk thiếu ngữ cảnh (không rõ đang nói về đối tượng nào, giai đoạn nào), khó truy hồi đúng và khó dùng để trả lời. Chunk lớn hơn và có overlap giữ ngữ cảnh tốt hơn.\nChunk quá to: dễ vượt giới hạn token của embedding model, một vector phải đại diện nhiều ý nên biểu diễn kém, và đưa nhiều nội dung thừa vào prompt.",
+    "difficulty": "medium",
+    "language": "vi",
+    "tags": ["rag", "chunking", "text-splitter"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.langchain.com/oss/python/integrations/splitters/index",
+      "https://learn.microsoft.com/en-us/azure/search/vector-search-how-to-chunk-documents",
+      "https://www.pinecone.io/learn/chunking-strategies/",
+      "https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-chunking-phase"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0306",
+    "topic_id": "ai.llm.reasoning-models",
+    "question": "Chain-of-thought prompting là gì, và vì sao nó giúp LLM làm tốt hơn các bài toán nhiều bước?",
+    "answer": "Chain-of-thought (CoT) là chuỗi các bước suy luận trung gian mà model viết ra trước khi đưa đáp án cuối, thay vì trả lời thẳng. Chain-of-thought prompting là kỹ thuật prompt khiến model sinh ra chuỗi này:\n- Few-shot CoT: đưa vài ví dụ mẫu trong prompt, mỗi ví dụ gồm câu hỏi, các bước giải và đáp án, để model bắt chước cách giải từng bước.\n- Zero-shot CoT: không cần ví dụ, chỉ thêm câu như 'Let's think step by step' trước phần trả lời.\n\nVì sao hiệu quả với bài toán nhiều bước: thay vì phải ra đáp án trong một bước, model chia bài toán thành các bước nhỏ, bước sau dựa trên kết quả bước trước. Nhờ vậy CoT cải thiện rõ kết quả trên các bài số học, suy luận thông thường (commonsense) và suy luận ký hiệu. Nghiên cứu gốc cũng cho thấy khả năng suy luận này chỉ xuất hiện rõ ở các model đủ lớn; model nhỏ ít được lợi từ CoT.",
+    "difficulty": "easy",
+    "language": "vi",
+    "tags": ["chain-of-thought", "prompting", "reasoning"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://arxiv.org/abs/2201.11903",
+      "https://arxiv.org/abs/2205.11916"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0307",
+    "topic_id": "ai.llm.reasoning-models",
+    "question": "Reasoning token của reasoning model là gì, và chúng ảnh hưởng thế nào tới chi phí và context window?",
+    "answer": "Reasoning model sinh thêm reasoning token (còn gọi là thinking token) ngoài input token và output token thông thường. Model dùng chúng để 'suy nghĩ': phân tích prompt và cân nhắc nhiều hướng giải trước khi viết câu trả lời. Với các API như OpenAI và Claude, phần suy luận thô thường không được trả về: tuỳ API, bạn không thấy gì hoặc chỉ thấy bản tóm tắt suy luận, chứ không phải chuỗi suy nghĩ gốc.\n- Context window: dù không hiển thị, reasoning token vẫn chiếm chỗ trong context window và tính vào giới hạn max output token của request.\n- Chi phí: reasoning token bị tính phí như output token. Nếu API chỉ trả bản tóm tắt, bạn vẫn trả tiền cho toàn bộ token suy luận gốc, nên số token bị tính phí lớn hơn số token nhìn thấy trong response.\nSố reasoning token thay đổi theo độ khó bài toán, từ vài trăm đến hàng chục nghìn token, nên cần theo dõi chúng trong phần usage của response.",
+    "difficulty": "easy",
+    "language": "vi",
+    "tags": ["reasoning-tokens", "cost", "context-window"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://platform.openai.com/docs/guides/reasoning",
+      "https://platform.claude.com/docs/en/build-with-claude/thinking"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0308",
+    "topic_id": "ai.llm.reasoning-models",
+    "question": "Tham số reasoning effort của reasoning model dùng để làm gì, và tăng hay giảm nó ảnh hưởng thế nào tới chi phí và độ trễ?",
+    "answer": "Reasoning effort là tham số điều chỉnh model nên suy nghĩ nhiều hay ít trước khi trả lời, tức là dùng bao nhiêu token cho phần suy luận. Một số API hoặc model cũ dùng thinking budget tính bằng token; Claude đã deprecate thinking budget (budget_tokens bị từ chối từ Claude 4.7 trở lên) và điều chỉnh bằng mức effort.\n- Giảm effort: model nghĩ ít hơn, dùng ít token hơn nên trả lời nhanh và rẻ hơn, đổi lại chất lượng có thể giảm ở bài khó. Hợp với tác vụ đơn giản hoặc cần độ trễ thấp.\n- Tăng effort: model suy nghĩ kỹ hơn, chất lượng tốt hơn cho bài phức tạp (lập kế hoạch, debug khó, bài toán nhiều bước), nhưng tốn nhiều token hơn nên chi phí và độ trễ tăng.\nEffort không phải giới hạn token cứng: model vẫn tự điều chỉnh theo độ khó, dùng ít token cho câu dễ và nghĩ nhiều hơn cho câu khó.",
+    "difficulty": "easy",
+    "language": "vi",
+    "tags": ["reasoning-effort", "thinking-budget", "latency", "cost"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://platform.openai.com/docs/guides/reasoning",
+      "https://platform.claude.com/docs/en/build-with-claude/effort",
+      "https://platform.claude.com/docs/en/build-with-claude/extended-thinking"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0309",
+    "topic_id": "ai.llm.reasoning-models",
+    "question": "Gọi reasoning model với giới hạn max output tokens nhỏ thì nhận về response incomplete, không có chữ nào mà vẫn bị tính phí. Vì sao, và bạn sửa thế nào?",
+    "answer": "Nguyên nhân: với reasoning model, max output tokens giới hạn toàn bộ token model sinh ra, gồm reasoning token (ẩn) cộng phần trả lời hiển thị. Bài càng khó, model càng dùng nhiều reasoning token. Khi số token sinh ra chạm max output tokens (hoặc chạm giới hạn context window) trước khi viết xong, API (ví dụ OpenAI Responses API) trả response trạng thái incomplete với lý do là max output tokens; với Claude, dấu hiệu tương ứng là stop_reason bằng max_tokens. Việc này có thể xảy ra trước khi có token hiển thị nào, nên bạn vẫn trả tiền cho input và reasoning token mà không nhận được câu trả lời.\n\nCách sửa:\n- Tăng max output tokens để chừa đủ chỗ cho cả phần suy luận lẫn câu trả lời, rồi điều chỉnh dần theo số reasoning token đo được trong usage.\n- Đảm bảo context window còn đủ chỗ: input quá dài thì cắt bớt hoặc tóm tắt.\n- Muốn giảm chi phí và độ trễ thì hạ reasoning effort thay vì bóp max output tokens quá chặt.\n- Trong code, kiểm tra trạng thái incomplete và xử lý rõ ràng (retry với giới hạn cao hơn hoặc báo lỗi), không coi output rỗng là kết quả hợp lệ.",
+    "difficulty": "medium",
+    "language": "vi",
+    "tags": ["max-output-tokens", "reasoning-tokens", "debugging", "cost"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://platform.openai.com/docs/guides/reasoning",
+      "https://platform.claude.com/docs/en/build-with-claude/handling-stop-reasons"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0310",
+    "topic_id": "ai.llm.reasoning-models",
+    "question": "Prompt cho reasoning model nên khác prompt cho model thường thế nào? Có nên thêm câu think step by step hay nhiều ví dụ few-shot không?",
+    "answer": "Reasoning model đã tự suy luận nội bộ trước khi trả lời, nên cách viết prompt khác model thường:\n- Giữ prompt đơn giản, trực tiếp: nêu rõ nhiệm vụ và đầu vào, không cần dắt model qua từng bước.\n- Không cần chain-of-thought prompt: câu như 'think step by step' hay 'giải thích lập luận của bạn' là thừa vì model đã tự suy luận, và có khi còn làm kết quả kém đi. Với model thường, CoT prompt mới là kỹ thuật hữu ích.\n- Few-shot: theo hướng dẫn của OpenAI thường không cần, nên thử zero-shot trước. Nếu thêm ví dụ thì ví dụ phải khớp chặt với hướng dẫn, vì mâu thuẫn giữa ví dụ và hướng dẫn sẽ cho kết quả kém. Docs Claude cho biết ví dụ multishot vẫn có tác dụng khi bật thinking, nên few-shot không bị cấm.\n- Nêu rõ ràng buộc trong prompt: ví dụ giới hạn ngân sách, định dạng đầu ra, điều kiện phải thoả.\nNói ngắn gọn: với reasoning model, hãy mô tả rõ mục tiêu và ràng buộc, thay vì mô tả cách suy nghĩ.",
+    "difficulty": "medium",
+    "language": "vi",
+    "tags": ["prompting", "reasoning-model", "chain-of-thought", "few-shot"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://platform.openai.com/docs/guides/reasoning-best-practices",
+      "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0311",
+    "topic_id": "ai.llm.reasoning-models",
+    "question": "Agent dùng reasoning model gọi tool qua nhiều bước. Vì sao nên gửi lại reasoning items hoặc thinking blocks của các bước trước, bỏ đi thì sao?",
+    "answer": "Khi reasoning model gọi tool, nó suy luận, phát ra tool call rồi tạm dừng chờ kết quả; khi nhận tool result, model tiếp tục xây chính câu trả lời đó. Với model, cả vòng tool-use là một lượt trả lời liên tục, nên phần suy luận trước đó phải còn trong context.\n\nVì sao nên gửi lại:\n- Liên tục suy luận: reasoning items/thinking blocks ghi lại lập luận dẫn tới tool call; gửi lại giúp model tiếp tục từ chỗ đã dừng thay vì suy luận lại từ đầu.\n- Hiệu năng và chi phí: model không phải bắt đầu lại phần suy luận nên gọi function chính xác hơn và tổng token thấp hơn.\n- Ràng buộc API: có API bắt buộc gửi lại thinking blocks nguyên vẹn, không chỉnh sửa, khi trả tool result.\n\nNếu bỏ đi: chất lượng giảm (docs OpenAI ghi là giảm nhẹ) và tốn thêm reasoning token, rõ nhất ở các luồng agent phức tạp nhiều function call (ví dụ dùng API stateless không mang reasoning items sang request sau).\n\nCách làm: trong một lượt tool-use, luôn gửi lại toàn bộ output của response trước (gồm reasoning items) cùng tool result, hoặc dùng cơ chế lưu state phía server của API. Theo docs Claude, giữa các lượt hội thoại khác nhau thì gửi lại được khuyến nghị, còn ngoài tool use có thể bỏ phần thinking cũ.",
+    "difficulty": "medium",
+    "language": "vi",
+    "tags": ["reasoning-items", "thinking-blocks", "tool-use", "agent"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://platform.claude.com/docs/en/build-with-claude/thinking",
+      "https://platform.openai.com/docs/guides/reasoning-best-practices"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0312",
+    "topic_id": "ai.llm.context-engineering",
+    "question": "Context window của LLM là gì? Những phần nào của một request được tính vào context window?",
+    "answer": "Context window là toàn bộ lượng văn bản, đo bằng token, mà model có thể tham chiếu khi sinh câu trả lời, gồm cả chính câu trả lời đó. Có thể hiểu nó là 'bộ nhớ làm việc' của model trong một request, khác với kho dữ liệu khổng lồ đã dùng để huấn luyện model.\n\nNhững phần được tính vào context window:\n- Input: system prompt, toàn bộ messages (lịch sử hội thoại, tin nhắn hiện tại, tool result, ảnh, tài liệu) và định nghĩa các tool.\n- Output: phần model sinh ra trong lượt đó, kể cả reasoning hay thinking token của reasoning model.\n\nTrong hội thoại nhiều lượt, mỗi tin nhắn của user và câu trả lời của model được tích luỹ dần vào context, nên context ngày càng đầy nếu không được quản lý. Kích thước context window khác nhau theo từng model.",
+    "difficulty": "easy",
+    "language": "vi",
+    "tags": ["context-window", "tokens", "token-budget"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://platform.claude.com/docs/en/build-with-claude/context-windows",
+      "https://platform.openai.com/docs/guides/conversation-state"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0313",
+    "topic_id": "ai.llm.context-engineering",
+    "question": "Hiện tượng lost in the middle khi đưa context dài vào LLM là gì?",
+    "answer": "Lost in the middle là hiện tượng LLM dùng thông tin trong context dài không đồng đều theo vị trí:\n- Khi thông tin liên quan nằm ở đầu hoặc cuối input, model thường trả lời tốt nhất.\n- Khi thông tin đó nằm ở giữa một context dài, hiệu năng giảm đáng kể.\n\nTrong nghiên cứu gốc (Liu và cộng sự, 2023), chỉ cần đổi vị trí của thông tin liên quan là kết quả đã thay đổi rõ, cho thấy các model được thử nghiệm không khai thác ổn định thông tin trong context dài; hiện tượng này xảy ra cả với các model được thiết kế riêng cho long context. Docs của Anthropic hiện nay vẫn ghi nhận độ chính xác và recall giảm khi số token tăng (gọi là context rot).",
+    "difficulty": "easy",
+    "language": "vi",
+    "tags": ["lost-in-the-middle", "long-context", "position-bias"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://arxiv.org/abs/2307.03172",
+      "https://platform.claude.com/docs/en/build-with-claude/context-windows"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0314",
+    "topic_id": "ai.llm.context-engineering",
+    "question": "Khi đưa một tài liệu rất dài vào prompt, nên sắp xếp tài liệu, hướng dẫn và câu hỏi theo thứ tự nào? Vì sao?",
+    "answer": "Nhà cung cấp model khuyến nghị hơi khác nhau; điểm chung là không để câu hỏi và hướng dẫn chìm giữa khối tài liệu dài:\n- Anthropic: đặt tài liệu và dữ liệu dài ở đầu prompt, phía trên câu hỏi, hướng dẫn và ví dụ; đặt câu hỏi ở cuối. Anthropic ghi nhận cách này cải thiện chất lượng tới 30% trong thử nghiệm của họ, nhất là khi input gồm nhiều tài liệu phức tạp.\n- OpenAI (hướng dẫn GPT-4.1): đặt hướng dẫn ở cả đầu và cuối phần context; nếu chỉ đặt một lần thì đặt phía trên context, tốt hơn đặt phía dưới.\n- Tách bạch các phần bằng delimiter như XML tag, markdown hoặc tiêu đề; với nhiều tài liệu thì bọc từng tài liệu trong tag riêng kèm metadata như nguồn để model phân biệt.\n\nVì sao: các nhà cung cấp đo thấy cách sắp xếp này cho kết quả tốt hơn. Một cách giải thích hợp lý là model dùng thông tin ở đầu và cuối context tốt hơn ở giữa (hiện tượng lost in the middle), nên không để câu hỏi và yêu cầu chìm giữa khối tài liệu; delimiter giúp model không nhầm nội dung tài liệu với hướng dẫn.",
+    "difficulty": "easy",
+    "language": "vi",
+    "tags": ["prompt-structure", "long-context", "lost-in-the-middle"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices",
+      "https://platform.openai.com/docs/guides/reasoning-best-practices",
+      "https://arxiv.org/abs/2307.03172",
+      "https://developers.openai.com/cookbook/examples/gpt4-1_prompting_guide"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0315",
+    "topic_id": "ai.llm.context-engineering",
+    "question": "Agent chạy hội thoại dài sắp vượt context window. So sánh tóm tắt lịch sử (compaction) với xoá bớt kết quả tool cũ: mỗi cách được gì, mất gì?",
+    "answer": "Cả hai đều giữ context trong giới hạn, nhưng cách làm khác nhau:\n\n1. Compaction (tóm tắt lịch sử): khi context vượt một ngưỡng token, hệ thống gọi model tóm tắt phần hội thoại cũ và dùng bản tóm tắt thay cho lịch sử đầy đủ.\n- Được: hội thoại chạy tiếp vượt giới hạn context window, vẫn giữ trạng thái quan trọng với ít token hơn.\n- Mất: bản tóm tắt có thể làm rơi chi tiết mà lượt sau cần (khi đó nên tự viết prompt tóm tắt để giữ thông tin quan trọng), và tốn thêm một bước gọi model.\n\n2. Xoá kết quả tool cũ (context editing): khi context vượt ngưỡng, xoá các tool result cũ nhất (nội dung file, kết quả search) theo thứ tự thời gian, thay bằng placeholder báo đã bị xoá.\n- Được: đơn giản, không cần gọi model tóm tắt, phần hội thoại vẫn nguyên văn; hợp với agent dùng tool nhiều vì kết quả tool cũ thường không còn cần sau khi model đã xử lý.\n- Mất: model không còn thấy nội dung đã xoá trong context (muốn dùng lại phải gọi lại tool); prompt cache bị mất hiệu lực từ chỗ bị xoá, nên mỗi lần nên xoá đủ nhiều token cho đáng.\n\nKể cả khi context window lớn vẫn nên dùng các kỹ thuật này, vì token càng nhiều thì độ chính xác và khả năng nhớ lại càng giảm (context rot). Thực tế có thể kết hợp cả hai cách tuỳ nhu cầu.",
+    "difficulty": "medium",
+    "language": "vi",
+    "tags": ["compaction", "context-editing", "conversation-history", "context-rot"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://platform.claude.com/docs/en/build-with-claude/context-windows",
+      "https://platform.claude.com/docs/en/build-with-claude/compaction",
+      "https://platform.claude.com/docs/en/build-with-claude/context-editing",
+      "https://platform.openai.com/docs/guides/compaction"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0316",
+    "topic_id": "ai.llm.context-engineering",
+    "question": "Request tới LLM bị lỗi vượt context window khi người dùng dán tài liệu dài. Bạn kiểm soát token budget trước khi gọi API thế nào?",
+    "answer": "Trước hết cần hiểu cái gì tính vào context window: system prompt, toàn bộ messages (kể cả tool result, ảnh, tài liệu), định nghĩa tool, cộng với phần output model sẽ sinh, gồm cả reasoning hay thinking token. Nếu riêng input đã vượt context window thì API từ chối request; nếu input cộng phần output vượt giới hạn thì tuỳ model và API, request bị từ chối hoặc output bị cắt giữa chừng.\n\nCách kiểm soát token budget:\n- Đếm token trước khi gửi bằng token counting API hoặc tokenizer của đúng model, thay vì ước lượng theo số ký tự.\n- Lập budget: context window trừ phần chừa cho output (max output tokens, gồm cả reasoning), trừ system prompt và định nghĩa tool; phần còn lại mới chia cho lịch sử hội thoại và tài liệu.\n- Nếu tài liệu vượt budget: chia chunk và chỉ đưa phần liên quan (RAG), tóm tắt trước, hoặc báo người dùng tài liệu quá dài. Lịch sử hội thoại thì tóm tắt hoặc bỏ bớt phần cũ.\n- Sau mỗi request, đọc số token thực tế trong usage để hiệu chỉnh cách ước lượng.",
+    "difficulty": "medium",
+    "language": "vi",
+    "tags": ["token-budget", "context-window", "token-counting"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://platform.claude.com/docs/en/build-with-claude/context-windows",
+      "https://platform.openai.com/docs/guides/conversation-state"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0317",
+    "topic_id": "ai.llm.context-engineering",
+    "question": "Hệ RAG đưa 20 đoạn truy hồi vào prompt nhưng model hay bỏ sót thông tin ở các đoạn giữa. Giải thích nguyên nhân và cách sắp xếp lại context.",
+    "answer": "Nguyên nhân: đây là hiện tượng lost in the middle. Hiệu năng của LLM phụ thuộc vào vị trí của thông tin liên quan trong context: thường cao nhất khi thông tin ở đầu hoặc cuối, và giảm đáng kể khi nằm ở giữa một context dài, kể cả với model hỗ trợ long context. Nhồi 20 đoạn, trong đó nhiều đoạn kém liên quan, khiến đoạn đúng dễ rơi vào vùng giữa và bị chìm; nhiều context hơn không tự động tốt hơn.\n\nCách xử lý:\n- Giảm số đoạn: dùng reranker (ví dụ cross-encoder) chấm lại các đoạn truy hồi và chỉ giữ vài đoạn liên quan nhất thay vì cả 20.\n- Sắp xếp theo độ liên quan: đặt các đoạn điểm cao nhất ở đầu và cuối khối context, đoạn kém liên quan hơn ở giữa.\n- Cấu trúc prompt: không để câu hỏi và hướng dẫn nằm giữa khối tài liệu (Anthropic khuyên đặt tài liệu ở đầu, câu hỏi ở cuối; OpenAI khuyên đặt hướng dẫn ở cả đầu và cuối); mỗi đoạn bọc trong tag riêng kèm nguồn.\n- Yêu cầu model trích dẫn các đoạn liên quan trước rồi mới trả lời, để nó tập trung vào đúng phần cần dùng.\n- Kiểm tra lại bằng tập câu hỏi có đáp án nằm ở các vị trí khác nhau trong context.",
+    "difficulty": "medium",
+    "language": "vi",
+    "tags": ["lost-in-the-middle", "rag", "rerank", "prompt-ordering"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://arxiv.org/abs/2307.03172",
+      "https://www.sbert.net/examples/applications/retrieve_rerank/README.html",
+      "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices",
+      "https://platform.claude.com/docs/en/build-with-claude/context-windows",
+      "https://developers.openai.com/cookbook/examples/gpt4-1_prompting_guide"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0318",
+    "topic_id": "ai.agent.mcp-tool-integration",
+    "question": "Trong MCP, host, client và server là gì, và quan hệ giữa chúng ra sao?",
+    "answer": "MCP dùng kiến trúc client-host-server, các bên trao đổi message JSON-RPC 2.0.\n- Host: ứng dụng LLM mà người dùng làm việc trực tiếp (IDE, ứng dụng chat...), là bên khởi tạo kết nối. Host đóng vai trò chứa và điều phối: tạo và quản lý nhiều client, kiểm soát quyền kết nối, áp dụng chính sách bảo mật và yêu cầu người dùng đồng ý.\n- Client: connector nằm bên trong host, do host tạo ra. Mỗi client nói chuyện với đúng một server.\n- Server: dịch vụ cung cấp context và khả năng cho AI qua các primitive tools, resources và prompts; có thể là process chạy local hoặc dịch vụ remote.\nQuan hệ: một host chạy nhiều client, mỗi client gắn 1:1 với một server. Nhờ vậy một ứng dụng dùng được nhiều server cùng lúc, còn các server vẫn cách ly: server chỉ nhận phần context cần thiết, không đọc được toàn bộ hội thoại và không nhìn được vào server khác; lịch sử hội thoại đầy đủ nằm ở host.",
+    "difficulty": "easy",
+    "language": "vi",
+    "tags": ["mcp", "architecture", "host", "client", "server"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://modelcontextprotocol.io/specification/2026-07-28",
+      "https://modelcontextprotocol.io/specification/2026-07-28/architecture"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0319",
+    "topic_id": "ai.agent.mcp-tool-integration",
+    "question": "Một tool definition trong MCP gồm những trường chính nào? inputSchema dùng để làm gì?",
+    "answer": "Server trả danh sách tool qua tools/list; mỗi tool definition gồm các trường chính:\n- name: định danh duy nhất của tool.\n- title (tuỳ chọn): tên dễ đọc để hiển thị trên UI.\n- description: mô tả chức năng của tool, model dựa vào đây để biết khi nào nên gọi.\n- inputSchema: JSON Schema mô tả các tham số đầu vào.\n- outputSchema (tuỳ chọn): JSON Schema mô tả kết quả có cấu trúc.\n- annotations (tuỳ chọn): gợi ý về hành vi của tool.\n\ninputSchema dùng để:\n- Cho model biết cần truyền tham số gì, kiểu gì, trường nào bắt buộc khi gọi tools/call.\n- Làm chuẩn để server validate input trước khi chạy (spec yêu cầu server validate mọi input của tool).",
+    "difficulty": "easy",
+    "language": "vi",
+    "tags": ["mcp", "tool-definition", "json-schema", "inputschema"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://modelcontextprotocol.io/specification/2026-07-28/server/tools"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0320",
+    "topic_id": "ai.agent.mcp-tool-integration",
+    "question": "Tool annotations trong MCP như readOnlyHint, destructiveHint, idempotentHint nghĩa là gì? Client có nên tin tuyệt đối vào chúng không?",
+    "answer": "Annotations là các thuộc tính tuỳ chọn trong tool definition, mô tả hành vi của tool cho client (ví dụ để quyết định có cần hỏi người dùng xác nhận):\n- readOnlyHint: true nghĩa là tool không thay đổi môi trường (chỉ đọc).\n- destructiveHint: true nghĩa là tool có thể cập nhật mang tính phá huỷ (xoá, ghi đè); false nghĩa là chỉ thêm mới. Chỉ có ý nghĩa khi tool không read-only.\n- idempotentHint: true nghĩa là gọi lặp lại với cùng tham số không gây thêm tác động nào; hữu ích khi cân nhắc retry.\n- openWorldHint: tool có tương tác với thế giới bên ngoài mở (như web search) hay chỉ trong miền đóng (như memory tool).\n\nClient không nên tin tuyệt đối. Tất cả annotations chỉ là gợi ý, không bảo đảm mô tả đúng hành vi thật. Spec yêu cầu client coi annotations là untrusted trừ khi đến từ server tin cậy, và không dựa vào annotations của server không tin cậy để quyết định dùng tool. Với thao tác nhạy cảm vẫn cần người dùng xác nhận.",
+    "difficulty": "easy",
+    "language": "vi",
+    "tags": ["mcp", "tool-annotations", "idempotency", "side-effect"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://modelcontextprotocol.io/specification/2026-07-28/schema",
+      "https://modelcontextprotocol.io/specification/2026-07-28/server/tools"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0321",
+    "topic_id": "ai.agent.mcp-tool-integration",
+    "question": "MCP phân biệt protocol error và tool execution error (isError) thế nào? Vì sao lỗi tham số sai định dạng nên trả về dạng isError?",
+    "answer": "Theo spec MCP (cả revision 2025-11-25 và 2026-07-28 đều phân loại như sau), có hai cơ chế báo lỗi cho tool:\n1. Protocol error: lỗi ở chính cấu trúc request, ví dụ gọi tool không tồn tại, request không khớp schema CallToolRequest, lỗi server. Trả về dạng error chuẩn của JSON-RPC (ví dụ code -32602, message 'Unknown tool'). Model khó tự sửa loại lỗi này.\n2. Tool execution error: lỗi xảy ra khi chạy tool, như API bên ngoài lỗi, input không hợp lệ (ngày sai định dạng, giá trị ngoài khoảng), lỗi nghiệp vụ. Trả về trong result bình thường với isError: true và nội dung text giải thích.\n\nVì sao tham số sai định dạng nên dùng isError:\n- Thông báo nằm trong tool result nên client đưa lại cho model như một kết quả tool. Nếu message cụ thể và có hướng dẫn (ví dụ 'ngày khởi hành phải ở tương lai, hôm nay là ...'), model đọc được, tự sửa tham số và gọi lại.\n- Spec khuyến nghị client đưa tool execution error cho model để tự sửa; còn protocol error thì client có thể đưa nhưng ít khi giúp phục hồi.\nVì vậy phần validate nghiệp vụ trong tool nên trả isError với lời giải thích rõ ràng thay vì ném lỗi JSON-RPC.",
+    "difficulty": "medium",
+    "language": "vi",
+    "tags": ["mcp", "error-handling", "iserror", "json-rpc"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://modelcontextprotocol.io/specification/2026-07-28/server/tools",
+      "https://modelcontextprotocol.io/specification/2025-11-25/server/tools"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0322",
+    "topic_id": "ai.agent.mcp-tool-integration",
+    "question": "Một tool call qua MCP chạy rất lâu. Client nên xử lý timeout, progress notification và hủy request như thế nào?",
+    "answer": "Theo spec MCP (cách hủy khác nhau giữa hai revision, xem bên dưới):\n- Timeout: nên đặt timeout cho mọi request đã gửi, kể cả tools/call, để tránh treo kết nối và cạn tài nguyên. Tool vốn chạy lâu thì đặt timeout riêng dài hơn.\n- Progress: client có thể gửi kèm progressToken trong metadata của request; server khi đó có thể gửi notifications/progress với giá trị progress tăng dần, total và message tuỳ chọn. Client có thể reset đồng hồ timeout khi nhận progress, vì đó là dấu hiệu tool vẫn đang làm việc, nhưng vẫn phải áp một timeout tối đa bất kể có progress, để chặn bên hoạt động sai kéo dài mãi.\n- Hủy: quá timeout mà chưa có kết quả hoặc lỗi thì client hủy request và thôi chờ. Cách hủy theo từng revision:\n  + Revision 2026-07-28: với Streamable HTTP, đóng response stream của request chính là tín hiệu hủy; với stdio, client gửi notifications/cancelled kèm request ID.\n  + Revision 2025-11-25: client gửi notifications/cancelled kèm request ID với mọi transport; ngắt kết nối HTTP không được coi là hủy.",
+    "difficulty": "medium",
+    "language": "vi",
+    "tags": ["mcp", "timeout", "cancellation", "progress"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://modelcontextprotocol.io/specification/2026-07-28/basic/patterns/cancellation",
+      "https://modelcontextprotocol.io/specification/2026-07-28/basic/patterns/progress",
+      "https://modelcontextprotocol.io/specification/2025-11-25/basic/transports"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0323",
+    "topic_id": "ai.agent.mcp-tool-integration",
+    "question": "Người dùng thêm một MCP server local bằng cấu hình one-click của client. Rủi ro bảo mật là gì, và client nên xin đồng ý, sandbox ra sao?",
+    "answer": "Rủi ro: MCP server local là binary hoặc lệnh được tải về và chạy trên cùng máy với client. Nếu thiếu sandbox và cơ chế xin đồng ý, kẻ tấn công có thể chèn lệnh khởi động độc hại vào cấu hình client, hoặc phát tán payload độc ngay trong server. Hậu quả: thực thi lệnh tuỳ ý với quyền của client, người dùng không thấy lệnh gì đang chạy, lộ dữ liệu (ví dụ SSH key) và mất dữ liệu.\n\nClient nên làm theo MCP security best practices:\n- Xin đồng ý trước khi chạy: hiện hộp thoại hiển thị đầy đủ lệnh sẽ chạy, không cắt bớt, kèm tham số; nói rõ đây là thao tác chạy code trên máy; bắt buộc người dùng chấp thuận và cho phép huỷ.\n- Cảnh báo thêm: làm nổi bật mẫu lệnh nguy hiểm như sudo, rm -rf, truy cập thư mục nhạy cảm.\n- Sandbox: chạy server trong môi trường cô lập với quyền mặc định tối thiểu, hạn chế file system, network và tài nguyên hệ thống; chỉ cấp thêm quyền cụ thể (một thư mục, network) khi người dùng cho phép; dùng container, chroot hoặc app sandbox của nền tảng.",
+    "difficulty": "medium",
+    "language": "vi",
+    "tags": ["mcp", "security", "sandbox", "consent", "local-server"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/security_best_practices"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0324",
+    "topic_id": "ai.sec.llm-security-guardrails",
+    "question": "Prompt injection là gì? Phân biệt prompt injection trực tiếp và gián tiếp.",
+    "answer": "Prompt injection là lỗ hổng xảy ra khi nội dung đưa vào prompt làm thay đổi hành vi hoặc output của LLM theo cách ngoài ý muốn của người xây ứng dụng, ví dụ khiến model bỏ qua hướng dẫn, làm lộ thông tin nhạy cảm hoặc gọi chức năng trái phép. Nội dung tấn công không cần con người đọc được, chỉ cần model xử lý nó.\n\n- Prompt injection trực tiếp: chính input mà người dùng gửi vào ứng dụng làm thay đổi hành vi model. Có thể cố ý (kẻ tấn công soạn prompt kiểu 'bỏ qua mọi hướng dẫn trước đó') hoặc vô tình.\n- Prompt injection gián tiếp: model nhận nội dung từ nguồn bên ngoài như website, file, email, tài liệu hay kết quả tool, và trong nội dung đó có chỉ thị gây hại. Người dùng có thể hoàn toàn đáng tin; kẻ tấn công chỉ cần kiểm soát được nội dung mà model sẽ đọc.\n\nKhác biệt chính: trực tiếp thì kẻ tấn công là người gõ prompt; gián tiếp thì lệnh độc nằm trong dữ liệu bên thứ ba được đưa vào context.",
+    "difficulty": "easy",
+    "language": "vi",
+    "tags": ["prompt-injection", "owasp-llm01", "security"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
+      "https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/mitigate-jailbreaks"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0325",
+    "topic_id": "ai.sec.llm-security-guardrails",
+    "question": "Jailbreak khác prompt injection như thế nào?",
+    "answer": "Hai khái niệm liên quan và hay bị dùng lẫn lộn, nhưng phạm vi khác nhau:\n- Prompt injection: dùng input để thao túng phản hồi, làm thay đổi hành vi model theo ý kẻ tấn công. Mục tiêu có thể rất đa dạng (lộ dữ liệu, gọi tool trái phép, sửa nội dung output...), trong đó có cả việc vượt qua các biện pháp an toàn. Nguồn tấn công có thể là người dùng (trực tiếp) hoặc nội dung bên thứ ba (gián tiếp).\n- Jailbreak: là một dạng của prompt injection, trong đó kẻ tấn công đưa input khiến model bỏ qua hoàn toàn các nguyên tắc an toàn của nó, ví dụ để sinh nội dung bị cấm. Trong jailbreak, chính người dùng ứng dụng là kẻ tấn công.\n\nVề phòng thủ: với prompt injection, dev có thể thêm biện pháp ở system prompt và khâu xử lý input; còn ngăn jailbreak hiệu quả cần cập nhật liên tục việc huấn luyện và cơ chế an toàn của model.",
+    "difficulty": "easy",
+    "language": "vi",
+    "tags": ["jailbreak", "prompt-injection", "owasp-llm01"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
+      "https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/mitigate-jailbreaks"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0326",
+    "topic_id": "ai.sec.llm-security-guardrails",
+    "question": "OWASP Top 10 cho LLM là gì? Kể ít nhất bốn nhóm rủi ro trong bản 2025 và giải thích ngắn một nhóm bạn thấy quan trọng nhất với ứng dụng có RAG hoặc agent.",
+    "answer": "OWASP Top 10 for LLM Applications là danh sách 10 rủi ro bảo mật quan trọng nhất của ứng dụng dùng LLM và GenAI, do OWASP GenAI Security Project công bố. Mỗi mục có mô tả, ví dụ tấn công và cách phòng tránh, dùng làm checklist khi thiết kế và review ứng dụng LLM. Không cần kể đủ 10 mục: nêu đúng từ 4 mục trở lên và giải thích được một mục là đạt. Bản 2025 gồm:\n- LLM01 Prompt Injection\n- LLM02 Sensitive Information Disclosure (lộ thông tin nhạy cảm)\n- LLM03 Supply Chain (chuỗi cung ứng: model, dữ liệu, thư viện bên thứ ba)\n- LLM04 Data and Model Poisoning (đầu độc dữ liệu và model)\n- LLM05 Improper Output Handling (xử lý output không an toàn)\n- LLM06 Excessive Agency (cấp cho LLM quá nhiều quyền hành động)\n- LLM07 System Prompt Leakage (lộ system prompt)\n- LLM08 Vector and Embedding Weaknesses (điểm yếu của vector và embedding trong RAG)\n- LLM09 Misinformation (thông tin sai)\n- LLM10 Unbounded Consumption (tiêu thụ tài nguyên không giới hạn)\nVí dụ giải thích một mục, Excessive Agency: LLM có quá nhiều chức năng, quyền hoặc tự chủ nên khi output bất thường hay bị thao túng thì hệ thống thực hiện hành động gây hại; giảm thiểu bằng cách cho tool tối thiểu, quyền tối thiểu và người duyệt các hành động tác động lớn. Ứng viên có thể chọn nhóm khác, miễn giải thích đúng.",
+    "difficulty": "easy",
+    "language": "vi",
+    "tags": ["owasp", "llm-top-10", "security"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://genai.owasp.org/llm-top-10/",
+      "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0327",
+    "topic_id": "ai.sec.llm-security-guardrails",
+    "question": "Excessive Agency trong OWASP Top 10 cho LLM là gì, và giảm thiểu nó thế nào khi cấp tool cho agent?",
+    "answer": "Excessive Agency (LLM06) là lỗ hổng cho phép hệ thống LLM thực hiện hành động gây hại khi output của model bất thường, mơ hồ hoặc bị thao túng, bất kể nguyên nhân là hallucination hay prompt injection. Nó xuất hiện khi ứng dụng cho LLM gọi function, tool, plugin để hành động.\n\nBa nguyên nhân gốc:\n1. Excessive functionality: agent có tool chứa chức năng không cần, ví dụ chỉ cần đọc tài liệu nhưng extension cũng cho sửa và xoá.\n2. Excessive permissions: tool có quyền ở hệ thống phía sau lớn hơn cần, ví dụ tool chỉ đọc nhưng kết nối database bằng tài khoản có cả quyền UPDATE, INSERT, DELETE.\n3. Excessive autonomy: hành động tác động lớn được thực hiện mà không có bước xác minh hay phê duyệt.\n\nGiảm thiểu khi cấp tool:\n- Chỉ cấp số tool và chức năng tối thiểu; tránh tool mở như chạy shell bất kỳ hay fetch URL bất kỳ, thay bằng tool chức năng hẹp.\n- Quyền tối thiểu ở hệ thống phía sau, chạy hành động trong ngữ cảnh quyền của chính user.\n- Human-in-the-loop: người phê duyệt trước các hành động tác động lớn.\n- Kiểm tra quyền ở hệ thống phía sau, không để LLM tự quyết hành động có được phép hay không.\n- Log, giám sát và rate limit để hạn chế thiệt hại nếu có sự cố.",
+    "difficulty": "medium",
+    "language": "vi",
+    "tags": ["excessive-agency", "owasp-llm06", "least-privilege", "tools"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": ["https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0328",
+    "topic_id": "ai.sec.llm-security-guardrails",
+    "question": "Hệ RAG dùng chung một vector database cho nhiều khách hàng. Rủi ro rò rỉ dữ liệu là gì và bạn phòng tránh thế nào?",
+    "answer": "Rủi ro (OWASP LLM08 Vector and Embedding Weaknesses):\n- Rò rỉ chéo giữa tenant: khi nhiều nhóm người dùng hoặc ứng dụng dùng chung vector database, embedding của khách hàng này có thể được truy hồi cho câu hỏi của khách hàng khác, rồi LLM đưa nội dung đó vào câu trả lời, làm lộ thông tin kinh doanh nhạy cảm.\n- Truy cập trái phép: access control thiếu hoặc cấu hình lệch khiến model truy hồi và tiết lộ dữ liệu cá nhân hay dữ liệu độc quyền.\n- Embedding inversion: kẻ tấn công có thể đảo ngược embedding để khôi phục phần lớn nội dung gốc, nên bản thân vector cũng là dữ liệu nhạy cảm cần bảo vệ.\n\nPhòng tránh:\n- Dùng vector store có phân quyền (permission-aware), access control chi tiết, và phân vùng dữ liệu chặt chẽ theo từng khách hàng.\n- Cách làm phổ biến: gắn trường định danh tenant (ví dụ group_id) cho mỗi vector và mọi truy vấn đều bắt buộc lọc theo tenant; tenant ID lấy từ thông tin xác thực phía server chứ không để LLM hay người dùng tự điền. Khách hàng lớn cần cô lập mạnh hơn có thể dùng shard hoặc collection riêng.\n- Ghi log truy hồi chi tiết, không sửa được, để phát hiện truy cập bất thường.",
+    "difficulty": "medium",
+    "language": "vi",
+    "tags": ["rag", "vector-database", "multi-tenant", "data-leakage", "owasp-llm08"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://genai.owasp.org/llmrisk/llm082025-vector-and-embedding-weaknesses/",
+      "https://qdrant.tech/documentation/manage-data/multitenancy/"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0329",
+    "topic_id": "ai.sec.llm-security-guardrails",
+    "question": "Guardrail dùng model phân loại như Llama Guard để kiểm input và output hoạt động thế nào? Nên chạy nó song song hay chặn trước model chính?",
+    "answer": "Cơ chế: dùng một model riêng làm bộ phân loại an toàn, đặt ở hai điểm:\n- Input guardrail: nhận đúng input người dùng gửi cho model chính, phân loại prompt theo một taxonomy rủi ro; nếu vi phạm thì chặn, dừng xử lý và trả lời từ chối.\n- Output guardrail: nhận output cuối của model chính và phân loại câu trả lời theo cùng taxonomy trước khi trả cho người dùng.\nLlama Guard là ví dụ: một LLM được instruction-tune làm safeguard cho cả input và output, thực hiện phân loại đa lớp và trả về quyết định an toàn hay không. Guardrail thường dùng model nhỏ, nhanh, rẻ; khi phát hiện lạm dụng thì dừng sớm, tiết kiệm thời gian và chi phí của model lớn.\n\nHai cách chạy input guardrail (ví dụ OpenAI Agents SDK, mặc định chạy song song):\n- Song song với model chính: độ trễ tốt nhất vì cả hai bắt đầu cùng lúc; nhưng nếu guardrail chặn thì model chính có thể đã tiêu token và đã gọi tool.\n- Chặn trước (blocking): guardrail chạy xong mới cho model chính chạy; nếu bị chặn thì model chính không chạy, không tốn token và không có side effect từ tool, đổi lại phải cộng thêm thời gian của guardrail vào độ trễ.\nVì vậy agent có tool gây side effect nên dùng blocking; chatbot chỉ trả lời văn bản có thể chạy song song để giảm độ trễ.",
+    "difficulty": "medium",
+    "language": "vi",
+    "tags": ["guardrails", "llama-guard", "input-output-filtering", "latency"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://arxiv.org/abs/2312.06674",
+      "https://openai.github.io/openai-agents-python/guardrails/"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0330",
+    "topic_id": "ai.llm.agents-tool-use",
+    "question": "Vì sao ReAct, tức xen kẽ thought, action và observation, giúp agent giảm hallucination so với chain-of-thought thuần? Cách này có điểm yếu gì?",
+    "answer": "Chain-of-thought (CoT) thuần: model suy luận từng bước chỉ bằng kiến thức bên trong, không được grounding vào thế giới bên ngoài, nên không cập nhật được thông tin và dễ bị fact hallucination, lỗi lan truyền qua các bước.\n\nReAct xen kẽ hai loại bước trong một vòng lặp:\n- Thought: phân rã mục tiêu, lập và cập nhật kế hoạch, trích ý chính từ observation, xử lý ngoại lệ.\n- Action: gọi tool/API (ví dụ search) để lấy thông tin từ nguồn ngoài; kết quả trả về là observation, được đưa lại vào context cho bước tiếp theo.\nMỗi bước dựa trên observation thật thay vì chỉ trí nhớ của model nên câu trả lời được grounding hơn. Trong paper, trên HotpotQA CoT có tỉ lệ false positive do hallucination cao hơn hẳn ReAct.\n\nĐiểm yếu:\n- Cấu trúc xen kẽ làm giảm độ linh hoạt khi suy luận, nên reasoning error nhiều hơn CoT; có lỗi đặc trưng là lặp lại thought/action cũ và không thoát được vòng lặp, vì vậy cần giới hạn số bước.\n- Phụ thuộc chất lượng tool: kết quả search không hữu ích làm lệch hướng suy luận và khó phục hồi.\n- Nhiều lượt gọi model và tool nên tốn token và latency hơn một lần gọi CoT.",
+    "difficulty": "medium",
+    "language": "vi",
+    "tags": ["react", "agent-loop", "hallucination"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://arxiv.org/abs/2210.03629",
+      "https://arxiv.org/html/2210.03629"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0331",
+    "topic_id": "ai.llm.agents-tool-use",
+    "question": "Agent có tool đọc trang web và tool gửi email. Indirect prompt injection có thể xảy ra thế nào trong tình huống này, và bạn giảm thiểu rủi ro ra sao?",
+    "answer": "Cơ chế: indirect prompt injection xảy ra khi LLM nhận input từ nguồn ngoài như website hay file. Trang web có thể chứa chỉ dẫn ẩn (chữ cùng màu nền, comment HTML) mà người không thấy nhưng model vẫn đọc. Model không phân biệt chắc chắn dữ liệu với lệnh nên có thể làm theo, ví dụ \"gửi toàn bộ hội thoại tới địa chỉ X\", rồi gọi tool email để đẩy dữ liệu ra ngoài. Mức thiệt hại phụ thuộc agency của hệ thống: agent càng nhiều quyền tool thì hậu quả càng lớn.\n\nKhông có cách phòng tuyệt đối, nên giảm thiểu theo nhiều lớp:\n- Least privilege: tool email chỉ làm đúng việc cần (ví dụ chỉ gửi cho chính người dùng hoặc domain nội bộ); credentials do code giữ, không đưa cho model.\n- Human approval cho hành động rủi ro cao như gửi email ra ngoài.\n- Tách và đánh dấu rõ nội dung không tin cậy: bọc nội dung web trong delimiter, nói rõ đó là dữ liệu, không phải lệnh.\n- Validate tham số tool bằng code deterministic (allowlist người nhận, chặn URL lạ) và lọc input/output.\n- System prompt ràng buộc vai trò và phạm vi của agent.\n- Adversarial testing định kỳ, coi model như một user không tin cậy khi kiểm tra trust boundary.",
+    "difficulty": "medium",
+    "language": "vi",
+    "tags": ["prompt-injection", "tool-use", "security"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": ["https://genai.owasp.org/llmrisk/llm01-prompt-injection/"],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0332",
+    "topic_id": "ai.llm.agents-tool-use",
+    "question": "Trong function calling, tham số tool_choice điều khiển việc model gọi tool. Có những chế độ nào, và khi nào nên dùng từng chế độ?",
+    "answer": "Các API function calling phổ biến có tool_choice với bốn hành vi chính (tên cụ thể khác nhau tùy nhà cung cấp; hai chế độ bắt buộc không phải model hay setting nào cũng hỗ trợ, ví dụ Anthropic ghi nhận không hỗ trợ khi bật extended thinking thủ công):\n\n- Model tự quyết (auto, mặc định khi có tools): model trả lời bằng text hoặc gọi 0, 1 hay nhiều tool. Dùng cho chatbot, agent hội thoại, nơi không phải câu nào cũng cần tool.\n- Bắt buộc gọi ít nhất một tool nhưng model tự chọn tool nào: dùng khi bước này chắc chắn phải hành động, ví dụ bước router phải chọn một trong các tool xử lý, hoặc agent không được trả lời khi chưa tra cứu.\n- Ép gọi đúng một tool chỉ định: dùng cho structured extraction (bắt model điền đúng schema của tool đó) hoặc một bước cố định trong workflow mà code đã biết trước cần tool nào.\n- Không gọi tool (none): vẫn khai báo tools nhưng model hành xử như không có tool nào; dùng ở bước cần model tổng hợp câu trả lời cuối bằng text từ kết quả đã có, hoặc để cắt một vòng gọi tool đang kéo dài.\n\nTrên model hỗ trợ ép tool, nên kết hợp strict mode (tham số phải khớp JSON Schema) để vừa chắc chắn có tool call, vừa chắc tham số hợp lệ. Nếu không ép được tool thì dùng auto kèm strict tool, hoặc structured outputs khi chỉ cần response theo một JSON shape cố định.",
+    "difficulty": "medium",
+    "language": "vi",
+    "tags": ["function-calling", "tool-choice"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://developers.openai.com/api/docs/guides/function-calling",
+      "https://platform.claude.com/docs/en/agents-and-tools/tool-use/define-tools"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0333",
+    "topic_id": "ai.llm.cost-latency",
+    "question": "Streaming cải thiện độ trễ của ứng dụng LLM theo nghĩa nào, xét time to first token và tổng thời gian sinh? Khi nào streaming khó áp dụng?",
+    "answer": "Streaming: server gửi dần từng token (thường qua server-sent events) ngay khi sinh, thay vì đợi xong cả câu trả lời.\n\n- Time to first token (TTFT): thời gian từ lúc gửi prompt tới khi có token đầu tiên. Với streaming, người dùng thấy chữ sau TTFT thay vì chờ toàn bộ output, nên độ trễ cảm nhận giảm mạnh.\n- Tổng thời gian sinh (end-to-end) gần như không đổi: model vẫn sinh từng token với cùng tốc độ. Muốn giảm tổng thời gian vẫn phải giảm token hoặc dùng model nhanh hơn.\n- Xét cả hệ ứng dụng và người dùng, streaming vẫn rút ngắn thời gian thật: người dùng đọc song song khi model đang sinh nên đọc xong sớm hơn.\n\nKhó áp dụng khi:\n- Output phải xử lý trước khi hiển thị (moderation, dịch, validate JSON): stream về backend rồi xử lý theo chunk thay vì đợi toàn bộ, hoặc chấp nhận không stream.\n- Tool call: tham số tới dưới dạng partial JSON, phải tích lũy đủ rồi mới parse và chạy tool.\n- Lỗi có thể xuất hiện giữa stream sau khi đã gửi một phần, nên client phải xử lý lỗi giữa chừng và có cách retry.",
+    "difficulty": "medium",
+    "language": "vi",
+    "tags": ["streaming", "ttft", "latency"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/reduce-latency",
+      "https://huggingface.co/docs/text-generation-inference/conceptual/streaming",
+      "https://developers.openai.com/api/docs/guides/latency-optimization",
+      "https://platform.claude.com/docs/en/build-with-claude/streaming"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0334",
+    "topic_id": "ai.llm.cost-latency",
+    "question": "Batch API khác gọi API đồng bộ thế nào về chi phí, thời gian chờ và cách lấy kết quả? Tác vụ nào nên và không nên đưa vào batching?",
+    "answer": "Batch API: gom nhiều request (thường là file JSONL, mỗi dòng một request kèm custom_id) gửi một lần; nhà cung cấp xử lý bất đồng bộ, client poll trạng thái rồi tải file kết quả.\n\nSo với gọi đồng bộ:\n- Thường rẻ hơn đáng kể (khoảng một nửa) và có rate limit riêng, cao hơn.\n- Không có kết quả ngay: hoàn thành trong vài phút tới vài giờ, có hạn tối đa (thường 24 giờ); quá hạn thì batch expire, request chưa chạy bị hủy.\n- Thứ tự kết quả có thể khác thứ tự input, nên map kết quả theo custom_id; request lỗi hoặc expired phải tách ra và retry từng item. Lỗi validate tham số có thể chỉ được báo khi cả batch kết thúc, nên chạy thử vài request bằng API thường trước.\n\nNên đưa vào batch: offline evaluation, phân loại hay gắn nhãn dataset lớn, tạo embedding cho kho tài liệu, chấm lại hàng loạt dữ liệu cũ theo lịch đêm.\nKhông nên: tác vụ tương tác cần phản hồi ngay như chatbot, AI interviewer đang hỏi đáp trực tiếp, hay bất kỳ bước nào nằm trên đường xử lý request của người dùng.",
+    "difficulty": "medium",
+    "language": "vi",
+    "tags": ["batch-api", "batching", "cost"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://developers.openai.com/api/docs/guides/batch",
+      "https://platform.claude.com/docs/en/build-with-claude/batch-processing"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0335",
+    "topic_id": "ai.llm.cost-latency",
+    "question": "Vì sao cắt output token thường giảm latency nhiều hơn cắt input token? Với reasoning model, bạn đặt token budget cho output thế nào để không bị cụt?",
+    "answer": "Vì sao output quan trọng hơn:\n- LLM sinh output theo kiểu autoregressive: mỗi token mới phụ thuộc các token đã sinh, nên phải sinh tuần tự từng token; còn prompt được đọc vào ngay từ đầu. Vì vậy sinh token gần như luôn là bước tốn thời gian nhất.\n- Kinh nghiệm thực tế: cắt 50% output token có thể giảm khoảng 50% latency, còn cắt 50% prompt thường chỉ giảm 1 đến 5%, trừ khi context rất lớn.\n\nToken budget với reasoning model:\n- Reasoning token không hiển thị nhưng vẫn chiếm context window và tính tiền như output token; giới hạn output (max_output_tokens hoặc max_tokens) thường áp cho tổng reasoning cộng text hiển thị.\n- Đặt quá thấp: response bị incomplete, có khi trước khi có chữ nào hiển thị, tức vẫn trả tiền input và reasoning mà không có kết quả.\n- Cách làm: chừa đủ buffer cho reasoning, đo số reasoning token thực tế trong usage để chỉnh dần, giảm reasoning effort cho tác vụ đơn giản, và luôn kiểm tra lý do dừng để xử lý trường hợp bị cắt.\n- max_tokens là công cụ thô: chạm giới hạn thì câu trả lời bị cắt giữa câu, chỉ hợp với câu trả lời ngắn; muốn ngắn gọn thì nên hướng dẫn trong prompt.",
+    "difficulty": "medium",
+    "language": "vi",
+    "tags": ["token-budget", "output-tokens", "reasoning-tokens"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://developers.openai.com/api/docs/guides/latency-optimization",
+      "https://developers.openai.com/api/docs/guides/reasoning",
+      "https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/reduce-latency",
+      "https://platform.claude.com/docs/en/about-claude/glossary"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0336",
+    "topic_id": "ai.rag.advanced-retrieval",
+    "question": "Multi-query retrieval kiểu RAG-Fusion hoạt động thế nào? Vì sao thường gộp kết quả bằng reciprocal rank fusion thay vì cộng điểm similarity?",
+    "answer": "Cơ chế multi-query (RAG-Fusion):\n- Dùng LLM sinh vài biến thể của câu hỏi gốc (diễn đạt khác, góc nhìn khác, tách ý), thường giữ cả câu gốc.\n- Chạy retrieval cho từng truy vấn, thu được nhiều danh sách kết quả đã xếp hạng.\n- Gộp các danh sách bằng reciprocal rank fusion (RRF), lấy top-k làm context cho LLM.\nLợi ích: tăng recall khi người dùng diễn đạt khác tài liệu, vì mỗi biến thể tiếp cận từ một góc.\n\nVì sao dùng RRF:\n- RRF chỉ dùng thứ hạng: ở mỗi danh sách, tài liệu nhận điểm 1/(k + rank), rồi cộng điểm qua các danh sách; k là hằng số nhỏ (thường 60) để các hạng đầu không chênh nhau quá lớn.\n- Điểm gốc của từng phương pháp có thang đo và độ lớn khác nhau (BM25 không có cận trên, cosine nằm trong khoảng hẹp), và điểm similarity của các truy vấn khác nhau cũng có phân phối khác nhau. Cộng điểm thô dễ để một danh sách lấn át các danh sách khác; RRF không cần chuẩn hóa điểm hay tinh chỉnh.\n- Tài liệu đứng cao ở nhiều danh sách được đẩy lên đầu, tức ưu tiên kết quả mà nhiều truy vấn cùng đồng thuận.",
+    "difficulty": "medium",
+    "language": "vi",
+    "tags": ["multi-query", "rag-fusion", "rrf"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://arxiv.org/abs/2402.03367",
+      "https://learn.microsoft.com/en-us/azure/search/hybrid-search-ranking",
+      "https://www.elastic.co/docs/reference/elasticsearch/rest-apis/reciprocal-rank-fusion"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0337",
+    "topic_id": "ai.rag.advanced-retrieval",
+    "question": "Parent-document retrieval index và truy xuất thế nào để giải quyết mâu thuẫn khi chọn kích thước chunk? Đánh đổi là gì?",
+    "answer": "Mâu thuẫn khi chunking:\n- Chunk nhỏ cho embedding phản ánh sát nghĩa nên khớp truy vấn chính xác; chunk quá dài làm embedding bị loãng nghĩa.\n- Nhưng LLM cần đoạn đủ dài để giữ ngữ cảnh; chunk nhỏ thường thiếu thông tin để trả lời.\n\nCách hoạt động (small-to-big):\n- Chia tài liệu thành parent (cả tài liệu gốc hoặc một chunk lớn) và các child chunk nhỏ; mỗi child lưu id của parent.\n- Chỉ embed và index child trong vector store; parent lưu trong docstore hoặc key-value store.\n- Khi truy vấn: tìm child bằng similarity search, tra parent id, loại trùng, rồi đưa parent vào context.\n\nĐánh đổi:\n- Context dài hơn nên tốn token và tăng latency; parent có thể chứa phần không liên quan, gây nhiễu.\n- Cần thêm một store và giữ đồng bộ child với parent khi cập nhật hoặc xóa tài liệu.\n- Kích thước parent và child phải thử nghiệm và đo bằng eval retrieval, không có giá trị chung.",
+    "difficulty": "medium",
+    "language": "vi",
+    "tags": ["parent-document", "chunking", "small-to-big"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://reference.langchain.com/python/langchain-classic/retrievers/parent_document_retriever"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0338",
+    "topic_id": "ai.rag.advanced-retrieval",
+    "question": "GraphRAG xây index từ tài liệu thô như thế nào, và global search khác local search ra sao khi trả lời câu hỏi?",
+    "answer": "Indexing (theo Microsoft GraphRAG):\n- Chia tài liệu thành text unit; dùng LLM trích entity (người, tổ chức, sự kiện...) và relationship từ từng text unit; entity trùng tên và loại được gộp, các mô tả được LLM tóm tắt lại.\n- Chạy hierarchical community detection (thuật toán Leiden) trên đồ thị để gom các entity liên quan chặt thành community nhiều cấp.\n- LLM viết community report tóm tắt từng community. Chi phí index cao vì phải gọi LLM trên toàn bộ corpus.\n\nGlobal search: cho câu hỏi về toàn bộ dataset (\"các chủ đề chính là gì\"). Chạy kiểu map-reduce: ở bước map, LLM đọc community report của cấp đã chọn và sinh câu trả lời trung gian gồm các ý kèm điểm mức độ quan trọng; ở bước reduce, lọc các ý quan trọng nhất rồi tổng hợp thành câu trả lời. Cấp sâu hơn trong cây community (community nhỏ hơn, report chi tiết hơn) cho câu trả lời đầy đủ hơn nhưng tốn thời gian và LLM call hơn do số report nhiều.\n\nLocal search: cho câu hỏi về entity cụ thể. Tìm các entity liên quan ngữ nghĩa với truy vấn làm điểm vào đồ thị, rồi kéo entity lân cận, relationship, community report và text chunk gốc liên quan; xếp hạng và lọc cho vừa context window trước khi sinh câu trả lời.",
+    "difficulty": "medium",
+    "language": "vi",
+    "tags": ["graphrag", "knowledge-graph", "global-search"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://microsoft.github.io/graphrag/index/default_dataflow/",
+      "https://microsoft.github.io/graphrag/query/global_search/",
+      "https://microsoft.github.io/graphrag/query/local_search/"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0339",
+    "topic_id": "ai.agent.multi-agent-orchestration",
+    "question": "Trong hệ multi-agent, handoff giữa các agent khác gì so với gọi một agent khác như tool (manager pattern)? Khi nào nên chọn mỗi cách?",
+    "answer": "Handoff:\n- Agent hiện tại (thường là triage/router) chuyển quyền điều khiển cho agent chuyên trách; agent nhận trở thành agent đang hoạt động và trả lời trực tiếp người dùng cho phần còn lại của lượt.\n- Với LLM, handoff thường được biểu diễn như một tool đặc biệt (ví dụ transfer_to_refund_agent); khi model gọi tool đó, runtime đổi agent và chạy tiếp.\n- Mặc định agent nhận thấy toàn bộ lịch sử hội thoại; nên lọc hoặc tóm tắt lịch sử để giảm token và không chuyển dữ liệu thừa.\n\nAgent-as-tool (manager pattern):\n- Manager agent giữ quyền điều khiển hội thoại, gọi agent chuyên trách như một tool cho subtask có phạm vi rõ, nhận kết quả rồi tự tổng hợp câu trả lời cuối.\n- Agent con chỉ nhận input manager truyền vào, không tiếp quản hội thoại với người dùng.\n\nKhi nào chọn:\n- Handoff: khi routing là một phần của workflow và muốn specialist trả lời trực tiếp, giữ prompt mỗi agent tập trung (ví dụ chăm sóc khách hàng tách đơn hàng, hoàn tiền, FAQ).\n- Agent-as-tool: khi cần một agent chịu trách nhiệm câu trả lời cuối, phải gộp output của nhiều specialist, hoặc muốn áp guardrail chung ở một chỗ.\n- Có thể kết hợp: triage handoff sang specialist, specialist vẫn gọi agent khác như tool cho việc nhỏ.",
+    "difficulty": "medium",
+    "language": "vi",
+    "tags": ["handoff", "agents-as-tools", "orchestration"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://openai.github.io/openai-agents-python/multi_agent/",
+      "https://openai.github.io/openai-agents-python/handoffs/"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0340",
+    "topic_id": "ai.agent.multi-agent-orchestration",
+    "question": "Agent cần gửi offer cho ứng viên nhưng hành động này phải được người duyệt trước. Bạn thiết kế human-in-the-loop để tạm dừng, lưu state và resume thế nào?",
+    "answer": "Thiết kế:\n- Đánh dấu tool gửi offer là cần approval (luôn luôn, hoặc theo chính sách dựa trên tham số). Khi model sinh tool call này, runtime không thực thi mà dừng run, trả về một interruption kèm tên tool, tham số và agent đề xuất.\n- Lưu state: serialize trạng thái run (lịch sử, bước hiện tại, tool call đang chờ) vào storage bền như database, gắn với một id (thread hoặc run id). Không giữ process hay connection chờ, vì việc duyệt có thể mất hàng giờ.\n- Người duyệt xem đề xuất trên UI (người nhận, mức lương, nội dung), chọn approve hoặc reject, có thể kèm lý do.\n- Resume: nạp state theo đúng id, ghi quyết định rồi chạy tiếp. Approve thì tool được thực thi; reject thì model nhận thông báo từ chối để xử lý tiếp, ví dụ báo lại cho recruiter.\n\nLưu ý:\n- Phải resume bằng đúng id; id mới nghĩa là bắt đầu với state rỗng.\n- Một số framework chạy lại từ đầu bước chứa điểm dừng khi resume, nên code chạy trước điểm dừng phải idempotent (không gửi email hai lần).\n- Fail closed: nếu không đọc được tham số để áp chính sách thì vẫn bắt duyệt.",
+    "difficulty": "medium",
+    "language": "vi",
+    "tags": ["human-in-the-loop", "approval", "state-persistence"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://openai.github.io/openai-agents-python/human_in_the_loop/",
+      "https://docs.langchain.com/oss/python/langgraph/interrupts"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0341",
+    "topic_id": "ai.agent.multi-agent-orchestration",
+    "question": "Vì sao mẫu planner và executor thường tiết kiệm token hơn agent kiểu ReAct? Khi nào planner cần lập lại kế hoạch?",
+    "answer": "Agent kiểu ReAct: ở mỗi bước, LLM suy luận, gọi tool, dừng chờ kết quả rồi quyết định bước tiếp dựa trên toàn bộ token trước đó. Mỗi bước là một lần gọi model với context ngày càng dài, prompt bị lặp lại nhiều nên tốn token.\n\nPlanner và executor tách lập kế hoạch khỏi việc quan sát kết quả:\n- Planner (thường là model mạnh) đọc yêu cầu một lần và sinh kế hoạch: danh sách bước hoặc subtask, có thể kèm phụ thuộc giữa các bước.\n- Executor (tool, worker agent hoặc model rẻ hơn) thực hiện từng bước.\n- Một bước tổng hợp cuối gom kết quả thành câu trả lời.\nVì planner không phải đọc lại observation sau mỗi bước, số lần gọi model lớn và lượng prompt lặp lại giảm mạnh; ví dụ ReWOO đạt hiệu quả token gấp 5 lần trên HotpotQA mà độ chính xác không giảm. Kế hoạch hiển thị rõ nên cũng dễ review và debug.\n\nNhược điểm và replan: kế hoạch lập trước khi thấy kết quả nên có thể sai khi thực tế khác dự kiến. Cần gọi lại planner kèm kết quả đã có khi một bước thất bại hoặc tool lỗi, kết quả trả về mâu thuẫn hay thiếu thông tin cho các bước sau, hoặc bước kiểm tra cho thấy đang lệch mục tiêu. Nếu không thể đoán trước subtask, dùng orchestrator chia việc động theo input thay cho kế hoạch cố định.",
+    "difficulty": "medium",
+    "language": "vi",
+    "tags": ["planner-executor", "rewoo", "planning"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://arxiv.org/abs/2305.18323",
+      "https://arxiv.org/abs/2305.04091",
+      "https://www.anthropic.com/engineering/building-effective-agents"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0342",
+    "topic_id": "ai.llmops.production-monitoring",
+    "question": "Khi tracing một agent gọi LLM và tool qua nhiều bước, trace và span là gì, và mỗi span nên ghi những thông tin nào để debug chất lượng, độ trễ, chi phí?",
+    "answer": "Khái niệm:\n- Trace: một thao tác end-to-end, ví dụ từ lúc người dùng hỏi tới khi có câu trả lời cuối; có trace_id duy nhất.\n- Span (có công cụ gọi là observation): một bước có thời điểm bắt đầu và kết thúc trong trace, như một lần gọi LLM, một tool call, một bước retrieval, một handoff giữa agent. Span có parent_id nên lồng nhau thành cây phản ánh luồng chạy của agent.\n- Nhiều trace của cùng một hội thoại được nhóm bằng session hoặc group id.\n\nNên ghi trên mỗi span:\n- Span gọi LLM: model và tham số, prompt kèm version, output, số token input/output (cả cached, reasoning token), latency (và TTFT nếu stream), chi phí ước tính, lý do dừng.\n- Span tool/retrieval: tên tool, tham số, kết quả hoặc lỗi, thời gian; với retrieval là id và điểm của document.",
+    "difficulty": "medium",
+    "language": "vi",
+    "tags": ["tracing", "observability", "spans"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://openai.github.io/openai-agents-python/tracing/",
+      "https://langfuse.com/docs/observability/data-model"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0343",
+    "topic_id": "ai.llmops.production-monitoring",
+    "question": "Thu thập feedback người dùng cho tính năng LLM: so sánh explicit feedback với implicit feedback, và làm sao gắn feedback với đúng lời gọi LLM để dùng được?",
+    "answer": "Explicit feedback: người dùng chủ động đánh giá (thumbs up/down, chấm sao, comment).\n- Ưu: tín hiệu rõ về mức hài lòng, dễ triển khai, dễ hành động.\n- Nhược: tỉ lệ phản hồi thấp, mẫu bị lệch vì người không hài lòng hay phản hồi hơn, đòi người dùng thao tác.\n\nImplicit feedback: suy ra từ hành vi như thời gian đọc, copy output, chấp nhận gợi ý, hỏi lại hoặc regenerate, bỏ ngang phiên; với AI interviewer có thể là recruiter sửa điểm do AI chấm.\n- Ưu: số lượng lớn, có ở mọi tương tác, không tốn công người dùng, phản ánh cách dùng thật.\n- Nhược: khó triển khai, tín hiệu mơ hồ, cần diễn giải (copy có thể vì hài lòng hoặc để báo lỗi).\n\nGắn feedback với lời gọi LLM:\n- Mỗi request được tracing với trace id; backend trả trace id (hoặc message id gắn với trace) cho frontend.\n- Khi người dùng đánh giá, frontend gửi feedback dạng score kèm trace id; client chỉ dùng key có quyền ghi score.\n- Tín hiệu đến muộn (ticket được đóng, recruiter ra quyết định sau) được ghi từ server với cùng trace id.",
+    "difficulty": "medium",
+    "language": "vi",
+    "tags": ["user-feedback", "explicit-feedback", "implicit-feedback"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": ["https://langfuse.com/docs/observability/features/user-feedback"],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0344",
+    "topic_id": "ai.llmops.production-monitoring",
+    "question": "Bạn dùng LLM-as-a-judge để chấm online một phần traffic production. Judge có những bias nào, và làm sao kiểm chứng judge đáng tin trước khi dùng để cảnh báo?",
+    "answer": "Judge nhận input, output của ứng dụng và rubric, trả score kèm lý do; trong production thường chỉ chấm một tỉ lệ mẫu để kiểm soát chi phí.\n\nCác bias chính:\n- Position bias: khi so sánh cặp, judge thiên về một vị trí (thường là câu đầu). Giảm bằng cách chấm hai lần đổi thứ tự, chỉ tính thắng khi thắng ở cả hai, không nhất quán thì xử hòa.\n- Verbosity bias: ưu tiên câu dài, dài dòng dù không rõ hay đúng hơn. Giảm bằng rubric nêu rõ không thưởng độ dài.\n- Self-enhancement bias: có thể ưu ái câu do chính nó sinh ra; nên dùng judge khác họ với model được chấm.\n- Năng lực suy luận hạn chế: dễ chấm sai câu cần tính toán, logic; bổ sung đáp án tham chiếu.\n\nKiểm chứng trước khi dựa vào judge:\n- Lấy một tập mẫu từ chính traffic, cho người gán nhãn, chạy judge và đo mức đồng thuận (agreement, Cohen's kappa). Judge mạnh có thể đạt trên 80%, ngang mức đồng thuận giữa người với người, nhưng phải đo trên dữ liệu của mình.\n- Version hóa prompt judge; kiểm lại định kỳ và mỗi khi đổi model judge hay rubric.",
+    "difficulty": "medium",
+    "language": "vi",
+    "tags": ["llm-as-a-judge", "online-evaluation", "alerting"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://arxiv.org/abs/2306.05685",
+      "https://arxiv.org/html/2306.05685v4",
+      "https://langfuse.com/docs/evaluation/evaluation-methods/llm-as-a-judge"
+    ],
+    "reviewed_by": "minhtuann1102"
+  }
+]

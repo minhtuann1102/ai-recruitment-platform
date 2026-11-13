@@ -113,6 +113,8 @@ def check_pair(item: SeedItem, topics: Dict[str, str]) -> List[Issue]:
     tags = pair.get("tags", [])
     if not isinstance(tags, list) or any(not isinstance(t, str) or t != t.lower() for t in tags) or len(set(tags)) != len(tags):
         error("tags", "tags phai la mang string chu thuong, khong trung")
+    if "interview_style" in pair and not isinstance(pair["interview_style"], bool):
+        error("schema", "interview_style (tuy chon) phai la bool")
 
     (_check_crawled_provenance if crawled else _check_curated_provenance)(pair, error)
 

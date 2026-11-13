@@ -93,7 +93,9 @@ không commit vì repo public — spec Clarifications)
 - [X] T050 [US1] `crawlers/qa_markdown_parsers.py`, `crawlers/qa_sources.py`, `crawlers/github_raw_client.py`, `pipeline/collect_command.py`: lệnh `collect` qua GitHub API (rate limit, xóa PII, cắt đáp án > 4000 ký tự) — 2026-10-19: 4.840 cặp / 44 nguồn (en 4.349, uk 350, ru 141)
 - [X] T051 [US1] `pipeline/llm_enricher.py`, `pipeline/enrich_command.py`: lệnh `enrich` — LLM dịch sang tiếng Việt giữ thuật ngữ Anh + code, gán `topic_id` từ catalog + độ khó, kiểm code fence, chạy tiếp được, ghi `_rejected.jsonl`; dataset `de_crawled_qa` tách khỏi seed curated
 - [X] T052 [US1] (2026-10-19/20: DeepSeek `deepseek-chat` dịch 4.4k cặp ~10 tệ; hết tiền ở 115 cặp cuối → 2 subagent Sonnet dịch, gộp qua `parse_response` — bản dịch lưu ở `data/raw/agent_translations/`, chạy lại `enrich` có key sẽ dịch lại bằng API; kết quả: 4.359 cặp hợp lệ, hard 42) Có key: `enrich --extra-catalog ../../specs/005-rag-knowledge-base-qa/contracts/topic-catalog-proposal --per-source 3` (~130 cặp) → đọc thử chất lượng dịch + gán topic → chạy toàn bộ; ghi token + chi phí vào PR
-- [ ] T053 [US1] **Thuộc Phase B của AIE** (`context/next-phase-plan.md` mục B4, lập 2026-10-24): điền `verdict` cho 440 dòng `data/reviews/translation-review.csv` (0/440 đã điền), DE duyệt toàn bộ (Clarifications 2026-10-24), hạn 09/11; đích lỗi dịch nghiêm trọng < 5%. Review mẫu ~10 cặp ngẫu nhiên / nguồn, đối chiếu `question_original`/`answer_original`; nguồn dịch kém → sửa prompt hoặc bỏ nguồn (cách ghi kết quả: chốt với DE)
+- [x] T053 [US1] **Đóng 2026-11-08 (Session 2026-11-08): thay bằng đợt duyệt crawl 27/10** — 389 cặp ngẫu nhiên (~9%
+  kho), có trích nguồn, qua kiểm ở máy: bản dịch ok 358, lỗi nhỏ 29, sai 2 (0,5% < 5%); `translation-review.csv` không
+  điền nữa. Mô tả cũ: **Thuộc Phase B của AIE** (`context/next-phase-plan.md` mục B4, lập 2026-10-24): điền `verdict` cho 440 dòng `data/reviews/translation-review.csv` (0/440 đã điền), DE duyệt toàn bộ (Clarifications 2026-10-24), hạn 09/11; đích lỗi dịch nghiêm trọng < 5%. Review mẫu ~10 cặp ngẫu nhiên / nguồn, đối chiếu `question_original`/`answer_original`; nguồn dịch kém → sửa prompt hoặc bỏ nguồn (cách ghi kết quả: chốt với DE)
 - [x] T054 [US1] `validate --strict` trên seed curated + dữ liệu crawl: mọi topic ≥ 2 cặp, mỗi topic middle/senior ≥ 2 cặp hard (SC-001 sửa 2026-10-19); topic thiếu → thêm nguồn vào `qa_sources.py` hoặc cặp tự soạn vào seed curated. **Xong 2026-10-24** (cùng lần chạy T026): 0 topic middle/senior thiếu cặp hard
 
 - [X] T055 [US1] `pipeline/qa_seed_validator.py`, `pipeline/topic_catalog_reader.py`: thay luật "mỗi độ khó ≥ 20%" bằng `hard_coverage` — topic có level middle/senior phải có ≥ 2 cặp hard; `review-sample` cho review mẫu bản dịch
@@ -180,6 +182,87 @@ không commit vì repo public — spec Clarifications)
 - [x] T048 [P] Cập nhật `specs/README.md` (Trạng thái 005) và `spec.md` (Status) khi PR merge. **Xong 2026-10-24**
 - [ ] T049 Nhờ AIE chạy quickstart §0–§5 trên máy họ chỉ theo hướng dẫn, ≤ 5 lệnh (SC-007); sửa hướng dẫn nếu phải hỏi DE
 - [ ] T058 (2026-10-23: project Singapore; `index` 9.006 bản ghi, 0 lỗi embed, ~14 phút; lần 2 `embedded = 0`; `PgKnowledgeRepository` qua pooler bằng `aie_reader` PASS topic / search / `qa_id`; INSERT, DELETE bị từ chối; `anon` không đọc được; pooler bỏ qua startup `options` → read-only đặt ở cấp role; mở kết nối ~0,4 s, quét ấm ~0,12 s; `evals.run_rag` golden set AIE 24 truy vấn bằng `aie_reader`: recall@5 0,875 — en 1,0, mixed 1,0, không dấu 0,8, vi 0,667; chờ AIE xác nhận dùng được) Kho dùng chung trên Supabase cho AIE (quickstart §4b): `scripts/supabase-setup-ai-db.sh` dựng pgvector + DDL lấy nguyên từ `init-databases.sh` + `scripts/supabase-ai-db-access.sql` (RLS chặn Data API, role chỉ đọc `aie_reader`); `index` vào Supabase; kiểm `PgKnowledgeRepository` của ai-service đọc được qua pooler bằng `aie_reader`, ghi bằng `aie_reader` bị từ chối; gửi riêng URI đọc cho AIE
+
+---
+
+## Phase 9: Phase B — làm sạch kho (DE, Session 2026-11-08) · 1 PR `feat/data-pipeline/qa-relabel` (công cụ + nhãn + nội dung B5, B6)
+
+**Goal**: topic đúng trọng tâm, độ khó đúng rubric, cờ `interview_style`, đủ câu hard đọc được cho senior, không topic
+mỏng (FR-026..FR-029, SC-010)
+
+- [X] T059 [P] `pipeline/qa_relabel_prompt.py`, `pipeline/qa_relabel_command.py`, `settings.py` (`RELABEL_*`): lệnh
+  `relabel` (FR-026); test `tests/test_qa_relabel.py`. Đo 2026-11-08: gpt-6-luna ~4,2k token vào + ~130 ra / cặp
+  (~$0,0005), 60/60 hợp lệ
+- [X] T060 [P] `pipeline/qa_relabel_agreement.py`: lệnh `relabel-score` (FR-027); trang chấm mù 60 cặp (artifact
+  riêng tư, nhãn lưu ở db của trang, mẫu `data/raw/relabel/sample-60-ids.json`, seed 2026); Haiku 5.5 chấm cùng 60 cặp
+  bằng subagent (effort low, 4 lô × 15) → `judgments-claude-haiku-5.5-subagent.jsonl`
+- [x] T061 DE chấm mù 60 cặp → xuất nhãn → `relabel-score --human` → chọn model. **Xong 2026-11-09: chọn gpt-6-luna**
+  (DE chốt). Nhãn DE: 60/60 "main" (không tách được model về topic); độ khó so với DE: luna 52%, Haiku 60%, enrich gốc
+  60%; trên các cặp model đổi độ khó, DE đồng ý gần hết lần tăng (luna 4/4, Haiku 5/6) và 0 lần giảm (0/9, 0/4).
+  luna bỏ 9/60 và hay chuyển topic, Haiku bỏ 14/60; luna chạy 1 lệnh, Haiku cần ~300 lô subagent. DE chọn áp MỌI thay
+  đổi độ khó (kể cả giảm)
+- [x] T062 Chạy `relabel` cả kho bằng gpt-6-luna. **Xong 2026-11-09**: 4.517/4.519 cặp (2 cặp lỗi 429 do key OpenAI hết
+  credit, giữ nhãn enrich), ~18M token vào / 0,8M ra; off+none 517, medium→easy 653, easy→medium 113, hard→medium 25,
+  medium→hard 13, `interview_style=false` 167
+- [x] T063 Áp kết quả (FR-028). **Code xong 2026-11-08** (`pipeline/qa_relabel_decisions.py`,
+  `qa_relabel_apply_command.py`, `data/reviews/qa-drops.json` loại `cr-lz-python-basics-8979143a`, `interview_style`
+  vào metadata, contracts cập nhật; test `tests/test_qa_relabel_decisions.py`). Golden DE + AIE (kể cả PR #49) hiện
+  không trỏ tới cặp crawl nào. Chạy thử với 60 cặp luna: bỏ 52 (duyệt 27/10) + 1 (DE) + 9 (`none`); áp độ khó duyệt
+  27/10 làm 5 topic middle/senior còn < 2 cặp hard → B5 bù. Review code 2026-11-08
+  (`plans/reports/code-reviewer-261108-2133-005-qa-relabel.md`) đã sửa: H1 chấm mọi cặp qua luật mức cặp trước dedup
+  (4.519 cặp, gồm ~160 cặp trùng câu hỏi), H2/M1 không dừng cả lần chạy, M2 golden chặn mọi nguồn bỏ, M3 thiếu CSV duyệt
+  27/10 là lỗi, M4/M5 lọc judgment hỏng/cũ, M6 `records_in` tính cả cặp bỏ, M7 in khi áp `decisions.json` + file hỏng
+  là lỗi rõ. Chưa sửa (chấp nhận): prompt chưa có dấu phân cách nội dung (đổi prompt làm mất bộ so 60 cặp; đầu ra đã
+  kiểm enum + catalog). **Áp 2026-11-09** (`relabel-apply --model gpt-6-luna`): bỏ 562 (luna 509, duyệt 27/10 52, DE
+  1), đổi topic 224, `interview_style=false` 149; `validate`: 3.979/4.664 hợp lệ, easy 2.460 / medium 1.342 / hard
+  177; còn cảnh báo `ai.llm.context-engineering` < 2 cặp (B6 bù) và 6 topic middle/senior thiếu hard (B5 bù)
+- [ ] T064 **Sau T065** (đã xong: `validate --strict` 0 lỗi 2026-11-09)
+  `process` → mẫu mù ~100 cặp sau áp (SC-010) → báo AIE → `index` (DE đồng ý, từ checkout `main` mới nhất;
+  AIE khởi động lại ai-service để nạp lại BM25) → AIE thêm lọc `interview_style` ở ngân hàng câu hỏi.
+  **2026-11-13**: duyệt 14 câu hard bù (worker Sonnet, câu mồi `dns.lookup` bị bắt, critical): ok 13, sửa
+  `de-qa-1323`; trích dẫn 101/101 found; `validate --strict` 0 lỗi; `process` 8.356 bản ghi; senior ≥ 3 câu hard qua
+  bộ lọc 58/58. Mẫu SC-010: 100 cặp crawl ngẫu nhiên sau áp (seed 20261113, trừ mẫu 60) + 4 câu mồi gán sai topic
+  khác track, worker Sonnet chấm mù main/related/off (không phải DE). Câu mồi 4/4 "off". 100 cặp thật: main 77,
+  related 23, off 0 → **chưa đạt 85% nếu chỉ tính main** (main + related 100%); 9/23 related là câu JS cơ bản ở
+  `fe.js.core-closure-this` (catalog không có topic JS chung). luna cũng chấm related 21/23 cặp đó (relabel-apply
+  giữ topic cho related, chỉ chuyển off). **DE chốt 2026-11-13: SC-010 tính main + related → đạt (100/100)**. Còn lại
+  của T064: merge PR → `index` từ `main` (cần credit OpenAI) → báo AIE
+- [x] T065 [P] B5 (FR-029). **2026-11-08, đổi cách làm (DE chốt): tách đôi** mỗi câu hard dài thành 2 cặp ngắn, mỗi
+  cặp chỉ giữ phần đáp án nó hỏi (chữ lấy từ đáp án gốc), nửa a giữ `qa_id` cũ, nửa b `qa_id` mới; DE duyệt lại
+  `reviewed_by`; bảng ánh xạ cũ → 2 nửa để AIE cập nhật `relevant` trong `rag_golden*.json` (57 id hard đang là đáp
+  án đúng). Lý do: rút gọn không tăng số câu (senior vẫn 6/58 topic đủ 3 câu hard). **Đính chính 2026-11-09**: con số
+  "rút gọn mất 162 ý" (2026-11-08) sai do mốc lệch (chấm câu gốc với câu mới = chính nó); đo lại cùng thước (luna,
+  "câu trả lời đầy đủ có cần ý này không", 2 lần) trên lô AI: câu gốc 74–80%, rút gọn 80%, tách đôi 80–81% ý được hỏi.
+  Kết quả tách đôi 2026-11-09: 131/131 câu tách được, đáp án mỗi nửa chép nguyên văn khối của đáp án gốc (phủ
+  99–100%); 262 nửa, 20 nửa bị gắn cờ ở cả 2 lần chấm (13 không còn hard → đề xuất nhãn medium, 11 hỏi < 60% ý); senior
+  ≥ 3 câu hard: **54/58** (còn thiếu `fe.web.security`, `ai.llm.evaluation-hallucination`,
+  `fe.react.rendering-performance`, `node.core.event-loop`: cần ~6 câu hard mới).
+  **Duyệt + sửa 2026-11-09**: worker duyệt 40 nửa (20 luna gắn cờ + 20 ngẫu nhiên, câu mồi bị bắt), sửa 26 nửa, 12 nửa
+  hạ medium; DE chọn không duyệt thêm 222 nửa còn lại. Gộp vào seed (`split_from`, nửa b dải 1300–1599, NOTICE,
+  `data/reviews/qa-split-map.json` cho AIE); DE chốt `approve-seed --reviewer minhtuann1102` cho 316 cặp mới/đổi.
+  Sau relabel (luna hạ 25 câu hard crawl) còn thiếu: senior ≥ 3 hard 52/58, 4 topic middle/senior < 2 hard →
+  worker viết 14 câu hard bù (78/78 trích dẫn found), gộp vào `hard-*.json` dải thứ hai, `approve-seed` (DE chốt).
+  **Kết quả 2026-11-09**: `validate --strict` 0 lỗi; 4.178 cặp hợp lệ (easy 2.478, medium 1.390, hard 310); topic ≥ 3
+  câu đọc được ở độ khó của level: senior **58/58** (trước 6/58), middle 59/80 (54), junior 51/63 (50), fresher 31/37
+  (34, giảm vì relabel bỏ/chuyển câu easy); `process` 8.356 bản ghi. Chưa `index`
+- [x] T066 [P] B6: bù 12 topic < 3 cặp (10 topic AI + `java.spring.transaction`, `py.async.celery-queues`): ≥ 3 câu
+  đọc được ở độ khó của mỗi level của topic (FR-029); seed curated, `source="self"`, duyệt theo quy trình T057.
+  **Nháp xong 2026-11-09**: 54 cặp (18 easy, 36 medium), mỗi cặp 3–6 trích dẫn; `verify_quotes.py` tải lại trang:
+  317/317 found. Duyệt từng cặp (câu mồi 2/2 bị bắt): ok 44, fix 8; worker sửa 38 cặp (MCP nêu cả revision
+  2025-11-25 và 2026-07-28), trích dẫn 306/306 found. Gộp vào `ai.json` (45), `backend-java.json` (6),
+  `backend-python.json` (3); `approve-seed` (DE chốt). Báo cáo `plans/reports/qa-review-261109-1624-phase-b-b5-b6.md`
+- [x] T067 [P] FR-030 (2026-11-13, DE yêu cầu): lệnh `scope-check-prepare` / `scope-check-score`
+  (`pipeline/qa_scope_check_*.py`, test `tests/test_qa_scope_check.py`); hiệu chỉnh trên 40 nửa đã duyệt; chạy 222 nửa
+  chưa duyệt bằng worker Sonnet + câu mồi; sửa theo thứ tự chuyển khối sang nửa anh em → cắt khối → mở rộng câu hỏi
+  (≤ 200 ký tự); chấm lại, `validate --strict`, senior 58/58, `process`. Kế hoạch `plans/261113-1006-005-split-scope-check/`
+  **Kết quả 2026-11-13**: hiệu chỉnh prompt v2 recall 89%, precision 71%. 222 nửa: judge cờ 127, quét trùng với nửa
+  anh em thêm 5; câu mồi judge bắt 7/8, quét trùng 8/8. Worker sửa (`fixer-instructions.md`, chỉ xóa chữ, kiểm tất
+  định): 112 nửa đổi đáp án (2 nhận khối chuyển từ nửa anh em), bác 19 cờ, không đổi câu hỏi; đánh số lại 11 nửa.
+  Chấm lại các nửa đã đổi: 54 ý trong 40 nửa bị cờ = 31 ý lượt 1 đã cho `asked` (một phần có thể là lượt 1
+  bỏ sót thật) + 23 ý worker cố ý giữ; dừng, không vòng 2 (chỉ nửa đã sửa được chấm lại, chấm thêm sẽ cờ tỉ lệ tương tự). Đọc tay 5 nửa cắt "không chắc": khôi phục 1318 (cắt ý được hỏi).
+  Review Opus 20 nửa cắt ngẫu nhiên: 0 cắt quá tay, 2 khó quyết. Đánh số lại thêm 6 nửa (tiêu đề in đậm / "Vấn đề N").
+  `validate --strict` 0 lỗi; câu hỏi/độ khó/topic không đổi nên senior 58/58 giữ nguyên; `process` 8.356 bản ghi.
+  Chưa `index`.
 
 ---
 

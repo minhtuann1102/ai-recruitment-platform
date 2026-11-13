@@ -29,6 +29,7 @@ Hợp đồng chung DE (ghi) ↔ AIE (đọc). Schema bảng: [rag-design.md §3
 | `source_url` | URL nguồn hoặc `null` khi `source = "self"` |
 | `license` | giá trị `license` của cặp |
 | `synthetic` | bool |
+| `interview_style` | bool *(thêm 2026-11-08, Phase B, FR-028)*: `false` = câu đố / trắc nghiệm / "đoạn code in ra gì" / bắt viết code dài; ngân hàng câu hỏi của AIE NÊN bỏ qua, vẫn dùng làm bằng chứng RAG. Seed curated và cặp chưa chấm: `true` |
 
 ## Ngữ nghĩa ghi (chỉ pipeline DE)
 
