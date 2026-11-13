@@ -64,9 +64,11 @@ halves with answer points the question does not ask; a duplicate scan against th
 planted canaries were caught 7/8 by the judge and 8/8 by the scan. LLM fixers edited 112 answers by
 deletion only (2 also received a block moved from their sibling half), rejected 19 flags, and changed no
 question; list numbering was renumbered in 11 halves. A second judge pass on the changed halves flagged 54
-points in 40 halves: 31 on text the first pass had marked asked (judge noise), 23 the fixers kept on purpose;
-none on removed text, so no second round. Known risk: fixers may have cut points a question does ask (1 of
-5 spot-checked trims was restored). These halves were not re-read by a human; reviewed_by still names the
+points in 40 halves: 31 on text the first pass had marked asked (some may be real misses of the first pass),
+23 on points the fixers kept on purpose; no second fix round, because only changed halves got a second pass
+and another pass would flag at a similar rate. Known risk: fixers may have cut points a question does ask; a
+reviewer (Claude Opus) read 20 random trims: 0 over-trimmed, 2 borderline; separately 1 of 5 trims the
+fixers marked unsure was restored (de-qa-1318). List numbering was later renumbered in 6 more halves. These halves were not re-read by a human; reviewed_by still names the
 owner who approved the split. The 54 easy/medium pairs were reviewed pair by pair with AI assistance and source quotes; the 14 new
 hard pairs in the second ranges were content-reviewed pair by pair on 2026-11-13 with AI assistance and
 source quotes (13 ok, de-qa-1323 rewritten; 101/101 quotes found).

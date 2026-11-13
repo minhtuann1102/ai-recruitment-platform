@@ -258,8 +258,9 @@ mỏng (FR-026..FR-029, SC-010)
   **Kết quả 2026-11-13**: hiệu chỉnh prompt v2 recall 89%, precision 71%. 222 nửa: judge cờ 127, quét trùng với nửa
   anh em thêm 5; câu mồi judge bắt 7/8, quét trùng 8/8. Worker sửa (`fixer-instructions.md`, chỉ xóa chữ, kiểm tất
   định): 112 nửa đổi đáp án (2 nhận khối chuyển từ nửa anh em), bác 19 cờ, không đổi câu hỏi; đánh số lại 11 nửa.
-  Chấm lại các nửa đã đổi: 54 ý trong 40 nửa bị cờ = 31 ý lượt 1 đã cho `asked` (nhiễu judge) + 23 ý worker cố ý giữ;
-  0 trên chữ đã cắt → dừng, không vòng 2. Đọc tay 5 nửa cắt "không chắc": khôi phục 1318 (cắt ý được hỏi).
+  Chấm lại các nửa đã đổi: 54 ý trong 40 nửa bị cờ = 31 ý lượt 1 đã cho `asked` (một phần có thể là lượt 1
+  bỏ sót thật) + 23 ý worker cố ý giữ; dừng, không vòng 2 (chỉ nửa đã sửa được chấm lại, chấm thêm sẽ cờ tỉ lệ tương tự). Đọc tay 5 nửa cắt "không chắc": khôi phục 1318 (cắt ý được hỏi).
+  Review Opus 20 nửa cắt ngẫu nhiên: 0 cắt quá tay, 2 khó quyết. Đánh số lại thêm 6 nửa (tiêu đề in đậm / "Vấn đề N").
   `validate --strict` 0 lỗi; câu hỏi/độ khó/topic không đổi nên senior 58/58 giữ nguyên; `process` 8.356 bản ghi.
   Chưa `index`.
 

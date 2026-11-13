@@ -558,7 +558,7 @@
       "https://prometheus.io/docs/practices/histograms/"
     ],
     "question": "Dashboard p99 latency toàn hệ thống trên Prometheus đang lấy trung bình p99 từ summary của từng pod. Vì sao cách này sai, và bạn instrument lại metric latency thế nào cho đúng?",
-    "answer": "**Vấn đề 2: tính percentile sai**\n- Summary tính quantile ngay phía client, mỗi pod ra một giá trị riêng. Các quantile này **không aggregate được**: lấy trung bình chúng là vô nghĩa về thống kê. p99 toàn hệ thống khác trung bình p99 của từng pod, vì pod ít traffic kéo lệch kết quả.\n- Dùng histogram: cộng bucket của mọi pod trước, rồi mới tính quantile.\n\n```promql\nhistogram_quantile(0.99,\n  sum by (le) (rate(http_request_duration_seconds_bucket[5m])))\n```\n\n- Sai số của ước lượng nằm trong độ rộng của bucket chứa quantile, nên đặt bucket dày quanh ngưỡng SLO (ví dụ 300 ms).",
+    "answer": "**Vấn đề 1: tính percentile sai**\n- Summary tính quantile ngay phía client, mỗi pod ra một giá trị riêng. Các quantile này **không aggregate được**: lấy trung bình chúng là vô nghĩa về thống kê. p99 toàn hệ thống khác trung bình p99 của từng pod, vì pod ít traffic kéo lệch kết quả.\n- Dùng histogram: cộng bucket của mọi pod trước, rồi mới tính quantile.\n\n```promql\nhistogram_quantile(0.99,\n  sum by (le) (rate(http_request_duration_seconds_bucket[5m])))\n```\n\n- Sai số của ước lượng nằm trong độ rộng của bucket chứa quantile, nên đặt bucket dày quanh ngưỡng SLO (ví dụ 300 ms).",
     "difficulty": "hard",
     "split_from": "de-qa-1213",
     "reviewed_by": "minhtuann1102"
