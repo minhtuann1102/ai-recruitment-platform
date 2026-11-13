@@ -1,0 +1,50 @@
+[
+  {
+    "qa_id": "de-qa-0100",
+    "topic_id": "py.async.celery-queues",
+    "question": "Giải thích vai trò của broker, worker và result backend trong Celery, và luồng đi của một task từ lúc gọi delay đến khi lấy được kết quả.",
+    "answer": "- Broker: một dịch vụ message riêng dùng để gửi và nhận message. Celery giao tiếp qua message, broker làm trung gian giữa client và worker; client không gọi worker trực tiếp.\n- Worker: các process chuyên trách, liên tục theo dõi queue để lấy việc (mỗi đơn vị việc là một task) và thực thi task.\n- Result backend: nơi lưu hoặc gửi state và kết quả của task. Kết quả không được bật mặc định; chỉ khi cấu hình result backend thì mới theo dõi được state hoặc lấy được return value.\n- Luồng của một task:\n  1. Client gọi delay, là shortcut của apply_async. Celery tạo một message và đưa vào queue trên broker; lời gọi trả về ngay một AsyncResult.\n  2. Broker giao message đó cho một worker.\n  3. Worker chạy task, rồi ghi state cùng return value (hoặc exception) vào result backend nếu đã cấu hình.\n  4. Client dùng AsyncResult để kiểm tra state, chờ task xong hoặc lấy return value; nếu task lỗi thì lấy được exception và traceback.",
+    "difficulty": "medium",
+    "language": "vi",
+    "tags": ["celery", "broker", "worker", "result-backend"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.celeryq.dev/en/stable/getting-started/introduction.html",
+      "https://docs.celeryq.dev/en/stable/getting-started/first-steps-with-celery.html"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0101",
+    "topic_id": "py.async.celery-queues",
+    "question": "Trong Celery, khi task gọi retry thì điều gì xảy ra với message và task id? Muốn tự động retry với exponential backoff thì cấu hình thế nào?",
+    "answer": "- Retry thủ công: trong task bắt lỗi rồi raise self.retry(exc=exc). Khi gọi retry, Celery gửi một message mới với cùng task id, vào cùng queue với task ban đầu. Bản thân retry() raise một exception nên code phía sau lời gọi không được chạy.\n- Số lần retry tối đa được giới hạn bởi max_retries; đặt None nghĩa là retry mãi. Hết lượt thì task bỏ cuộc, không retry nữa và kết thúc ở trạng thái lỗi.\n- Retry tự động: khai báo autoretry_for với danh sách exception (ví dụ lỗi request tới API); nếu task ném các exception đó trong lúc chạy thì sẽ tự được retry. Mặc định không exception nào được autoretry.\n- Exponential backoff: thêm retry_backoff=True, delay giữa các lần retry tăng theo cấp số nhân. Mặc định backoff có thêm jitter ngẫu nhiên để các task không chạy lại cùng một lúc, và delay bị chặn tối đa 10 phút; hai hành vi này chỉnh được bằng retry_jitter và retry_backoff_max.",
+    "difficulty": "medium",
+    "language": "vi",
+    "tags": ["celery", "retry", "backoff", "autoretry"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": ["https://docs.celeryq.dev/en/stable/userguide/tasks.html"],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0102",
+    "topic_id": "py.async.celery-queues",
+    "question": "Sau khi gọi delay, trạng thái task Celery xem qua AsyncResult luôn là PENDING dù worker đã chạy xong. Nguyên nhân có thể là gì và kiểm tra thế nào?",
+    "answer": "- Bản chất PENDING: Celery không cập nhật state lúc gửi task, và mọi task id chưa có lịch sử đều được coi là PENDING. Vì vậy PENDING thực ra nghĩa là đang chờ hoặc không biết; nếu state không được lưu ở đâu cả thì AsyncResult sẽ luôn trả về PENDING.\n- Nguyên nhân thường gặp:\n  + Chưa cấu hình result backend: kết quả không được bật mặc định, muốn theo dõi state phải cấu hình backend.\n  + Task bật ignore_result, hoặc setting toàn cục task_ignore_result đang bật: worker bỏ qua việc cập nhật state.\n  + Client cấu hình backend khác với worker nên client không nhận được kết quả.\n  + Còn một worker cũ đang chạy với cấu hình backend khác và cướp task.\n- Cách kiểm tra: in result.backend ở phía client và so với cấu hình backend của worker; xem option ignore_result của task và setting task_ignore_result; đảm bảo worker cũ đã tắt hẳn trước khi chạy worker mới.",
+    "difficulty": "medium",
+    "language": "vi",
+    "tags": ["celery", "asyncresult", "result-backend", "monitoring"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.celeryq.dev/en/stable/getting-started/first-steps-with-celery.html",
+      "https://docs.celeryq.dev/en/stable/userguide/tasks.html"
+    ],
+    "reviewed_by": "minhtuann1102"
+  }
+]

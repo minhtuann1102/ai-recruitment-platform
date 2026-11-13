@@ -38,7 +38,25 @@ hard-java.json ............. de-qa-1100 .. de-qa-1149
 hard-ai.json ............... de-qa-1150 .. de-qa-1199
 hard-devops.json ........... de-qa-1200 .. de-qa-1249
 hard-frontend.json ......... de-qa-1250 .. de-qa-1299
+Second ranges (Phase B 2026-11-09: second halves of split pairs, then new hard pairs for thin topics):
+hard-nodejs.json ........... de-qa-1300 .. de-qa-1349
+hard-python.json ........... de-qa-1350 .. de-qa-1399
+hard-java.json ............. de-qa-1400 .. de-qa-1449
+hard-ai.json ............... de-qa-1450 .. de-qa-1499
+hard-devops.json ........... de-qa-1500 .. de-qa-1549
+hard-frontend.json ......... de-qa-1550 .. de-qa-1599
 
 Hard pairs are original Vietnamese text written with Claude, grounded in the crawled advanced
 sources and official docs listed in each pair's "grounding_urls"; source "self", license CC-BY-4.0,
-every pair read by a human reviewer (reviewed_by).
+every original hard pair read by a human reviewer (reviewed_by); see the Phase B note below for later pairs.
+
+Phase B (spec 005 Session 2026-11-08/09): each long hard pair (question over 200 characters) was split
+into two short pairs; "split_from" names the original qa_id, the first half keeps it, and each answer is
+copied (near-verbatim, list numbering only) from the reviewed original answer; some halves are labeled
+"medium". ai.json, backend-java.json and backend-python.json hold new easy/medium pairs written with Claude
+for thin topics, grounded in official docs ("grounding_urls"), source "self", license CC-BY-4.0.
+Mapping original -> halves: ../../reviews/qa-split-map.json.
+Review level of Phase B pairs (reviewed_by filled by the owner's decision, Session 2026-11-09): 40 of the
+262 split halves were reviewed pair by pair (../../reviews/qa-split-reviewed.json), the other 222 were not
+read; the 54 easy/medium pairs were reviewed pair by pair with AI assistance and source quotes; the 14 new
+hard pairs in the second ranges had their source quotes checked but no content review yet.

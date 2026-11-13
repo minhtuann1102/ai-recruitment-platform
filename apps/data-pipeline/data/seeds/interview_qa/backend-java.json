@@ -1,0 +1,107 @@
+[
+  {
+    "qa_id": "de-qa-0200",
+    "topic_id": "java.spring.transaction",
+    "question": "Theo mặc định, @Transactional sẽ rollback khi method ném ra loại exception nào? Muốn rollback cả với checked exception thì cấu hình thế nào?",
+    "answer": "- Spring quyết định có rollback hay không khi một exception chưa được xử lý ném ra khỏi method transactional (đi ngược lên call stack).\n- Mặc định: RuntimeException (unchecked exception) và Error làm transaction bị rollback. Checked exception (ví dụ IOException hoặc exception nghiệp vụ kế thừa Exception) thì không gây rollback, transaction vẫn commit phần đã làm.\n- Muốn rollback cả checked exception thì khai báo rollback rules ngay trên @Transactional:\n  + rollbackFor: các exception phải gây rollback, ví dụ rollbackFor = Exception.class hoặc một exception nghiệp vụ cụ thể.\n  + rollbackForClassName: tương tự nhưng khai báo theo pattern tên exception thay vì theo kiểu.",
+    "difficulty": "easy",
+    "language": "vi",
+    "tags": ["spring", "transactional", "rollback-rules", "checked-exception"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/rolling-back.html",
+      "https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/annotations.html",
+      "https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/transaction/annotation/Transactional.html"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0201",
+    "topic_id": "java.spring.transaction",
+    "question": "Thuộc tính readOnly trong @Transactional dùng để làm gì? Đặt readOnly bằng true có chắc chắn chặn được mọi thao tác ghi không?",
+    "answer": "- readOnly là cờ boolean cho biết transaction thực chất chỉ đọc dữ liệu, để tầng bên dưới có thể áp dụng các tối ưu tương ứng lúc chạy. Mặc định transaction là read-write (readOnly bằng false). Thường đặt cho các method chỉ truy vấn.\n- Không chắc chắn chặn ghi: readOnly chỉ là gợi ý (hint) cho transaction subsystem, không nhất thiết làm thao tác ghi bị lỗi. Transaction manager nào không hiểu hint này sẽ âm thầm bỏ qua chứ không ném exception.\n- Với JDBC, hint chuẩn là Connection.setReadOnly(true) và có chặn ghi hay không tùy driver/DB; muốn ép chặn thì bật chế độ read-only tường minh (ví dụ enforceReadOnly của DataSourceTransactionManager).\n- Vì vậy không nên coi readOnly là cơ chế bảo vệ dữ liệu; method read-only vẫn phải được viết để không ghi.",
+    "difficulty": "easy",
+    "language": "vi",
+    "tags": ["spring", "transactional", "readonly"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/transaction/annotation/Transactional.html",
+      "https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/annotations.html",
+      "https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/jdbc/datasource/DataSourceTransactionManager.html"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0202",
+    "topic_id": "java.spring.transaction",
+    "question": "Isolation level của @Transactional mặc định là gì? Hãy kể các mức isolation và hiện tượng đọc mà mỗi mức ngăn được.",
+    "answer": "- Mặc định @Transactional dùng Isolation.DEFAULT, nghĩa là dùng isolation level mặc định của database bên dưới, Spring không tự ép một mức cụ thể.\n- Các mức có thể khai báo, từ thấp đến cao:\n  + READ_UNCOMMITTED: không ngăn hiện tượng nào; dirty read, non-repeatable read và phantom read đều có thể xảy ra.\n  + READ_COMMITTED: ngăn dirty read; non-repeatable read và phantom read vẫn có thể xảy ra.\n  + REPEATABLE_READ: ngăn dirty read và non-repeatable read; phantom read vẫn có thể xảy ra.\n  + SERIALIZABLE: ngăn cả ba hiện tượng dirty read, non-repeatable read và phantom read.\n- Vì vậy nếu không khai báo isolation, transaction chạy theo đúng mức mặc định của database đang dùng; muốn mức khác thì khai báo rõ trên @Transactional.\n- Các hiện tượng ở trên là mức tối thiểu theo chuẩn; DB cụ thể có thể chặt hơn (ví dụ PostgreSQL REPEATABLE READ không cho phantom read).",
+    "difficulty": "easy",
+    "language": "vi",
+    "tags": ["spring", "transactional", "isolation-level"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/annotations.html",
+      "https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/transaction/annotation/Isolation.html",
+      "https://www.postgresql.org/docs/current/transaction-iso.html"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0203",
+    "topic_id": "java.spring.transaction",
+    "question": "Một method không có @Transactional gọi trực tiếp một method @Transactional khác trong cùng class, nhưng khi lỗi xảy ra dữ liệu không rollback. Vì sao, và sửa thế nào?",
+    "answer": "- Nguyên nhân: mặc định Spring xử lý @Transactional ở proxy mode. Nơi khác gọi vào bean thực chất là gọi qua proxy, và chỉ lời gọi từ bên ngoài đi qua proxy mới bị intercept để mở, commit hoặc rollback transaction.\n- Khi một method gọi method khác trong cùng class (self-invocation, qua this tường minh hoặc ngầm định), lời gọi đi thẳng vào đối tượng gốc và bỏ qua advice. Vì vậy dù method được gọi có @Transactional, lúc chạy không có transaction thật nào được tạo, nên khi lỗi xảy ra không có gì để rollback.\n- Cách sửa:\n  + Tốt nhất là refactor để không còn self-invocation: tách method transactional sang một bean khác rồi gọi qua bean đó, hoặc đặt @Transactional ở chính method được gọi từ bên ngoài để cả luồng nằm trong một transaction.\n  + Self injection (phương án thay thế khi không refactor được): inject tham chiếu tới chính bean (là proxy) và gọi method qua tham chiếu đó thay vì qua this.\n  + Dùng AspectJ mode (compile-time hoặc load-time weaving): advice được đưa thẳng vào bytecode chứ không qua proxy, nên self-invocation cũng có transaction.",
+    "difficulty": "medium",
+    "language": "vi",
+    "tags": ["spring", "transactional", "self-invocation", "proxy"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/annotations.html",
+      "https://docs.spring.io/spring-framework/reference/core/aop/proxying.html"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0204",
+    "topic_id": "java.spring.transaction",
+    "question": "Cần một bước con có thể rollback riêng mà không hủy cả transaction lớn: bạn chọn propagation REQUIRES_NEW hay NESTED? So sánh cơ chế và rủi ro của hai cách.",
+    "answer": "- REQUIRES_NEW: bước con chạy trong một physical transaction độc lập, dùng resource transaction khác với transaction ngoài. Hai bên commit hoặc rollback độc lập: rollback của bước con không ảnh hưởng transaction ngoài, lock của bước con được nhả ngay khi nó kết thúc. Hệ quả: bước con đã commit thì vẫn giữ dù sau đó transaction ngoài rollback.\n  Rủi ro: transaction ngoài vẫn giữ connection trong khi bước con phải lấy thêm một connection mới. Nhiều thread cùng làm vậy có thể làm cạn connection pool và gây deadlock.\n- NESTED: dùng một physical transaction duy nhất với các savepoint. Bước con lỗi thì chỉ rollback về savepoint của nó, transaction ngoài vẫn chạy tiếp. Vì chung một transaction nên phần của bước con chỉ thật sự được lưu khi transaction ngoài commit; ngoài rollback thì mất cả.\n  Giới hạn: NESTED thường map vào JDBC savepoint nên chỉ dùng được với JDBC resource transaction.\n- Với cả hai cách, caller phải catch exception của bước con; nếu để exception lan ra thì transaction ngoài cũng rollback.\n- Chọn: cần bước con được lưu bất kể kết quả bên ngoài (ví dụ ghi audit) thì dùng REQUIRES_NEW; cần thử một bước, lỗi thì bỏ qua nhưng vẫn cùng commit hoặc rollback với giao dịch lớn thì dùng NESTED.",
+    "difficulty": "medium",
+    "language": "vi",
+    "tags": ["spring", "transactional", "propagation", "requires-new", "nested"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/tx-propagation.html",
+      "https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/rolling-back.html"
+    ],
+    "reviewed_by": "minhtuann1102"
+  },
+  {
+    "qa_id": "de-qa-0205",
+    "topic_id": "java.spring.transaction",
+    "question": "Service A có @Transactional mặc định gọi sang service B khai báo isolation SERIALIZABLE, nhưng B vẫn chạy với isolation của A. Vì sao, và xử lý thế nào?",
+    "answer": "- Propagation mặc định là REQUIRED: nếu chưa có transaction thì tạo mới, nếu đã có thì tham gia vào transaction ngoài. Ở đây A đã mở transaction nên B chỉ tham gia transaction của A.\n- Isolation chỉ áp dụng cho transaction được bắt đầu mới (REQUIRED khi chưa có transaction, hoặc REQUIRES_NEW). Transaction tham gia sẽ nhận đặc tính của scope ngoài, Spring âm thầm bỏ qua isolation, timeout và readOnly khai báo ở B. Kết quả là B chạy với isolation của A.\n- Phát hiện: bật cờ validateExistingTransaction trên transaction manager. Khi đó khai báo isolation khác với transaction đang có sẽ bị từ chối thay vì bị bỏ qua.\n- Xử lý:\n  + Đặt isolation cần thiết ở method mở transaction ngoài cùng (A, hoặc method đầu vào của use case).\n  + Nếu B thật sự cần isolation riêng thì cho B dùng REQUIRES_NEW: B chạy trong transaction độc lập với isolation, timeout, readOnly của riêng nó, nhưng phải chấp nhận B commit hoặc rollback tách khỏi A.",
+    "difficulty": "medium",
+    "language": "vi",
+    "tags": ["spring", "transactional", "isolation-level", "propagation"],
+    "source": "self",
+    "license": "CC-BY-4.0",
+    "synthetic": true,
+    "grounding_urls": [
+      "https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/tx-propagation.html",
+      "https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/transaction/annotation/Transactional.html"
+    ],
+    "reviewed_by": "minhtuann1102"
+  }
+]
