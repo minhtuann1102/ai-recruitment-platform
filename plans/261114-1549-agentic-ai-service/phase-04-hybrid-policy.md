@@ -9,7 +9,7 @@
 - Phase 01 (ngưỡng, `--runs`, `sim_runs`), 03 (`EvaluationInput`, `evaluator_output_models.py`)
 
 ## Overview
-- Priority: P2. Status: pending. Nhánh: `thang/hybrid-policy`. Effort 2d.
+- Priority: P2. Status: code + test xong (cờ mặc định `rules`); đo thật [BLOCKED-KEY]. Nhánh: `thang/hybrid-policy`. Effort 2d.
 - Cờ `POLICY_MODE=rules` (mặc định) | `hybrid`. Không có `shadow` (M1): sim `hybrid` đã ghi phản thực của luật (`policy_action`).
 - Cách A: thêm trường vào output Evaluator, prompt `evaluator.v9.md`, lớp `EvaluatorOutputV9` (không thêm required vào V4).
 - Ghi chú (hạng mục 4) **tách sang phase 07 tùy chọn** (H2): context ghi chú đi vào chính lời gọi chấm điểm → rủi ro
@@ -131,15 +131,24 @@ def choose_decision(ev, proposal, state, plan, phase, topic, topics, pos, req) -
     `[ai-service] feat: policy lai sau cờ POLICY_MODE`.
 
 ## Todo List
-- [ ] Refactor models_evaluation + turn_decision
-- [ ] Ghim v8 trong LlmEvaluator + test pinning + v9→v99
-- [ ] action_budget/allowed_actions
-- [ ] V9 output + context + prompt
-- [ ] validate_decision (bảng H8) + choose_decision + TurnInfo + metrics
-- [ ] Sim recorder passthrough + khóa + agreement/overrule
-- [ ] Test bước 7
-- [ ] [BLOCKED-KEY] gate v9 vs v8; sim rules/hybrid × 3 runs
-- [ ] Docs + context + báo FSD, PR
+- [x] Refactor models_evaluation + turn_decision
+- [x] Ghim v8 trong LlmEvaluator (đã có từ phase 03) + test pinning + v9→v99
+- [x] action_budget/allowed_actions
+- [x] V9 output + context + prompt
+- [x] validate_decision (bảng H8) + choose_decision + TurnInfo + metrics
+- [x] Sim recorder passthrough + khóa + agreement/overrule
+- [x] Test bước 7 (`test_policy_hybrid`, `test_evaluator_prompt_pinning`, `test_prompt_injection_agentic_guards`, `test_sim_hybrid_recording`)
+- [ ] [BLOCKED-KEY] gate v9 vs v8; sim rules/hybrid × 3 runs (khóa OpenRouter hết hạn; chưa có số, không bịa)
+- [x] Docs + context; [ ] báo FSD (gộp với phase 05), PR
+
+## Ghi chú triển khai (lệch spec, có lý do)
+- `hint` không có focus hợp lệ vẫn hợp lệ (luật cũ cũng trả `hint` focus `None`); chỉ `follow_up` thiếu focus mới bác `no_valid_focus`.
+- `next_focus` còn bị bác khi trùng `covered` (ý ứng viên đã nêu), không chỉ `focus_used`.
+- `agreement`/`overrule_rate` bỏ lượt `forced` (policy_action = null, không phải do bác); báo riêng `forced_turns`.
+- `EvaluatorOutputV9` dùng `str`/`int` lỏng + mặc định (không `Literal`): giá trị lạ phải thành "bác đề xuất", không thành lỗi schema làm degraded cả lượt chấm.
+- `evaluate_turn` trả bộ 4 (thêm proposal). `tests/test_interviewer_v3.py`, `test_rag_turn_retrieval.py` patch `app.turn_decision.decide` (hàm dời khỏi turn_engine).
+- Sau review: `proposed_action` chuẩn hóa (`invalid`), `overrule_rate_llm` là chỉ số gate, câu trả lời khớp injection coi là `sensitive_kind`, `action_reason` chỉ khi `decided_by = llm`, validator V9 ép kiểu delta, cảnh báo `policy_prompt_mismatch`.
+- `--policy-context default` ở `run_evaluator`/`run_evaluator_sourced` dùng ngữ cảnh trung tính (`evals/policy_context_support.py`).
 
 ## Success Criteria (reply mục 8, stdev theo plan.md mục 8)
 - Tiền đề: ngưỡng đã hiệu chỉnh ở 01.

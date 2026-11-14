@@ -24,6 +24,7 @@ from app.models_interview import PlanTopic
 from evals.evaluator_metrics import (CRITERIA, agreement, consensus, consistency, ordering, quadratic_kappa,
                                      rate)
 from evals.label_sheet import SETS, load_golden
+from evals.policy_context_support import apply_policy_context
 from evals.lookup_support import attach_lookup, load_lookup_retriever, lookup_fields, lookup_summary
 from evals.stt_noise import inherit_labels, plain_samples, stt_samples, stt_summary
 
@@ -39,12 +40,12 @@ def to_input(s: dict) -> EvaluationInput:
 
 
 async def run_all(samples: List[dict], runs: int, prompt: str, collector: UsageCollector,
-                  concurrency: int = 4, lookup: bool = False) -> Dict[str, List[dict]]:
+                  concurrency: int = 4, lookup: bool = False, policy_context: str = "none") -> Dict[str, List[dict]]:
     evaluator, sem = LlmEvaluator(get_gateway(), prompt_version=prompt), asyncio.Semaphore(concurrency)
     retriever = await load_lookup_retriever() if lookup else None
 
     async def one(s: dict) -> dict:
-        inp = to_input(s)
+        inp = apply_policy_context(to_input(s), policy_context)
         tool = attach_lookup(retriever, s, inp)  # trang thai theo lan chay: moi lan mot TurnLookup moi
         async with sem:
             raw, ev = await evaluator.evaluate_with_raw(inp, collector)
@@ -127,6 +128,8 @@ def main() -> None:
     parser.add_argument("--labels-dir", type=Path, help="mac dinh: thu muc nhan cua --set")
     parser.add_argument("--out", type=Path)
     parser.add_argument("--lookup", action="store_true", help="bat Evaluator tra cuu kho (can RAG + AI_DB_URL)")
+    parser.add_argument("--policy-context", choices=["none", "default"], default="none",
+                        help="default: them policy_context trung tinh vao dau vao (chi prompt v9 render), de gate v9 vs v8")
     parser.add_argument("--stt", nargs="?", const="noisy", choices=["noisy", "plain"],
                         help="mau nhieu STT kem ban sach (NFR-AI-QUAL17); plain = thuat ngu dung, mat dau cau")
     args = parser.parse_args()
@@ -138,7 +141,8 @@ def main() -> None:
     if noisy:
         samples = [s for s in samples if s["id"] in {n["stt_of"] for n in noisy}] + noisy
     collector = UsageCollector()
-    results = asyncio.run(run_all(samples, args.runs, args.prompt, collector, lookup=args.lookup))
+    results = asyncio.run(run_all(samples, args.runs, args.prompt, collector, lookup=args.lookup,
+                                  policy_context=args.policy_context))
     labels = load_labels(args.labels_dir or labels_dir)
     summary = summarize(samples, results, inherit_labels(labels, noisy) if noisy else labels)
     if noisy:

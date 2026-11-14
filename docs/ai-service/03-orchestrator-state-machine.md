@@ -185,6 +185,8 @@ async def run_turn(req: NextTurnRequest) -> AsyncIterator[SseEvent]:
 `/api/start` giống vậy nhưng bước 1 là Planner (+ RAG cho từng topic), không có Evaluator, action luôn là
 `ask_main` topic đầu.
 
+> **Policy lai (2026-11-14, phase 04, `POLICY_MODE=rules|hybrid`, mặc định `rules`, `app/turn_decision.py`).** Thứ tự quyết định mỗi lượt: **`forced_transition` (hết giờ, turn cap, phase quá hạn, hai lần `dont_know`, topic quá hạn) → (chỉ `hybrid`) đề xuất của Evaluator đã qua `validate_decision` → `decide()` → `low_performance_stop`**. `forced`, `low_performance_stop` và turn cap luôn đứng trên LLM: đề xuất không bao giờ ghi đè chúng (`decided_by = "forced"`). `rules` giữ quyết định và request y như trước (Evaluator prompt v8, không `policy_context`, 5 trường `TurnInfo` mới là `null`). Trong `hybrid`, LLM chọn `follow_up`/`clarify` ở chỗ luật chọn `next_topic` chỉ làm `low_performance_stop` đến muộn hơn (tối đa hết ngân sách hành động của topic), không bao giờ vượt qua nó. Chi tiết bảng hợp lệ ở 04 §5.4, ngưỡng và đo ở 09.
+
 ## 4.6 Xử lý lỗi và retry
 
 ### Gọi LLM: chính sách chung

@@ -9,7 +9,6 @@ from typing import Dict, List, Optional, Tuple
 
 from .agents.evaluator_provider import Evaluator, get_evaluator
 from .api_error import ApiError
-from .early_stop import low_performance_stop
 from .llm.usage import UsageCollector
 from .mock_evaluator import fold
 from .agents.interviewer import QuestionSpec, safe_focus
@@ -20,12 +19,12 @@ from .plan_snippets import attach_reference_snippets, get_retriever
 from .models_common import LEVEL_CONFIG
 from .models_interview import (CandidateState, Evaluation, InterviewPlan, NextTurnRequest, PlanTopic, StartRequest,
                                TopicState, TurnInfo)
-from .policy import Decision, decide
 from .rag.difficulty import difficulty_bucket
 from .rag.question_bank import kept_meaning, pick
 from .state_update import apply_action, record_evaluation
 from .tracing import observation
-from .time_budget import forced_transition, phase_deadline_s
+from .time_budget import forced_transition
+from .turn_decision import choose_decision, time_hint
 from .turn_evaluation import evaluate_turn
 from .turn_reference_snippets import TurnChunks
 from .voice_turn import MAX_REASKS, heard_answer, low_confidence, no_speech, \
@@ -155,9 +154,9 @@ async def next_turn(req: NextTurnRequest, evaluator: Optional[Evaluator] = None,
         log.info("voice_unclear turn=%d confidence=%s", req.turn_number, req.stt_confidence)
         reject_unclear()  # 422 voice_unclear: state giu nguyen, ung vien go chat roi gui lai cung luot
     if silent or unclear:  # het gio / het luot: khong cham, khong goi RAG / Evaluator, dieu kien uu tien quyet tiep
-        key, extra, ev = "", TurnChunks(), unclear_evaluation(req.turn_number)
+        key, extra, ev, proposal = "", TurnChunks(), unclear_evaluation(req.turn_number), None
     else:
-        key, extra, ev = await evaluate_turn(req, state, phase, topic, answer, evaluator or get_evaluator(),
+        key, extra, ev, proposal = await evaluate_turn(req, state, phase, topic, answer, evaluator or get_evaluator(),
                                              collector, retriever)
     if state.current_qa_id and not key and not (silent or unclear) and ev.answer_type not in NO_REFERENCE_NEEDED:
         ev = ev.model_copy(update={"reference_missing": True})
@@ -169,18 +168,8 @@ async def next_turn(req: NextTurnRequest, evaluator: Optional[Evaluator] = None,
         state.topics[pos].status = "done"
         state.phase, state.active_topic_id, state.end_reason = "done", None, forced[1]
         return TurnResult(None, None, state, plan, ev, True, {})
-    if forced:
-        if forced[0] == "wrap_up":
-            state.end_reason = forced[1]
-        dec = Decision(forced[0], -1 if forced[1] == "two_dont_know" else 0, None,
-                       f"{forced[1]} -> {forced[0]} (điều kiện ưu tiên, design 03 §4.4)")
-    else:
-        # covered: y da neu trong ca topic (record_evaluation da gop ca luot nay), de khong hoi lai y da tra loi
-        ts = next(t for t in state.topics if t.id == topic.id)
-        dec = decide(ev, state, req.level, phase == "scenario", topic, ts.focus_used, ts.covered)
-    if dec.action in ("next_topic", "next_phase") and low_performance_stop(state, topics, pos, req.level, dec.action):
-        state.end_reason = "low_performance"
-        dec = Decision("wrap_up", 0, None, "low_performance -> wrap_up (3 topic technical yếu liên tiếp)")
+    trace = choose_decision(ev, proposal, state, phase, topic, topics, pos, req, forced)
+    dec = trace.dec
 
     focus = safe_focus(dec.focus)  # chi luu va dung focus da qua kiem (khong giu chuoi nghi injection trong state)
     action, phase_changed, next_pos = apply_action(state, topics, pos, dec.action, dec.difficulty_delta,
@@ -194,7 +183,7 @@ async def next_turn(req: NextTurnRequest, evaluator: Optional[Evaluator] = None,
     spec = QuestionSpec(action, n_phase, n_topic, state.current_difficulty, focus=focus,
                         last_question=req.question, last_answer=answer, phase_changed=phase_changed,
                         asked_on_topic=[t.q for t in req.topic_turns] + [req.question] if action != "ask_main" else [],
-                        time_hint=_time_hint(req.elapsed_seconds, plan, n_phase), avoid=list(state.asked_questions),
+                        time_hint=time_hint(req.elapsed_seconds, plan, n_phase), avoid=list(state.asked_questions),
                         bank_question=bank.question if bank else None,
                         reference_answer=_hint_source(action, key, extra))
     state.turn_count += 1
@@ -202,15 +191,9 @@ async def next_turn(req: NextTurnRequest, evaluator: Optional[Evaluator] = None,
         next(t for t in state.topics if t.id == n_topic.id).turns.append(req.turn_number + 1)
     info = TurnInfo(turn_number=req.turn_number + 1, phase=n_phase, topic_id=n_topic.id if n_topic else None,
                     turn_kind=_KIND[action], action=action, agent_decision=_AGENT.get(action, "switch_topic"),
-                    difficulty=state.current_difficulty, reasoning=dec.reasoning, qa_id=state.current_qa_id)
+                    difficulty=state.current_difficulty, reasoning=dec.reasoning, qa_id=state.current_qa_id,
+                    decided_by=trace.decided_by, proposed_action=trace.proposed, policy_action=trace.policy,
+                    overrule_reason=trace.overrule_reason, action_reason=trace.action_reason)
     meta = _meta(n_phase, (next_pos or 0) + 1 if n_topic else len(topics), len(topics), action, info.turn_number)
     return TurnResult(spec, info, state, plan, ev, False, meta)
 
-
-def _time_hint(elapsed_s: int, plan: InterviewPlan, phase: str) -> str:
-    """hurry khi con < 20% thoi gian phase (design 02 muc 3.3.4)."""
-    ph = next((p for p in plan.phases if p.phase == phase), None)
-    if ph is None:
-        return "normal"
-    left = phase_deadline_s(plan, phase) - elapsed_s
-    return "hurry" if left < 0.2 * ph.time_budget_min * 60 else "normal"

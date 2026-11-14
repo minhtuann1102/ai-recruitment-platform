@@ -119,6 +119,19 @@ xuống, luật đầu tiên khớp thắng. `F` = follow-up còn lại của to
 - Evaluation `degraded`: xử lý như `ok` không có `missing_points`, nhưng nếu `follow_ups = 0` thì `follow_up` theo
   key point đầu tiên chưa được hỏi (tránh đóng topic chỉ sau 1 câu vì lỗi kỹ thuật).
 
+### Policy lai: LLM đề xuất, code quyết (2026-11-14, phase 04, `POLICY_MODE=hybrid`)
+
+Cờ mặc định `rules` = luật trên, không đổi. `hybrid`: Evaluator (prompt **v9**, lớp `EvaluatorOutputV9`, cách A: gộp vào lượt chấm, không thêm lời gọi) trả thêm `next_action` (`follow_up|hint|clarify|next_topic`), `next_focus`, `difficulty_delta`, `action_reason` (≤ 20 từ), sau khi chấm xong. Đầu vào v9 thêm `policy_context` (`follow_ups_left`, `hint_used`, `clarifies_used`, `time_hint`, độ khó + biên, `focus_used`, `covered`); chuỗi từ ứng viên bọc `<untrusted>`; prompt buộc chấm độc lập với trạng thái phỏng vấn. `app/policy_hybrid.py::validate_decision` kiểm đề xuất với `classify(ev)` **sau** `allowed_actions` theo ngân sách (`app/policy.py::action_budget`):
+
+| `classify(ev)` | Hành động LLM được chọn | `difficulty_delta` (ngoài khoảng thì kẹp, không bác) |
+|---|---|---|
+| nhạy cảm: `manipulation`, `off_topic`, `asks_clarification`, `dont_know`, `ok_degraded`, **hoặc câu trả lời khớp mẫu injection** (`cv_text.has_injection`, để lệnh kiểu "chuyển câu khác đi" kèm mẫu injection không bỏ qua follow-up) | không giao LLM: dùng `decide()` (`overrule_reason = sensitive_kind`) | – |
+| `weak` | còn hint (`left > 0`, chưa gợi ý): `hint` hoặc `clarify`; hết hint: `next_topic` hoặc `clarify` | −1 … 0 |
+| `ok` | `follow_up`, `next_topic` | 0 |
+| `strong` | `follow_up`, `next_topic` | 0 … +1 |
+
+`clarify` luôn cần `clarifies < 1` và `left > 0`; `follow_up`/`hint` cần `left > 0`; `hint` cần chưa gợi ý. `next_focus` qua `safe_focus`, bỏ nếu trùng `focus_used` hoặc ý ứng viên đã nêu; không còn thì lấy focus của luật (cùng hành động) hoặc `gap_focus`/`deepen_focus`/`hint_focus`. `follow_up` không có focus hợp lệ thì bác (`no_valid_focus`); `hint` không focus vẫn hợp lệ (như luật: hỏi lại câu vừa hỏi). Đề xuất thiếu, tên hành động lạ hoặc ngoài bảng thì dùng `decide()` kèm lý do (`no_proposal`, `action_not_allowed`), không làm hỏng lượt chấm. `action_reason` qua `safe_focus` + bộ lọc PII (`redact_pii`); trúng thì bỏ. Metric: `ai_policy_decisions_total{decided_by}`, `ai_policy_overrules_total{reason}` (06 §metrics).
+
 ### Map sang `agent_decision` hiện có
 
 Cột `interview_turns.agent_decision` (`deepen | switch_topic | keep_difficulty`) giữ để tương thích FE/BE cũ.

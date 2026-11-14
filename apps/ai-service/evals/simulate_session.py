@@ -14,6 +14,8 @@ from app.models_interview import InterviewPlan, PlanTopic
 from evals.personas import Persona
 
 MAX_TURNS = 40
+# TurnInfo (phase 04, POLICY_MODE=hybrid): quyet dinh truoc apply_action; sim_policy_metrics doc cac khoa nay
+POLICY_KEYS = ("decided_by", "proposed_action", "policy_action", "overrule_reason", "action_reason")
 
 
 async def call_sse(client: httpx.AsyncClient, path: str, body: Dict) -> Tuple[List[Tuple[str, Dict]], Dict]:
@@ -84,7 +86,9 @@ async def run_session(client: httpx.AsyncClient, persona: Persona, simulator, du
         turns.append({"turn_number": turn["turn_number"], "phase": turn["phase"], "topic_id": turn["topic_id"],
                       "turn_kind": turn["turn_kind"], "difficulty": turn["difficulty"], "question": question,
                       "answer": answer, "evaluation": nd["evaluation"], "action": turn["action"],
-                      "question_source": turn.get("question_source"), "qa_id": turn.get("qa_id")})
+                      "question_source": turn.get("question_source"), "qa_id": turn.get("qa_id"),
+                      # phase 04 (hybrid): quyet dinh da dua ra cau hoi nay; rules thi toan None
+                      **{k: turn.get(k) for k in POLICY_KEYS}})
         history.setdefault(turn["topic_id"], []).append({"q": question, "a": answer})
         state = nd["state"]
         if nd["session_end"]:

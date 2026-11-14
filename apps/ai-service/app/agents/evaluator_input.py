@@ -12,6 +12,20 @@ if TYPE_CHECKING:
 
 
 @dataclass
+class PolicyContext:
+    """Trang thai phong van cho prompt v9 (de xuat hanh dong): tinh truoc quyet dinh, tu app/policy.action_budget.
+    focus_used / covered chua chuoi tu ung vien nen boc <untrusted> khi render."""
+    left: int
+    hinted: bool
+    clarifies: int
+    focus_used: List[str]
+    covered: List[str]
+    time_hint: str
+    difficulty: int
+    bounds: dict
+
+
+@dataclass
 class EvaluationInput:
     level: str
     phase: str
@@ -28,12 +42,14 @@ class EvaluationInput:
     reference_source: Optional[SourceRef] = None  # 03b: cau tu kho cua reference_answer
     spoken: bool = False  # answer la ban ghi STT (answer_source = voice): doi thuat ngu phien am truoc khi cham
     lookup: Optional["TurnLookup"] = None  # phase 03: Evaluator duoc tra cuu kho (chi luot khong R, cho EVALUATOR_TOOLS)
+    policy_context: Optional[PolicyContext] = None  # phase 04: chi dat khi POLICY_MODE=hybrid, chi render voi prompt v9
     tool_base_ids: Optional[int] = None  # chi dat sau khi tra cuu co chunk: id S{n} voi n > gia tri nay la chunk cong cu
 
 
-def build_messages(system_prompt: str, inp: EvaluationInput, with_ids: bool = False) -> List[dict]:
+def build_messages(system_prompt: str, inp: EvaluationInput, with_ids: bool = False, policy: bool = False) -> List[dict]:
     """Phan tinh (rubric, anchor) o system de huong prompt caching; du lieu nguoi dung boc <untrusted>.
-    with_ids (v4): moi tai lieu doi chieu co id [S1].. / [R] de Evaluator trich nguon."""
+    with_ids (v4): moi tai lieu doi chieu co id [S1].. / [R] de Evaluator trich nguon.
+    policy (v9): them khoi policy_context (trang thai phong van) o CUOI user, sau answer."""
     data = {"level": inp.level, "phase": inp.phase, "difficulty": inp.difficulty, "turn_kind": inp.turn_kind,
             "topic": {"title": inp.topic.title, "objective": inp.topic.objective,
                       "key_points": inp.topic.key_points},
@@ -44,12 +60,23 @@ def build_messages(system_prompt: str, inp: EvaluationInput, with_ids: bool = Fa
     texts = [label(i, t) if with_ids else t for i, t in blocks]
     reference = texts.pop() if inp.reference_answer else "(không có)"
     snippets = "\n---\n".join(texts) or "(không có)"
-    user = "\n\n".join([json.dumps(data, ensure_ascii=False), wrap_untrusted("topic_turns", turns),
-                        wrap_untrusted("reference_snippets", snippets),
-                        wrap_untrusted("reference_answer", reference),
-                        wrap_untrusted("answer", inp.answer)])
+    parts = [json.dumps(data, ensure_ascii=False), wrap_untrusted("topic_turns", turns),
+             wrap_untrusted("reference_snippets", snippets), wrap_untrusted("reference_answer", reference),
+             wrap_untrusted("answer", inp.answer)]
+    if policy and inp.policy_context is not None:
+        parts.append(render_policy_context(inp.policy_context))
+    user = "\n\n".join(parts)
     return [{"role": "system", "content": f"{system_prompt}\n\n{UNTRUSTED_NOTICE}"},
             {"role": "user", "content": user}]
+
+
+def render_policy_context(pc: PolicyContext) -> str:
+    """Con so / co do code tinh (tin cay) o JSON; chuoi focus / y da neu tu ung vien boc <untrusted>."""
+    data = {"follow_ups_left": pc.left, "hint_used": pc.hinted, "clarifies_used": pc.clarifies,
+            "time_hint": pc.time_hint, "difficulty": pc.difficulty, "difficulty_bounds": pc.bounds}
+    lists = "focus_used:\n{}\ncovered:\n{}".format("\n".join(pc.focus_used) or "(không có)",
+                                                      "\n".join(pc.covered) or "(không có)")
+    return "policy_context: " + json.dumps(data, ensure_ascii=False) + "\n" + wrap_untrusted("policy_lists", lists)
 
 
 def all_snippets(inp: EvaluationInput) -> List[str]:

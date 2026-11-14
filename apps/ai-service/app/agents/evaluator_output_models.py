@@ -1,7 +1,7 @@
 """Schema output cua Evaluator (gui cho LLM) va phien ban prompt co trich nguon; tach khoi evaluator.py de file gon."""
 from typing import List, Literal, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 from ..models_common import AnswerType
 
@@ -41,3 +41,35 @@ class EvaluatorOutputV4(EvaluatorOutput):
 
 def uses_sources(prompt_version: str) -> bool:
     return int(prompt_version.lstrip("v") or 0) >= 4
+
+
+class EvaluatorOutputV9(EvaluatorOutputV4):
+    """v9 (phase 04, POLICY_MODE=hybrid): them de xuat hanh dong tiep theo. Kieu long (str / int) co chu dich: gia tri
+    la khong hop le thi code bo de xuat va dung luat (policy_hybrid), khong lam hong ca luot cham."""
+    next_action: str = ""  # follow_up | hint | clarify | next_topic
+    next_focus: Optional[str] = None
+    difficulty_delta: int = 0  # -1 | 0 | 1, code kep theo phan loai
+    action_reason: str = ""  # <= 20 tu
+
+    @field_validator("difficulty_delta", mode="before")
+    @classmethod
+    def _delta_in_range(cls, v):
+        """0.5, "+1", 7, None, chuoi la: ep ve int trong [-1, 1], khong duoc thi 0 (khong lam hong luot cham)."""
+        try:
+            return max(-1, min(1, int(float(v))))
+        except (TypeError, ValueError, OverflowError):
+            return 0
+
+    @field_validator("next_action", "action_reason", mode="before")
+    @classmethod
+    def _text_or_empty(cls, v):
+        return v if isinstance(v, str) else ""
+
+    @field_validator("next_focus", mode="before")
+    @classmethod
+    def _focus_or_none(cls, v):
+        return v if isinstance(v, str) else None
+
+
+def uses_policy(prompt_version: str) -> bool:
+    return int(prompt_version.lstrip("v") or 0) >= 9

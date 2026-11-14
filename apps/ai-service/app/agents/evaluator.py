@@ -27,7 +27,7 @@ from ..stt_terms import normalize_stt_terms_with_map, restore_quote
 from .evaluator_lookup_call import call_with_lookup
 from .evaluator_input import EvaluationInput, all_snippets, build_messages, cited_sources, source_refs  # noqa: F401
 from .evaluator_output_models import (CoveredPoint, EvaluatorOutput, EvaluatorOutputV4, RawBands,  # noqa: F401
-                                      SourcedCoveredPoint, uses_sources)
+                                      SourcedCoveredPoint, EvaluatorOutputV9, uses_policy, uses_sources)
 
 log = logging.getLogger("ai_service.evaluator")
 DEFAULT_PROMPT_VERSION = "v8"
@@ -122,13 +122,14 @@ class LlmEvaluator:
         started, n0 = time.perf_counter(), len(collector.records) if collector is not None else 0
         try:
             sourced = uses_sources(self._prompt.version)
-            schema = EvaluatorOutputV4 if sourced else EvaluatorOutput
+            policy = uses_policy(self._prompt.version)  # v9: dau ra them de xuat hanh dong; dau vao them policy_context
+            schema = EvaluatorOutputV9 if policy else EvaluatorOutputV4 if sourced else EvaluatorOutput
             if inp.lookup is not None and sourced:  # phase 03: 1 ngan sach 10 s cho vong lap tra cuu + fallback
                 result, inp = await call_with_lookup(
-                    self._gateway, self.agent, self._prompt.text, lambda text, i: build_messages(text, i, True),
+                    self._gateway, self.agent, self._prompt.text, lambda text, i: build_messages(text, i, True, policy),
                     schema, self._prompt.version, inp, collector, started)
             else:
-                result = await self._gateway.complete(self.agent, build_messages(self._prompt.text, inp, sourced),
+                result = await self._gateway.complete(self.agent, build_messages(self._prompt.text, inp, sourced, policy),
                                                       schema, prompt_version=self._prompt.version,
                                                       collector=collector)
         except (LlmError, ConfigError, openai.APIError) as err:  # openai.APIError: loi API con lai sau khi het retry

@@ -1,6 +1,6 @@
 """Policy chon hanh dong tiep theo, thuan code (docs/ai-service/04 muc 5.4). Luat dau tien khop thang."""
 from dataclasses import dataclass
-from typing import Optional, Sequence
+from typing import Optional, Sequence, Set
 
 from .models_common import LEVEL_CONFIG
 from .focus import deepen_focus, gap_focus, hint_focus
@@ -19,6 +19,32 @@ class Decision:
     reasoning: str
 
 
+@dataclass
+class Budget:
+    left: int        # luot follow-up / hint / clarify con lai trong topic
+    hinted: bool     # da goi y trong topic
+    clarifies: int   # so lan clarify da dung
+
+
+def action_budget(state: CandidateState, level: str, is_scenario: bool) -> Budget:
+    """Ngan sach hanh dong con lai trong topic; dung chung cho decide() va policy lai (policy_hybrid)."""
+    cfg = LEVEL_CONFIG[level]
+    c = state.counters
+    return Budget((cfg["max_fu_scn"] if is_scenario else cfg["max_fu"]) - c.follow_ups, c.hints >= 1, c.clarifies)
+
+
+def allowed_actions(b: Budget) -> Set[str]:
+    """Hanh dong con hop le theo ngan sach: next_topic luon; cac hanh dong o lai topic can left > 0."""
+    out = {"next_topic"}
+    if b.left > 0:
+        out.add("follow_up")
+        if not b.hinted:
+            out.add("hint")
+        if b.clarifies < 1:
+            out.add("clarify")
+    return out
+
+
 def classify(ev: Evaluation) -> str:
     if ev.degraded:  # FR-AI-072: Evaluator loi han -> coi nhu ok, khong thieu y (khong hoi sau dua tren diem doan)
         return "ok_degraded"
@@ -31,12 +57,10 @@ def classify(ev: Evaluation) -> str:
 def decide(ev: Evaluation, state: CandidateState, level: str, is_scenario: bool, topic: PlanTopic,
            used_focus: Sequence[str] = (), covered: Sequence[str] = ()) -> Decision:
     """used_focus: focus da hoi trong topic; covered: y ung vien da neu o cac luot truoc cua topic (app/focus.py)."""
-    cfg = LEVEL_CONFIG[level]
-    c = state.counters
-    left = (cfg["max_fu_scn"] if is_scenario else cfg["max_fu"]) - c.follow_ups
+    b = action_budget(state, level, is_scenario)
+    left, hinted, c = b.left, b.hinted, state.counters
     kind = classify(ev)
     gap = gap_focus(ev, topic, used_focus, covered)
-    hinted = c.hints >= 1
 
     def d(action, delta, rule, f=None):
         return Decision(action, delta, f, f"{kind} -> {action} (luật {rule})")
