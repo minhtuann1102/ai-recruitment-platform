@@ -147,6 +147,7 @@ def choose_decision(ev, proposal, state, plan, phase, topic, topics, pos, req) -
 - `agreement`/`overrule_rate` bỏ lượt `forced` (policy_action = null, không phải do bác); báo riêng `forced_turns`.
 - `EvaluatorOutputV9` dùng `str`/`int` lỏng + mặc định (không `Literal`): giá trị lạ phải thành "bác đề xuất", không thành lỗi schema làm degraded cả lượt chấm.
 - `evaluate_turn` trả bộ 4 (thêm proposal). `tests/test_interviewer_v3.py`, `test_rag_turn_retrieval.py` patch `app.turn_decision.decide` (hàm dời khỏi turn_engine).
+- Sau review: `proposed_action` chuẩn hóa (`invalid`), `overrule_rate_llm` là chỉ số gate, câu trả lời khớp injection coi là `sensitive_kind`, `action_reason` chỉ khi `decided_by = llm`, validator V9 ép kiểu delta, cảnh báo `policy_prompt_mismatch`.
 - `--policy-context default` ở `run_evaluator`/`run_evaluator_sourced` dùng ngữ cảnh trung tính (`evals/policy_context_support.py`).
 
 ## Success Criteria (reply mục 8, stdev theo plan.md mục 8)

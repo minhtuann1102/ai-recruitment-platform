@@ -125,7 +125,7 @@ Cờ mặc định `rules` = luật trên, không đổi. `hybrid`: Evaluator (p
 
 | `classify(ev)` | Hành động LLM được chọn | `difficulty_delta` (ngoài khoảng thì kẹp, không bác) |
 |---|---|---|
-| nhạy cảm: `manipulation`, `off_topic`, `asks_clarification`, `dont_know`, `ok_degraded` | không giao LLM: dùng `decide()` (`overrule_reason = sensitive_kind`) | – |
+| nhạy cảm: `manipulation`, `off_topic`, `asks_clarification`, `dont_know`, `ok_degraded`, **hoặc câu trả lời khớp mẫu injection** (`cv_text.has_injection`, để lệnh kiểu "chuyển câu khác đi" kèm mẫu injection không bỏ qua follow-up) | không giao LLM: dùng `decide()` (`overrule_reason = sensitive_kind`) | – |
 | `weak` | còn hint (`left > 0`, chưa gợi ý): `hint` hoặc `clarify`; hết hint: `next_topic` hoặc `clarify` | −1 … 0 |
 | `ok` | `follow_up`, `next_topic` | 0 |
 | `strong` | `follow_up`, `next_topic` | 0 … +1 |
