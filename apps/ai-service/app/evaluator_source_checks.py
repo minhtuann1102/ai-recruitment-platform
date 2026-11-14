@@ -61,14 +61,34 @@ def refuted_by_reference(contradicted: Sequence[SourcedPoint], reference_answer:
             if REFERENCE_ID in p.source_ids and not restates_reference(p.point, reference_answer)]
 
 
+def _similar(m: str, r: str, min_ratio: float = 0.8) -> bool:
+    return SequenceMatcher(None, m.lower(), r.lower()).ratio() >= min_ratio or r.lower() in m.lower()
+
+
 def merge_misconceptions(refuted: Sequence[str], llm: Sequence[str], min_ratio: float = 0.8) -> List[str]:
     """Y code da kiem (R bac bo) dung truoc de khong bi cat khi chi giu 2; bo y LLM gan trung."""
     out = list(dict.fromkeys(refuted))
     for m in llm:
-        if not any(SequenceMatcher(None, m.lower(), r.lower()).ratio() >= min_ratio or r.lower() in m.lower()
-                   for r in out):
+        if not any(_similar(m, r, min_ratio) for r in out):
             out.append(m)
     return out
+
+
+def is_tool_id(source_id: str, base_ids: int) -> bool:
+    """S{n} voi n > base_ids: chunk Evaluator tra cuu duoc (noi cuoi turn_snippets), khong phai tai lieu co san."""
+    return source_id.startswith("S") and source_id[1:].isdigit() and int(source_id[1:]) > base_ids
+
+
+def split_tool_misconceptions(misconceptions: Sequence[str], contradicted: Sequence[SourcedPoint], base_ids: int
+                              ) -> Tuple[List[str], List[str]]:
+    """Luat "chi R bac" o luot co chunk cong cu (phase 03): chunk do duoc tim theo truy van bi cau tra loi lai nen khong
+    du de chan technical_accuracy. Tra (chan, khong chan): khong chan = hieu sai LLM ghi khop `point` / `quote` cua y
+    contradicted ma MOI id hop le deu la id cong cu. Hieu sai khac (khong gan nguon, hay dua tren snippet co san, hay
+    id lan) chan nhu khi tat co. Hai danh sach van deu vao bao cao."""
+    tool_only = [t for p in contradicted if p.source_ids and all(is_tool_id(i, base_ids) for i in p.source_ids)
+                 for t in (p.point, p.quote) if t.strip()]
+    free = [m for m in misconceptions if any(_similar(m, t) for t in tool_only)]
+    return [m for m in misconceptions if m not in free], free
 
 
 def _tokens(text: str) -> List[str]:

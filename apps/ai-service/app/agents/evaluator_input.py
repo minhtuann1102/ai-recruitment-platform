@@ -1,11 +1,14 @@
 """Dau vao Evaluator va viec dung prompt: EvaluationInput, build_messages, id tai lieu S1..Sn / R, nguon da trich."""
 import json
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 from ..evaluator_source_checks import SourcedPoint, label, source_blocks
 from ..models_interview import CitedSource, PlanTopic, SourceRef, TopicTurn
 from ..prompts.store import UNTRUSTED_NOTICE, wrap_untrusted
+
+if TYPE_CHECKING:
+    from ..evaluator_lookup import TurnLookup
 
 
 @dataclass
@@ -24,6 +27,8 @@ class EvaluationInput:
     turn_sources: List[SourceRef] = field(default_factory=list)  # 03b: cung thu tu turn_snippets
     reference_source: Optional[SourceRef] = None  # 03b: cau tu kho cua reference_answer
     spoken: bool = False  # answer la ban ghi STT (answer_source = voice): doi thuat ngu phien am truoc khi cham
+    lookup: Optional["TurnLookup"] = None  # phase 03: Evaluator duoc tra cuu kho (chi luot khong R, cho EVALUATOR_TOOLS)
+    tool_base_ids: Optional[int] = None  # chi dat sau khi tra cuu co chunk: id S{n} voi n > gia tri nay la chunk cong cu
 
 
 def build_messages(system_prompt: str, inp: EvaluationInput, with_ids: bool = False) -> List[dict]:

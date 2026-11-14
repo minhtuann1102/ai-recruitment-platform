@@ -14,7 +14,8 @@ import openai
 
 from .. import mock_evaluator
 from ..evaluator_source_checks import (SourcedPoint, check_sources, confidence, merge_misconceptions,
-                                      refuted_by_reference, restates_reference, source_blocks)
+                                      refuted_by_reference, restates_reference, source_blocks,
+                                      split_tool_misconceptions)
 from ..evaluation_checks import (MAX_COVERED, apply_caps, build_evaluation, is_term_list, matched_key_points,
                                  precheck_answer, quote_in_answer, slug_tags, supports_point, zero_evaluation)
 from ..llm.errors import ConfigError, LlmError
@@ -23,11 +24,13 @@ from ..llm.usage import CallRecord, UsageCollector
 from ..models_interview import Evaluation, Evidence, TopicTurn  # noqa: F401  (re-export cho evals)
 from ..prompts.store import PromptStore
 from ..stt_terms import normalize_stt_terms_with_map, restore_quote
+from .evaluator_lookup_call import call_with_lookup
 from .evaluator_input import EvaluationInput, all_snippets, build_messages, cited_sources, source_refs  # noqa: F401
 from .evaluator_output_models import (CoveredPoint, EvaluatorOutput, EvaluatorOutputV4, RawBands,  # noqa: F401
                                       SourcedCoveredPoint, uses_sources)
 
 log = logging.getLogger("ai_service.evaluator")
+DEFAULT_PROMPT_VERSION = "v8"
 
 
 def _sourced(c: CoveredPoint) -> SourcedPoint:
@@ -60,6 +63,11 @@ def postcheck(out: EvaluatorOutput, inp: EvaluationInput) -> Evaluation:
         if invalid or contradicted:
             log.info("evaluator_sources turn=%d invalid_ids=%d contradicted=%d", inp.turn_number, invalid,
                      len(contradicted))
+    tool_only: List[str] = []  # hieu sai chi dua vao chunk cong cu: vao bao cao, khong chan diem (luat H4)
+    if sourced and inp.tool_base_ids is not None:
+        misconceptions, tool_only = split_tool_misconceptions(misconceptions, contradicted, inp.tool_base_ids)
+        if tool_only:
+            log.info("evaluator_tool_misconception_uncapped turn=%d n=%d", inp.turn_number, len(tool_only))
     if inp.reference_answer:
         # cau tu kho chi hoi mot khia canh cua topic: tran completeness theo so y co quote (1 y -> 2, 3+ y -> 4)
         # thay vi ti le key_points cua ca topic (se ep diem thap du tra loi du dap an chuan)
@@ -74,7 +82,7 @@ def postcheck(out: EvaluatorOutput, inp: EvaluationInput) -> Evaluation:
     return build_evaluation(
         turn_number=inp.turn_number, answer_type=out.answer_type, bands=bands,
         covered_points=[c.point for c in verified], missing_points=out.missing_points,
-        misconceptions=misconceptions,
+        misconceptions=[*misconceptions, *tool_only],
         evidence=[Evidence(claim=c.point[:150], quote=c.quote[:100], source_ids=c.source_ids,
                            support=c.support if sourced else None) for c in verified],
         # tag do code sinh tu y da kiem chung (v2 khong bat LLM viet tag: bot token o duong nong)
@@ -85,10 +93,12 @@ def postcheck(out: EvaluatorOutput, inp: EvaluationInput) -> Evaluation:
 
 class LlmEvaluator:
     agent = "evaluator"
+    supports_lookup = True  # turn_evaluation: chi agent LLM duoc tra cuu kho (EVALUATOR_TOOLS)
 
     def __init__(self, gateway: LlmGateway, prompts: Optional[PromptStore] = None, prompt_version: str = None):
         self._gateway = gateway
-        self._prompt = (prompts or PromptStore()).get(self.agent, prompt_version)
+        # ghim v8 (ban da do): them prompt moi vao thu muc khong tu dong doi Evaluator, chi EVALUATOR_PROMPT_VERSION
+        self._prompt = (prompts or PromptStore()).get(self.agent, prompt_version or DEFAULT_PROMPT_VERSION)
 
     @property
     def prompt_version(self) -> str:
@@ -112,10 +122,15 @@ class LlmEvaluator:
         started = time.perf_counter()
         try:
             sourced = uses_sources(self._prompt.version)
-            result = await self._gateway.complete(self.agent, build_messages(self._prompt.text, inp, sourced),
-                                                  EvaluatorOutputV4 if sourced else EvaluatorOutput,
-                                                  prompt_version=self._prompt.version,
-                                                  collector=collector)
+            schema = EvaluatorOutputV4 if sourced else EvaluatorOutput
+            if inp.lookup is not None and sourced:  # phase 03: 1 ngan sach 10 s cho vong lap tra cuu + fallback
+                result, inp = await call_with_lookup(
+                    self._gateway, self.agent, self._prompt.text, lambda text, i: build_messages(text, i, True),
+                    schema, self._prompt.version, inp, collector, started)
+            else:
+                result = await self._gateway.complete(self.agent, build_messages(self._prompt.text, inp, sourced),
+                                                      schema, prompt_version=self._prompt.version,
+                                                      collector=collector)
         except (LlmError, ConfigError, openai.APIError) as err:  # openai.APIError: loi API con lai sau khi het retry
             log.warning("evaluator_degraded turn=%d error=%s", inp.turn_number, type(err).__name__)
             if collector is not None:
