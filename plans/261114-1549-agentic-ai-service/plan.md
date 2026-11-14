@@ -26,7 +26,7 @@ Evaluator. `forced_transition`, `low_performance_stop`, turn cap đứng trên L
 | 02 | [Vòng lặp công cụ trong gateway](phase-02-gateway-tool-loop.md) | – (thư viện) | 1,5d | không (song song 01) | pending |
 | 03 | [Evaluator tự tra cứu](phase-03-evaluator-knowledge-lookup.md) | `EVALUATOR_TOOLS` | 2d | 02; DE docs (đo scenario) | code xong, đo [BLOCKED-KEY] |
 | 04 | [Policy lai](phase-04-hybrid-policy.md) | `POLICY_MODE=rules\|hybrid` | 2d | 01 (ngưỡng, `--runs`); 03 (cùng file) | code xong, đo [BLOCKED-KEY] |
-| 05 | [Lập lại kế hoạch giữa buổi (gated)](phase-05-mid-session-replanning.md) | `REPLAN_ENABLED` | 3d | 04; **FSD** | pending |
+| 05 | [Lập lại kế hoạch giữa buổi (gated)](phase-05-mid-session-replanning.md) | `REPLAN_ENABLED` | 3d | 04; **FSD** | code xong, cờ giữ tắt chờ FSD, đo [BLOCKED-KEY] |
 | 06 | [Đo tổng, quyết bật mặc định, docs](phase-06-measurement-rollout-and-docs.md) | – | 0,5d | 03–05 + khóa | pending |
 | 07 | [Ghi chú agent (tùy chọn)](phase-07-optional-agent-notes.md) | `AGENT_NOTES_ENABLED` | 1d | 04 đã đo đạt mốc | optional |
 
