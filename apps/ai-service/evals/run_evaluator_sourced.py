@@ -29,6 +29,7 @@ from app.llm.gateway import get_gateway
 from app.llm.usage import UsageCollector
 from app.models_interview import Evaluation, PlanTopic, SourceRef
 from evals.label_sheet import load_golden
+from evals.policy_context_support import apply_policy_context
 from evals.lookup_support import attach_lookup, load_lookup_retriever, lookup_fields, lookup_summary
 from evals.run_evaluator import REPORTS
 
@@ -60,12 +61,12 @@ def blocked_by_reference(ev: Evaluation) -> bool:
 
 
 async def run_all(samples: List[dict], runs: int, prompt: Optional[str], collector: UsageCollector,
-                  concurrency: int = 4, lookup: bool = False) -> Dict[str, List[dict]]:
+                  concurrency: int = 4, lookup: bool = False, policy_context: str = "none") -> Dict[str, List[dict]]:
     evaluator, sem = LlmEvaluator(get_gateway(), prompt_version=prompt), asyncio.Semaphore(concurrency)
     retriever = await load_lookup_retriever() if lookup else None
 
     async def one(s: dict) -> dict:
-        inp = to_input(s)
+        inp = apply_policy_context(to_input(s), policy_context)
         tool = attach_lookup(retriever, s, inp)
         async with sem:
             raw, ev = await evaluator.evaluate_with_raw(inp, collector)
@@ -145,10 +146,12 @@ def main() -> None:
     parser.add_argument("--runs", type=int, default=3)
     parser.add_argument("--prompt", default=None, help="vd v5; mac dinh v8 (ban ghim)")
     parser.add_argument("--lookup", action="store_true", help="bat Evaluator tra cuu kho (can RAG + AI_DB_URL)")
+    parser.add_argument("--policy-context", choices=["none", "default"], default="none",
+                        help="default: them policy_context trung tinh vao dau vao (chi prompt v9 render), de gate v9 vs v8")
     parser.add_argument("--out", type=Path)
     args = parser.parse_args()
     samples, collector = load_golden(GOLDEN), UsageCollector()
-    results = asyncio.run(run_all(samples, args.runs, args.prompt, collector, lookup=args.lookup))
+    results = asyncio.run(run_all(samples, args.runs, args.prompt, collector, lookup=args.lookup, policy_context=args.policy_context))
     summary = {**summarize(samples, results), "usage": collector.to_metadata()["usage"]}
     if args.lookup:
         summary["lookup"] = lookup_summary([r for runs in results.values() for r in runs])

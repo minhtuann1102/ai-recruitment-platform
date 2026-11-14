@@ -40,12 +40,19 @@ class _RecordingEvaluator:
         return getattr(self.inner, "supports_lookup", False)
 
     async def evaluate(self, inp: EvaluationInput, collector: Optional[UsageCollector] = None) -> Evaluation:
+        return (await self.evaluate_with_raw(inp, collector))[1]
+
+    async def evaluate_with_raw(self, inp: EvaluationInput, collector: Optional[UsageCollector] = None
+                                ) -> Tuple[Optional[object], Evaluation]:
+        """Passthrough: hybrid (phase 04) lay de xuat hanh dong tu output goc qua evaluate_with_raw; thieu no (mock) thi
+        raw = None. Neu lop boc nay chi co `evaluate` thi turn_engine khong thay de xuat va hybrid == rules."""
         key = (bound_session_id(), inp.turn_number)
         self.seen[key] = documents(inp)  # inp truoc vong lap: chua co chunk cong cu
-        ev = await self.inner.evaluate(inp, collector)
+        inner_raw = getattr(self.inner, "evaluate_with_raw", None)
+        raw, ev = await inner_raw(inp, collector) if inner_raw else (None, await self.inner.evaluate(inp, collector))
         if inp.lookup is not None and inp.lookup.committed:  # chi khi vong lap da chot: loi / fallback thi khong co
             self.seen[key] = documents(inp.lookup.extend(inp))
-        return ev
+        return raw, ev
 
 
 @contextmanager
