@@ -57,6 +57,9 @@ def _warn_mismatch(prompt_version: str) -> None:
     if notes_enabled() and not uses_notes(prompt_version):
         log.warning("policy_prompt_mismatch AGENT_NOTES_ENABLED nhung Evaluator %s khong ghi ghi chu (can v11)",
                     prompt_version)
+    if uses_notes(prompt_version) and not notes_enabled():
+        log.warning("policy_prompt_mismatch Evaluator %s ghi ghi chu nhung AGENT_NOTES_ENABLED tat (ghi chu bi bo)",
+                    prompt_version)
     if replan_enabled() and not uses_replan(prompt_version):
         log.warning("policy_prompt_mismatch REPLAN_ENABLED nhung Evaluator %s khong de xuat doi topic (can v10)",
                     prompt_version)
