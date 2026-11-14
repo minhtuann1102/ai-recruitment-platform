@@ -130,6 +130,8 @@ p50 ≤ 3.5 s. Ước tính hai pha (lạc quan): p50 2.92 s, p95 4.27 s. Báo c
 >
 > **Tác động ước tính từ log 02/11 (không đo lại):** 17/930 lần gọi Evaluator (1.8%) dài hơn 8 s. Các lần này giờ bị cắt, lần retry chỉ còn ~1.5 s trong khi P50 là 3 s, nên gần như đều thành `degraded`. Query rewriter 10/282 lần quá 3 s, giữ truy vấn gốc. Reporter 1/115 lần quá 60 s. Planner không có lần nào quá hạn.
 
+> **Ngân sách Evaluator khi bật tra cứu (2026-11-14, `EVALUATOR_TOOLS`).** Vòng lặp tool và đường lùi dùng chung **một** ngân sách 10 s từ đầu `evaluate_with_raw` (mọi lần gọi, kể cả lần đầu, bị cắt theo phần dư; xem docs 02). Không chia như vậy thì vòng lặp (≤ 8 s) cộng gọi lại (≤ 8 s) ≈ 18-20 s, vượt hạn sự kiện đầu 15 s của interview-service (docs 06). Trường hợp xấu nhất trước sự kiện `meta`: RAG theo lượt ≤ 1,0 s (`TURN_DEADLINE_S`) + Evaluator ≤ 10 s + chấm mock ≈ **≤ 11,5 s** < 15 s. Mốc cần đo khi có khóa API (reply mục 8): TTFT P95 lượt tra cứu ≤ 7,5 s, TTFT P95 cả phiên tăng ≤ 0,3 s, ≤ 30% lượt không `R` gọi công cụ **[BLOCKED-KEY]**; chưa có số đo nào.
+
 Tất cả qua cùng một endpoint OpenAI-compatible. Env riêng từng agent; không đặt thì dùng `LLM_MODEL` (mặc định
 `openai/gpt-4o-mini`, như `config.py` hiện có).
 
