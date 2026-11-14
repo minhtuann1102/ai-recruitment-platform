@@ -15,6 +15,7 @@ class CallRecord:
     repaired: bool = False
     fallback: Optional[str] = None
     cached_tokens: int = 0  # phan cua input_tokens doc tu prompt cache cua provider
+    tool_calls: int = 0  # so lan agent goi cong cu trong vong lap tool (tool_loop.py)
 
 
 @dataclass
