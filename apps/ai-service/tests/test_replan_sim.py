@@ -57,7 +57,7 @@ def test_sim_runs_a_swapped_session_end_to_end_and_measures_it(monkeypatch):
     ids = [t["topic_id"] for t in s["turns"]]
     assert "alt1" in ids and "t4" not in ids  # _topic() tim topic alt1 qua effective_plan: simulator tra loi duoc
     results = [t["swap_result"] for t in s["turns"] if t["swap_result"]]
-    assert results.count("applied") == 1 and set(results) <= {"applied", "budget", "not_applicable"}
+    assert results.count("applied") == 1 and set(results) <= {"applied", "budget", "not_applicable", "untrusted"}
     stats = summarize(sessions, all_personas(), load_pricing())["replan"]
     assert stats["swap_sessions"] == stats["sessions_with_reserve"] == 1 and stats["swap_rate"] == 1.0
     assert stats["swaps"] == 1 and stats["jd_priority_violations"] == 0 and stats["swap_results"]["applied"] == 1

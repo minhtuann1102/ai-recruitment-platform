@@ -10,11 +10,12 @@ import os
 from typing import List, Optional, Tuple
 
 from .agents.evaluator_input import ReplanContext
+from .api_error import ApiError
 from .models_interview import CandidateState, InterviewPlan, PlanTopic, Swap, TopicState
 from .policy_hybrid import policy_mode, safe_reason
 
 DEFAULT_MAX_SWAPS, MAX_SWAPS_CAP = 1, 2  # reserve toi da 2 topic nen khong the doi nhieu hon
-RESULTS = ("applied", "budget", "bad_drop", "jd_priority", "bad_add", "not_applicable")  # nhan metric / TurnInfo
+RESULTS = ("applied", "budget", "bad_drop", "jd_priority", "bad_add", "not_applicable", "untrusted")  # nhan metric / TurnInfo
 
 
 def replan_enabled(env=None) -> bool:
@@ -49,6 +50,14 @@ def effective_plan(plan: InterviewPlan, state: CandidateState) -> InterviewPlan:
     return plan.model_copy(update={"phases": phases})
 
 
+def check_alignment(state: CandidateState, topics: List[Tuple[str, PlanTopic]]) -> List[Tuple[str, PlanTopic]]:
+    """state.topics[i] phai khop flat_topics(plan thuc te)[i]. Lech (vd client mat plan.replan nhung giu state.swaps)
+    thi 409 thay vi 500 o buoc sau."""
+    if state.topics and [t.id for t in state.topics] != [t.id for _, t in topics]:
+        raise ApiError(409, "session_invalid_state", "state.topics không khớp plan (plan.replan bị mất?)")
+    return topics
+
+
 def _index_of(topics: List[Tuple[str, PlanTopic]], topic_id: str) -> Optional[int]:
     return next((i for i, (_, t) in enumerate(topics) if t.id == topic_id), None)
 
@@ -57,6 +66,8 @@ def validate_swap(p, state: CandidateState, plan: InterviewPlan, pos: int, topic
                   phase: str, action: str, hint: str, max_swaps: int) -> Optional[str]:
     """None = hop le, con lai la ly do bac (nhan metric). topics = flat_topics(plan thuc te); action la hanh dong cuoi
     cung truoc khi ap dung (sau low_performance_stop); p = SwapProposal."""
+    if p is not None and action == "untrusted":
+        return "untrusted"
     if p is None or action != "next_topic" or phase != "technical":
         return "not_applicable"
     if plan.replan is None or len(state.swaps) >= max_swaps or hint == "hurry":

@@ -21,7 +21,7 @@ from .models_interview import (CandidateState, Evaluation, InterviewPlan, NextTu
                                TopicState, TurnInfo)
 from .rag.difficulty import difficulty_bucket
 from .rag.question_bank import kept_meaning, pick
-from .replan import effective_plan
+from .replan import check_alignment, effective_plan
 from .replan_reserve import with_reserve
 from .state_update import apply_action, record_evaluation
 from .tracing import observation
@@ -132,7 +132,7 @@ async def next_turn(req: NextTurnRequest, evaluator: Optional[Evaluator] = None,
                     collector: Optional[UsageCollector] = None, retriever=None) -> TurnResult:
     state = req.state.model_copy(deep=True)
     plan = effective_plan(req.plan, state)  # phase 05: topic da doi (swaps) tai cho; moi reader phia sau thay plan thuc te
-    topics = flat_topics(plan)
+    topics = check_alignment(state, flat_topics(plan))
     if state.phase == "done":
         raise ApiError(409, "session_invalid_state", "Phiên đã kết thúc")
     if state.phase == "wrap_up":  # tra loi cau wrap-up xong thi dong phien, khong cham

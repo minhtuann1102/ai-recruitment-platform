@@ -73,8 +73,12 @@ def choose_decision(ev: Evaluation, proposal, state: CandidateState, phase: str,
         trace.overrule_reason = None
     if hybrid:
         metrics.record_policy_decision(trace.decided_by, trace.overrule_reason)
-        if plan is not None:  # forced / low_performance (khong con next_topic) o tren LLM: de xuat doi bi bac not_applicable
-            trace.swap = attempt_swap(proposal, state, plan, topics, pos, phase, "forced" if forced else trace.dec.action,
+        if plan is not None:
+            # chi doi khi quyet dinh khong forced, khong phai sensitive_kind (manipulation / injection: ung vien khong
+            # duoc chon topic bi bo) va chinh LLM de xuat next_topic; con lai bi bac (forced / low_performance: not_applicable)
+            gate = "untrusted" if trace.overrule_reason == "sensitive_kind" else \
+                trace.dec.action if not forced and trace.proposed == "next_topic" else "not_applicable"
+            trace.swap = attempt_swap(proposal, state, plan, topics, pos, phase, gate,
                                       time_hint(req.elapsed_seconds, plan, phase), req.turn_number)
             if trace.swap:
                 metrics.record_replan_swap(trace.swap)

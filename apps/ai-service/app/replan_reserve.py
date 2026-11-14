@@ -9,7 +9,8 @@ attach_reference_snippets (chung han 5 s luc start).
 from typing import Optional
 
 from .catalog.models import TrackCatalog
-from .mock_planner import _rank_with_jd, catalog_topic
+from .mock_planner import _clamp, _rank_with_jd, catalog_topic
+from .models_common import LEVEL_CONFIG
 from .models_cv import CvProfile
 from .models_interview import InterviewPlan, ReplanPool
 from .models_jd import JdProfile
@@ -23,7 +24,7 @@ def select_reserve(plan: InterviewPlan, catalog: TrackCatalog, level: str, cover
                    cv: Optional[CvProfile], jd: Optional[JdProfile]) -> Optional[ReplanPool]:
     """None khi khong co topic du phong."""
     in_plan = {t.catalog_ref for ph in plan.phases for t in ph.topics if t.catalog_ref}
-    start = next((t.start_difficulty for ph in plan.phases if ph.phase == "technical" for t in ph.topics), 2)
+    start = _clamp(LEVEL_CONFIG[level]["start"], level)  # cung do kho bat dau voi catalog_topic cua reserve
     spare = [t for t in catalog.topics_for(level) if t.id not in in_plan
              and (not coverage or bank_count(coverage, t.id, start) > 0)]  # coverage rong = khong biet: khong loc
     ranked = _rank_with_jd(spare, [s.name for s in cv.skills] if cv else [], jd)[:MAX_RESERVE]

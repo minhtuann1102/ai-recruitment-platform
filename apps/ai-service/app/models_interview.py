@@ -41,8 +41,7 @@ class PlanPhase(BaseModel):
 
 
 class ReplanPool(BaseModel):
-    """Phase 05 (REPLAN_ENABLED): topic du phong id `alt{n}` (khong nam trong phases) va id topic plan khong duoc bo
-    (map tu yeu cau JD). Chi co khi start chay voi co bat va co it nhat 1 topic du phong."""
+    """Phase 05: topic du phong `alt{n}` (ngoai phases) + id topic plan khong duoc bo (map tu yeu cau JD)."""
     reserve: List[PlanTopic] = Field(default_factory=list, max_length=2)
     keep_ids: List[str] = Field(default_factory=list)
 
@@ -131,8 +130,8 @@ class TurnInfo(BaseModel):
     policy_action: Optional[str] = None     # hanh dong luat decide() se chon (phan thuc cua LLM)
     overrule_reason: Optional[str] = None   # vi sao bac de xuat; None khi dung de xuat hoac forced
     action_reason: Optional[str] = None     # ly do cua LLM da qua kiem (injection / PII thi None)
-    # phase 05, chi gan khi LLM de xuat doi topic (REPLAN_ENABLED): applied | budget | bad_drop | jd_priority | bad_add
-    # | not_applicable. Doi that thi turn nay hoi topic `alt*` (xem state.swaps), plan tra ve client khong doi.
+    # phase 05, chi khi LLM de xuat doi topic: applied | budget | bad_drop | jd_priority | bad_add | not_applicable |
+    # untrusted (sensitive_kind). Doi that thi turn nay hoi topic `alt*` (state.swaps), plan tra ve client khong doi.
     swap_result: Optional[str] = None
 
 
