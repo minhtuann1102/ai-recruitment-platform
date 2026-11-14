@@ -583,6 +583,37 @@ bảng tra; không trùng. Dịch vụ giới hạn số cụm thì cắt đuôi
 
 Response 200: report theo §6.4 (snake_case) + `metadata` (usage, latency, prompt version của Reporter). Reporter lỗi vẫn trả 200 với `status = "partial"` (chỉ có điểm và nhận xét mẫu); `meta.fallbacks` ghi `reporter_partial`, hoặc `reporter_config_error` nếu thiếu cấu hình. Không lượt nào chấm được thì vẫn 200 với `status = "unscored"`, `overall.score`, `overall.verdict` và các tiêu chí là `null`, không gọi Reporter LLM. Có `jd_profile` thì report có khối `requirements` (design 05 §6.4). Report luôn có `level_signal` (`null` hoặc cờ `above_level` gợi ý thử level cao hơn, design 05 §6.3, thêm 2026-11-03). `end_reason` có thêm giá trị `low_performance` (ai-service tự wrap-up sớm khi ứng viên middle/senior yếu 3 topic technical liên tiếp, hoặc tất cả nếu plan ít hơn 3, design 03 §4.4).
 
+### Thông báo gộp cho FSD / interview-service (2026-11-14, phase 03-07 kế hoạch agentic)
+
+Một danh sách để gửi một lần. Mọi khóa mới có giá trị mặc định; tất cả cờ mặc định tắt (`EVALUATOR_TOOLS`, `POLICY_MODE=rules`, `REPLAN_ENABLED`, `AGENT_NOTES_ENABLED`), tắt thì hành vi y như trước. Chi tiết từng khóa ở các đoạn phía trên.
+
+**Khóa response mới**
+| Nơi | Khóa | Giá trị khi cờ tắt | Phase |
+|---|---|---|---|
+| `metadata.usage.<agent>` | `tool_calls` (chỉ có khi > 0) | không có | 02-03 |
+| `turn` | `decided_by`, `proposed_action`, `policy_action`, `overrule_reason`, `action_reason` | `null` (có giá trị chỉ khi `POLICY_MODE=hybrid`; `reasoning` có thể bắt đầu bằng `llm: `) | 04 |
+| `turn` | `swap_result` (`applied\|budget\|bad_drop\|jd_priority\|bad_add\|not_applicable\|untrusted`) | `null` | 05 |
+| `plan` | `replan` (`{reserve, keep_ids}`, topic dự phòng `alt1`/`alt2` không nằm trong `plan.phases`) | `null` | 05 |
+| `state` | `swaps` (`[{drop, add, turn, reason}]`) | `[]` | 05 |
+| `state` | `notes` (`[{id, turn, topic_id, kind, text, status}]`, tối đa 8) | `[]` | 07 |
+| `turn.topic_id`, `topics[].topic_id` của báo cáo | có thể là `alt1`/`alt2` | chỉ khi `REPLAN_ENABLED` | 05 |
+
+**Mã fallback mới** (`metadata.fallbacks`): `evaluator_lookup_fallback` (phase 03, chỉ khi `EVALUATOR_TOOLS`; lượt vẫn thành công, chấm lại không tools hoặc kèm `evaluator_mock_heuristic`). Metric mới: `ai_llm_tool_calls_total`, `ai_policy_decisions_total`, `ai_policy_overrules_total`, `ai_replan_swaps_total`, `ai_notes_dropped_total`, `ai_notes_recorded_total` (nhãn đóng, không có dữ liệu cá nhân).
+
+**Hành vi lỗi**
+- `POST /api/next-turn` trả `409 session_invalid_state` khi `state.topics` không khớp plan thực tế (client mất `plan.replan` nhưng giữ `state.swaps`, hoặc swap giả/trùng). Client phải gửi lại cả `plan.replan` và `state.swaps`.
+- `422` khi `state.notes` sai: `kind`/`status` ngoài tập, `text` > 300 ký tự hoặc hơn 8 phần tử. Xảy ra bất kể `AGENT_NOTES_ENABLED`. Server trả lại nguyên `notes` do client gửi khi cờ tắt.
+- Không có mã lỗi mới nào ở phase 03 và 04 (lỗi tra cứu là fallback, không phải lỗi HTTP).
+
+**Câu hỏi cho interview-service / FSD** (chưa có trả lời bằng văn bản; `REPLAN_ENABLED` và `AGENT_NOTES_ENABLED` giữ tắt cho đến khi có)
+1. Có lưu nguyên JSON `plan` và `state` (gồm `plan.replan`, `state.swaps`, `state.notes`) không lọc schema, và gửi lại nguyên ở mọi `/api/next-turn` và `/api/finalize`? Thiếu `notes` thì ghi chú mất (không lỗi); thiếu `plan.replan` hoặc `swaps` thì 409.
+2. Có tra `turn.topic_id` (có thể là `alt1`) theo `plan.phases` đã lưu không? `alt*` chỉ có trong `plan.replan.reserve`.
+3. UI có hiển thị danh sách topic lấy từ plan không (topic bị bỏ sẽ hiện ra mà không được hỏi)? Nếu có, cần `state.swaps`.
+4. Chấp nhận các khóa mặc định mới của `turn`, `plan`, `state` ở bảng trên? Có validate schema `turn` nghiêm không (nếu có thì thêm 5 khóa phase 04 + `swap_result`)?
+5. Có chuyển `turn.reasoning`, `action_reason` hay `proposed_action` ra giao diện ứng viên không? Nếu có thì ai-service phải lọc thêm (chúng có thể chứa lý do do LLM viết).
+6. Xử lý `409 session_invalid_state` và `422` mới thế nào (thử lại, báo lỗi, hay bỏ qua)?
+7. Mã fallback `evaluator_lookup_fallback` có cần hiển thị hoặc lưu riêng không?
+
 ### Interface phía NestJS
 
 `AiInterviewClient` (interview-service) đổi thành:
