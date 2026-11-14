@@ -47,6 +47,8 @@ POLICY_DECISIONS = Counter("ai_policy_decisions", "Quyet dinh hanh dong moi luot
                            "low_performance)", ["decided_by"])
 POLICY_OVERRULES = Counter("ai_policy_overrules", "Ly do code bac de xuat cua LLM (hybrid): no_proposal / sensitive_kind / "
                            "action_not_allowed / no_valid_focus", ["reason"])
+REPLAN_SWAPS = Counter("ai_replan_swaps", "Evaluator v10 de xuat doi topic (REPLAN_ENABLED) va ket qua sau khi code kiem: "
+                       "applied / budget / bad_drop / jd_priority / bad_add / not_applicable", ["result"])
 RAG = Counter("ai_rag_requests", "Trang thai RAG bao trong metadata cua request co dung RAG", ["status"])
 RAG_ERRORS = Counter("ai_rag_errors", "Ma loi RAG trong request (rag_timeout, rag_db_error...)", ["code"])
 TURNS = Counter("ai_turns", "Ket qua cham moi luot next-turn stream xong (luot wrap-up khong cham thi khong dem): "
@@ -101,6 +103,11 @@ def record_policy_decision(decided_by: str, overrule_reason: Optional[str]) -> N
     POLICY_DECISIONS.labels(decided_by).inc()
     if overrule_reason:
         POLICY_OVERRULES.labels(overrule_reason).inc()
+
+
+@_safe
+def record_replan_swap(result: str) -> None:
+    REPLAN_SWAPS.labels(result).inc()
 
 
 @_safe

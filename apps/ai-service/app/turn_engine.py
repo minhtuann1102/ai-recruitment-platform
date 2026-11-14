@@ -21,11 +21,13 @@ from .models_interview import (CandidateState, Evaluation, InterviewPlan, NextTu
                                TopicState, TurnInfo)
 from .rag.difficulty import difficulty_bucket
 from .rag.question_bank import kept_meaning, pick
+from .replan import effective_plan
+from .replan_reserve import with_reserve
 from .state_update import apply_action, record_evaluation
 from .tracing import observation
 from .time_budget import forced_transition
 from .turn_decision import choose_decision, time_hint
-from .turn_evaluation import evaluate_turn
+from .turn_evaluation import evaluate_turn, hint_source
 from .turn_reference_snippets import TurnChunks
 from .voice_turn import MAX_REASKS, heard_answer, low_confidence, no_speech, \
     reask_spec, reject_no_speech, reject_unclear, unclear_evaluation
@@ -89,7 +91,9 @@ async def start_session(req: StartRequest, planner=None, collector: Optional[Usa
     counting = start_coverage(retriever or get_retriever(), catalog, req.level)
     plan = await planner.plan(req.track, req.level, req.duration_minutes, req.cv_profile, req.jd_profile, collector)
     keep = req.jd_profile.priority_topic_ids() if req.jd_profile else ()
-    plan = prefer_covered(plan, catalog, req.level, await settle(counting), keep=keep)
+    coverage = await settle(counting)
+    plan = prefer_covered(plan, catalog, req.level, coverage, keep=keep)
+    plan = with_reserve(plan, catalog, req.level, coverage, req.cv_profile, req.jd_profile)  # phase 05, chi khi co bat
     with observation("rag_plan", "retriever", nest=True) as obs:  # doc lai: ngat mach co the vua mo trong luc Planner
         plan = await attach_reference_snippets(plan, catalog, retriever or get_retriever(), collector)
         obs.update(output={t.id: [s.ref for s in t.reference_sources] for ph in plan.phases for t in ph.topics})
@@ -106,13 +110,6 @@ async def start_session(req: StartRequest, planner=None, collector: Optional[Usa
     turn = TurnInfo(turn_number=1, phase=first_phase, topic_id=first.id, turn_kind="main", action="ask_main",
                     agent_decision="switch_topic", difficulty=state.current_difficulty)
     return TurnResult(spec, turn, state, plan, None, False, _meta(first_phase, 1, len(topics), "ask_main", 1))
-
-
-def _hint_source(action: str, key: str, extra: TurnChunks) -> str:
-    """Hint goi y cho dung cau vua hoi: dap an chuan (cau tu kho), khong co thi chunk theo luot cung topic_id."""
-    if action != "hint":
-        return ""
-    return key or extra.hint
 
 
 def _reask(req: NextTurnRequest, state: CandidateState, plan: InterviewPlan, phase: str, topic: PlanTopic,
@@ -133,7 +130,8 @@ def _reask(req: NextTurnRequest, state: CandidateState, plan: InterviewPlan, pha
 
 async def next_turn(req: NextTurnRequest, evaluator: Optional[Evaluator] = None,
                     collector: Optional[UsageCollector] = None, retriever=None) -> TurnResult:
-    plan, state = req.plan, req.state.model_copy(deep=True)
+    state = req.state.model_copy(deep=True)
+    plan = effective_plan(req.plan, state)  # phase 05: topic da doi (swaps) tai cho; moi reader phia sau thay plan thuc te
     topics = flat_topics(plan)
     if state.phase == "done":
         raise ApiError(409, "session_invalid_state", "Phiên đã kết thúc")
@@ -157,7 +155,7 @@ async def next_turn(req: NextTurnRequest, evaluator: Optional[Evaluator] = None,
         key, extra, ev, proposal = "", TurnChunks(), unclear_evaluation(req.turn_number), None
     else:
         key, extra, ev, proposal = await evaluate_turn(req, state, phase, topic, answer, evaluator or get_evaluator(),
-                                             collector, retriever)
+                                             collector, retriever, plan)
     if state.current_qa_id and not key and not (silent or unclear) and ev.answer_type not in NO_REFERENCE_NEEDED:
         ev = ev.model_copy(update={"reference_missing": True})
     record_evaluation(state, ev, req.turn_number)
@@ -168,9 +166,10 @@ async def next_turn(req: NextTurnRequest, evaluator: Optional[Evaluator] = None,
         state.topics[pos].status = "done"
         state.phase, state.active_topic_id, state.end_reason = "done", None, forced[1]
         return TurnResult(None, None, state, plan, ev, True, {})
-    trace = choose_decision(ev, proposal, state, phase, topic, topics, pos, req, forced)
+    trace = choose_decision(ev, proposal, state, phase, topic, topics, pos, req, forced, plan)
     dec = trace.dec
-
+    if trace.swap == "applied":  # topic pending da doi tai cho (cung vi tri, cung do dai): tinh lai plan thuc te
+        topics = flat_topics(plan := effective_plan(req.plan, state))
     focus = safe_focus(dec.focus)  # chi luu va dung focus da qua kiem (khong giu chuoi nghi injection trong state)
     action, phase_changed, next_pos = apply_action(state, topics, pos, dec.action, dec.difficulty_delta,
                                                    req.elapsed_seconds, focus)
@@ -185,7 +184,7 @@ async def next_turn(req: NextTurnRequest, evaluator: Optional[Evaluator] = None,
                         asked_on_topic=[t.q for t in req.topic_turns] + [req.question] if action != "ask_main" else [],
                         time_hint=time_hint(req.elapsed_seconds, plan, n_phase), avoid=list(state.asked_questions),
                         bank_question=bank.question if bank else None,
-                        reference_answer=_hint_source(action, key, extra))
+                        reference_answer=hint_source(action, key, extra))
     state.turn_count += 1
     if n_topic:
         next(t for t in state.topics if t.id == n_topic.id).turns.append(req.turn_number + 1)
@@ -193,7 +192,8 @@ async def next_turn(req: NextTurnRequest, evaluator: Optional[Evaluator] = None,
                     turn_kind=_KIND[action], action=action, agent_decision=_AGENT.get(action, "switch_topic"),
                     difficulty=state.current_difficulty, reasoning=dec.reasoning, qa_id=state.current_qa_id,
                     decided_by=trace.decided_by, proposed_action=trace.proposed, policy_action=trace.policy,
-                    overrule_reason=trace.overrule_reason, action_reason=trace.action_reason)
+                    overrule_reason=trace.overrule_reason, action_reason=trace.action_reason,
+                    swap_result=trace.swap)
     meta = _meta(n_phase, (next_pos or 0) + 1 if n_topic else len(topics), len(topics), action, info.turn_number)
     return TurnResult(spec, info, state, plan, ev, False, meta)
 

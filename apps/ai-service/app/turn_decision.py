@@ -10,6 +10,7 @@ from . import metrics
 from .early_stop import low_performance_stop
 from .models_interview import CandidateState, Evaluation, InterviewPlan, NextTurnRequest, PlanTopic
 from .policy import Decision, decide
+from .replan import attempt_swap
 from .policy_hybrid import policy_mode, proposed_label, safe_reason, validate_decision
 from .time_budget import phase_deadline_s
 
@@ -24,6 +25,7 @@ class DecisionTrace:
     policy: Optional[str] = None          # hanh dong decide() (luat)
     overrule_reason: Optional[str] = None
     action_reason: Optional[str] = None   # ly do LLM da qua kiem (PII / injection thi None); chi khi decided_by = llm
+    swap: Optional[str] = None            # phase 05: applied | ly do bac, khi LLM de xuat doi topic; "applied" thi state da doi
 
 
 def time_hint(elapsed_s: int, plan: InterviewPlan, phase: str) -> str:
@@ -44,8 +46,10 @@ def forced_decision(forced: Tuple[str, str], state: CandidateState) -> Decision:
 
 def choose_decision(ev: Evaluation, proposal, state: CandidateState, phase: str, topic: PlanTopic,
                     topics: List[Tuple[str, PlanTopic]], pos: int, req: NextTurnRequest,
-                    forced: Optional[Tuple[str, str]]) -> DecisionTrace:
-    """forced: ket qua forced_transition (khac "end", da xu ly o turn_engine). proposal: output V9 cua Evaluator hoac None."""
+                    forced: Optional[Tuple[str, str]], plan: Optional[InterviewPlan] = None) -> DecisionTrace:
+    """forced: ket qua forced_transition (khac "end", da xu ly o turn_engine). proposal: output V9 / V10 cua Evaluator hoac
+    None. plan = plan thuc te: co thi (hybrid) xet de xuat doi topic cua v10 sau khi quyet dinh cuoi la next_topic va
+    khong forced; doi that thi state.swaps / state.topics[i] da sua, turn_engine tinh lai topics."""
     hybrid = policy_mode() == "hybrid"
     proposed = proposed_label(proposal) if hybrid else None
     if forced:
@@ -69,4 +73,9 @@ def choose_decision(ev: Evaluation, proposal, state: CandidateState, phase: str,
         trace.overrule_reason = None
     if hybrid:
         metrics.record_policy_decision(trace.decided_by, trace.overrule_reason)
+        if plan is not None:  # forced / low_performance (khong con next_topic) o tren LLM: de xuat doi bi bac not_applicable
+            trace.swap = attempt_swap(proposal, state, plan, topics, pos, phase, "forced" if forced else trace.dec.action,
+                                      time_hint(req.elapsed_seconds, plan, phase), req.turn_number)
+            if trace.swap:
+                metrics.record_replan_swap(trace.swap)
     return trace
