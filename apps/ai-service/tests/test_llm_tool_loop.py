@@ -62,7 +62,7 @@ def test_no_tool_call_sends_full_params_and_returns_data():
     res, calls = go(gw)
     p = client.calls[0]
     assert res.data == Out(answer="ok") and res.tool_calls == 0 and calls == []
-    assert p["tools"] == TOOLS and p["tool_choice"] == "auto" and p["parallel_tool_calls"] is False
+    assert p["tools"] == TOOLS and p["tool_choice"] == "auto" and "parallel_tool_calls" not in p
     assert p["response_format"]["json_schema"]["strict"]
     assert p["extra_body"]["provider"] == {"require_parameters": True}  # base_url mac dinh la OpenRouter
 

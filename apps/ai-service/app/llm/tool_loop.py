@@ -115,7 +115,9 @@ async def complete_with_tools(gw, agent: str, messages: List[dict], schema: Type
         raise LlmError(TOOLS_UNSUPPORTED)
     cfg = agent_settings(agent, gw.llm, gw._env)
     base = request_base(cfg, schema, gw.llm)
-    base.update(tools=tools, tool_choice="auto", parallel_tool_calls=False)
+    # Khong gui parallel_tool_calls: OpenRouter + require_parameters tra 404 voi gpt-4o-mini (probe 2026-11-14);
+    # gioi han so lenh moi buoc do code tu ap (phan du tra `error: call_limit`).
+    base.update(tools=tools, tool_choice="auto")
     if is_openrouter(gw.llm.base_url):  # moi tham so (ca seed, reasoning) bat buoc duoc provider ho tro, khong thi 404
         merge_extra_body(base, {"provider": {"require_parameters": True}})
     names = {t["function"]["name"] for t in tools}
@@ -135,7 +137,7 @@ async def complete_with_tools(gw, agent: str, messages: List[dict], schema: Type
                 if last:
                     raise LlmOutputError("Model van goi cong cu sau tool_choice=none")
                 msgs.append(_assistant_tool_message(calls))
-                allowed = max_calls - used  # model bo qua parallel_tool_calls=false: chi chay toi da phan con lai
+                allowed = max_calls - used  # model co the goi song song: chi chay toi da phan con lai
                 deadline = min(budget_started + budget_s, t0 + step_deadline_s)
                 for i, c in enumerate(calls):  # moi tool_call_id van phai duoc tra loi
                     if i >= allowed:
