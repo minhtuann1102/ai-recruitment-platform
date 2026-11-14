@@ -110,7 +110,8 @@ class Retriever:
     async def retrieve_for_topic(self, *, topic_id: Optional[str], category: Optional[str], difficulty: int,
                                  query: str, include_qa: bool = True, k: Optional[int] = None,
                                  token_budget: Optional[int] = None, chunk_type: str = "qa_pair",
-                                 collector: Optional[UsageCollector] = None) -> List[Chunk]:
+                                 collector: Optional[UsageCollector] = None,
+                                 categories: Sequence[str] = ()) -> List[Chunk]:
         """chunk_type cua interview_qa trong vector fallback: qa_pair (Planner, Evaluator) hoac question
         (Interviewer tim cau hoi tuong tu, rag-design muc 4)."""
         k, budget = k or self.k, token_budget or self.token_budget
@@ -118,13 +119,14 @@ class Retriever:
         if not types:  # vd scenario khi chua bat textbook: khong co gi de tim, khong ton embed
             return []
         via = "topic"
+        cats = tuple(categories)
         try:
             bucket = difficulty_bucket(difficulty)
             if self.hybrid is not None:
                 via = "hybrid"
                 by_topic = include_qa and topic_id
                 extra = [self._repo.list_by_topic_id(topic_id, bucket, k * OVERFETCH)] if by_topic else []
-                found = await self.hybrid.search(query, SearchFilters(types, category, bucket, chunk_type),
+                found = await self.hybrid.search(query, SearchFilters(types, category, bucket, chunk_type, cats),
                                                  k * OVERFETCH, collector, extra)
                 return self._finish(topic_id, via, found, k, budget)
             found = await self._repo.list_by_topic_id(topic_id, bucket, k) if include_qa and topic_id else []
@@ -132,7 +134,7 @@ class Retriever:
             if len(found) < MIN_TOPIC_HITS:
                 via = "topic+vector" if found else "vector"
                 vector = await self._embed(await self.search_text(query, collector), collector=collector)
-                hits = await self._repo.search(vector, SearchFilters(types, category, bucket, chunk_type),
+                hits = await self._repo.search(vector, SearchFilters(types, category, bucket, chunk_type, cats),
                                                k * OVERFETCH)
                 found = dedup([*found, *hits])
         except Exception as err:  # RAG tuy chon (FR-AI-022): khong de loi DB/embedding lam hong phien
@@ -151,11 +153,12 @@ class Retriever:
 
     async def plan_snippets(self, *, topic_id: Optional[str], category: Optional[str], difficulty: int,
                             query: str, include_qa: bool = True,
-                            collector: Optional[UsageCollector] = None) -> List[Chunk]:
+                            collector: Optional[UsageCollector] = None,
+                            categories: Sequence[str] = ()) -> List[Chunk]:
         """FR-AI-022: toi da 3 chunk, <= 600 token moi topic (PlanTopic.reference_snippets + reference_sources)."""
         return await self.retrieve_for_topic(topic_id=topic_id, category=category, difficulty=difficulty,
                                              query=query, include_qa=include_qa, k=3, token_budget=600,
-                                             collector=collector)
+                                             collector=collector, categories=categories)
 
     async def reference_answer(self, qa_id: str, collector: Optional[UsageCollector] = None) -> Optional[Chunk]:
         """Evaluator: cau hoi tu ngan hang thi tra thang theo qa_id, khong tim tuong dong (rag-design muc 4)."""

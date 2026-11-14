@@ -74,7 +74,7 @@ Mỗi agent có tool riêng (xem ai-integration.md mục 2). Tất cả dùng ch
 
 Mỗi vị trí phỏng vấn (`track`) có một file YAML trong `apps/ai-service/app/catalog/`: `java_backend`, `python_backend`, `nodejs_backend`, `ai_engineer`, `frontend_react`, `devops_engineer` (6 track, 90 topic: Backend 30, AI 25, DevOps 14, Frontend 12, System Design 5, Database 4). Mỗi topic có `id`, `title`, `levels`, `category`, `key_concepts`; kèm danh sách `scenarios` theo level. Thêm vị trí mới = thêm một file YAML, loader và test tự nhận.
 
-**Scenario không có `topic_id` hay `category`** nên phase scenario **không** lấy `interview_qa` theo topic; Evaluator chấm scenario bằng `key_points` chung của scenario, RAG chỉ bổ sung `textbook` lọc theo category của track (AIE xác nhận mục 7 trong spec 005).
+**Scenario không có `topic_id` hay `category`** nên phase scenario **không** lấy `interview_qa` theo topic; Evaluator chấm scenario bằng `key_points` chung của scenario, RAG chỉ bổ sung `textbook` lọc theo category của track (AIE xác nhận mục 7 trong spec 005). Từ 14/11 (agentic phase 01) bộ lọc scenario nhận thêm `System Design`: `SearchFilters.categories` = (category chính của track, `System Design`), áp cho cả lúc start (`plan_snippets`) và theo lượt (`turn_reference_snippets`), qua BM25 (`category_matches`) và SQL (`category = ANY(%s)`). Topic technical vẫn lọc một `category`. Chỉ có tác dụng khi `RAG_TEXTBOOK_ENABLED=true`.
 
 Lấy ngữ cảnh cho từng topic: `interview_qa` theo `topic_id` trước (khớp chính xác); dưới 2 kết quả thì bổ sung bằng vector search lọc `category` + `difficulty`, cả `interview_qa` và `textbook`. Pipeline index từ chối chunk có `topic_id` không có trong catalog.
 

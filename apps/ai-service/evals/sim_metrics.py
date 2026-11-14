@@ -7,7 +7,7 @@ from app.models_common import LEVEL_CONFIG
 from app.models_interview import InterviewPlan
 from app.text_similarity import jaccard
 from app.time_budget import turn_cap
-from evals.personas import Persona
+from evals.personas import QUALITIES, Persona
 
 
 def _rate(hits: List[bool]) -> Optional[float]:
@@ -33,22 +33,41 @@ def discrimination(sessions: Dict[str, Dict], personas: Dict[str, Persona]) -> D
     groups: Dict[tuple, Dict[str, float]] = {}
     for pid, s in sessions.items():
         p = personas[pid]
-        if not p.behaviors and _overall(s) is not None:
+        if not p.behaviors and p.quality in QUALITIES and _overall(s) is not None:
             groups.setdefault((p.level, p.track), {})[p.quality] = _overall(s)
     full = [g for g in groups.values() if len(g) == 3]
     verdict_ok = [sessions[pid]["report"]["overall"]["verdict"] in
                   (("meets", "exceeds") if personas[pid].quality == "strong" else ("below",))
-                  for pid in sessions if not personas[pid].behaviors and personas[pid].quality != "average"]
+                  for pid in sessions if not personas[pid].behaviors and personas[pid].quality in ("strong", "weak")]
     return {"ordered": sum(g["strong"] > g["average"] > g["weak"] for g in full), "groups": len(full),
             "gap_strong_weak": round(mean(g["strong"] - g["weak"] for g in full), 2) if full else None,
             "verdict_ok": _rate(verdict_ok)}
+
+
+# ket thuc "tu nhien": het plan / het gio / cap luot. low_performance chi hop le voi persona yeu
+_NATURAL_ENDS = ("plan_complete", "time_up", "turn_cap", "time_hard_limit")
+
+
+def end_reasons(sessions: Dict[str, Dict], personas: Dict[str, Persona]) -> Dict:
+    """Phan bo end_reason cua bao cao theo chat luong persona + ty le "dung ly do": weak ket thuc tu nhien hoac
+    low_performance; strong/average chi ket thuc tu nhien (low_performance som la loi). Bo adversarial va skewed."""
+    dist: Dict[str, Counter] = {}
+    ok: List[bool] = []
+    for pid, s in sessions.items():
+        p = personas[pid]
+        if p.behaviors or p.quality not in QUALITIES or not s.get("report"):
+            continue
+        reason = s["report"]["session"]["end_reason"]
+        dist.setdefault(p.quality, Counter())[reason] += 1
+        ok.append(reason in _NATURAL_ENDS or (p.quality == "weak" and reason == "low_performance"))
+    return {"by_quality": {q: dict(c) for q, c in sorted(dist.items())}, "correct_reason": _rate(ok)}
 
 
 def adaptation(sessions: Dict[str, Dict], personas: Dict[str, Persona]) -> Dict:
     ok, hints = [], {"strong": [], "weak": []}
     for pid, s in sessions.items():
         p = personas[pid]
-        if p.behaviors or p.quality == "average":
+        if p.behaviors or p.quality not in ("strong", "weak"):
             continue
         diffs = [t["difficulty"] for t in s["turns"] if t["phase"] != "wrap_up"]
         ok.append(slope(diffs) > 0 if p.quality == "strong" else slope(diffs) < 0)

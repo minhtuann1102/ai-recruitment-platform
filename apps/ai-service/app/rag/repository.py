@@ -85,6 +85,9 @@ def _filter_where(filters: SearchFilters, model: str) -> Tuple[List[str], List[A
     if filters.category:
         where.append("category = %s")
         params.append(filters.category)
+    if filters.categories:
+        where.append("category = ANY(%s)")
+        params.append(list(filters.categories))
     if filters.difficulty:
         where.append("(difficulty = %s OR difficulty IS NULL)")
         params.append(filters.difficulty)

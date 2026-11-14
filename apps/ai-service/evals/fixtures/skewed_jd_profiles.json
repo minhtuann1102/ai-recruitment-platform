@@ -1,0 +1,44 @@
+{
+  "java_backend": {
+    "jd_profile": {
+      "title": "Junior Java Backend Developer (du lieu gia)",
+      "requirements": [
+        {"id": "r1", "text": "Toi uu truy van SQL va thiet ke index", "kind": "must",
+         "topic_ids": ["java.data.sql-index-tuning"]},
+        {"id": "r2", "text": "Quan ly transaction trong Spring", "kind": "must",
+         "topic_ids": ["java.spring.transaction"]},
+        {"id": "r3", "text": "Thiet ke REST API", "kind": "must", "topic_ids": ["java.web.rest-api-design"]},
+        {"id": "r4", "text": "Viet unit test voi JUnit va Mockito", "kind": "nice",
+         "topic_ids": ["java.testing.junit-mockito"]}
+      ]
+    },
+    "cv_profile": {
+      "headline": "Java backend developer 2 nam kinh nghiem (ho so gia)",
+      "skills": [{"name": "Java", "category": "language", "evidence": "work"},
+                 {"name": "Spring Boot", "category": "framework", "evidence": "work"},
+                 {"name": "MySQL", "category": "database", "evidence": "listed"}],
+      "total_years_experience": 2.0,
+      "track_relevance": "high"
+    }
+  },
+  "nodejs_backend": {
+    "jd_profile": {
+      "title": "Junior Node.js Backend Developer (du lieu gia)",
+      "requirements": [
+        {"id": "r1", "text": "Lam viec voi ORM va transaction", "kind": "must",
+         "topic_ids": ["node.data.orm-transactions"]},
+        {"id": "r2", "text": "Hieu event loop va bat dong bo", "kind": "must", "topic_ids": ["node.core.event-loop"]},
+        {"id": "r3", "text": "Xac thuc API bang JWT", "kind": "must", "topic_ids": ["node.web.api-auth-jwt"]},
+        {"id": "r4", "text": "Viet test voi Jest", "kind": "nice", "topic_ids": ["node.test.jest-testing"]}
+      ]
+    },
+    "cv_profile": {
+      "headline": "Node.js backend developer 2 nam kinh nghiem (ho so gia)",
+      "skills": [{"name": "Node.js", "category": "language", "evidence": "work"},
+                 {"name": "Express", "category": "framework", "evidence": "work"},
+                 {"name": "PostgreSQL", "category": "database", "evidence": "listed"}],
+      "total_years_experience": 2.0,
+      "track_relevance": "high"
+    }
+  }
+}

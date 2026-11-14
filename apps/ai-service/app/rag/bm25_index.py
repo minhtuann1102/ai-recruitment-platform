@@ -16,7 +16,7 @@ import unicodedata
 from collections import Counter, defaultdict
 from typing import Awaitable, Callable, Dict, List, Optional, Sequence
 
-from .models import Chunk, SearchFilters
+from .models import Chunk, SearchFilters, category_matches
 
 log = logging.getLogger("ai_service.rag")
 K1, B = 1.2, 0.75
@@ -44,7 +44,7 @@ def _allowed(chunk: Chunk, filters: SearchFilters) -> bool:
     """Cung bo loc voi vector search (tru chunk_type: corpus chi co qa_pair, khu trung theo qa_id nhu nhau)."""
     if chunk.source_type not in filters.source_types:
         return False
-    if filters.category and chunk.category != filters.category:
+    if not category_matches(filters, chunk.category):
         return False
     return not filters.difficulty or chunk.difficulty in (filters.difficulty, None)
 

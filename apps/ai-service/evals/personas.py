@@ -6,7 +6,8 @@ truoc lo hong that cua ung vien de kiem bao cao. In card: python -m evals.person
 import json
 import random
 from dataclasses import asdict, dataclass, field
-from typing import Dict, List
+from pathlib import Path
+from typing import Dict, List, Optional
 
 from app.catalog.loader import load_catalog
 
@@ -15,6 +16,7 @@ LEVELS = ("fresher", "junior", "middle", "senior")
 QUALITIES = ("strong", "average", "weak")
 # ti le topic (biet tot, biet mot phan); phan con lai la khong biet
 _SPLIT = {"strong": (0.75, 0.15), "average": (0.35, 0.35), "weak": (0.1, 0.2)}
+SKEWED_FIXTURE = Path(__file__).parent / "fixtures" / "skewed_jd_profiles.json"
 _STYLE = {"strong": "Trả lời mạch lạc, có ví dụ thực tế và trade-off.",
           "average": "Trả lời ngắn, đúng ý chính nhưng ít giải thích, đôi khi đoán ('em nghĩ là...').",
           "weak": "Trả lời mơ hồ, hay nói không chắc, đôi khi hiểu sai khái niệm."}
@@ -32,6 +34,8 @@ class Persona:
     style: str
     behaviors: List[str] = field(default_factory=list)  # rambling | injection_attempt | one_word_answers | end_early | english_answers
     base_id: str = ""  # persona goc cua ban adversarial (de so sanh, vd injection khong lam tang diem)
+    jd_profile: Optional[Dict] = None  # co thi run_session gui o start + finalize (khoi `requirements`)
+    cv_profile: Optional[Dict] = None  # co thi run_session gui o start
 
     def knowledge(self, catalog_ref: str) -> str:
         """well | partial | none cho topic catalog; topic khong thuoc catalog (intro, scenario) tinh theo chat luong."""
@@ -41,7 +45,7 @@ class Persona:
             return "partial"
         if catalog_ref in self.does_not_know:
             return "none"
-        return {"strong": "well", "average": "partial", "weak": "none"}[self.quality]
+        return {"strong": "well", "average": "partial", "weak": "none"}.get(self.quality, "partial")
 
 
 def build_persona(track: str, level: str, quality: str) -> Persona:
@@ -68,6 +72,25 @@ def adversarial() -> List[Persona]:
         out.append(Persona(f"{base}+{behavior}", p.track, p.level, p.quality, p.knows_well, p.knows_partially,
                            p.does_not_know, p.style, [behavior], base_id=base))
     return out
+
+
+def build_skewed(track: str, level: str, strong_category: str = "Backend", weak_category: str = "Database") -> Persona:
+    """Manh mot category, yeu category khac (quality = skewed, ngoai ma tran strong/average/weak). Kem JD + CV gia:
+    yeu cau `must` tro topic ca hai nhom, de do do phu JD va luc policy phai chon giua topic manh va yeu."""
+    pid = f"{level}-{track.split('_')[0]}-skewed"
+    topics = load_catalog(track).topics_for(level)
+    well = [t.id for t in topics if t.category == strong_category]
+    none = [t.id for t in topics if t.category == weak_category]
+    rest = [t.id for t in topics if t.id not in well and t.id not in none]
+    fixture = json.loads(SKEWED_FIXTURE.read_text("utf-8"))[track]
+    style = f"Rất chắc phần {strong_category}, mơ hồ và hay nói không biết phần {weak_category}."
+    return Persona(pid, track, level, "skewed", well, rest, none, style,
+                   jd_profile=fixture["jd_profile"], cv_profile=fixture["cv_profile"])
+
+
+def skewed_personas() -> Dict[str, Persona]:
+    """Chay rieng bang `simulate --matrix skewed`; khong nam trong all_personas() de ma tran 29 persona khong doi."""
+    return {p.id: p for p in (build_skewed(t, "junior") for t in TRACKS)}
 
 
 def all_personas() -> Dict[str, Persona]:
