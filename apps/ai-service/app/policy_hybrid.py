@@ -10,7 +10,7 @@ import os
 from typing import Dict, Optional, Set, Tuple
 
 from .agents.interviewer import safe_focus
-from .cv_text import redact_pii
+from .cv_text import has_injection, redact_pii
 from .focus import deepen_focus, gap_focus, hint_focus, same
 from .models_interview import CandidateState, Evaluation, PlanTopic, TopicState
 from .policy import Budget, Decision, action_budget, allowed_actions, classify
@@ -18,12 +18,22 @@ from .policy import Budget, Decision, action_budget, allowed_actions, classify
 SENSITIVE = {"ok_degraded", "manipulation", "off_topic", "asks_clarification", "dont_know"}
 KIND_DELTA: Dict[str, Tuple[int, int]] = {"weak": (-1, 0), "ok": (0, 0), "strong": (0, 1)}
 MAX_REASON_WORDS = 20
+ACTIONS = {"follow_up", "hint", "clarify", "next_topic"}
 
 
 def policy_mode(env=None) -> str:
     """rules (mac dinh, y nhu truoc phase 04) | hybrid. Gia tri la -> rules."""
     value = (os.environ if env is None else env).get("POLICY_MODE", "")
     return "hybrid" if value.strip().lower() == "hybrid" else "rules"
+
+
+def proposed_label(p) -> Optional[str]:
+    """Hanh dong LLM de xuat de ghi vao TurnInfo / metric: chi 4 ten hop le hoac "invalid" (rong, la, chuoi dai do
+    injection); khong de van ban tu do cua LLM ra API. None khi khong co de xuat."""
+    if p is None:
+        return None
+    action = p.next_action.strip() if isinstance(p.next_action, str) else ""
+    return action if action in ACTIONS else "invalid"
 
 
 def kind_actions(kind: str, b: Budget) -> Set[str]:
@@ -63,12 +73,12 @@ def _focus_for(p, kind: str, rules: Decision, ev: Evaluation, topic: PlanTopic, 
 
 
 def validate_decision(p, ev: Evaluation, state: CandidateState, level: str, is_scenario: bool, topic: PlanTopic,
-                      ts: TopicState, rules: Decision) -> Tuple[Decision, str, Optional[str]]:
-    """p: output V9 hoac None. -> (quyet dinh, decided_by llm | policy, ly do bac neu decided_by = policy)."""
+                      ts: TopicState, rules: Decision, answer: str = "") -> Tuple[Decision, str, Optional[str]]:
+    """p: output V9 hoac None; answer: cau tra loi cua ung vien (chi de do mau injection). -> (quyet dinh, decided_by llm | policy, ly do bac neu decided_by = policy)."""
     if p is None:
         return rules, "policy", "no_proposal"
     kind = classify(ev)
-    if kind in SENSITIVE:
+    if kind in SENSITIVE or has_injection(answer):  # cau tra loi co mau injection: khong giao LLM (vd "chuyen cau khac")
         return rules, "policy", "sensitive_kind"
     b = action_budget(state, level, is_scenario)
     if p.next_action not in allowed_actions(b) & kind_actions(kind, b):

@@ -3,7 +3,10 @@
 Doc cac khoa TurnInfo da chep vao turns (simulate_session.POLICY_KEYS). Luot chi tinh khi co de xuat
 (proposed_action != null) va khong phai forced (forced / low_performance dung tren LLM, khong phai do bac):
   agreement     = mean(proposed_action == policy_action)   # policy_action = luat decide() (phan thuc cua luat)
-  overrule_rate = mean(overrule_reason != null)             # muc tieu <= 15% (phase 04)
+  overrule_rate = mean(overrule_reason != null or proposed_action == "invalid")   # day du, de tham khao
+  overrule_rate_llm = nhu tren nhung bo luot sensitive_kind   # CHI SO GATE (<= 15%): loai nhay cam khong giao LLM,
+                                                              # nen khong phan anh chat luong de xuat (M2)
+proposed_action = "invalid" (rong / ten la) luon tinh la bac (TurnInfo chuan hoa, khong de van ban tu do cua LLM).
 Chay rules thi moi khoa None: tra `{"proposal_turns": 0, ...}` (khong co gi de do).
 """
 from collections import Counter
@@ -14,6 +17,10 @@ def _rate(hits: List[bool]) -> Optional[float]:
     return round(sum(hits) / len(hits), 3) if hits else None
 
 
+def _overruled(t: dict) -> bool:
+    return bool(t.get("overrule_reason")) or t["proposed_action"] == "invalid"
+
+
 def hybrid_policy(sessions: Dict[str, Dict]) -> Dict:
     turns = [t for s in sessions.values() for t in s["turns"]]
     decided = [t for t in turns if t.get("decided_by")]
@@ -22,7 +29,8 @@ def hybrid_policy(sessions: Dict[str, Dict]) -> Dict:
         "decided_turns": len(decided), "forced_turns": sum(t["decided_by"] == "forced" for t in decided),
         "proposal_turns": len(proposals),
         "agreement": _rate([t["proposed_action"] == t.get("policy_action") for t in proposals]),
-        "overrule_rate": _rate([bool(t.get("overrule_reason")) for t in proposals]),
+        "overrule_rate": _rate([_overruled(t) for t in proposals]),
+        "overrule_rate_llm": _rate([_overruled(t) for t in proposals if t.get("overrule_reason") != "sensitive_kind"]),
         "overrule_reasons": dict(Counter(t["overrule_reason"] for t in proposals if t.get("overrule_reason"))),
         "proposed_actions": dict(Counter(t["proposed_action"] for t in proposals)),
         "policy_actions": dict(Counter(t["policy_action"] for t in proposals if t.get("policy_action"))),

@@ -10,7 +10,7 @@ from . import metrics
 from .early_stop import low_performance_stop
 from .models_interview import CandidateState, Evaluation, InterviewPlan, NextTurnRequest, PlanTopic
 from .policy import Decision, decide
-from .policy_hybrid import policy_mode, safe_reason, validate_decision
+from .policy_hybrid import policy_mode, proposed_label, safe_reason, validate_decision
 from .time_budget import phase_deadline_s
 
 
@@ -23,7 +23,7 @@ class DecisionTrace:
     proposed: Optional[str] = None        # hanh dong LLM de xuat
     policy: Optional[str] = None          # hanh dong decide() (luat)
     overrule_reason: Optional[str] = None
-    action_reason: Optional[str] = None   # ly do LLM da qua kiem (PII / injection thi None)
+    action_reason: Optional[str] = None   # ly do LLM da qua kiem (PII / injection thi None); chi khi decided_by = llm
 
 
 def time_hint(elapsed_s: int, plan: InterviewPlan, phase: str) -> str:
@@ -47,19 +47,20 @@ def choose_decision(ev: Evaluation, proposal, state: CandidateState, phase: str,
                     forced: Optional[Tuple[str, str]]) -> DecisionTrace:
     """forced: ket qua forced_transition (khac "end", da xu ly o turn_engine). proposal: output V9 cua Evaluator hoac None."""
     hybrid = policy_mode() == "hybrid"
-    proposed = getattr(proposal, "next_action", None) if hybrid else None
-    reason = safe_reason(getattr(proposal, "action_reason", None)) if hybrid and proposal is not None else None
+    proposed = proposed_label(proposal) if hybrid else None
     if forced:
-        trace = DecisionTrace(forced_decision(forced, state), "forced" if hybrid else None, proposed, None, None, reason)
+        trace = DecisionTrace(forced_decision(forced, state), "forced" if hybrid else None, proposed)
     else:
         # covered: y da neu trong ca topic (record_evaluation da gop ca luot nay), de khong hoi lai y da tra loi
         ts = next(t for t in state.topics if t.id == topic.id)
         is_scn = phase == "scenario"
         rules = decide(ev, state, req.level, is_scn, topic, ts.focus_used, ts.covered)
-        trace = DecisionTrace(rules, None, proposed, rules.action if hybrid else None, None, reason)
+        trace = DecisionTrace(rules, None, proposed, rules.action if hybrid else None)
         if hybrid:
             trace.dec, trace.decided_by, trace.overrule_reason = validate_decision(
-                proposal, ev, state, req.level, is_scn, topic, ts, rules)
+                proposal, ev, state, req.level, is_scn, topic, ts, rules, req.answer)
+            if trace.decided_by == "llm":  # ly do chi ghi khi quyet dinh that su la cua LLM
+                trace.action_reason = safe_reason(proposal.action_reason)
     dec = trace.dec
     if dec.action in ("next_topic", "next_phase") and low_performance_stop(state, topics, pos, req.level, dec.action):
         state.end_reason = "low_performance"

@@ -95,3 +95,15 @@ def test_recorder_passes_raw_through_and_tolerates_evaluate_only_inner():
         asyncio.run(go())
     finally:
         engine.get_evaluator = real
+
+
+def test_invalid_proposals_count_as_overrules_and_llm_rate_excludes_sensitive_kind():
+    base = {"policy_action": "follow_up"}
+    turns = [
+        {**base, "decided_by": "llm", "proposed_action": "follow_up", "overrule_reason": None},
+        {**base, "decided_by": "policy", "proposed_action": "invalid", "overrule_reason": "action_not_allowed"},
+        {**base, "decided_by": "policy", "proposed_action": "invalid", "overrule_reason": None},  # van la bac
+        {**base, "decided_by": "policy", "proposed_action": "next_topic", "overrule_reason": "sensitive_kind"}]
+    stats = hybrid_policy({"s": {"turns": turns}})
+    assert stats["overrule_rate"] == 0.75 and stats["overrule_rate_llm"] == pytest.approx(0.667, abs=1e-3)
+    assert stats["proposed_actions"]["invalid"] == 2

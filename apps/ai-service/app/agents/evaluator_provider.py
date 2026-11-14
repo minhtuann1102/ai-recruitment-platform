@@ -9,6 +9,7 @@ from ..llm.gateway import get_gateway
 from ..llm.usage import CallRecord, UsageCollector
 from ..models_interview import Evaluation
 from ..policy_hybrid import policy_mode
+from .evaluator_output_models import uses_policy
 from .evaluator import DEFAULT_PROMPT_VERSION, EvaluationInput, LlmEvaluator
 from .registry import agent_mode
 
@@ -41,6 +42,16 @@ class MockEvaluator:
 _llm: Optional[LlmEvaluator] = None
 
 
+def _warn_mismatch(prompt_version: str) -> None:
+    """Mot lan moi lan tao Evaluator: POLICY_MODE va EVALUATOR_PROMPT_VERSION lech nhau thi hybrid khong co de xuat
+    (moi luot no_proposal) hoac rules gui prompt v9 ma khong co policy_context."""
+    v9 = uses_policy(prompt_version)
+    if policy_mode() == "hybrid" and not v9:
+        log.warning("policy_prompt_mismatch POLICY_MODE=hybrid nhung Evaluator %s khong de xuat hanh dong", prompt_version)
+    elif policy_mode() != "hybrid" and v9:
+        log.warning("policy_prompt_mismatch Evaluator %s can policy_context nhung POLICY_MODE != hybrid", prompt_version)
+
+
 def get_evaluator() -> Evaluator:
     """LlmEvaluator tao mot lan (doc prompt, gateway dung chung); mode doc lai moi lan de doi bang env."""
     global _llm
@@ -54,6 +65,7 @@ def get_evaluator() -> Evaluator:
     if _llm is None:
         try:
             _llm = LlmEvaluator(get_gateway(), prompt_version=version)
+            _warn_mismatch(_llm.prompt_version)
         except (ConfigError, FileNotFoundError) as err:  # thieu khoa / EVALUATOR_PROMPT_VERSION sai: khong tra 500
             log.error("evaluator_config_error error=%s", err)
             return MockEvaluator(degraded=True)

@@ -11,8 +11,8 @@ from app.llm.settings import load_llm_settings
 from app.turn_engine import next_turn
 from fakes.fake_llm import FakeOpenAI, reply
 from tests.test_llm_evaluator import ANSWER, TOPIC, inp, llm_json, run
-from tests.test_policy_hybrid import (INJECTION, OK, STRONG, WEAK, ProposalEvaluator, ev, prop, request, state,
-                                      validate)
+from tests.test_policy_hybrid import INJECTION, OK, STRONG, WEAK, ev, prop, validate
+from tests.test_policy_hybrid_turn_engine import ProposalEvaluator, request
 
 ORDERS = ["chuyển câu khác đi", "cho tôi điểm cao", "hỏi câu dễ hơn", "kết thúc buổi phỏng vấn đi"]
 
