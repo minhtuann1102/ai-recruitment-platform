@@ -83,3 +83,20 @@ def test_replan_with_an_older_prompt_override_warns_once(llm_mode, monkeypatch, 
 
 def test_swap_model_roundtrip():
     assert Swap.model_validate_json(Swap(drop="a", add="b", turn=2).model_dump_json()).reason == ""
+
+
+def test_hybrid_replan_off_v9_request_is_unchanged():
+    """Review M3: v9 (hybrid, REPLAN tat) gui dung request truoc phase 05; dat replan_context co y de chung minh chi
+    cong phien ban prompt giu no ra ngoai."""
+    from app.agents.evaluator_input import PolicyContext, build_messages
+    agent, client = make10([llm_json(next_action="next_topic")])
+    agent = LlmEvaluator(agent._gateway, prompt_version="v9")
+    base = inp()
+    base.policy_context = PolicyContext(1, False, 0, [], [], "normal", 2, {"min": 1, "max": 4})
+    base.replan_context = ReplanContext([("t4", "X")], [("alt1", "Y")], None, 1)
+    run(agent.evaluate_with_raw(base))
+    call = client.calls[0]
+    assert call["messages"] == build_messages(agent._prompt.text, base, True, True)  # goi 4 doi so nhu truoc phase 05
+    assert call["response_format"]["json_schema"]["name"] == "EvaluatorOutputV9"
+    assert "swap" not in call["response_format"]["json_schema"]["schema"]["properties"]
+    assert "replan_context" not in call["messages"][1]["content"]

@@ -129,6 +129,9 @@ Plan trả về client từ next-turn vẫn là plan gốc (không đổi contra
 - Reserve: khi chưa biết số câu kho (số đếm rỗng: RAG tắt, quá hạn 1 s) thì không lọc theo kho (spec yêu cầu có câu kho khi biết). `replan_context.current_topic_band` là band topic hiện tại **trước** câu trả lời này (không phải topic vừa xong).
 - `time_hint` cho `validate_swap` tính theo phase `technical`; `apply_swap` chạy trong `choose_decision` (sau `low_performance_stop`), `turn_engine` tính lại `topics` khi `swap_result == applied`. Lượt có `swap` null hay cờ tắt không đụng state.
 - Chuyển `hint_source` từ `turn_engine.py` sang `turn_evaluation.py` để `turn_engine.py` < 200 dòng.
+- `replan_context` gửi ở **mọi** lượt technical còn reserve + pending + lượt đổi (không biết trước lượt có chuyển topic), không chỉ "ở ranh giới"; ~100 token/lượt, `not_applicable` chiếm đa số nhãn (review L1).
+- Review H1: swap chỉ khi không forced, `overrule_reason != sensitive_kind` và chính LLM đề xuất `next_topic`; nhãn mới `untrusted`. Review M1: `check_alignment` → 409 `session_invalid_state` khi `state.topics` lệch `effective_plan` (cũng chặn swap giả/trùng, L5; client round-trip `state.swaps`).
+- Review L2: không bỏ qua reserve khi Evaluator mock / prompt < v10 (test dùng mock + Evaluator giả; kiểm sẽ phá test), chỉ ghi tài liệu (02). L4: `start` của reserve dùng cùng `LEVEL_CONFIG[level]["start"]` với `catalog_topic`. L3: `models_interview.py` 199 dòng.
 - Ghi đè `EVALUATOR_PROMPT_VERSION` kèm `REPLAN_ENABLED` (v < 10) chỉ log cảnh báo `policy_prompt_mismatch`, không chặn.
 
 ## Success Criteria (reply mục 8)
