@@ -63,11 +63,11 @@ def postcheck(out: EvaluatorOutput, inp: EvaluationInput) -> Evaluation:
         if invalid or contradicted:
             log.info("evaluator_sources turn=%d invalid_ids=%d contradicted=%d", inp.turn_number, invalid,
                      len(contradicted))
-    tool_only: List[str] = []  # hieu sai chi dua vao chunk cong cu: vao bao cao, khong chan diem (luat H4)
+    # hieu sai chi dua vao chunk cong cu (luat H4): khong chan diem va KHONG vao Evaluation (chi log)
     if sourced and inp.tool_base_ids is not None:
-        misconceptions, tool_only = split_tool_misconceptions(misconceptions, contradicted, inp.tool_base_ids)
-        if tool_only:
-            log.info("evaluator_tool_misconception_uncapped turn=%d n=%d", inp.turn_number, len(tool_only))
+        misconceptions, freed = split_tool_misconceptions(misconceptions, contradicted, inp.tool_base_ids)
+        if freed:
+            log.info("evaluator_tool_misconception_dropped turn=%d n=%d", inp.turn_number, len(freed))
     if inp.reference_answer:
         # cau tu kho chi hoi mot khia canh cua topic: tran completeness theo so y co quote (1 y -> 2, 3+ y -> 4)
         # thay vi ti le key_points cua ca topic (se ep diem thap du tra loi du dap an chuan)
@@ -82,7 +82,7 @@ def postcheck(out: EvaluatorOutput, inp: EvaluationInput) -> Evaluation:
     return build_evaluation(
         turn_number=inp.turn_number, answer_type=out.answer_type, bands=bands,
         covered_points=[c.point for c in verified], missing_points=out.missing_points,
-        misconceptions=[*misconceptions, *tool_only],
+        misconceptions=misconceptions,
         evidence=[Evidence(claim=c.point[:150], quote=c.quote[:100], source_ids=c.source_ids,
                            support=c.support if sourced else None) for c in verified],
         # tag do code sinh tu y da kiem chung (v2 khong bat LLM viet tag: bot token o duong nong)
@@ -119,7 +119,7 @@ class LlmEvaluator:
         if replaced:
             log.info("evaluator_stt_terms turn=%d", inp.turn_number)
             inp = replace(inp, answer=normalized)
-        started = time.perf_counter()
+        started, n0 = time.perf_counter(), len(collector.records) if collector is not None else 0
         try:
             sourced = uses_sources(self._prompt.version)
             schema = EvaluatorOutputV4 if sourced else EvaluatorOutput
@@ -134,10 +134,12 @@ class LlmEvaluator:
         except (LlmError, ConfigError, openai.APIError) as err:  # openai.APIError: loi API con lai sau khi het retry
             log.warning("evaluator_degraded turn=%d error=%s", inp.turn_number, type(err).__name__)
             if collector is not None:
-                # thoi gian cho truoc khi fallback (het han ~10 s): khong ghi thi latency_ms va /metrics bao 0
+                # thoi gian cho truoc khi fallback (het han ~10 s): khong ghi thi latency_ms va /metrics bao 0.
+                # Tru phan vong lap tra cuu da tu ghi (record loi) de khong tinh hai lan.
+                waited = int((time.perf_counter() - started) * 1000)
+                recorded = sum(r.latency_ms for r in collector.records[n0:] if r.agent == self.agent)
                 collector.add(CallRecord(self.agent, "mock-heuristic", prompt_version=self._prompt.version,
-                                         fallback="evaluator_mock_heuristic",
-                                         latency_ms=int((time.perf_counter() - started) * 1000)))
+                                         fallback="evaluator_mock_heuristic", latency_ms=max(waited - recorded, 0)))
             fallback = mock_evaluator.evaluate(inp.answer, inp.question, inp.topic, inp.turn_kind, inp.turn_number)
             return None, fallback.model_copy(update={"degraded": True})
         ev = await asyncio.to_thread(postcheck, result.data, inp)

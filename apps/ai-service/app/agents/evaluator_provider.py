@@ -46,7 +46,7 @@ def get_evaluator() -> Evaluator:
         return MockEvaluator()
     if _llm is None:
         try:
-            # EVALUATOR_PROMPT_VERSION (vd v3) de A/B; trong = ban moi nhat
+            # EVALUATOR_PROMPT_VERSION (vd v3) de A/B; trong = v8 (ghim trong LlmEvaluator)
             _llm = LlmEvaluator(get_gateway(), prompt_version=os.getenv("EVALUATOR_PROMPT_VERSION") or None)
         except (ConfigError, FileNotFoundError) as err:  # thieu khoa / EVALUATOR_PROMPT_VERSION sai: khong tra 500
             log.error("evaluator_config_error error=%s", err)

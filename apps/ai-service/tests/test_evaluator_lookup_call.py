@@ -8,7 +8,9 @@ import pytest
 
 import app.agents.evaluator_lookup_call as elc
 from app import metrics
-from app.agents.evaluator import EvaluationInput, LlmEvaluator
+from app.agents.evaluator import EvaluatorOutputV4, LlmEvaluator, build_messages
+from app.llm.chat_call import request_base
+from app.llm.settings import agent_settings
 from app.evaluator_lookup import TurnLookup, load_lookup_settings
 from app.llm import tool_loop
 from app.llm.gateway import LlmGateway
@@ -66,12 +68,15 @@ def final_json(source_id="S2"):
     return reply(json.dumps(out, ensure_ascii=False))
 
 
-def test_flag_off_request_has_no_tools_and_no_fragment():
+def test_flag_off_request_equals_the_pre_change_request_exactly():
     ev_agent, client = make([llm_json()])
     ev = run(ev_agent.evaluate(inp(), UsageCollector()))
-    p = client.calls[0]
-    assert not ev.degraded and "tools" not in p and "tool_choice" not in p
-    assert "search_knowledge" not in p["messages"][0]["content"]
+    gw = ev_agent._gateway
+    cfg = agent_settings("evaluator", gw.llm, {})
+    # yeu cau nhu truoc phase 03: request_base cua gateway + messages build theo cach cu (khong tools, khong fragment)
+    expected = {"kind": "chat", **request_base(cfg, EvaluatorOutputV4, gw.llm),
+                "messages": build_messages(ev_agent._prompt.text, inp(), True)}
+    assert not ev.degraded and client.calls[0] == expected
 
 
 def test_one_tool_call_extends_ids_and_sources_and_keeps_prompt_version():
@@ -131,8 +136,12 @@ def test_slow_loop_uses_whole_budget_then_mock_degraded_without_second_call(smal
     base, _ = with_lookup()
     ev_agent, client = make([Slow(5.0, CALL), llm_json()])
     col, started = UsageCollector(), time.perf_counter()
+    before, fb = lookup_count("budget_exhausted"), lookup_count("fallback")
     ev = run(ev_agent.evaluate(base, col))
-    assert ev.degraded and time.perf_counter() - started < 1.2 + 0.5  # B + 0.5 s (tuong ung 10 + 0.5 s)
+    wall_ms = (time.perf_counter() - started) * 1000
+    assert ev.degraded and wall_ms < 1700  # B + 0.5 s (tuong ung 10 + 0.5 s)
+    assert col.to_metadata()["latency_ms"]["evaluator"] <= wall_ms + 50  # M1: khong tinh hai lan do tre vong lap loi
+    assert lookup_count("budget_exhausted") == before + 1 and lookup_count("fallback") == fb
     assert len(client.calls) == 1  # het ngan sach: khong goi lai khong tools
     assert [r.fallback for r in col.records] == ["evaluator_lookup_fallback", "evaluator_mock_heuristic"]
 

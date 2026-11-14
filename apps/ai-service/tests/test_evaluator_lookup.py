@@ -48,6 +48,20 @@ def test_settings_default_off_and_clamped(monkeypatch):
     assert load_lookup_settings({"EVALUATOR_TOOL_DEADLINE_S": "x"}).tool_deadline_s == 2.0
 
 
+def test_bad_env_never_raises_and_is_ignored_when_flag_off():
+    off = {"EVALUATOR_MAX_TOOL_CALLS": "inf", "EVALUATOR_TOOL_DEADLINE_S": "nan"}
+    assert load_lookup_settings(off) == load_lookup_settings({})  # cho tat: khong doc, khong loi
+    for bad in ("inf", "nan", "abc", "-1e999"):
+        s = load_lookup_settings({"EVALUATOR_TOOLS": "1", "EVALUATOR_MAX_TOOL_CALLS": bad,
+                                  "EVALUATOR_TOOL_DEADLINE_S": bad})
+        assert (s.enabled, s.max_calls, s.tool_deadline_s) == (True, 1, 2.0)
+
+
+def test_fragment_is_read_once():
+    from app.evaluator_lookup import fragment_text
+    assert fragment_text() is fragment_text() and "search_knowledge" in fragment_text()
+
+
 def test_tool_schema_is_strict_with_single_query():
     f = SEARCH_TOOL["function"]
     assert f["strict"] and f["name"] == "search_knowledge"

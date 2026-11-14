@@ -143,7 +143,7 @@ def summarize(samples: List[dict], results: Dict[str, List[dict]]) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--runs", type=int, default=3)
-    parser.add_argument("--prompt", default=None, help="vd v5; mac dinh ban moi nhat")
+    parser.add_argument("--prompt", default=None, help="vd v5; mac dinh v8 (ban ghim)")
     parser.add_argument("--lookup", action="store_true", help="bat Evaluator tra cuu kho (can RAG + AI_DB_URL)")
     parser.add_argument("--out", type=Path)
     args = parser.parse_args()

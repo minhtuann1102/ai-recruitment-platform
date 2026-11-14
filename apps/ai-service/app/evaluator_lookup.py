@@ -6,7 +6,9 @@ BM25 trong bo nho (`memory_only`, < 20 ms, khong cham ai_db). Chunk tra ve duoc 
 (snippet topic + chunk theo luot), <= 3 chunk / <= 600 token. Chunk noi vao cuoi `turn_snippets` nen id tiep tuc
 S{n+1}..: hau kiem, trich nguon va bao cao chay nguyen. Chunk cong cu khong co quyen phat (xem postcheck, luat H4).
 """
+import functools
 import logging
+import math
 import os
 from dataclasses import dataclass, field, replace
 from typing import Awaitable, Callable, List, Mapping, Optional, Sequence
@@ -43,23 +45,34 @@ class LookupSettings:
     tool_deadline_s: float = 2.0
 
 
-def _number(raw: str, default: float) -> float:
-    try:
-        return float(raw)
-    except ValueError:
+def _finite(env: Mapping[str, str], name: str, default: float) -> float:
+    """So huu han tu env; thieu thi mac dinh, sai dinh dang (chu, nan, inf) thi mac dinh kem canh bao."""
+    raw = (env.get(name) or "").strip()
+    if not raw:
         return default
+    try:
+        value = float(raw)
+    except ValueError:
+        value = math.nan
+    if not math.isfinite(value):
+        log.warning("evaluator_lookup_bad_env name=%s default=%s", name, default)
+        return default
+    return value
 
 
 def load_lookup_settings(env: Optional[Mapping[str, str]] = None) -> LookupSettings:
+    """Chi doc EVALUATOR_MAX_TOOL_CALLS / _DEADLINE_S khi co bat: go sai khi tat khong duoc anh huong luot cham."""
     env = os.environ if env is None else env
-    calls = int(_number(env.get("EVALUATOR_MAX_TOOL_CALLS", "") or "1", 1))
-    deadline = _number(env.get("EVALUATOR_TOOL_DEADLINE_S", "") or "2.0", 2.0)
-    return LookupSettings(_flag(env.get("EVALUATOR_TOOLS", ""), False), max(1, min(calls, MAX_CALLS_CAP)),
-                          deadline if deadline > 0 else 2.0)
+    if not _flag(env.get("EVALUATOR_TOOLS", ""), False):
+        return LookupSettings()
+    calls = int(_finite(env, "EVALUATOR_MAX_TOOL_CALLS", 1))
+    deadline = _finite(env, "EVALUATOR_TOOL_DEADLINE_S", 2.0)
+    return LookupSettings(True, max(1, min(calls, MAX_CALLS_CAP)), deadline if deadline > 0 else 2.0)
 
 
+@functools.lru_cache(maxsize=1)
 def fragment_text() -> str:
-    """Luat tra cuu, chi noi vao system prompt o luot co tools (prompt chinh van la v8)."""
+    """Luat tra cuu, chi noi vao system prompt o luot co tools (prompt chinh van la v8). Doc dia mot lan."""
     return (PROMPTS_DIR / f"{FRAGMENT}.md").read_text(encoding="utf-8")
 
 

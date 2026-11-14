@@ -27,13 +27,14 @@ def _has_reference(turn: dict) -> bool:
 def evaluator_lookup(sessions: Dict[str, Dict]) -> Dict:
     eligible = [(c, t) for c, t in _pairs(sessions) if t["phase"] != "intro" and not _has_reference(t)]
     usage = lambda c: ((c.get("metadata") or {}).get("usage") or {}).get("evaluator") or {}  # noqa: E731
-    looked = [(c, t) for c, t in eligible if usage(c).get("tool_calls")]
+    failed = lambda c: "evaluator_lookup_fallback" in ((c.get("metadata") or {}).get("fallbacks") or [])  # noqa: E731
+    # vong lap loi (co record fallback, mang tool_calls) khong tinh la tra cuu va khong tinh la tim rong
+    looked = [(c, t) for c, t in eligible if usage(c).get("tool_calls") and not failed(c)]
     recorded = [t for _, t in looked if t.get("documents") is not None]
     return {
         "eligible_turns": len(eligible), "lookup_turns": len(looked),
-        "lookup_rate": _rate([bool(usage(c).get("tool_calls")) for c, _ in eligible]),
+        "lookup_rate": _rate([(c, t) in looked for c, t in eligible]),
         "empty_rate": _rate([not any(d["origin"] == "tool" for d in t["documents"]) for t in recorded]),
         "misconception_rate": _rate([bool(t["evaluation"].get("misconceptions")) for _, t in eligible]),
         "ta_le1_rate": _rate([t["evaluation"]["scores"]["technical_accuracy"] <= 1 for _, t in eligible]),
-        "lookup_fallback": sum("evaluator_lookup_fallback" in ((c.get("metadata") or {}).get("fallbacks") or [])
-                               for c, _ in eligible)}
+        "lookup_fallback": sum(failed(c) for c, _ in eligible)}

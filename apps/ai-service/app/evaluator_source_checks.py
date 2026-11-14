@@ -61,8 +61,11 @@ def refuted_by_reference(contradicted: Sequence[SourcedPoint], reference_answer:
             if REFERENCE_ID in p.source_ids and not restates_reference(p.point, reference_answer)]
 
 
-def _similar(m: str, r: str, min_ratio: float = 0.8) -> bool:
-    return SequenceMatcher(None, m.lower(), r.lower()).ratio() >= min_ratio or r.lower() in m.lower()
+def _similar(m: str, r: str, min_ratio: float = 0.8, contain_min_words: int = 0) -> bool:
+    """Gan trung: ti le ky tu >= min_ratio, hoac `r` nam trong `m` (chi khi r du `contain_min_words` tu)."""
+    if SequenceMatcher(None, m.lower(), r.lower()).ratio() >= min_ratio:
+        return True
+    return len(r.split()) >= contain_min_words and r.lower() in m.lower()
 
 
 def merge_misconceptions(refuted: Sequence[str], llm: Sequence[str], min_ratio: float = 0.8) -> List[str]:
@@ -82,13 +85,22 @@ def is_tool_id(source_id: str, base_ids: int) -> bool:
 def split_tool_misconceptions(misconceptions: Sequence[str], contradicted: Sequence[SourcedPoint], base_ids: int
                               ) -> Tuple[List[str], List[str]]:
     """Luat "chi R bac" o luot co chunk cong cu (phase 03): chunk do duoc tim theo truy van bi cau tra loi lai nen khong
-    du de chan technical_accuracy. Tra (chan, khong chan): khong chan = hieu sai LLM ghi khop `point` / `quote` cua y
-    contradicted ma MOI id hop le deu la id cong cu. Hieu sai khac (khong gan nguon, hay dua tren snippet co san, hay
-    id lan) chan nhu khi tat co. Hai danh sach van deu vao bao cao."""
-    tool_only = [t for p in contradicted if p.source_ids and all(is_tool_id(i, base_ids) for i in p.source_ids)
-                 for t in (p.point, p.quote) if t.strip()]
-    free = [m for m in misconceptions if any(_similar(m, t) for t in tool_only)]
-    return [m for m in misconceptions if m not in free], free
+    du de chan technical_accuracy. Tra (chan, bo): bo = hieu sai LLM khop `point` / `quote` cua y contradicted ma MOI id
+    hop le deu la id cong cu VA khong khop y contradicted nao dua tren tai lieu co san (id S co san, R, hay lan). Khop
+    chua (chi khi cum >= 4 tu) tranh bo nham hieu sai chi vi chua mot thuat ngu ngan. Hieu sai con lai chan nhu khi tat
+    co. Danh sach `bo` khong vao Evaluation (Reporter khong thay), chi ghi log."""
+    def texts(only_tool: bool) -> List[str]:
+        return [t for p in contradicted if p.source_ids and
+                all(is_tool_id(i, base_ids) for i in p.source_ids) == only_tool
+                for t in (p.point, p.quote) if t.strip()]
+
+    tool_texts, other_texts = texts(True), texts(False)
+
+    def matches(m: str, ts: List[str]) -> bool:
+        return any(_similar(m, t, contain_min_words=4) for t in ts)
+
+    freed = [m for m in misconceptions if matches(m, tool_texts) and not matches(m, other_texts)]
+    return [m for m in misconceptions if m not in freed], freed
 
 
 def _tokens(text: str) -> List[str]:

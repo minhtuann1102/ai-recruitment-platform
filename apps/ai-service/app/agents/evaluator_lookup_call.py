@@ -10,11 +10,12 @@ import time
 from typing import List, Tuple
 
 from .. import metrics
-from ..evaluator_lookup import SEARCH_TOOL, fragment_text
+from ..evaluator_lookup import FRAGMENT, SEARCH_TOOL, fragment_text
 from ..llm.errors import LlmError, LlmTimeoutError
 from ..llm.settings import agent_settings
 from ..llm.tool_loop import FINAL_RESERVE_S, TOOLS_UNSUPPORTED, complete_with_tools
 from ..llm.usage import CallRecord, UsageCollector
+from ..tracing import observation
 from .evaluator_input import EvaluationInput
 
 log = logging.getLogger("ai_service.evaluator")
@@ -37,29 +38,31 @@ async def call_with_lookup(gw, agent: str, system_prompt: str, build_messages, s
             raise LlmTimeoutError("Het ngan sach truoc khi tra cuu")
         step = max(min(lookup.settings.tool_deadline_s, left - FINAL_RESERVE_S), 0.05)
         messages = build_messages(f"{system_prompt}\n\n{fragment_text()}", inp)
-        result = await asyncio.wait_for(
-            complete_with_tools(gw, agent, messages, schema, [SEARCH_TOOL], lookup.run_tool,
-                                max_calls=lookup.settings.max_calls, step_deadline_s=step, budget_started=t0,
-                                budget_s=budget, prompt_version=prompt_version, collector=inner,
-                                failure_fallback=LOOKUP_FALLBACK), left)
+        with observation("evaluator_lookup", "span", nest=True, metadata={"fragment": FRAGMENT}):  # L4: ban fragment
+            result = await asyncio.wait_for(
+                complete_with_tools(gw, agent, messages, schema, [SEARCH_TOOL], lookup.run_tool,
+                                    max_calls=lookup.settings.max_calls, step_deadline_s=step, budget_started=t0,
+                                    budget_s=budget, prompt_version=prompt_version, collector=inner,
+                                    failure_fallback=LOOKUP_FALLBACK), left)
     except (LlmError, asyncio.TimeoutError) as err:
         _merge(collector, inner)
         if not inner.records and isinstance(err, (asyncio.TimeoutError, LlmTimeoutError)):
             # wait_for huy vong lap (BaseException, gateway khong kip ghi) hoac het ngan sach: ghi do tre o day
             _record_cut(collector, agent, cfg.model, prompt_version, t0)
         unsupported = str(err) == TOOLS_UNSUPPORTED
-        metrics.record_evaluator_lookup("unsupported" if unsupported else "fallback")
         remaining = budget - (time.perf_counter() - t0)
-        log.warning("evaluator_lookup_fallback turn=%d reason=%s remaining_s=%.1f", inp.turn_number,
-                    type(err).__name__, remaining)
+        log.warning("evaluator_lookup_fallback turn=%d fragment=%s reason=%s remaining_s=%.1f", inp.turn_number,
+                    FRAGMENT, type(err).__name__, remaining)
         if remaining < MIN_FALLBACK_S:
+            metrics.record_evaluator_lookup("budget_exhausted")
             raise LlmTimeoutError("no_budget_for_fallback") from err  # -> mock + degraded
+        metrics.record_evaluator_lookup("unsupported" if unsupported else "fallback")  # chi khi that su cham lai
         plain = await gw.complete(agent, build_messages(system_prompt, inp), schema, prompt_version=prompt_version,
                                   collector=collector, budget_started=t0, budget_s=budget)
         return plain, inp
     _merge(collector, inner)
     lookup.committed = True
-    log.info("evaluator_lookup turn=%d fragment=%s calls=%d chunks=%d", inp.turn_number, "evaluator_tools.v1",
+    log.info("evaluator_lookup turn=%d fragment=%s calls=%d chunks=%d", inp.turn_number, FRAGMENT,
              result.tool_calls, len(lookup.texts))
     return result, lookup.extend(inp)
 

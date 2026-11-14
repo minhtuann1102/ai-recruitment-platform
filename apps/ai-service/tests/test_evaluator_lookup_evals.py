@@ -110,9 +110,17 @@ def test_sim_lookup_metrics_count_only_eligible_turns():
                       "turns": [turn(1, 3, docs=tool_doc), turn(2, 1, ["m"], docs=[]), turn(3, 2, docs=ref_doc),
                                 turn(4, 4, phase="intro"), turn(5, 0, ["m"], docs=[], qa=None)]}}
     out = evaluator_lookup(sessions)
-    assert out["eligible_turns"] == 3 and out["lookup_turns"] == 2  # tru luot co R, luot intro
-    assert out["lookup_rate"] == 0.667 and out["empty_rate"] == 0.5  # luot 2 goi cong cu nhung khong co chunk
+    assert out["eligible_turns"] == 3 and out["lookup_turns"] == 1  # tru R, intro, vong lap loi (turn 2)
+    assert out["lookup_rate"] == 0.333 and out["empty_rate"] == 0.0
     assert out["misconception_rate"] == 0.667 and out["ta_le1_rate"] == 0.667 and out["lookup_fallback"] == 1
+
+
+def test_sim_lookup_metrics_failed_loops_are_not_lookups_or_empty():
+    calls = [{"path": "start"}, call(1, ["evaluator_lookup_fallback"]), call(1)]
+    sessions = {"p": {"calls": calls, "turns": [turn(1, 2, docs=[]), turn(2, 2, docs=[{"origin": "tool"}])]}}
+    out = evaluator_lookup(sessions)
+    assert out["lookup_turns"] == 1 and out["lookup_rate"] == 0.5 and out["empty_rate"] == 0.0
+    assert out["lookup_fallback"] == 1
 
 
 def test_sim_lookup_metrics_empty_sessions():

@@ -121,7 +121,7 @@ def summarize(samples: List[dict], all_results: Dict[str, List[dict]], labels: D
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--runs", type=int, default=3)
-    parser.add_argument("--prompt", default=None, help="vd v1; mac dinh ban moi nhat")
+    parser.add_argument("--prompt", default=None, help="vd v1; mac dinh v8 (ban ghim)")
     parser.add_argument("--limit", type=int)
     parser.add_argument("--set", choices=sorted(SETS), default="main")
     parser.add_argument("--labels-dir", type=Path, help="mac dinh: thu muc nhan cua --set")

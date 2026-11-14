@@ -44,7 +44,7 @@
 - F: ép "chỉ R bác" ở lượt có chunk công cụ (H4): trong `postcheck`, khi `inp.tool_base_ids is not None`:
   (a) bỏ misconception LLM khớp (`SequenceMatcher ≥ 0,8` hoặc chứa, như `merge_misconceptions`) `point`/`quote` của điểm
   `contradicted` mà mọi id hợp lệ là id công cụ (> `tool_base_ids`) — chỉ những misconception này không chặn
-  `technical_accuracy` (vẫn trả về cho báo cáo); (b) misconception khác (không gắn nguồn, hoặc dựa snippet có sẵn)
+  `technical_accuracy` và **không** vào `Evaluation.misconceptions` (quyết định lead 2026-11-14 sau review: Reporter không được thấy; chỉ log). Khớp chứa chỉ với cụm ≥ 4 từ; misconception còn khớp ý `contradicted` dựa snippet có sẵn vẫn chặn; (b) misconception khác (không gắn nguồn, hoặc dựa snippet có sẵn)
   chặn như khi tắt cờ. Mục tiêu: bật cờ không làm điểm cao hơn so với tắt cờ ở cùng câu trả lời, ngoài phần do chunk công cụ.
 - F: vòng lặp lỗi → truyền `failure_fallback="evaluator_lookup_fallback"` cho `complete_with_tools`, gateway đã tự thêm `CallRecord` kèm latency (M4); caller KHÔNG thêm record thứ hai; thêm vào
   `FALLBACK_KINDS`; báo FSD mã fallback mới.
