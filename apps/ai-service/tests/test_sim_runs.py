@@ -6,7 +6,8 @@ import math
 from evals.personas import all_personas, skewed_personas
 from evals.sim_metrics import end_reasons
 from evals.sim_runs import bootstrap_ci, pooled_stdev, pooled_stdev_report, strong_weak_gap, summarize_runs
-from evals.simulate import known_personas, run_all, summarize
+import evals.simulate as simulate
+from evals.simulate import known_personas, run_all, run_many, summarize
 from evals.simulate_session import session_id
 from evals.simulator import RuleSimulator
 from evals.turn_source_recorder import attach_documents
@@ -97,3 +98,39 @@ def test_skewed_persona_knowledge_split():
     assert p.knowledge("not-in-catalog") == "partial"
     must = {t for r in p.jd_profile["requirements"] if r["kind"] == "must" for t in r["topic_ids"]}
     assert must & set(p.does_not_know) and must & set(p.knows_well)
+
+
+def test_pooled_stdev_uses_core_personas_only():
+    ps = known_personas()
+    runs = [{"junior-java-strong": sess(6), "junior-java-average+one_word_answers": sess(2),
+             "junior-java-skewed": sess(1)},
+            {"junior-java-strong": sess(8), "junior-java-average+one_word_answers": sess(2),
+             "junior-java-skewed": sess(9)}]
+    assert pooled_stdev(runs, ps) == math.sqrt(2)  # chi persona strong: [6, 8] -> ss 2, df 1
+    assert pooled_stdev_report(runs, ps)["personas"] == 1
+    assert summarize_runs(runs, ps)["pooled_stdev"]["df"] == 1
+
+
+def test_all_runs_share_one_event_loop(monkeypatch):
+    loops, kwargs = [], []
+
+    async def fake_run_all(ids, simulator, base_url, duration, concurrency, serve, run=None):
+        loops.append(id(asyncio.get_running_loop()))
+        kwargs.append(run)
+        await asyncio.sleep(0)
+        return {pid: sess(5) for pid in ids}
+
+    monkeypatch.setattr(simulate, "run_all", fake_run_all)
+    args = type("A", (), {"base_url": None, "duration": 20, "concurrency": 1, "serve": False})()
+    out = asyncio.run(run_many(["a"], None, args, 3))
+    assert len(out) == 3 and len(set(loops)) == 1 and kwargs == [1, 2, 3]
+    assert asyncio.run(run_many(["a"], None, args, 1)) and kwargs[-1] is None  # 1 run: sid cu
+
+
+def test_runs_below_one_is_rejected(monkeypatch):
+    import pytest
+
+    monkeypatch.setattr("sys.argv", ["simulate", "--runs", "0"])
+    with pytest.raises(SystemExit) as exc:
+        simulate.main()
+    assert exc.value.code == 2

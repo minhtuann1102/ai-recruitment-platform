@@ -49,7 +49,7 @@ Nhánh `thang/<feature>`; commit conventional tiếng Anh, không ghi công AI; 
 5. Docs DE: `category` khớp catalog, `topic_id` cho technical, chunk 150–300 token. 6. Docs ưu tiên: scenario java/nodejs.
 7. Ngưỡng chưa hiệu chỉnh → 01, trước 04; kết quả tạm thời đến khi kiểm trên tập giữ lại.
 8. Mốc bật mặc định: reply mục 8, **trừ** độ ổn định: đổi "stdev mỗi persona ≤ 1,2×" thành stdev gộp (pooled) giữa các
-   persona: `s_p = sqrt(Σ_p Σ_i (x_pi − x̄_p)² / Σ_p (n_p − 1))`; hybrid `s_p` ≤ 1,2× rules và ≤ 0,5/10, kèm CI bootstrap.
+   persona lõi (strong/average/weak, bỏ adversarial và skewed): `s_p = sqrt(Σ_p Σ_i (x_pi − x̄_p)² / Σ_p (n_p − 1))`; hybrid `s_p` ≤ 1,2× rules và ≤ 0,5/10, kèm CI bootstrap.
 9. LangGraph: chờ mentor; có yêu cầu → xem lại A4 trước khi merge 02.
 
 ## Blockers

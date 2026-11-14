@@ -64,7 +64,8 @@ async def probe(post: Post, model: str) -> List[Dict[str, Any]]:
     s1, r1 = await send(request(model, ask_tool, tool_choice="auto"))
     out.append({"n": 1, "question": "tools(strict) + response_format json_schema + require_parameters=true cung 1 request, "
                 "tra tool_calls (content null)?",
-                "ok": s1 == 200 and bool(message(r1).get("tool_calls")), "detail": brief(s1, r1)})
+                "ok": s1 == 200 and bool(message(r1).get("tool_calls")) and not message(r1).get("content"),
+                "detail": brief(s1, r1)})
     s2, r2 = await send(request(model, "Cham: 'HashMap dung bucket'. Tra score 0-10 va reason.", tool_choice="none"))
     valid = False
     if s2 == 200:
@@ -87,7 +88,7 @@ async def probe(post: Post, model: str) -> List[Dict[str, Any]]:
                 "detail": f"{brief(s3, r3)} len={len(text)} (200 + len > 20 = bo qua; 400 = tu choi; <= 20 = ep)"})
     s4, r4 = await send(request(model, ask_tool, require_parameters=False))
     out.append({"n": 4, "question": "provider thuc te + require_parameters=false co khac require_parameters=true?",
-                "ok": s1 == 200 or s4 == 200,
+                "ok": None,  # so provider / status hai ben bang mat, khong co tieu chi tu dong dang tin
                 "detail": f"true: {brief(s1, r1)} | false: {brief(s4, r4)}"})
     s5, r5 = await send(request(model, ask_tool))
     cached = ((r5.get("usage") or {}).get("prompt_tokens_details") or {}).get("cached_tokens")

@@ -16,7 +16,7 @@ import sys
 from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
-from typing import AsyncIterator, Dict
+from typing import AsyncIterator, Dict, List
 
 import httpx
 import uvicorn
@@ -74,7 +74,8 @@ async def local_server() -> AsyncIterator[str]:
 def summarize(sessions: Dict[str, Dict], personas, pricing: Dict) -> Dict:
     return {"sessions": len(sessions), "discrimination": discrimination(sessions, personas),
             "adaptation": adaptation(sessions, personas), "constraints": constraints(sessions, personas),
-            "end_reasons": end_reasons(sessions, personas), "report": report_quality(sessions, personas), "injection": injection(sessions, personas),
+            "end_reasons": end_reasons(sessions, personas), "report": report_quality(sessions, personas),
+            "injection": injection(sessions, personas),
             "language": language(sessions), "question_bank": question_bank(sessions), "style": session_style(sessions),
             "grounding": grounding(sessions), "grounding_breakdown": grounding_breakdown(sessions),
             "rag_health": rag_health(sessions), "ops": ops_summary(sessions, pricing)}
@@ -112,6 +113,13 @@ async def run_all(ids, simulator, base_url=None, duration=20, concurrency=4, ser
     return out
 
 
+async def run_many(ids, simulator, args, runs: int) -> List[Dict[str, Dict]]:
+    """Moi run noi tiep trong CUNG mot event loop: gateway LLM la singleton giu pool httpx gan voi loop dau tien,
+    asyncio.run moi run se de run sau dung ket noi cua loop da dong."""
+    return [await run_all(ids, simulator, args.base_url, args.duration, args.concurrency, args.serve,
+                          run=i if runs > 1 else None) for i in range(1, runs + 1)]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--matrix", choices=["quick", "full", "skewed"], default="quick")
@@ -125,17 +133,20 @@ def main() -> None:
     parser.add_argument("--concurrency", type=int, default=4)
     parser.add_argument("--out", type=Path)
     args = parser.parse_args()
+    if args.runs < 1:
+        parser.error("--runs phai >= 1")
     personas = known_personas()
     adv = [pid for pid, p in all_personas().items() if p.behaviors]
     ids = (list(all_personas()) if args.matrix == "full" else list(skewed_personas()) if args.matrix == "skewed"
            else [*QUICK, *adv, "junior-nodejs-strong", "middle-nodejs-average"])
     ids = list(dict.fromkeys(ids))
     simulator = LlmSimulator() if args.simulator == "llm" else RuleSimulator()
-    runs = max(1, args.runs)
-    by_run = [asyncio.run(run_all(ids, simulator, args.base_url, args.duration, args.concurrency, args.serve,
-                                  run=i if runs > 1 else None)) for i in range(1, runs + 1)]
+    runs = args.runs
+    by_run = asyncio.run(run_many(ids, simulator, args, runs))
     target = args.base_url or ("local-server" if args.serve else "in-process")
-    failed = sorted({p for sessions in by_run for p in ids if p not in sessions})
+    missing = [(i, p) for i, sessions in enumerate(by_run, 1) for p in ids if p not in sessions]
+    failed = ([p for p in ids if any(p not in s for s in by_run)] if runs == 1
+              else [{"run": i, "persona": p} for i, p in missing])  # N > 1: biet run nao hong
     run_info = {"matrix": args.matrix, "simulator": args.simulator, "base_url": target, "runs": runs,
                 "duration_min": args.duration, "failed": failed,
                 "agent_modes": {k: v for k, v in os.environ.items() if k.startswith("AGENT_")}}

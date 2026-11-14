@@ -55,7 +55,7 @@ def end_reasons(sessions: Dict[str, Dict], personas: Dict[str, Persona]) -> Dict
     ok: List[bool] = []
     for pid, s in sessions.items():
         p = personas[pid]
-        if p.behaviors or p.quality not in ("strong", "average", "weak") or not s.get("report"):
+        if p.behaviors or p.quality not in QUALITIES or not s.get("report"):
             continue
         reason = s["report"]["session"]["end_reason"]
         dist.setdefault(p.quality, Counter())[reason] += 1

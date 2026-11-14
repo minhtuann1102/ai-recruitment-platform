@@ -2,6 +2,7 @@
 import asyncio
 import json
 
+import scripts.probe_tool_strict_json as probe_module
 from scripts.probe_tool_strict_json import probe, render, request
 
 
@@ -42,7 +43,17 @@ def test_probe_reads_seven_answers_from_fake_transport():
     assert by[3]["ok"] is False and "len=60" in by[3]["detail"]  # vuot 20: bo qua maxLength
     assert by[6]["ok"] is False  # 2 tool call du parallel=false
     assert any(b["provider"] == {"require_parameters": False} for b in seen if "provider" in b)
-    assert "| 1 |" in render("m", "http://x", rows) and "sk-" not in render("m", "http://x", rows)
+    assert by[4]["ok"] is None and "true:" in by[4]["detail"] and "false:" in by[4]["detail"]
+    assert "| 1 |" in render("m", "http://x", rows)
+
+
+def test_q1_requires_null_content_with_tool_calls():
+    async def post(body):
+        status, resp = tool_reply()
+        resp["choices"][0]["message"]["content"] = "da tra loi luon"  # co tool_calls nhung content khong null
+        return status, resp
+
+    assert asyncio.run(probe(post, "m"))[0]["ok"] is False
 
 
 def test_probe_records_http_errors_and_network_failures_without_raising():
@@ -54,3 +65,38 @@ def test_probe_records_http_errors_and_network_failures_without_raising():
     rows = asyncio.run(probe(post, "m"))
     assert all(r["ok"] in (False, None) for r in rows)
     assert "HTTP 404" in rows[0]["detail"] and "HTTP 0" in rows[1]["detail"]
+
+
+def test_main_async_never_leaks_the_key(monkeypatch, capsys, tmp_path):
+    secret = "sk-test-secret-123"
+    monkeypatch.setenv("LLM_API_KEY", secret)
+    monkeypatch.setenv("LLM_BASE_URL", "http://probe.invalid/v1")
+    seen = {}
+
+    class FakeResp:
+        status_code = 200
+        text = ""
+
+        def json(self):
+            return tool_reply(cached=2048)[1]
+
+    class FakeClient:
+        def __init__(self, **kw):
+            seen["headers"] = kw.get("headers")
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *exc):
+            return False
+
+        async def post(self, path, json=None):
+            return FakeResp()
+
+    monkeypatch.setattr(probe_module.httpx, "AsyncClient", FakeClient)
+    out = tmp_path / "probe.md"
+    assert asyncio.run(probe_module.main_async(str(out))) == 0
+    assert secret in seen["headers"]["Authorization"]  # khoa that su duoc gui di...
+    printed = capsys.readouterr()
+    assert secret not in printed.out + printed.err and secret not in out.read_text("utf-8")  # ...nhung khong in / ghi
+    assert "| 7 |" in out.read_text("utf-8")

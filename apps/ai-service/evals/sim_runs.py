@@ -1,6 +1,6 @@
 """Gop nhieu run (`simulate --runs N`): stdev gop giua persona + CI bootstrap + gap strong-weak (plan agentic muc 8).
 
-Ham thuan, khong goi mang. `sessions_by_run`: moi phan tu la {persona_id: session} cua mot run (cung dinh dang
+Ham thuan, khong goi mang. Co `personas` thi chi persona loi (khong adversarial / skewed) tinh vao stdev gop va gap. `sessions_by_run`: moi phan tu la {persona_id: session} cua mot run (cung dinh dang
 `run_all`). Stdev mot persona voi n = 3 (df = 2) khong du de so sanh; gop theo persona cho df ~ 2 x so persona:
   s_p = sqrt( sum_p sum_i (x_pi - mean_p)^2 / sum_p (n_p - 1) )
 CI bootstrap lay mau PERSONA (khong lay mau run): do bat dinh giua persona la nguon nhieu chinh.
@@ -10,15 +10,24 @@ from collections import defaultdict
 from statistics import mean
 from typing import Callable, Dict, List, Optional, Sequence, Tuple
 
-from evals.personas import Persona
+from evals.personas import QUALITIES, Persona
 
 Scores = Dict[str, List[float]]  # persona_id -> diem tong theo tung run (bo run hong / unscored)
 
 
-def scores_by_persona(sessions_by_run: Sequence[Dict[str, Dict]]) -> Scores:
+def is_core(p: Optional[Persona]) -> bool:
+    """Persona ma tran strong/average/weak, khong adversarial / skewed: diem cua chung moi dung de do nhieu."""
+    return p is not None and not p.behaviors and p.quality in QUALITIES
+
+
+def scores_by_persona(sessions_by_run: Sequence[Dict[str, Dict]],
+                      personas: Optional[Dict[str, Persona]] = None) -> Scores:
+    """`personas` co thi chi lay persona loi (adversarial co diem gan san, se keo stdev gop xuong)."""
     out: Scores = defaultdict(list)
     for sessions in sessions_by_run:
         for pid, s in sessions.items():
+            if personas is not None and not is_core(personas.get(pid)):
+                continue
             score = ((s.get("report") or {}).get("overall") or {}).get("score")
             if score is not None:
                 out[pid].append(score)
@@ -34,8 +43,9 @@ def _pooled(groups: Sequence[Sequence[float]]) -> Optional[float]:
     return (ss / df) ** 0.5
 
 
-def pooled_stdev(sessions_by_run: Sequence[Dict[str, Dict]]) -> Optional[float]:
-    return _pooled(list(scores_by_persona(sessions_by_run).values()))
+def pooled_stdev(sessions_by_run: Sequence[Dict[str, Dict]],
+                 personas: Optional[Dict[str, Persona]] = None) -> Optional[float]:
+    return _pooled(list(scores_by_persona(sessions_by_run, personas).values()))
 
 
 def bootstrap_ci(items: Sequence, stat: Callable[[Sequence], Optional[float]], n_boot: int = 1000, seed: int = 0,
@@ -55,8 +65,9 @@ def _round(x: Optional[float]) -> Optional[float]:
     return None if x is None else round(x, 3)
 
 
-def pooled_stdev_report(sessions_by_run: Sequence[Dict[str, Dict]]) -> Dict:
-    groups = list(scores_by_persona(sessions_by_run).values())
+def pooled_stdev_report(sessions_by_run: Sequence[Dict[str, Dict]],
+                        personas: Optional[Dict[str, Persona]] = None) -> Dict:
+    groups = list(scores_by_persona(sessions_by_run, personas).values())
     return {"value": _round(_pooled(groups)), "ci95": bootstrap_ci(groups, _pooled),
             "personas": sum(len(g) >= 2 for g in groups), "df": sum(len(g) - 1 for g in groups if len(g) >= 2)}
 
@@ -67,7 +78,7 @@ def strong_weak_gap(sessions_by_run: Sequence[Dict[str, Dict]], personas: Dict[s
     cells: Dict[tuple, Dict[str, float]] = {}
     for pid, vals in scores.items():
         p = personas.get(pid)
-        if p is not None and not p.behaviors and p.quality in ("strong", "weak"):
+        if is_core(p) and p.quality in ("strong", "weak"):
             cells.setdefault((p.level, p.track), {})[p.quality] = mean(vals)
     gaps = [c["strong"] - c["weak"] for c in cells.values() if len(c) == 2]
     stat = lambda xs: mean(xs) if xs else None  # noqa: E731
@@ -75,5 +86,5 @@ def strong_weak_gap(sessions_by_run: Sequence[Dict[str, Dict]], personas: Dict[s
 
 
 def summarize_runs(sessions_by_run: Sequence[Dict[str, Dict]], personas: Dict[str, Persona]) -> Dict:
-    return {"runs": len(sessions_by_run), "pooled_stdev": pooled_stdev_report(sessions_by_run),
+    return {"runs": len(sessions_by_run), "pooled_stdev": pooled_stdev_report(sessions_by_run, personas),
             "strong_weak_gap": strong_weak_gap(sessions_by_run, personas)}
