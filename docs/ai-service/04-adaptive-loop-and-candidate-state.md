@@ -143,6 +143,17 @@ Evaluator **v10** = v9 + `swap: {drop, add, reason} | null` (`EvaluatorOutputV10
 
 `effective_plan(plan, state)` thay topic theo `state.swaps` tại đúng vị trí, trả nguyên plan khi không có swap hoặc plan cũ. Client phải gửi lại nguyên `state.swaps` (và `plan.replan`) mỗi lượt; `state.swaps` do client mang nên được tin ở mức interview-service tin cậy, và lệch với `state.topics` (swap giả, trùng, mất `replan`) bị chặn bằng kiểm khớp vị trí → 409. Plan trả về client từ next-turn vẫn là plan gốc (`alt*` chỉ nằm trong `plan.replan.reserve`); `turn.topic_id` có thể là `alt1`; `/api/finalize` tự áp `effective_plan` từ `state.swaps` (báo cáo hiện `alt*` ở vị trí topic bị bỏ, topic bị bỏ không có điểm nên biến mất khỏi danh sách; không cần trạng thái `skipped`).
 
+### 5.6 Ghi chú agent (tùy chọn, 2026-11-14, phase 07, `AGENT_NOTES_ENABLED=false`, cần `POLICY_MODE=hybrid`)
+
+**Mặc định tắt; chưa đo nên chưa có lý do bật** (gate chấm điểm và đọc tay 20 phiên là [BLOCKED-KEY], mục 09). Lý do hoãn: người dùng duy nhất của ghi chú là chính lời gọi Evaluator chấm điểm (Interviewer, Reporter không đọc), nên ghi chú kiểu `risk: yếu X` có thể neo điểm.
+
+- `state.notes: [{id, turn, topic_id, kind, text, status}]`, mặc định `[]` (state cũ nạp được; JSON thêm khóa `notes: []`, báo FSD cùng đợt với `swaps`). `id = n{turn}`, `kind`: `hypothesis | to_verify | strength | risk`, `status`: `open | confirmed | rejected`, `text` ≤ 150 ký tự. Model ở `app/models_agent_notes.py` (re-export qua `models_interview`).
+- Evaluator **v11** = v10 + `new_note: {kind, text} | null` và `note_updates: [{id, status}]` (`EvaluatorOutputV11`, kiểu lỏng như v9/v10: giá trị lạ thì bỏ, không làm hỏng lượt chấm). Chọn cố định cả phiên khi `AGENT_NOTES_ENABLED` và hybrid (ưu tiên hơn v10; v11 gồm cả `swap`, nên một phiên chỉ có một version). Cờ tắt: v8 (rules), v9 (hybrid), v10 (hybrid + `REPLAN_ENABLED`) y nguyên, request giống từng byte (test ghim v8/v9/v10 với `notes_context` đặt sẵn).
+- `app/agent_notes.py::apply_notes` chạy cuối `choose_decision` (sau quyết định), chỉ khi cờ bật: tối đa 1 ghi chú mới mỗi lượt; tối đa 8, đầy thì bỏ ghi chú `confirmed/rejected` cũ nhất, không có thì bỏ ghi chú mới (`full`). `safe_note`: gộp khoảng trắng, cắt 150, có mẫu injection (`has_injection`) hoặc PII (`redact_pii` đổi text) thì bỏ. `note_updates` chỉ đổi được ghi chú `to_verify` đang `open` và status `confirmed|rejected`.
+- **Lượt không tin cậy** (`overrule_reason == "sensitive_kind"`, loại nhạy cảm, hoặc `has_injection(answer)`, kể cả lượt forced) không ghi và không cập nhật gì (`untrusted`). Ghi chú không dùng để tính điểm và không vào quyết định hành động.
+- **Chỉ ghi chú `to_verify` đang `open`** được đưa lại vào Evaluator (`notes_for_context`, qua `safe_note` lần nữa vì state do client mang), trong khối `<untrusted label="open_notes">` cuối tin nhắn (`render` trong `evaluator_input.build_messages`, chỉ với v11). `strength`/`risk`/`hypothesis` chỉ lưu (giảm neo điểm, audit H2).
+- Metric `ai_notes_dropped_total{reason}` (`untrusted`, `empty`, `injection`, `pii`, `invalid_kind`, `duplicate`, `full`, `unknown_id`, `bad_status`; tập nhãn đóng). `has_injection` có thể bỏ nhầm ghi chú kỹ thuật (mẫu "```", `you are`): chấp nhận, theo dõi bằng metric này.
+
 ### Map sang `agent_decision` hiện có
 
 Cột `interview_turns.agent_decision` (`deepen | switch_topic | keep_difficulty`) giữ để tương thích FE/BE cũ.
