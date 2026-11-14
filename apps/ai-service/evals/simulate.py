@@ -25,6 +25,7 @@ from app.plan_snippets import warm_rag
 from evals.cost_latency import load_pricing, ops_summary
 from evals.personas import all_personas, skewed_personas
 from evals.sim_language import language
+from evals.sim_lookup_metrics import evaluator_lookup
 from evals.sim_style import session_style
 from evals.sim_metrics import (adaptation, constraints, discrimination, end_reasons, grounding, grounding_breakdown,
                                injection, question_bank, rag_health, report_quality)
@@ -78,7 +79,7 @@ def summarize(sessions: Dict[str, Dict], personas, pricing: Dict) -> Dict:
             "injection": injection(sessions, personas),
             "language": language(sessions), "question_bank": question_bank(sessions), "style": session_style(sessions),
             "grounding": grounding(sessions), "grounding_breakdown": grounding_breakdown(sessions),
-            "rag_health": rag_health(sessions), "ops": ops_summary(sessions, pricing)}
+            "rag_health": rag_health(sessions), "evaluator_lookup": evaluator_lookup(sessions), "ops": ops_summary(sessions, pricing)}
 
 
 def known_personas() -> Dict:

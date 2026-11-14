@@ -5,6 +5,7 @@ chua co nhan thi chi in cac chi so khong can nhan (nhat quan, thu tu, bat manipu
   cd apps/ai-service && python -m evals.run_evaluator --runs 3 [--prompt v1] [--limit 10] [--out report.json]
 --stt: chi chay cac mau co ban nhieu STT (evals/evaluator_golden_stt.jsonl) cung ban sach, in them `stt_noise`.
 --stt plain: cung cac mau do nhung ban "STT tot" (thuat ngu dung, chi mat dau cau, them tu dem).
+--lookup: Evaluator duoc tra cuu kho nhu EVALUATOR_TOOLS=true (xap xi: mau golden khong co catalog_ref, xem lookup_support.py).
 --set holdout: bo held-out (cau hoi moi, nhan o evaluator_labels/holdout/); khong chinh prompt theo ket qua bo nay.
 """
 import argparse
@@ -23,6 +24,7 @@ from app.models_interview import PlanTopic
 from evals.evaluator_metrics import (CRITERIA, agreement, consensus, consistency, ordering, quadratic_kappa,
                                      rate)
 from evals.label_sheet import SETS, load_golden
+from evals.lookup_support import attach_lookup, load_lookup_retriever, lookup_fields, lookup_summary
 from evals.stt_noise import inherit_labels, plain_samples, stt_samples, stt_summary
 
 REPORTS = Path(__file__).resolve().parents[3] / "plans" / "reports"
@@ -37,19 +39,22 @@ def to_input(s: dict) -> EvaluationInput:
 
 
 async def run_all(samples: List[dict], runs: int, prompt: str, collector: UsageCollector,
-                  concurrency: int = 4) -> Dict[str, List[dict]]:
+                  concurrency: int = 4, lookup: bool = False) -> Dict[str, List[dict]]:
     evaluator, sem = LlmEvaluator(get_gateway(), prompt_version=prompt), asyncio.Semaphore(concurrency)
+    retriever = await load_lookup_retriever() if lookup else None
 
     async def one(s: dict) -> dict:
+        inp = to_input(s)
+        tool = attach_lookup(retriever, s, inp)  # trang thai theo lan chay: moi lan mot TurnLookup moi
         async with sem:
-            raw, ev = await evaluator.evaluate_with_raw(to_input(s), collector)
+            raw, ev = await evaluator.evaluate_with_raw(inp, collector)
         quotes = [c.quote for c in raw.covered] if raw else []
         source_ids = [i for c in (raw.covered if raw else []) for i in getattr(c, "source_ids", [])]
         return {**ev.scores.model_dump(), "answer_type": ev.answer_type, "turn_score_10": ev.turn_score_10,
                 "degraded": ev.degraded, "llm": raw is not None, "quotes": len(quotes),
                 "valid_quotes": sum(quote_in_answer(q, s["answer"]) for q in quotes),
                 # golden khong co tai lieu: moi id deu la id la (v4 phai tra no_source, source_ids rong)
-                "source_ids": len(source_ids)}
+                "source_ids": len(source_ids), **lookup_fields(tool)}
 
     results: Dict[str, List[dict]] = {s["id"]: [] for s in samples}
     for r in range(runs):
@@ -121,6 +126,7 @@ def main() -> None:
     parser.add_argument("--set", choices=sorted(SETS), default="main")
     parser.add_argument("--labels-dir", type=Path, help="mac dinh: thu muc nhan cua --set")
     parser.add_argument("--out", type=Path)
+    parser.add_argument("--lookup", action="store_true", help="bat Evaluator tra cuu kho (can RAG + AI_DB_URL)")
     parser.add_argument("--stt", nargs="?", const="noisy", choices=["noisy", "plain"],
                         help="mau nhieu STT kem ban sach (NFR-AI-QUAL17); plain = thuat ngu dung, mat dau cau")
     args = parser.parse_args()
@@ -132,12 +138,14 @@ def main() -> None:
     if noisy:
         samples = [s for s in samples if s["id"] in {n["stt_of"] for n in noisy}] + noisy
     collector = UsageCollector()
-    results = asyncio.run(run_all(samples, args.runs, args.prompt, collector))
+    results = asyncio.run(run_all(samples, args.runs, args.prompt, collector, lookup=args.lookup))
     labels = load_labels(args.labels_dir or labels_dir)
     summary = summarize(samples, results, inherit_labels(labels, noisy) if noisy else labels)
     if noisy:
         summary["stt_noise"] = stt_summary(noisy, results)
     summary["usage"] = collector.to_metadata()["usage"]
+    if args.lookup:
+        summary["lookup"] = lookup_summary([r for runs in results.values() for r in runs])
     for key, value in summary.items():
         print(f"{key:22s} {value}")
     out = args.out or REPORTS / f"eval-evaluator-{args.set}-{datetime.now():%y%m%d-%H%M}.json"
