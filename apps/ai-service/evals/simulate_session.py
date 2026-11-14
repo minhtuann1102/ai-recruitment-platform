@@ -47,10 +47,20 @@ def _topic(plan: InterviewPlan, topic_id: Optional[str]) -> Optional[PlanTopic]:
     return next((t for ph in plan.phases for t in ph.topics if t.id == topic_id), None)
 
 
-async def run_session(client: httpx.AsyncClient, persona: Persona, simulator, duration: int = 20) -> Dict:
-    sid = f"sim-{persona.id}"
-    events, timing = await call_sse(client, "/api/start", {"session_id": sid, "track": persona.track,
-                                                            "level": persona.level, "duration_minutes": duration})
+def session_id(pid: str, run: Optional[int] = None) -> str:
+    """`--runs N` (N > 1): moi run co sid rieng de tai lieu ghi lai khong de nhau; run None = dinh dang cu."""
+    return f"sim-{pid}" if run is None else f"sim-{pid}-r{run}"
+
+
+async def run_session(client: httpx.AsyncClient, persona: Persona, simulator, duration: int = 20,
+                      run: Optional[int] = None) -> Dict:
+    sid = session_id(persona.id, run)
+    start = {"session_id": sid, "track": persona.track, "level": persona.level, "duration_minutes": duration}
+    if persona.jd_profile:  # persona co JD/CV gia (skewed): do phu yeu cau, khong chi plan theo track + level
+        start["jd_profile"] = persona.jd_profile
+    if persona.cv_profile:
+        start["cv_profile"] = persona.cv_profile
+    events, timing = await call_sse(client, "/api/start", start)
     done = _done(events, "/api/start")
     plan_json, plan = done["plan"], InterviewPlan.model_validate(done["plan"])
     state, question, turn, elapsed = done["state"], done["question"], done["turn"], 0
@@ -86,10 +96,13 @@ async def run_session(client: httpx.AsyncClient, persona: Persona, simulator, du
     if not turns:  # ket thuc truoc khi tra loi cau nao: khong co gi de cham
         return {"persona": persona.id, "plan": plan_json, "turns": [], "report": None, "calls": calls,
                 "elapsed_s": elapsed}
-    resp = await client.post("/api/finalize", json={
-        "session_id": sid, "track": persona.track, "level": persona.level, "plan": plan_json, "state": state,
-        "end_reason": state.get("end_reason") or "plan_complete", "duration_s": elapsed,
-        "turns": [{k: v for k, v in t.items() if k not in ("action", "question_source", "qa_id")} for t in turns]})
+    final = {"session_id": sid, "track": persona.track, "level": persona.level, "plan": plan_json, "state": state,
+             "end_reason": state.get("end_reason") or "plan_complete", "duration_s": elapsed,
+             "turns": [{k: v for k, v in t.items() if k not in ("action", "question_source", "qa_id")}
+                       for t in turns]}
+    if persona.jd_profile:
+        final["jd_profile"] = persona.jd_profile
+    resp = await client.post("/api/finalize", json=final)
     if resp.status_code != 200:
         raise RuntimeError(f"/api/finalize {resp.status_code}: {resp.text[:300]}")
     report = resp.json()

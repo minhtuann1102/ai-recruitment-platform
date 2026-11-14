@@ -29,3 +29,11 @@ class SearchFilters:
     category: Optional[str] = None
     difficulty: Optional[str] = None  # ban ghi difficulty NULL (textbook) van khop
     chunk_type: Optional[str] = None  # chi ap cho interview_qa
+    categories: Tuple[str, ...] = ()  # nhieu category (scenario: nhom chinh + System Design); rong = khong loc them
+
+
+def category_matches(filters: SearchFilters, category: Optional[str]) -> bool:
+    """`category` don va `categories` cung ap (AND); khong dat cai nao thi khop moi chunk."""
+    if filters.category and category != filters.category:
+        return False
+    return not filters.categories or category in filters.categories

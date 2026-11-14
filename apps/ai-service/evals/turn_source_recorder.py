@@ -13,6 +13,7 @@ from app.evaluator_source_checks import REFERENCE_ID, source_blocks
 from app.llm.usage import UsageCollector
 from app.logging_setup import bound_session_id, safe_session_id
 from app.models_interview import Evaluation
+from evals.simulate_session import session_id
 
 Key = Tuple[Optional[str], int]  # (session_id, turn_number): topic id `t{n}` va cau hoi co the trung giua cac phien
 
@@ -48,10 +49,11 @@ def record_documents() -> Iterator[Dict[Key, List[Dict]]]:
         engine.get_evaluator = real
 
 
-def attach_documents(sessions: Dict[str, Dict], seen: Dict[Key, List[Dict]]) -> None:
-    """Gan `documents` vao tung luot; luot khong cham (wrap_up) hoac chay qua --base-url thi khong co khoa nay."""
+def attach_documents(sessions: Dict[str, Dict], seen: Dict[Key, List[Dict]], run: Optional[int] = None) -> None:
+    """Gan `documents` vao tung luot; luot khong cham (wrap_up) hoac chay qua --base-url thi khong co khoa nay.
+    `run`: so thu tu run cua --runs N (None = mot run, sid cu)."""
     for pid, session in sessions.items():
-        sid = safe_session_id(f"sim-{pid}")  # cung id run_session gui, bind_request da lam sach
+        sid = safe_session_id(session_id(pid, run))  # cung id run_session gui, bind_request da lam sach
         for t in session["turns"]:
             docs = seen.get((sid, t["turn_number"]))
             if docs is not None:

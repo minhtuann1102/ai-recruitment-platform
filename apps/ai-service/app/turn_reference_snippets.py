@@ -16,7 +16,7 @@ from .catalog.models import TrackCatalog
 from .mock_planner import load_track
 from .llm.usage import UsageCollector
 from .models_interview import PlanTopic, SourceRef
-from .plan_snippets import main_category, swallow_task_result
+from .plan_snippets import scenario_categories, swallow_task_result
 from .rag.difficulty import difficulty_bucket
 from .rag.hybrid_fusion import rrf
 from .rag.models import Chunk, SearchFilters
@@ -50,7 +50,7 @@ def _known(content: str, known: Sequence[str]) -> bool:
 def _filters(retriever: Retriever, phase: str, topic: PlanTopic, catalog: TrackCatalog) -> Optional[SearchFilters]:
     textbook = ("textbook",) if retriever.textbook else ()
     if phase == "scenario":  # nhu luc start: scenario khong lay interview_qa
-        return SearchFilters(textbook, main_category(catalog)) if textbook else None
+        return SearchFilters(textbook, categories=scenario_categories(catalog)) if textbook else None
     entry = next((t for t in catalog.topics if t.id == topic.catalog_ref), None)
     return SearchFilters(("interview_qa", *textbook), entry.category if entry else None)
 
@@ -83,7 +83,7 @@ async def _search(retriever: Retriever, filters: SearchFilters, topic: PlanTopic
         log.info("rag_turn_skipped reason=corpus_not_loaded")
         return []
     bucket = difficulty_bucket(difficulty)
-    filters = SearchFilters(filters.source_types, filters.category, bucket)
+    filters = SearchFilters(filters.source_types, filters.category, bucket, categories=filters.categories)
     lexical = index.search(query, filters, TURN_K * OVERFETCH)
     if not lexical:
         return []

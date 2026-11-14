@@ -1,7 +1,7 @@
 """Planner uu tien topic co cau trong kho o level dang hoi (next-phase-plan Phase C muc 3).
 
 Topic khong co cau hoi trong kho thi Interviewer tu dat cau, khong co dap an chuan: do 30/10 `supported` cua cau
-AI tu dat 0.63 so voi 0.88 cua cau kho. Luc start dem so cau hoi doc duoc (spoken_ok) theo topic va do kho, chay
+AI tu dat 0.53 so voi 0.71 cua cau kho (judge_support v2, hieu chinh voi LLM thu hai, 3 lan). Luc start dem so cau hoi doc duoc (spoken_ok) theo topic va do kho, chay
 song song voi Planner nen khong them do tre; sau khi co plan, topic ky thuat lay tu catalog ma kho khong co cau nao
 gan do kho bat dau thi doi sang topic chua dung co cau, uu tien cung nhom (category). Ap dung cho ca Planner LLM va
 plan du phong, khong doi prompt. Topic JD giu nguyen. So dem la can tren: chua ap dieu kien trung tu cua

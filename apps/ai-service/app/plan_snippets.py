@@ -2,13 +2,13 @@
 chung trong kho, app/rag/question_bank.py) vao plan sau khi plan hop le.
 
 Chi chay mot lan luc start; Evaluator dung lai o cac luot sau, khong tim RAG moi luot. Intro (du an trong CV)
-khong co topic_id nen bo qua; scenario khong lay interview_qa, chi textbook theo category chinh cua track
+khong co topic_id nen bo qua; scenario khong lay interview_qa, chi textbook theo category chinh cua track va System Design
 (chi khi RAG_TEXTBOOK_ENABLED=true; kho chua co textbook thi scenario khong co snippet).
 """
 import asyncio
 import logging
 from collections import Counter
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 from .catalog.models import TrackCatalog
 from .llm.errors import ConfigError
@@ -22,6 +22,7 @@ from .rag.settings import load_rag_settings
 from .source_refs import source_ref
 
 log = logging.getLogger("ai_service.rag")
+SCENARIO_EXTRA_CATEGORY = "System Design"
 SNIPPET_DEADLINE_S = 5.0  # han chung luc start; do 30/10: viet lai truy van p50 4.4-6 s khi nhieu phien cung start
 _retriever: Optional[Retriever] = None
 _config_error: Optional[str] = None  # RAG bat nhung cau hinh sai: moi response bao loi nay trong metadata.rag
@@ -118,15 +119,21 @@ def main_category(catalog: TrackCatalog) -> Optional[str]:
     return counts.most_common(1)[0][0] if counts else None
 
 
+def scenario_categories(catalog: TrackCatalog) -> Tuple[str, ...]:
+    """Scenario: nhom chinh cua track va System Design (tai lieu thiet ke he thong cung phuc vu cau scenario)."""
+    main = main_category(catalog)
+    return tuple(dict.fromkeys(c for c in (main, SCENARIO_EXTRA_CATEGORY) if c))
+
+
 async def _snippets(retriever: Retriever, phase: str, topic: PlanTopic, catalog: TrackCatalog,
                     collector: Optional[UsageCollector] = None):
     if phase == "intro":
         return []
     query = build_query(None, topic.title, " ".join(topic.key_points))
     if phase == "scenario":
-        return await retriever.plan_snippets(topic_id=None, category=main_category(catalog),
+        return await retriever.plan_snippets(topic_id=None, category=None,
                                              difficulty=topic.start_difficulty, query=query, include_qa=False,
-                                             collector=collector)
+                                             collector=collector, categories=scenario_categories(catalog))
     entry = next((t for t in catalog.topics if t.id == topic.catalog_ref), None)
     return await retriever.plan_snippets(topic_id=topic.catalog_ref, category=entry.category if entry else None,
                                          difficulty=topic.start_difficulty, query=query, collector=collector)

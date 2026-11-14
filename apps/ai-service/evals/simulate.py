@@ -23,11 +23,12 @@ import uvicorn
 
 from app.plan_snippets import warm_rag
 from evals.cost_latency import load_pricing, ops_summary
-from evals.personas import all_personas
+from evals.personas import all_personas, skewed_personas
 from evals.sim_language import language
 from evals.sim_style import session_style
-from evals.sim_metrics import (adaptation, constraints, discrimination, grounding, grounding_breakdown, injection,
-                               question_bank, rag_health, report_quality)
+from evals.sim_metrics import (adaptation, constraints, discrimination, end_reasons, grounding, grounding_breakdown,
+                               injection, question_bank, rag_health, report_quality)
+from evals.sim_runs import summarize_runs
 from evals.simulate_session import run_session
 from evals.simulator import LlmSimulator, RuleSimulator
 from evals.turn_source_recorder import attach_documents, record_documents
@@ -73,21 +74,28 @@ async def local_server() -> AsyncIterator[str]:
 def summarize(sessions: Dict[str, Dict], personas, pricing: Dict) -> Dict:
     return {"sessions": len(sessions), "discrimination": discrimination(sessions, personas),
             "adaptation": adaptation(sessions, personas), "constraints": constraints(sessions, personas),
-            "report": report_quality(sessions, personas), "injection": injection(sessions, personas),
+            "end_reasons": end_reasons(sessions, personas), "report": report_quality(sessions, personas), "injection": injection(sessions, personas),
             "language": language(sessions), "question_bank": question_bank(sessions), "style": session_style(sessions),
             "grounding": grounding(sessions), "grounding_breakdown": grounding_breakdown(sessions),
             "rag_health": rag_health(sessions), "ops": ops_summary(sessions, pricing)}
 
 
-async def run_all(ids, simulator, base_url=None, duration=20, concurrency=4, serve=False) -> Dict[str, Dict]:
-    personas, sem, out = all_personas(), asyncio.Semaphore(concurrency), {}
+def known_personas() -> Dict:
+    """Ma tran 29 persona + persona skewed (chi chay khi chon ro: `--matrix skewed`)."""
+    return {**all_personas(), **skewed_personas()}
+
+
+async def run_all(ids, simulator, base_url=None, duration=20, concurrency=4, serve=False,
+                  run=None) -> Dict[str, Dict]:
+    """`run`: so thu tu run khi `--runs N` > 1 (sid `sim-{pid}-r{run}`); None = mot run, sid cu."""
+    personas, sem, out = known_personas(), asyncio.Semaphore(concurrency), {}
 
     async def play(url):
         async with make_client(url) as client:
             async def one(pid):
                 async with sem:
                     try:
-                        out[pid] = await run_session(client, personas[pid], simulator, duration)
+                        out[pid] = await run_session(client, personas[pid], simulator, duration, run)
                         print(f"OK   {pid} turns={len(out[pid]['turns'])} "
                               f"overall={out[pid]['report']['overall']['score']}", file=sys.stderr)
                     except Exception as err:  # mot phien loi khong dung ca ma tran; ghi lai de bao cao
@@ -100,13 +108,15 @@ async def run_all(ids, simulator, base_url=None, duration=20, concurrency=4, ser
                 await play(url)
         else:
             await play(base_url)
-    attach_documents(out, seen)
+    attach_documents(out, seen, run)
     return out
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--matrix", choices=["quick", "full"], default="quick")
+    parser.add_argument("--matrix", choices=["quick", "full", "skewed"], default="quick")
+    parser.add_argument("--runs", type=int, default=1, help="so lan chay lai ca ma tran (sid rieng moi run); "
+                        "N > 1 thi in them stdev gop + CI bootstrap + gap strong-weak")
     parser.add_argument("--simulator", choices=["rule", "llm"], default="rule")
     target_group = parser.add_mutually_exclusive_group()
     target_group.add_argument("--base-url")
@@ -115,23 +125,34 @@ def main() -> None:
     parser.add_argument("--concurrency", type=int, default=4)
     parser.add_argument("--out", type=Path)
     args = parser.parse_args()
-    personas = all_personas()
-    adv = [pid for pid, p in personas.items() if p.behaviors]
-    ids = list(personas) if args.matrix == "full" else [*QUICK, *adv, "junior-nodejs-strong", "middle-nodejs-average"]
+    personas = known_personas()
+    adv = [pid for pid, p in all_personas().items() if p.behaviors]
+    ids = (list(all_personas()) if args.matrix == "full" else list(skewed_personas()) if args.matrix == "skewed"
+           else [*QUICK, *adv, "junior-nodejs-strong", "middle-nodejs-average"])
+    ids = list(dict.fromkeys(ids))
     simulator = LlmSimulator() if args.simulator == "llm" else RuleSimulator()
-    sessions = asyncio.run(run_all(dict.fromkeys(ids), simulator, args.base_url, args.duration, args.concurrency,
-                                   args.serve))
+    runs = max(1, args.runs)
+    by_run = [asyncio.run(run_all(ids, simulator, args.base_url, args.duration, args.concurrency, args.serve,
+                                  run=i if runs > 1 else None)) for i in range(1, runs + 1)]
     target = args.base_url or ("local-server" if args.serve else "in-process")
-    summary = {"run": {"matrix": args.matrix, "simulator": args.simulator, "base_url": target,
-                       "duration_min": args.duration, "failed": [p for p in ids if p not in sessions],
-                       "agent_modes": {k: v for k, v in os.environ.items() if k.startswith("AGENT_")}},
-               **summarize(sessions, personas, load_pricing())}
+    failed = sorted({p for sessions in by_run for p in ids if p not in sessions})
+    run_info = {"matrix": args.matrix, "simulator": args.simulator, "base_url": target, "runs": runs,
+                "duration_min": args.duration, "failed": failed,
+                "agent_modes": {k: v for k, v in os.environ.items() if k.startswith("AGENT_")}}
+    pricing = load_pricing()
+    if runs == 1:  # dinh dang cu
+        summary = {"run": run_info, **summarize(by_run[0], personas, pricing)}
+        payload = {"summary": summary, "sessions": by_run[0]}
+    else:
+        summary = {"run": run_info, "pooled": summarize_runs(by_run, personas),
+                   "per_run": [summarize(s, personas, pricing) for s in by_run]}
+        payload = {"summary": summary, "sessions_by_run": by_run}
     print(json.dumps(summary, ensure_ascii=False, indent=1))
     out = args.out or REPORTS / f"eval-sim-{datetime.now():%y%m%d-%H%M}.json"
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps({"summary": summary, "sessions": sessions}, ensure_ascii=False, indent=1), "utf-8")
+    out.write_text(json.dumps(payload, ensure_ascii=False, indent=1), "utf-8")
     print(f"Da ghi {out}", file=sys.stderr)
-    if summary["run"]["failed"]:  # phien loi bi loai khoi mau so: khong de lan chay "xanh" gia
+    if failed:  # phien loi bi loai khoi mau so: khong de lan chay "xanh" gia
         sys.exit(1)
 
 
