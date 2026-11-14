@@ -49,6 +49,10 @@ CORPUS_SQL = f"SELECT {_COLS}, NULL::float8 FROM knowledge_chunks {_CORPUS_WHERE
 CORPUS_VERSION_SQL = ("SELECT md5(string_agg(md5(ROW(id, content_hash, source_type, category, difficulty, topic_id, "
                       f"metadata)::text), '' ORDER BY id)) FROM knowledge_chunks {_CORPUS_WHERE}")
 
+# Phase B cua DE (FR-028): metadata.interview_style = false la cau do / trac nghiem / bat viet code dai, khong hop hoi
+# mieng nen ngan hang cau hoi bo qua (van la bang chung RAG). Ban ghi cu khong co truong nay: coi la true.
+INTERVIEW_STYLE_SQL = "q.metadata->>'interview_style' IS DISTINCT FROM 'false'"
+
 # Ngan hang cau hoi: cau hoi (chunk question) + cap Q&A cung qa_id theo topic_id; uu tien dung do kho.
 # Cot thu 5: do giong (cosine) cua cau hoi voi truy van topic khi co vector (hybrid xep hang), khong thi NULL.
 BANK_SQL = ("SELECT q.metadata->>'qa_id', q.content, q.difficulty, p.content, {sim}, q.metadata->>'license' "
@@ -56,17 +60,17 @@ BANK_SQL = ("SELECT q.metadata->>'qa_id', q.content, q.difficulty, p.content, {s
             "JOIN knowledge_chunks p ON p.metadata->>'qa_id' = q.metadata->>'qa_id' "
             "AND p.metadata->>'chunk_type' = 'qa_pair' AND p.embedding_model = q.embedding_model "
             "WHERE q.source_type = 'interview_qa' AND q.topic_id = %s AND q.embedding_model = %s "
-            "AND q.metadata->>'chunk_type' = 'question' "
+            "AND q.metadata->>'chunk_type' = 'question' AND " + INTERVIEW_STYLE_SQL + " "
             "ORDER BY (q.difficulty = %s) DESC NULLS LAST, q.metadata->>'qa_id' LIMIT %s")
 
 
 # Dem cau hoi theo topic va do kho cho Planner (app/plan_bank_coverage.py): cung dieu kien voi question_bank.spoken_ok
-# (mot dong, khong khoi code, <= MAX_QUESTION_CHARS ky tu sau khi bo khoang trang hai dau). Khong kiem cap Q&A cung
-# qa_id nhu BANK_SQL: khong co index tren metadata->>'qa_id' nen EXISTS mat 0.5-4.9 s (do 03/11), so dem van
-# giong het vi pipeline DE luon ghi ca hai chunk; bo di con ~0.2 s.
+# (mot dong, khong khoi code, <= MAX_QUESTION_CHARS ky tu sau khi bo khoang trang hai dau) va INTERVIEW_STYLE_SQL.
+# Khong kiem cap Q&A cung qa_id nhu BANK_SQL: khong co index tren metadata->>'qa_id' nen EXISTS mat 0.5-4.9 s
+# (do 03/11), so dem van giong het vi pipeline DE luon ghi ca hai chunk; bo di con ~0.2 s.
 COVERAGE_SQL = ("SELECT q.topic_id, q.difficulty, count(*) FROM knowledge_chunks q "
                 "WHERE q.source_type = 'interview_qa' AND q.metadata->>'chunk_type' = 'question' "
-                "AND q.embedding_model = %s AND q.topic_id = ANY(%s) "
+                "AND q.embedding_model = %s AND q.topic_id = ANY(%s) AND " + INTERVIEW_STYLE_SQL + " "
                 "AND strpos(btrim(q.content, E' \\t\\r\\n'), E'\\n') = 0 AND strpos(q.content, '```') = 0 "
                 "AND char_length(btrim(q.content, E' \\t\\r\\n')) BETWEEN 1 AND %s "
                 "GROUP BY q.topic_id, q.difficulty")

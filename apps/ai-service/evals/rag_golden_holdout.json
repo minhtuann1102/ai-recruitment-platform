@@ -1,6 +1,6 @@
 {
  "version": 1,
- "status": "held-out: h01-h08 viet 2026-10-24 sau khi chot tu dien; h09-h32 viet 2026-10-24 TRUOC thu nghiem query rewrite va doi model embedding; nhan ban nhap cho DE duyet",
+ "status": "held-out: h01-h08 viet 2026-10-24 sau khi chot tu dien; h09-h32 viet 2026-10-24 TRUOC thu nghiem query rewrite va doi model embedding; nhan ban nhap cho DE duyet; 2026-11-14: cau hard tach doi (data-pipeline qa-split-map.json): nua a giu qa_id cu, them nua b vao relevant khi nua b tra loi truc tiep y cua truy van (doc tay)",
  "corpus": "de_interview_qa",
  "k": 5,
  "groups": {
@@ -21,7 +21,8 @@
    "group": "vi",
    "query": "Dịch vụ Node bị khởi động lại vì tràn bộ nhớ sau vài ngày, tìm chỗ rò rỉ bộ nhớ thế nào",
    "relevant": [
-    "de-qa-1016"
+    "de-qa-1016",
+    "de-qa-1316"
    ],
    "filters": {}
   },
@@ -39,7 +40,8 @@
    "group": "vi",
    "query": "Lưu mật khẩu người dùng thế nào cho an toàn và so sánh mã đặt lại mật khẩu ra sao",
    "relevant": [
-    "de-qa-1069"
+    "de-qa-1069",
+    "de-qa-1369"
    ],
    "filters": {}
   },
@@ -57,7 +59,8 @@
    "group": "vi",
    "query": "Mỗi tuần nhận hàng trăm cảnh báo vô nghĩa, thiết kế lại cách cảnh báo thế nào",
    "relevant": [
-    "de-qa-1212"
+    "de-qa-1212",
+    "de-qa-1512"
    ],
    "filters": {}
   },
@@ -102,7 +105,8 @@
    "group": "vi",
    "query": "Bộ dọn rác dừng chương trình vài trăm mili giây làm trễ phản hồi vượt cam kết, đọc nhật ký và chỉnh thế nào",
    "relevant": [
-    "de-qa-1105"
+    "de-qa-1105",
+    "de-qa-1405"
    ],
    "filters": {}
   },
@@ -120,7 +124,8 @@
    "group": "vi",
    "query": "Ứng dụng vừa có trang quản trị đăng nhập bằng phiên vừa có giao diện lập trình dùng mã thông báo, cấu hình bảo mật thế nào cho đúng",
    "relevant": [
-    "de-qa-1113"
+    "de-qa-1113",
+    "de-qa-1413"
    ],
    "filters": {}
   },
@@ -129,7 +134,8 @@
    "group": "vi",
    "query": "Hai lớp dịch vụ phụ thuộc vòng tròn lẫn nhau nên ứng dụng không khởi động được sau khi nâng phiên bản",
    "relevant": [
-    "de-qa-1116"
+    "de-qa-1116",
+    "de-qa-1416"
    ],
    "filters": {}
   },
@@ -183,7 +189,8 @@
    "group": "vi",
    "query": "Hệ thống hỏi đáp dựa trên tài liệu vẫn trả lời trôi chảy nhưng sai khi kho không có thông tin",
    "relevant": [
-    "de-qa-1176"
+    "de-qa-1176",
+    "de-qa-1466"
    ],
    "filters": {}
   },
@@ -201,7 +208,8 @@
    "group": "vi",
    "query": "Trợ lý giọng nói cần xử lý chuyện người dùng ngắt lời và biết khi nào họ nói xong",
    "relevant": [
-    "de-qa-1188"
+    "de-qa-1188",
+    "de-qa-1476"
    ],
    "filters": {}
   },
@@ -219,7 +227,8 @@
    "group": "vi",
    "query": "Một phần nhỏ yêu cầu tới dịch vụ thanh toán trong cụm bị từ chối kết nối hoặc nhận phản hồi từ phiên bản cũ",
    "relevant": [
-    "de-qa-1203"
+    "de-qa-1203",
+    "de-qa-1503"
    ],
    "filters": {}
   },
@@ -273,7 +282,8 @@
    "group": "vi",
    "query": "Ô tìm kiếm gợi ý đôi khi hiện kết quả của từ khóa cũ còn biểu tượng đang tải quay mãi không dừng",
    "relevant": [
-    "de-qa-1251"
+    "de-qa-1251",
+    "de-qa-1551"
    ],
    "filters": {}
   },
@@ -291,7 +301,8 @@
    "group": "vi",
    "query": "Người dùng trình đọc màn hình không biết trang đã chuyển và không nghe thông báo đã lưu",
    "relevant": [
-    "de-qa-1261"
+    "de-qa-1261",
+    "de-qa-1561"
    ],
    "filters": {}
   }

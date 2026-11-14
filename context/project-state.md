@@ -1,4 +1,4 @@
-# Trạng thái dự án (cập nhật 2026-11-09)
+# Trạng thái dự án (cập nhật 2026-11-14)
 
 ## Kế hoạch
 - Kế hoạch gốc: `plans/20261019-1100-ai-interview-brd-implementation/` (9 phase). Phase 01–06 xong code và đã merge; Phase 07 (harness, đo LLM thật) xong phần AIE.
@@ -59,6 +59,7 @@ Sau khi sửa ngắt mạch (3 vòng, kể cả tải gấp đôi): RAG `error` 
 Báo cáo: `plans/reports/eval-261109-1648-ttft-breakdown.md`.
 
 ## Đang làm
+- Theo kho index lại 14/11 (PR #87 của DE, 8 356 bản ghi; nhánh `thang/bank-interview-style-golden-split`): ngân hàng câu hỏi và `COVERAGE_SQL` bỏ 149 câu `interview_style = false`. Golden RAG: 54 `qa_id` hard bị tách đôi; nửa a giữ id cũ nên nhãn cũ vẫn đúng, đọc tay 53 truy vấn và thêm nửa b vào `relevant` ở 23 truy vấn mà nửa b trả lời trực tiếp. Chưa chạy lại `run_rag` vì khóa LLM hết hạn (cần embed truy vấn). Đã khởi động lại ai-service local: BM25 nạp 4 178 cặp. Đề xuất agentic của DE: `plans/reports/aie-request-261114-1057-agentic-ai-service.md` (AIE đang soạn trả lời).
 - Kế hoạch `plans/261029-1415-hybrid-grounded-rag/`: Phase 01–03 xong (`focus_source` để sau), Phase 05 đang làm (đo nền và `judge_support` v2 + repair xong; so nhãn LLM thứ hai đồng ý 0.85, kappa 0.70; `supported` đúng ~0.64, câu AI tự đặt 0.53, dưới ngưỡng 0.80; nhãn người 60 cặp là tùy chọn theo quyết định owner 31/10; golden có tài liệu xong: Evaluator không cite `R` nên `contradicted` qua đáp án chuẩn 0/9, tài liệu không liên quan vẫn `supported` 7/12, cần Evaluator v6), Phase 04 chờ DE.
 - Evaluator v5 (nhánh `thang/evaluator-v5`, 31/10): ±1 band 0.963, lệch −0.27, thứ tự 1.0, injection 6/8; so với v4 0.919, −0.467, 0.917, 6/8. Nhồi thuật ngữ a04 đã chặn bằng code (3.1–3.8). Còn lọt injection không từ khóa; mẫu không dấu a10 chưa ổn định. Báo cáo `plans/reports/eval-261031-1456-evaluator-v5.md`.
 - Evaluator v6 (PR #65, đã merge 02/11): `R` được cite, `supported` judge 0.964 nhưng recall ~0.58; đạt 4/5 ngưỡng đặt trước, đã qua review độc lập. Lộ lỗi có sẵn trên `main`: `R` chặn điểm oan trên mô phỏng (0/9 đúng), 5/6 ca của v6 từ mục `cr-lz-python-basics-8979143a`, cần DE sửa. Báo cáo `plans/reports/eval-261102-1109-evaluator-v6.md`.
