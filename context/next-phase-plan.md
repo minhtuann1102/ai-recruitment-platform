@@ -21,7 +21,7 @@ Xong khi: có số đo thật cho Evaluator, level-fit và tự nhiên.
 ## Phase B: làm sạch dữ liệu DE (27/10 – 09/11, DE chính, AIE hỗ trợ công cụ)
 1. ~~Giấy phép theo Q1~~: bỏ, owner chốt 09/11 không lọc theo giấy phép.
 2. Remap topic: chạy LLM-judge (`python -m evals.judge_bank`, ~$0.3 cho cả kho) → cặp "off" gán lại topic đúng hoặc `none`; DE duyệt mẫu 10%. Đích: đúng trọng tâm ≥ 85%.
-3. Nhãn độ khó: chấm lại bằng rubric neo theo level (easy = nhớ định nghĩa, medium = cơ chế/so sánh/áp dụng, hard = internals/hiệu năng/trade-off); DE duyệt chỗ lệch. Thêm cờ `interview_style` (bỏ câu đố, trắc nghiệm, viết code dài khỏi ngân hàng câu hỏi; vẫn dùng làm snippet).
+3. Nhãn độ khó: chấm lại bằng rubric neo theo level (easy = nhớ định nghĩa, medium = cơ chế/so sánh/áp dụng, hard = internals/hiệu năng/trade-off); DE duyệt chỗ lệch. Thêm cờ `interview_style` (bỏ câu đố, trắc nghiệm, viết code dài khỏi ngân hàng câu hỏi; vẫn dùng làm snippet). **AIE xong 14/11:** ngân hàng câu hỏi và số đếm cho Planner bỏ 149 câu `interview_style = false`.
 4. Duyệt bản dịch: điền verdict cho 440 dòng `translation-review.csv` (DE + AIE chia đôi). Đích: lỗi dịch nghiêm trọng < 5%.
 5. Câu `hard` cho senior: DE viết hoặc chọn nguồn permissive, ≥ 3 câu hard cho mỗi topic senior (~120 câu), theo format seed có `reviewed_by`.
 6. Bù track AI: 12 topic < 3 câu.

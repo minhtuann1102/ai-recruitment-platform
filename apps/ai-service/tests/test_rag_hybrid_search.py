@@ -10,7 +10,7 @@ from app.rag.circuit_breaker import CircuitBreaker
 from app.rag.hybrid_fusion import rrf
 from app.rag.models import SearchFilters
 from app.rag.question_bank import BankEntry, rank
-from app.rag.repository import build_bank_sql
+from app.rag.repository import COVERAGE_SQL, build_bank_sql
 from app.rag.retriever import Retriever
 from app.rag.settings import load_rag_settings
 from tests.fakes.fake_knowledge_repo import FakeEmbed, FakeKnowledgeRepo, qa
@@ -94,6 +94,13 @@ def test_bank_sql_adds_similarity_only_with_vector():
     assert "NULL::float8" in sql and params == ["t", "m", "easy", 80]
     sql, params = build_bank_sql("t", "m", "easy", 80, [0.5, 0.25])
     assert "q.embedding <=> %s::vector" in sql and params[0] == "[0.5,0.25]" and params[1:] == ["t", "m", "easy", 80]
+
+
+def test_bank_and_coverage_sql_skip_non_interview_style_questions():
+    """Phase B (FR-028): cau interview_style = false khong vao ngan hang cau hoi, ke ca so dem cho Planner; ban ghi cu
+    khong co truong nay van duoc dung (IS DISTINCT FROM, khong phai = 'true')."""
+    for sql in (build_bank_sql("t", "m", "easy", 80)[0], build_bank_sql("t", "m", "easy", 80, [0.5])[0], COVERAGE_SQL):
+        assert "q.metadata->>'interview_style' IS DISTINCT FROM 'false'" in sql
 
 
 def _hybrid(repo, embed=None, rewrite=None):

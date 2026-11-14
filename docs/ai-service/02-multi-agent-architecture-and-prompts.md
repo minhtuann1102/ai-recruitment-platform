@@ -264,7 +264,9 @@ không có đáp án chuẩn thì dùng chunk đầu cùng `topic_id` với topi
 có thể lạc đề). Cờ `RAG_TURN_RETRIEVAL` (mặc định bật, cần hybrid).
 
 **Ngân hàng câu hỏi từ kho (2026-10-24, `app/rag/question_bank.py`):** cùng lúc với snippet, mỗi topic `technical` có
-`catalog_ref` lấy tối đa 80 cặp Q&A theo `topic_id` (chunk `question` + `qa_pair` cùng `qa_id`), bỏ câu không đọc thành
+`catalog_ref` lấy tối đa 80 cặp Q&A theo `topic_id` (chunk `question` + `qa_pair` cùng `qa_id`; từ 2026-11-14 bỏ câu có
+`metadata.interview_style = false` do DE gắn ở Phase B: câu đố, trắc nghiệm, bắt viết code dài; 149/4 178 câu trên kho
+14/11; bản ghi không có trường này coi là `true`; các câu này vẫn là tài liệu RAG), bỏ câu không đọc thành
 tiếng được (có code, nhiều dòng, > 200 ký tự), chỉ giữ câu có ít nhất một từ chung với topic (title, `key_points`,
 `key_concepts`, không tính từ chung của track như "java"), xếp theo độ sát rồi độ khó, lưu tối đa 3 câu vào
 `PlanTopic.bank_questions` (`qa_id`, câu hỏi, độ khó). Lượt `ask_main` của topic đó chọn một câu chưa dùng
@@ -279,7 +281,7 @@ không chấm theo đáp án chuẩn. Khi bật hybrid (`RAG_HYBRID`, mặc đ�
 
 **Planner ưu tiên topic có câu trong kho (2026-11-03, `app/plan_bank_coverage.py`, Phase C mục 3):** lúc start, song
 song với Planner, một truy vấn (`COVERAGE_SQL`, ~0.2 s) đếm số câu hỏi đọc được (cùng điều kiện với
-`spoken_ok`; không kiểm cặp Q&A cùng `qa_id` vì không có index, mất 0.5–4.9 s, số đếm như nhau) theo `topic_id` và độ khó cho mọi topic catalog của level; kết quả cache 10 phút theo tập topic. Sau khi có
+`spoken_ok` và bộ lọc `interview_style`; không kiểm cặp Q&A cùng `qa_id` vì không có index, mất 0.5–4.9 s, số đếm như nhau) theo `topic_id` và độ khó cho mọi topic catalog của level; kết quả cache 10 phút theo tập topic. Sau khi có
 plan (LLM hay plan dự phòng), topic `technical` có `source = "catalog"` mà kho không có câu nào lệch tối đa một bậc so
 với `start_difficulty` (cùng luật với `pick`) thì đổi sang topic chưa dùng của level có câu: cùng `category` trước, rồi
 nhiều câu hơn, rồi thứ tự catalog. Topic mới dựng lại từ catalog (title, objective, `key_points`, hint) nhưng giữ `id` và
