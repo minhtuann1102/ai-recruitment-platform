@@ -32,6 +32,7 @@ from .security import internal_token_middleware
 from .sse import SSE_HEADERS, event
 from .stt_phrase_hints import track_phrases
 from . import metrics, tracing
+from .replan import effective_plan
 from .turn_engine import TurnResult, finish_turn, next_turn, start_session
 
 MODEL = "mock-v2"
@@ -255,6 +256,8 @@ async def finalize(req: FinalizeRequest):
     tracing.start_request("finalize", session_id=safe_session_id(req.session_id), tags=[req.track, req.level])
     started, collector = time.perf_counter(), UsageCollector()
     with _logged_failure("finalize", started, collector, rag="-"):  # finalize khong dung RAG
+        # phase 05: topic da doi (state.swaps) thanh plan thuc te truoc khi cham diem / bao cao; plan cu y nguyen
+        req = req.model_copy(update={"plan": effective_plan(req.plan, req.state)})
         report = await get_reporter().report(req, collector)
         usage = collector.to_metadata()
         report.setdefault("meta", {})["fallbacks"] = usage["fallbacks"]

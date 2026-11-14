@@ -40,10 +40,17 @@ class PlanPhase(BaseModel):
     topics: List[PlanTopic]
 
 
+class ReplanPool(BaseModel):
+    """Phase 05: topic du phong `alt{n}` (ngoai phases) + id topic plan khong duoc bo (map tu yeu cau JD)."""
+    reserve: List[PlanTopic] = Field(default_factory=list, max_length=2)
+    keep_ids: List[str] = Field(default_factory=list)
+
+
 class InterviewPlan(BaseModel):
     schema_version: int = 1
     level_note: Optional[str] = None
     phases: List[PlanPhase]
+    replan: Optional[ReplanPool] = None  # None: khong lap lai ke hoach (co tat, plan cu, hoac khong con topic du phong)
 
 
 # --- Candidate state (docs 04 muc 5.2). n_scored / score_sum la truong mock de tinh score_band ---
@@ -72,6 +79,14 @@ class Tagged(BaseModel):
     turns: List[int] = Field(default_factory=list)
 
 
+class Swap(BaseModel):
+    """Mot lan doi topic technical `pending` (drop) lay topic du phong (add) tai cung vi tri (phase 05)."""
+    drop: str
+    add: str
+    turn: int
+    reason: str = ""  # qua safe_focus + loc PII, <= 20 tu
+
+
 class CandidateState(BaseModel):
     schema_version: int = 1
     phase: Phase = "intro"
@@ -94,6 +109,7 @@ class CandidateState(BaseModel):
     topic_started_s: Optional[int] = None
     current_qa_id: Optional[str] = None  # cau vua hoi lay tu kho (dap an chuan cho Evaluator o luot sau)
     used_qa_ids: List[str] = Field(default_factory=list)
+    swaps: List[Swap] = Field(default_factory=list)  # phase 05: cac lan doi topic; state cu khong co thi rong
 
 
 class TurnInfo(BaseModel):
@@ -114,6 +130,9 @@ class TurnInfo(BaseModel):
     policy_action: Optional[str] = None     # hanh dong luat decide() se chon (phan thuc cua LLM)
     overrule_reason: Optional[str] = None   # vi sao bac de xuat; None khi dung de xuat hoac forced
     action_reason: Optional[str] = None     # ly do cua LLM da qua kiem (injection / PII thi None)
+    # phase 05, chi khi LLM de xuat doi topic: applied | budget | bad_drop | jd_priority | bad_add | not_applicable |
+    # untrusted (sensitive_kind). Doi that thi turn nay hoi topic `alt*` (state.swaps), plan tra ve client khong doi.
+    swap_result: Optional[str] = None
 
 
 # --- Requests ---

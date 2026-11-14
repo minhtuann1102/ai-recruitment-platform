@@ -9,12 +9,14 @@ from ..llm.gateway import get_gateway
 from ..llm.usage import CallRecord, UsageCollector
 from ..models_interview import Evaluation
 from ..policy_hybrid import policy_mode
-from .evaluator_output_models import uses_policy
+from ..replan import replan_enabled
+from .evaluator_output_models import uses_policy, uses_replan
 from .evaluator import DEFAULT_PROMPT_VERSION, EvaluationInput, LlmEvaluator
 from .registry import agent_mode
 
 log = logging.getLogger("ai_service.evaluator")
-HYBRID_PROMPT_VERSION = "v9"  # POLICY_MODE=hybrid: Evaluator de xuat hanh dong (phase 04); v10 them o phase 05
+HYBRID_PROMPT_VERSION = "v9"  # POLICY_MODE=hybrid: Evaluator de xuat hanh dong (phase 04)
+REPLAN_PROMPT_VERSION = "v10"  # POLICY_MODE=hybrid + REPLAN_ENABLED: them de xuat doi topic (phase 05)
 
 
 class Evaluator(Protocol):
@@ -50,6 +52,9 @@ def _warn_mismatch(prompt_version: str) -> None:
         log.warning("policy_prompt_mismatch POLICY_MODE=hybrid nhung Evaluator %s khong de xuat hanh dong", prompt_version)
     elif policy_mode() != "hybrid" and v9:
         log.warning("policy_prompt_mismatch Evaluator %s can policy_context nhung POLICY_MODE != hybrid", prompt_version)
+    if replan_enabled() and not uses_replan(prompt_version):
+        log.warning("policy_prompt_mismatch REPLAN_ENABLED nhung Evaluator %s khong de xuat doi topic (can v10)",
+                    prompt_version)
 
 
 def get_evaluator() -> Evaluator:
@@ -57,9 +62,11 @@ def get_evaluator() -> Evaluator:
     global _llm
     if agent_mode("evaluator") == "mock":
         return MockEvaluator()
-    # EVALUATOR_PROMPT_VERSION (vd v3) de A/B ghi de; trong thi v8 (ghim) hoac v9 khi POLICY_MODE=hybrid.
+    # EVALUATOR_PROMPT_VERSION (vd v3) de A/B ghi de; trong thi v8 (ghim), v9 khi POLICY_MODE=hybrid, v10 khi them REPLAN_ENABLED.
     # Doi POLICY_MODE luc chay thi tao lai Evaluator (cache theo phien ban prompt).
-    version = os.getenv("EVALUATOR_PROMPT_VERSION") or (HYBRID_PROMPT_VERSION if policy_mode() == "hybrid" else None)
+    # Phase 05: v10 co dinh ca phien khi hybrid + REPLAN_ENABLED (env khong doi giua luot: prompt cham va cache khong doi).
+    default = (REPLAN_PROMPT_VERSION if replan_enabled() else HYBRID_PROMPT_VERSION) if policy_mode() == "hybrid" else None
+    version = os.getenv("EVALUATOR_PROMPT_VERSION") or default
     if _llm is not None and _llm.prompt_version != (version or DEFAULT_PROMPT_VERSION):
         _llm = None
     if _llm is None:

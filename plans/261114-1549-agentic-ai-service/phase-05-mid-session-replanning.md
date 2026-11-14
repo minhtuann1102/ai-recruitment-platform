@@ -9,7 +9,7 @@
 - Phase 04 (V9, `choose_decision`, TurnInfo trace); phase 01 (persona `skewed` + fixture JD/CV); audit H7, M5, M6, M9, L1
 
 ## Overview
-- Priority: P3. Status: pending, **blocked bởi FSD**. Nhánh: `thang/mid-session-replan`. Effort 3d.
+- Priority: P3. Status: code + test LLM giả xong (1108 passed), **cờ giữ tắt, blocked bởi FSD**; đo [BLOCKED-KEY]. Nhánh: `thang/mid-session-replan`. Effort 3d.
 - Cờ `REPLAN_ENABLED=false`, `REPLAN_MAX_SWAPS=1`; chỉ có tác dụng khi `POLICY_MODE=hybrid`.
 - Ở ranh giới topic technical, LLM đề xuất đổi 1 topic technical `pending` lấy 1 topic dự phòng chuẩn bị sẵn lúc start;
   code kiểm và đổi **tại chỗ** (cùng vị trí).
@@ -112,14 +112,27 @@ Plan trả về client từ next-turn vẫn là plan gốc (không đổi contra
    context. PR `[ai-service] feat: lập lại kế hoạch giữa buổi sau cờ REPLAN_ENABLED`.
 
 ## Todo List
-- [ ] [FSD] xác nhận lưu nguyên plan/state
-- [ ] Models + tương thích ngược
-- [ ] effective_plan + test mọi entry point/reader
-- [ ] Reserve lúc start + keep_ids
-- [ ] V10 + validate/apply swap
-- [ ] Test ràng buộc
-- [ ] Eval skewed; [BLOCKED-KEY] sim + start P95
-- [ ] Docs + FSD note, PR
+- [ ] [FSD] xác nhận lưu nguyên plan/state (3 câu hỏi + khóa mặc định ghi ở 06 §7.4; **chưa có trả lời, cờ giữ tắt**)
+- [x] Models + tương thích ngược
+- [x] effective_plan + test mọi entry point/reader (next_turn, finalize/report, sim; time_budget/early_stop/scoring đọc plan thực tế qua căn chỉnh vị trí)
+- [x] Reserve lúc start + keep_ids
+- [x] V10 + validate/apply swap
+- [x] Test ràng buộc
+- [x] Eval skewed (sim `replan`, bất biến `jd_priority_violations = 0`); [ ] **[BLOCKED-KEY]** sim + gate v10 vs v8 + start P95
+- [x] Docs 02/03/04/06/09 + context + `.env.example`; [ ] PR (chưa tạo: không push theo yêu cầu)
+
+## Deviations (ghi khi triển khai, 2026-11-14)
+- `ReplanPool` và `Swap` nằm trong `models_interview.py`, không có `models_replan.py`: `ReplanPool` chứa `PlanTopic` nên tách file gây import vòng; file đạt 200 dòng.
+- Thêm `TurnInfo.swap_result` (nhãn bounded) để sim/debug thấy đề xuất bị bác; không có trong spec gốc, cùng nhóm khóa mặc định báo FSD.
+- Chỉ số sim ở `evals/sim_replan_metrics.py` (không thêm vào `sim_metrics.py` 189 dòng); `simulate.py` thoát mã 1 nếu `jd_priority_violations > 0`. `--personas skewed` thực tế là `--matrix skewed` (phase 01 đã có), không thêm cờ.
+- `effective_plan` trong `next_turn` là plan nội bộ; `TurnResult.plan` cũng là plan thực tế nhưng route next-turn không trả plan nên client không thấy khác.
+- Reserve: khi chưa biết số câu kho (số đếm rỗng: RAG tắt, quá hạn 1 s) thì không lọc theo kho (spec yêu cầu có câu kho khi biết). `replan_context.current_topic_band` là band topic hiện tại **trước** câu trả lời này (không phải topic vừa xong).
+- `time_hint` cho `validate_swap` tính theo phase `technical`; `apply_swap` chạy trong `choose_decision` (sau `low_performance_stop`), `turn_engine` tính lại `topics` khi `swap_result == applied`. Lượt có `swap` null hay cờ tắt không đụng state.
+- Chuyển `hint_source` từ `turn_engine.py` sang `turn_evaluation.py` để `turn_engine.py` < 200 dòng.
+- `replan_context` gửi ở **mọi** lượt technical còn reserve + pending + lượt đổi (không biết trước lượt có chuyển topic), không chỉ "ở ranh giới"; ~100 token/lượt, `not_applicable` chiếm đa số nhãn (review L1).
+- Review H1: swap chỉ khi không forced, `overrule_reason != sensitive_kind` và chính LLM đề xuất `next_topic`; nhãn mới `untrusted`. Review M1: `check_alignment` → 409 `session_invalid_state` khi `state.topics` lệch `effective_plan` (cũng chặn swap giả/trùng, L5; client round-trip `state.swaps`).
+- Review L2: không bỏ qua reserve khi Evaluator mock / prompt < v10 (test dùng mock + Evaluator giả; kiểm sẽ phá test), chỉ ghi tài liệu (02). L4: `start` của reserve dùng cùng `LEVEL_CONFIG[level]["start"]` với `catalog_topic`. L3: `models_interview.py` 199 dòng.
+- Ghi đè `EVALUATOR_PROMPT_VERSION` kèm `REPLAN_ENABLED` (v < 10) chỉ log cảnh báo `policy_prompt_mismatch`, không chặn.
 
 ## Success Criteria (reply mục 8)
 - v10 vs v8 (H2): band agreement golden + holdout (`run_evaluator --prompt v10 --policy-context default --runs 3`) không

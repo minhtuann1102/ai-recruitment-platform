@@ -73,3 +73,30 @@ class EvaluatorOutputV9(EvaluatorOutputV4):
 
 def uses_policy(prompt_version: str) -> bool:
     return int(prompt_version.lstrip("v") or 0) >= 9
+
+
+class SwapProposal(BaseModel):
+    """Phase 05: de xuat doi topic technical pending (drop) lay topic du phong (add). Kieu long co chu dich (nhu V9):
+    id la / thieu thi code bac (replan.validate_swap), khong lam hong ca luot cham."""
+    drop: str = ""
+    add: str = ""
+    reason: str = ""  # <= 20 tu; qua safe_reason truoc khi vao state
+
+    @field_validator("drop", "add", "reason", mode="before")
+    @classmethod
+    def _text_or_empty(cls, v):
+        return v.strip() if isinstance(v, str) else ""
+
+
+class EvaluatorOutputV10(EvaluatorOutputV9):
+    """v10 (phase 05, POLICY_MODE=hybrid + REPLAN_ENABLED): V9 them `swap` (null khi khong ap dung)."""
+    swap: Optional[SwapProposal] = None
+
+    @field_validator("swap", mode="before")
+    @classmethod
+    def _swap_or_none(cls, v):
+        return v if isinstance(v, (dict, SwapProposal)) else None
+
+
+def uses_replan(prompt_version: str) -> bool:
+    return int(prompt_version.lstrip("v") or 0) >= 10
