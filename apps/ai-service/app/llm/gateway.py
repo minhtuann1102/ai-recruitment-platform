@@ -51,6 +51,8 @@ class LlmGateway:
                        budget_started: Optional[float] = None, budget_s: Optional[float] = None) -> LlmResult:
         """`budget_started` (perf_counter) + `budget_s`: ngan sach dong ho chung voi buoc truoc cua cung luot; moi lan
         goi, ke ca lan dau, bi cat theo phan du (het thi LlmTimeoutError). Khong truyen thi hanh vi cu."""
+        if (budget_started is None) != (budget_s is None):
+            raise ValueError("budget_started va budget_s phai di cung nhau")
         cfg = agent_settings(agent, self.llm, self._env)
         with observation(agent, "generation", input=messages, **trace_fields(cfg, prompt_version)) as gen:
             result = await self._complete(agent, cfg, messages, schema, prompt_version, collector,

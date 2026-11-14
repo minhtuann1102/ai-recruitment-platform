@@ -57,8 +57,8 @@ class ChatCall:
         self.budget_s = cfg.retry_budget_s if budget_s is None else budget_s
         self.cap_first, self.calls = cap_first, 0
 
-    async def __call__(self, msgs: List[dict], *, timeout_cap: Optional[float] = None, **override):
-        """Tra ve choice dau tien. `timeout_cap`: tran thoi gian rieng cua lan goi nay (buoc tool)."""
+    async def __call__(self, msgs: List[dict], *, step_until: Optional[float] = None, **override):
+        """Tra ve choice dau tien. `step_until`: han tuyet doi (perf_counter) cua buoc tool; length retry cung khong vuot han nay."""
         params = {**self.base, **override, "messages": msgs}
         timeout_s, budget_s = self.cfg.timeout_s, self.budget_s
         hedge_after_s = None if self.calls else self.cfg.hedge_after_s  # chi hedge lan goi dau, khong hedge repair / length
@@ -67,7 +67,10 @@ class ChatCall:
             if self.cap_first and budget_s <= 0:
                 raise LlmTimeoutError("Het ngan sach thoi gian truoc khi goi LLM")
             timeout_s = min(timeout_s, max(budget_s, 0.0))
-        if timeout_cap is not None:
+        if step_until is not None:
+            timeout_cap = step_until - time.perf_counter()
+            if timeout_cap <= 0:
+                raise LlmTimeoutError("Het han buoc tool")
             timeout_s = min(timeout_s, max(timeout_cap, 0.0))
             budget_s = timeout_cap if budget_s is None else min(budget_s, timeout_cap)  # retry o lai trong buoc
         resp, attempts = await self.gw._retry(lambda: self.gw.client.chat.completions.create(**params),
@@ -79,7 +82,7 @@ class ChatCall:
         self.rec.cached_tokens += cached_tokens(usage)
         choice = resp.choices[0]
         if choice.finish_reason == "length" and "max_tokens" not in override:
-            return await self(msgs, timeout_cap=timeout_cap,
+            return await self(msgs, step_until=step_until,
                               **{**override, "max_tokens": int(self.cfg.max_tokens * 1.5)})
         if choice.finish_reason == "length":
             raise LlmOutputError("Output bi cat do gioi han max_tokens")

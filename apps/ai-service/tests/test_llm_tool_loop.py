@@ -188,7 +188,7 @@ def test_complete_with_budget_started_caps_first_call(monkeypatch):
     assert asyncio.run(gw.complete("evaluator", MSGS, Out)).data.answer == "ok"
 
 
-@pytest.mark.parametrize("err", [status_error(404), status_error(
+@pytest.mark.parametrize("err", [status_error(404, message="No endpoints found that support tool use"), status_error(
     400, message="No endpoints found that can handle the requested parameters, support tools")])
 def test_unsupported_combo_latches_and_next_call_sends_nothing(err):
     gw, client = make([err])
@@ -217,7 +217,7 @@ def test_metrics_count_tool_calls_and_unsupported():
     metrics.record_request("next-turn", "ok", "", 0.1, col, None)
     assert REGISTRY.get_sample_value("ai_llm_tool_calls_total", {"agent": "evaluator"}) == before + 1
     unsupported = REGISTRY.get_sample_value("ai_llm_tools_unsupported_total") or 0
-    gw, _ = make([status_error(404)])
+    gw, _ = make([status_error(404, message="No endpoints found that support tools")])
     with pytest.raises(LlmError):
         go(gw)
     assert REGISTRY.get_sample_value("ai_llm_tools_unsupported_total") == unsupported + 1

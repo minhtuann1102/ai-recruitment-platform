@@ -4,6 +4,7 @@ Thu vien noi bo, agent goi qua `complete_with_tools`. Rang buoc: moi loi quy ve 
 mot lan khong tools); ngan sach dong ho chung voi buoc truoc cua luot (moi lan goi, ke ca lan dau, bi cat); buoc cuoi
 luon tool_choice="none"; combo model + tools + JSON strict bi tu choi thi latch theo tien trinh (khong thu lai).
 """
+import asyncio
 import json
 import logging
 import time
@@ -26,6 +27,7 @@ TOOLS_UNSUPPORTED = "tools_unsupported"
 FINAL_RESERVE_S = 1.5  # chua cho buoc `none` khi buoc tools dung het han cua no
 MAX_QUERY_CHARS = 200  # strict schema khong bao dam maxLength: code cat
 MAX_ARGS_CHARS = 1000  # chuoi JSON doi so qua dai la sai
+MAX_RESULT_CHARS = 2400  # ket qua cong cu vao moi request sau: khong de no phinh
 _tools_supported = True  # latch theo tien trinh, dat lai khi restart
 
 
@@ -46,11 +48,11 @@ class ToolLoopResult:
 
 
 def _is_unsupported(err: Exception) -> bool:
-    """OpenRouter: 404 (hoac 400 "No endpoints found ... support ...") khi require_parameters khong co provider hop."""
-    if isinstance(err, openai.NotFoundError):
-        return True
+    """OpenRouter: 404 / 400 "No endpoints found ... support ..." khi require_parameters khong co provider hop.
+    404 "model not found" (sai ten model) khong phai: khong latch."""
     text = str(err).lower()
-    return isinstance(err, openai.BadRequestError) and "no endpoints" in text and "support" in text
+    return (isinstance(err, (openai.NotFoundError, openai.BadRequestError)) and "no endpoints" in text
+            and ("support" in text or "tool" in text or "parameter" in text))
 
 
 def _map_error(err: Exception) -> LlmError:
@@ -59,6 +61,7 @@ def _map_error(err: Exception) -> LlmError:
         return err
     if _is_unsupported(err):
         _tools_supported = False
+        log.warning("tools_unsupported_latched status=%s msg=%s", getattr(err, "status_code", "?"), str(err)[:200])
         metrics.record_tools_unsupported()
         return LlmError(TOOLS_UNSUPPORTED)
     return LlmError(f"tool_loop_failed ({type(err).__name__})")
@@ -71,8 +74,10 @@ def _assistant_tool_message(calls) -> dict:
         for c in calls]}
 
 
-async def _safe_run(run_tool: Callable[[str, Dict[str, Any]], Awaitable[str]], names: set, call, agent: str) -> str:
-    """Loi cong cu thanh chuoi loi cho model, khong nem. Doi so: JSON object, `query` chuoi khong rong, cat 200 ky tu."""
+async def _safe_run(run_tool: Callable[[str, Dict[str, Any]], Awaitable[str]], names: set, call, agent: str,
+                    deadline: float) -> str:
+    """Loi cong cu thanh chuoi loi cho model, khong nem. Doi so: JSON object, `query` chuoi khong rong, cat 200 ky tu;
+    chi `query` den run_tool. `deadline` (perf_counter): qua han thi "error: tool_timeout"."""
     name, raw = call.function.name, call.function.arguments or ""
     if name not in names:
         return "error: unknown_tool"
@@ -87,7 +92,11 @@ async def _safe_run(run_tool: Callable[[str, Dict[str, Any]], Awaitable[str]], n
     if not query:
         return "error: empty_query"
     try:
-        return str(await run_tool(name, {**args, "query": query}))
+        left = max(deadline - time.perf_counter(), 0.05)
+        return str(await asyncio.wait_for(run_tool(name, {"query": query}), left))[:MAX_RESULT_CHARS]
+    except asyncio.TimeoutError:
+        log.warning("tool_timeout agent=%s tool=%s", agent, name)
+        return "error: tool_timeout"
     except Exception as err:  # cong cu hong khong duoc lam hong luot cham
         log.warning("tool_failed agent=%s tool=%s err=%s", agent, name, type(err).__name__)
         return "error: tool_failed"
@@ -101,6 +110,7 @@ async def complete_with_tools(gw, agent: str, messages: List[dict], schema: Type
     """`run_tool(ten, doi_so)` tra chuoi ket qua (caller tu boc `wrap_untrusted`). `tools` la hang so, gui nguyen
     moi buoc de prefix cache on dinh. `budget_started` (perf_counter) + `budget_s`: ngan sach chung ca luot.
     Loi: LlmError / LlmOutputError / LlmTimeoutError; da them CallRecord (fallback=failure_fallback, kem do tre)."""
+    assert schema is not None, "complete_with_tools can schema (data la BaseModel)"
     if not _tools_supported:
         raise LlmError(TOOLS_UNSUPPORTED)
     cfg = agent_settings(agent, gw.llm, gw._env)
@@ -118,19 +128,24 @@ async def complete_with_tools(gw, agent: str, messages: List[dict], schema: Type
                 step_left = step_deadline_s - (time.perf_counter() - t0)
                 last = used >= max_calls or step_left <= 0
                 choice = await (chat(msgs, tool_choice="none") if last
-                                else chat(msgs, timeout_cap=step_left + FINAL_RESERVE_S))
+                                else chat(msgs, step_until=t0 + step_deadline_s + FINAL_RESERVE_S))
                 calls = getattr(choice.message, "tool_calls", None) or []
                 if not calls:
                     break
                 if last:
                     raise LlmOutputError("Model van goi cong cu sau tool_choice=none")
                 msgs.append(_assistant_tool_message(calls))
-                for c in calls:  # parallel tat, nhung moi tool_call_id thua van phai duoc tra loi
+                allowed = max_calls - used  # model bo qua parallel_tool_calls=false: chi chay toi da phan con lai
+                deadline = min(budget_started + budget_s, t0 + step_deadline_s)
+                for i, c in enumerate(calls):  # moi tool_call_id van phai duoc tra loi
+                    if i >= allowed:
+                        msgs.append({"role": "tool", "tool_call_id": c.id, "content": "error: call_limit"})
+                        continue
                     with observation("tool:" + str(c.function.name)[:40], "span", nest=True):
                         msgs.append({"role": "tool", "tool_call_id": c.id,
-                                     "content": await _safe_run(run_tool, names, c, agent)})
-                used += len(calls)
-                rec.tool_calls += len(calls)
+                                     "content": await _safe_run(run_tool, names, c, agent, deadline)})
+                used += min(len(calls), allowed)
+                rec.tool_calls += min(len(calls), allowed)
             content = choice.message.content or ""
             data = await parse_or_repair(chat, schema, msgs, content, rec, tool_choice="none")  # M3: repair khong goi tool
             rec.attempts = chat.calls

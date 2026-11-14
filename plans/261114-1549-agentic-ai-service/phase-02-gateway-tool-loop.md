@@ -112,6 +112,10 @@ do caller (03); `run_tool` ném → log + `"error: tool_failed"`.
 - Không agent dùng → output `/api/*` y hệt.
 - **[BLOCKED-KEY]** `complete_with_tools` thật (evaluator, tool giả) ra JSON hợp lệ; nếu 404 → latch hoạt động.
 
+## Known (review 2026-11-14, chấp nhận)
+- L5: message assistant của bước tool bỏ `content` đi kèm tool_calls. L6: tool_loop dùng `gw._env`, `gw._retry` (nội bộ).
+- Đã sửa sau review: H1 tool timeout, H2 hạn mức lệnh mỗi bước, M1 hạn bước tuyệt đối, M2 latch theo nội dung lỗi, M3 cắt kết quả, M4, L1-L4, L7.
+
 ## Risk Assessment
 - Combo không hỗ trợ → lookup không bao giờ chạy; 03 vẫn an toàn (đường cũ). Khi đó mở lại thiết kế (split) sau probe.
 - `require_parameters` đổi provider → độ trễ khác; đo ở 03.

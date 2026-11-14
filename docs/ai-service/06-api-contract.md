@@ -316,7 +316,7 @@ Giữ tên `start / next-turn / finalize` theo constitution IV; **nội dung** �
 | `ai_agent_latency_seconds` | `agent` | Độ trễ một lần gọi LLM |
 | `ai_tokens_total` | `agent`, `kind` (input, output, cached) | Token; nhân với bảng giá để ra chi phí |
 | `ai_llm_tool_calls_total` | `agent` | Lần agent gọi công cụ trong vòng lặp tool calling (2026-11-14); 0 khi chưa agent nào bật |
-| `ai_llm_tools_unsupported_total` | không | Lần model/provider từ chối tools + JSON strict (latch theo tiến trình, đếm một lần mỗi process) |
+| `ai_llm_tools_unsupported_total` | không | Lần model/provider từ chối tools + JSON strict (latch theo tiến trình; ≥ 1 lần mỗi process vì các request đang chạy song song có thể cùng đếm) |
 | `ai_rag_requests_total`, `ai_rag_errors_total` | `status` / `code` | Trạng thái RAG trong `metadata.rag`, mã lỗi RAG |
 | `ai_turns_total` | `answer_source` (text, voice), `outcome` (`answer_type`, `degraded`, `low_confidence`) | Kết quả chấm mỗi lượt next-turn stream xong; lượt wrap-up không chấm thì không đếm |
 | `ai_http_responses_total` | `route` (mẫu route, lạ thì `other`), `code` | Mọi response, kể cả 401/422 bị chặn trước route và 500 lỗi ngoài dự kiến. SSE đếm 200 lúc gửi header; kết quả stream (lỗi, client ngắt) xem `ai_requests_total` |

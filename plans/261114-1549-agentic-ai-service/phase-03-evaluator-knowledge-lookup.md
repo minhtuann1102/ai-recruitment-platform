@@ -38,7 +38,7 @@
 - F: luật tra cứu ở fragment `evaluator_tools.v1.md`, nối vào system prompt chỉ khi lượt có tools. Version fragment ghi vào
   trace Langfuse + log, **không** nhét vào `prompt_version` (`uses_sources` parse số, `evaluator.py:67`) (L4).
 - F: **1 ngân sách đồng hồ** `B = retry_budget_s` (10 s) từ `t0` đầu `evaluate_with_raw` cho vòng lặp + fallback:
-  `asyncio.wait_for(complete_with_tools(..., budget_started=t0, budget_s=B), B − elapsed)`; lỗi → nếu còn ≥ `MIN_FALLBACK_S`
+  `asyncio.wait_for(complete_with_tools(..., budget_started=t0, budget_s=B, failure_fallback="evaluator_lookup_fallback"), B − elapsed)`; lỗi → nếu còn ≥ `MIN_FALLBACK_S`
   (2,5 s) thì 1 lần gọi không tools với `budget_started=t0` (cắt cả lần đầu), không thì thẳng `mock_evaluator` + `degraded`.
   Worst case trước sự kiện `meta`: RAG theo lượt ≤ 1,0 s (`TURN_DEADLINE_S`) + Evaluator ≤ 10 s + mock ≈ **≤ 11,5 s** < 15 s.
 - F: ép "chỉ R bác" ở lượt có chunk công cụ (H4): trong `postcheck`, khi `inp.tool_base_ids is not None`:
@@ -46,7 +46,7 @@
   `contradicted` mà mọi id hợp lệ là id công cụ (> `tool_base_ids`) — chỉ những misconception này không chặn
   `technical_accuracy` (vẫn trả về cho báo cáo); (b) misconception khác (không gắn nguồn, hoặc dựa snippet có sẵn)
   chặn như khi tắt cờ. Mục tiêu: bật cờ không làm điểm cao hơn so với tắt cờ ở cùng câu trả lời, ngoài phần do chunk công cụ.
-- F: vòng lặp lỗi → `collector.add(CallRecord(..., fallback="evaluator_lookup_fallback", latency_ms=...))` (M4); thêm vào
+- F: vòng lặp lỗi → truyền `failure_fallback="evaluator_lookup_fallback"` cho `complete_with_tools`, gateway đã tự thêm `CallRecord` kèm latency (M4); caller KHÔNG thêm record thứ hai; thêm vào
   `FALLBACK_KINDS`; báo FSD mã fallback mới.
 - NF: cờ tắt → request Evaluator byte-identical; postcheck không đổi khi `tool_base_ids is None`.
 
@@ -87,7 +87,7 @@ async def call_with_lookup(gw, prompt, inp, t0):
         inp.lookup.committed = True
         return r, inp.lookup.extend(inp)
     except (LlmError, asyncio.TimeoutError) as err:
-        record_fallback("evaluator_lookup_fallback", now() - t0)
+        # gateway đã thêm CallRecord(fallback="evaluator_lookup_fallback") qua failure_fallback; không thêm record thứ hai
         if B - (now() - t0) < MIN_FALLBACK_S: raise LlmTimeoutError("no_budget_for_fallback") from err  # → mock+degraded
         return await gw.complete(..., budget_started=t0, budget_s=B), inp
 ```
