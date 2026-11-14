@@ -5,131 +5,29 @@ Luong: precheck bang code (dont_know ngan, manipulation) -> luot voice: doi thua
 dung mock heuristic va danh dau degraded (luot khong tinh diem, BRU-05) de phien khong chet.
 """
 import asyncio
-import json
 import logging
 import time
-from dataclasses import dataclass, field, replace
-from typing import List, Literal, Optional, Tuple
+from dataclasses import replace
+from typing import List, Optional, Tuple
 
 import openai
-from pydantic import BaseModel
 
 from .. import mock_evaluator
-from ..evaluator_source_checks import (SourcedPoint, check_sources, confidence, label, merge_misconceptions,
+from ..evaluator_source_checks import (SourcedPoint, check_sources, confidence, merge_misconceptions,
                                       refuted_by_reference, restates_reference, source_blocks)
 from ..evaluation_checks import (MAX_COVERED, apply_caps, build_evaluation, is_term_list, matched_key_points,
                                  precheck_answer, quote_in_answer, slug_tags, supports_point, zero_evaluation)
 from ..llm.errors import ConfigError, LlmError
 from ..llm.gateway import LlmGateway
 from ..llm.usage import CallRecord, UsageCollector
-from ..models_common import AnswerType
-from ..models_interview import CitedSource, Evaluation, Evidence, PlanTopic, SourceRef, TopicTurn
-from ..prompts.store import UNTRUSTED_NOTICE, PromptStore, wrap_untrusted
+from ..models_interview import Evaluation, Evidence, TopicTurn  # noqa: F401  (re-export cho evals)
+from ..prompts.store import PromptStore
 from ..stt_terms import normalize_stt_terms_with_map, restore_quote
+from .evaluator_input import EvaluationInput, all_snippets, build_messages, cited_sources, source_refs  # noqa: F401
+from .evaluator_output_models import (CoveredPoint, EvaluatorOutput, EvaluatorOutputV4, RawBands,  # noqa: F401
+                                      SourcedCoveredPoint, uses_sources)
 
 log = logging.getLogger("ai_service.evaluator")
-
-
-# Schema gui cho LLM: khong rang buoc min/max (che do strict khong ho tro het); code tu kep va cat.
-class CoveredPoint(BaseModel):
-    point: str
-    quote: str
-
-
-class RawBands(BaseModel):
-    technical_accuracy: int
-    completeness: int
-    extensibility: int
-    relevance: int
-
-
-class EvaluatorOutput(BaseModel):
-    answer_type: AnswerType
-    covered: List[CoveredPoint]
-    missing_points: List[str]
-    misconceptions: List[str]
-    scores: RawBands
-    follow_up_focus: Optional[str]
-
-
-class SourcedCoveredPoint(CoveredPoint):
-    # mac dinh chi cho che do json_object (khong strict) chiu duoc model bo truong; strict_schema bat buoc moi truong
-    source_ids: List[str] = []
-    support: Literal["supported", "contradicted", "no_source"] = "no_source"
-
-
-class EvaluatorOutputV4(EvaluatorOutput):
-    """v4 (Phase 03a): moi y covered ghi tai lieu doi chieu (S1.., R) va muc ung ho."""
-    covered: List[SourcedCoveredPoint]
-
-
-def uses_sources(prompt_version: str) -> bool:
-    return int(prompt_version.lstrip("v") or 0) >= 4
-
-
-@dataclass
-class EvaluationInput:
-    level: str
-    phase: str
-    topic: PlanTopic
-    difficulty: int
-    turn_kind: str
-    turn_number: int
-    question: str
-    answer: str
-    topic_turns: List[TopicTurn] = field(default_factory=list)
-    reference_answer: str = ""  # cap Q&A chuan trong kho khi cau vua hoi lay tu kho (question_bank)
-    turn_snippets: List[str] = field(default_factory=list)  # Phase 02: chunk theo cau vua hoi + cau tra loi
-    turn_sources: List[SourceRef] = field(default_factory=list)  # 03b: cung thu tu turn_snippets
-    reference_source: Optional[SourceRef] = None  # 03b: cau tu kho cua reference_answer
-    spoken: bool = False  # answer la ban ghi STT (answer_source = voice): doi thuat ngu phien am truoc khi cham
-
-
-def build_messages(system_prompt: str, inp: EvaluationInput, with_ids: bool = False) -> List[dict]:
-    """Phan tinh (rubric, anchor) o system de huong prompt caching; du lieu nguoi dung boc <untrusted>.
-    with_ids (v4): moi tai lieu doi chieu co id [S1].. / [R] de Evaluator trich nguon."""
-    data = {"level": inp.level, "phase": inp.phase, "difficulty": inp.difficulty, "turn_kind": inp.turn_kind,
-            "topic": {"title": inp.topic.title, "objective": inp.topic.objective,
-                      "key_points": inp.topic.key_points},
-            "question": inp.question}
-    turns = "\n".join(f"Q: {t.q}\nA: {t.a}" for t in inp.topic_turns[-5:]) or "(không có)"
-    # snippet cua topic (luc start) truoc, chunk theo luot sau; prompt coi ca hai la tai lieu doi chieu (luat 8)
-    blocks = source_blocks(all_snippets(inp), inp.reference_answer)
-    texts = [label(i, t) if with_ids else t for i, t in blocks]
-    reference = texts.pop() if inp.reference_answer else "(không có)"
-    snippets = "\n---\n".join(texts) or "(không có)"
-    user = "\n\n".join([json.dumps(data, ensure_ascii=False), wrap_untrusted("topic_turns", turns),
-                        wrap_untrusted("reference_snippets", snippets),
-                        wrap_untrusted("reference_answer", reference),
-                        wrap_untrusted("answer", inp.answer)])
-    return [{"role": "system", "content": f"{system_prompt}\n\n{UNTRUSTED_NOTICE}"},
-            {"role": "user", "content": user}]
-
-
-def all_snippets(inp: EvaluationInput) -> List[str]:
-    # snippet cua topic (luc start) truoc, chunk theo luot sau: thu tu nay quyet dinh id S1..Sn
-    return [*inp.topic.reference_snippets, *inp.turn_snippets]
-
-
-def source_refs(inp: EvaluationInput) -> List[Optional[SourceRef]]:
-    """Tham chieu ben vung cung thu tu id S1.. / R; thieu (plan cu, interview-service bo truong) thi None."""
-    topic = list(inp.topic.reference_sources)[:len(inp.topic.reference_snippets)]
-    topic += [None] * (len(inp.topic.reference_snippets) - len(topic))
-    turn = list(inp.turn_sources)[:len(inp.turn_snippets)]
-    turn += [None] * (len(inp.turn_snippets) - len(turn))
-    return topic + turn + ([inp.reference_source] if inp.reference_answer else [])
-
-
-def cited_sources(points: List[SourcedPoint], inp: EvaluationInput) -> List[CitedSource]:
-    """Tai lieu cac y (giu lai + bi bac bo) da trich, bo trung theo id; y contradicted dung truoc (can on nhat)."""
-    ids = [i for i, _ in source_blocks(all_snippets(inp), inp.reference_answer)]
-    refs = dict(zip(ids, source_refs(inp)))
-    out: dict = {}
-    for p in sorted(points, key=lambda p: p.support != "contradicted"):
-        for i in p.source_ids:
-            if refs.get(i) is not None and i not in out:
-                out[i] = CitedSource(**refs[i].model_dump(), id=i, support=p.support)
-    return list(out.values())
 
 
 def _sourced(c: CoveredPoint) -> SourcedPoint:

@@ -47,7 +47,10 @@ def _known(content: str, known: Sequence[str]) -> bool:
     return any(content == k or (k.endswith(" ...") and content.startswith(k[:-4])) for k in known)
 
 
-def _filters(retriever: Retriever, phase: str, topic: PlanTopic, catalog: TrackCatalog) -> Optional[SearchFilters]:
+def filters_for_turn(retriever: Retriever, phase: str, topic: PlanTopic, catalog: TrackCatalog
+                     ) -> Optional[SearchFilters]:
+    """Pham vi tim cua mot luot (category / nguon theo phase va topic); None = khong co pham vi hop le (scenario khong
+    co textbook). Evaluator tra cuu (evaluator_lookup.py) dung lai de pham vi do code co dinh."""
     textbook = ("textbook",) if retriever.textbook else ()
     if phase == "scenario":  # nhu luc start: scenario khong lay interview_qa
         return SearchFilters(textbook, categories=scenario_categories(catalog)) if textbook else None
@@ -76,8 +79,8 @@ async def _topic_list(retriever: Retriever, topic: PlanTopic, bucket: Optional[s
     return []
 
 
-async def _search(retriever: Retriever, filters: SearchFilters, topic: PlanTopic, difficulty: int, query: str,
-                  known: Sequence[str], collector: Optional[UsageCollector], memory_only: bool) -> List[Chunk]:
+async def search_turn(retriever: Retriever, filters: SearchFilters, topic: PlanTopic, difficulty: int, query: str,
+                      known: Sequence[str], collector: Optional[UsageCollector], memory_only: bool) -> List[Chunk]:
     index = retriever.hybrid.bm25.ready()
     if index is None:  # corpus chua nap xong (vua khoi dong): khong cho
         log.info("rag_turn_skipped reason=corpus_not_loaded")
@@ -96,6 +99,9 @@ async def _search(retriever: Retriever, filters: SearchFilters, topic: PlanTopic
     return trim_to_budget(dedup(fused)[:TURN_K], TURN_TOKENS)
 
 
+_filters, _search = filters_for_turn, search_turn  # ten cu (test dung)
+
+
 async def turn_snippets(retriever: Optional[Retriever], track: str, *, phase: str, topic: PlanTopic,
                         difficulty: int, question: str, answer: str, has_answer_key: bool,
                         collector: Optional[UsageCollector] = None, memory_only: bool = False) -> TurnChunks:
@@ -106,11 +112,11 @@ async def turn_snippets(retriever: Optional[Retriever], track: str, *, phase: st
         return TurnChunks()
     query = f"{question}\n{answer[:ANSWER_CHARS]}"
     try:
-        filters = _filters(retriever, phase, topic, load_track(track))
+        filters = filters_for_turn(retriever, phase, topic, load_track(track))
         if filters is None:
             return TurnChunks()
-        chunks = await _search(retriever, filters, topic, difficulty, query, topic.reference_snippets, collector,
-                               memory_only)
+        chunks = await search_turn(retriever, filters, topic, difficulty, query, topic.reference_snippets, collector,
+                                   memory_only)
     except Exception as err:  # tuy chon: loi bat ngo thi luot van cham voi snippet cua topic
         log.warning("rag_turn_failed topic=%s error=%s", topic.catalog_ref, type(err).__name__)
         if collector is not None:
