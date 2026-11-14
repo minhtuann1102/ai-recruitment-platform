@@ -10,12 +10,14 @@ from typing import Dict, List, Optional, Tuple
 
 import httpx
 
-from app.models_interview import InterviewPlan, PlanTopic
+from app.models_interview import CandidateState, InterviewPlan, PlanTopic
+from app.replan import effective_plan
 from evals.personas import Persona
 
 MAX_TURNS = 40
-# TurnInfo (phase 04, POLICY_MODE=hybrid): quyet dinh truoc apply_action; sim_policy_metrics doc cac khoa nay
-POLICY_KEYS = ("decided_by", "proposed_action", "policy_action", "overrule_reason", "action_reason")
+# TurnInfo (phase 04, POLICY_MODE=hybrid): quyet dinh truoc apply_action; sim_policy_metrics doc cac khoa nay;
+# swap_result (phase 05, REPLAN_ENABLED): sim_replan_metrics doc
+POLICY_KEYS = ("decided_by", "proposed_action", "policy_action", "overrule_reason", "action_reason", "swap_result")
 
 
 async def call_sse(client: httpx.AsyncClient, path: str, body: Dict) -> Tuple[List[Tuple[str, Dict]], Dict]:
@@ -69,7 +71,8 @@ async def run_session(client: httpx.AsyncClient, persona: Persona, simulator, du
     calls = [{"path": "start", **timing, "metadata": done["metadata"]}]
     turns, history = [], {}
     for _ in range(MAX_TURNS):
-        topic = _topic(plan, turn["topic_id"])
+        # phase 05: topic `alt*` chi co trong plan.replan.reserve; plan thuc te = plan goc + state.swaps moi nhat
+        topic = _topic(effective_plan(plan, CandidateState.model_validate(state)), turn["topic_id"])
         answer = await simulator.answer(persona, topic, question, turn["action"])
         if answer is None:  # ung vien bam ket thuc (vd go /end trong evals.play)
             state["end_reason"] = "candidate_ended"
@@ -99,7 +102,7 @@ async def run_session(client: httpx.AsyncClient, persona: Persona, simulator, du
         question, turn = nd["question"], nd["turn"]
     if not turns:  # ket thuc truoc khi tra loi cau nao: khong co gi de cham
         return {"persona": persona.id, "plan": plan_json, "turns": [], "report": None, "calls": calls,
-                "elapsed_s": elapsed}
+                "elapsed_s": elapsed, "swaps": state.get("swaps", [])}
     final = {"session_id": sid, "track": persona.track, "level": persona.level, "plan": plan_json, "state": state,
              "end_reason": state.get("end_reason") or "plan_complete", "duration_s": elapsed,
              "turns": [{k: v for k, v in t.items() if k not in ("action", "question_source", "qa_id")}
@@ -115,4 +118,4 @@ async def run_session(client: httpx.AsyncClient, persona: Persona, simulator, du
                                                    "latency_ms": fin.get("latency_ms_by_agent", {}),
                                                    "fallbacks": report.get("meta", {}).get("fallbacks", [])}})
     return {"persona": persona.id, "plan": plan_json, "turns": turns, "report": report, "calls": calls,
-            "elapsed_s": elapsed}
+            "elapsed_s": elapsed, "swaps": state.get("swaps", [])}
