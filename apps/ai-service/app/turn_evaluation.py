@@ -8,6 +8,7 @@ from typing import Optional, Tuple
 
 from .agents.evaluator import EvaluationInput
 from .agents.evaluator_input import PolicyContext
+from .agent_notes import notes_enabled, notes_for_context
 from .agents.evaluator_output_models import EvaluatorOutputV9
 from .agents.evaluator_provider import Evaluator
 from .evaluator_lookup import lookup_for_turn
@@ -98,7 +99,8 @@ async def evaluate_turn(req: NextTurnRequest, state: CandidateState, phase: str,
         reference_answer=key, turn_snippets=extra.texts, turn_sources=extra.sources,
         reference_source=reference_source(topic, state.current_qa_id, key), spoken=is_voice(req), lookup=lookup,
         policy_context=policy_context(req, state, phase) if hybrid else None,
-        replan_context=replan_context(plan or req.plan, state, phase) if hybrid else None)
+        replan_context=replan_context(plan or req.plan, state, phase) if hybrid else None,
+        notes_context=notes_for_context(state) if notes_enabled() else None)
     with_raw = getattr(evaluator, "evaluate_with_raw", None) if hybrid else None
     if with_raw is None:
         return key, extra, await evaluator.evaluate(inp, collector), None

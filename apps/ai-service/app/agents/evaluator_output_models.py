@@ -100,3 +100,45 @@ class EvaluatorOutputV10(EvaluatorOutputV9):
 
 def uses_replan(prompt_version: str) -> bool:
     return int(prompt_version.lstrip("v") or 0) >= 10
+
+
+class RawNote(BaseModel):
+    """Phase 07: ghi chu moi LLM de xuat. Kieu long (str) co chu dich: kind / text la -> code bo (agent_notes), khong lam
+    hong ca luot cham."""
+    kind: str = ""  # hypothesis | to_verify | strength | risk
+    text: str = ""
+
+    @field_validator("kind", "text", mode="before")
+    @classmethod
+    def _text_or_empty(cls, v):
+        return v.strip() if isinstance(v, str) else ""
+
+
+class RawNoteUpdate(BaseModel):
+    id: str = ""
+    status: str = ""  # confirmed | rejected
+
+    @field_validator("id", "status", mode="before")
+    @classmethod
+    def _text_or_empty(cls, v):
+        return v.strip() if isinstance(v, str) else ""
+
+
+class EvaluatorOutputV11(EvaluatorOutputV10):
+    """v11 (phase 07, POLICY_MODE=hybrid + AGENT_NOTES_ENABLED): V10 them `new_note` (null khi khong co) va `note_updates`."""
+    new_note: Optional[RawNote] = None
+    note_updates: List[RawNoteUpdate] = []
+
+    @field_validator("new_note", mode="before")
+    @classmethod
+    def _note_or_none(cls, v):
+        return v if isinstance(v, (dict, RawNote)) else None
+
+    @field_validator("note_updates", mode="before")
+    @classmethod
+    def _updates_or_empty(cls, v):
+        return [u for u in v if isinstance(u, (dict, RawNoteUpdate))] if isinstance(v, list) else []
+
+
+def uses_notes(prompt_version: str) -> bool:
+    return int(prompt_version.lstrip("v") or 0) >= 11

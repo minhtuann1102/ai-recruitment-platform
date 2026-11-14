@@ -54,15 +54,17 @@ class EvaluationInput:
     lookup: Optional["TurnLookup"] = None  # phase 03: Evaluator duoc tra cuu kho (chi luot khong R, cho EVALUATOR_TOOLS)
     policy_context: Optional[PolicyContext] = None  # phase 04: chi dat khi POLICY_MODE=hybrid, chi render voi prompt v9
     replan_context: Optional[ReplanContext] = None  # phase 05: chi dat khi REPLAN_ENABLED + o ranh gioi co reserve; chi render voi v10
+    notes_context: Optional[List[Tuple[str, str]]] = None  # phase 07: (id, text) ghi chu to_verify open; chi render voi v11
     tool_base_ids: Optional[int] = None  # chi dat sau khi tra cuu co chunk: id S{n} voi n > gia tri nay la chunk cong cu
 
 
 def build_messages(system_prompt: str, inp: EvaluationInput, with_ids: bool = False, policy: bool = False,
-                   replan: bool = False) -> List[dict]:
+                   replan: bool = False, notes: bool = False) -> List[dict]:
     """Phan tinh (rubric, anchor) o system de huong prompt caching; du lieu nguoi dung boc <untrusted>.
     with_ids (v4): moi tai lieu doi chieu co id [S1].. / [R] de Evaluator trich nguon.
     policy (v9): them khoi policy_context (trang thai phong van) o CUOI user, sau answer.
-    replan (v10): them khoi replan_context (topic co the doi) sau policy_context, chi khi co (o ranh gioi co reserve)."""
+    replan (v10): them khoi replan_context (topic co the doi) sau policy_context, chi khi co (o ranh gioi co reserve).
+    notes (v11): them khoi <untrusted> open_notes (ghi chu to_verify con open; text sinh tu cau tra loi) sau cung."""
     data = {"level": inp.level, "phase": inp.phase, "difficulty": inp.difficulty, "turn_kind": inp.turn_kind,
             "topic": {"title": inp.topic.title, "objective": inp.topic.objective,
                       "key_points": inp.topic.key_points},
@@ -80,6 +82,8 @@ def build_messages(system_prompt: str, inp: EvaluationInput, with_ids: bool = Fa
         parts.append(render_policy_context(inp.policy_context))
     if replan and inp.replan_context is not None:
         parts.append(render_replan_context(inp.replan_context))
+    if notes and inp.notes_context:
+        parts.append(wrap_untrusted("open_notes", "\n".join(f"{i}: {t}" for i, t in inp.notes_context)))
     user = "\n\n".join(parts)
     return [{"role": "system", "content": f"{system_prompt}\n\n{UNTRUSTED_NOTICE}"},
             {"role": "user", "content": user}]

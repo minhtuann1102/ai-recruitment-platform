@@ -102,7 +102,7 @@ async def run_session(client: httpx.AsyncClient, persona: Persona, simulator, du
         question, turn = nd["question"], nd["turn"]
     if not turns:  # ket thuc truoc khi tra loi cau nao: khong co gi de cham
         return {"persona": persona.id, "plan": plan_json, "turns": [], "report": None, "calls": calls,
-                "elapsed_s": elapsed, "swaps": state.get("swaps", [])}
+                "elapsed_s": elapsed, "swaps": state.get("swaps", []), "notes": state.get("notes", [])}
     final = {"session_id": sid, "track": persona.track, "level": persona.level, "plan": plan_json, "state": state,
              "end_reason": state.get("end_reason") or "plan_complete", "duration_s": elapsed,
              "turns": [{k: v for k, v in t.items() if k not in ("action", "question_source", "qa_id")}
@@ -118,4 +118,4 @@ async def run_session(client: httpx.AsyncClient, persona: Persona, simulator, du
                                                    "latency_ms": fin.get("latency_ms_by_agent", {}),
                                                    "fallbacks": report.get("meta", {}).get("fallbacks", [])}})
     return {"persona": persona.id, "plan": plan_json, "turns": turns, "report": report, "calls": calls,
-            "elapsed_s": elapsed, "swaps": state.get("swaps", [])}
+            "elapsed_s": elapsed, "swaps": state.get("swaps", []), "notes": state.get("notes", [])}

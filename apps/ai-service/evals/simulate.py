@@ -27,6 +27,7 @@ from evals.personas import all_personas, skewed_personas
 from evals.sim_language import language
 from evals.sim_lookup_metrics import evaluator_lookup
 from evals.sim_policy_metrics import hybrid_policy
+from evals.sim_notes_metrics import notes_summary
 from evals.sim_replan_metrics import replan_summary
 from evals.sim_style import session_style
 from evals.sim_metrics import (adaptation, constraints, discrimination, end_reasons, grounding, grounding_breakdown,
@@ -82,7 +83,8 @@ def summarize(sessions: Dict[str, Dict], personas, pricing: Dict) -> Dict:
             "language": language(sessions), "question_bank": question_bank(sessions), "style": session_style(sessions),
             "grounding": grounding(sessions), "grounding_breakdown": grounding_breakdown(sessions),
             "rag_health": rag_health(sessions), "evaluator_lookup": evaluator_lookup(sessions),
-            "hybrid_policy": hybrid_policy(sessions), "replan": replan_summary(sessions), "ops": ops_summary(sessions, pricing)}
+            "hybrid_policy": hybrid_policy(sessions), "replan": replan_summary(sessions), "notes": notes_summary(sessions),
+            "ops": ops_summary(sessions, pricing)}
 
 
 def known_personas() -> Dict:
@@ -170,6 +172,10 @@ def main() -> None:
     violations = [r["replan"]["jd_priority_violations"] for r in ([summary] if runs == 1 else summary["per_run"])]
     if any(violations):  # bat bien phase 05: khong swap nao bo topic JD uu tien
         print("FAIL swap bo topic JD uu tien (jd_priority_violations > 0)", file=sys.stderr)
+        sys.exit(1)
+    unsafe = [r["notes"]["unsafe_notes"] for r in ([summary] if runs == 1 else summary["per_run"])]
+    if any(unsafe):  # bat bien phase 07: khong ghi chu nao chua injection / PII / qua dai
+        print("FAIL ghi chu khong an toan (unsafe_notes > 0)", file=sys.stderr)
         sys.exit(1)
     if failed:  # phien loi bi loai khoi mau so: khong de lan chay "xanh" gia
         sys.exit(1)

@@ -7,11 +7,13 @@ from dataclasses import dataclass
 from typing import List, Optional, Tuple
 
 from . import metrics
+from .agent_notes import apply_notes, notes_enabled
 from .early_stop import low_performance_stop
 from .models_interview import CandidateState, Evaluation, InterviewPlan, NextTurnRequest, PlanTopic
-from .policy import Decision, decide
+from .policy import Decision, classify, decide
 from .replan import attempt_swap
-from .policy_hybrid import policy_mode, proposed_label, safe_reason, validate_decision
+from .cv_text import has_injection
+from .policy_hybrid import SENSITIVE, policy_mode, proposed_label, safe_reason, validate_decision
 from .time_budget import phase_deadline_s
 
 
@@ -82,4 +84,8 @@ def choose_decision(ev: Evaluation, proposal, state: CandidateState, phase: str,
                                       time_hint(req.elapsed_seconds, plan, phase), req.turn_number)
             if trace.swap:
                 metrics.record_replan_swap(trace.swap)
+    if hybrid and notes_enabled():  # phase 07: ghi chu sau quyet dinh; luot sensitive / injection (cung forced) la untrusted
+        apply_notes(state, proposal, req.turn_number, topic.id,
+                    untrusted=trace.overrule_reason == "sensitive_kind" or classify(ev) in SENSITIVE
+                    or has_injection(req.answer))
     return trace
