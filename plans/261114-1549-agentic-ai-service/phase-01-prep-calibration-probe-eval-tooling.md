@@ -5,7 +5,7 @@
 - `context/workflow.md`, `context/decisions.md`
 
 ## Overview
-- Priority: P1 (chặn 04). Status: pending. Nhánh: `thang/agentic-prep`. Effort 2d.
+- Priority: P1 (chặn 04). Status: code xong, bước live [BLOCKED-KEY]. Nhánh: `thang/agentic-prep`. Effort 2d.
 - Việc nền không đổi hành vi (trừ ngưỡng, cần owner duyệt) để các phase sau có số và công cụ đo đúng.
 
 ## Key Insights
@@ -75,13 +75,16 @@
    category), `context/project-state.md`; check_docs, pytest. PR `[ai-service] chore: chuẩn bị đo cho agentic`.
 
 ## Todo List
-- [ ] Docstring mốc
-- [ ] `categories` (BM25, SQL, retriever) + test
-- [ ] `--runs` id riêng + `sim_runs.py` + test
-- [ ] `end_reasons`, persona skewed + JD/CV fixture
-- [ ] Probe script
-- [ ] [BLOCKED-KEY] probe; baseline 4 runs; hiệu chỉnh A/B + owner duyệt
-- [ ] Docs + context, PR
+- [x] Docstring mốc
+- [x] `categories` (BM25, SQL, retriever) + test (`tests/test_scenario_categories.py`)
+- [x] `--runs` id riêng + `sim_runs.py` + test (`tests/test_sim_runs.py`)
+- [x] `end_reasons`, persona skewed + JD/CV fixture
+- [x] Probe script (`scripts/probe_tool_strict_json.py`, test bằng transport giả)
+- [ ] [BLOCKED-KEY] probe live -> `plans/reports/probe-<date>-tool-strict-json.md`
+- [ ] [BLOCKED-KEY] baseline `rules`: `simulate.py --matrix full --simulator llm --runs 4` (stdev gộp, gap, end_reason), TTFT, `judge_support` 3 lần
+- [ ] [BLOCKED-KEY] hiệu chỉnh `WEAK_BELOW`/`STRONG_FROM` trên A, kiểm trên B; owner duyệt (giữ 1.5 / 3.0 đến lúc đó)
+- [x] Docs + context (09, rag-design, project-state); `04` không đổi vì ngưỡng chưa đổi
+- [ ] PR `[ai-service] chore: chuẩn bị đo cho agentic` (chưa push theo yêu cầu)
 
 ## Success Criteria
 - Test cũ xanh; `--runs 1` cùng định dạng cũ; 2 run cùng persona tách biệt.
