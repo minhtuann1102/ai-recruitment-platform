@@ -27,7 +27,8 @@ from ..stt_terms import normalize_stt_terms_with_map, restore_quote
 from .evaluator_lookup_call import call_with_lookup
 from .evaluator_input import EvaluationInput, all_snippets, build_messages, cited_sources, source_refs  # noqa: F401
 from .evaluator_output_models import (CoveredPoint, EvaluatorOutput, EvaluatorOutputV4, RawBands,  # noqa: F401
-                                      SourcedCoveredPoint, EvaluatorOutputV9, uses_policy, uses_sources)
+                                      SourcedCoveredPoint, EvaluatorOutputV9, EvaluatorOutputV10, uses_policy,
+                                      uses_replan, uses_sources)
 
 log = logging.getLogger("ai_service.evaluator")
 DEFAULT_PROMPT_VERSION = "v8"
@@ -123,13 +124,15 @@ class LlmEvaluator:
         try:
             sourced = uses_sources(self._prompt.version)
             policy = uses_policy(self._prompt.version)  # v9: dau ra them de xuat hanh dong; dau vao them policy_context
-            schema = EvaluatorOutputV9 if policy else EvaluatorOutputV4 if sourced else EvaluatorOutput
+            replan = uses_replan(self._prompt.version)  # v10: dau ra them swap; dau vao them replan_context (khi co)
+            schema = EvaluatorOutputV10 if replan else EvaluatorOutputV9 if policy else \
+                EvaluatorOutputV4 if sourced else EvaluatorOutput
             if inp.lookup is not None and sourced:  # phase 03: 1 ngan sach 10 s cho vong lap tra cuu + fallback
                 result, inp = await call_with_lookup(
-                    self._gateway, self.agent, self._prompt.text, lambda text, i: build_messages(text, i, True, policy),
+                    self._gateway, self.agent, self._prompt.text, lambda text, i: build_messages(text, i, True, policy, replan),
                     schema, self._prompt.version, inp, collector, started)
             else:
-                result = await self._gateway.complete(self.agent, build_messages(self._prompt.text, inp, sourced, policy),
+                result = await self._gateway.complete(self.agent, build_messages(self._prompt.text, inp, sourced, policy, replan),
                                                       schema, prompt_version=self._prompt.version,
                                                       collector=collector)
         except (LlmError, ConfigError, openai.APIError) as err:  # openai.APIError: loi API con lai sau khi het retry
