@@ -69,6 +69,7 @@ class ChatCall:
             timeout_s = min(timeout_s, max(budget_s, 0.0))
         if timeout_cap is not None:
             timeout_s = min(timeout_s, max(timeout_cap, 0.0))
+            budget_s = timeout_cap if budget_s is None else min(budget_s, timeout_cap)  # retry o lai trong buoc
         resp, attempts = await self.gw._retry(lambda: self.gw.client.chat.completions.create(**params),
                                               timeout_s, budget_s, hedge_after_s)
         self.calls += attempts

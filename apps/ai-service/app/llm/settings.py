@@ -3,6 +3,7 @@ import math
 import os
 from dataclasses import dataclass
 from typing import Mapping, Optional
+from urllib.parse import urlparse
 
 from dotenv import load_dotenv
 
@@ -115,3 +116,14 @@ def reasoning_body(level: Optional[str]) -> dict:
     if level is None:
         return {}
     return {"extra_body": {"reasoning": {"enabled": False} if level == "off" else {"effort": level}}}
+
+
+def merge_extra_body(base: dict, extra: dict) -> None:
+    """Gop `extra` vao base["extra_body"] (giu khoa da co, vd reasoning)."""
+    base["extra_body"] = {**base.get("extra_body", {}), **extra}
+
+
+def is_openrouter(base_url: str) -> bool:
+    """`provider.require_parameters` chi OpenRouter hieu; endpoint OpenAI goc se bao loi tham so la."""
+    host = (urlparse(base_url or "").hostname or "").lower()
+    return host == "openrouter.ai" or host.endswith(".openrouter.ai")

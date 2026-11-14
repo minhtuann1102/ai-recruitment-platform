@@ -6,7 +6,7 @@
   `tests/fakes/fake_llm.py:29-31`, `docs/ai-service/README.md` (A4), `docs/ai-service/06-api-contract.md:302` (first event ≤ 15 s)
 
 ## Overview
-- Priority: P1 (chặn 03). Status: pending. Nhánh: `thang/llm-tool-loop`. Effort 1,5d. Không phụ thuộc code 01 → song song.
+- Priority: P1 (chặn 03). Status: code done (fake LLM), live check [BLOCKED-KEY]. Nhánh: `thang/llm-tool-loop`. Effort 1,5d. Không phụ thuộc code 01 → song song.
 - Thư viện nội bộ, chưa agent nào dùng → không cờ hành vi. **Không làm split mode** (M2): combo không hỗ trợ → lỗi
   `tools_unsupported`, latch theo tiến trình, caller đi đường cũ không tools.
 
@@ -97,12 +97,14 @@ do caller (03); `run_tool` ném → log + `"error: tool_failed"`.
    `[ai-service] feat: vòng lặp tool calling trong LLM gateway`.
 
 ## Todo List
-- [ ] Refactor ChatCall (test cũ không sửa)
-- [ ] Ngân sách chung `cap_first`
-- [ ] Fake: tool_calls, 404, độ trễ
-- [ ] tool_loop + latch + usage/metrics/tracing
-- [ ] Test bước 5
-- [ ] Docs + decisions, PR
+- [x] Refactor ChatCall (test cũ không sửa)
+- [x] Ngân sách chung `cap_first`
+- [x] Fake: tool_calls, 404, độ trễ
+- [x] tool_loop + latch + usage/metrics/tracing
+- [x] Test bước 5
+- [x] Docs + decisions
+- [ ] PR (chưa mở, theo yêu cầu không push)
+- [ ] **[BLOCKED-KEY]** `complete_with_tools` thật (evaluator, tool giả) ra JSON hợp lệ; 404 thì latch hoạt động
 
 ## Success Criteria
 - `gateway.py` < 200 dòng; `test_llm_gateway.py` không đổi mà xanh.

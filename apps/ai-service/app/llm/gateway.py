@@ -47,18 +47,25 @@ class LlmGateway:
                                      hedge_after_s=hedge_after_s)
 
     async def complete(self, agent: str, messages: List[dict], schema: Optional[Type[BaseModel]] = None,
-                       *, prompt_version: str = "", collector: Optional[UsageCollector] = None) -> LlmResult:
+                       *, prompt_version: str = "", collector: Optional[UsageCollector] = None,
+                       budget_started: Optional[float] = None, budget_s: Optional[float] = None) -> LlmResult:
+        """`budget_started` (perf_counter) + `budget_s`: ngan sach dong ho chung voi buoc truoc cua cung luot; moi lan
+        goi, ke ca lan dau, bi cat theo phan du (het thi LlmTimeoutError). Khong truyen thi hanh vi cu."""
         cfg = agent_settings(agent, self.llm, self._env)
         with observation(agent, "generation", input=messages, **trace_fields(cfg, prompt_version)) as gen:
-            result = await self._complete(agent, cfg, messages, schema, prompt_version, collector)
+            result = await self._complete(agent, cfg, messages, schema, prompt_version, collector,
+                                          budget_started, budget_s)
             data = result.data
             gen.update(output=data.model_dump() if isinstance(data, BaseModel) else data, **trace_usage(result.record))
         return result
 
     async def _complete(self, agent: str, cfg, messages: List[dict], schema: Optional[Type[BaseModel]],
-                        prompt_version: str, collector: Optional[UsageCollector]) -> LlmResult:
+                        prompt_version: str, collector: Optional[UsageCollector],
+                        budget_started: Optional[float] = None, budget_s: Optional[float] = None) -> LlmResult:
         rec, started = CallRecord(agent, cfg.model, prompt_version=prompt_version), time.perf_counter()
-        chat = ChatCall(self, cfg, request_base(cfg, schema, self.llm), rec, started)
+        capped = budget_started is not None
+        chat = ChatCall(self, cfg, request_base(cfg, schema, self.llm), rec,
+                        budget_started if capped else started, budget_s=budget_s, cap_first=capped)
         content = await chat.text(messages)
         data = await parse_or_repair(chat, schema, messages, content, rec)
         rec.attempts, rec.latency_ms = chat.calls, int((time.perf_counter() - started) * 1000)

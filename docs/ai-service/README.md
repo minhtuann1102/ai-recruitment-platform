@@ -52,7 +52,7 @@ Repo đã chốt stack và LLM provider nên tài liệu không đặt câu hỏ
 | A1 | LLM provider | API **OpenAI-compatible**, cấu hình qua `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`; mặc định OpenRouter | Constitution IV; `apps/ai-service/app/config.py` (nhánh `feat/aie`) |
 | A2 | Model mặc định | `gpt-4o-mini` cho mọi agent; **override riêng từng agent bằng env** (§9) | Constitution IV, [rag-design.md](../architecture/rag-design.md) ¹ |
 | A3 | Embedding / RAG | `text-embedding-3-small` (1536 dims), pgvector `knowledge_chunks`; chỉ dùng `interview_qa` + `textbook`, **JD không vào RAG** (JD chỉ vào Planner, xem A11) | rag-design.md ¹; quyết định của team 2026-10-15 |
-| A4 | ai-service | Python FastAPI, Pydantic v2, `openai` SDK. **Không dùng LangGraph/agent framework**: state machine tự viết | Constitution VII (KISS) |
+| A4 | ai-service | Python FastAPI, Pydantic v2, `openai` SDK. **Không dùng LangGraph/agent framework**: state machine tự viết; vòng lặp tool calling tự viết trên tool calling của SDK `openai` (`app/llm/tool_loop.py`, từ 2026-11-14) | Constitution VII (KISS) |
 | A5 | Quyền sở hữu dữ liệu | interview-service sở hữu toàn bộ dữ liệu phỏng vấn; ai-service không lưu phiên | ADR-004, constitution IV |
 | A6 | Transport | REST giữa interview-service ↔ ai-service; streaming bằng **SSE** | ADR-003 |
 | A7 | Ngôn ngữ | Phỏng vấn tiếng Việt, giữ thuật ngữ tiếng Anh | rag-design.md §9 ¹ |

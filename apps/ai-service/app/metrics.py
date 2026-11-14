@@ -36,6 +36,9 @@ AGENT_CALLS = Counter("ai_agent_calls", "Lan goi agent; fallback=none la chay bi
 AGENT_LATENCY = Histogram("ai_agent_latency_seconds", "Do tre mot lan goi LLM cua agent", ["agent"], buckets=_SLOW)
 TOKENS = Counter("ai_tokens", "Token theo agent; kind = input / output / cached (phan input doc tu cache)",
                  ["agent", "kind"])
+TOOL_CALLS = Counter("ai_llm_tool_calls", "Lan agent goi cong cu trong vong lap tool calling cua gateway", ["agent"])
+TOOLS_UNSUPPORTED = Counter("ai_llm_tools_unsupported", "Lan model/provider tu choi tools + JSON strict (latch theo "
+                            "tien trinh: cac luot sau khong thu lai)")
 RAG = Counter("ai_rag_requests", "Trang thai RAG bao trong metadata cua request co dung RAG", ["status"])
 RAG_ERRORS = Counter("ai_rag_errors", "Ma loi RAG trong request (rag_timeout, rag_db_error...)", ["code"])
 TURNS = Counter("ai_turns", "Ket qua cham moi luot next-turn stream xong (luot wrap-up khong cham thi khong dem): "
@@ -64,6 +67,8 @@ def record_request(endpoint: str, status: str, error: str, seconds: float, colle
         AGENT_CALLS.labels(r.agent, r.fallback or "none").inc()
         if r.latency_ms:
             AGENT_LATENCY.labels(r.agent).observe(r.latency_ms / 1000)
+        if r.tool_calls:
+            TOOL_CALLS.labels(r.agent).inc(r.tool_calls)
         for kind, n in (("input", r.input_tokens), ("output", r.output_tokens), ("cached", r.cached_tokens)):
             if n:
                 TOKENS.labels(r.agent, kind).inc(n)
@@ -71,6 +76,11 @@ def record_request(endpoint: str, status: str, error: str, seconds: float, colle
         RAG.labels(rag).inc()
     for code in collector.rag_errors:
         RAG_ERRORS.labels(code).inc()
+
+
+@_safe
+def record_tools_unsupported() -> None:
+    TOOLS_UNSUPPORTED.inc()
 
 
 @_safe

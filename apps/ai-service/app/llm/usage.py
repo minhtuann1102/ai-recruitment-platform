@@ -42,6 +42,8 @@ class UsageCollector:
             u["input_tokens"] += r.input_tokens
             u["output_tokens"] += r.output_tokens
             u["cached_tokens"] += r.cached_tokens
+            if r.tool_calls:  # chi them khi agent that su goi cong cu: response cu khong doi hinh dang
+                u["tool_calls"] = u.get("tool_calls", 0) + r.tool_calls
             latency[r.agent] = latency.get(r.agent, 0) + r.latency_ms
         latency["total"] = sum(r.latency_ms for r in self.records)
         return {
