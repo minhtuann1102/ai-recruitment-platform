@@ -1,7 +1,7 @@
 # Agentic ai-service: runbook đo, bảng rollout, kết quả (phase 06)
 
 - Ngày soạn: 2026-11-14. Kế hoạch: `plans/261114-1549-agentic-ai-service/`. Mốc: `plans/reports/aie-reply-261114-1448-agentic-ai-service.md` mục 8 (đề xuất AIE, **nhóm chưa thống nhất**).
-- **Trạng thái: chưa có số đo nào.** Khóa OpenRouter hết hạn (401 "API key expired"), nên mọi bước [BLOCKED-KEY] dưới đây chưa chạy. Không số nào trong file này là số đo; bảng kết quả (mục 4) để trống.
+- **Trạng thái (đo 2026-11-14/15, commit `9444594`): đo được một phần.** Khóa mới chạy được gate Evaluator (bước 7, 8, 11, 14, 17), probe (bước 1), sim C0 và C1 (3 run, full) và `ttft_breakdown`. Giữa sim C2 thì OpenRouter **hết credit (HTTP 402)**: C2 bị nhiễm (76/87 phiên lỗi, bỏ), C3/C4/C5/skewed không có phiên nào. Còn chặn [BLOCKED-CREDIT]: `judge_support`, C2-C5, skewed, `/api/start` C3/C4, đọc notes. Dữ liệu thô ở máy người đo, không commit: `plans/reports/agentic-measure/` (sim 6-7 MB/file, có hội thoại persona).
 - Không đổi mặc định nào. Cờ nào cũng giữ tắt cho đến khi bảng mục 4 được điền và owner duyệt.
 
 ## 1. Quy ước chạy
@@ -23,41 +23,41 @@ Biến cấu hình cho 6 cấu hình ma trận (C0 là baseline; các biến kh�
 | C4 + replan | C3 + `REPLAN_ENABLED=true` |
 | C5 + notes (tùy chọn) | C4 + `AGENT_NOTES_ENABLED=true` |
 
-## 2. Lệnh đo theo phase (tất cả [BLOCKED-KEY])
+## 2. Lệnh đo theo phase
 
 Đặt `D=$(date +%y%m%d)`; file ra ở `plans/reports/`.
 
 ### Phase 01: probe, baseline, hiệu chỉnh ngưỡng
-1. [BLOCKED-KEY] Probe tool calling + JSON strict: `python -m scripts.probe_tool_strict_json --out ../../plans/reports/probe-$D-tool-strict-json.md`. Ghi provider, `require_parameters`, lỗi 404/400 (nếu có). Không hỗ trợ: latch `tools_unsupported`, lượt chấm như cũ.
-2. [BLOCKED-KEY] Baseline C0, 4 run: `$LLM python -m evals.simulate --matrix full --simulator llm --serve --runs 4 --out ../../plans/reports/eval-sim-$D-c0.json`. Lấy stdev gộp, gap strong-weak (mốc 3,74), `end_reasons`.
-3. [BLOCKED-KEY] TTFT baseline: `python -m evals.ttft_breakdown ../../plans/reports/eval-sim-$D-c0.json`.
-4. [BLOCKED-KEY] `judge_support` 3 lần, tách câu AI và câu kho: `python -m evals.judge_support ../../plans/reports/eval-sim-$D-c0.json --control --triage --out ../../plans/reports/eval-$D-judge-c0-<k>.json` (k = 1..3; trung bình).
-5. [BLOCKED-KEY] Hiệu chỉnh `WEAK_BELOW`/`STRONG_FROM` (hiện 1,5 / 3,0 là giả định) trên tập A (nửa lượt từ baseline), kiểm trên tập B; owner duyệt rồi mới sửa `app/policy.py`, ghi "đo <ngày>, tạm thời". Hỏi owner có hiệu chỉnh cả `STRONG_BAND/WEAK_BAND` (`state_update.py`) không.
+1. [ĐÃ ĐO 2026-11-14] Probe tool calling + JSON strict: `python -m scripts.probe_tool_strict_json --out ../../plans/reports/probe-$D-tool-strict-json.md`. Ghi provider, `require_parameters`, lỗi 404/400 (nếu có). Không hỗ trợ: latch `tools_unsupported`, lượt chấm như cũ.
+2. [ĐÃ ĐO 2026-11-14] Baseline C0, 4 run: `$LLM python -m evals.simulate --matrix full --simulator llm --serve --runs 4 --out ../../plans/reports/eval-sim-$D-c0.json`. Lấy stdev gộp, gap strong-weak (mốc 3,74), `end_reasons`.
+3. [ĐÃ ĐO 2026-11-14] TTFT baseline: `python -m evals.ttft_breakdown ../../plans/reports/eval-sim-$D-c0.json`.
+4. [BLOCKED-CREDIT] `judge_support` 3 lần, tách câu AI và câu kho: `python -m evals.judge_support ../../plans/reports/eval-sim-$D-c0.json --control --triage --out ../../plans/reports/eval-$D-judge-c0-<k>.json` (k = 1..3; trung bình).
+5. [BLOCKED-CREDIT] Hiệu chỉnh `WEAK_BELOW`/`STRONG_FROM` (hiện 1,5 / 3,0 là giả định) trên tập A (nửa lượt từ baseline), kiểm trên tập B; owner duyệt rồi mới sửa `app/policy.py`, ghi "đo <ngày>, tạm thời". Hỏi owner có hiệu chỉnh cả `STRONG_BAND/WEAK_BAND` (`state_update.py`) không.
 
 ### Phase 03: `EVALUATOR_TOOLS`
-6. [BLOCKED-KEY] Độ đúng `supported`: chạy sim C0 và C1 như bước 2 (`--runs 2` đủ), rồi `judge_support` 3 lần cho mỗi file như bước 4. So độ đúng câu AI (mốc 0,53) và câu kho (0,71).
-7. [BLOCKED-KEY] Band golden và holdout: `EVALUATOR_TOOLS=true $LLM python -m evals.run_evaluator --set main --lookup --runs 3`; cùng lệnh với `--set holdout`; so với chạy không `--lookup`.
-8. [BLOCKED-KEY] Trích nguồn sai id: `python -m evals.run_evaluator_sourced --runs 3` rồi `--lookup --runs 3`.
-9. [BLOCKED-KEY] TTFT và tool-call: sim C1 `--serve --runs 2`, rồi `ttft_breakdown` (cột `lookup`, `evaluator_lookup_fallback`) và `summary.evaluator_lookup` (`lookup_rate`, `misconception_rate`, `ta_le1_rate`, `lookup_fallback`).
-10. [BLOCKED-KEY] [DE] Scenario: lặp 6-9 với `RAG_TEXTBOOK_ENABLED=true` sau khi DE nạp textbook (scenario java/nodejs).
+6. [BLOCKED-CREDIT] Độ đúng `supported`: chạy sim C0 và C1 như bước 2 (`--runs 2` đủ), rồi `judge_support` 3 lần cho mỗi file như bước 4. So độ đúng câu AI (mốc 0,53) và câu kho (0,71).
+7. [ĐÃ ĐO 2026-11-14] Band golden và holdout: `EVALUATOR_TOOLS=true $LLM python -m evals.run_evaluator --set main --lookup --runs 3`; cùng lệnh với `--set holdout`; so với chạy không `--lookup`.
+8. [ĐÃ ĐO 2026-11-14] Trích nguồn sai id: `python -m evals.run_evaluator_sourced --runs 3` rồi `--lookup --runs 3`.
+9. [ĐÃ ĐO 2026-11-14] TTFT và tool-call: sim C1 `--serve --runs 2`, rồi `ttft_breakdown` (cột `lookup`, `evaluator_lookup_fallback`) và `summary.evaluator_lookup` (`lookup_rate`, `misconception_rate`, `ta_le1_rate`, `lookup_fallback`).
+10. [BLOCKED-CREDIT] [DE] Scenario: lặp 6-9 với `RAG_TEXTBOOK_ENABLED=true` sau khi DE nạp textbook (scenario java/nodejs).
 
 ### Phase 04: `POLICY_MODE=hybrid`
-11. [BLOCKED-KEY] Gate chấm v9 vs v8: `python -m evals.run_evaluator --set main --prompt v8 --policy-context default --runs 3` và `--prompt v9`; cùng với `--set holdout`; `run_evaluator_sourced --prompt v8|v9 --policy-context default --runs 3`.
-12. [BLOCKED-KEY] Sim C0 vs C2, 3 run mỗi bên (`--matrix full --simulator llm --serve --runs 3`). Lấy `pooled` (stdev gộp persona lõi, CI), `hybrid_policy.overrule_rate_llm`, gap, TTFT P50.
-13. Injection: unit test `tests/test_policy_hybrid*.py` đã có và chạy không cần khóa. Phần [BLOCKED-KEY]: đọc lượt của persona adversarial trong file sim C2 (`turns[].decided_by`, `overrule_reason`): lượt injection phải `forced` hoặc bị bác `sensitive_kind`, không có `decided_by = llm` đổi hành động.
+11. [ĐÃ ĐO 2026-11-14] Gate chấm v9 vs v8: `python -m evals.run_evaluator --set main --prompt v8 --policy-context default --runs 3` và `--prompt v9`; cùng với `--set holdout`; `run_evaluator_sourced --prompt v8|v9 --policy-context default --runs 3`.
+12. [BLOCKED-CREDIT] Sim C0 vs C2, 3 run mỗi bên (`--matrix full --simulator llm --serve --runs 3`). Lấy `pooled` (stdev gộp persona lõi, CI), `hybrid_policy.overrule_rate_llm`, gap, TTFT P50.
+13. Injection: unit test `tests/test_policy_hybrid*.py` đã có và chạy không cần khóa. Phần [BLOCKED-CREDIT]: đọc lượt của persona adversarial trong file sim C2 (`turns[].decided_by`, `overrule_reason`): lượt injection phải `forced` hoặc bị bác `sensitive_kind`, không có `decided_by = llm` đổi hành động.
 
 ### Phase 05: `REPLAN_ENABLED` (và FSD)
-14. [BLOCKED-KEY] Gate v10 vs v8: `run_evaluator --set main|holdout --prompt v10 --policy-context default --runs 3` so v8; `run_evaluator_sourced --prompt v10 --policy-context default`.
-15. [BLOCKED-KEY] Sim `skewed` (JD + CV giả) và full, C3 vs C4: `$LLM <env> python -m evals.simulate --matrix skewed --simulator llm --serve --runs 3` và `--matrix full`. `summary.replan`: `swap_rate`, `jd_assessed_rate`, `scored_topics`, `jd_priority_violations` (sim thoát mã 1 nếu > 0).
-16. [BLOCKED-KEY] `/api/start` P95: không có script riêng; mỗi phiên trong file sim có `calls[]` với phần tử `path == "start"` (`total_s`). Lấy P95 gộp mọi run: `python -c "import json,sys; from evals.cost_latency import percentile as p; d=json.load(open(sys.argv[1])); s=d.get('sessions') or d; print(p([c['total_s'] for x in (s.values() if isinstance(s,dict) else s) for c in x.get('calls',[]) if c.get('path')=='start'],95))" <file.json>"` cho C3 và C4 (lệnh đã chạy thử trên file sim cũ, không cần khóa).
+14. [ĐÃ ĐO 2026-11-14] Gate v10 vs v8: `run_evaluator --set main|holdout --prompt v10 --policy-context default --runs 3` so v8; `run_evaluator_sourced --prompt v10 --policy-context default`.
+15. [BLOCKED-CREDIT] Sim `skewed` (JD + CV giả) và full, C3 vs C4: `$LLM <env> python -m evals.simulate --matrix skewed --simulator llm --serve --runs 3` và `--matrix full`. `summary.replan`: `swap_rate`, `jd_assessed_rate`, `scored_topics`, `jd_priority_violations` (sim thoát mã 1 nếu > 0).
+16. [BLOCKED-CREDIT] `/api/start` P95: không có script riêng; mỗi phiên trong file sim có `calls[]` với phần tử `path == "start"` (`total_s`). Lấy P95 gộp mọi run: `python -c "import json,sys; from evals.cost_latency import percentile as p; d=json.load(open(sys.argv[1])); s=d.get('sessions') or d; print(p([c['total_s'] for x in (s.values() if isinstance(s,dict) else s) for c in x.get('calls',[]) if c.get('path')=='start'],95))" <file.json>"` cho C3 và C4 (lệnh đã chạy thử trên file sim cũ, không cần khóa).
 
 ### Phase 07: `AGENT_NOTES_ENABLED` (tùy chọn)
-17. [BLOCKED-KEY] Gate chấm v11 vs v8: `run_evaluator --set main|holdout --prompt v11 --policy-context default --runs 3`, và `run_evaluator_sourced --prompt v11 --policy-context default`.
-18. [BLOCKED-KEY] Sim C4 vs C5, `--runs 3`: gap và stdev gộp không xấu hơn; `summary.notes.unsafe_notes` = 0 (sim thoát mã 1 nếu khác 0).
-19. [BLOCKED-KEY] Đọc tay 20 phiên có ghi chú từ file sim C5 (phiên + `state.notes`): đếm ghi chú đúng với hội thoại và ghi chú có thông tin cá nhân (kể cả tên người, nơi làm việc; `redact_pii` không bắt tên).
+17. [ĐÃ ĐO 2026-11-14] Gate chấm v11 vs v8: `run_evaluator --set main|holdout --prompt v11 --policy-context default --runs 3`, và `run_evaluator_sourced --prompt v11 --policy-context default`.
+18. [BLOCKED-CREDIT] Sim C4 vs C5, `--runs 3`: gap và stdev gộp không xấu hơn; `summary.notes.unsafe_notes` = 0 (sim thoát mã 1 nếu khác 0).
+19. [BLOCKED-CREDIT] Đọc tay 20 phiên có ghi chú từ file sim C5 (phiên + `state.notes`): đếm ghi chú đúng với hội thoại và ghi chú có thông tin cá nhân (kể cả tên người, nơi làm việc; `redact_pii` không bắt tên).
 
 ### Phase 06: ma trận kết hợp
-20. [BLOCKED-KEY] C0..C5 mỗi cấu hình `--matrix full --simulator llm --serve --runs 3`, cùng ngày; `ttft_breakdown` trên từng file. Kiểm cấu hình kết hợp vẫn đạt TTFT toàn phiên P95 +≤ 0,3 s so C0.
+20. [BLOCKED-CREDIT] C0..C5 mỗi cấu hình `--matrix full --simulator llm --serve --runs 3`, cùng ngày; `ttft_breakdown` trên từng file. Kiểm cấu hình kết hợp vẫn đạt TTFT toàn phiên P95 +≤ 0,3 s so C0.
 
 ## 3. Mốc và cổng (từ reply mục 8; chưa chốt giữa nhóm)
 
@@ -70,30 +70,46 @@ Biến cấu hình cho 6 cấu hình ma trận (C0 là baseline; các biến kh�
 
 Ghi chú: "overrule" dùng `overrule_rate_llm` (bỏ lượt `sensitive_kind`); chờ owner xác nhận dùng số này hay tỷ lệ đầy đủ.
 
-## 4. Bảng kết quả (điền sau khi có khóa; đang trống)
+## 4. Bảng kết quả (đo một phần)
 
-Điền: ngày đo, commit, số bản ghi `knowledge_chunks`, cấu hình.
+Ngày đo 2026-11-14/15, commit `9444594`, 29 persona × 3 run, `--serve`, chạy tuần tự (pooler Supabase 15 client, `maxconn=0` mọi bước). Số `knowledge_chunks` chưa ghi. C2-C5: [BLOCKED-CREDIT].
 
-| Chỉ số | Mốc | C0 | C1 | C2 | C3 | C4 | C5 | Đạt? |
-|---|---|---|---|---|---|---|---|---|
-| Ngày / commit / số chunk | – | | | | | | | |
-| TTFT P95 lượt tra cứu (s) | ≤ 7,5 | n/a | | n/a | | | | |
-| TTFT P95 toàn phiên, tăng so C0 (s) | ≤ 0,3 | – | | | | | | |
-| TTFT P50 tăng so C0 (s, hybrid) | ≤ 0,5 | – | n/a | | | | | |
-| Tỷ lệ gọi công cụ (lượt không `R`) | ≤ 30% | n/a | | n/a | | | | |
-| Độ đúng `supported`, câu AI | ≥ 0,65 (0,53) | | | | | | | |
-| Độ đúng `supported`, câu kho | ≥ 0,71 | | | | | | | |
-| Band agreement golden / holdout | không giảm | | | | | | | |
-| Trích nguồn sai id | không tăng | | | | | | | |
-| `misconception_rate`, `ta_le1_rate` | không tăng | | | | | | | |
-| `overrule_rate_llm` | ≤ 15% | n/a | n/a | | | | | |
-| Stdev gộp (/10), tỷ số so C0 | ≤ 1,2× và ≤ 0,5 | | | | | | | |
-| Gap strong − weak | giảm ≤ 10% (3,74) | | | | | | | |
-| `jd_priority_violations` | = 0 | n/a | n/a | n/a | n/a | | | |
-| Độ phủ JD (`skewed`) | không giảm | | | | | | | |
-| `/api/start` P95 tăng (s) | ≤ 0,5 | – | | | | | | |
-| `unsafe_notes` | = 0 | n/a | n/a | n/a | n/a | n/a | | |
-| Ghi chú đọc tay đúng / có PII | ≥ 85% / 0 | n/a | n/a | n/a | n/a | n/a | | |
+| Chỉ số | Mốc | C0 | C1 | C2-C5 | Đạt? |
+|---|---|---|---|---|---|
+| TTFT P95 lượt tra cứu (s) | ≤ 7,5 | n/a | **9,65** (P50 7,41; 132 lượt) | – | **C1 trượt** |
+| TTFT P95 toàn phiên (s), tăng so C0 | ≤ +0,3 | 6,84 | 8,71 (**+1,86**) | – | **C1 trượt** |
+| TTFT P50 toàn phiên (s) | – | 4,78 | 4,95 | – | |
+| Tỷ lệ gọi công cụ (lượt đủ điều kiện) | ≤ 30% | 0 | **37,6%** (132/351) | – | **C1 trượt** |
+| Lượt Evaluator mock (degraded) | – | 3 | **20** + 17 `evaluator_lookup_fallback` | – | C1 xấu hơn |
+| Độ đúng `supported` câu AI / kho | ≥ 0,65 / ≥ 0,71 | [BLOCKED-CREDIT] | [BLOCKED-CREDIT] | – | chưa đo |
+| Band golden (main): within1 / mae | không giảm | v8 0,961 / 0,547 | `--lookup` 0,950 / 0,632 | – | lookup giảm nhẹ |
+| Trích nguồn sai id (main / holdout) | không tăng | 0 / 0 | **31 / 43** | – | **C1 trượt** |
+| `misconception_rate`, `ta_le1_rate` | không tăng | 0,072 / 0,394 | 0,048 / 0,389 | – | đạt |
+| Stdev gộp (/10), CI95 | ≤ 1,2× và ≤ 0,5 | 0,353 [0,28; 0,42] | 0,471 (1,33×) | – | C1 vượt 1,2× (cổng này chỉ áp cho hybrid) |
+| Gap strong − weak | giảm ≤ 10% | 4,19 (mốc cũ 3,74) | 3,98 (−5%) | – | đạt |
+| `/api/start` P95 (s) | tăng ≤ 0,5 (C3→C4) | 12,5 | 11,2 | [BLOCKED-CREDIT] | chưa đo |
+| Chi phí TB / phiên (USD, giá giả định) | – | 0,0104 | 0,0112 | – | |
+| `overrule_rate_llm`, `jd_priority_violations`, `unsafe_notes`, notes đọc tay | xem mục 3 | n/a | n/a | [BLOCKED-CREDIT] | chưa đo |
+
+Gate prompt Evaluator (`run_evaluator`, 3 run; main có nhãn, holdout chưa nhãn nên chỉ có consistency/ordering):
+
+| Prompt | main within1 / mae / bias | type acc | evidence_valid | sourced: `supported` P/R, `contradicted` R, id sai | holdout ordering / std / degraded |
+|---|---|---|---|---|---|
+| v8 | 0,961 / 0,547 / −0,28 | 0,953 | 0,99 | 0,98/0,79, 0,57, 0 | 0,75 / 0,034 / 3 |
+| v8 + policy-context | 0,967 / 0,541 / −0,25 | 0,977 | 0,99 | 0,97/0,77, 0,50, 0 | 0,75 / 0,041 / 3 |
+| v9 + pc (hybrid) | 0,948 / 0,585 / −0,31 | 0,977 | 0,962 | 0,98/0,84, 0,60, 0 | 0,80 / 0,082 / 2 |
+| v10 + pc (replan) | 0,953 / 0,580 / −0,24 | 0,953 | 0,963 | 1,00/0,81, 0,60, 0 | 0,75 / 0,033 / **16** |
+| v11 + pc (notes) | 0,967 / 0,547 / −0,30 | 0,953 | 0,959 | 0,91/0,87, 0,67, **9** | 0,80 / 0,035 / 1 |
+| v8 `--lookup` | 0,950 / 0,632 / −0,35 | 0,930 | 0,977 | 0,77/0,76, 0,40, 0 | 0,75 / 0,041 / 4 |
+
+Đánh giá: v9/v10 trong nhiễu so v8 (within1 −0,01, `evidence_valid` −0,03): coi là đạt sơ bộ, chờ owner chốt "không giảm" có dung sai. v11 sourced có 9 id sai (chạy song song, 1 run degraded) cần chạy lại khi có credit. Holdout v10 có 16 run degraded (chưa rõ nguyên nhân, log không có 402/EMAXCONN): chạy lại.
+
+### 4b. Phát hiện: vòng tra cứu bị cắt ở bước đầu
+
+- `loop_failed` 66/144 (main) và 19/60 (holdout) trên bản chạy tuần tự sạch, log đều `evaluator_lookup_fallback reason=LlmTimeoutError remaining_s≈6,5`.
+- Nguyên nhân: bước đầu (`tool_choice=auto`) bị cắt ở `EVALUATOR_TOOL_DEADLINE_S + FINAL_RESERVE_S` = 2,0 + 1,5 = 3,5 s (`app/llm/tool_loop.py`, `step_until`), trong khi Evaluator viết JSON không gọi tool mất P50 3,65 s / P95 5,6 s (C0). Khoảng nửa số lượt model trả lời thẳng vẫn bị cắt, rồi chấm lại không tools: lượt mất ~3,5 s + một lần chấm, giải thích TTFT P95 lượt tra cứu 9,65 s và mock tăng 3 → 20.
+- Sửa đề xuất (chưa làm, cần đo lại): chỉ áp hạn bước tool cho bước có tool call; bước đầu được dùng tới ngân sách còn lại trừ `FINAL_RESERVE_S`, hoặc nâng `EVALUATOR_TOOL_DEADLINE_S` mặc định. Id sai 31/43 nhiều khả năng cũng do model trích `S*` của chunk tra cứu ở lượt bị fallback, cần kiểm khi sửa.
+- Kết luận hiện tại: **`EVALUATOR_TOOLS` giữ tắt.**
 
 ## 5. Bảng rollout
 
@@ -110,7 +126,9 @@ Thứ tự bật đề xuất khi đạt cổng: `EVALUATOR_TOOLS`, rồi `POLIC
 
 ## 6. Việc mở
 
-- [BLOCKED-KEY]: bước 1-20 mục 2.
+- Đã chạy: bước 1, 2 (3 run thay vì 4), 3, 7, 8, 9, 11, 14, 17; bước 20 chỉ C0/C1.
+- [BLOCKED-CREDIT] (OpenRouter hết credit 2026-11-15 00:05): bước 4, 5, 6 (`judge_support`), 12, 13, 15, 16, 18, 19, 20 (C2-C5). Nạp credit rồi chạy lại tuần tự (`run_seq` một tiến trình một lúc); chạy lại cả gate holdout v10 và sourced v11.
+- Sửa hạn bước đầu vòng tra cứu (mục 4b), rồi đo lại C1.
 - [DE]: textbook scenario java/nodejs (bước 10).
 - Owner: duyệt hiệu chỉnh ngưỡng; chốt mốc mục 3 (gồm stdev gộp); `overrule_rate_llm` hay tỷ lệ đầy đủ; bật cờ nào mặc định.
 - FSD: xem `docs/ai-service/06-api-contract.md` mục "Thông báo gộp cho FSD".

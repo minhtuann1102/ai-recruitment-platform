@@ -22,20 +22,20 @@ Evaluator. `forced_transition`, `low_performance_stop`, turn cap đứng trên L
 
 | # | Phase | Cờ | Effort | Phụ thuộc | Status |
 |---|---|---|---|---|---|
-| 01 | [Chuẩn bị: probe, ngưỡng, mốc, eval tooling, scenario `System Design`](phase-01-prep-calibration-probe-eval-tooling.md) | – | 2d | khóa API (bước live) | code xong, đo [BLOCKED-KEY] |
-| 02 | [Vòng lặp công cụ trong gateway](phase-02-gateway-tool-loop.md) | – (thư viện) | 1,5d | không (song song 01) | xong (probe live [BLOCKED-KEY]) |
-| 03 | [Evaluator tự tra cứu](phase-03-evaluator-knowledge-lookup.md) | `EVALUATOR_TOOLS` | 2d | 02; DE docs (đo scenario) | code xong, đo [BLOCKED-KEY] |
-| 04 | [Policy lai](phase-04-hybrid-policy.md) | `POLICY_MODE=rules\|hybrid` | 2d | 01 (ngưỡng, `--runs`); 03 (cùng file) | code xong, đo [BLOCKED-KEY] |
-| 05 | [Lập lại kế hoạch giữa buổi (gated)](phase-05-mid-session-replanning.md) | `REPLAN_ENABLED` | 3d | 04; **FSD** | code xong, cờ giữ tắt chờ FSD, đo [BLOCKED-KEY] |
-| 06 | [Đo tổng, quyết bật mặc định, docs](phase-06-measurement-rollout-and-docs.md) | – | 0,5d | 03–05 + khóa | docs + runbook xong; đo + quyết mặc định [BLOCKED-KEY] |
-| 07 | [Ghi chú agent (tùy chọn)](phase-07-optional-agent-notes.md) | `AGENT_NOTES_ENABLED` | 1d | 04 đã đo đạt mốc | code xong, cờ giữ tắt, đo [BLOCKED-KEY] |
+| 01 | [Chuẩn bị: probe, ngưỡng, mốc, eval tooling, scenario `System Design`](phase-01-prep-calibration-probe-eval-tooling.md) | – | 2d | khóa API (bước live) | code xong; probe + baseline C0 đo 2026-11-14; `judge_support`, hiệu chỉnh ngưỡng [BLOCKED-CREDIT] |
+| 02 | [Vòng lặp công cụ trong gateway](phase-02-gateway-tool-loop.md) | – (thư viện) | 1,5d | không (song song 01) | xong; probe live 2026-11-14 (bỏ `parallel_tool_calls`, commit 9444594) |
+| 03 | [Evaluator tự tra cứu](phase-03-evaluator-knowledge-lookup.md) | `EVALUATOR_TOOLS` | 2d | 02; DE docs (đo scenario) | code xong; đo C1 2026-11-14: **trượt cổng TTFT, tool-call, id sai** (hạn bước đầu 3,5 s, runbook mục 4b); giữ tắt |
+| 04 | [Policy lai](phase-04-hybrid-policy.md) | `POLICY_MODE=rules\|hybrid` | 2d | 01 (ngưỡng, `--runs`); 03 (cùng file) | code xong; gate v9 đạt sơ bộ; sim C2 [BLOCKED-CREDIT] |
+| 05 | [Lập lại kế hoạch giữa buổi (gated)](phase-05-mid-session-replanning.md) | `REPLAN_ENABLED` | 3d | 04; **FSD** | code xong, cờ giữ tắt chờ FSD; gate v10 đạt sơ bộ (holdout chạy lại); sim [BLOCKED-CREDIT] |
+| 06 | [Đo tổng, quyết bật mặc định, docs](phase-06-measurement-rollout-and-docs.md) | – | 0,5d | 03–05 + khóa | docs + runbook xong; C0/C1 + gate prompt đã điền; C2-C5 [BLOCKED-CREDIT] |
+| 07 | [Ghi chú agent (tùy chọn)](phase-07-optional-agent-notes.md) | `AGENT_NOTES_ENABLED` | 1d | 04 đã đo đạt mốc | code xong, cờ giữ tắt; gate v11 cần chạy lại (9 id sai); sim [BLOCKED-CREDIT] |
 
 ```
 01 code ─┐        01 live (khóa) ──► 04 (ngưỡng)
 02 ──────┴──► 03 ──► 04 ──► 05 ──► 06        04 đạt mốc ──► 07 (tùy chọn)
 DE textbook ──► 03 đo scenario      FSD (lưu nguyên JSON, topic_id alt*, danh sách topic) ──► 05
 ```
-03/04 cùng sửa `agents/evaluator.py` → tuần tự. Bước gọi LLM thật: **[BLOCKED-KEY]**; code + test fake LLM làm trước.
+03/04 cùng sửa `agents/evaluator.py` → tuần tự. Bước gọi LLM thật: đo một phần 2026-11-14/15, phần còn lại **[BLOCKED-CREDIT]** (OpenRouter hết credit). Kết quả: `plans/reports/eval-261114-1807-agentic-rollout.md` mục 4.
 
 ## Quy trình mỗi phase
 Nhánh `thang/<feature>`; commit conventional tiếng Anh, không ghi công AI; PR `[ai-service] type: mô tả`; cùng PR sửa

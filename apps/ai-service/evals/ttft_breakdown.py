@@ -103,6 +103,11 @@ def breakdown(rows: List[Dict]) -> Dict:
     return out
 
 
+def _session_maps(data: Dict) -> List[Dict[str, Dict]]:
+    """File mot run co `sessions`; file `--runs N` co `sessions_by_run` (danh sach {persona: session})."""
+    return data["sessions_by_run"] if "sessions_by_run" in data else [data["sessions"]]
+
+
 def main(paths: List[str]) -> None:
     pooled: List[Dict] = []
     for p in paths:
@@ -111,7 +116,7 @@ def main(paths: List[str]) -> None:
         if run.get("base_url") in (None, "in-process"):
             print(f"{Path(p).name}: bo qua (in-process, ttft_s = total_s)")
             continue
-        rows = turn_rows(data["sessions"])
+        rows = [r for sessions in _session_maps(data) for r in turn_rows(sessions)]
         pooled += rows
         print(Path(p).name, json.dumps(breakdown(rows), ensure_ascii=False))
     if len(paths) > 1:
