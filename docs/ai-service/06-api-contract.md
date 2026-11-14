@@ -315,6 +315,8 @@ Giữ tên `start / next-turn / finalize` theo constitution IV; **nội dung** �
 | `ai_agent_calls_total` | `agent`, `fallback` (`none` hoặc mã fallback) | Lần gọi agent; tỉ lệ fallback = phần `fallback != "none"` |
 | `ai_agent_latency_seconds` | `agent` | Độ trễ một lần gọi LLM |
 | `ai_tokens_total` | `agent`, `kind` (input, output, cached) | Token; nhân với bảng giá để ra chi phí |
+| `ai_llm_tool_calls_total` | `agent` | Lần agent gọi công cụ trong vòng lặp tool calling (2026-11-14); 0 khi chưa agent nào bật |
+| `ai_llm_tools_unsupported_total` | không | Lần model/provider từ chối tools + JSON strict (latch theo tiến trình; ≥ 1 lần mỗi process vì các request đang chạy song song có thể cùng đếm) |
 | `ai_rag_requests_total`, `ai_rag_errors_total` | `status` / `code` | Trạng thái RAG trong `metadata.rag`, mã lỗi RAG |
 | `ai_turns_total` | `answer_source` (text, voice), `outcome` (`answer_type`, `degraded`, `low_confidence`) | Kết quả chấm mỗi lượt next-turn stream xong; lượt wrap-up không chấm thì không đếm |
 | `ai_http_responses_total` | `route` (mẫu route, lạ thì `other`), `code` | Mọi response, kể cả 401/422 bị chặn trước route và 500 lỗi ngoài dự kiến. SSE đếm 200 lúc gửi header; kết quả stream (lỗi, client ngắt) xem `ai_requests_total` |
@@ -511,6 +513,7 @@ trước khi chấm heuristic, thường ~10 s. Trước đó trường này là
 lần gọi Evaluator; `usage` chỉ tính token của request về trước, token của request bị hủy không có trong metadata.
 `metadata.usage.<agent>.cached_tokens` (2026-11-02): phần của `input_tokens` đọc từ prompt cache của provider. `0` khi không
 có cache hit hoặc provider không trả trường này.
+`metadata.usage.<agent>.tool_calls` (tùy chọn, 2026-11-14): số lần agent gọi công cụ trong lượt; chỉ có khi > 0, nên response không đổi khi tắt tool calling.
 
 `evaluation.prompt_version` (2026-11-02): bản prompt đã chấm lượt này, `null` khi không qua LLM (mock, luật code,
 `degraded`). `evaluation.reference_missing` (2026-11-02): `true` khi câu trong kho nhưng không lấy được đáp án chuẩn lúc

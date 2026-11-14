@@ -21,16 +21,27 @@ def reply(content: str, finish_reason: str = "stop", prompt_tokens: int = 10, co
         usage=usage or SimpleNamespace(prompt_tokens=prompt_tokens, completion_tokens=completion_tokens))
 
 
+def tool_reply(calls, prompt_tokens: int = 10, completion_tokens: int = 5):
+    """Luot model doi goi cong cu: content=None, finish_reason=tool_calls. calls: [(id, ten, chuoi JSON doi so)]."""
+    tool_calls = [SimpleNamespace(id=cid, type="function", function=SimpleNamespace(name=name, arguments=args))
+                  for cid, name, args in calls]
+    return SimpleNamespace(
+        choices=[SimpleNamespace(message=SimpleNamespace(content=None, tool_calls=tool_calls),
+                                 finish_reason="tool_calls")],
+        usage=SimpleNamespace(prompt_tokens=prompt_tokens, completion_tokens=completion_tokens))
+
+
 def embedding_reply(vectors: List[List[float]], prompt_tokens: int = 7):
     return SimpleNamespace(data=[SimpleNamespace(embedding=v) for v in vectors],
                            usage=SimpleNamespace(prompt_tokens=prompt_tokens))
 
 
-def status_error(status: int, headers: Dict[str, str] = None) -> openai.APIStatusError:
+def status_error(status: int, headers: Dict[str, str] = None, message: str = None) -> openai.APIStatusError:
     cls = {400: openai.BadRequestError, 401: openai.AuthenticationError, 403: openai.PermissionDeniedError,
+           404: openai.NotFoundError,
            429: openai.RateLimitError}.get(status, openai.InternalServerError)
     resp = httpx.Response(status, request=_REQ, headers=headers or {})
-    return cls(f"fake {status}", response=resp, body=None)
+    return cls(message or f"fake {status}", response=resp, body=None)
 
 
 def timeout_error() -> openai.APITimeoutError:

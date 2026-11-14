@@ -6,7 +6,7 @@
   `tests/fakes/fake_llm.py:29-31`, `docs/ai-service/README.md` (A4), `docs/ai-service/06-api-contract.md:302` (first event ≤ 15 s)
 
 ## Overview
-- Priority: P1 (chặn 03). Status: pending. Nhánh: `thang/llm-tool-loop`. Effort 1,5d. Không phụ thuộc code 01 → song song.
+- Priority: P1 (chặn 03). Status: code done (fake LLM), live check [BLOCKED-KEY]. Nhánh: `thang/llm-tool-loop`. Effort 1,5d. Không phụ thuộc code 01 → song song.
 - Thư viện nội bộ, chưa agent nào dùng → không cờ hành vi. **Không làm split mode** (M2): combo không hỗ trợ → lỗi
   `tools_unsupported`, latch theo tiến trình, caller đi đường cũ không tools.
 
@@ -97,18 +97,24 @@ do caller (03); `run_tool` ném → log + `"error: tool_failed"`.
    `[ai-service] feat: vòng lặp tool calling trong LLM gateway`.
 
 ## Todo List
-- [ ] Refactor ChatCall (test cũ không sửa)
-- [ ] Ngân sách chung `cap_first`
-- [ ] Fake: tool_calls, 404, độ trễ
-- [ ] tool_loop + latch + usage/metrics/tracing
-- [ ] Test bước 5
-- [ ] Docs + decisions, PR
+- [x] Refactor ChatCall (test cũ không sửa)
+- [x] Ngân sách chung `cap_first`
+- [x] Fake: tool_calls, 404, độ trễ
+- [x] tool_loop + latch + usage/metrics/tracing
+- [x] Test bước 5
+- [x] Docs + decisions
+- [ ] PR (chưa mở, theo yêu cầu không push)
+- [ ] **[BLOCKED-KEY]** `complete_with_tools` thật (evaluator, tool giả) ra JSON hợp lệ; 404 thì latch hoạt động
 
 ## Success Criteria
 - `gateway.py` < 200 dòng; `test_llm_gateway.py` không đổi mà xanh.
 - Với `budget_s=10`, mọi kịch bản fake kết thúc ≤ 10,5 s; mọi lỗi vòng lặp là `LlmError`.
 - Không agent dùng → output `/api/*` y hệt.
 - **[BLOCKED-KEY]** `complete_with_tools` thật (evaluator, tool giả) ra JSON hợp lệ; nếu 404 → latch hoạt động.
+
+## Known (review 2026-11-14, chấp nhận)
+- L5: message assistant của bước tool bỏ `content` đi kèm tool_calls. L6: tool_loop dùng `gw._env`, `gw._retry` (nội bộ).
+- Đã sửa sau review: H1 tool timeout, H2 hạn mức lệnh mỗi bước, M1 hạn bước tuyệt đối, M2 latch theo nội dung lỗi, M3 cắt kết quả, M4, L1-L4, L7.
 
 ## Risk Assessment
 - Combo không hỗ trợ → lookup không bao giờ chạy; 03 vẫn an toàn (đường cũ). Khi đó mở lại thiết kế (split) sau probe.

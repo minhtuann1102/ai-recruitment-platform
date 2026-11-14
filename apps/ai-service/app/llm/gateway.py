@@ -15,10 +15,10 @@ from openai import AsyncOpenAI
 from pydantic import BaseModel
 
 from ..tracing import observation
+from .chat_call import ChatCall, cached_tokens, parse_or_repair, request_base, trace_fields, trace_usage
 from .errors import LlmOutputError
 from .retry import call_with_retry
 from .settings import LlmSettings, agent_settings, load_llm_settings, reasoning_body
-from .structured_output import parse_output, repair_messages, response_format
 from .usage import CallRecord, UsageCollector
 
 log = logging.getLogger("ai_service.llm")
@@ -28,22 +28,6 @@ log = logging.getLogger("ai_service.llm")
 class LlmResult:
     data: Union[BaseModel, str]
     record: CallRecord
-
-
-def _trace_fields(cfg, prompt_version: str) -> dict:
-    return {"model": cfg.model, "version": prompt_version or None,
-            "model_parameters": {"temperature": cfg.temperature, "max_tokens": cfg.max_tokens}}
-
-
-def _trace_usage(rec: CallRecord) -> dict:
-    return {"usage_details": {"input": rec.input_tokens, "output": rec.output_tokens},
-            "metadata": {"attempts": rec.attempts, "repaired": rec.repaired, "fallback": rec.fallback,
-                         "cached_tokens": rec.cached_tokens}}
-
-
-def _cached_tokens(usage) -> int:
-    """Token input doc tu prompt cache; provider khong tra thi 0, nen 0 khong khang dinh la khong co cache."""
-    return getattr(getattr(usage, "prompt_tokens_details", None), "cached_tokens", 0) or 0
 
 
 def build_client(llm: LlmSettings) -> AsyncOpenAI:
@@ -63,60 +47,30 @@ class LlmGateway:
                                      hedge_after_s=hedge_after_s)
 
     async def complete(self, agent: str, messages: List[dict], schema: Optional[Type[BaseModel]] = None,
-                       *, prompt_version: str = "", collector: Optional[UsageCollector] = None) -> LlmResult:
+                       *, prompt_version: str = "", collector: Optional[UsageCollector] = None,
+                       budget_started: Optional[float] = None, budget_s: Optional[float] = None) -> LlmResult:
+        """`budget_started` (perf_counter) + `budget_s`: ngan sach dong ho chung voi buoc truoc cua cung luot; moi lan
+        goi, ke ca lan dau, bi cat theo phan du (het thi LlmTimeoutError). Khong truyen thi hanh vi cu."""
+        if (budget_started is None) != (budget_s is None):
+            raise ValueError("budget_started va budget_s phai di cung nhau")
         cfg = agent_settings(agent, self.llm, self._env)
-        with observation(agent, "generation", input=messages, **_trace_fields(cfg, prompt_version)) as gen:
-            result = await self._complete(agent, cfg, messages, schema, prompt_version, collector)
+        with observation(agent, "generation", input=messages, **trace_fields(cfg, prompt_version)) as gen:
+            result = await self._complete(agent, cfg, messages, schema, prompt_version, collector,
+                                          budget_started, budget_s)
             data = result.data
-            gen.update(output=data.model_dump() if isinstance(data, BaseModel) else data, **_trace_usage(result.record))
+            gen.update(output=data.model_dump() if isinstance(data, BaseModel) else data, **trace_usage(result.record))
         return result
 
     async def _complete(self, agent: str, cfg, messages: List[dict], schema: Optional[Type[BaseModel]],
-                        prompt_version: str, collector: Optional[UsageCollector]) -> LlmResult:
-        base = {"model": cfg.model, "temperature": cfg.temperature, "max_tokens": cfg.max_tokens,
-                "timeout": cfg.timeout_s}
-        if cfg.seed is not None:
-            base["seed"] = cfg.seed
-        base.update(reasoning_body(cfg.reasoning))
-        if schema is not None:
-            base["response_format"] = response_format(schema, self.llm.structured_outputs)
-        rec, calls, started = CallRecord(agent, cfg.model, prompt_version=prompt_version), 0, time.perf_counter()
-
-        async def chat(msgs: List[dict], **override):
-            nonlocal calls
-            params = {**base, **override, "messages": msgs}
-            timeout_s, budget_s = cfg.timeout_s, cfg.retry_budget_s
-            hedge_after_s = None if calls else cfg.hedge_after_s  # chi hedge lan goi dau, khong hedge repair / length
-            if calls and budget_s is not None:  # repair / length dung chung ngan sach voi lan goi dau
-                budget_s -= time.perf_counter() - started
-                timeout_s = min(timeout_s, max(budget_s, 0.0))
-            resp, attempts = await self._retry(lambda: self.client.chat.completions.create(**params),
-                                               timeout_s, budget_s, hedge_after_s)
-            calls += attempts
-            usage = getattr(resp, "usage", None)
-            rec.input_tokens += getattr(usage, "prompt_tokens", 0) or 0
-            rec.output_tokens += getattr(usage, "completion_tokens", 0) or 0
-            rec.cached_tokens += _cached_tokens(usage)
-            choice = resp.choices[0]
-            if choice.finish_reason == "length" and "max_tokens" not in override:
-                return await chat(msgs, **{**override, "max_tokens": int(cfg.max_tokens * 1.5)})
-            if choice.finish_reason == "length":
-                raise LlmOutputError("Output bi cat do gioi han max_tokens")
-            return choice.message.content or ""
-
-        content = await chat(messages)
-        data: Union[BaseModel, str] = content
-        if schema is not None:
-            try:
-                data = parse_output(schema, content)
-            except ValueError as err:  # gom ca pydantic.ValidationError
-                rec.repaired = True
-                fixed = await chat(repair_messages(messages, content, str(err)), temperature=0)
-                try:
-                    data = parse_output(schema, fixed)
-                except ValueError as err2:
-                    raise LlmOutputError(f"Dau ra khong hop le sau repair ({type(err2).__name__})") from err2
-        rec.attempts, rec.latency_ms = calls, int((time.perf_counter() - started) * 1000)
+                        prompt_version: str, collector: Optional[UsageCollector],
+                        budget_started: Optional[float] = None, budget_s: Optional[float] = None) -> LlmResult:
+        rec, started = CallRecord(agent, cfg.model, prompt_version=prompt_version), time.perf_counter()
+        capped = budget_started is not None
+        chat = ChatCall(self, cfg, request_base(cfg, schema, self.llm), rec,
+                        budget_started if capped else started, budget_s=budget_s, cap_first=capped)
+        content = await chat.text(messages)
+        data = await parse_or_repair(chat, schema, messages, content, rec)
+        rec.attempts, rec.latency_ms = chat.calls, int((time.perf_counter() - started) * 1000)
         log.info("llm_call agent=%s model=%s in=%d cached=%d out=%d ms=%d attempts=%d repaired=%s", agent, cfg.model,
                  rec.input_tokens, rec.cached_tokens, rec.output_tokens, rec.latency_ms, rec.attempts, rec.repaired)
         if self.llm.log_io:
@@ -135,7 +89,7 @@ class LlmGateway:
                   "stream_options": {"include_usage": True}, **reasoning_body(cfg.reasoning)}
         rec, started = CallRecord(agent, cfg.model, prompt_version=prompt_version), time.perf_counter()
         parts: List[str] = []
-        with observation(agent, "generation", input=messages, **_trace_fields(cfg, prompt_version)) as gen:
+        with observation(agent, "generation", input=messages, **trace_fields(cfg, prompt_version)) as gen:
             try:
                 resp, rec.attempts = await self._retry(lambda: self.client.chat.completions.create(**params),
                                                        cfg.timeout_s, cfg.retry_budget_s)
@@ -144,7 +98,7 @@ class LlmGateway:
                     if usage:
                         rec.input_tokens = getattr(usage, "prompt_tokens", 0) or 0
                         rec.output_tokens = getattr(usage, "completion_tokens", 0) or 0
-                        rec.cached_tokens = _cached_tokens(usage)
+                        rec.cached_tokens = cached_tokens(usage)
                     choices = getattr(chunk, "choices", None) or []
                     text = choices[0].delta.content if choices and getattr(choices[0], "delta", None) else None
                     if text:
@@ -156,7 +110,7 @@ class LlmGateway:
                 rec.latency_ms = int((time.perf_counter() - started) * 1000)
                 log.info("llm_stream agent=%s model=%s in=%d cached=%d out=%d ms=%d", agent, cfg.model,
                          rec.input_tokens, rec.cached_tokens, rec.output_tokens, rec.latency_ms)
-                gen.update(output="".join(parts), **_trace_usage(rec))  # ca khi stream dut: phan da nhan
+                gen.update(output="".join(parts), **trace_usage(rec))  # ca khi stream dut: phan da nhan
                 if collector is not None:
                     collector.add(rec)
 
