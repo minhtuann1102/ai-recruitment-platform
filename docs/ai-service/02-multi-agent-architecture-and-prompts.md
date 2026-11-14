@@ -40,8 +40,9 @@ flowchart LR
   orchestrator đưa vào input.
 - Agent = `prompt template (có version) + Pydantic input/output schema + model config`. Không có class
   hierarchy phức tạp.
-- **Không tool calling** trong MVP: orchestrator lấy RAG và topic catalog **trước**, đưa vào prompt. Bớt một
-  vòng LLM, dễ test, latency ổn định.
+- **Mặc định không tool calling**: orchestrator lấy RAG và topic catalog **trước**, đưa vào prompt. Bớt một
+  vòng LLM, dễ test, latency ổn định. Ngoại lệ duy nhất (2026-11-14): Evaluator tự tra cứu kho qua tool calling
+  khi `EVALUATOR_TOOLS=true` (mặc định tắt, xem bên dưới và `plans/reports/eval-261114-1807-agentic-rollout.md`).
 - Interviewer là agent duy nhất **nói với ứng viên** và duy nhất **stream**.
 
 ### Luồng theo thời gian của một phiên

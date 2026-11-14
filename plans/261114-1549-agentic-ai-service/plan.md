@@ -1,7 +1,7 @@
 ---
 title: "ai-service: từ workflow cố định sang vòng lặp agentic có rào chắn"
 description: "Tool calling trong gateway, Evaluator tự tra cứu, policy lai, lập lại kế hoạch, ghi chú (tùy chọn); mỗi hạng mục 1 cờ, mặc định tắt"
-status: pending
+status: code-complete-measurement-blocked
 priority: P2
 effort: 12d
 branch: main
@@ -18,16 +18,16 @@ Nguồn: `plans/reports/aie-request-261114-1057-agentic-ai-service.md` (scope), 
 quyết định/giá trị y hiện tại (JSON chỉ thêm khóa mặc định, báo FSD 1 lần). Lỗi → lùi đường cũ trong ngân sách 10 s
 Evaluator. `forced_transition`, `low_performance_stop`, turn cap đứng trên LLM. Không framework (A4).
 
-## Phase
+## Phase (trạng thái cập nhật 2026-11-14: code 01–05, 07 xong, 1176 test; chưa có số đo nào, mọi cờ tắt)
 
 | # | Phase | Cờ | Effort | Phụ thuộc | Status |
 |---|---|---|---|---|---|
-| 01 | [Chuẩn bị: probe, ngưỡng, mốc, eval tooling, scenario `System Design`](phase-01-prep-calibration-probe-eval-tooling.md) | – | 2d | khóa API (bước live) | pending |
-| 02 | [Vòng lặp công cụ trong gateway](phase-02-gateway-tool-loop.md) | – (thư viện) | 1,5d | không (song song 01) | pending |
+| 01 | [Chuẩn bị: probe, ngưỡng, mốc, eval tooling, scenario `System Design`](phase-01-prep-calibration-probe-eval-tooling.md) | – | 2d | khóa API (bước live) | code xong, đo [BLOCKED-KEY] |
+| 02 | [Vòng lặp công cụ trong gateway](phase-02-gateway-tool-loop.md) | – (thư viện) | 1,5d | không (song song 01) | xong (probe live [BLOCKED-KEY]) |
 | 03 | [Evaluator tự tra cứu](phase-03-evaluator-knowledge-lookup.md) | `EVALUATOR_TOOLS` | 2d | 02; DE docs (đo scenario) | code xong, đo [BLOCKED-KEY] |
 | 04 | [Policy lai](phase-04-hybrid-policy.md) | `POLICY_MODE=rules\|hybrid` | 2d | 01 (ngưỡng, `--runs`); 03 (cùng file) | code xong, đo [BLOCKED-KEY] |
 | 05 | [Lập lại kế hoạch giữa buổi (gated)](phase-05-mid-session-replanning.md) | `REPLAN_ENABLED` | 3d | 04; **FSD** | code xong, cờ giữ tắt chờ FSD, đo [BLOCKED-KEY] |
-| 06 | [Đo tổng, quyết bật mặc định, docs](phase-06-measurement-rollout-and-docs.md) | – | 0,5d | 03–05 + khóa | pending |
+| 06 | [Đo tổng, quyết bật mặc định, docs](phase-06-measurement-rollout-and-docs.md) | – | 0,5d | 03–05 + khóa | docs + runbook xong; đo + quyết mặc định [BLOCKED-KEY] |
 | 07 | [Ghi chú agent (tùy chọn)](phase-07-optional-agent-notes.md) | `AGENT_NOTES_ENABLED` | 1d | 04 đã đo đạt mốc | code xong, cờ giữ tắt, đo [BLOCKED-KEY] |
 
 ```
@@ -68,3 +68,7 @@ Nhánh `thang/<feature>`; commit conventional tiếng Anh, không ghi công AI; 
 - Ghi chú tách thành phase 07 tùy chọn; gate golden/holdout/sourced cho v9, v10 (H2). `--runs` id riêng mỗi run (H5).
 - Stdev gộp (H6); JD fixture cho sim persona `skewed` (H7); bảng hành động theo phân loại (H8).
 - Bỏ `shadow` (M1), bỏ split mode (M2); M3–M10, L1–L7 sửa trong phase tương ứng.
+
+## Phase 06 (2026-11-14)
+Runbook đo, mốc, bảng kết quả trống và bảng rollout: `plans/reports/eval-261114-1807-agentic-rollout.md`. Thông báo gộp FSD: docs 06 "Thông báo gộp cho FSD".
+Việc còn mở: khóa API mới (chạy 20 bước đo), FSD (05, 07), DE textbook (đo scenario 03), owner duyệt mốc, ngưỡng và mặc định cờ; câu hỏi từ review: hypothesis notes giữ hay bỏ, phát hiện tên/nơi làm việc, `overrule_rate_llm` hay tỷ lệ đầy đủ, chunk công cụ ở báo cáo cuối (phase 03 M3), tương thích `parallel_tool_calls=false` + `tool_choice=none` (probe).
