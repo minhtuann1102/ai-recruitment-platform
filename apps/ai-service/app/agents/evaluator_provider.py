@@ -8,10 +8,12 @@ from ..llm.errors import ConfigError
 from ..llm.gateway import get_gateway
 from ..llm.usage import CallRecord, UsageCollector
 from ..models_interview import Evaluation
-from .evaluator import EvaluationInput, LlmEvaluator
+from ..policy_hybrid import policy_mode
+from .evaluator import DEFAULT_PROMPT_VERSION, EvaluationInput, LlmEvaluator
 from .registry import agent_mode
 
 log = logging.getLogger("ai_service.evaluator")
+HYBRID_PROMPT_VERSION = "v9"  # POLICY_MODE=hybrid: Evaluator de xuat hanh dong (phase 04); v10 them o phase 05
 
 
 class Evaluator(Protocol):
@@ -44,10 +46,14 @@ def get_evaluator() -> Evaluator:
     global _llm
     if agent_mode("evaluator") == "mock":
         return MockEvaluator()
+    # EVALUATOR_PROMPT_VERSION (vd v3) de A/B ghi de; trong thi v8 (ghim) hoac v9 khi POLICY_MODE=hybrid.
+    # Doi POLICY_MODE luc chay thi tao lai Evaluator (cache theo phien ban prompt).
+    version = os.getenv("EVALUATOR_PROMPT_VERSION") or (HYBRID_PROMPT_VERSION if policy_mode() == "hybrid" else None)
+    if _llm is not None and _llm.prompt_version != (version or DEFAULT_PROMPT_VERSION):
+        _llm = None
     if _llm is None:
         try:
-            # EVALUATOR_PROMPT_VERSION (vd v3) de A/B; trong = v8 (ghim trong LlmEvaluator)
-            _llm = LlmEvaluator(get_gateway(), prompt_version=os.getenv("EVALUATOR_PROMPT_VERSION") or None)
+            _llm = LlmEvaluator(get_gateway(), prompt_version=version)
         except (ConfigError, FileNotFoundError) as err:  # thieu khoa / EVALUATOR_PROMPT_VERSION sai: khong tra 500
             log.error("evaluator_config_error error=%s", err)
             return MockEvaluator(degraded=True)

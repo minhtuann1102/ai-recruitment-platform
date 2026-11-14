@@ -154,9 +154,9 @@ async def next_turn(req: NextTurnRequest, evaluator: Optional[Evaluator] = None,
         log.info("voice_unclear turn=%d confidence=%s", req.turn_number, req.stt_confidence)
         reject_unclear()  # 422 voice_unclear: state giu nguyen, ung vien go chat roi gui lai cung luot
     if silent or unclear:  # het gio / het luot: khong cham, khong goi RAG / Evaluator, dieu kien uu tien quyet tiep
-        key, extra, ev = "", TurnChunks(), unclear_evaluation(req.turn_number)
+        key, extra, ev, proposal = "", TurnChunks(), unclear_evaluation(req.turn_number), None
     else:
-        key, extra, ev = await evaluate_turn(req, state, phase, topic, answer, evaluator or get_evaluator(),
+        key, extra, ev, proposal = await evaluate_turn(req, state, phase, topic, answer, evaluator or get_evaluator(),
                                              collector, retriever)
     if state.current_qa_id and not key and not (silent or unclear) and ev.answer_type not in NO_REFERENCE_NEEDED:
         ev = ev.model_copy(update={"reference_missing": True})
@@ -168,7 +168,8 @@ async def next_turn(req: NextTurnRequest, evaluator: Optional[Evaluator] = None,
         state.topics[pos].status = "done"
         state.phase, state.active_topic_id, state.end_reason = "done", None, forced[1]
         return TurnResult(None, None, state, plan, ev, True, {})
-    dec = choose_decision(ev, None, state, phase, topic, topics, pos, req, forced).dec
+    trace = choose_decision(ev, proposal, state, phase, topic, topics, pos, req, forced)
+    dec = trace.dec
 
     focus = safe_focus(dec.focus)  # chi luu va dung focus da qua kiem (khong giu chuoi nghi injection trong state)
     action, phase_changed, next_pos = apply_action(state, topics, pos, dec.action, dec.difficulty_delta,
@@ -190,7 +191,9 @@ async def next_turn(req: NextTurnRequest, evaluator: Optional[Evaluator] = None,
         next(t for t in state.topics if t.id == n_topic.id).turns.append(req.turn_number + 1)
     info = TurnInfo(turn_number=req.turn_number + 1, phase=n_phase, topic_id=n_topic.id if n_topic else None,
                     turn_kind=_KIND[action], action=action, agent_decision=_AGENT.get(action, "switch_topic"),
-                    difficulty=state.current_difficulty, reasoning=dec.reasoning, qa_id=state.current_qa_id)
+                    difficulty=state.current_difficulty, reasoning=dec.reasoning, qa_id=state.current_qa_id,
+                    decided_by=trace.decided_by, proposed_action=trace.proposed, policy_action=trace.policy,
+                    overrule_reason=trace.overrule_reason, action_reason=trace.action_reason)
     meta = _meta(n_phase, (next_pos or 0) + 1 if n_topic else len(topics), len(topics), action, info.turn_number)
     return TurnResult(spec, info, state, plan, ev, False, meta)
 

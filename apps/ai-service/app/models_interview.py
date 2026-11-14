@@ -107,6 +107,13 @@ class TurnInfo(BaseModel):
     question_source: Literal["ai", "bank", "fallback"] = "ai"  # bank: tu kho (AI dien dat lai); fallback: cau mau
     qa_id: Optional[str] = None  # cau hoi goc trong kho (question_source = bank)
     reasoning: Optional[str] = None
+    # phase 04, chi gan khi POLICY_MODE=hybrid (rules: None). proposed / policy la hanh dong TRUOC apply_action
+    # (next_topic chua doi thanh ask_main) va truoc low_performance_stop; action la sau apply.
+    decided_by: Optional[Literal["llm", "policy", "forced"]] = None
+    proposed_action: Optional[str] = None   # hanh dong Evaluator v9 de xuat (None: khong co de xuat)
+    policy_action: Optional[str] = None     # hanh dong luat decide() se chon (phan thuc cua LLM)
+    overrule_reason: Optional[str] = None   # vi sao bac de xuat; None khi dung de xuat hoac forced
+    action_reason: Optional[str] = None     # ly do cua LLM da qua kiem (injection / PII thi None)
 
 
 # --- Requests ---

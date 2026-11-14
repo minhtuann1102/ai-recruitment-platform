@@ -6,9 +6,11 @@ Thu tu uu tien khong doi: dieu kien thoi gian / turn cap (forced) va low_perform
 from dataclasses import dataclass
 from typing import List, Optional, Tuple
 
+from . import metrics
 from .early_stop import low_performance_stop
 from .models_interview import CandidateState, Evaluation, InterviewPlan, NextTurnRequest, PlanTopic
 from .policy import Decision, decide
+from .policy_hybrid import policy_mode, safe_reason, validate_decision
 from .time_budget import phase_deadline_s
 
 
@@ -44,14 +46,26 @@ def choose_decision(ev: Evaluation, proposal, state: CandidateState, phase: str,
                     topics: List[Tuple[str, PlanTopic]], pos: int, req: NextTurnRequest,
                     forced: Optional[Tuple[str, str]]) -> DecisionTrace:
     """forced: ket qua forced_transition (khac "end", da xu ly o turn_engine). proposal: output V9 cua Evaluator hoac None."""
+    hybrid = policy_mode() == "hybrid"
+    proposed = getattr(proposal, "next_action", None) if hybrid else None
+    reason = safe_reason(getattr(proposal, "action_reason", None)) if hybrid and proposal is not None else None
     if forced:
-        trace = DecisionTrace(forced_decision(forced, state))
+        trace = DecisionTrace(forced_decision(forced, state), "forced" if hybrid else None, proposed, None, None, reason)
     else:
         # covered: y da neu trong ca topic (record_evaluation da gop ca luot nay), de khong hoi lai y da tra loi
         ts = next(t for t in state.topics if t.id == topic.id)
-        trace = DecisionTrace(decide(ev, state, req.level, phase == "scenario", topic, ts.focus_used, ts.covered))
+        is_scn = phase == "scenario"
+        rules = decide(ev, state, req.level, is_scn, topic, ts.focus_used, ts.covered)
+        trace = DecisionTrace(rules, None, proposed, rules.action if hybrid else None, None, reason)
+        if hybrid:
+            trace.dec, trace.decided_by, trace.overrule_reason = validate_decision(
+                proposal, ev, state, req.level, is_scn, topic, ts, rules)
     dec = trace.dec
     if dec.action in ("next_topic", "next_phase") and low_performance_stop(state, topics, pos, req.level, dec.action):
         state.end_reason = "low_performance"
         trace.dec = Decision("wrap_up", 0, None, "low_performance -> wrap_up (3 topic technical yếu liên tiếp)")
+        trace.decided_by = "forced" if hybrid else None
+        trace.overrule_reason = None
+    if hybrid:
+        metrics.record_policy_decision(trace.decided_by, trace.overrule_reason)
     return trace

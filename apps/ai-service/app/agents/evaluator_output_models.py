@@ -41,3 +41,16 @@ class EvaluatorOutputV4(EvaluatorOutput):
 
 def uses_sources(prompt_version: str) -> bool:
     return int(prompt_version.lstrip("v") or 0) >= 4
+
+
+class EvaluatorOutputV9(EvaluatorOutputV4):
+    """v9 (phase 04, POLICY_MODE=hybrid): them de xuat hanh dong tiep theo. Kieu long (str / int) co chu dich: gia tri
+    la khong hop le thi code bo de xuat va dung luat (policy_hybrid), khong lam hong ca luot cham."""
+    next_action: str = ""  # follow_up | hint | clarify | next_topic
+    next_focus: Optional[str] = None
+    difficulty_delta: int = 0  # -1 | 0 | 1, code kep theo phan loai
+    action_reason: str = ""  # <= 20 tu
+
+
+def uses_policy(prompt_version: str) -> bool:
+    return int(prompt_version.lstrip("v") or 0) >= 9

@@ -7,14 +7,19 @@ import logging
 from typing import Optional, Tuple
 
 from .agents.evaluator import EvaluationInput
+from .agents.evaluator_input import PolicyContext
+from .agents.evaluator_output_models import EvaluatorOutputV9
 from .agents.evaluator_provider import Evaluator
 from .evaluator_lookup import lookup_for_turn
 from .llm.usage import UsageCollector
 from .models_interview import CandidateState, Evaluation, NextTurnRequest, PlanTopic, SourceRef
+from .policy import action_budget
+from .policy_hybrid import policy_mode
 from .plan_snippets import get_retriever, memory_retriever
 from .rag.circuit_breaker import MEMORY_ONLY_ERROR
 from .source_refs import title_of
 from .tracing import observation
+from .turn_decision import time_hint
 from .turn_reference_snippets import TurnChunks, turn_snippets
 from .voice_turn import heard_topic_turns, is_voice
 
@@ -48,10 +53,20 @@ def reference_source(topic: PlanTopic, qa_id: Optional[str], key: str) -> Option
                      license=bank.license if bank else None)
 
 
+def policy_context(req: NextTurnRequest, state: CandidateState, phase: str) -> PolicyContext:
+    """Trang thai TRUOC quyet dinh cua luot nay cho Evaluator v9 (hybrid): ngan sach con lai, focus da hoi, y da neu."""
+    b = action_budget(state, req.level, phase == "scenario")
+    ts = next((t for t in state.topics if t.id == state.active_topic_id), None)
+    return PolicyContext(b.left, b.hinted, b.clarifies, list(ts.focus_used) if ts else [], list(ts.covered) if ts else [],
+                         time_hint(req.elapsed_seconds, req.plan, phase), state.current_difficulty,
+                         dict(state.difficulty_bounds))
+
+
 async def evaluate_turn(req: NextTurnRequest, state: CandidateState, phase: str, topic: PlanTopic, answer: str,
                         evaluator: Evaluator, collector: Optional[UsageCollector],
-                        retriever) -> Tuple[str, TurnChunks, Evaluation]:
-    """RAG theo luot (dap an chuan hoac chunk) roi Evaluator cham. answer: ban da doi thuat ngu neu la luot voice."""
+                        retriever) -> Tuple[str, TurnChunks, Evaluation, Optional[EvaluatorOutputV9]]:
+    """RAG theo luot (dap an chuan hoac chunk) roi Evaluator cham. answer: ban da doi thuat ngu neu la luot voice.
+    Tra them de xuat hanh dong (output V9) khi POLICY_MODE=hybrid va Evaluator tra output goc; khong thi None."""
     live = retriever or get_retriever()
     retriever = live or memory_retriever()  # dang ngat: van con BM25 va cache dap an trong bo nho
     if live is None and retriever is not None and collector is not None:
@@ -65,11 +80,16 @@ async def evaluate_turn(req: NextTurnRequest, state: CandidateState, phase: str,
         obs.update(output={"answer_key": bool(key), "chunks": [s.ref for s in extra.sources]})
     lookup = lookup_for_turn(retriever, req.track, phase=phase, topic=topic, difficulty=state.current_difficulty,
                              extra=extra, reference_answer=key, evaluator=evaluator)  # None khi EVALUATOR_TOOLS tat (mac dinh)
+    hybrid = policy_mode() == "hybrid"
     # Evaluator nhan ban ghi goc va tu doi thuat ngu (spoken): con giu nguyen van de trich quote
-    ev = await evaluator.evaluate(EvaluationInput(
+    inp = EvaluationInput(
         level=req.level, phase=phase, topic=topic, difficulty=state.current_difficulty, turn_kind=req.turn_kind,
         turn_number=req.turn_number, question=req.question, answer=req.answer, topic_turns=heard_topic_turns(req),
         reference_answer=key, turn_snippets=extra.texts, turn_sources=extra.sources,
-        reference_source=reference_source(topic, state.current_qa_id, key), spoken=is_voice(req),
-        lookup=lookup), collector)
-    return key, extra, ev
+        reference_source=reference_source(topic, state.current_qa_id, key), spoken=is_voice(req), lookup=lookup,
+        policy_context=policy_context(req, state, phase) if hybrid else None)
+    with_raw = getattr(evaluator, "evaluate_with_raw", None) if hybrid else None
+    if with_raw is None:
+        return key, extra, await evaluator.evaluate(inp, collector), None
+    raw, ev = await with_raw(inp, collector)
+    return key, extra, ev, raw if isinstance(raw, EvaluatorOutputV9) else None
