@@ -6,7 +6,7 @@
   `app/cv_text.py:86,101`, phase 04 (V9, `PolicyContext`, `choose_decision`)
 
 ## Overview
-- Priority: P3, **tùy chọn**. Status: optional. Nhánh: `thang/agent-notes`. Effort 1d.
+- Priority: P3, **tùy chọn**. Status: code xong sau cờ (tắt), gate đo [BLOCKED-KEY]. Nhánh: `thang/agent-notes`. Effort 1d.
 - Chỉ bắt đầu khi phase 04 đã đo và `hybrid` đạt mốc (lead quyết định, audit H2). Cờ `AGENT_NOTES_ENABLED=false`,
   chỉ có tác dụng khi `POLICY_MODE=hybrid`.
 - Lý do hoãn: người dùng duy nhất của ghi chú là chính lời gọi Evaluator vừa chấm điểm (Reporter/Interviewer không đọc) →
@@ -54,12 +54,22 @@ def notes_for_context(state) -> List[Note]            # chỉ to_verify + open
 5. Docs `04` (`notes`), `06` (khóa `state.notes`, báo FSD), `09`; context. PR `[ai-service] feat: ghi chú agent sau cờ AGENT_NOTES_ENABLED`.
 
 ## Todo List
-- [ ] Chờ quyết định sau phase 04
-- [ ] Model + apply/safe/context
-- [ ] Prompt version + lớp output
-- [ ] Test
-- [ ] [BLOCKED-KEY] gate + đọc tay 20 phiên
-- [ ] Docs + FSD, PR
+- [x] Chờ quyết định sau phase 04 (lead giao làm code sau cờ; gate đo ghi [BLOCKED-KEY])
+- [x] Model + apply/safe/context
+- [x] Prompt version (v11) + lớp output + chọn version
+- [x] Test (`tests/test_agent_notes.py`, `tests/test_agent_notes_turn_engine.py`, guard injection)
+- [ ] [BLOCKED-KEY] gate + đọc tay 20 phiên (không có khóa; không có số)
+- [x] Docs + FSD notice (06) ; PR do lead mở
+
+## Deviations (ghi khi triển khai)
+- `models_interview.py` ở 199 dòng: tách `PlanTopic`/`PlanPhase`/`ReplanPool`/`InterviewPlan`/`BankQuestion` sang `app/models_plan.py` (re-export, import cũ chạy), `Note` ở `app/models_agent_notes.py` (review phase 05 L3).
+- v11 chọn khi `AGENT_NOTES_ENABLED` ∧ hybrid, ưu tiên hơn v10 (v11 gồm `swap`); `replan_context` vẫn chỉ dựng khi `REPLAN_ENABLED`.
+- `apply_notes` gọi cuối `turn_decision.choose_decision` (không ở `turn_engine`, file 199 dòng) để biết `overrule_reason`; lượt sensitive / injection (kể cả forced) là untrusted: không ghi, không cập nhật (theo review 04/05).
+- Thêm `open_notes` bọc `<untrusted>`, lọc lại bằng `safe_note` vì state do client mang. `note_updates` chỉ đổi `to_verify` đang `open`.
+- Thêm metric `ai_notes_dropped_total{reason}` (9 nhãn đóng), sim `notes` + bất biến `unsafe_notes == 0` (`evals/sim_notes_metrics.py`, thay vì sửa `sim_metrics.py`). Không thêm khóa vào `TurnInfo`.
+- Eviction (review M2): thay quy tắc spec "đầy → bỏ confirmed/rejected cũ nhất, không có thì bỏ note mới" bằng: bỏ note đã xong cũ nhất, rồi note cũ nhất không phải `to_verify`, chỉ bỏ note mới khi cả 8 là `to_verify` open (strength/risk/hypothesis không bao giờ xong nên spec cũ làm tính năng tắt dần).
+- `safe_note` (review M1): kiểm injection/PII trên toàn text rồi mới xét độ dài; > 150 ký tự thì bỏ (nhãn `too_long`), không cắt. Spec ghi "cắt 150".
+- Chưa đo: tỉ lệ `to_verify` được xác nhận/bác chỉ có công cụ (`resolved_rate`), không có số.
 
 ## Success Criteria
 - ≥ **85%** ghi chú đúng hội thoại (20 phiên đọc tay); 0 ghi chú chứa thông tin cá nhân.
