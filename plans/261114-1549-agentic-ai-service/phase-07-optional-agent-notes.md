@@ -67,6 +67,8 @@ def notes_for_context(state) -> List[Note]            # chỉ to_verify + open
 - `apply_notes` gọi cuối `turn_decision.choose_decision` (không ở `turn_engine`, file 199 dòng) để biết `overrule_reason`; lượt sensitive / injection (kể cả forced) là untrusted: không ghi, không cập nhật (theo review 04/05).
 - Thêm `open_notes` bọc `<untrusted>`, lọc lại bằng `safe_note` vì state do client mang. `note_updates` chỉ đổi `to_verify` đang `open`.
 - Thêm metric `ai_notes_dropped_total{reason}` (9 nhãn đóng), sim `notes` + bất biến `unsafe_notes == 0` (`evals/sim_notes_metrics.py`, thay vì sửa `sim_metrics.py`). Không thêm khóa vào `TurnInfo`.
+- Eviction (review M2): thay quy tắc spec "đầy → bỏ confirmed/rejected cũ nhất, không có thì bỏ note mới" bằng: bỏ note đã xong cũ nhất, rồi note cũ nhất không phải `to_verify`, chỉ bỏ note mới khi cả 8 là `to_verify` open (strength/risk/hypothesis không bao giờ xong nên spec cũ làm tính năng tắt dần).
+- `safe_note` (review M1): kiểm injection/PII trên toàn text rồi mới xét độ dài; > 150 ký tự thì bỏ (nhãn `too_long`), không cắt. Spec ghi "cắt 150".
 - Chưa đo: tỉ lệ `to_verify` được xác nhận/bác chỉ có công cụ (`resolved_rate`), không có số.
 
 ## Success Criteria
