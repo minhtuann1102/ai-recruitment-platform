@@ -11,6 +11,7 @@ from ..llm.settings import AGENTS, load_llm_settings
 from ..llm.usage import CallRecord, UsageCollector
 from ..prompts.store import PromptStore
 from ..security import STRICT_ENVS
+from .evaluator import DEFAULT_PROMPT_VERSION
 
 MODES = ("mock", "llm")
 
@@ -54,7 +55,7 @@ def _llm_config_error(agent: str, env: Mapping[str, str]) -> Optional[Exception]
     try:
         load_llm_settings(env)
         if agent == "evaluator":  # EVALUATOR_PROMPT_VERSION go sai cung lam Evaluator ve mock (evaluator_provider.py)
-            PromptStore().get(agent, env.get("EVALUATOR_PROMPT_VERSION") or None)
+            PromptStore().get(agent, env.get("EVALUATOR_PROMPT_VERSION") or DEFAULT_PROMPT_VERSION)
     except (ConfigError, FileNotFoundError, ValueError) as err:
         return err
     return None

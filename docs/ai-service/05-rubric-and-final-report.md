@@ -39,6 +39,7 @@ này trong phần tĩnh của prompt. Hệ quả: cùng một câu trả lời, 
 | `dont_know` / `manipulation` → mọi band = 0 | ✔ | Ép về 0 |
 | Dài ≠ tốt | ✔ | Test case "lan man" trong golden set (§10) |
 | Trích nguồn (v4, 2026-10-29): mỗi ý covered ghi `source_ids` (`S1..Sn` snippet theo thứ tự gửi, `R` đáp án chuẩn) + `support` | ✔ | Bỏ id không có trong lượt; hết id thì `no_source`; `contradicted` có id hợp lệ → ý không được tính covered; chỉ khi đáp án chuẩn (`R`) bác bỏ mới thành `misconceptions` (kéo theo `technical_accuracy ≤ 1`), vì snippet / chunk BM25 chỉ gần đúng chủ đề; ý code kiểm đứng đầu, bỏ ý LLM gần trùng; `confidence = low` khi có tài liệu mà không ý nào `supported` (không hạ điểm) |
+| Chỉ R bác ở lượt tra cứu (2026-11-14, `EVALUATOR_TOOLS`): chunk Evaluator tự tra (id `S{n}` > số tài liệu có sẵn) không đủ để phạt | ✔ (`evaluator_tools.v1`) | Khi lượt có chunk tra cứu: `misconceptions` của LLM khớp (`SequenceMatcher ≥ 0,8` hoặc chứa) `point`/`quote` của ý `contradicted` mà **mọi** id hợp lệ là id tra cứu thì **không** chặn `technical_accuracy` và **không** vào `Evaluation.misconceptions` (Reporter không thấy, chỉ log `evaluator_tool_misconception_dropped`); misconception còn khớp ý `contradicted` dựa snippet có sẵn / `R` / id lẫn, hoặc không gắn nguồn, chặn như khi tắt cờ. Khớp chứa chỉ tính cụm ≥ 4 từ. Giới hạn: ý `contradicted` bị bỏ vì quote sai hoặc vượt `MAX_COVERED` không vào bộ so khớp, nên misconception suy từ chunk tra cứu với quote diễn đạt lại vẫn chặn như khi tắt cờ (thận trọng) |
 
 ## 6.3 Tổng hợp điểm (code, không phải LLM)
 

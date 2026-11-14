@@ -11,7 +11,8 @@ Nhan quan sat cua mot lan chay lay tu output LLM truoc hau kiem (`evaluate_with_
 `contradicted` khoi `covered`: co y contradicted voi id hop le -> `contradicted`; con lai co y supported -> `supported`;
 khong thi `no_source`. `r_blocked` lay tu Evaluation sau hau kiem: R bi trich la bac bo va con misconception nen luat 4
 da chan diem, do ca hai chieu vi bac nham cau dung con hai hon bo sot cau sai.
-  cd apps/ai-service && python -m evals.run_evaluator_sourced --runs 3 [--prompt v5] [--out report.json]
+  cd apps/ai-service && python -m evals.run_evaluator_sourced --runs 3 [--prompt v5] [--lookup] [--out report.json]
+--lookup: mau khong co R duoc tra cuu them (nhu EVALUATOR_TOOLS=true); id sai (`invalid_source_ids`) khong duoc tang.
 """
 import argparse
 import asyncio
@@ -28,6 +29,7 @@ from app.llm.gateway import get_gateway
 from app.llm.usage import UsageCollector
 from app.models_interview import Evaluation, PlanTopic, SourceRef
 from evals.label_sheet import load_golden
+from evals.lookup_support import attach_lookup, load_lookup_retriever, lookup_fields, lookup_summary
 from evals.run_evaluator import REPORTS
 
 GOLDEN = Path(__file__).with_name("evaluator_golden_sourced.jsonl")
@@ -58,18 +60,25 @@ def blocked_by_reference(ev: Evaluation) -> bool:
 
 
 async def run_all(samples: List[dict], runs: int, prompt: Optional[str], collector: UsageCollector,
-                  concurrency: int = 4) -> Dict[str, List[dict]]:
+                  concurrency: int = 4, lookup: bool = False) -> Dict[str, List[dict]]:
     evaluator, sem = LlmEvaluator(get_gateway(), prompt_version=prompt), asyncio.Semaphore(concurrency)
+    retriever = await load_lookup_retriever() if lookup else None
 
     async def one(s: dict) -> dict:
+        inp = to_input(s)
+        tool = attach_lookup(retriever, s, inp)
         async with sem:
-            raw, ev = await evaluator.evaluate_with_raw(to_input(s), collector)
+            raw, ev = await evaluator.evaluate_with_raw(inp, collector)
         points = [c.model_dump() for c in raw.covered] if raw else []
-        valid = [i for i, _ in source_blocks(s["documents"], s.get("reference_answer", ""))]
+        # id hop le gom ca chunk cong cu (S{n+1}..) khi vong lap da chot
+        extended = tool.extend(inp) if tool is not None and tool.committed else inp
+        valid = [i for i, _ in source_blocks([*extended.topic.reference_snippets, *extended.turn_snippets],
+                                             s.get("reference_answer", ""))]
         return {"observed": observed(points, valid), "points": points, "degraded": ev.degraded,
                 "invalid_ids": sum(i.strip().upper() not in valid for p in points for i in p.get("source_ids", [])),
                 "r_blocked": blocked_by_reference(ev),
-                "technical_accuracy": ev.scores.technical_accuracy, "misconceptions": len(ev.misconceptions)}
+                "technical_accuracy": ev.scores.technical_accuracy, "misconceptions": len(ev.misconceptions),
+                **lookup_fields(tool)}
 
     results: Dict[str, List[dict]] = {s["id"]: [] for s in samples}
     for r in range(runs):
@@ -134,12 +143,15 @@ def summarize(samples: List[dict], results: Dict[str, List[dict]]) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--runs", type=int, default=3)
-    parser.add_argument("--prompt", default=None, help="vd v5; mac dinh ban moi nhat")
+    parser.add_argument("--prompt", default=None, help="vd v5; mac dinh v8 (ban ghim)")
+    parser.add_argument("--lookup", action="store_true", help="bat Evaluator tra cuu kho (can RAG + AI_DB_URL)")
     parser.add_argument("--out", type=Path)
     args = parser.parse_args()
     samples, collector = load_golden(GOLDEN), UsageCollector()
-    results = asyncio.run(run_all(samples, args.runs, args.prompt, collector))
+    results = asyncio.run(run_all(samples, args.runs, args.prompt, collector, lookup=args.lookup))
     summary = {**summarize(samples, results), "usage": collector.to_metadata()["usage"]}
+    if args.lookup:
+        summary["lookup"] = lookup_summary([r for runs in results.values() for r in runs])
     print(json.dumps({k: v for k, v in summary.items() if k != "by_sample"}, ensure_ascii=False, indent=1))
     out = args.out or REPORTS / f"eval-evaluator-sourced-{datetime.now():%y%m%d-%H%M}.json"
     out.parent.mkdir(parents=True, exist_ok=True)

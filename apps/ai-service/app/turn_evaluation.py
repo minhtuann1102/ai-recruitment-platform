@@ -8,6 +8,7 @@ from typing import Optional, Tuple
 
 from .agents.evaluator import EvaluationInput
 from .agents.evaluator_provider import Evaluator
+from .evaluator_lookup import lookup_for_turn
 from .llm.usage import UsageCollector
 from .models_interview import CandidateState, Evaluation, NextTurnRequest, PlanTopic, SourceRef
 from .plan_snippets import get_retriever, memory_retriever
@@ -62,10 +63,13 @@ async def evaluate_turn(req: NextTurnRequest, state: CandidateState, phase: str,
                           question=req.question, answer=answer, has_answer_key=bool(state.current_qa_id),
                           collector=collector, memory_only=live is None))
         obs.update(output={"answer_key": bool(key), "chunks": [s.ref for s in extra.sources]})
+    lookup = lookup_for_turn(retriever, req.track, phase=phase, topic=topic, difficulty=state.current_difficulty,
+                             extra=extra, reference_answer=key, evaluator=evaluator)  # None khi EVALUATOR_TOOLS tat (mac dinh)
     # Evaluator nhan ban ghi goc va tu doi thuat ngu (spoken): con giu nguyen van de trich quote
     ev = await evaluator.evaluate(EvaluationInput(
         level=req.level, phase=phase, topic=topic, difficulty=state.current_difficulty, turn_kind=req.turn_kind,
         turn_number=req.turn_number, question=req.question, answer=req.answer, topic_turns=heard_topic_turns(req),
         reference_answer=key, turn_snippets=extra.texts, turn_sources=extra.sources,
-        reference_source=reference_source(topic, state.current_qa_id, key), spoken=is_voice(req)), collector)
+        reference_source=reference_source(topic, state.current_qa_id, key), spoken=is_voice(req),
+        lookup=lookup), collector)
     return key, extra, ev

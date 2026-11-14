@@ -8,7 +8,7 @@
   `evals/ttft_breakdown.py:25,39-40`, `docs/ai-service/06-api-contract.md:302`
 
 ## Overview
-- Priority: P2. Status: pending. Nhánh: `thang/evaluator-lookup`. Effort 2d. Cờ `EVALUATOR_TOOLS=false`,
+- Priority: P2. Status: code + test xong (cờ tắt); đo thật [BLOCKED-KEY]. Nhánh: `thang/evaluator-lookup`. Effort 2d. Cờ `EVALUATOR_TOOLS=false`,
   `EVALUATOR_MAX_TOOL_CALLS=1` (trần cứng 2), `EVALUATOR_TOOL_DEADLINE_S=2.0`.
 - Lượt không có `R` (không intro): Evaluator được gọi `search_knowledge(query)`; code cố định phạm vi tìm.
 
@@ -44,7 +44,7 @@
 - F: ép "chỉ R bác" ở lượt có chunk công cụ (H4): trong `postcheck`, khi `inp.tool_base_ids is not None`:
   (a) bỏ misconception LLM khớp (`SequenceMatcher ≥ 0,8` hoặc chứa, như `merge_misconceptions`) `point`/`quote` của điểm
   `contradicted` mà mọi id hợp lệ là id công cụ (> `tool_base_ids`) — chỉ những misconception này không chặn
-  `technical_accuracy` (vẫn trả về cho báo cáo); (b) misconception khác (không gắn nguồn, hoặc dựa snippet có sẵn)
+  `technical_accuracy` và **không** vào `Evaluation.misconceptions` (quyết định lead 2026-11-14 sau review: Reporter không được thấy; chỉ log). Khớp chứa chỉ với cụm ≥ 4 từ; misconception còn khớp ý `contradicted` dựa snippet có sẵn vẫn chặn; (b) misconception khác (không gắn nguồn, hoặc dựa snippet có sẵn)
   chặn như khi tắt cờ. Mục tiêu: bật cờ không làm điểm cao hơn so với tắt cờ ở cùng câu trả lời, ngoài phần do chunk công cụ.
 - F: vòng lặp lỗi → truyền `failure_fallback="evaluator_lookup_fallback"` cho `complete_with_tools`, gateway đã tự thêm `CallRecord` kèm latency (M4); caller KHÔNG thêm record thứ hai; thêm vào
   `FALLBACK_KINDS`; báo FSD mã fallback mới.
@@ -129,15 +129,17 @@ async def call_with_lookup(gw, prompt, inp, t0):
     `[ai-service] feat: Evaluator tự tra cứu kho sau cờ EVALUATOR_TOOLS`.
 
 ## Todo List
-- [ ] Tách `evaluator_output_models.py`
-- [ ] TurnLookup + SEARCH_TOOL + fragment prompt
-- [ ] call_with_lookup: 1 ngân sách, wait_for, fallback có điều kiện, CallRecord fallback
-- [ ] Postcheck "chỉ R bác" ở lượt tra cứu
-- [ ] Gate turn_evaluation
-- [ ] Test bước 6
-- [ ] `--lookup`, recorder, metric, TTFT tách
-- [ ] [BLOCKED-KEY] đo; [DE] scenario
-- [ ] Docs + context + báo FSD, PR
+- [x] Tách `evaluator_output_models.py` (+ `evaluator_input.py`: `evaluator.py` 234 -> 147 dòng; commit riêng)
+- [x] TurnLookup + SEARCH_TOOL + fragment prompt (`app/evaluator_lookup.py`, `evaluator_tools.v1.md`)
+- [x] call_with_lookup: 1 ngân sách, wait_for, fallback có điều kiện, CallRecord fallback (`agents/evaluator_lookup_call.py`)
+- [x] Postcheck "chỉ R bác" ở lượt tra cứu (`split_tool_misconceptions`)
+- [x] Gate turn_evaluation (`lookup_for_turn`); prompt Evaluator ghim `v8` (C1)
+- [x] Test bước 6 (`test_evaluator_lookup*.py`: 937 passed, 8 skipped; ngân sách thu nhỏ 10 s -> 1,2 s cho test thời gian)
+- [x] `--lookup`, recorder, metric, TTFT tách (`evals/lookup_support.py`, `sim_lookup_metrics.py`)
+- [ ] [BLOCKED-KEY] đo (bước 8): judge_support 3 lần, `run_evaluator --set main` / `holdout --runs 3 --lookup`, `run_evaluator_sourced --lookup`, sim `--serve --runs 2`, `ttft_breakdown`, `cost_latency`; báo cáo `eval-<date>-evaluator-lookup.md`
+- [ ] [BLOCKED-KEY] [DE] đo scenario (`RAG_TEXTBOOK_ENABLED=true`, chờ DE nạp textbook)
+- [x] Docs 02/05/06/08/09 + context
+- [ ] Báo FSD mã `evaluator_lookup_fallback`; PR `[ai-service] feat: Evaluator tự tra cứu kho sau cờ EVALUATOR_TOOLS` (chưa push)
 
 ## Success Criteria (reply mục 8)
 - Độ đúng `supported` câu AI ≥ **0,65** (mốc 0,53), câu kho không giảm (0,71); TB 3 lần judge.

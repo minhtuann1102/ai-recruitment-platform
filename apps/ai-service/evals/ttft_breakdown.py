@@ -22,7 +22,7 @@ from evals.cost_latency import percentile
 TARGET_P50_S, TARGET_P95_S = 3.5, 6.0  # NFR-AI-PERF01
 HOT_TOKENS = 60
 RAG_AGENTS = ("query_rewriter", "embedding")
-FALLBACK_KINDS = ("evaluator_mock_heuristic", "interviewer_fallback")
+FALLBACK_KINDS = ("evaluator_mock_heuristic", "interviewer_fallback", "evaluator_lookup_fallback")
 
 
 def turn_rows(sessions: Dict[str, Dict]) -> List[Dict]:
@@ -37,7 +37,8 @@ def turn_rows(sessions: Dict[str, Dict]) -> List[Dict]:
             ev, rag = lat["evaluator"] / 1000, sum(lat.get(a, 0) for a in RAG_AGENTS) / 1000
             usage = (meta.get("usage") or {}).get("evaluator") or {}
             fallbacks = meta.get("fallbacks") or []
-            kind = next((f for f in FALLBACK_KINDS if f in fallbacks), "normal")
+            # luot Evaluator co goi cong cu (EVALUATOR_TOOLS) tach rieng: ve them 1 round trip, khong tron vao luot thuong
+            kind = next((f for f in FALLBACK_KINDS if f in fallbacks), "lookup" if usage.get("tool_calls") else "normal")
             rows.append({"kind": kind, "ttft": c["ttft_s"], "evaluator": ev, "rag_llm": rag,
                          "other": c["ttft_s"] - ev - rag, "interviewer_stream": lat.get("interviewer", 0) / 1000,
                          "ev_out": usage.get("output_tokens", 0), "ev_in": usage.get("input_tokens", 0)})
@@ -86,6 +87,9 @@ def breakdown(rows: List[Dict]) -> Dict:
            "fallback": {k: {"turns": len(g), "ttft_p50": percentile([r["ttft"] for r in g], 50)}
                         for k in FALLBACK_KINDS if (g := [r for r in rows if r["kind"] == k])},
            "normal": _stages(normal) if normal else {"turns": 0}}
+    lookup = [r for r in rows if r["kind"] == "lookup"]
+    if lookup:
+        out["lookup"] = _stages(lookup)
     out["without_fallback_turns"] = _pct([r["ttft"] for r in normal])
     line = fit_line([r["ev_out"] for r in normal], [r["evaluator"] for r in normal])
     if line:

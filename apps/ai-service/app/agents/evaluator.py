@@ -5,131 +5,32 @@ Luong: precheck bang code (dont_know ngan, manipulation) -> luot voice: doi thua
 dung mock heuristic va danh dau degraded (luot khong tinh diem, BRU-05) de phien khong chet.
 """
 import asyncio
-import json
 import logging
 import time
-from dataclasses import dataclass, field, replace
-from typing import List, Literal, Optional, Tuple
+from dataclasses import replace
+from typing import List, Optional, Tuple
 
 import openai
-from pydantic import BaseModel
 
 from .. import mock_evaluator
-from ..evaluator_source_checks import (SourcedPoint, check_sources, confidence, label, merge_misconceptions,
-                                      refuted_by_reference, restates_reference, source_blocks)
+from ..evaluator_source_checks import (SourcedPoint, check_sources, confidence, merge_misconceptions,
+                                      refuted_by_reference, restates_reference, source_blocks,
+                                      split_tool_misconceptions)
 from ..evaluation_checks import (MAX_COVERED, apply_caps, build_evaluation, is_term_list, matched_key_points,
                                  precheck_answer, quote_in_answer, slug_tags, supports_point, zero_evaluation)
 from ..llm.errors import ConfigError, LlmError
 from ..llm.gateway import LlmGateway
 from ..llm.usage import CallRecord, UsageCollector
-from ..models_common import AnswerType
-from ..models_interview import CitedSource, Evaluation, Evidence, PlanTopic, SourceRef, TopicTurn
-from ..prompts.store import UNTRUSTED_NOTICE, PromptStore, wrap_untrusted
+from ..models_interview import Evaluation, Evidence, TopicTurn  # noqa: F401  (re-export cho evals)
+from ..prompts.store import PromptStore
 from ..stt_terms import normalize_stt_terms_with_map, restore_quote
+from .evaluator_lookup_call import call_with_lookup
+from .evaluator_input import EvaluationInput, all_snippets, build_messages, cited_sources, source_refs  # noqa: F401
+from .evaluator_output_models import (CoveredPoint, EvaluatorOutput, EvaluatorOutputV4, RawBands,  # noqa: F401
+                                      SourcedCoveredPoint, uses_sources)
 
 log = logging.getLogger("ai_service.evaluator")
-
-
-# Schema gui cho LLM: khong rang buoc min/max (che do strict khong ho tro het); code tu kep va cat.
-class CoveredPoint(BaseModel):
-    point: str
-    quote: str
-
-
-class RawBands(BaseModel):
-    technical_accuracy: int
-    completeness: int
-    extensibility: int
-    relevance: int
-
-
-class EvaluatorOutput(BaseModel):
-    answer_type: AnswerType
-    covered: List[CoveredPoint]
-    missing_points: List[str]
-    misconceptions: List[str]
-    scores: RawBands
-    follow_up_focus: Optional[str]
-
-
-class SourcedCoveredPoint(CoveredPoint):
-    # mac dinh chi cho che do json_object (khong strict) chiu duoc model bo truong; strict_schema bat buoc moi truong
-    source_ids: List[str] = []
-    support: Literal["supported", "contradicted", "no_source"] = "no_source"
-
-
-class EvaluatorOutputV4(EvaluatorOutput):
-    """v4 (Phase 03a): moi y covered ghi tai lieu doi chieu (S1.., R) va muc ung ho."""
-    covered: List[SourcedCoveredPoint]
-
-
-def uses_sources(prompt_version: str) -> bool:
-    return int(prompt_version.lstrip("v") or 0) >= 4
-
-
-@dataclass
-class EvaluationInput:
-    level: str
-    phase: str
-    topic: PlanTopic
-    difficulty: int
-    turn_kind: str
-    turn_number: int
-    question: str
-    answer: str
-    topic_turns: List[TopicTurn] = field(default_factory=list)
-    reference_answer: str = ""  # cap Q&A chuan trong kho khi cau vua hoi lay tu kho (question_bank)
-    turn_snippets: List[str] = field(default_factory=list)  # Phase 02: chunk theo cau vua hoi + cau tra loi
-    turn_sources: List[SourceRef] = field(default_factory=list)  # 03b: cung thu tu turn_snippets
-    reference_source: Optional[SourceRef] = None  # 03b: cau tu kho cua reference_answer
-    spoken: bool = False  # answer la ban ghi STT (answer_source = voice): doi thuat ngu phien am truoc khi cham
-
-
-def build_messages(system_prompt: str, inp: EvaluationInput, with_ids: bool = False) -> List[dict]:
-    """Phan tinh (rubric, anchor) o system de huong prompt caching; du lieu nguoi dung boc <untrusted>.
-    with_ids (v4): moi tai lieu doi chieu co id [S1].. / [R] de Evaluator trich nguon."""
-    data = {"level": inp.level, "phase": inp.phase, "difficulty": inp.difficulty, "turn_kind": inp.turn_kind,
-            "topic": {"title": inp.topic.title, "objective": inp.topic.objective,
-                      "key_points": inp.topic.key_points},
-            "question": inp.question}
-    turns = "\n".join(f"Q: {t.q}\nA: {t.a}" for t in inp.topic_turns[-5:]) or "(không có)"
-    # snippet cua topic (luc start) truoc, chunk theo luot sau; prompt coi ca hai la tai lieu doi chieu (luat 8)
-    blocks = source_blocks(all_snippets(inp), inp.reference_answer)
-    texts = [label(i, t) if with_ids else t for i, t in blocks]
-    reference = texts.pop() if inp.reference_answer else "(không có)"
-    snippets = "\n---\n".join(texts) or "(không có)"
-    user = "\n\n".join([json.dumps(data, ensure_ascii=False), wrap_untrusted("topic_turns", turns),
-                        wrap_untrusted("reference_snippets", snippets),
-                        wrap_untrusted("reference_answer", reference),
-                        wrap_untrusted("answer", inp.answer)])
-    return [{"role": "system", "content": f"{system_prompt}\n\n{UNTRUSTED_NOTICE}"},
-            {"role": "user", "content": user}]
-
-
-def all_snippets(inp: EvaluationInput) -> List[str]:
-    # snippet cua topic (luc start) truoc, chunk theo luot sau: thu tu nay quyet dinh id S1..Sn
-    return [*inp.topic.reference_snippets, *inp.turn_snippets]
-
-
-def source_refs(inp: EvaluationInput) -> List[Optional[SourceRef]]:
-    """Tham chieu ben vung cung thu tu id S1.. / R; thieu (plan cu, interview-service bo truong) thi None."""
-    topic = list(inp.topic.reference_sources)[:len(inp.topic.reference_snippets)]
-    topic += [None] * (len(inp.topic.reference_snippets) - len(topic))
-    turn = list(inp.turn_sources)[:len(inp.turn_snippets)]
-    turn += [None] * (len(inp.turn_snippets) - len(turn))
-    return topic + turn + ([inp.reference_source] if inp.reference_answer else [])
-
-
-def cited_sources(points: List[SourcedPoint], inp: EvaluationInput) -> List[CitedSource]:
-    """Tai lieu cac y (giu lai + bi bac bo) da trich, bo trung theo id; y contradicted dung truoc (can on nhat)."""
-    ids = [i for i, _ in source_blocks(all_snippets(inp), inp.reference_answer)]
-    refs = dict(zip(ids, source_refs(inp)))
-    out: dict = {}
-    for p in sorted(points, key=lambda p: p.support != "contradicted"):
-        for i in p.source_ids:
-            if refs.get(i) is not None and i not in out:
-                out[i] = CitedSource(**refs[i].model_dump(), id=i, support=p.support)
-    return list(out.values())
+DEFAULT_PROMPT_VERSION = "v8"
 
 
 def _sourced(c: CoveredPoint) -> SourcedPoint:
@@ -162,6 +63,11 @@ def postcheck(out: EvaluatorOutput, inp: EvaluationInput) -> Evaluation:
         if invalid or contradicted:
             log.info("evaluator_sources turn=%d invalid_ids=%d contradicted=%d", inp.turn_number, invalid,
                      len(contradicted))
+    # hieu sai chi dua vao chunk cong cu (luat H4): khong chan diem va KHONG vao Evaluation (chi log)
+    if sourced and inp.tool_base_ids is not None:
+        misconceptions, freed = split_tool_misconceptions(misconceptions, contradicted, inp.tool_base_ids)
+        if freed:
+            log.info("evaluator_tool_misconception_dropped turn=%d n=%d", inp.turn_number, len(freed))
     if inp.reference_answer:
         # cau tu kho chi hoi mot khia canh cua topic: tran completeness theo so y co quote (1 y -> 2, 3+ y -> 4)
         # thay vi ti le key_points cua ca topic (se ep diem thap du tra loi du dap an chuan)
@@ -187,10 +93,12 @@ def postcheck(out: EvaluatorOutput, inp: EvaluationInput) -> Evaluation:
 
 class LlmEvaluator:
     agent = "evaluator"
+    supports_lookup = True  # turn_evaluation: chi agent LLM duoc tra cuu kho (EVALUATOR_TOOLS)
 
     def __init__(self, gateway: LlmGateway, prompts: Optional[PromptStore] = None, prompt_version: str = None):
         self._gateway = gateway
-        self._prompt = (prompts or PromptStore()).get(self.agent, prompt_version)
+        # ghim v8 (ban da do): them prompt moi vao thu muc khong tu dong doi Evaluator, chi EVALUATOR_PROMPT_VERSION
+        self._prompt = (prompts or PromptStore()).get(self.agent, prompt_version or DEFAULT_PROMPT_VERSION)
 
     @property
     def prompt_version(self) -> str:
@@ -211,20 +119,27 @@ class LlmEvaluator:
         if replaced:
             log.info("evaluator_stt_terms turn=%d", inp.turn_number)
             inp = replace(inp, answer=normalized)
-        started = time.perf_counter()
+        started, n0 = time.perf_counter(), len(collector.records) if collector is not None else 0
         try:
             sourced = uses_sources(self._prompt.version)
-            result = await self._gateway.complete(self.agent, build_messages(self._prompt.text, inp, sourced),
-                                                  EvaluatorOutputV4 if sourced else EvaluatorOutput,
-                                                  prompt_version=self._prompt.version,
-                                                  collector=collector)
+            schema = EvaluatorOutputV4 if sourced else EvaluatorOutput
+            if inp.lookup is not None and sourced:  # phase 03: 1 ngan sach 10 s cho vong lap tra cuu + fallback
+                result, inp = await call_with_lookup(
+                    self._gateway, self.agent, self._prompt.text, lambda text, i: build_messages(text, i, True),
+                    schema, self._prompt.version, inp, collector, started)
+            else:
+                result = await self._gateway.complete(self.agent, build_messages(self._prompt.text, inp, sourced),
+                                                      schema, prompt_version=self._prompt.version,
+                                                      collector=collector)
         except (LlmError, ConfigError, openai.APIError) as err:  # openai.APIError: loi API con lai sau khi het retry
             log.warning("evaluator_degraded turn=%d error=%s", inp.turn_number, type(err).__name__)
             if collector is not None:
-                # thoi gian cho truoc khi fallback (het han ~10 s): khong ghi thi latency_ms va /metrics bao 0
+                # thoi gian cho truoc khi fallback (het han ~10 s): khong ghi thi latency_ms va /metrics bao 0.
+                # Tru phan vong lap tra cuu da tu ghi (record loi) de khong tinh hai lan.
+                waited = int((time.perf_counter() - started) * 1000)
+                recorded = sum(r.latency_ms for r in collector.records[n0:] if r.agent == self.agent)
                 collector.add(CallRecord(self.agent, "mock-heuristic", prompt_version=self._prompt.version,
-                                         fallback="evaluator_mock_heuristic",
-                                         latency_ms=int((time.perf_counter() - started) * 1000)))
+                                         fallback="evaluator_mock_heuristic", latency_ms=max(waited - recorded, 0)))
             fallback = mock_evaluator.evaluate(inp.answer, inp.question, inp.topic, inp.turn_kind, inp.turn_number)
             return None, fallback.model_copy(update={"degraded": True})
         ev = await asyncio.to_thread(postcheck, result.data, inp)

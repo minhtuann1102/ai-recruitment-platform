@@ -39,6 +39,9 @@ TOKENS = Counter("ai_tokens", "Token theo agent; kind = input / output / cached 
 TOOL_CALLS = Counter("ai_llm_tool_calls", "Lan agent goi cong cu trong vong lap tool calling cua gateway", ["agent"])
 TOOLS_UNSUPPORTED = Counter("ai_llm_tools_unsupported", "Lan model/provider tu choi tools + JSON strict (latch theo "
                             "tien trinh: cac luot sau khong thu lai)")
+EVALUATOR_LOOKUP = Counter("ai_evaluator_lookup", "Evaluator tra cuu kho (EVALUATOR_TOOLS): hit / empty / error (query bi "
+                           "tu choi) / fallback (vong lap loi, cham lai mot lan khong tools) / budget_exhausted (vong lap loi, het ngan sach nen thang sang mock) / unsupported (latch tools)",
+                           ["result"])
 RAG = Counter("ai_rag_requests", "Trang thai RAG bao trong metadata cua request co dung RAG", ["status"])
 RAG_ERRORS = Counter("ai_rag_errors", "Ma loi RAG trong request (rag_timeout, rag_db_error...)", ["code"])
 TURNS = Counter("ai_turns", "Ket qua cham moi luot next-turn stream xong (luot wrap-up khong cham thi khong dem): "
@@ -81,6 +84,11 @@ def record_request(endpoint: str, status: str, error: str, seconds: float, colle
 @_safe
 def record_tools_unsupported() -> None:
     TOOLS_UNSUPPORTED.inc()
+
+
+@_safe
+def record_evaluator_lookup(result: str) -> None:
+    EVALUATOR_LOOKUP.labels(result).inc()
 
 
 @_safe
