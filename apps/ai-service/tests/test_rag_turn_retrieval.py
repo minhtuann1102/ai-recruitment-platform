@@ -164,7 +164,7 @@ def test_next_turn_passes_turn_chunks_to_evaluator_and_hint(monkeypatch):
     assert res.turn.topic_id == target and not res.state.current_qa_id
     for t in (t for ph in res.plan.phases for t in ph.topics if t.id == target):
         t.reference_snippets = []  # luc start BM25 da gan chunk HashMap vao snippet topic (luot sau se bo vi trung)
-    monkeypatch.setattr(turn_engine, "decide", lambda *a, **k: Decision("hint", 0, "va chạm", "test"))
+    monkeypatch.setattr("app.turn_decision.decide", lambda *a, **k: Decision("hint", 0, "va chạm", "test"))
     req = NextTurnRequest(session_id="s", level="junior", track="java_backend", plan=res.plan, state=res.state,
                           turn_number=res.turn.turn_number, question="HashMap xử lý va chạm như thế nào?",
                           answer="Em nghĩ dùng bucket", elapsed_seconds=60 * res.turn.turn_number)

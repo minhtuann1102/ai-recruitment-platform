@@ -59,7 +59,7 @@ def test_engine_passes_answer_key_to_hint(monkeypatch):
             break
     qa_id = r.turn.qa_id
     assert qa_id
-    monkeypatch.setattr("app.turn_engine.decide", lambda *a, **k: Decision("hint", 0, "va chạm", "test"))
+    monkeypatch.setattr("app.turn_decision.decide", lambda *a, **k: Decision("hint", 0, "va chạm", "test"))
     nreq = NextTurnRequest(session_id="s", level="junior", track="java_backend", plan=r.plan, state=r.state,
                            turn_number=r.turn.turn_number, question=r.question, turn_kind="main",
                            answer="Em không chắc.", elapsed_seconds=60 * r.turn.turn_number)
