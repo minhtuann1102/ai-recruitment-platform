@@ -17,14 +17,16 @@ from pydantic import BaseModel
 from .. import metrics
 from ..tracing import observation
 from .chat_call import ChatCall, parse_or_repair, request_base, trace_fields, trace_usage
-from .errors import LlmError, LlmOutputError
+from .errors import LlmError, LlmOutputError, LlmTimeoutError
 from .settings import agent_settings, is_openrouter, merge_extra_body
 from .usage import CallRecord, UsageCollector
 
 log = logging.getLogger("ai_service.llm")
 
 TOOLS_UNSUPPORTED = "tools_unsupported"
-FINAL_RESERVE_S = 1.5  # chua cho buoc `none` khi buoc tools dung het han cua no
+FINAL_RESERVE_S = 1.5  # chua cho buoc `none` cuoi: buoc `auto` dung toi het ngan sach tru phan nay
+FINAL_ANSWER_S = 3.5  # tool call den ma khong con du (lenh + cau tra loi cuoi ~ P50 Evaluator 3,65 s): dung, de caller cham lai
+NO_TIME_FOR_TOOL = "no_time_for_tool"
 MAX_QUERY_CHARS = 200  # strict schema khong bao dam maxLength: code cat
 MAX_ARGS_CHARS = 1000  # chuoi JSON doi so qua dai la sai
 MAX_RESULT_CHARS = 2400  # ket qua cong cu vao moi request sau: khong de no phinh
@@ -109,6 +111,9 @@ async def complete_with_tools(gw, agent: str, messages: List[dict], schema: Type
                               failure_fallback: str = "tool_loop_failed") -> ToolLoopResult:
     """`run_tool(ten, doi_so)` tra chuoi ket qua (caller tu boc `wrap_untrusted`). `tools` la hang so, gui nguyen
     moi buoc de prefix cache on dinh. `budget_started` (perf_counter) + `budget_s`: ngan sach chung ca luot.
+    `step_deadline_s`: han chay MOT lenh cong cu (tinh tu luc lenh bat dau), khong phai han buoc LLM. Buoc `auto` duoc
+    dung toi `tools_until` = het ngan sach - FINAL_RESERVE_S: model tra loi thang (khong goi tool) mat ~ bang Evaluator
+    thuong (P50 3,65 s, do 2026-11-14), cat som hon thi gan nua so luot hong roi phai cham lai.
     Loi: LlmError / LlmOutputError / LlmTimeoutError; da them CallRecord (fallback=failure_fallback, kem do tre)."""
     assert schema is not None, "complete_with_tools can schema (data la BaseModel)"
     if not _tools_supported:
@@ -124,21 +129,22 @@ async def complete_with_tools(gw, agent: str, messages: List[dict], schema: Type
     rec, t0 = CallRecord(agent, cfg.model, prompt_version=prompt_version), time.perf_counter()
     chat = ChatCall(gw, cfg, base, rec, budget_started, budget_s=budget_s, cap_first=True)
     msgs, used = list(messages), 0
+    tools_until = budget_started + budget_s - FINAL_RESERVE_S
     try:
         with observation(agent, "generation", input=messages, **trace_fields(cfg, prompt_version)) as gen:
             while True:
-                step_left = step_deadline_s - (time.perf_counter() - t0)
-                last = used >= max_calls or step_left <= 0
-                choice = await (chat(msgs, tool_choice="none") if last
-                                else chat(msgs, step_until=t0 + step_deadline_s + FINAL_RESERVE_S))
+                last = used >= max_calls or time.perf_counter() >= tools_until
+                choice = await (chat(msgs, tool_choice="none") if last else chat(msgs, step_until=tools_until))
                 calls = getattr(choice.message, "tool_calls", None) or []
                 if not calls:
                     break
                 if last:
                     raise LlmOutputError("Model van goi cong cu sau tool_choice=none")
+                if time.perf_counter() + step_deadline_s + FINAL_ANSWER_S > budget_started + budget_s:
+                    raise LlmTimeoutError(NO_TIME_FOR_TOOL)  # tool goi muon: buoc cuoi khong kip, caller fallback khi con gio
                 msgs.append(_assistant_tool_message(calls))
                 allowed = max_calls - used  # model co the goi song song: chi chay toi da phan con lai
-                deadline = min(budget_started + budget_s, t0 + step_deadline_s)
+                deadline = min(tools_until, time.perf_counter() + step_deadline_s)
                 for i, c in enumerate(calls):  # moi tool_call_id van phai duoc tra loi
                     if i >= allowed:
                         msgs.append({"role": "tool", "tool_call_id": c.id, "content": "error: call_limit"})

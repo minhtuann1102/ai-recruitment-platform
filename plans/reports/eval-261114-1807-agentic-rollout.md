@@ -108,7 +108,7 @@ Gate prompt Evaluator (`run_evaluator`, 3 run; main có nhãn, holdout chưa nh�
 
 - `loop_failed` 66/144 (main) và 19/60 (holdout) trên bản chạy tuần tự sạch, log đều `evaluator_lookup_fallback reason=LlmTimeoutError remaining_s≈6,5`.
 - Nguyên nhân: bước đầu (`tool_choice=auto`) bị cắt ở `EVALUATOR_TOOL_DEADLINE_S + FINAL_RESERVE_S` = 2,0 + 1,5 = 3,5 s (`app/llm/tool_loop.py`, `step_until`), trong khi Evaluator viết JSON không gọi tool mất P50 3,65 s / P95 5,6 s (C0). Khoảng nửa số lượt model trả lời thẳng vẫn bị cắt, rồi chấm lại không tools: lượt mất ~3,5 s + một lần chấm, giải thích TTFT P95 lượt tra cứu 9,65 s và mock tăng 3 → 20.
-- Sửa đề xuất (chưa làm, cần đo lại): chỉ áp hạn bước tool cho bước có tool call; bước đầu được dùng tới ngân sách còn lại trừ `FINAL_RESERVE_S`, hoặc nâng `EVALUATOR_TOOL_DEADLINE_S` mặc định. Id sai 31/43 nhiều khả năng cũng do model trích `S*` của chunk tra cứu ở lượt bị fallback, cần kiểm khi sửa.
+- **Đã sửa 2026-11-15** (`app/llm/tool_loop.py`): bước `auto` dùng tới `tools_until` = hết ngân sách − `FINAL_RESERVE_S`; `EVALUATOR_TOOL_DEADLINE_S` chỉ còn là hạn chạy một lệnh tra cứu, tính từ lúc lệnh bắt đầu. Test hồi quy: `test_slow_direct_answer_is_not_cut_at_tool_deadline`, `test_tool_deadline_counts_from_tool_start_not_loop_start`. Tool call đến muộn (lệnh + câu trả lời cuối `FINAL_ANSWER_S` = 3,5 s không còn vừa ngân sách) thì vòng lặp dừng với `no_time_for_tool` trước khi chạy lệnh, để caller chấm lại không tools khi còn ≥ 2,5 s (review code). Rủi ro còn lại: retry 5xx hoặc repair kéo dài bước `auto` làm mất fallback; theo dõi tỷ lệ degraded khi đo lại. **Chưa đo lại** (hết credit). Id sai 31/43 nhiều khả năng cũng do model trích `S*` của chunk tra cứu ở lượt bị fallback, cần kiểm khi sửa.
 - Kết luận hiện tại: **`EVALUATOR_TOOLS` giữ tắt.**
 
 ## 5. Bảng rollout
@@ -117,7 +117,7 @@ Mọi cờ **mặc định tắt**. Tắt = quyết định, request LLM và gi�
 
 | Cờ | Mặc định | Điều kiện cần | Cổng bật | Giới hạn liên quan |
 |---|---|---|---|---|
-| `EVALUATOR_TOOLS` | `false` | Evaluator LLM; `RAG_HYBRID` và `RAG_TURN_RETRIEVAL` bật; chỉ lượt không có đáp án chuẩn, không phải intro | mục 3 hàng 1; probe tool + JSON strict đạt (hoặc latch giữ đường cũ) | `EVALUATOR_MAX_TOOL_CALLS=1` (trần 2), `EVALUATOR_TOOL_DEADLINE_S=2.0`; chung ngân sách 10 s Evaluator; lỗi hoặc quá hạn thì `evaluator_lookup_fallback` |
+| `EVALUATOR_TOOLS` | `false` | Evaluator LLM; `RAG_HYBRID` và `RAG_TURN_RETRIEVAL` bật; chỉ lượt không có đáp án chuẩn, không phải intro | mục 3 hàng 1; probe tool + JSON strict đạt (hoặc latch giữ đường cũ) | `EVALUATOR_MAX_TOOL_CALLS=1` (trần 2), `EVALUATOR_TOOL_DEADLINE_S=2.0` (hạn một lệnh tra cứu); chung ngân sách 10 s Evaluator; lỗi hoặc quá hạn thì `evaluator_lookup_fallback` |
 | `POLICY_MODE` | `rules` | Evaluator LLM; hiệu chỉnh ngưỡng (phase 01) xong và owner duyệt | mục 3 hàng 2 | `forced_transition`, `low_performance_stop`, turn cap luôn đứng trên LLM; `EVALUATOR_PROMPT_VERSION` ghi đè lệch thì log `policy_prompt_mismatch` |
 | `REPLAN_ENABLED` | `false` | `POLICY_MODE=hybrid`; Evaluator v10; **FSD xác nhận**; không bật ở môi trường thật trước đó | mục 3 hàng 3 | `REPLAN_MAX_SWAPS=1` (trần 2); reserve tối đa 2 topic `alt1/alt2`; pool mỏng thì không có reserve |
 | `AGENT_NOTES_ENABLED` | `false` | `POLICY_MODE=hybrid`; Evaluator v11 (chọn cố định cả phiên); FSD lưu nguyên `state` | mục 3 hàng 4 | ≤ 8 ghi chú, ≤ 150 ký tự, 1 ghi chú/lượt; client gửi quá giới hạn thì 422 bất kể cờ |
@@ -128,7 +128,7 @@ Thứ tự bật đề xuất khi đạt cổng: `EVALUATOR_TOOLS`, rồi `POLIC
 
 - Đã chạy: bước 1, 2 (3 run thay vì 4), 3, 7, 8, 9, 11, 14, 17; bước 20 chỉ C0/C1.
 - [BLOCKED-CREDIT] (OpenRouter hết credit 2026-11-15 00:05): bước 4, 5, 6 (`judge_support`), 12, 13, 15, 16, 18, 19, 20 (C2-C5). Nạp credit rồi chạy lại tuần tự (`run_seq` một tiến trình một lúc); chạy lại cả gate holdout v10 và sourced v11.
-- Sửa hạn bước đầu vòng tra cứu (mục 4b), rồi đo lại C1.
+- Đo lại C1 (bước 6-9) sau bản sửa hạn bước đầu (mục 4b).
 - [DE]: textbook scenario java/nodejs (bước 10).
 - Owner: duyệt hiệu chỉnh ngưỡng; chốt mốc mục 3 (gồm stdev gộp); `overrule_rate_llm` hay tỷ lệ đầy đủ; bật cờ nào mặc định.
 - FSD: xem `docs/ai-service/06-api-contract.md` mục "Thông báo gộp cho FSD".
