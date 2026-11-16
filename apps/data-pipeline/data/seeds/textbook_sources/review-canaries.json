@@ -1,0 +1,50 @@
+[
+  {
+    "kind": "nav",
+    "content": "Messaging Basics > Overview > Where to go next\n\nIn this section: Getting started. Core concepts. Delivery guarantees. Consumer groups. Monitoring and alerting. Previous: Introduction to event streams. Next: Choosing a broker. Back to top. Table of contents: Chapter one. Chapter two. Chapter three. Chapter four. Appendix A. Appendix B. Glossary. Index. Related pages: Queues versus topics. Retry policies. Dead letter handling. Capacity planning. Contact the maintainers."
+  },
+  {
+    "kind": "code_only",
+    "content": "Concurrency Patterns > Worker Pools > Example\n\n```python\nimport queue\nimport threading\n\njobs = queue.Queue()\nresults = []\n\ndef worker():\n    while True:\n        item = jobs.get()\n        if item is None:\n            break\n        results.append(item * 2)\n        jobs.task_done()\n\nthreads = [threading.Thread(target=worker) for _ in range(4)]\nfor t in threads:\n    t.start()\nfor n in range(20):\n    jobs.put(n)\nfor _ in threads:\n    jobs.put(None)\nfor t in threads:\n    t.join()\n```"
+  },
+  {
+    "kind": "off_topic",
+    "content": "About This Project > Community > Project history\n\nThe project began as a weekend experiment by a small group of friends who liked board games. The mascot is a friendly otter, chosen by a public vote held during the first anniversary party. Every autumn the contributors meet in a different city for a social weekend with food, music, and a charity run. Stickers and mugs are sold in the online shop, and all proceeds support a local library. Newcomers are encouraged to introduce themselves in the welcome channel and share a photo of their desk."
+  },
+  {
+    "kind": "reference_table",
+    "content": "Configuration Reference > Connection Pool > Settings\n\nName Default Description\nmax_size 10 Maximum number of open connections\nmin_idle 2 Minimum number of idle connections kept ready\nacquire_timeout 30000 Milliseconds to wait for a free connection\nidle_timeout 600000 Milliseconds before an idle connection is closed\nmax_lifetime 1800000 Milliseconds before a connection is retired\nleak_threshold 0 Milliseconds before a leak warning is logged\nvalidation_query none Statement used to test a connection\nauto_commit true Default commit mode for new connections"
+  },
+  {
+    "kind": "nav",
+    "content": "Relational Storage Guide > Chapters\n\nContents\nChapter 1 Introduction\nChapter 2 Schemas\nChapter 3 Constraints\nChapter 4 Joins\nChapter 5 Indexes\nChapter 6 Transactions\nChapter 7 Backup\nChapter 8 Replication\nChapter 9 Tuning\nChapter 10 Security\nPrevious chapter Next chapter\nSee also: Index of terms, Glossary, Release history, Download PDF, Report a problem with this page."
+  },
+  {
+    "kind": "code_only",
+    "content": "Data Access Layer > Repositories > Sample code\n\n```java\npublic interface OrderRepository extends JpaRepository<Order, Long> {\n\n    List<Order> findByCustomerIdAndStatus(Long customerId, OrderStatus status);\n\n    List<Order> findTop10ByStatusOrderByCreatedAtDesc(OrderStatus status);\n\n    long countByStatus(OrderStatus status);\n\n    boolean existsByCustomerIdAndStatus(Long customerId, OrderStatus status);\n\n    Optional<Order> findFirstByCustomerIdOrderByCreatedAtDesc(Long customerId);\n\n    List<Order> findByTotalGreaterThanEqualOrderByTotalDesc(BigDecimal minimum);\n\n    Page<Order> findByStatus(OrderStatus status, Pageable pageable);\n\n    void deleteByStatusAndCreatedAtBefore(OrderStatus status, Instant cutoff);\n}\n```"
+  },
+  {
+    "kind": "off_topic",
+    "content": "Release Notes > Acknowledgements\n\nWe thank everyone who made this release possible. Special thanks go to the translators for the Portuguese and Korean editions, to the volunteers who ran the booth at the spring conference, and to the sponsors who paid for the hosting bills. The cover illustration was drawn by a contributor who prefers to remain anonymous. Our next meetup is planned for early spring, and lunch will be provided. If you would like to become a sponsor, please write to the community team and ask about the supporter tiers and the logo placement on our website."
+  },
+  {
+    "kind": "reference_table",
+    "content": "Command Line Reference > Options > Flags of the sync command\n\nFlag Short Default Description\n--dry-run -n off Show planned changes without applying them\n--workers -w 4 Number of parallel transfer workers\n--timeout -t 60 Seconds before a transfer is abandoned\n--retries -r 3 Attempts per file before it is reported\n--exclude -x none Glob pattern of paths to skip\n--verbose -v off Print every file touched\n--checksum -c off Compare content hashes instead of timestamps\n--log-file -l none Path of the report file\n--config none Path of an alternative settings file"
+  },
+  {
+    "kind": "nav",
+    "content": "Web Services Handbook > Navigation > Site map\n\nHome | Tutorials | Reference | Downloads | Community | Blog | Support. Tutorials: First service, Second service, Testing basics. Reference: Configuration keys, Command line, Error codes. Downloads: Latest release, Older releases, Checksums. Community: Forum, Chat, Mailing list. Skip to main content. Search this site. Edit this page. Was this page helpful? Yes No. Last updated on a recent date by the documentation team."
+  },
+  {
+    "kind": "code_only",
+    "content": "Query Tuning > Execution Plans > Commands\n\n```sql\nCREATE INDEX idx_orders_customer ON orders (customer_id, created_at);\n\nEXPLAIN ANALYZE\nSELECT o.id, o.total\nFROM orders o\nWHERE o.customer_id = 42\n  AND o.created_at >= now() - interval '7 days'\nORDER BY o.created_at DESC\nLIMIT 20;\n\nVACUUM ANALYZE orders;\n\nSELECT relname, n_live_tup, n_dead_tup\nFROM pg_stat_user_tables\nORDER BY n_dead_tup DESC\nLIMIT 10;\n```"
+  },
+  {
+    "kind": "off_topic",
+    "content": "Contributing > Code of Conduct > Etiquette\n\nBe kind in chat rooms and forums. Greet people by name when you can, avoid sarcasm in written messages, and remember that many members are volunteers who give their free time. Please keep conversations on the proper channel, mark spoilers for the weekly community quiz, and do not post job advertisements outside the dedicated thread. Moderators may archive threads that drift away from the topic. Birthday wishes are welcome in the social channel, and members often share photos of their pets and favorite lunch spots there."
+  },
+  {
+    "kind": "reference_table",
+    "content": "Starling Service > Limits > Plan quotas\n\nPlan Requests per minute Storage Seats\nFree 60 1 GB 1\nTeam 600 50 GB 10\nBusiness 3000 500 GB 50\nEnterprise 12000 5 TB 500\nBurst allowance 2x for 30 seconds on every plan\nOverage rate 0.4 credits per 1000 requests\nSupport response Community Email Priority Dedicated\nAudit log retention 7 days 30 days 90 days 365 days"
+  }
+]
