@@ -1,4 +1,5 @@
 """validate-textbook va viec dang ky 7 lenh textbook vao CLI (T009): ma thoat, bang in, lenh chua lam tra 2."""
+import argparse
 import shutil
 
 import pytest
@@ -62,20 +63,12 @@ def test_unreadable_yaml_exits_one(sources_dir, capsys):
     assert "broken.yaml" in capsys.readouterr().err
 
 
-@pytest.mark.parametrize(
-    "argv",
-    [
-        ["crawl-textbook", "--source", "postgresql"],
-        ["process-textbook"],
-        ["review-textbook-prepare", "--source", "postgresql", "--batch-size", "10", "--seed", "7"],
-        ["review-textbook-score", "--source", "postgresql"],
-        ["coverage-textbook", "--db", "--strict"],
-        ["index-textbook", "--source", "postgresql"],
-    ],
-)
-def test_commands_not_implemented_yet_exit_two_with_message(argv, capsys):
-    assert main(argv) == 2
-    assert f"lenh '{argv[0]}' chua duoc hien thuc" in capsys.readouterr().err
+def test_lazy_handler_missing_module_exits_two_with_message(capsys):
+    from pipeline.textbook_cli import _lazy
+
+    handler = _lazy("textbook_module_that_does_not_exist", "run")
+    assert handler(argparse.Namespace(command="crawl-textbook")) == 2
+    assert "lenh 'crawl-textbook' chua duoc hien thuc" in capsys.readouterr().err
 
 
 @pytest.mark.parametrize("command", ["crawl-textbook", "review-textbook-prepare", "review-textbook-score", "index-textbook"])

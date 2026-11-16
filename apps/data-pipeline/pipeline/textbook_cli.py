@@ -4,6 +4,7 @@ __main__ chi goi add_parsers(sub) va HANDLERS.update(HANDLERS cua file nay). Len
 _not_implemented (ma thoat 2, giong lenh chua lam o __main__); moi task hien thuc xong thay mot dong trong HANDLERS.
 """
 import argparse
+import importlib
 import sys
 from typing import Callable, Dict
 
@@ -19,14 +20,33 @@ def _not_implemented(args: argparse.Namespace) -> int:
     return EXIT_PREFLIGHT_ERROR
 
 
+def _lazy(module: str, func: str) -> Handler:
+    """Handler nap module lenh khi chay (de cac lenh duoc viet song song khong sua file nay).
+
+    Module chua ton tai -> _not_implemented (ma 2); loi import khac van noi len.
+    """
+    full_name = f"{__package__}.{module}"
+
+    def handler(args: argparse.Namespace) -> int:
+        try:
+            mod = importlib.import_module(full_name)
+        except ModuleNotFoundError as exc:
+            if exc.name != full_name:
+                raise
+            return _not_implemented(args)
+        return getattr(mod, func)(args)
+
+    return handler
+
+
 HANDLERS: Dict[str, Handler] = {
     "validate-textbook": run_validate_textbook,
-    "crawl-textbook": _not_implemented,
-    "process-textbook": _not_implemented,
-    "review-textbook-prepare": _not_implemented,
-    "review-textbook-score": _not_implemented,
-    "coverage-textbook": _not_implemented,
-    "index-textbook": _not_implemented,
+    "crawl-textbook": _lazy("textbook_crawl_command", "run_crawl_textbook"),
+    "process-textbook": _lazy("textbook_process_command", "run_process_textbook"),
+    "review-textbook-prepare": _lazy("textbook_review_prepare", "run_review_textbook_prepare"),
+    "review-textbook-score": _lazy("textbook_review_score", "run_review_textbook_score"),
+    "coverage-textbook": _lazy("textbook_coverage_command", "run_coverage_textbook"),
+    "index-textbook": _lazy("textbook_index_command", "run_index_textbook"),
 }
 
 
