@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head><title>PostgreSQL: Documentation: Explicit Locking</title></head>
+<body>
+  <div id="sidebar" class="menu">
+    <h2>Site navigation</h2>
+    <ul><li>Documentation menu entry that must never reach the output</li></ul>
+  </div>
+  <div id="docContent">
+    <h1>Explicit Locking</h1>
+    <p>PostgreSQL provides various lock modes to control concurrent access to data in tables.</p>
+    <h2>Row-Level Locks</h2>
+    <p>Row-level locks do not affect data querying; they block only writers and lockers to the same row.</p>
+    <h3>FOR UPDATE</h3>
+    <p>Rows selected with this clause are locked as though for update, so other transactions wait.</p>
+    <pre>SELECT * FROM stock WHERE sku = 'A1' FOR UPDATE;</pre>
+    <p>Contact the maintainers at lienhe@congty-gia.vn for questions.</p>
+    <h2>Deadlocks</h2>
+    <p>Explicit locking can increase the likelihood of deadlocks, where two transactions wait on each other.</p>
+    <button>Copy</button>
+  </div>
+  <div id="footer"><p>Footer text copyright notice that must not appear</p></div>
+</body>
+</html>

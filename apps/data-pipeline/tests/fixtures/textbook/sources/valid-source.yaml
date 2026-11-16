@@ -1,0 +1,48 @@
+source_id: valid-source
+name: Example Backend Docs
+kind: official
+homepage: https://docs.example.org/guide/
+format: html
+content_selector: "#content"
+language: en
+license: MIT
+license_class: open
+license_url: https://docs.example.org/license
+license_quote: "Permission is hereby granted, free of charge, to any person obtaining a copy of this software."
+license_checked: 2026-11-16
+robots_checked: 2026-11-16
+robots_note: "User-agent: * does not disallow /guide/"
+attribution: "Example Backend Docs, Copyright Example Authors"
+status: use
+excluded_reason: ""
+pages:
+  - url: https://docs.example.org/guide/locking.html
+    category: Backend
+    tracks: [be_track]
+    scenarios: [scn.be.orders]
+    topics: []
+    sections: []
+    kind: guide
+    why: "Row locking and transactions for the orders scenario"
+    status: use
+    excluded_reason: ""
+  - url: https://docs.example.org/guide/constraints.html
+    category: Backend
+    tracks: [be_track]
+    scenarios: [scn.be.orders]
+    topics: []
+    sections: []
+    kind: concept
+    why: "Unique and foreign key constraints"
+    status: use
+    excluded_reason: ""
+  - url: https://docs.example.org/guide/reference.html
+    category: Backend
+    tracks: [be_track]
+    scenarios: [scn.be.orders]
+    topics: []
+    sections: ["Cache", "Queue"]
+    kind: concept
+    why: "Only the Cache and Queue sections of a long page"
+    status: use
+    excluded_reason: ""
