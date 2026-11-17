@@ -54,7 +54,7 @@ python -m pipeline process-textbook --source postgresql
 python -m pipeline review-textbook-prepare --source postgresql
 #   worker soát -> judgments-NN.jsonl
 python -m pipeline review-textbook-score --source postgresql
-#   DE duyệt, điền approved_by, commit decisions
+#   qua cổng mồi → approved_by = "auto:canary-gate", commit decisions
 python -m pipeline process-textbook --source postgresql
 python -m pipeline coverage-textbook
 python -m pipeline index-textbook --source postgresql

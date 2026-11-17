@@ -80,7 +80,7 @@ Trang lỗi (404, robots cấm, rỗng sau khi tách) không ghi dòng; lý do n
 
 - `reason` của `drop`: `nav` (điều hướng / mục lục), `code_only`, `off_topic`, `not_self_contained`, `reference_table`,
   `other`.
-- `approved_by` để trống tới khi DE duyệt; `index-textbook` từ chối file có `approved_by` rỗng.
+- `approved_by` để trống tới khi qua cổng mồi (`review-textbook-score` thoát 0) rồi điền `auto:canary-gate` (DE bỏ duyệt tay 2026-11-17); `index-textbook` từ chối file có `approved_by` rỗng.
 - Áp `trim`: xóa từng chuỗi trong `remove` (khớp nguyên văn, mỗi chuỗi đúng một lần); thân đoạn sau khi cắt dưới 30 từ
   thì coi như `drop` với lý do `too_short_after_trim`.
 
