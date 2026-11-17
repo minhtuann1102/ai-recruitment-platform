@@ -138,3 +138,10 @@ def test_heading_key_ignores_headerlink_marks_and_curly_quotes():
 
     assert _heading_key("Using “atomic” ¶") == _heading_key('Using "atomic"')
     assert _heading_key("5.4. Constraints #") == _heading_key("Constraints")
+
+
+def test_heading_key_strips_nannyml_permalink_but_keeps_trailing_letters():
+    from pipeline.textbook_record_builder import _heading_key
+
+    assert _heading_key("Univariate Drift") == _heading_key("Univariate Drift")
+    assert _heading_key("Basic") == "basic" and _heading_key("Step 1") == "step 1"

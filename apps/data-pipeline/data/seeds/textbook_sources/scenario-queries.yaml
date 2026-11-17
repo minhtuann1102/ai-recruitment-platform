@@ -58,3 +58,27 @@ scn.fe.slow-page-lcp:
 scn.fe.realtime-interview-ui:
   query_en: "stream questions to a React UI over server-sent events or WebSocket, reconnect after disconnect, clean up effects"
   terms: ["server-sent events (EventSource)", "WebSocket close and error events", "automatic reconnection (retry interval, backoff)", "event id to resume after reconnect", "Effect cleanup on unmount", "streaming fetch body"]
+scn.ai.cv-job-matching:
+  query_en: "match CVs to job descriptions using text embeddings, similarity ranking, ranking metrics and avoiding train test leakage"
+  terms: ["TF-IDF", "text embeddings", "cosine similarity", "precision at k and NDCG", "data leakage", "grouped train test split"]
+scn.ai.docs-qa-rag:
+  query_en: "retrieval augmented generation chatbot over internal documents with chunking, vector search, reranking, access control and groundedness evaluation"
+  terms: ["chunking", "embedding retrieval", "reranking", "hallucination", "access control on retrieved chunks", "retrieval evaluation"]
+scn.ai.model-drift-incident:
+  query_en: "diagnose production model quality drop from data drift, concept drift, training serving skew and delayed labels"
+  terms: ["data drift", "concept drift", "training-serving skew", "performance estimation without labels", "drift detection method", "monitoring threshold"]
+scn.ai.prompt-injection-defense:
+  query_en: "defend LLM application against direct and indirect prompt injection with least privilege, output handling and system prompt protection"
+  terms: ["direct and indirect prompt injection", "least privilege", "improper output handling", "system prompt leakage", "human approval", "sandbox"]
+scn.ai.support-agent-handoff:
+  query_en: "customer support agent calling tools with limited autonomy, human approval and handoff to a person when unsure"
+  terms: ["tool calling", "human-in-the-loop", "excessive agency", "workflow versus agent", "step limit", "fallback to human"]
+scn.ai.llm-cost-reduction:
+  query_en: "reduce LLM cost and latency with semantic caching, smaller or quantized models and token limits while measuring quality"
+  terms: ["semantic cache", "prompt or KV cache", "quantization", "token budget", "unbounded consumption", "model routing"]
+scn.ai.model-upgrade-rollout:
+  query_en: "upgrade to a new LLM version safely using offline evaluation, LLM judge, significance testing and monitoring after rollout"
+  terms: ["golden set", "LLM-as-judge", "regression test", "statistical significance", "canary rollout", "monitoring without labels"]
+scn.ai.voice-interview-agent:
+  query_en: "realtime voice interview agent with streaming speech recognition, turn detection, interruptions and latency budget"
+  terms: ["STT LLM TTS pipeline", "voice activity detection", "end-of-turn detection", "barge-in", "latency budget", "provider fallback"]
