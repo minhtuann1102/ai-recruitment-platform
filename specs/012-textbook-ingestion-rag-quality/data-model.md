@@ -14,7 +14,7 @@ Không có bảng mới. Bảng `knowledge_chunks` (`ai_db`, DDL do AIE sở h�
 | Trang thô | `apps/data-pipeline/data/raw/textbook/<source_id>/<UTC>.jsonl` | Không | §2 |
 | Đoạn đã xử lý | `apps/data-pipeline/data/processed/textbook/<source_id>.jsonl` | Không | §3 |
 | Lô soát + kết luận worker | `apps/data-pipeline/data/raw/textbook/review/<source_id>/` | Không | [hướng dẫn soát](contracts/textbook-review-instructions.md) |
-| Quyết định soát | `apps/data-pipeline/data/reviews/textbook/<source_id>-decisions.json` | Có (sau khi DE duyệt) | §4 |
+| Quyết định soát | `apps/data-pipeline/data/reviews/textbook/<source_id>-decisions.json` | Có (sau khi qua cổng mồi) | §4 |
 | Báo cáo độ phủ | `apps/data-pipeline/data/processed/textbook/coverage-report.json` + bản in | Không (dán bảng vào PR) | §5 |
 
 ## 2. Trang thô (một dòng JSONL)
@@ -80,7 +80,7 @@ Trang lỗi (404, robots cấm, rỗng sau khi tách) không ghi dòng; lý do n
 
 - `reason` của `drop`: `nav` (điều hướng / mục lục), `code_only`, `off_topic`, `not_self_contained`, `reference_table`,
   `other`.
-- `approved_by` để trống tới khi DE duyệt; `index-textbook` từ chối file có `approved_by` rỗng.
+- `approved_by` để trống tới khi qua cổng mồi: `review-textbook-score` thoát 0 thì tự ghi `auto:canary-gate` (DE bỏ duyệt tay 2026-11-17); `index-textbook` từ chối file có `approved_by` rỗng.
 - Áp `trim`: xóa từng chuỗi trong `remove` (khớp nguyên văn, mỗi chuỗi đúng một lần); thân đoạn sau khi cắt dưới 30 từ
   thì coi như `drop` với lý do `too_short_after_trim`.
 
@@ -99,7 +99,7 @@ Trang lỗi (404, robots cấm, rỗng sau khi tách) không ghi dòng; lý do n
 ```
 ứng viên → [worker kiểm giấy phép + robots] → manifest (status use / excluded)
         → [DE duyệt manifest] → crawl → process (lọc nhiễu, dedup)
-        → review-prepare → [worker soát] → review-score → [DE duyệt decisions]
+        → review-prepare → [worker soát] → review-score (cổng mồi → auto:canary-gate)
         → process (áp quyết định) → coverage → index → [báo AIE]
 ```
 

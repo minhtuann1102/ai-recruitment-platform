@@ -1,0 +1,7 @@
+track: fe_track
+title: Frontend mau
+id_prefix: fe
+topics:
+  - {id: fe.core.state, title: State, levels: [junior], category: Frontend, key_concepts: [a]}
+scenarios:
+  - {id: scn.fe.dashboard, title: Dashboard, levels: [junior]}

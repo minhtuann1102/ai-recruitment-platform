@@ -1,0 +1,72 @@
+source_id: postgresql
+name: PostgreSQL Documentation
+kind: official
+homepage: https://www.postgresql.org/docs/current/
+format: html
+# Page body lives in #docContent. Inside it, strip div.navheader (Prev/Up/Home/Next table + hr) and div.navfooter
+# (same links, bottom of page); div.toc (in-page subsection list) is optional to strip; also remove a.id_link ("#"
+# permalink in headings) and empty a.indexterm anchors. Site header, version selector, search form, "Submit correction"
+# (#docComments) and site footer are outside #docContent.
+content_selector: "#docContent"
+language: en
+license: PostgreSQL
+license_class: open
+license_url: https://www.postgresql.org/docs/current/legalnotice.html
+license_quote: "Permission to use, copy, modify, and distribute this software and its documentation for any purpose, without fee, and without a written agreement is hereby granted, provided that the above copyright notice and this paragraph and the following two paragraphs appear in all copies."
+license_checked: 2026-11-14
+robots_checked: 2026-11-14
+robots_note: "https://www.postgresql.org/robots.txt (HTTP 200) has one group, User-agent: *, with Disallow: /admin/, /account/, /docs/devel/, /list/, /search/, /message-id/raw/, /message-id/flat/, /message-id/resend/, /message-id/mbox/. No Allow lines, no Crawl-delay; Sitemap: https://www.postgresql.org/sitemap.xml. Docs paths: /docs/current/ and numbered versions such as /docs/18/ are not disallowed (allowed by default); /docs/devel/ IS disallowed - never fetch it. Do not fetch /search/ or /account/ links found on doc pages."
+attribution: "PostgreSQL Documentation, Portions Copyright © 1996-2026, PostgreSQL Global Development Group; Portions Copyright © 1994, The Regents of the University of California Notice: notices/postgresql.txt"
+status: use
+excluded_reason: ""
+pages:
+  - url: https://www.postgresql.org/docs/current/explicit-locking.html
+    category: System Design
+    tracks: [java_backend]
+    scenarios: [scn.java.flash-sale-inventory]
+    topics: []
+    sections: []
+    kind: concept
+    why: "Row-level lock modes taken by SELECT FOR UPDATE and by UPDATE, how they block concurrent writers, and deadlocks: the basis for pessimistic stock reservation."
+    status: use
+    excluded_reason: ""
+  - url: https://www.postgresql.org/docs/current/transaction-iso.html
+    category: System Design
+    tracks: [java_backend]
+    scenarios: [scn.java.flash-sale-inventory, scn.java.payment-idempotency]
+    topics: []
+    sections: []
+    kind: concept
+    why: "Read Committed re-evaluates the WHERE clause after a concurrent update, and Repeatable Read and Serializable raise serialization failures that the application must retry, which grounds atomic stock decrements and safe retries."
+    status: use
+    excluded_reason: ""
+  - url: https://www.postgresql.org/docs/current/ddl-constraints.html
+    category: System Design
+    tracks: [java_backend]
+    scenarios: [scn.java.order-api-crud, scn.java.payment-idempotency]
+    topics: []
+    sections: []
+    kind: concept
+    why: "Primary key, foreign key, check, not-null and unique constraints let the database itself reject invalid or duplicate rows, which supports order schema design and a unique idempotency key."
+    status: use
+    excluded_reason: ""
+  - url: https://www.postgresql.org/docs/current/using-explain.html
+    category: System Design
+    tracks: [java_backend]
+    scenarios: [scn.java.slow-query-incident]
+    topics: []
+    sections: []
+    kind: guide
+    why: "How to read EXPLAIN and EXPLAIN ANALYZE output (scan types, row estimates, actual time, buffers) to find out why a query is slow."
+    status: use
+    excluded_reason: ""
+  - url: https://www.postgresql.org/docs/current/indexes-examine.html
+    category: System Design
+    tracks: [java_backend]
+    scenarios: [scn.java.slow-query-incident]
+    topics: []
+    sections: []
+    kind: guide
+    why: "How to check which indexes a real workload actually uses, why to run ANALYZE and use realistic data first, and when the planner prefers a sequential scan."
+    status: use
+    excluded_reason: ""

@@ -9,21 +9,18 @@ from datetime import datetime, timezone
 from typing import Dict, List, Optional, Tuple
 from urllib.parse import urljoin, urlsplit
 
-from bs4 import BeautifulSoup, Tag
+from bs4 import BeautifulSoup
 
 from pipeline.pii_patterns import scrub_pii
 from pipeline.text_cleaning import clean_text
 
+from .docs_section_parser import NOISE_TAGS, content_root, parse_sections
 from .polite_fetcher import PoliteFetcher
 
 BASE_URL = "https://react.dev"
 START_URLS = ("https://react.dev/learn", "https://react.dev/reference/react")
 ALLOWED_PREFIXES = ("/learn", "/reference/react")
 LICENSE = "CC-BY-4.0"
-HEADING_LEVELS = {"h1": 1, "h2": 2, "h3": 3}
-BLOCK_TAGS = ("h1", "h2", "h3", "p", "li", "pre", "blockquote", "td", "th")
-# Phan giao dien, khong phai noi dung (nut copy code, icon, script)
-NOISE_TAGS = ("script", "style", "noscript", "svg", "button", "nav", "iframe")
 
 
 def normalize_url(href: str, page_url: str) -> Optional[str]:
@@ -37,51 +34,13 @@ def normalize_url(href: str, page_url: str) -> Optional[str]:
     return f"{BASE_URL}{path}"
 
 
-def _block_text(element: Tag) -> str:
-    if element.name == "pre":
-        code = element.get_text().strip("\n")
-        return f"```\n{code}\n```" if code.strip() else ""
-    return element.get_text(" ", strip=True)
-
-
-def _content_root(soup: BeautifulSoup) -> Optional[Tag]:
-    return soup.find("article") or soup.find("main") or soup.body
-
-
-def parse_sections(root: Tag) -> List[Dict]:
-    """Gom block theo heading gan nhat; heading_path = [h1, h2, h3] hien hanh. Bo section rong."""
-    sections: List[Dict] = []
-    path: List[str] = []
-    buffer: List[str] = []
-
-    def flush() -> None:
-        text = scrub_pii(clean_text("\n\n".join(b for b in buffer if b)))
-        if text and path:
-            sections.append({"heading_path": list(path), "text": text})
-        buffer.clear()
-
-    for element in root.find_all(BLOCK_TAGS):
-        # Block long trong block khac (p trong li, li trong li...) da nam trong text cua block ngoai
-        if element.find_parent(BLOCK_TAGS) is not None:
-            continue
-        level = HEADING_LEVELS.get(element.name)
-        if level is None:
-            buffer.append(_block_text(element))
-            continue
-        flush()
-        heading = scrub_pii(clean_text(element.get_text(" ", strip=True)))
-        path[:] = path[: level - 1] + [heading]
-    flush()
-    return sections
-
-
 def parse_page(url: str, html: str) -> Tuple[Optional[Dict], List[str]]:
     """(record hoac None neu trang khong co noi dung, cac link hop le de crawl tiep)."""
     soup = BeautifulSoup(html, "html.parser")
     links = sorted({u for a in soup.find_all("a", href=True) if (u := normalize_url(a["href"], url))})
     for noise in soup.find_all(NOISE_TAGS):
         noise.decompose()
-    root = _content_root(soup)
+    root = content_root(soup, None) or soup.body  # article, main, roi body (hanh vi cu)
     if root is None:
         return None, links
     sections = parse_sections(root)

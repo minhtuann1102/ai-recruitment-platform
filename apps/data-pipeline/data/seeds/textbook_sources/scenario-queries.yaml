@@ -1,0 +1,12 @@
+scn.java.order-api-crud:
+  query_en: "design REST order API with validation, error handling and transactional order creation in Spring Boot"
+  terms: ["REST resource design", "Bean Validation", "@Transactional", "problem details error response", "database constraints"]
+scn.java.flash-sale-inventory:
+  query_en: "prevent overselling stock under concurrent requests using row locks, optimistic locking and isolation levels"
+  terms: ["row-level lock", "SELECT FOR UPDATE", "optimistic locking with @Version", "isolation level", "cache and queue trade-offs", "atomic UPDATE with WHERE condition"]
+scn.java.payment-idempotency:
+  query_en: "idempotent payment API safe against client retries using idempotency key, unique constraint and transaction boundaries"
+  terms: ["idempotency key", "unique constraint", "transaction propagation", "serialization failure retry", "at-least-once delivery", "exactly-once"]
+scn.java.slow-query-incident:
+  query_en: "diagnose slow database query with EXPLAIN ANALYZE, missing index, N+1 selects and connection pool exhaustion"
+  terms: ["EXPLAIN ANALYZE", "index scan versus sequential scan", "N+1 select", "lazy and eager fetching", "connection pool", "slow query logging"]

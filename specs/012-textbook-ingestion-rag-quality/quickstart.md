@@ -40,7 +40,7 @@ python -m pipeline process-textbook --source <S>
 python -m pipeline review-textbook-prepare --source <S>
 #   giao mỗi batch-NN.json cho một worker theo hướng dẫn C
 python -m pipeline review-textbook-score --source <S>
-#   DE đọc danh sách drop / trim, điền approved_by trong data/reviews/textbook/<S>-decisions.json
+#   score thoát 0 (qua cổng mồi) → tự ghi approved_by = "auto:canary-gate" vào data/reviews/textbook/<S>-decisions.json
 python -m pipeline process-textbook --source <S>
 ```
 

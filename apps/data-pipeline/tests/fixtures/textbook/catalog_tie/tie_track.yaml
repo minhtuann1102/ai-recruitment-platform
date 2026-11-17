@@ -1,0 +1,10 @@
+track: tie_track
+title: Track hoa category
+id_prefix: tie
+topics:
+  - {id: tie.a, title: A, levels: [junior], category: Database, key_concepts: [a]}
+  - {id: tie.b, title: B, levels: [junior], category: Backend, key_concepts: [b]}
+  - {id: tie.c, title: C, levels: [junior], category: Backend, key_concepts: [c]}
+  - {id: tie.d, title: D, levels: [junior], category: Database, key_concepts: [d]}
+scenarios:
+  - {id: scn.tie.one, title: Mot, levels: [junior]}

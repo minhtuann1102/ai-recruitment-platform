@@ -1,0 +1,263 @@
+{
+  "approved_by": "auto:canary-gate",
+  "decisions": {
+    "0a8bb474b23633ae2ca266de869f285e": {
+      "remove": [
+        "The ease-of-use afforded by the use of the @Transactional annotation is best\nillustrated with an example, which is explained in the text that follows.\nConsider the following class definition:\n\nJava"
+      ],
+      "verdict": "trim"
+    },
+    "14558d28f9b4ed27f4691d62292665f1": {
+      "verdict": "keep"
+    },
+    "1a740ebd5951efcb6f44c15c26618d8a": {
+      "remove": ["For example, consider the\nfollowing annotation definitions:\n\nJava"],
+      "verdict": "trim"
+    },
+    "1d5cbe36b82c60a5e34d3d203c12898e": {
+      "verdict": "keep"
+    },
+    "1f92b83d242d8b2b80755ef54dff462f": {
+      "remove": [
+        "You can change these default settings. The following table summarizes the various\nproperties of the @Transactional annotation:\n\nProperty\n\nType\n\nDescription\n\nvalue\n\nString\n\nOptional qualifier that specifies the transaction manager to be used.\n\ntransactionManager\n\nString\n\nAlias for value .\n\nlabel"
+      ],
+      "verdict": "trim"
+    },
+    "229746f48591702a2c274af287b98494": {
+      "remove": ["See equivalent in the Reactive stack"],
+      "verdict": "trim"
+    },
+    "230f20897b9dc23e0e2edebd608eafa0": {
+      "verdict": "keep"
+    },
+    "25745758157e00343d165343c18ae5ce": {
+      "remove": [
+        "For example, using the qualifier notation, you can\ncombine the following Java code with the following transaction manager bean declarations\nin the application context:\n\nJava"
+      ],
+      "verdict": "trim"
+    },
+    "2b65d339f3f4b20fdbcd66cd153f6dd6": {
+      "remove": [
+        "The Error Responses section provides further\ndetails on how MethodArgumentNotValidException and HandlerMethodValidationException are handled, and also how their rendering can be customized through a MessageSource and\nlocale and language specific resource bundles."
+      ],
+      "verdict": "trim"
+    },
+    "37b2f05c4cf3c179129d8885cdd4d373": {
+      "verdict": "keep"
+    },
+    "3a5e8ce993cb0f8e03b355406298009e": {
+      "verdict": "keep"
+    },
+    "3a6e14dbf5fd28e2e4e41d19aa7d039f": {
+      "note": "annotation property table fragment, no explanation",
+      "reason": "reference_table",
+      "verdict": "drop"
+    },
+    "3de476372f8557b581de94e78e1af99f": {
+      "verdict": "keep"
+    },
+    "4116f86c9a900fa37a75bb22a2eb3bd0": {
+      "note": "attribute-table fragment; proxy-target-class explanation repeated in prose of item ae07f9d2f06e",
+      "reason": "reference_table",
+      "verdict": "drop"
+    },
+    "4647b79181fd0af4f55c39cd3d7ba4ea": {
+      "remove": [
+        "See The @Async annotation for general details on asynchronous method execution."
+      ],
+      "verdict": "trim"
+    },
+    "4b8f05ecd128801bbbf9a7895a4ce6e5": {
+      "verdict": "keep"
+    },
+    "53415a74cc06723ab258c9b3f6612edc": {
+      "verdict": "keep"
+    },
+    "553ad8b6723373326a19b19f0c074bfe": {
+      "verdict": "keep"
+    },
+    "5726311bf5b35ef343d3769606aa83c6": {
+      "verdict": "keep"
+    },
+    "58945bb4b652bed74d80dfd7caf18990": {
+      "remove": [
+        "Or for 4 retry attempts and an exponential back-off strategy with a bit of jitter:\n\n```\n@Retryable(\n        includes = MessageDeliveryException.class,\n        maxRetries = 4,\n        delay = 100,\n        jitter = 10,\n        multiplier = 2,\n        maxDelay = 1000)\npublic void sendNotification() {\n    this.jmsClient.destination(\"notifications\").send(...);\n}\n```"
+      ],
+      "verdict": "trim"
+    },
+    "5e1040ea3232b7d88bec50fb7bc888b0": {
+      "verdict": "keep"
+    },
+    "62f5b7a08a77f5cce8a4b30949c2fe37": {
+      "verdict": "keep"
+    },
+    "64b8622039b93e3f0fa89feae044295a": {
+      "note": "exception message-code table, no explanation",
+      "reason": "reference_table",
+      "verdict": "drop"
+    },
+    "651ac86bacb9ba047ea87afa756020b7": {
+      "remove": ["See equivalent in the Reactive stack"],
+      "verdict": "trim"
+    },
+    "69cdad97352934d3369d376578f18e45": {
+      "verdict": "keep"
+    },
+    "6b342d983f10369b284cc7716388dc9b": {
+      "note": "Java/Kotlin usage code of annotations defined elsewhere; closing sentence refers to the preceding example",
+      "reason": "not_self_contained",
+      "verdict": "drop"
+    },
+    "71100e1b37628365433d1155dee0596a": {
+      "remove": ["See equivalent in the Reactive stack"],
+      "verdict": "trim"
+    },
+    "79cc452f7145c2985d4922390fd9bc61": {
+      "verdict": "keep"
+    },
+    "7cb8fc552684fd5a30654d21e7675e92": {
+      "remove": [
+        "Note that there are special considerations for the returned Publisher with regards to\nReactive Streams cancellation signals. See the Cancel Signals section under \"Using the TransactionalOperator\" for more details."
+      ],
+      "verdict": "trim"
+    },
+    "7e6a0f3787512f64446fe5f4c6a3456a": {
+      "verdict": "keep"
+    },
+    "8bfd29d249d73f05c2f66ce92fe59d72": {
+      "verdict": "keep"
+    },
+    "90c8431d4451cfeb055b791e6473d94a": {
+      "verdict": "keep"
+    },
+    "95490b6311f84516c8d0f2640499664d": {
+      "remove": ["See equivalent in the Reactive stack"],
+      "verdict": "trim"
+    },
+    "98093b7fb7bc5ede8f754b52a8062b1d": {
+      "note": "attribute-table fragment; mode explanation repeated in prose of item ae07f9d2f06e",
+      "reason": "reference_table",
+      "verdict": "drop"
+    },
+    "997be1a70b551bb50c4ce3d9ade1b103": {
+      "remove": [
+        "The following example shows the configuration needed to enable annotation-driven transaction management:\n\nJava\n\nKotlin"
+      ],
+      "verdict": "trim"
+    },
+    "9ce466ab57cbbe341af8af2fb0f5530d": {
+      "note": "section intro only; says to be aware of physical vs logical transactions without explaining it",
+      "reason": "other",
+      "verdict": "drop"
+    },
+    "a03d0d783f3b5f61af1189b7b2745552": {
+      "note": "XML bean list plus text about TransactionalService whose Java code is not in the passage; only extra fact is the fallback to the default transactionManager bean",
+      "reason": "not_self_contained",
+      "verdict": "drop"
+    },
+    "a19014e470fb01b4d8dd8ee897caff71": {
+      "verdict": "keep"
+    },
+    "a5578c4da599721304b5b00f5590121c": {
+      "verdict": "keep"
+    },
+    "a7e834a6dbe78f8a4afb5ddd3b1b5de5": {
+      "remove": [
+        "See Using @Transactional for general details on declarative transaction management."
+      ],
+      "verdict": "trim"
+    },
+    "aaecc0a192c5a2dc314019f63f0591c8": {
+      "remove": [
+        "Reactive transactional methods use reactive return types in contrast to imperative\nprogramming arrangements as the following listing shows:\n\nJava"
+      ],
+      "verdict": "trim"
+    },
+    "ae07f9d2f06e52d903c3ec0cd95db0d7": {
+      "verdict": "keep"
+    },
+    "afc53a9805f83a19cc6dcb2a31827072": {
+      "remove": ["See equivalent in the Reactive stack"],
+      "verdict": "trim"
+    },
+    "b56a403624df99ce8bbfe888be74c1cd": {
+      "note": "exception message-code table, no explanation",
+      "reason": "reference_table",
+      "verdict": "drop"
+    },
+    "b71ac5573117e6ccc1eab7f4b00c4c8a": {
+      "note": "opens mid-callout (explains a code callout not in the passage) and refers to 'the reversed order shown above'; useful fact: reversed order means retry sees only the Future handle, so async failures are not retried",
+      "reason": "not_self_contained",
+      "verdict": "drop"
+    },
+    "bae6f71d5093075314ab2605f792b1db": {
+      "remove": [
+        "See The @Cacheable Annotation for general details on declarative caching."
+      ],
+      "verdict": "trim"
+    },
+    "bc838ecde1cc71748da894e302363ef3": {
+      "remove": ["Java"],
+      "verdict": "trim"
+    },
+    "bcf3ce3b5472a39218106dea354d6ff4": {
+      "verdict": "keep"
+    },
+    "c0d9419de1cca0743b3c628027946d58": {
+      "verdict": "keep"
+    },
+    "c348175a06498840a8bff2dc83cd53ce": {
+      "verdict": "keep"
+    },
+    "c390f74f062e8dabe1f91e55169cd8fb": {
+      "remove": ["See equivalent in the Reactive stack"],
+      "verdict": "trim"
+    },
+    "c9525cb6a5f5f93c87cb41010fe59bab": {
+      "verdict": "keep"
+    },
+    "cc2bed97b8d894adffacecc8fa6cf0ae": {
+      "note": "table tail plus one note that depends on the table ('Unlike other exceptions')",
+      "reason": "not_self_contained",
+      "verdict": "drop"
+    },
+    "d0a23419b3a10029ffa5a041ef35c47f": {
+      "remove": ["Java"],
+      "verdict": "trim"
+    },
+    "d3486b60bb400d5db5d8dec6b9b0244f": {
+      "verdict": "keep"
+    },
+    "d74a1f0a9f62deaef0cac68ffc6324e6": {
+      "verdict": "keep"
+    },
+    "e3883c763ef8198328e5aa9ca2d5843b": {
+      "verdict": "keep"
+    },
+    "e5adcf30a7c55f2f50528ce724fa5836": {
+      "verdict": "keep"
+    },
+    "effdb9e38cfc9123737ecd58cc994071": {
+      "remove": [
+        "XML Attribute\n\nAnnotation Attribute\n\nDefault\n\nDescription\n\ntransaction-manager\n\nN/A (see TransactionManagementConfigurer javadoc)"
+      ],
+      "verdict": "trim"
+    },
+    "f7845405545446b16fa4eb16048a6d10": {
+      "note": "annotation property table fragment, no explanation",
+      "reason": "reference_table",
+      "verdict": "drop"
+    },
+    "f87d68fa587ebbd1f07d5affc37641de": {
+      "verdict": "keep"
+    },
+    "f92b6f386b33349f4fb26229493c8eeb": {
+      "verdict": "keep"
+    },
+    "fb186bcfccf5b0eaabfb1bbedeaabde1": {
+      "verdict": "keep"
+    }
+  },
+  "reviewed_at": "2026-11-16",
+  "source_id": "spring-framework"
+}

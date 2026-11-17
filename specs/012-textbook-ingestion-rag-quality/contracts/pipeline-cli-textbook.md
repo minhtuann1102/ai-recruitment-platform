@@ -22,12 +22,15 @@ manifest trước và dừng với mã 1 nếu có lỗi.
 
 **`crawl-textbook`**: chỉ tải trang `status: use` của nguồn `status: use`. Bắt buộc `--source` (không crawl mọi nguồn
 một lúc). Trang bị robots cấm, 404, hoặc rỗng sau khi tách section: bỏ qua, in lý do, đếm. Thoát 1 nếu 0 trang ghi
-được; thoát 4 nếu host chặn (3 lần 403 / 429 liên tiếp). In: số trang trong manifest, tải được, bỏ theo lý do, thời
-gian.
+được; thoát 4 nếu host chặn (HTML: 3 lần 403 / 429 liên tiếp; GitHub API: một lần 403 / 429 = hết hạn mức), không ghi
+file. Thoát 1 khi có trang bị bỏ (lỗi tải / robots cấm / rỗng): file thô vẫn ghi nhưng thiếu trang, `process-textbook`
+sẽ từ chối nó, phải crawl lại. In: số trang trong manifest, tải được, bỏ theo lý do, thời gian.
 
 **`process-textbook`**: lấy file thô mới nhất của mỗi nguồn; cắt đoạn (R6), lọc nhiễu (R7), xóa PII, dedup, áp
 decisions nếu có. In: trang vào, đoạn tạo, bỏ theo lý do (`too_short`, `code_only`, `link_list`, `blocked_heading`,
-`review_drop`, `too_short_after_trim`), trùng, đoạn chưa có quyết định soát. Thoát 1 nếu nguồn chưa có file thô.
+`review_drop`, `too_short_after_trim`), trùng, đoạn chưa có quyết định soát. Thoát 1 nếu nguồn chưa có file thô, hoặc
+file thô thiếu URL `status: use` của manifest (in danh sách URL, không ghi gì cho nguồn đó: tránh `index-textbook` xóa
+đoạn đã nạp của trang thiếu).
 
 **`review-textbook-prepare`**: chỉ đưa vào lô những đoạn chưa có trong decisions; mỗi lô thêm 3 đoạn mồi, xáo vị trí
 theo seed. Lô chỉ có `item_id` và `content`: không lộ đoạn nào là mồi. `canary-key.json` nằm cùng thư mục, worker
@@ -35,13 +38,15 @@ không được đọc. Thoát 0 và in "không có đoạn cần soát" khi m�
 
 **`review-textbook-score`**: thoát 1 và không ghi gì nếu: thiếu kết luận cho đoạn nào; lô nào có đoạn mồi không bị
 `drop` (in tên lô phải soát lại); chuỗi `trim` không có trong đoạn hoặc có nhiều hơn một lần. Đạt thì gộp vào file
-decisions (giữ quyết định cũ, `approved_by` đặt lại rỗng) và in: số `keep` / `trim` / `drop` theo lý do.
+decisions (giữ quyết định cũ), đặt `approved_by = "auto:canary-gate"` (thoát 0 = qua cổng mồi, không duyệt tay) và
+in: số `keep` / `trim` / `drop` theo lý do.
 
 **`coverage-textbook`**: định dạng báo cáo ở [data-model.md](../data-model.md) §5. Luôn thoát 0 khi chạy được; chỗ
 thiếu nằm trong `gaps`. `--strict` thoát 1 khi không đạt SC-001 hoặc SC-004.
 
 **`index-textbook`**: bắt buộc `--source`. Từ chối (thoát 1) nếu: decisions của nguồn có `approved_by` rỗng; còn đoạn
-chưa có quyết định. In số bản ghi từng `source_type` trong kho trước và sau; dừng với mã 1 trước khi ghi nếu kho đã có
+chưa có quyết định; còn đoạn đã soát nhưng quyết định hiện tại đã khác lúc process (hash nay là `drop` / bị xóa / đổi
+`keep` ↔ `trim`; in danh sách hash, chạy lại `process-textbook`). In số bản ghi từng `source_type` trong kho trước và sau; dừng với mã 1 trước khi ghi nếu kho đã có
 bản ghi `textbook` không thuộc dataset `de_textbook_*` nào trong manifest (edge case bản ghi sót). Chạy lại: 0 bản ghi
 mới, không gọi API embedding.
 
@@ -54,7 +59,7 @@ python -m pipeline process-textbook --source postgresql
 python -m pipeline review-textbook-prepare --source postgresql
 #   worker soát -> judgments-NN.jsonl
 python -m pipeline review-textbook-score --source postgresql
-#   DE duyệt, điền approved_by, commit decisions
+#   qua cổng mồi → approved_by = "auto:canary-gate", commit decisions
 python -m pipeline process-textbook --source postgresql
 python -m pipeline coverage-textbook
 python -m pipeline index-textbook --source postgresql

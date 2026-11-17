@@ -1,0 +1,9 @@
+track: be_track
+title: Backend mau
+id_prefix: be
+topics:
+  - {id: be.core.threads, title: Threads, levels: [junior], category: Backend, key_concepts: [a]}
+  - {id: be.core.http, title: HTTP, levels: [junior], category: Backend, key_concepts: [a]}
+  - {id: be.data.sql, title: SQL, levels: [junior], category: Database, key_concepts: [a]}
+scenarios:
+  - {id: scn.be.orders, title: Don hang, levels: [junior]}

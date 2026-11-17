@@ -1,0 +1,68 @@
+source_id: spring-framework
+name: Spring Framework Reference Documentation
+kind: official
+homepage: https://docs.spring.io/spring-framework/reference/
+format: html
+content_selector: "article.doc"
+language: en
+license: LicenseRef-Spring-Docs-Notice
+license_class: restricted
+license_url: https://docs.spring.io/spring-framework/reference/
+license_quote: "Copies of this document may be made for your own use and for distribution to others, provided that you do not charge any fee for such copies and further provided that each copy contains the Copyright Notice, whether distributed in print or electronically."
+license_checked: 2026-11-14
+robots_checked: 2026-11-14
+robots_note: "https://docs.spring.io/robots.txt (HTTP 200) has two User-agent: * groups: one with 'crawl-delay: 1', one with 'Disallow: /autorepo/'. No Allow or Sitemap lines. /spring-framework/reference/ is not disallowed. Honour crawl-delay 1 if ever fetched."
+attribution: "Spring Framework Reference Documentation, Copyright © 2005 - Broadcom. All Rights Reserved. Notice: notices/spring-framework.txt"
+status: use
+excluded_reason: ""
+pages:
+  - url: https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/annotations.html
+    category: Backend
+    tracks: [java_backend]
+    scenarios: [scn.java.order-api-crud]
+    topics: []
+    sections: []
+    kind: guide
+    why: "How @Transactional works through AOP proxies (method visibility, self-invocation) and its default settings, so that an order and its items are saved atomically."
+    status: use
+    excluded_reason: ""
+  - url: https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-validation.html
+    category: Backend
+    tracks: [java_backend]
+    scenarios: [scn.java.order-api-crud]
+    topics: []
+    sections: []
+    kind: guide
+    why: "Bean Validation with @Valid and @Validated on request bodies and the exceptions raised when validation fails, which is how an order API rejects invalid input."
+    status: use
+    excluded_reason: ""
+  - url: https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-ann-rest-exceptions.html
+    category: Backend
+    tracks: [java_backend]
+    scenarios: [scn.java.order-api-crud]
+    topics: []
+    sections: []
+    kind: guide
+    why: "Problem Details (RFC 9457) error responses in Spring MVC, for returning consistent machine-readable error bodies from a REST API."
+    status: use
+    excluded_reason: ""
+  - url: https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/tx-propagation.html
+    category: Backend
+    tracks: [java_backend]
+    scenarios: [scn.java.payment-idempotency]
+    topics: []
+    sections: []
+    kind: concept
+    why: "Physical versus logical transactions and PROPAGATION_REQUIRED, REQUIRES_NEW and NESTED, which decide whether a payment or an idempotency record commits or rolls back with the outer transaction."
+    status: use
+    excluded_reason: ""
+  - url: https://docs.spring.io/spring-framework/reference/core/resilience.html
+    category: Backend
+    tracks: [java_backend]
+    scenarios: [scn.java.payment-idempotency]
+    topics: []
+    sections: []
+    kind: guide
+    why: "@Retryable attempt semantics (one initial call plus maxRetries) and how retries combine with @Transactional proxies, for reasoning about retried payment operations."
+    status: use
+    excluded_reason: ""
