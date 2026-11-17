@@ -104,7 +104,7 @@ khi chạy dữ liệu lô thử, vì FR-021 bắt soát đoạn trước khi gh
 ## Phase 5: Hoàn tất PR-A
 
 - [x] T034 [W] Cập nhật `docs/architecture/data-pipeline.md` phần textbook (§ bảng nguồn S3, cây thư mục, phần Processing, ví dụ lệnh): thay phác thảo cũ (`textbook_processor.py`, `run_textbook_pipeline.sh`, 5000+ chunks) bằng cấu trúc thật và 7 lệnh, link tới `specs/012-textbook-ingestion-rag-quality/contracts/`; không chép lại contract
-- [ ] T035 [R] `code-reviewer` (opus) review toàn bộ PR-A theo spec + contract; báo cáo vào `plans/reports/`; worker sửa các mục reviewer nêu, chạy lại pytest
+- [x] T035 [R] `code-reviewer` (opus) review toàn bộ PR-A theo spec + contract; báo cáo vào `plans/reports/`; worker sửa các mục reviewer nêu, chạy lại pytest
 - [ ] T036 [DE] Mở PR-A (conventional commit, không nhắc công cụ AI), CI xanh, merge
 
 ---
@@ -123,7 +123,7 @@ khi chạy dữ liệu lô thử, vì FR-021 bắt soát đoạn trước khi gh
 - [x] T042 [P] [W] [US1] Soát đoạn theo hướng dẫn C, **mỗi `batch-NN.json` một worker**, ghi `judgments-NN.jsonl`
 - [x] T043 [W] [US1] `review-textbook-score --source <S>` cho từng nguồn; lô bỏ sót đoạn mồi → giao lại lô đó cho worker khác (T042); tới khi thoát 0. Báo số `keep` / `trim` / `drop` và danh sách `drop` + `trim`
 - [x] T044 [DE] [US1] *(2026-11-17: DE bỏ duyệt tay; `review-textbook-score` thoát 0 = qua cổng mồi → `approved_by = "auto:canary-gate"`)* ~~Duyệt danh sách `drop` + `trim` của từng nguồn; đọc mẫu ngẫu nhiên 50 đoạn `keep` (SC-006, không quá 3 đoạn nhiễu; vượt thì siết luật lọc hoặc hướng dẫn C rồi soát lại); điền `approved_by` trong từng `<S>-decisions.json`~~
-- [ ] T045 [W] [US1] `process-textbook` lại cho các nguồn của lô thử, `coverage-textbook`; báo bảng tình huống × số đoạn × `keyword_hit` và `gaps`. Tình huống dưới 1 đoạn hoặc trượt truy hồi: đề xuất trang bù (quay lại T039 cho tình huống đó)
+- [x] T045 [W] [US1] `process-textbook` lại cho các nguồn của lô thử, `coverage-textbook`; báo bảng tình huống × số đoạn × `keyword_hit` và `gaps`. Tình huống dưới 1 đoạn hoặc trượt truy hồi: đề xuất trang bù (quay lại T039 cho tình huống đó)
 - [ ] T046 [DE] [US1] Mở PR-B (manifest, `scenario-queries.yaml`, decisions; bảng độ phủ và bảng nguồn × giấy phép trong mô tả PR), merge
 - [ ] T047 [DE] [US1] Từ `main` mới nhất: `index-textbook --source <S>` cho từng nguồn, chạy lần hai để xác nhận 0 bản ghi mới, `coverage-textbook --db`, hai câu SQL ở quickstart §5. Cần `.env` có DB + key embedding. Ghi số bản ghi từng `source_type` trước / sau vào task này
 - [ ] T048 [DE] [US1] Báo AIE (FR-025): tên dataset, số bản ghi, category đã dùng (`Backend`, `System Design`), việc cần làm (đo nền với cờ tắt → bật `RAG_TEXTBOOK_ENABLED` → khởi động lại → đo lại), kèm 5 câu hỏi ở spec
