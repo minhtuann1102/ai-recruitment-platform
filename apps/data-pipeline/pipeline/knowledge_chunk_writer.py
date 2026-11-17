@@ -4,7 +4,8 @@
 2. tra hash da co -> plan_writes (ham thuan): new | update cung dataset | skip dataset khac
 3. co ban ghi moi: embed thu, roi embed + INSERT theo batch, commit tung batch
 4. UPDATE cot phan loai + content cho hash da co cung dataset (khong embed lai)
-5. don ban ghi cung dataset khong con trong lan chay — chi khi 0 loi embedding
+5. don ban ghi cung dataset + source_type khong con trong lan chay — chi khi 0 loi embedding
+   (source_type lay tu ban ghi cua lan chay nen index Q&A khong xoa textbook va nguoc lai; spec 012 research R8)
 Khong tao / sua bang (FR-011).
 """
 from collections import defaultdict
@@ -42,14 +43,22 @@ class WritePlan:
     update: List[Dict] = field(default_factory=list)
     skip_other: List[Dict] = field(default_factory=list)
     keep_hashes: Dict[str, List[str]] = field(default_factory=dict)  # dataset -> hash cua lan chay
+    source_types: Dict[str, str] = field(default_factory=dict)  # dataset -> source_type cua ban ghi trong lan chay
 
 
 def plan_writes(records: Sequence[Dict], existing: Dict[str, str]) -> WritePlan:
-    """existing = {content_hash: dataset} cua ban ghi da co trong kho."""
+    """existing = {content_hash: dataset} cua ban ghi da co trong kho.
+
+    Ban ghi khong co khoa source_type duoc coi la interview_qa (hanh vi truoc spec 012).
+    """
     plan = WritePlan()
     keep: Dict[str, List[str]] = defaultdict(list)
     for record in records:
         content_hash, dataset = record["content_hash"], record["metadata"]["dataset"]
+        source_type = record.get("source_type", SOURCE_TYPE)
+        if plan.source_types.setdefault(dataset, source_type) != source_type:
+            raise ValueError(f"dataset {dataset} co hai source_type trong cung lan chay: "
+                             f"{plan.source_types[dataset]} va {source_type}")
         keep[dataset].append(content_hash)
         if content_hash not in existing:
             plan.new.append(record)
@@ -114,7 +123,7 @@ def write_records(conn, plan: WritePlan, embed: Callable[[Sequence[str]], List[L
             stats["cleanup"] = "skipped (embed_errors > 0)"
             return stats
         for dataset, hashes in plan.keep_hashes.items():
-            cur.execute(_DELETE_SQL, (SOURCE_TYPE, dataset, hashes))
+            cur.execute(_DELETE_SQL, (plan.source_types[dataset], dataset, hashes))
             stats["deleted"] += cur.rowcount
         conn.commit()
     stats["cleanup"] = "done"

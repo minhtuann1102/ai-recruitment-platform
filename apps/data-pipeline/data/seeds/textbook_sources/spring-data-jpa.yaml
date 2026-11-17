@@ -1,0 +1,29 @@
+source_id: spring-data-jpa
+name: Spring Data JPA Reference Documentation
+kind: official
+homepage: https://docs.spring.io/spring-data/jpa/reference/
+format: html
+# Typical page (jpa/query-methods.html): one article.doc holds the text. Inside it strip
+# div.breadcrumbs-container (nav.breadcrumbs, top; includes empty li#copy-url) and a.anchor (empty permalink
+# anchors in headings). nav.pagination (Prev/Next) was not present on the two pages checked (index, query-methods)
+# but is used by the same Antora template on other Spring docs, so strip it if present. Sidebar, toolbar, footer
+# and version modal are outside article.doc. The index page's article.doc also holds the notice block below.
+content_selector: "article.doc"
+language: en
+# Notice is in the article body of the index page (authors line, '© 2008-2026 VMware, Inc.', then the copies paragraph;
+# same wording as Spring Framework except 'this Copyright Notice' instead of 'the Copyright Notice'). Site footer
+# (every page) reads 'Copyright © 2005 - Broadcom. All Rights Reserved.' (year written by JavaScript). Repo
+# README.adoc (https://github.com/spring-projects/spring-data-jpa, section License) says 'Spring Data JPA is Open
+# Source software released under the Apache 2.0 license.'; names the software, not the docs.
+# Footer 'Terms of Use' link (https://www.vmware.com/help/legal.html, redirects to https://www.broadcom.com/company/legal/terms-of-use) returned only a page title to a plain request (content is loaded by JavaScript), so any terms on automated collection are UNCONFIRMED.
+license: LicenseRef-Spring-Docs-Notice
+license_class: restricted
+license_url: https://docs.spring.io/spring-data/jpa/reference/
+license_quote: "Copies of this document may be made for your own use and for distribution to others, provided that you do not charge any fee for such copies and further provided that each copy contains this Copyright Notice, whether distributed in print or electronically."
+license_checked: 2026-11-14
+robots_checked: 2026-11-14
+robots_note: "https://docs.spring.io/robots.txt (HTTP 200) has two User-agent: * groups: one with 'crawl-delay: 1', one with 'Disallow: /autorepo/'. No Allow or Sitemap lines. /spring-data/jpa/reference/ is not disallowed. Honour crawl-delay 1 if ever fetched."
+attribution: "Spring Data JPA Reference Documentation, © 2008-2026 VMware, Inc. Notice: notices/spring-data-jpa.txt"
+status: excluded
+excluded_reason: "Lo thu java_backend chua chon trang; Spring Framework + Hibernate da phu JPA. Mo lai khi can trang rieng."
+pages: []

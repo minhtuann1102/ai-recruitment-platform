@@ -1,0 +1,6 @@
+Spring Framework Reference Documentation
+Source: https://docs.spring.io/spring-framework/reference/ (read 2026-11-14)
+
+Copyright © 2005 - Broadcom. All Rights Reserved. The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+
+Copies of this document may be made for your own use and for distribution to others, provided that you do not charge any fee for such copies and further provided that each copy contains the Copyright Notice, whether distributed in print or electronically.

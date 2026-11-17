@@ -261,8 +261,8 @@ câu chính của các topic này đã có đáp án từ kho.
   trong ba kết quả đầu.
 - **SC-005**: Sau mỗi lần ghi, số bản ghi `interview_qa` và `job_description` không đổi; chạy lại lần hai thêm 0 bản
   ghi.
-- **SC-006**: 100% đoạn mồi bị bước soát đánh dấu bỏ; trong mẫu ngẫu nhiên 50 đoạn sau soát do DE đọc, không quá 3 đoạn
-  là nhiễu.
+- **SC-006**: 100% đoạn mồi bị bước soát đánh dấu bỏ (cổng tự động; DE bỏ bước đọc mẫu tay 2026-11-17 vì nội dung lấy
+  nguyên từ docs chính thức, bước soát chỉ loại nhiễu).
 - **SC-007**: Lô thử có số đo trước / sau do AIE ghi lại cho phase scenario (tỉ lệ ý có căn cứ, độ trễ lúc bắt đầu
   buổi và theo lượt), và quyết định của DE về việc nạp tiếp được ghi kèm số đo đó.
 - **SC-008**: Tổng số đoạn `textbook` nằm trong khoảng 300–1.500; vượt thì DE rà lại danh sách trang trước khi nạp

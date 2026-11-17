@@ -27,6 +27,8 @@ from .qa_scope_check_score import add_parser as add_scope_check_score_parser
 from .qa_scope_check_score import run_scope_check_score
 from .review_sample_command import run_review_sample
 from .seed_review_command import run_approve_seed, run_review_seed
+from .textbook_cli import HANDLERS as TEXTBOOK_HANDLERS
+from .textbook_cli import add_parsers as add_textbook_parsers
 
 EXIT_OK = 0
 EXIT_INPUT_ERROR = 1  # seed / catalog / golden set loi, hoac crawl thu 0 record
@@ -63,6 +65,7 @@ HANDLERS: Dict[str, Handler] = {
     "process-jd": run_process_jd,
     "synth-jd": run_synth_jd,
 }
+HANDLERS.update(TEXTBOOK_HANDLERS)  # 7 lenh textbook (spec 012): parser + handler nam o textbook_cli
 
 
 def _add_catalog_option(parser: argparse.ArgumentParser) -> None:
@@ -157,6 +160,7 @@ def build_parser() -> argparse.ArgumentParser:
     synth_jd.add_argument("--target", type=int, default=500, help="so JD hop le muc tieu (FR-002)")
     synth_jd.add_argument("--limit", type=int, default=None, metavar="N", help="toi da N JD moi lan chay")
     synth_jd.add_argument("--dry-run", action="store_true", help="chi in o thieu, khong goi LLM, khong can key")
+    add_textbook_parsers(sub)
     return parser
 
 

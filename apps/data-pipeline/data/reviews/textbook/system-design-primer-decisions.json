@@ -1,0 +1,103 @@
+{
+  "approved_by": "auto:canary-gate",
+  "decisions": {
+    "24ac26fa00c230fc0ec7da50e283d13c": {
+      "verdict": "keep"
+    },
+    "25699702eb4ddb21b172f3dd462718d3": {
+      "verdict": "keep"
+    },
+    "2c9539799ee90561ab11eb28b67a65bf": {
+      "remove": ["Source: Intro to architecting systems for scale"],
+      "verdict": "trim"
+    },
+    "3222fa5997b81b324d4c7e30013f9c53": {
+      "remove": ["Source: From cache to in-memory data grid"],
+      "verdict": "trim"
+    },
+    "379dd7ddc160d5355d3f37aa46a07628": {
+      "verdict": "keep"
+    },
+    "3bf8cff1e4bf3b3433c099ea4302ba98": {
+      "remove": ["Source: From cache to in-memory data grid"],
+      "verdict": "trim"
+    },
+    "3deece6fc93128387ab29bc97192d7f3": {
+      "note": "opens with four bullets whose lead-in (choose a native library when) is in the previous chunk; second half (REST for public APIs, RPC disadvantages) is useful, salvage by trimming the orphan bullets",
+      "reason": "not_self_contained",
+      "verdict": "drop"
+    },
+    "5623f03d0f17d3b2ddd33d70df65f945": {
+      "verdict": "keep"
+    },
+    "61a19fcf1f2bfa91088cd5c791fa39a2": {
+      "note": "RPC vs REST sample-call table with no explanation; multi-line cells broken; ends with empty sources heading",
+      "reason": "reference_table",
+      "verdict": "drop"
+    },
+    "6dee407f75e51d2948395d20e32bb980": {
+      "verdict": "keep"
+    },
+    "845cbb37b9e1a0350fa2f6595282a8e0": {
+      "remove": [
+        "Source: How to make a multiplayer game",
+        "#### Source(s) and further reading: TCP and UDP\n\n* [Networking for game programming](https://gafferongames.com/post/udp_vs_tcp/)\n* [Key differences between TCP and UDP protocols](http://www.cyberciti.biz/faq/key-differences-between-tcp-and-udp-protocols/)\n* [Difference between TCP and UDP](http://stackoverflow.com/questions/5970383/difference-between-tcp-and-udp)\n* [Transmission control protocol](https://en.wikipedia.org/wiki/Transmission_Control_Protocol)\n* [User datagram protocol](https://en.wikipedia.org/wiki/User_Datagram_Protocol)\n* [Scaling memcache at Facebook](http://www.cs.bu.edu/~jappavoo/jappavoo.github.com/451/papers/memcache-fb.pdf)"
+      ],
+      "verdict": "trim"
+    },
+    "8b2677e867ba47adb31ca25ca48d6757": {
+      "verdict": "keep"
+    },
+    "8ddec3ce876c6ee5e7c2acd6bf30a902": {
+      "remove": ["Source: Scalability, availability, stability, patterns"],
+      "verdict": "trim"
+    },
+    "8e37001892057d2585003759ea60704d": {
+      "remove": ["Source: How to make a multiplayer game"],
+      "verdict": "trim"
+    },
+    "90d086902aa3de28896d1d08bf0df7a0": {
+      "verdict": "keep"
+    },
+    "a1cce3fa8113b42ab9b677099aa13671": {
+      "remove": ["Source: Scalable system design patterns"],
+      "verdict": "trim"
+    },
+    "ac69da23fc76fd8f12f946920c7f66c1": {
+      "remove": ["Choose a native library (aka SDK) when:"],
+      "verdict": "trim"
+    },
+    "ae4267792e7e83f9b111fd4489afc5b3": {
+      "verdict": "keep"
+    },
+    "b0c78674a73ce1b1bcc97d1fe67155b8": {
+      "remove": ["#### Disadvantage(s): REST"],
+      "verdict": "trim"
+    },
+    "b65e6bcd4e431315f9f4304a6bb436d1": {
+      "remove": ["Source: Crack the system design interview"],
+      "verdict": "trim"
+    },
+    "bb27246322dd78661ff1920e23aa550f": {
+      "verdict": "keep"
+    },
+    "bd45def662ff90ba4611818be5a351a6": {
+      "remove": [
+        "#### Source(s) and further reading: HTTP\n\n* [What is HTTP?](https://www.nginx.com/resources/glossary/http/)\n* [Difference between HTTP and TCP](https://www.quora.com/What-is-the-difference-between-HTTP-protocol-and-TCP-protocol)\n* [Difference between PUT and PATCH](https://laracasts.com/discuss/channels/general-discussion/whats-the-differences-between-put-and-patch?page=1)"
+      ],
+      "verdict": "trim"
+    },
+    "cabd19d8cffcdf274ba8a3f0e5b2ac93": {
+      "remove": [
+        "Source: Scalability, availability, stability, patterns",
+        "##### Disadvantage(s): write-behind"
+      ],
+      "verdict": "trim"
+    },
+    "dcc63345a8fbef82af1d399b126eb614": {
+      "verdict": "keep"
+    }
+  },
+  "reviewed_at": "2026-11-16",
+  "source_id": "system-design-primer"
+}

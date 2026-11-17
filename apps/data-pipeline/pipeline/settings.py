@@ -32,6 +32,17 @@ CURATED_DATASET = "de_interview_qa"  # seed commit trong repo
 CRAWLED_DATASET = "de_crawled_qa"  # crawl + dich, khong commit
 SOURCE_TYPE = "interview_qa"
 
+# Spec 012 (textbook): manifest nguon + decisions soat duoc commit; trang tho, doan da xu ly, lo soat nam ngoai git
+# (data/raw va data/processed da co trong .gitignore goc)
+TEXTBOOK_SOURCES_DIR = APP_DIR / "data" / "seeds" / "textbook_sources"
+TEXTBOOK_RAW_DIR = RAW_DIR / "textbook"
+TEXTBOOK_PROCESSED_DIR = PROCESSED_DIR / "textbook"
+TEXTBOOK_REVIEW_WORK_DIR = TEXTBOOK_RAW_DIR / "review"
+TEXTBOOK_DECISIONS_DIR = APP_DIR / "data" / "reviews" / "textbook"
+TEXTBOOK_SOURCE_TYPE = "textbook"
+TEXTBOOK_DATASET_PREFIX = "de_textbook_"  # metadata.dataset = prefix + source_id (research R1)
+SYSTEM_DESIGN_CATEGORY = "System Design"  # category cua tai lieu dung chung nhieu track (research R2)
+
 # Chi doc .env cua app, khong lan len .env goc cua monorepo
 load_dotenv(APP_DIR / ".env")
 

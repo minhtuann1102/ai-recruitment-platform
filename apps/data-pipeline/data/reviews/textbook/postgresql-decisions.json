@@ -1,0 +1,430 @@
+{
+  "approved_by": "auto:canary-gate",
+  "decisions": {
+    "02b2b42f4847fae3d2225d1e354200d9": {
+      "verdict": "keep"
+    },
+    "044a8d87a708cbb73a494a812a46aca8": {
+      "verdict": "keep"
+    },
+    "06efcb1e00b840dc8636cc6433f61cec": {
+      "note": "'Here we see' an unshown plan; skip-scan point depends on that example",
+      "reason": "not_self_contained",
+      "verdict": "drop"
+    },
+    "09bc66c00ccc341608e60734405136a7": {
+      "verdict": "keep"
+    },
+    "0a0c725bd76d8a009c105a3073f74c00": {
+      "verdict": "keep"
+    },
+    "0c7f630dee4ad0182d956956d32d8e6b": {
+      "verdict": "keep"
+    },
+    "0f45a0f5f32ab5f82186d721e57ffb25": {
+      "note": "refers to constraints in an example that is not in the passage",
+      "reason": "not_self_contained",
+      "verdict": "drop"
+    },
+    "10b9cb82a790ea3e7b97cc80ce0c82a6": {
+      "verdict": "keep"
+    },
+    "14ee3d62727a8087afedc490edd13f02": {
+      "verdict": "keep"
+    },
+    "1cfa90a77ace36a2cf886b6c0d20a03e": {
+      "verdict": "keep"
+    },
+    "20289b872fb711235ae05330c7926c43": {
+      "verdict": "keep"
+    },
+    "237fb862f29a8ec8758fcfe3da334af0": {
+      "verdict": "keep"
+    },
+    "23ae6c70332801822526e5cbbb7587a6": {
+      "verdict": "keep"
+    },
+    "25129c052bf6d9e172fbc977ed2487da": {
+      "verdict": "keep"
+    },
+    "26479635062e414ac45ef3776ae942ef": {
+      "verdict": "keep"
+    },
+    "2748d49da80bc840dc45a346fbe62f7a": {
+      "verdict": "keep"
+    },
+    "2ae4a2ba5724a990dd6fb00caa2534f8": {
+      "verdict": "keep"
+    },
+    "33b3b58363bc5e30f851eee9174e29b4": {
+      "verdict": "keep"
+    },
+    "375927bf6fb6bc03c1ef42ca106bded1": {
+      "verdict": "keep"
+    },
+    "38e37f03964c3cb5cc06c2a83a623c54": {
+      "note": "starts with a dependent fragment; LIMIT example explained only in next passage",
+      "reason": "not_self_contained",
+      "verdict": "drop"
+    },
+    "398636e5812878a4549e551b83492a4d": {
+      "verdict": "keep"
+    },
+    "399208b775334478e53f05be0d929a8a": {
+      "verdict": "keep"
+    },
+    "3f736515d68f108560f6e56a675c1b1a": {
+      "remove": [
+        "Table 13.2. Conflicting Lock Modes\n\nRequested Lock Mode\n\nExisting Lock Mode\n\nACCESS SHARE\n\nROW SHARE\n\nROW EXCL.\n\nSHARE UPDATE EXCL.\n\nSHARE\n\nSHARE ROW EXCL.\n\nEXCL.\n\nACCESS EXCL.\n\nACCESS SHARE\n\nX\n\nROW SHARE\n\nX\n\nX\n\nROW EXCL.\n\nX\n\nX\n\nX\n\nX\n\nSHARE UPDATE EXCL.\n\nX\n\nX\n\nX\n\nX\n\nX\n\nSHARE\n\nX\n\nX\n\nX\n\nX\n\nX\n\nSHARE ROW EXCL.\n\nX\n\nX\n\nX\n\nX\n\nX\n\nX\n\nEXCL.\n\nX\n\nX\n\nX\n\nX\n\nX\n\nX\n\nX\n\nACCESS EXCL.\n\nX\n\nX\n\nX\n\nX\n\nX\n\nX\n\nX\n\nX"
+      ],
+      "verdict": "trim"
+    },
+    "3f73b96657480563ae6ed299ab322a4e": {
+      "verdict": "keep"
+    },
+    "3ff78595cae7bd90d6356ad721de1ddb": {
+      "verdict": "keep"
+    },
+    "42172b8bae208e2d855ba0ab5944a99b": {
+      "verdict": "keep"
+    },
+    "423356fa31ea1a4ecbb2bca9185ca926": {
+      "verdict": "keep"
+    },
+    "451217f4ff203bf5829aa02332d6c584": {
+      "verdict": "keep"
+    },
+    "4565dfc872b715500916ec24f9039c0d": {
+      "verdict": "keep"
+    },
+    "48251dc21c2810dc3ea7632ba80d8cb1": {
+      "remove": [
+        "\n\nThe functions provided to manipulate advisory locks are described in Section 9.28.10 .",
+        "\n\nPrev\n\nUp\n\nNext\n\n13.2. Transaction Isolation\n\nHome\n\n13.4. Data Consistency Checks at the Application Level"
+      ],
+      "verdict": "trim"
+    },
+    "4b8a64ab7f4783684984ac55be57cfb8": {
+      "verdict": "keep"
+    },
+    "4e5dd4586887a9d7a8104c8da1d9bb35": {
+      "verdict": "keep"
+    },
+    "4e6179bcf446a480261563a46c14dc85": {
+      "verdict": "keep"
+    },
+    "509c0630f79c3793bb545c1fa5c44c96": {
+      "remove": [
+        "Prev\n\nUp\n\nNext\n\n11.11. Indexes and Collations\n\nHome\n\nChapter 12. Full Text Search"
+      ],
+      "verdict": "trim"
+    },
+    "542837b6327b6d4a10e9f6c9c63fad9b": {
+      "verdict": "keep"
+    },
+    "5503b29cbe5cd578cfeb0fda0bea850f": {
+      "verdict": "keep"
+    },
+    "553a6032eeb5153f6f6c68f177957494": {
+      "verdict": "keep"
+    },
+    "5782692d6ec7884cbac4cf6c42f5de8a": {
+      "remove": [
+        "Prev\n\nUp\n\nNext\n\nChapter 14. Performance Tips\n\nHome\n\n14.2. Statistics Used by the Planner"
+      ],
+      "verdict": "trim"
+    },
+    "593892dfeb5a7640604b7f6677410207": {
+      "verdict": "keep"
+    },
+    "5b04c361be7755fa7231a4d50288356a": {
+      "verdict": "keep"
+    },
+    "5c685a9c9cab7cdb9f94e5663571b29b": {
+      "verdict": "keep"
+    },
+    "5cf6fd1e56ac67f39d20f1c1976ab85f": {
+      "verdict": "keep"
+    },
+    "63e922133d2c3100329f61db96ffcebf": {
+      "verdict": "keep"
+    },
+    "65c2d59f760b3c7ae4c3a7a94c0ac19a": {
+      "verdict": "keep"
+    },
+    "68a82d706334ae8dd943f84e0c2d3a35": {
+      "verdict": "keep"
+    },
+    "6b2f020a85b11e673a8ba40e3f7e3251": {
+      "verdict": "keep"
+    },
+    "6c709cc414ea1336a65af43034549298": {
+      "verdict": "keep"
+    },
+    "6d6dbb9836869648b8c83c652b3d64fe": {
+      "verdict": "keep"
+    },
+    "6de63177d43045e7ca1443d7883d412c": {
+      "verdict": "keep"
+    },
+    "6e74a7b9877cc77ce83422c10250e2a5": {
+      "verdict": "keep"
+    },
+    "70678359f77f10569644ecbf6623ff86": {
+      "note": "version history note (pre-9.1); refers to behaviour described elsewhere",
+      "reason": "off_topic",
+      "verdict": "drop"
+    },
+    "70bfdeac99dc7f42f3748c99ca01b653": {
+      "verdict": "keep"
+    },
+    "710abf6627877fb24c1447f44899fa02": {
+      "note": "lock mode names stripped from list; cannot tell which mode each paragraph describes",
+      "reason": "not_self_contained",
+      "verdict": "drop"
+    },
+    "731112521cf9d3174b030f23456b79dc": {
+      "verdict": "keep"
+    },
+    "73db407d6cd3b619865d7a61b532bfdf": {
+      "verdict": "keep"
+    },
+    "75074d6318a1bca554c9a723b52a2d8b": {
+      "verdict": "keep"
+    },
+    "75971fb798f205766a295c935b46ce58": {
+      "remove": [
+        "Table 13.3. Conflicting Row-Level Locks\n\nRequested Lock Mode\n\nCurrent Lock Mode\n\nFOR KEY SHARE\n\nFOR SHARE\n\nFOR NO KEY UPDATE\n\nFOR UPDATE\n\nFOR KEY SHARE\n\nX\n\nFOR SHARE\n\nX\n\nX\n\nFOR NO KEY UPDATE\n\nX\n\nX\n\nX\n\nFOR UPDATE\n\nX\n\nX\n\nX\n\nX"
+      ],
+      "verdict": "trim"
+    },
+    "7b4bfb981bc30779386e412206b2d3b5": {
+      "verdict": "keep"
+    },
+    "7c17c5fe162ee650845b00aabf9b7fd0": {
+      "verdict": "keep"
+    },
+    "7ce86b43d99e1117fed7b05604c65cfe": {
+      "verdict": "keep"
+    },
+    "7ec29ad4b3164c34e2d2d1d555a31c7f": {
+      "verdict": "keep"
+    },
+    "80d5be27f9ee34b15205d8e005d28e54": {
+      "verdict": "keep"
+    },
+    "81a037753db164765bd3c5541845d6f1": {
+      "verdict": "keep"
+    },
+    "81c6be1b04833c0da42dd0c953b8041f": {
+      "verdict": "keep"
+    },
+    "84548074ca4a077785ff24fa3c5a48c7": {
+      "verdict": "keep"
+    },
+    "84803ce03499fa28bc1b233c4ac7cd52": {
+      "verdict": "keep"
+    },
+    "85134c93cf14b78c8cdcdb7c6ccfb814": {
+      "verdict": "keep"
+    },
+    "85fa76796cb076e09889044eaca83894": {
+      "verdict": "keep"
+    },
+    "8884d17af19931763373179e74e171a1": {
+      "verdict": "keep"
+    },
+    "89bbc7d37f84f331f975d7cecad94543": {
+      "verdict": "keep"
+    },
+    "8c1186c11fe4cacfe653df5d21fa5079": {
+      "verdict": "keep"
+    },
+    "8cffb4517b2f593d71040a3da8776cc8": {
+      "verdict": "keep"
+    },
+    "909247a3094d5f1fbd72e76aa2daa262": {
+      "verdict": "keep"
+    },
+    "93e64f84798e59c8082d024f9dbf1444": {
+      "verdict": "keep"
+    },
+    "95ce14f293574c37cc70567a19a76363": {
+      "verdict": "keep"
+    },
+    "95fdac117bd1ef2414e33f9b88a02c59": {
+      "verdict": "keep"
+    },
+    "9689b3d440ee3d802afd3bbb539b0197": {
+      "verdict": "keep"
+    },
+    "96d48ab39e69734c2388ce989d007123": {
+      "note": "phenomena names stripped, isolation table flattened and cut across passages",
+      "reason": "not_self_contained",
+      "verdict": "drop"
+    },
+    "98b9f06a5050a8f4c67dc4ca6b53eff6": {
+      "note": "thin lead-in listing options without outcome; explained in the following passages",
+      "reason": "other",
+      "verdict": "drop"
+    },
+    "99589391f4470491c6f1798c24aebbea": {
+      "verdict": "keep"
+    },
+    "9ecbb7d6cfcb65c5e3a12516655cbf35": {
+      "remove": ["It's a matter of taste.\n\n"],
+      "verdict": "trim"
+    },
+    "a0c13995dad9dd11f873a1fdd90973b8": {
+      "remove": [
+        "This is because if A had executed before B, B would have computed the sum 330, not 300, and similarly the other order would have resulted in a different sum computed by A.\n\n"
+      ],
+      "verdict": "trim"
+    },
+    "a5f32d4ec5fb05b199260e4fac3b438a": {
+      "remove": ["\n\nRow-Level Lock Modes"],
+      "verdict": "trim"
+    },
+    "a939f220a01201770ba9153426cb79e7": {
+      "note": "lock mode names stripped from list; cannot tell which mode each paragraph describes",
+      "reason": "not_self_contained",
+      "verdict": "drop"
+    },
+    "ab946a742ba86deec022ff958854768d": {
+      "verdict": "keep"
+    },
+    "ac3eddee6bb70374a577036780ebcc3a": {
+      "verdict": "keep"
+    },
+    "ae03745efa57f580434c6dfd52e5e495": {
+      "verdict": "keep"
+    },
+    "ae2772b0112788f6b9b845233fd13005": {
+      "verdict": "keep"
+    },
+    "b027eedd719ec583de877658edb51e16": {
+      "verdict": "keep"
+    },
+    "b57096341ff5ee9b23ac5131ee13e45f": {
+      "verdict": "keep"
+    },
+    "b83110d8d0ac3d30de385cbe9861eefb": {
+      "verdict": "keep"
+    },
+    "bcce77fc38820de6a7522d671f251255": {
+      "verdict": "keep"
+    },
+    "bde069e7bdb11b48e27a2fc4501d3d23": {
+      "verdict": "keep"
+    },
+    "beb6c5e25b6a92166fd7133121f0d151": {
+      "verdict": "keep"
+    },
+    "bf562f4b5aad5ae7abc8d8393c3c8aa9": {
+      "verdict": "keep"
+    },
+    "c08ee3c1217a88f3416d8cc4fa9de2c9": {
+      "remove": [
+        "\n\nMore information about updating and deleting data is in Chapter 6 . Also see the description of foreign key constraint syntax in the reference documentation for CREATE TABLE ."
+      ],
+      "verdict": "trim"
+    },
+    "c2b180b97c0f40841acfecd752bd785e": {
+      "verdict": "keep"
+    },
+    "c491ebbf9ac21509f42efa41175b2639": {
+      "verdict": "keep"
+    },
+    "c657f4d36db03c60ca9fc5dab40f3aea": {
+      "verdict": "keep"
+    },
+    "c9db7add5b7c8a0e04604e6dff58011d": {
+      "remove": [
+        "See also CREATE TABLE ... CONSTRAINT ... EXCLUDE for details.\n\n",
+        "\n\nPrev\n\nUp\n\nNext\n\n5.4. Generated Columns\n\nHome\n\n5.6. System Columns"
+      ],
+      "verdict": "trim"
+    },
+    "cc321125336b62445f785ad471c5867d": {
+      "remove": ["Not possible\n\nNot possible\n\n"],
+      "verdict": "trim"
+    },
+    "cca17d48beecb1317d1ccff05f849a16": {
+      "verdict": "keep"
+    },
+    "cff7930400f83d50a67b61ae1a8808c3": {
+      "note": "lock mode names stripped from list; starts with tail of previous mode",
+      "reason": "not_self_contained",
+      "verdict": "drop"
+    },
+    "d0fd305b90e7a6cea8597867e887c432": {
+      "verdict": "keep"
+    },
+    "d19750d91c4c0a89d4abbe7816c16e4b": {
+      "verdict": "keep"
+    },
+    "d1a7c3805cc494a6d9dbfc424a3c4813": {
+      "verdict": "keep"
+    },
+    "d24c3ad356095c9cde48f50f16c9c1c1": {
+      "verdict": "keep"
+    },
+    "d36dac201b2b4771dcaada7dc2017a12": {
+      "verdict": "keep"
+    },
+    "d56ca86f7defb7664a735a5dcee31a5f": {
+      "verdict": "keep"
+    },
+    "d83fd0850704ba0e4362eabf1d2e7a12": {
+      "remove": [
+        " Please see [ports12] for detailed information.",
+        "\n\nPrev\n\nUp\n\nNext\n\n13.1. Introduction\n\nHome\n\n13.3. Explicit Locking"
+      ],
+      "verdict": "trim"
+    },
+    "d87e1da6a8c643d3423c55e2b104fcca": {
+      "verdict": "keep"
+    },
+    "d8b32f074e4888c378f32cfb548fc951": {
+      "verdict": "keep"
+    },
+    "da436ad367b04a12f7658339db88c98c": {
+      "verdict": "keep"
+    },
+    "dc2114cf27b63c22e44ca52dc4740d1f": {
+      "verdict": "keep"
+    },
+    "e320f11885a83531b675210c6b5758ee": {
+      "note": "middle steps of the deadlock example, depends on previous and next passage",
+      "reason": "not_self_contained",
+      "verdict": "drop"
+    },
+    "e357ff5e8485878cd7399a9f2b14ca0a": {
+      "verdict": "keep"
+    },
+    "e452c5232bb28ad7ae3e3afa25b7174f": {
+      "note": "refers to 'our IN query' / 'the original query' not in passage",
+      "reason": "not_self_contained",
+      "verdict": "drop"
+    },
+    "e4a470d9eb5a3dfdd717e9054e3c9eb4": {
+      "note": "starts mid-sentence, depends on an unshown LIMIT plan example",
+      "reason": "not_self_contained",
+      "verdict": "drop"
+    },
+    "eb46568f291f19c6347b2b7e6d3888e5": {
+      "verdict": "keep"
+    },
+    "eb4716a4e98ed4dddebdd99be81d05f1": {
+      "verdict": "keep"
+    },
+    "fc56a3dd15eb2b7abfee25d0c295dcca": {
+      "verdict": "keep"
+    },
+    "ff043df634ef736a68cc36e54a67a58a": {
+      "verdict": "keep"
+    }
+  },
+  "reviewed_at": "2026-11-16",
+  "source_id": "postgresql"
+}

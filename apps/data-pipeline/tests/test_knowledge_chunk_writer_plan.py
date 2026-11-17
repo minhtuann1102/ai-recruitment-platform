@@ -1,5 +1,8 @@
+import pytest
+
 from pipeline.knowledge_chunk_search import build_search_sql, dedup_by_qa_id
 from pipeline.knowledge_chunk_writer import plan_writes, vector_literal
+from pipeline.knowledge_chunk_writer import write_records
 
 
 def record(content_hash, qa_id="de-qa-0001", chunk_type="qa_pair", dataset="de_interview_qa"):
@@ -49,3 +52,77 @@ def test_search_sql_always_filters_model_and_applies_optional_filters():
 
 def test_vector_literal_format():
     assert vector_literal([1, 0.25]) == "[1.0,0.25]"
+
+
+# --- spec 012 (research R8): source_type theo ban ghi, don ban ghi dung source_type cua dataset ---
+
+
+def typed_record(content_hash, dataset, source_type):
+    return {  # du cot de nhanh UPDATE cua write_records chay duoc tren cursor gia
+        "content": f"noi dung {content_hash}", "content_hash": content_hash, "source_type": source_type,
+        "category": "Backend", "difficulty": None, "topic_id": None, "language": "en", "metadata": {"dataset": dataset},
+    }
+
+
+class FakeCursor:
+    """Ghi lai cac lenh SQL; chi can cho nhanh don cua write_records (khong co ban ghi moi / update)."""
+
+    def __init__(self):
+        self.calls = []
+        self.rowcount = 0
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+    def execute(self, sql, params=None):
+        self.calls.append((sql, params))
+
+
+class FakeConn:
+    def __init__(self):
+        self.cur = FakeCursor()
+
+    def cursor(self):
+        return self.cur
+
+    def commit(self):
+        pass
+
+
+def test_source_types_follow_the_record_of_each_dataset_in_a_mixed_run():
+    plan = plan_writes(
+        [typed_record("a", "de_interview_qa", "interview_qa"), typed_record("t", "de_textbook_postgresql", "textbook")], {}
+    )
+    assert plan.source_types == {"de_interview_qa": "interview_qa", "de_textbook_postgresql": "textbook"}
+    assert plan.keep_hashes == {"de_interview_qa": ["a"], "de_textbook_postgresql": ["t"]}
+
+
+def test_record_without_source_type_is_interview_qa_as_before():
+    assert plan_writes([record("a")], {}).source_types == {"de_interview_qa": "interview_qa"}
+
+
+def test_textbook_hash_in_other_dataset_is_skipped_and_same_dataset_is_updated():
+    records = [typed_record("other", "de_textbook_postgresql", "textbook"), typed_record("same", "de_textbook_postgresql", "textbook")]
+    plan = plan_writes(records, {"other": "de_textbook_spring-boot", "same": "de_textbook_postgresql"})
+    assert [r["content_hash"] for r in plan.skip_other] == ["other"]
+    assert [r["content_hash"] for r in plan.update] == ["same"]
+    assert plan.new == []
+
+
+def test_one_dataset_with_two_source_types_is_rejected():
+    with pytest.raises(ValueError, match="hai source_type"):
+        plan_writes([typed_record("a", "de_x", "interview_qa"), typed_record("b", "de_x", "textbook")], {})
+
+
+def test_cleanup_deletes_with_source_type_of_each_dataset():
+    plan = plan_writes(
+        [typed_record("a", "de_interview_qa", "interview_qa"), typed_record("t", "de_textbook_postgresql", "textbook")], {"a": "de_interview_qa", "t": "de_textbook_postgresql"}
+    )
+    conn = FakeConn()
+    stats = write_records(conn, plan, embed=lambda texts: [], stored_model="m")
+    deletes = [params for sql, params in conn.cur.calls if sql.lstrip().startswith("DELETE")]
+    assert deletes == [("interview_qa", "de_interview_qa", ["a"]), ("textbook", "de_textbook_postgresql", ["t"])]
+    assert stats["cleanup"] == "done"

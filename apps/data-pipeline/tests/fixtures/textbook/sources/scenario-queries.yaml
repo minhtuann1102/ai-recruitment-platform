@@ -1,0 +1,3 @@
+scn.be.orders:
+  query_en: "design an order API with transactions, row locking and unique constraints"
+  terms: ["row lock", "transaction isolation", "unique constraint"]

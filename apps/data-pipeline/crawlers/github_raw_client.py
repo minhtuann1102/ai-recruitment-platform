@@ -2,6 +2,7 @@
 
 Co GITHUB_TOKEN (vd `gh auth token`) thi duoc 5000 request/gio; khong co thi 60/gio, du cho ~60 file.
 Nghi `delay` giay giua hai request (constitution V: co rate limit).
+`blocked` thanh True khi gap 403 / 429 (het han muc API / bi chan): crawl-textbook coi do la host chan bot (thoat 4).
 """
 import os
 import time
@@ -22,6 +23,7 @@ class GithubRawClient:
         self._client = httpx.Client(headers=headers, timeout=60, follow_redirects=True)
         self._delay = delay
         self._last_request = 0.0
+        self.blocked = False
 
     def _get(self, url: str, accept: str) -> httpx.Response:
         wait = self._delay - (time.monotonic() - self._last_request)
@@ -29,6 +31,8 @@ class GithubRawClient:
             time.sleep(wait)
         self._last_request = time.monotonic()
         response = self._client.get(url, headers={"Accept": accept})
+        if response.status_code in (403, 429):
+            self.blocked = True  # van nem loi nhu cu (collect_command bat httpx.HTTPError)
         response.raise_for_status()
         return response
 

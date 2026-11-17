@@ -22,7 +22,7 @@ Textbook/Tutorial        ──┘   → dedup → tag          knowledge_chunks
 |---|---|---|---|---|
 | S1 | Interview Q&A | Curated thủ công + public datasets | 200+ cặp Q&A | `interview_qa` |
 | S2 | Job Descriptions | Crawl: itviec, topdev, careerviet, careerlink (topcv, jobsgo bị loại vì 403); phần thiếu bù JD synthetic | 500+ JD | `job_description` |
-| S3 | Textbook/Tutorial | Node.js, React, PostgreSQL docs; CS fundamentals; System Design | 5000+ chunks | `textbook` |
+| S3 | Textbook/Tutorial | Tài liệu chính thức theo manifest nguồn (spec 012): Spring, PostgreSQL, Hibernate, System Design Primer, ...; mỗi trang gắn tình huống `scn.*` | 300–1.500 đoạn, soát hết bằng worker | `textbook` |
 
 ---
 
@@ -32,24 +32,29 @@ Textbook/Tutorial        ──┘   → dedup → tag          knowledge_chunks
 apps/data-pipeline/
 ├── crawlers/
 │   ├── jd_sources.py          # Cấu hình 4 nguồn JD; jd_page_parser.py (JSON-LD), jd_listing_crawler.py
-│   └── docs_crawler.py        # Crawl technical documentation
+│   └── docs_section_parser.py # S3: tách trang docs (HTML / markdown) thành section; polite_fetcher.py (robots + giãn cách)
 ├── processors/
 │   ├── qa_processor.py        # Xử lý Interview Q&A (JSON/CSV → chunks)
-│   ├── jd_processor.py        # Xử lý Job Description text → chunks
-│   └── textbook_processor.py  # Xử lý docs/tutorial → chunks theo section
+│   └── jd_processor.py        # Xử lý Job Description text → chunks
 ├── pipeline/
 │   ├── embedder.py            # Gọi OpenAI text-embedding-3-small
 │   ├── indexer.py             # Upsert chunks vào ai_db (pgvector)
-│   └── deduper.py             # Phát hiện và loại bỏ chunks trùng
+│   ├── deduper.py             # Phát hiện và loại bỏ chunks trùng
+│   └── textbook_*.py          # S3 (spec 012), 7 lệnh trong textbook_cli.py; module theo vai trò:
+│       #   manifest: textbook_source_manifest / _manifest_models / _manifest_rules / _catalog_tracks, textbook_validate_command
+│       #   crawl + xử lý: textbook_crawl_command, textbook_process_command, textbook_record_builder, textbook_chunker, textbook_noise_filter
+│       #   soát: textbook_review_prepare / _review_score / _review_decisions
+│       #   độ phủ + chỉ mục: textbook_coverage_command / _coverage_report / _coverage_vector_check / _keyword_rank, textbook_index_command
 ├── data/
-│   ├── raw/                   # Dữ liệu thô sau crawl (gitignore)
-│   ├── processed/             # Chunks sau clean (gitignore)
+│   ├── raw/                   # Dữ liệu thô sau crawl (gitignore); textbook/<source_id>/ và textbook/review/<source_id>/ (lô soát)
+│   ├── processed/             # Chunks sau clean (gitignore); textbook/<source_id>.jsonl, textbook/coverage-report.json
+│   ├── reviews/textbook/      # <source_id>-decisions.json: quyết định soát, commit sau khi qua cổng mồi
 │   └── seeds/
-│       └── qa_seed.json       # Q&A curated ban đầu (commit được)
+│       ├── qa_seed.json       # Q&A curated ban đầu (commit được)
+│       └── textbook_sources/  # S3: <source_id>.yaml (manifest), scenario-queries.yaml, review-canaries.json, notices/
 ├── scripts/
 │   ├── run_qa_pipeline.sh     # S1: chạy Q&A ingestion
-│   ├── run_jd_pipeline.sh     # S2: chạy JD crawl + ingestion
-│   └── run_textbook_pipeline.sh # S3: chạy textbook ingestion
+│   └── run_jd_pipeline.sh     # S2: chạy JD crawl + ingestion
 ├── requirements.txt           # scrapy, playwright, openai, psycopg2, python-dotenv
 └── .env.example               # OPENAI_API_KEY, AI_DB_URL
 ```
@@ -173,39 +178,35 @@ def process_jd(jd: dict) -> list[dict]:
 
 ## 6. Sprint 3 — Textbook/Tutorial
 
-### Nguồn
+Spec: [`specs/012-textbook-ingestion-rag-quality/`](../../specs/012-textbook-ingestion-rag-quality/spec.md). Phạm vi:
+tài liệu chính thức của 6 track, chọn theo 28 tình huống `scn.*` trong catalog ai-service (mỗi tình huống 3-5 trang),
+300-1.500 đoạn. Dữ liệu theo **nguồn**, không theo track; mỗi đoạn mang `tracks` / `scenario_ids` để ai-service lọc.
 
-| Nguồn | URL/Method | Category | Ước tính chunks |
-|---|---|---|---|
-| Node.js docs | https://nodejs.org/en/docs | Backend | ~300 |
-| React docs | https://react.dev/learn | Frontend | ~400 |
-| PostgreSQL docs | https://www.postgresql.org/docs | Database | ~500 |
-| NestJS docs | https://docs.nestjs.com | Backend | ~300 |
-| System Design Primer | GitHub README crawl | System Design | ~200 |
-| CS fundamentals | Curate thủ công | General | ~300 |
-| Golang/Python basics | Curate thủ công | Backend | ~200 |
+### Cấu trúc
 
-### Processing (`textbook_processor.py`)
+Mọi nguồn khai báo trong manifest `data/seeds/textbook_sources/<source_id>.yaml` (giấy phép, robots, danh sách trang
+kèm track / tình huống), `scenario-queries.yaml` (truy vấn tiếng Anh từng tình huống) và `review-canaries.json` (đoạn
+mồi cho bước soát). Định dạng: [textbook-source-manifest.md](../../specs/012-textbook-ingestion-rag-quality/contracts/textbook-source-manifest.md).
+Đoạn ghi vào `knowledge_chunks` với `source_type = 'textbook'`, `metadata.dataset = de_textbook_<source_id>`; trường
+từng đoạn: [data-model.md](../../specs/012-textbook-ingestion-rag-quality/data-model.md) §3.
 
-```python
-CHUNK_SIZE = 512    # tokens
-CHUNK_OVERLAP = 50  # tokens
+### Processing
 
-def process_doc(raw_text: str, metadata: dict) -> list[dict]:
-    # Chunk theo section header (h2/h3) nếu có
-    # Fallback: sliding window 512 tokens với overlap 50
-    chunks = chunk_by_headers(raw_text) or sliding_window(raw_text, CHUNK_SIZE, CHUNK_OVERLAP)
-    return [
-        {
-            "content": chunk,
-            "source_type": "textbook",
-            "metadata": {**metadata, "chunk_index": i},
-        }
-        for i, chunk in enumerate(chunks)
-    ]
-```
+Trang thô (`data/raw/textbook/<source_id>/`) → cắt theo section (≤ 1.600 ký tự) → lọc nhiễu tự động (quá ngắn, chỉ có
+code, danh sách link, tiêu đề bị chặn) → xóa PII → dedup theo `content_hash` → áp quyết định soát → bản ghi sẵn sàng
+ghi (`data/processed/textbook/<source_id>.jsonl`). Bước soát: worker đánh dấu từng đoạn `keep` / `drop` / `trim`,
+mỗi lô chèn 3 đoạn mồi để phát hiện worker dễ dãi; `review-textbook-score` thoát 0 (mọi đoạn mồi bị `drop`) thì tự ghi
+`approved_by = auto:canary-gate`, không duyệt tay. `index-textbook` từ chối nguồn chưa qua cổng, còn đoạn chưa có quyết định,
+hoặc đoạn có quyết định đã đổi sau lần `process-textbook` cuối; `process-textbook` từ chối file thô thiếu trang của manifest.
 
-**Output Sprint 3:** ~2000-5000+ chunks → index vào ai_db. Target tổng ai_db: **6000+ chunks** covering Backend, Frontend, DB, System Design.
+### Lệnh (7)
+
+`validate-textbook`, `crawl-textbook`, `process-textbook`, `review-textbook-prepare`, `review-textbook-score`,
+`coverage-textbook`, `index-textbook`. Tham số, mã thoát, thứ tự cho một nguồn:
+[pipeline-cli-textbook.md](../../specs/012-textbook-ingestion-rag-quality/contracts/pipeline-cli-textbook.md);
+hướng dẫn worker soát: [textbook-review-instructions.md](../../specs/012-textbook-ingestion-rag-quality/contracts/textbook-review-instructions.md).
+`coverage-textbook` đo số đoạn theo nguồn / track / tình huống và kiểm tra truy hồi bằng BM25 offline (`--db`: thêm
+tìm vector trên kho thật); `--strict` thoát 1 khi không đạt SC-001 / SC-004.
 
 ---
 
@@ -310,11 +311,20 @@ python pipeline/run.py \
 
 ### Sprint 3 — Textbook
 
+Thứ tự cho một nguồn (chi tiết ở contract `pipeline-cli-textbook.md`):
+
 ```bash
-python pipeline/run.py \
-  --source textbook \
-  --input data/raw/textbook/ \
-  --verify
+python -m pipeline validate-textbook
+python -m pipeline crawl-textbook --source postgresql
+python -m pipeline process-textbook --source postgresql
+python -m pipeline review-textbook-prepare --source postgresql
+#   worker soát -> judgments-NN.jsonl
+python -m pipeline review-textbook-score --source postgresql
+#   qua cổng mồi → approved_by = auto:canary-gate, commit decisions
+python -m pipeline process-textbook --source postgresql
+python -m pipeline coverage-textbook
+python -m pipeline index-textbook --source postgresql
+python -m pipeline coverage-textbook --db
 ```
 
 **Verify sau mỗi pipeline:**
