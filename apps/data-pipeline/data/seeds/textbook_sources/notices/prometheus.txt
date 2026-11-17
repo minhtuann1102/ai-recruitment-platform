@@ -1,0 +1,17 @@
+Prometheus Documentation
+Source: https://raw.githubusercontent.com/prometheus/docs/main/NOTICE (read 2026-11-17)
+
+Prometheus documentation: content and static site generator
+Copyright 2014-2025 The Prometheus Authors
+
+This product includes software developed at
+SoundCloud Ltd. (http://soundcloud.com/).
+
+We also use code from a large number of npm packages. For details, see:
+- https://github.com/prometheus/docs/blob/main/package.json
+- https://github.com/prometheus/docs/blob/main/package-lock.json
+
+License: Apache License 2.0, see https://github.com/prometheus/docs/blob/main/LICENSE
+(http://www.apache.org/licenses/LICENSE-2.0). The prometheus.io page footer reads "© Prometheus Authors 2014-2026 | All components are available under the Apache 2 License on GitHub."
+
+Passages stored in this project are excerpts cut by section from the pages listed in prometheus.yaml; text is otherwise unchanged apart from noise removal.

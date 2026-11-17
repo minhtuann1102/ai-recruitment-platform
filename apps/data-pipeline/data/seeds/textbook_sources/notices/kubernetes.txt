@@ -1,0 +1,11 @@
+Kubernetes Documentation
+Source: https://kubernetes.io/docs/ (read 2026-11-17)
+
+© 2026 The Kubernetes Authors | Documentation Distributed under CC BY 4.0
+
+© 2026 Copyright © Kubernetes a Series of LF Projects, LLC. For website terms of use, trademark policy and other project policies please see https://lfprojects.org/policies/
+
+License text: https://git.k8s.io/website/LICENSE (Creative Commons Attribution 4.0 International Public License),
+https://creativecommons.org/licenses/by/4.0/
+
+Passages stored in this project are excerpts cut by section from the pages listed in kubernetes.yaml; text is otherwise unchanged apart from noise removal.

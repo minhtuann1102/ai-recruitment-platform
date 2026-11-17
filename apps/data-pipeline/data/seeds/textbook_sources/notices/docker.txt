@@ -1,0 +1,11 @@
+Docker Docs
+Source: https://raw.githubusercontent.com/docker/docs/main/README.md (read 2026-11-17)
+
+Copyright 2013-2026 Docker, Inc., released under the Apache 2.0 license.
+
+License text: https://github.com/docker/docs/blob/main/LICENSE (Apache License, Version 2.0),
+http://www.apache.org/licenses/LICENSE-2.0
+
+The repository has no NOTICE file. The docs.docker.com page footer reads "Copyright © 2013-2026 Docker Inc. All rights reserved."
+
+Passages stored in this project are excerpts cut by section from the pages listed in docker.yaml; text is otherwise unchanged apart from noise removal.

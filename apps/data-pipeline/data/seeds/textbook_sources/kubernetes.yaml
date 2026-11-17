@@ -1,0 +1,107 @@
+source_id: kubernetes
+name: Kubernetes Documentation
+kind: official
+homepage: https://kubernetes.io/docs/
+format: html
+# Page body lives in div.td-content (Docsy theme; the page has no <article> and <main> also wraps the sidebar column).
+# It holds the h1, the text, and a trailing "What's next" + "Feedback" ("Was this page helpful?") block; those two
+# headings are dropped by the noise filter. Left nav, breadcrumb, top bar and site footer are outside td-content.
+content_selector: "div.td-content"
+language: en
+license: CC-BY-4.0
+license_class: open
+# Statement read in the footer of https://kubernetes.io/docs/ (same text on every docs page). The word
+# "CC BY 4.0" links to https://git.k8s.io/website/LICENSE (the kubernetes/website repo LICENSE, which is the
+# Creative Commons Attribution 4.0 International Public License text, HTTP 200 on raw.githubusercontent.com).
+# The footer also says "Copyright © Kubernetes a Series of LF Projects, LLC" and points to
+# https://lfprojects.org/policies/ for website terms; the LF Projects Terms of Use (opened 2026-11-17) contain no
+# clause about crawlers, robots, scraping or automated access.
+license_url: https://kubernetes.io/docs/
+license_quote: "© 2026 The Kubernetes Authors | Documentation Distributed under CC BY 4.0"
+license_checked: 2026-11-17
+robots_checked: 2026-11-17
+robots_note: "https://kubernetes.io/robots.txt (HTTP 200) has one group, User-agent: *, with Disallow: /legacy/, /v1.0/, /v1.1/, /404/, /404.html. No Allow lines, no Crawl-delay; SITEMAP: https://kubernetes.io/sitemap.xml. /docs/ is not disallowed. Plain requests (curl, browser-like User-Agent) get HTTP 200 with the full page; no challenge page."
+attribution: "Kubernetes Documentation, © 2026 The Kubernetes Authors, Documentation Distributed under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). Notice: notices/kubernetes.txt"
+status: use
+excluded_reason: ""
+pages:
+  - url: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/
+    category: DevOps
+    tracks: [devops_engineer]
+    scenarios: [scn.devops.container-crashloop]
+    topics: []
+    sections: ["Container states", "How Pods handle problems with containers"]
+    kind: concept
+    why: "restartPolicy, exponential restart backoff, the CrashLoopBackOff state, its usual causes (application errors, bad configuration, resource limits, failing probes) and the first diagnosis steps (logs, describe, events)."
+    status: use
+    excluded_reason: ""
+  - url: https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/
+    category: DevOps
+    tracks: [devops_engineer]
+    scenarios: [scn.devops.container-crashloop]
+    topics: []
+    sections: ["Debugging Pods"]
+    kind: guide
+    why: "Triage of a Pod that is Pending or Waiting (scheduling failures, image pull errors, recent restarts): read the Pod state, kubectl describe and its events before changing anything."
+    status: use
+    excluded_reason: ""
+  - url: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+    category: DevOps
+    tracks: [devops_engineer]
+    scenarios: [scn.devops.container-crashloop, scn.devops.prod-latency-incident]
+    topics: []
+    sections: ["Requests and limits", "How Kubernetes applies resource requests and limits", "My container is terminated"]
+    kind: concept
+    why: "Requests versus limits, how the kernel enforces them (CPU limit throttles, memory limit kills the container), and how to tell that a container was terminated because it ran out of resources: OOM-driven restarts and throttling-driven latency."
+    status: use
+    excluded_reason: ""
+  - url: https://kubernetes.io/docs/concepts/workloads/pods/probes/
+    category: DevOps
+    tracks: [devops_engineer]
+    scenarios: [scn.devops.container-crashloop, scn.devops.zero-downtime-deploy]
+    topics: []
+    sections: []
+    kind: concept
+    why: "Liveness, readiness and startup probes: a failing liveness probe restarts the container (a common crash-loop cause for slow-starting apps), a failing readiness probe removes the Pod from Service endpoints, and a startup probe protects slow starts, which together decide whether a rollout serves traffic safely."
+    status: use
+    excluded_reason: ""
+  - url: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+    category: DevOps
+    tracks: [devops_engineer]
+    scenarios: [scn.devops.zero-downtime-deploy]
+    topics: []
+    sections: ["Updating a Deployment", "Rolling Back a Deployment", "Writing a Deployment Spec", "Canary deployments"]
+    kind: concept
+    why: "How a Deployment rolls out a new version through ReplicaSets, maxSurge and maxUnavailable, minReadySeconds and progressDeadlineSeconds, how to roll back a bad revision, and the canary option."
+    status: use
+    excluded_reason: ""
+  - url: https://kubernetes.io/docs/concepts/workloads/pods/pod-termination/
+    category: DevOps
+    tracks: [devops_engineer]
+    scenarios: [scn.devops.zero-downtime-deploy]
+    topics: []
+    sections: []
+    kind: concept
+    why: "Graceful Pod shutdown: preStop hook, SIGTERM, the grace period, the Pod being taken out of Service endpoints while it finishes open connections, and forced deletion, which is what keeps in-flight requests from failing when old Pods are replaced."
+    status: use
+    excluded_reason: ""
+  - url: https://kubernetes.io/docs/concepts/workloads/pods/disruptions/
+    category: DevOps
+    tracks: [devops_engineer]
+    scenarios: [scn.devops.zero-downtime-deploy]
+    topics: []
+    sections: ["Voluntary and involuntary disruptions", "Dealing with disruptions", "Pod disruption budgets", "PodDisruptionBudget example"]
+    kind: concept
+    why: "Voluntary versus involuntary disruptions and PodDisruptionBudgets that keep a minimum number of replicas available during node drains and cluster upgrades, so planned maintenance does not cause downtime."
+    status: use
+    excluded_reason: ""
+  - url: https://kubernetes.io/docs/concepts/workloads/autoscaling/horizontal-pod-autoscale/
+    category: DevOps
+    tracks: [devops_engineer]
+    scenarios: [scn.devops.prod-latency-incident]
+    topics: []
+    sections: ["How does a HorizontalPodAutoscaler work?"]
+    kind: concept
+    why: "How the HorizontalPodAutoscaler control loop computes the desired replica count from observed versus target metric values (for example CPU utilization) and how often it reacts, as a mitigation when load rather than a bug drives latency."
+    status: use
+    excluded_reason: ""

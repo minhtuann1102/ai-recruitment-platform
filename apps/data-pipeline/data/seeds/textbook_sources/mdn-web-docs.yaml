@@ -1,0 +1,109 @@
+source_id: mdn-web-docs
+name: MDN Web Docs
+kind: supplementary
+homepage: https://developer.mozilla.org/en-US/docs/
+format: html
+# Plain HTTP GET returns pre-rendered static HTML (checked 2026-11-17, UA ai-recruit-data-pipeline/0.1).
+# main#content holds h1 + baseline banner + article sections + "Help improve MDN" footer line; the left sidebar and
+# site footer are outside it. The right-hand TOC (aside > nav) sits inside main but nav tags are stripped by the parser.
+# Do NOT use article.main-page-content (no such element) or .layout__body (excludes the h1, so the parser nests every
+# h2 under the first h2). Intro text (before the first h2, usually the page's best summary) starts with a baseline
+# banner ("This feature is well established and works across many devices ... See full compatibility Learn more"):
+# reviewers should trim it. Pages listed whole also end with "Help improve MDN / This page was last modified on ...",
+# which the noise filter drops as too_short.
+content_selector: "main#content"
+language: en
+license: CC-BY-SA-2.5
+license_class: open
+license_url: https://developer.mozilla.org/en-US/docs/MDN/Writing_guidelines/Attrib_copyright_license
+# Page "Attribution and copyright licensing", section "Documentation" (read 2026-11-17). Page footer of every MDN
+# page says "Portions of this content are ©1998-2026 by individual mozilla.org contributors. Content available under
+# a Creative Commons license." Code samples added on or after 2010-08-20 are CC0; we keep text and short code only.
+license_quote: "Unless otherwise indicated, the content is available under the terms of the Creative Commons Attribution-ShareAlike license (CC-BY-SA), v2.5 or any later version."
+license_checked: 2026-11-17
+robots_checked: 2026-11-17
+robots_note: "https://developer.mozilla.org/robots.txt (HTTP 200) has one group, 'User-agent: *', with Disallow: /api/, /*/files/ and /media, plus a Sitemap line. No Crawl-delay. /en-US/docs/... is not disallowed; do not fetch /api/ or /*/files/ links."
+attribution: "MDN Web Docs, Mozilla Contributors, https://developer.mozilla.org, licensed under CC-BY-SA 2.5 or any later version (https://creativecommons.org/licenses/by-sa/2.5/). Notice: notices/mdn-web-docs.txt"
+status: use
+excluded_reason: ""
+pages:
+  - url: https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API
+    category: Frontend
+    tracks: [frontend_react]
+    scenarios: [scn.fe.job-list-infinite-scroll]
+    topics: []
+    sections: ["Overview", "Creating an intersection observer"]
+    kind: concept
+    why: "Why observing a sentinel element with IntersectionObserver replaces scroll-handler polling for infinite scroll and lazy loading, and how root, rootMargin and threshold decide when to load the next page."
+    status: use
+    excluded_reason: ""
+  - url: https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/Form_validation
+    category: Frontend
+    tracks: [frontend_react]
+    scenarios: [scn.fe.multi-step-apply-form]
+    topics: []
+    sections: ["What is form validation?", "Different types of client-side validation", "Using built-in form validation"]
+    kind: tutorial
+    why: "Why validate on the client and still on the server, and how HTML constraint attributes (required, pattern, min/max, length) validate each step before the user moves on."
+    status: use
+    excluded_reason: ""
+  - url: https://developer.mozilla.org/en-US/docs/Web/API/File_API/Using_files_from_web_applications
+    category: Frontend
+    tracks: [frontend_react]
+    scenarios: [scn.fe.multi-step-apply-form]
+    topics: []
+    sections: ["Accessing selected file(s)", "Getting information about selected file(s)", "Example: Uploading a user-selected file"]
+    kind: guide
+    why: "Reading the File object from a file input (name, size, type) to check a CV before upload, and sending it asynchronously with progress and per-file upload handling."
+    status: use
+    excluded_reason: ""
+  - url: https://developer.mozilla.org/en-US/docs/Web/Performance/Guides/Critical_rendering_path
+    category: Frontend
+    tracks: [frontend_react]
+    scenarios: [scn.fe.slow-page-lcp]
+    topics: []
+    sections: []
+    kind: concept
+    why: "How the browser turns HTML, CSS and JavaScript into pixels (DOM, CSSOM, render tree, layout, paint) and why render-blocking CSS and scripts delay the first render and LCP."
+    status: use
+    excluded_reason: ""
+  - url: https://developer.mozilla.org/en-US/docs/Web/Performance/Guides/Lazy_loading
+    category: Frontend
+    tracks: [frontend_react]
+    scenarios: [scn.fe.slow-page-lcp]
+    topics: []
+    sections: []
+    kind: guide
+    why: "Lazy loading non-critical images, scripts and routes to shorten the critical rendering path, and the strategies (loading attribute, code splitting) available."
+    status: use
+    excluded_reason: ""
+  - url: https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events
+    category: Frontend
+    tracks: [frontend_react]
+    scenarios: [scn.fe.realtime-interview-ui]
+    topics: []
+    sections: []
+    kind: guide
+    why: "EventSource for a one-way server-to-browser stream of questions: message and custom events, the text/event-stream format, automatic reconnection after a dropped connection, and closing the stream."
+    status: use
+    excluded_reason: ""
+  - url: https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_client_applications
+    category: Frontend
+    tracks: [frontend_react]
+    scenarios: [scn.fe.realtime-interview-ui]
+    topics: []
+    sections: []
+    kind: tutorial
+    why: "Client side of a two-way WebSocket: open, message, error and close events, sending data, handling disconnects and the page-lifecycle (bfcache) behaviour that closes connections."
+    status: use
+    excluded_reason: ""
+  - url: https://developer.mozilla.org/en-US/docs/Web/API/Streams_API/Using_readable_streams
+    category: Frontend
+    tracks: [frontend_react]
+    scenarios: [scn.fe.realtime-interview-ui]
+    topics: []
+    sections: ["Consuming a fetch as a stream"]
+    kind: guide
+    why: "Reading a fetch() response body chunk by chunk with a stream reader, the way a streamed question or model output is rendered progressively instead of waiting for the full response."
+    status: use
+    excluded_reason: ""

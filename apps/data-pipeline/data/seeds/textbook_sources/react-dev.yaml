@@ -1,0 +1,76 @@
+source_id: react-dev
+name: React Documentation (react.dev)
+kind: official
+homepage: https://react.dev/learn
+format: html
+# Plain HTTP GET returns the full article as server-rendered HTML (checked 2026-11-17, UA ai-recruit-data-pipeline/0.1):
+# no JS rendering needed. <article> holds h1 + body and excludes sidebar and footer. Inside it, Sandpack examples
+# come out as <pre> code and each page ends with "Recap" and "Try out some challenges" (use `sections` to skip them).
+# "You will learn" box is a one-line list of bullets, also skipped by `sections`.
+content_selector: "article"
+language: en
+license: CC-BY-4.0
+license_class: open
+license_url: https://raw.githubusercontent.com/reactjs/react.dev/main/README.md
+# README.md "## License" (rendered on GitHub without the markdown link brackets). The raw text is:
+#   Content submitted to [react.dev](https://react.dev/) is CC-BY-4.0 licensed, as found in the [LICENSE-DOCS.md](https://github.com/reactjs/react.dev/blob/main/LICENSE-DOCS.md) file.
+# LICENSE-DOCS.md (same repo) is the full "Attribution 4.0 International" legal text. Site footer on every page:
+# "Copyright © Meta Platforms, Inc". Already checked for spec 005 on 2026-10-19; re-opened 2026-11-17.
+license_quote: "Content submitted to react.dev is CC-BY-4.0 licensed, as found in the LICENSE-DOCS.md file."
+license_checked: 2026-11-17
+robots_checked: 2026-11-17
+robots_note: "https://react.dev/robots.txt (HTTP 200) has one group, 'User-agent: *' with an empty 'Disallow:' line (nothing disallowed). No Crawl-delay, no Sitemap line. /learn/* is allowed."
+attribution: "React Documentation, Copyright © Meta Platforms, Inc, https://react.dev, licensed under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). Notice: notices/react-dev.txt"
+status: use
+excluded_reason: ""
+pages:
+  - url: https://react.dev/learn/rendering-lists
+    category: Frontend
+    tracks: [frontend_react]
+    scenarios: [scn.fe.job-list-infinite-scroll]
+    topics: []
+    sections: ["Keeping list items in order with key"]
+    kind: guide
+    why: "Why React needs a stable key per list item and what goes wrong with index keys, which matters when a job list is appended to, filtered and re-sorted while the user scrolls."
+    status: use
+    excluded_reason: ""
+  - url: https://react.dev/learn/synchronizing-with-effects
+    category: Frontend
+    tracks: [frontend_react]
+    scenarios: [scn.fe.job-list-infinite-scroll, scn.fe.realtime-interview-ui]
+    topics: []
+    sections: ["Step 3: Add cleanup if needed", "Controlling non-React widgets", "Subscribing to events", "Fetching data"]
+    kind: guide
+    why: "Effect cleanup for connections and subscriptions (connect on mount, disconnect on unmount) and the ignore flag that stops a stale fetch response from overwriting newer search results, plus why client-side caches beat hand-written fetching."
+    status: use
+    excluded_reason: ""
+  - url: https://react.dev/learn/lifecycle-of-reactive-effects
+    category: Frontend
+    tracks: [frontend_react]
+    scenarios: [scn.fe.realtime-interview-ui]
+    topics: []
+    sections: ["Why synchronization may need to happen more than once", "How React re-synchronizes your Effect", "Each Effect represents a separate synchronization process"]
+    kind: concept
+    why: "Chat-room connection example showing an Effect disconnecting and reconnecting when its inputs change, which is the model for opening, tearing down and re-opening a realtime question stream."
+    status: use
+    excluded_reason: ""
+  - url: https://react.dev/learn/reacting-to-input-with-state
+    category: Frontend
+    tracks: [frontend_react]
+    scenarios: [scn.fe.multi-step-apply-form]
+    topics: []
+    sections: ["Thinking about UI declaratively"]
+    kind: guide
+    why: "Modelling a form as explicit visual states (empty, typing, submitting, success, error) and deriving the UI from state, which is how each step of the application form shows validation and submit status."
+    status: use
+    excluded_reason: ""
+  - url: https://react.dev/learn/sharing-state-between-components
+    category: Frontend
+    tracks: [frontend_react]
+    scenarios: [scn.fe.multi-step-apply-form]
+    topics: []
+    sections: ["Lifting state up by example", "A single source of truth for each state"]
+    kind: guide
+    why: "Lifting state to the closest common parent and passing it down as props, the basis for keeping one source of truth for answers entered across the steps of the form."
+    status: use
+    excluded_reason: ""

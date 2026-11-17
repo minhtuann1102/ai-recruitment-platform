@@ -1,0 +1,66 @@
+source_id: prometheus
+name: Prometheus Documentation
+kind: official
+homepage: https://prometheus.io/docs/
+format: html
+# prometheus.io is a Next.js + Mantine site (server-rendered HTML, text is in the response, no JS rendering needed).
+# <main> wraps the sidebar nav, the article, "On this page" and Prev/Next links, and the article has no id or semantic
+# class, so the selector walks down from the Mantine layout: main > Container > Group (sidebar nav | content column |
+# "On this page" column, the last has class mantine-visible-from-lg) > content column > its first div (= the article,
+# h1 included). Checked 2026-11-17 on /docs/practices/histograms/, /instrumentation/ and /alerting/: gives the article
+# text only, no "On this page" and no Edit / Report-an-issue links. If a page yields 0 sections the Mantine layout
+# changed; fall back to "main" (then "On this page" shows up as a stray last line).
+content_selector: "main > div > .mantine-Group-root > div:not(.mantine-visible-from-lg) > div:first-child"
+language: en
+license: Apache-2.0
+license_class: open
+# Read 2026-11-17. The three pages below are /docs/practices/*, which live in the prometheus/docs repository.
+# (1) docs repo README, https://raw.githubusercontent.com/prometheus/docs/main/README.md, section "License":
+#     "Apache License 2.0, see [LICENSE](LICENSE)."
+# (2) docs repo NOTICE (https://raw.githubusercontent.com/prometheus/docs/main/NOTICE) starts:
+#     "Prometheus documentation: content and static site generator" / "Copyright 2014-2025 The Prometheus Authors"
+#     (full text saved in notices/prometheus.txt, as Apache-2.0 section 4(d) asks).
+# (3) every prometheus.io page footer: "© Prometheus Authors 2014-2026 | All components are available under the
+#     Apache 2 License on GitHub. © 2026 The Linux Foundation. All rights reserved." (link goes to
+#     http://www.apache.org/licenses/LICENSE-2.0). The Linux Foundation line is about the foundation's trademarks;
+#     LF Projects Terms of Use (https://lfprojects.org/policies/terms-of-use/, opened 2026-11-17) have no clause about
+#     crawlers, robots, scraping or automated access.
+license_url: https://raw.githubusercontent.com/prometheus/docs/main/README.md
+license_quote: "Apache License 2.0, see [LICENSE](LICENSE)."
+license_checked: 2026-11-17
+robots_checked: 2026-11-17
+robots_note: "https://prometheus.io/robots.txt (HTTP 200, 24 lines) contains only comments: a preamble about 'content signals' (search, ai-input, ai-train) saying 'If the website operator does not include a content signal for a corresponding use, the website operator neither grants nor restricts permission via content signal with respect to the corresponding use.' It has no User-agent group, no Disallow, no Allow, no Content-Signal line and no Crawl-delay, so nothing restricts /docs/. https://prometheus.io/docs/ answers 302 to /docs/introduction/overview/ (normal). Plain requests return HTTP 200 with the full page."
+attribution: "Prometheus Documentation, © Prometheus Authors 2014-2026, Apache License 2.0 (http://www.apache.org/licenses/LICENSE-2.0). Notice: notices/prometheus.txt"
+status: use
+excluded_reason: ""
+pages:
+  - url: https://prometheus.io/docs/practices/histograms/
+    category: DevOps
+    tracks: [devops_engineer]
+    scenarios: [scn.devops.prod-latency-incident]
+    topics: []
+    sections: ["Overview", "Bucketing", "Quantiles"]
+    kind: concept
+    why: "How histograms and summaries record request durations, how bucket boundaries limit the accuracy of a quantile estimate, and how histogram_quantile computes percentiles, which is how a latency spike is measured."
+    status: use
+    excluded_reason: ""
+  - url: https://prometheus.io/docs/practices/instrumentation/
+    category: DevOps
+    tracks: [devops_engineer]
+    scenarios: [scn.devops.prod-latency-incident]
+    topics: []
+    sections: ["How to instrument"]
+    kind: guide
+    why: "What to measure for online-serving systems (query count, errors, latency, in-progress requests, client and server side) and for subsystems such as libraries that call databases or other external resources, so a latency incident can be traced to the component that slowed down."
+    status: use
+    excluded_reason: ""
+  - url: https://prometheus.io/docs/practices/alerting/
+    category: DevOps
+    tracks: [devops_engineer]
+    scenarios: [scn.devops.prod-latency-incident]
+    topics: []
+    sections: []
+    kind: guide
+    why: "Alert on user-visible symptoms such as high latency and error rate as high up in the stack as possible, keep alerts few, and use capacity and meta-monitoring alerts, so the on-call is paged for the latency spike and not for every cause."
+    status: use
+    excluded_reason: ""

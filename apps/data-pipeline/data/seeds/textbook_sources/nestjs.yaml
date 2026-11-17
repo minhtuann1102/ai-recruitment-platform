@@ -1,0 +1,79 @@
+source_id: nestjs
+name: NestJS Documentation
+kind: official
+homepage: https://docs.nestjs.com/
+format: html
+# The site is an Angular app but pages are prerendered: a plain GET returns the full chapter, so no --render is needed.
+# Chapter text is inside main#content > app-<name> > div.content-inner (h3 = chapter title, h4 = subsections). Outside
+# .content-inner: sidebar, "Copy markdown" button, previous/next navigation, "Support us" block, newsletter, footer.
+# Parser notes (no change made here): the page has no <h1>, so the title falls back to <title>
+# ("<chapter> | NestJS - A progressive Node.js framework"); crawlers/docs_section_parser splits on h1-h3 only, so each
+# chapter becomes ONE section and the h4 subsection headings are not kept in the text. Hence `sections` is empty on
+# every page. The same chapters exist as markdown in the docs repo (content/<group>/<name>.md) but with @@filename /
+# @@switch tab directives, so html is used.
+content_selector: ".content-inner"
+language: en
+license: MIT
+license_class: open
+# LICENSE of the docs repository (nestjs/docs.nestjs.com, branch master), read as raw text; the quote is its permission
+# sentence word for word (line breaks joined). README.md of the repo says "Nest is MIT licensed" and the docs site says
+# "Nest is an MIT-licensed open source project." and "Copyright © 2017-2026 MIT by Kamil Mysliwiec" in its footer.
+license_url: https://github.com/nestjs/docs.nestjs.com/blob/master/LICENSE
+license_quote: "Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the 'Software'), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:"
+license_checked: 2026-11-17
+robots_checked: 2026-11-17
+robots_note: "https://docs.nestjs.com/robots.txt (HTTP 200) has one group, User-agent: *, with Allow: / and Disallow: /v4 through /v11 (archived major versions). No Crawl-delay; Sitemap: https://docs.nestjs.com/sitemap.xml. Current chapters (no version prefix) are allowed; never fetch /v4../v11 paths. The site also publishes llms.txt and a .md copy per chapter; not used here."
+attribution: "NestJS Documentation, Copyright (c) 2017-present Kamil Myśliwiec, MIT License. Notice: notices/nestjs.txt"
+status: use
+excluded_reason: ""
+pages:
+  - url: https://docs.nestjs.com/http/file-upload
+    category: Backend
+    tracks: [nodejs_backend]
+    scenarios: [scn.node.file-upload-service]
+    topics: []
+    sections: []
+    kind: guide
+    why: "Multer memory versus diskStorage, size and parts limits answered with 413, ParseFilePipe validation of size and MIME type, streaming an upload to S3 or R2 without buffering, and StreamableFile for downloads: the building blocks of an upload service."
+    status: use
+    excluded_reason: ""
+  - url: https://docs.nestjs.com/security/rate-limiting
+    category: Backend
+    tracks: [nodejs_backend]
+    scenarios: [scn.node.rate-limit-api]
+    topics: []
+    sections: []
+    kind: guide
+    why: "ThrottlerModule ttl and limit, several named throttlers, per-route override and skip, tracker by client IP behind a proxy (trust proxy and X-Forwarded-For), and a pluggable storage (in-memory by default, a Redis provider for distributed servers) so limits are shared across instances."
+    status: use
+    excluded_reason: ""
+  - url: https://docs.nestjs.com/websockets/gateways
+    category: Backend
+    tracks: [nodejs_backend]
+    scenarios: [scn.node.realtime-notifications]
+    topics: []
+    sections: []
+    kind: guide
+    why: "How a WebSocket gateway receives and emits messages, namespaces, connection lifecycle hooks, and how guards, pipes and interceptors apply to gateways: the push channel for notifications."
+    status: use
+    excluded_reason: ""
+  - url: https://docs.nestjs.com/http/server-sent-events
+    category: Backend
+    tracks: [nodejs_backend]
+    scenarios: [scn.node.realtime-notifications]
+    topics: []
+    sections: []
+    kind: guide
+    why: "Server-Sent Events as a one-way push over plain HTTP, how a closed connection is cleaned up, abort signals, and the cap on events buffered for a slow client: the simpler alternative to WebSockets for notifications."
+    status: use
+    excluded_reason: ""
+  - url: https://docs.nestjs.com/websockets/adapter
+    category: Backend
+    tracks: [nodejs_backend]
+    scenarios: [scn.node.realtime-notifications]
+    topics: []
+    sections: []
+    kind: guide
+    why: "Running socket.io behind several load-balanced instances needs a Redis adapter (and sticky sessions or websocket-only transport), plus per-client message concurrency and maxPayload limits: how to scale notifications past one process."
+    status: use
+    excluded_reason: ""

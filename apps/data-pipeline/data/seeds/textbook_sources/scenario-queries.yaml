@@ -10,3 +10,51 @@ scn.java.payment-idempotency:
 scn.java.slow-query-incident:
   query_en: "diagnose slow database query with EXPLAIN ANALYZE, missing index, N+1 selects and connection pool exhaustion"
   terms: ["EXPLAIN ANALYZE", "index scan versus sequential scan", "N+1 select", "lazy and eager fetching", "connection pool", "slow query logging"]
+scn.node.file-upload-service:
+  query_en: "handle large file uploads in Node.js streaming to disk or object storage with size limits and backpressure"
+  terms: ["multipart upload", "stream instead of buffering in memory", "backpressure", "file size limit", "disk storage versus memory storage", "pipeline"]
+scn.node.rate-limit-api:
+  query_en: "rate limit a public API per client using token bucket or sliding window counters shared across instances in Redis"
+  terms: ["fixed window versus sliding window", "token bucket", "per client key (IP or API key)", "429 Too Many Requests", "shared store across instances", "atomic check and update"]
+scn.node.realtime-notifications:
+  query_en: "push real-time notifications to many connected users with WebSocket or server-sent events scaled across instances with Redis pub/sub"
+  terms: ["WebSocket versus server-sent events", "Redis pub/sub fan-out", "at-most-once delivery", "load balancer sticky sessions", "slow client buffering", "reconnection"]
+scn.node.cache-stampede:
+  query_en: "prevent cache stampede when a hot key expires using single-flight lock and early refresh with Redis"
+  terms: ["cache stampede", "single-flight lock", "TTL and expiration", "cache-aside", "early refresh", "stale data tolerance"]
+scn.py.report-export-timeout:
+  query_en: "export large report without request timeout using background task queue, streaming response and chunked queryset iteration"
+  terms: ["background job with status polling", "Celery task queue", "streaming response", "queryset iterator", "fetch only needed columns", "task granularity"]
+scn.py.webhook-ingest:
+  query_en: "receive third-party webhooks reliably: acknowledge fast, queue processing, retry failures and deduplicate events with idempotency key"
+  terms: ["acknowledge then process asynchronously", "idempotency key", "unique constraint", "acks_late", "retry with backoff", "at-least-once delivery"]
+scn.py.multi-tenant-api:
+  query_en: "multi-tenant API isolating each organization data with tenant context dependency, scoped permissions and row-level security"
+  terms: ["tenant_id filter", "row-level security", "dependency injection", "OAuth2 scopes", "shared schema versus schema per tenant", "central query filter"]
+scn.py.csv-import-pipeline:
+  query_en: "import large CSV file in batches with bulk insert, per-batch transactions, row validation and background processing"
+  terms: ["streaming upload", "bulk insert", "batch commit", "savepoint", "COPY", "row validation and error report"]
+scn.devops.dockerize-web-app:
+  query_en: "containerize web app and database with Docker Compose: Dockerfile build, multi-stage image, networking, volumes, startup order and healthcheck"
+  terms: ["multi-stage build", "named volume", "service name DNS", "depends_on healthcheck", "build cache", ".dockerignore"]
+scn.devops.container-crashloop:
+  query_en: "diagnose container restarting repeatedly after deploy: CrashLoopBackOff, exit code, logs, OOMKilled, failing liveness probe, restart policy"
+  terms: ["CrashLoopBackOff", "restart policy", "exit code", "kubectl logs and describe", "OOMKilled memory limit", "liveness probe"]
+scn.devops.zero-downtime-deploy:
+  query_en: "deploy new version without downtime using rolling update, readiness probe, graceful shutdown, rollback and pod disruption budget"
+  terms: ["rolling update", "maxSurge and maxUnavailable", "readiness probe", "graceful shutdown SIGTERM", "rollback", "PodDisruptionBudget"]
+scn.devops.prod-latency-incident:
+  query_en: "investigate production latency spike with percentile latency metrics, histogram, resource saturation, CPU throttling, autoscaling and symptom-based alerting"
+  terms: ["p99 latency", "histogram_quantile", "CPU throttling", "resource saturation", "HPA", "symptom-based alerting"]
+scn.fe.job-list-infinite-scroll:
+  query_en: "render thousands of job listings with search and infinite scroll using virtualization, IntersectionObserver, debounced input and request cancellation"
+  terms: ["list virtualization (windowing)", "IntersectionObserver sentinel", "cursor-based pagination", "debounced search input", "cancel stale requests (race condition)", "stable list keys"]
+scn.fe.multi-step-apply-form:
+  query_en: "multi-step application form keeping state across steps, client-side validation, file upload for CV and error messages"
+  terms: ["lifting state up", "controlled inputs", "form status states (typing, submitting, error)", "constraint validation attributes", "server-side re-validation", "file type and size check before upload"]
+scn.fe.slow-page-lcp:
+  query_en: "diagnose slow Largest Contentful Paint on mobile: LCP breakdown, resource load delay, image priority, render-blocking resources and lazy loading"
+  terms: ["LCP element", "LCP subparts (TTFB, load delay, load duration, render delay)", "fetchpriority and preload", "do not lazy-load above-the-fold image", "critical rendering path", "render-blocking CSS and JS"]
+scn.fe.realtime-interview-ui:
+  query_en: "stream questions to a React UI over server-sent events or WebSocket, reconnect after disconnect, clean up effects"
+  terms: ["server-sent events (EventSource)", "WebSocket close and error events", "automatic reconnection (retry interval, backoff)", "event id to resume after reconnect", "Effect cleanup on unmount", "streaming fetch body"]

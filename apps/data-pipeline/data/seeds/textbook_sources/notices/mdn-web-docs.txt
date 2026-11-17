@@ -1,0 +1,14 @@
+MDN Web Docs
+Source: https://developer.mozilla.org/en-US/docs/MDN/Writing_guidelines/Attrib_copyright_license, section "Documentation" (read 2026-11-17)
+
+The content on MDN Web Docs has been prepared with the contributions of authors from both inside and outside Mozilla. Unless otherwise indicated, the content is available under the terms of the Creative Commons Attribution-ShareAlike license (CC-BY-SA), v2.5 or any later version.
+
+Your reuse of the content here is published under the same license as the original content – CC-BY-SA v2.5 or any later version.
+
+When reusing the content on MDN Web Docs, you need to ensure that attribution is given to the material as well as to "Mozilla Contributors".
+
+Page footer of every MDN page: Portions of this content are ©1998–2026 by individual mozilla.org contributors. Content available under a Creative Commons license.
+
+Creative Commons Attribution-ShareAlike 2.5: https://creativecommons.org/licenses/by-sa/2.5/
+
+Each stored passage keeps the address of the MDN page it was cut from. Passages are excerpts cut by section; text is otherwise unchanged.

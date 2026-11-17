@@ -1,0 +1,55 @@
+source_id: nodejs
+name: Node.js Learn (nodejs.org guides)
+kind: official
+homepage: https://nodejs.org/learn/
+format: html
+# Guides live under https://nodejs.org/learn/<section>/<page> (no /en/ prefix; list: https://nodejs.org/learn/sitemap.xml).
+# Static server-rendered HTML. The whole article is inside <main> (h1 title, then h2 sections); sidebar, site header and
+# footer are outside <main>. Code samples sit in <is-land> custom elements whose <pre> text is kept (CJS/ESM tab labels
+# appear as a leading "CJS ESM" in code chunks). Do not use the /docs/ or /dist/ paths (robots disallow).
+content_selector: "main"
+language: en
+license: CC-BY-4.0
+license_class: open
+# The nodejs.org footer links "Terms of Use" to this address, which serves a PDF (5 pages); the sentence below is the
+# "Intellectual Property Rights" paragraph of that PDF, word for word. The nodejs.org repository LICENSE is MIT but covers
+# the website source code; the OpenJS statement is the one that names Content.
+license_url: https://terms-of-use.openjsf.org/
+license_quote: "Except as otherwise provided, Content on this site, including all materials posted by the OpenJS Foundation, is licensed under a Creative Commons Attribution 4.0 License."
+license_checked: 2026-11-17
+robots_checked: 2026-11-17
+robots_note: "https://nodejs.org/robots.txt (HTTP 200) has one group, User-agent: *, with Allow: /dist/latest/, /dist/latest/docs/api/, /api/ and Disallow: /dist/, /docs/. No Crawl-delay; Sitemap: https://nodejs.org/sitemap.xml and https://nodejs.org/learn/sitemap.xml. /learn/ is not disallowed (allowed by default); never fetch /docs/ or /dist/. The OpenJS Terms of Use PDF has no clause about robots, scraping, crawling or automated access (searched for those words)."
+attribution: "Node.js Learn guides, Copyright OpenJS Foundation and Node.js contributors. All rights reserved. Content licensed under Creative Commons Attribution 4.0 International (https://creativecommons.org/licenses/by/4.0/); passages are excerpts cut by section, text otherwise unchanged. Notice: notices/nodejs.txt"
+status: use
+excluded_reason: ""
+pages:
+  - url: https://nodejs.org/learn/modules/backpressuring-in-streams
+    category: Backend
+    tracks: [nodejs_backend]
+    scenarios: [scn.node.file-upload-service]
+    topics: []
+    sections: ["Too Much Data, Too Quickly", "Memory Exhaustion", "How Does Backpressure Resolve These Issues?"]
+    kind: concept
+    why: "Why a fast reader piles data up in memory when the writer is slow, the measured memory cost, and how highWaterMark and write() returning false pause the source, which is what keeps memory flat while a large upload is written to disk or storage."
+    status: use
+    excluded_reason: ""
+  - url: https://nodejs.org/learn/modules/how-to-use-streams
+    category: Backend
+    tracks: [nodejs_backend]
+    scenarios: [scn.node.file-upload-service]
+    topics: []
+    sections: ["Why use Streams?", "How to operate with streams"]
+    kind: guide
+    why: "Why streams beat reading a whole file into memory, and how pipe(), pipeline() and async iterators chain a request body into a file or transform step with error propagation and backpressure handled."
+    status: use
+    excluded_reason: ""
+  - url: https://nodejs.org/learn/http/anatomy-of-an-http-transaction
+    category: Backend
+    tracks: [nodejs_backend]
+    scenarios: [scn.node.file-upload-service]
+    topics: []
+    sections: ["Request Body", "A Quick Thing About Errors"]
+    kind: guide
+    why: "The incoming request is a readable stream whose body arrives in chunks (not a single value) and stream errors must be handled, which is the starting point of any upload endpoint built on plain Node.js."
+    status: use
+    excluded_reason: ""

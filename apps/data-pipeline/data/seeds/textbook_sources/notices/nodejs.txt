@@ -1,0 +1,12 @@
+Node.js Learn guides
+Source: https://terms-of-use.openjsf.org/ (OpenJS Foundation Terms of Use, linked as "Terms of Use" from the nodejs.org footer; read 2026-11-17)
+
+Copyright OpenJS Foundation and Node.js contributors. All rights reserved. The OpenJS Foundation has registered trademarks and uses trademarks. For a list of trademarks of the OpenJS Foundation, please see our Trademark Policy and Trademark List.
+(footer of https://nodejs.org/learn/ pages)
+
+Except as otherwise provided, Content on this site, including all materials posted by the OpenJS Foundation, is licensed under a Creative Commons Attribution 4.0 License.
+
+Creative Commons Attribution 4.0 International License (CC BY 4.0)
+https://creativecommons.org/licenses/by/4.0/
+
+Passages stored in this project are excerpts cut by section; text is otherwise unchanged.
