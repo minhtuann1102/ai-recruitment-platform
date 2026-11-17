@@ -48,6 +48,7 @@ def test_sections_filter_keeps_only_listed_first_headings_and_skips_uncrawled_ur
     records, stats = build_records(source, [raw], NO_DECISIONS)  # CONSTRAINTS chua crawl
     assert [r["metadata"]["heading_path"] for r in records] == [["Cache", "TTL"], ["Queue"]]
     assert stats["chunks"] == 2 and stats["pages_in"] == 1
+    assert stats["missing_urls"] == [CONSTRAINTS]  # H1: URL status use khong co trong file tho duoc liet ke (process tu choi ghi)
 
 
 def test_same_paragraph_on_two_pages_gives_one_record_and_dedup_one():

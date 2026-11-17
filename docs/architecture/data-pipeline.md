@@ -48,7 +48,7 @@ apps/data-pipeline/
 ├── data/
 │   ├── raw/                   # Dữ liệu thô sau crawl (gitignore); textbook/<source_id>/ và textbook/review/<source_id>/ (lô soát)
 │   ├── processed/             # Chunks sau clean (gitignore); textbook/<source_id>.jsonl, textbook/coverage-report.json
-│   ├── reviews/textbook/      # <source_id>-decisions.json: quyết định soát, commit sau khi DE duyệt
+│   ├── reviews/textbook/      # <source_id>-decisions.json: quyết định soát, commit sau khi qua cổng mồi
 │   └── seeds/
 │       ├── qa_seed.json       # Q&A curated ban đầu (commit được)
 │       └── textbook_sources/  # S3: <source_id>.yaml (manifest), scenario-queries.yaml, review-canaries.json, notices/
@@ -195,8 +195,9 @@ từng đoạn: [data-model.md](../../specs/012-textbook-ingestion-rag-quality/d
 Trang thô (`data/raw/textbook/<source_id>/`) → cắt theo section (≤ 1.600 ký tự) → lọc nhiễu tự động (quá ngắn, chỉ có
 code, danh sách link, tiêu đề bị chặn) → xóa PII → dedup theo `content_hash` → áp quyết định soát → bản ghi sẵn sàng
 ghi (`data/processed/textbook/<source_id>.jsonl`). Bước soát: worker đánh dấu từng đoạn `keep` / `drop` / `trim`,
-mỗi lô chèn 3 đoạn mồi để phát hiện worker dễ dãi; DE duyệt file decisions (`approved_by`) trước khi index.
-`index-textbook` từ chối nguồn chưa duyệt hoặc còn đoạn chưa có quyết định.
+mỗi lô chèn 3 đoạn mồi để phát hiện worker dễ dãi; `review-textbook-score` thoát 0 (mọi đoạn mồi bị `drop`) thì tự ghi
+`approved_by = auto:canary-gate`, không duyệt tay. `index-textbook` từ chối nguồn chưa qua cổng, còn đoạn chưa có quyết định,
+hoặc đoạn có quyết định đã đổi sau lần `process-textbook` cuối; `process-textbook` từ chối file thô thiếu trang của manifest.
 
 ### Lệnh (7)
 
@@ -319,7 +320,7 @@ python -m pipeline process-textbook --source postgresql
 python -m pipeline review-textbook-prepare --source postgresql
 #   worker soát -> judgments-NN.jsonl
 python -m pipeline review-textbook-score --source postgresql
-#   DE duyệt, điền approved_by, commit decisions
+#   qua cổng mồi → approved_by = auto:canary-gate, commit decisions
 python -m pipeline process-textbook --source postgresql
 python -m pipeline coverage-textbook
 python -m pipeline index-textbook --source postgresql

@@ -1,4 +1,4 @@
-"""Doc / ghi file JSONL cua textbook (spec 012, data-model §1): trang tho va doan da xu ly.
+"""Doc / ghi file JSONL cua textbook (spec 012, data-model §1): trang tho va doan da xu ly (+ khoa quyet dinh).
 
 Duong dan doc tu `settings` luc goi (khong chup luc import) de test doi duoc thu muc du lieu.
 """
@@ -43,3 +43,18 @@ def write_jsonl(path: Path, rows: Iterable[Dict]) -> None:
         for row in rows:
             handle.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
     os.replace(tmp, path)
+
+
+def read_processed(source_id: str) -> List[Dict]:
+    """Cac ban ghi cua mot nguon theo thu tu file. File chua co -> FileNotFoundError; dong hong / thieu truong -> ValueError."""
+    path = processed_path(source_id)
+    records = read_jsonl(path)
+    for number, record in enumerate(records, start=1):
+        if not record.get("content") or not record.get("content_hash"):
+            raise ValueError(f"{path.name}: ban ghi thu {number} thieu content / content_hash")
+    return records
+
+
+def original_hash(record: Dict) -> str:
+    """Hash cua noi dung TRUOC khi ap trim: khoa quyet dinh trong file decisions."""
+    return (record.get("metadata") or {}).get("original_hash") or record["content_hash"]

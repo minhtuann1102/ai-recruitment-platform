@@ -1,7 +1,9 @@
 """crawl-textbook (spec 012, contracts/pipeline-cli-textbook.md): tai cac trang status use cua mot nguon -> JSONL tho.
 
 Ghi `TEXTBOOK_RAW_DIR/<source_id>/<UTC>.jsonl` (moi dong mot trang, data-model §2). Ma thoat: 0 xong; 1 manifest loi /
-0 trang ghi duoc; 4 host chan bot (khong ghi file de file do khong thanh "file tho moi nhat" cua process-textbook).
+0 trang ghi duoc; 4 host chan bot (khong ghi file de file do khong thanh "file tho moi nhat" cua process-textbook);
+1 cung khi co trang bi bo (loi tai / robots cam / rong): file van ghi nhung thieu trang, process-textbook se tu choi
+no -> crawl lai. Chan bot = HTML 3 lan 403/429 lien tiep, hoac GitHub API tra 403/429 (het han muc).
 """
 import argparse
 import sys
@@ -35,7 +37,7 @@ def make_fetchers(source: Source, delay: float, render: bool, page_count: int) -
     crawl_source phat hien robots; chi dung cai ma dinh dang nguon can (PoliteFetcher doc robots.txt ngay khi tao)."""
     if source.format == "markdown":
         client = GithubRawClient(delay=delay)
-        return _unused, client.fetch, (lambda: False), client.close
+        return _unused, client.fetch, (lambda: client.blocked), client.close
     fetcher = PoliteFetcher(
         base_url=source.homepage, delay=delay, max_pages=max(DEFAULT_MAX_PAGES, page_count), render=render
     )
@@ -67,6 +69,10 @@ def _crawl_one(source: Source, delay: float, render: bool) -> int:
     path = Path(settings.TEXTBOOK_RAW_DIR) / source.source_id / f"{stamp}.jsonl"
     write_jsonl(path, pages)  # nguyen tu (tmp roi replace): ghi do khong thanh "file tho moi nhat"
     print(f"   ghi {path}")
+    if skipped:  # file thieu trang: process-textbook tu choi no cho toi khi crawl du
+        print(f"loi: {source.source_id} thieu {len(skipped)}/{page_count} trang (liet ke o tren): crawl lai truoc khi "
+              "process-textbook (file van ghi)", file=sys.stderr)
+        return EXIT_INPUT_ERROR
     return EXIT_OK
 
 

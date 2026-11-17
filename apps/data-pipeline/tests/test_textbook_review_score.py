@@ -1,4 +1,4 @@
-"""T030: review-textbook-score — thoat 1 khong ghi gi khi sai; dat thi decisions khong chua doan moi, approved_by rong."""
+"""T030: review-textbook-score — thoat 1 khong ghi gi khi sai; dat thi decisions khong chua doan moi, approved_by = auto:canary-gate."""
 import json
 
 import pytest
@@ -26,7 +26,7 @@ def score():
     return main(["review-textbook-score", "--source", SOURCE])
 
 
-def test_pass_writes_decisions_without_canaries_and_empty_approved_by(prepared, capsys):
+def test_pass_writes_decisions_without_canaries_and_canary_gate_approval(prepared, capsys):
     env, records = prepared
     write_judgments(env, {
         item_id(records[0]): {"verdict": "drop", "reason": "off_topic", "note": "marketing"},
@@ -34,7 +34,7 @@ def test_pass_writes_decisions_without_canaries_and_empty_approved_by(prepared, 
     })
     assert score() == 0
     saved = json.loads((env.decisions / DECISIONS_FILE).read_text(encoding="utf-8"))
-    assert saved["approved_by"] == "" and saved["source_id"] == SOURCE
+    assert saved["approved_by"] == "auto:canary-gate" and saved["source_id"] == SOURCE
     assert not {content_hash(c["content"]) for c in env.canaries} & set(saved["decisions"])
     assert set(saved["decisions"]) == {r["content_hash"] for r in records}  # hash day du, chi doan that
     assert all(len(h) == 32 for h in saved["decisions"])
@@ -42,6 +42,7 @@ def test_pass_writes_decisions_without_canaries_and_empty_approved_by(prepared, 
     assert saved["decisions"][records[1]["content_hash"]] == {"verdict": "trim", "remove": [TRIM_TEXT]}
     out = capsys.readouterr().out
     assert "3 keep, 1 trim, 1 drop (off_topic 1)" in out and records[1]["content_hash"] in out and "Topic 0" in out
+    assert "approved_by = auto:canary-gate" in out
 
 
 def assert_fails_and_writes_nothing(env, capsys, expect):
@@ -104,12 +105,23 @@ def test_missing_judgments_file_or_batches_fails(prepared, capsys):
     assert_fails_and_writes_nothing(env, capsys, "judgments-09.jsonl")
 
 
-def test_merge_keeps_old_decisions_and_resets_approval(prepared):
+def test_merge_keeps_old_decisions_and_rewrites_approval_to_canary_gate(prepared):
     env, records = prepared
     old = {"verdict": "drop", "reason": "nav"}
     save_decisions(Decisions(source_id=SOURCE, approved_by="DE", decisions={"b" * 32: old}))
     write_judgments(env)
     assert score() == 0
     saved = load_decisions(SOURCE)
-    assert saved.approved_by == "" and saved.decisions["b" * 32] == old
+    assert saved.approved_by == "auto:canary-gate" and saved.decisions["b" * 32] == old
     assert set(saved.decisions) == {"b" * 32, *(r["content_hash"] for r in records)}
+
+
+def test_failed_score_leaves_existing_approval_untouched(prepared, capsys):
+    """Chi khi qua cong moi dat approved_by; score loi khong dong vao file decisions (khong tu duyet, khong reset)."""
+    env, records = prepared
+    save_decisions(Decisions(source_id=SOURCE, approved_by="DE", decisions={"b" * 32: {"verdict": "keep"}}))
+    before = (env.decisions / DECISIONS_FILE).read_bytes()
+    write_judgments(env, {item_id(records[0]): {"verdict": "bogus"}})
+    assert score() == 1
+    assert (env.decisions / DECISIONS_FILE).read_bytes() == before
+    assert "khong ghi gi" in capsys.readouterr().err

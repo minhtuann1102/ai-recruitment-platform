@@ -70,3 +70,23 @@ def test_decisions_are_applied_on_second_run(textbook_env, capsys):
     assert len(_lines(textbook_env.processed_dir / f"{SOURCE_ID}.jsonl")) == 4
     out = capsys.readouterr().out
     assert "review_drop=1" in out and "chua co quyet dinh soat: 3" in out
+
+
+def test_raw_file_missing_manifest_urls_exits_one_lists_them_and_leaves_processed_file_untouched(textbook_env, capsys):
+    """H1: crawl thieu trang -> khong ghi, de index khong xoa doan da nap cua cac trang thieu; file cu giu nguyen."""
+    textbook_env.write_raw(RAW_PAGES, name="20261115T080000Z.jsonl")
+    assert main(["process-textbook", "--source", SOURCE_ID]) == 0
+    out_path = textbook_env.processed_dir / f"{SOURCE_ID}.jsonl"
+    before = out_path.read_bytes()
+    textbook_env.write_raw(RAW_PAGES[:1], name="20261116T080000Z.jsonl")  # file moi nhat thieu CONSTRAINTS + REFERENCE
+    capsys.readouterr()
+    assert main(["process-textbook", "--source", SOURCE_ID]) == 1
+    err = capsys.readouterr().err
+    assert "thieu 2 URL status use" in err and CONSTRAINTS in err and REFERENCE in err and LOCKING not in err
+    assert out_path.read_bytes() == before
+
+
+def test_missing_urls_for_one_source_does_not_write_it_even_when_nothing_else_is_there(textbook_env):
+    textbook_env.write_raw(RAW_PAGES[:2])
+    assert main(["process-textbook", "--source", SOURCE_ID]) == 1
+    assert not (textbook_env.processed_dir / f"{SOURCE_ID}.jsonl").exists()

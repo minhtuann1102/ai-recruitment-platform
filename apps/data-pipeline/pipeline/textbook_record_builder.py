@@ -81,13 +81,15 @@ def _record(source: Source, row: SourcePage, title: str, heading_path: List[str]
 
 
 def build_records(source: Source, pages: List[Dict], decisions: Decisions) -> Tuple[List[Dict], Dict[str, Any]]:
-    """(records, stats). Duyet dong manifest status use theo thu tu (de "giu doan dau" on dinh); URL chua crawl thi bo.
+    """(records, stats). Duyet dong manifest status use theo thu tu (de "giu doan dau" on dinh).
 
-    ValueError tu apply_decision (trim khong khop) duoc nem len cho lenh bao loi. stats ngoai bo dem con
-    `section_misses`: dong manifest co `sections` nhung khong khop section nao (tieu de ghi sai) — lenh in canh bao.
+    ValueError tu apply_decision (trim khong khop) duoc nem len cho lenh bao loi. stats ngoai bo dem con:
+    `section_misses` (dong manifest co `sections` nhung khong khop section nao: tieu de ghi sai) va `missing_urls`
+    (URL status use khong co trong file tho: crawl thieu trang). Lenh process in canh bao / tu choi ghi theo hai danh sach nay.
     """
     stats: Dict[str, Any] = {key: 0 for key in STAT_KEYS}
     stats["section_misses"] = []
+    stats["missing_urls"] = []
     pages_by_url = {p["url"]: p for p in pages}
     matched_urls = set()
     records: List[Dict] = []
@@ -95,6 +97,8 @@ def build_records(source: Source, pages: List[Dict], decisions: Decisions) -> Tu
     for _, row in active_pages([source]):
         raw = pages_by_url.get(row.url)
         if raw is None:
+            if row.url not in stats["missing_urls"]:
+                stats["missing_urls"].append(row.url)
             continue
         matched_urls.add(row.url)
         row_page = _rows_page(raw, row)

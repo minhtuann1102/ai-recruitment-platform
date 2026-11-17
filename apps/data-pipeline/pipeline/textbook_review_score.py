@@ -3,8 +3,8 @@
 Doc moi `batch-NN.json` + `judgments-NN.jsonl` trong `TEXTBOOK_REVIEW_WORK_DIR/<source_id>/`. Thoat 1 VA KHONG GHI GI khi:
 thieu / thua item_id, verdict sai, drop thieu ly do hop le, chuoi `remove` khong khop dung mot lan (cung luat voi
 apply_decision), hoac doan moi khong bi `drop` (in ten lo phai soat lai). Dat -> bo doan moi, doi item_id ve hash day du
-(tinh lai tu noi dung), merge_decisions (quyet dinh cu thang, approved_by reset rong) + save_decisions, in so keep / trim /
-drop theo ly do va danh sach drop + trim de DE duyet. Offline.
+(tinh lai tu noi dung), merge_decisions (quyet dinh cu thang) + approved_by = CANARY_GATE_APPROVER (thoat 0 = qua cong
+doan moi, khong duyet tay) + save_decisions, in so keep / trim / drop theo ly do va danh sach drop + trim de DE doc lai. Offline.
 """
 import argparse
 import datetime
@@ -18,7 +18,9 @@ from typing import Any, Dict, List
 from . import settings
 from .qa_record_builder import content_hash
 from .textbook_command_common import load_checked_manifest, select_sources
-from .textbook_review_decisions import Decisions, apply_decision, load_decisions, merge_decisions, save_decisions
+from .textbook_review_decisions import (
+    CANARY_GATE_APPROVER, Decisions, apply_decision, load_decisions, merge_decisions, save_decisions,
+)
 from .textbook_review_prepare import CANARY_KEY_FILE, item_id_of
 
 DROP_REASONS = ("nav", "code_only", "off_topic", "not_self_contained", "reference_table", "other")
@@ -127,7 +129,7 @@ def _print_summary(source_id: str, score: SourceScore) -> None:
     drops = Counter(d["reason"] for d in score.decisions.values() if d["verdict"] == "drop")
     by_reason = ", ".join(f"{reason} {n}" for reason, n in sorted(drops.items())) or "-"
     print(f"== review-textbook-score {source_id}: {verdicts['keep']} keep, {verdicts['trim']} trim, "
-          f"{verdicts['drop']} drop ({by_reason}); approved_by de trong cho toi khi DE duyet")
+          f"{verdicts['drop']} drop ({by_reason}); approved_by = {CANARY_GATE_APPROVER} (qua cong doan moi)")
     for full, decision in sorted(score.decisions.items(), key=lambda kv: kv[1]["verdict"]):
         if decision["verdict"] == "keep":
             continue
@@ -159,7 +161,9 @@ def run_review_textbook_score(args: argparse.Namespace) -> int:
     try:
         for source_id, score in scores.items():
             new = Decisions(source_id=source_id, reviewed_at=reviewed_at, decisions=score.decisions)
-            path = save_decisions(merge_decisions(load_decisions(source_id), new))
+            merged = merge_decisions(load_decisions(source_id), new)
+            merged.approved_by = CANARY_GATE_APPROVER  # den day moi lo da qua cong (moi doan moi bi drop)
+            path = save_decisions(merged)
             _print_summary(source_id, score)
             print(f"   -> {path}")
     except ValueError as exc:  # file decisions cu hong

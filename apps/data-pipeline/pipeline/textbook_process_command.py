@@ -2,7 +2,8 @@
 
 Doc `TEXTBOOK_RAW_DIR/<source_id>/<UTC>.jsonl` moi nhat + decisions (neu co), `build_records`, ghi
 `TEXTBOOK_PROCESSED_DIR/<source_id>.jsonl` (cung input -> file giong het tung byte). Ma thoat: 0 xong;
-1 manifest loi, nguon chua co file tho, hoac file tho / decisions / quyet dinh trim hong.
+1 manifest loi, nguon chua co file tho, file tho thieu URL status use cua manifest (crawl do dang; khong ghi gi cho
+nguon do, de index khong xoa doan da nap cua trang thieu), hoac file tho / decisions / quyet dinh trim hong.
 """
 import argparse
 import sys
@@ -42,6 +43,12 @@ def _process_one(source: Source) -> int:
         records, stats = build_records(source, read_jsonl(raw_file), load_decisions(source_id))
     except ValueError as exc:  # file tho / decisions hong, hoac trim khong khop (thong bao co hash)
         print(f"loi: [{source_id}] {exc}", file=sys.stderr)
+        return EXIT_INPUT_ERROR
+    if stats["missing_urls"]:  # crawl thieu trang: khong ghi, neu khong index se xoa doan da nap cua cac trang nay
+        print(f"loi: [{source_id}] file tho {raw_file.name} thieu {len(stats['missing_urls'])} URL status use "
+              "(crawl lai roi process lai); khong ghi gi:", file=sys.stderr)
+        for url in stats["missing_urls"]:
+            print(f"   {url}", file=sys.stderr)
         return EXIT_INPUT_ERROR
     write_jsonl(processed_path(source_id), records)
     _print_stats(source, raw_file.name, stats)

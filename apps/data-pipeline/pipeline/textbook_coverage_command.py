@@ -18,7 +18,7 @@ from .knowledge_chunk_writer import PreflightError
 from .textbook_coverage_report import build_report, drop_reasons, scenario_queries
 from .textbook_coverage_vector_check import run_vector_check
 from .textbook_command_common import load_checked_manifest
-from .textbook_processed_jsonl_reader import read_processed
+from .textbook_processed_io import read_processed
 from .textbook_review_decisions import load_decisions
 from .settings import ConfigError
 

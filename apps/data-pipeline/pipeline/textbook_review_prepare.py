@@ -15,12 +15,13 @@ from typing import Dict, List, Tuple
 from . import settings
 from .qa_record_builder import content_hash
 from .textbook_command_common import load_checked_manifest, select_sources
-from .textbook_processed_jsonl_reader import original_hash, read_processed
+from .textbook_processed_io import original_hash, read_processed
 from .textbook_review_decisions import Decisions, load_decisions
 
 CANARIES_FILE = "review-canaries.json"
 CANARY_KEY_FILE = "canary-key.json"
 CANARIES_PER_BATCH = 3
+MIN_CANARY_POOL = 12  # contract §4: du doan moi de xoay vong giua cac lo / nguon
 ITEM_ID_LEN = 12
 EXIT_OK, EXIT_INPUT_ERROR = 0, 1
 
@@ -34,15 +35,15 @@ def item_id_of(hash_value: str) -> str:
 
 
 def load_canaries() -> List[Dict]:
-    """Doan moi tu seeds (contract §4): mang {content, kind}; it nhat CANARIES_PER_BATCH doan."""
+    """Doan moi tu seeds (contract §4): mang {content, kind}; it nhat MIN_CANARY_POOL doan."""
     path = Path(settings.TEXTBOOK_SOURCES_DIR) / CANARIES_FILE
     try:
         canaries = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
         raise ValueError(f"khong doc duoc {path}: {exc}") from exc
     ok = isinstance(canaries, list) and all(isinstance(c, dict) and c.get("content") for c in canaries)
-    if not ok or len(canaries) < CANARIES_PER_BATCH:
-        raise ValueError(f"{path}: can mang >= {CANARIES_PER_BATCH} doi tuong {{content, kind}}")
+    if not ok or len(canaries) < MIN_CANARY_POOL:
+        raise ValueError(f"{path}: can mang >= {MIN_CANARY_POOL} doi tuong {{content, kind}}")
     return canaries
 
 

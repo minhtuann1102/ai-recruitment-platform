@@ -1,7 +1,8 @@
 """Quyet dinh soat doan giao trinh (spec 012, data-model §4): doc/ghi file, ap len noi dung, gop lo moi.
 
 File: `settings.TEXTBOOK_DECISIONS_DIR/<source_id>-decisions.json`, khoa quyet dinh = content_hash cua noi dung
-TRUOC khi ap. `approved_by` rong cho toi khi DE duyet (index-textbook tu choi file chua duyet).
+TRUOC khi ap. `approved_by` rong cho toi khi review-textbook-score thoat 0 (qua cong doan moi) va dat
+`CANARY_GATE_APPROVER`; index-textbook tu choi file co approved_by rong.
 """
 import json
 import os
@@ -16,6 +17,7 @@ from .textbook_chunker import MIN_WORDS, SEP
 from .textbook_noise_filter import prose_word_count
 
 VERDICTS = ("keep", "drop", "trim")
+CANARY_GATE_APPROVER = "auto:canary-gate"  # approved_by do review-textbook-score ghi khi lo qua cong doan moi (2026-11-17)
 
 
 @dataclass
@@ -67,7 +69,8 @@ def save_decisions(decisions: Decisions, directory: Optional[Path] = None) -> Pa
 
 
 def merge_decisions(old: Decisions, new: Decisions) -> Decisions:
-    """Gop lo moi vao file cu: quyet dinh cu thang khi trung hash; approved_by luon reset (DE phai duyet lai)."""
+    """Gop lo moi vao file cu: quyet dinh cu thang khi trung hash; approved_by luon reset (ham thuan; score dat lai
+    CANARY_GATE_APPROVER chi sau khi lo moi qua cong)."""
     if old.source_id != new.source_id:
         raise ValueError(f"khac nguon: {old.source_id!r} vs {new.source_id!r}")
     return Decisions(

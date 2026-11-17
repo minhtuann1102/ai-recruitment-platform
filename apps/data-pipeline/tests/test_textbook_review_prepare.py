@@ -86,3 +86,12 @@ def test_missing_processed_file_or_unknown_source_exits_one(textbook_env, capsys
     assert "chua co file da xu ly" in capsys.readouterr().err
     assert main(["review-textbook-prepare", "--source", "nope"]) == 1
     assert "nope" in capsys.readouterr().err
+
+
+def test_canary_pool_smaller_than_twelve_exits_one(textbook_env, capsys):
+    """L3: contract §4 can >= 12 doan moi (file that co 12); it hon -> xoay vong vo nghia -> tu choi."""
+    write_processed(textbook_env, [make_record(n) for n in range(4)])
+    (textbook_env.sources / "review-canaries.json").write_text(json.dumps(textbook_env.canaries[:11]), encoding="utf-8")
+    assert run_prepare() == 1
+    assert ">= 12" in capsys.readouterr().err
+    assert not (textbook_env.work / SOURCE).exists()
