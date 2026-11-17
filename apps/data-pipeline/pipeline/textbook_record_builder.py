@@ -23,8 +23,13 @@ _NUMBERING_RE = re.compile(r"^\d+(?:\.\d+)*\.?\s+")
 
 
 def _heading_key(text: str) -> str:
-    """So khop tieu de giua manifest va trang that: khong phan biet hoa thuong / khoang trang / so muc dau ("11. ")."""
+    """So khop tieu de giua manifest va trang that: khong phan biet hoa thuong / khoang trang / so muc dau ("11. "),
+    ky hieu headerlink cuoi tieu de (" ¶" cua Sphinx, " #" cua docs PostgreSQL) va ngoac kep cong / thang."""
+    text = text.translate(_QUOTES).rstrip().rstrip("¶#").rstrip()
     return _NUMBERING_RE.sub("", " ".join(text.split())).casefold()
+
+
+_QUOTES = str.maketrans({"“": '"', "”": '"', "‘": "'", "’": "'"})
 
 
 def _rows_page(page: Dict, row: SourcePage) -> Dict:

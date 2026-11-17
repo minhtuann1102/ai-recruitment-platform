@@ -131,3 +131,10 @@ def test_section_names_match_ignoring_case_spacing_and_leading_numbering_and_mis
     records, stats = build_records(source, pages, NO_DECISIONS)
     assert [r["metadata"]["heading_path"] for r in records] == [["11. locking"]]
     assert stats["section_misses"] == [f"{CONSTRAINTS} ['Missing name']"]
+
+
+def test_heading_key_ignores_headerlink_marks_and_curly_quotes():
+    from pipeline.textbook_record_builder import _heading_key
+
+    assert _heading_key("Using “atomic” ¶") == _heading_key('Using "atomic"')
+    assert _heading_key("5.4. Constraints #") == _heading_key("Constraints")

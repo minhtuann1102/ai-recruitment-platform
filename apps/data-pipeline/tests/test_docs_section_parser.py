@@ -73,3 +73,95 @@ def test_markdown_without_h1_has_empty_title_and_keeps_paths():
 def test_markdown_closing_hashes_stripped_but_c_sharp_kept():
     page = parse_markdown_page("# Title\n\n## Notes on C#\n\nSome text.\n\n## Closed heading ##\n\nOther text.\n")
     assert [s["heading_path"] for s in page["sections"]] == [["Notes on C#"], ["Closed heading"]]
+
+
+def test_markdown_without_h1_uses_front_matter_title_and_keeps_h2_siblings():
+    text = "---\ntitle: Cache-aside pattern\nweight: 3\n---\nIntro text.\n\n## First\nAlpha body.\n\n### Deep\nDeep body.\n\n## Second\nBeta body.\n"
+    page = parse_markdown_page(text)
+    assert page["title"] == "Cache-aside pattern"
+    assert [s["heading_path"] for s in page["sections"]] == [["First"], ["First", "Deep"], ["Second"]]
+    assert all("weight" not in s["text"] for s in page["sections"])
+
+
+def test_markdown_h1_wins_over_front_matter_and_unclosed_front_matter_is_text():
+    page = parse_markdown_page("---\ntitle: Meta\n---\n# Real Title\n## A\nbody a\n")
+    assert page["title"] == "Real Title" and page["sections"][0]["heading_path"] == ["A"]
+    assert parse_markdown_page("---\ntitle: x\n## A\nbody\n")["title"] == ""
+
+
+def _page(body, selector=None):
+    return parse_html_page(f"<html><body><article>{body}</article></body></html>", selector)
+
+
+def test_definition_list_terms_and_descriptions_are_kept():
+    page = _page("<h1>Fetch</h1><h2>Options</h2><dl><dt>method</dt><dd>HTTP verb to use.</dd><dt>headers</dt><dd>Request headers.</dd></dl>")
+    text = page["sections"][0]["text"]
+    assert page["sections"][0]["heading_path"] == ["Options"]
+    assert "method" in text and "HTTP verb to use." in text and "headers" in text
+
+
+def test_hidden_elements_are_dropped_from_title_headings_and_chunks():
+    page = _page(
+        '<h1>Learn CSS<devsite-actions hidden data-nosnippet><devsite-feature-tooltip class="nocontent">'
+        '<span slot="popout-heading">Stay organized with collections</span></devsite-feature-tooltip></devsite-actions>'
+        '<div class="devsite-actions">Class form actions</div>'
+        '<span hidden>Save collection</span><i aria-hidden="true">icon</i></h1>'
+        '<p>Intro text.</p>'
+        '<h2>Box model <a aria-hidden="TRUE" href="#box">#</a></h2><p>Body.<span hidden>secret <b>nested</b></span></p>'
+    )
+    assert page["title"] == "Learn CSS"
+    assert [s["heading_path"] for s in page["sections"]] == [[], ["Box model"]]
+    everything = " ".join(s["text"] for s in page["sections"]) + page["title"]
+    for junk in ("organized", "Class form", "Save collection", "icon", "secret", "nested"):
+        assert junk not in everything
+
+
+def test_hidden_elements_outside_content_root_h1_fallback_are_dropped_too():
+    html = ('<html><body><h1>Site <span hidden>hidden bit</span>Guide</h1>'
+            '<main><h2>Part</h2><p>Text.</p></main></body></html>')
+    assert parse_html_page(html, None)["title"] == "Site Guide"
+
+
+def test_code_block_with_per_line_divs_keeps_line_breaks_and_indent():
+    code = (
+        '<pre><code>'
+        '<div class="cm-line"><span>function</span> <span>f</span>() {<br/></div>'
+        '<div class="cm-line">  <span>return</span> 1;<br/></div>'
+        '<div class="cm-line"><br/></div>'
+        '<div class="cm-line">}<br/></div>'
+        '</code></pre>'
+    )
+    page = _page(f"<h1>T</h1><h2>Code</h2><p>Before.</p>{code}")
+    assert "```\nfunction f() {\n  return 1;\n\n}\n```" in page["sections"][0]["text"]
+
+
+def test_code_block_with_lines_without_br_and_plain_newline_block():
+    divs = '<pre><code><div>first</div><div>second</div><div>third</div></code></pre>'
+    plain = "<pre><code>alpha\nbeta\ngamma\n</code></pre>"
+    page = _page(f"<h1>T</h1><h2>A</h2>{divs}<h2>B</h2>{plain}")
+    assert "```\nfirst\nsecond\nthird\n```" in page["sections"][0]["text"]
+    assert "```\nalpha\nbeta\ngamma\n```" in page["sections"][1]["text"]  # khong sinh dong trong thua
+
+
+def test_html_without_h1_keeps_h2_as_siblings():
+    page = _page("<h2>First</h2><p>Alpha.</p><h3>Deep</h3><p>Deep text.</p><h2>Second</h2><p>Beta.</p>")
+    assert [s["heading_path"] for s in page["sections"]] == [["First"], ["First", "Deep"], ["Second"]]
+
+
+def test_html_skipped_level_does_not_nest_sibling_h3():
+    page = _page("<h1>T</h1><h3>One</h3><p>a</p><h3>Two</h3><p>b</p><h2>Mid</h2><p>c</p>")
+    assert [s["heading_path"] for s in page["sections"]] == [["One"], ["Two"], ["Mid"]]
+
+
+def test_definition_list_with_block_children_keeps_blocks_and_code_fence():
+    # dang MDN: dd chua p / ul / pre va dl long; dd la container, khong nuot cac block con
+    page = _page(
+        "<h1>T</h1><h2>Options</h2><dl><dt><code>opt</code></dt>"
+        "<dd><p>desc</p><ul><li>a</li></ul><pre>x = 1\ny = 2</pre>"
+        "<dl><dt>inner</dt><dd>leaf</dd></dl></dd></dl>"
+    )
+    text = page["sections"][0]["text"]
+    assert text.index("opt") < text.index("desc") < text.index("inner") < text.index("leaf")
+    assert "desc\n\na\n\n```\nx = 1\ny = 2\n```" in text  # desc va a la hai block rieng, code giu fence
+
+
