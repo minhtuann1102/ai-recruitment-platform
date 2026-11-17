@@ -1,0 +1,206 @@
+{
+  "approved_by": "auto:canary-gate",
+  "decisions": {
+    "0080fad21cc556fc1f71a5283be12942": {
+      "verdict": "keep"
+    },
+    "03dbe2c47a74803c486bcd9a05cf8f70": {
+      "note": "opens with orphaned PESSIMISTIC_READ description (name is in previous chunk), table split mid-way, says 'mentioned above'; NOWAIT/SKIPLOCKED rows are useful",
+      "reason": "not_self_contained",
+      "verdict": "drop"
+    },
+    "07ad2ad491e988ebe57b17abbe68c18b": {
+      "verdict": "keep"
+    },
+    "0d5683fe189b7259898f66f19bb2c02a": {
+      "verdict": "keep"
+    },
+    "0e8eb39e5d12640a01cd05da2bde0e99": {
+      "verdict": "keep"
+    },
+    "10762d765a05c4d58467aa571c48b856": {
+      "note": "fetch strategy names (BATCH/SUBSELECT) and dynamic scope names stripped; descriptions unlabeled",
+      "reason": "not_self_contained",
+      "verdict": "drop"
+    },
+    "10d121c9d7c704847f9d31be961fcdc6": {
+      "note": "list of 4 OptimisticLockTypes lost its option names (NONE/VERSION/ALL/DIRTY), only 3 descriptions remain",
+      "reason": "not_self_contained",
+      "verdict": "drop"
+    },
+    "131a72ea90883e8e590ebc84fc878a2f": {
+      "verdict": "keep"
+    },
+    "22ec380d4ed8790e97b815aed8aac701": {
+      "verdict": "keep"
+    },
+    "242c8d74fb4168b4fd96162569f889e1": {
+      "verdict": "keep"
+    },
+    "297f28889025d36c03aa07a693c0a35d": {
+      "verdict": "keep"
+    },
+    "305f17b37b47cfc13629139328df33bb": {
+      "verdict": "keep"
+    },
+    "346d47366cc5985137374f6f1d54f559": {
+      "verdict": "keep"
+    },
+    "3568ae9fd3123b90cd054f372d52b9ee": {
+      "verdict": "keep"
+    },
+    "3776fe23524dbed5c378cb3b016c4c61": {
+      "verdict": "keep"
+    },
+    "4873e4497ccb4f8f8ea6e9cce6f06483": {
+      "verdict": "keep"
+    },
+    "4b6f7b728f4a5233eaef76ce05ca1857": {
+      "note": "graph syntax forms only, almost no explanation",
+      "reason": "code_only",
+      "verdict": "drop"
+    },
+    "545730ae699dc6d6e95d43127a778e00": {
+      "verdict": "keep"
+    },
+    "67b7800ebc81bbf9df7a9fdb2c7d4873": {
+      "verdict": "keep"
+    },
+    "6f66b43f84a4f7ed40e185b981e1037d": {
+      "note": "starts with orphaned list item ('modern -'); syntax examples depend on missing graph context",
+      "reason": "not_self_contained",
+      "verdict": "drop"
+    },
+    "762ab14f3b46b04f3bda1f533d2c439a": {
+      "verdict": "keep"
+    },
+    "79dbef7a5574725e3eac82374b5f723f": {
+      "verdict": "keep"
+    },
+    "7de5ff1f5cdae198d23819cab6465302": {
+      "verdict": "keep"
+    },
+    "83fa8a5a3061f4ec1302f6350546732a": {
+      "verdict": "keep"
+    },
+    "8a7aa0aeee5c5f77b260564184d724a8": {
+      "verdict": "keep"
+    },
+    "8fbfdbbfdf47f95ee825ff505d148198": {
+      "verdict": "keep"
+    },
+    "8fc52f0a591906ff5b10614ae36f40f6": {
+      "verdict": "keep"
+    },
+    "92df7140db25f6f81601c5c0987358d8": {
+      "note": "entity setup and SQL for direct fetch; the explanation is in the next passage",
+      "reason": "code_only",
+      "verdict": "drop"
+    },
+    "93f24a9ce020db5c5f0ccc8da8a3a74b": {
+      "verdict": "keep"
+    },
+    "95a9cda8ecf5d1aed2da504c9251058e": {
+      "verdict": "keep"
+    },
+    "9632e528306ab126aec6819f85b100d5": {
+      "verdict": "keep"
+    },
+    "9e2693fbe890963472d89d06f5feb361": {
+      "verdict": "keep"
+    },
+    "a5694295bd998eaa1f3155ce51bb0247": {
+      "verdict": "keep"
+    },
+    "a92f1ccd6fe7b2b9dd9b8dd52427aaa6": {
+      "remove": ["PESSIMISTIC_READ\n\nPESSIMISTIC_READ"],
+      "verdict": "trim"
+    },
+    "abc50f3cae58e230ceb0c15a185aef33": {
+      "verdict": "keep"
+    },
+    "ad8c1b785cdbc3921ddb36f60de7e37e": {
+      "verdict": "keep"
+    },
+    "ae1dc54a26d4172fb074334e033e95dd": {
+      "verdict": "keep"
+    },
+    "b38f0e6698bb17dc88d8701ed2471cc6": {
+      "note": "FetchMode names (SELECT/JOIN/SUBSELECT) stripped; three unlabeled descriptions",
+      "reason": "not_self_contained",
+      "verdict": "drop"
+    },
+    "b3d1fa1f69c7314492737c2855172bac": {
+      "verdict": "keep"
+    },
+    "b43225d01471792e06c470d9486e5d7a": {
+      "verdict": "keep"
+    },
+    "b80a3e6d9275b7c7fc0d8ecfdfb019d2": {
+      "verdict": "keep"
+    },
+    "baa29de4674641d4f5e1f75b70e203c2": {
+      "verdict": "keep"
+    },
+    "bb05e49c9e7f8fc494f59fccc8c29004": {
+      "remove": ["Check out this article for more details on this topic."],
+      "verdict": "trim"
+    },
+    "beb80f17df5c2a62bee0d8937fe52ede": {
+      "note": "generic section intro/marketing sentence, no mechanism or practice",
+      "reason": "other",
+      "verdict": "drop"
+    },
+    "c3b775734066fa4d4236d1bfd47dd13f": {
+      "verdict": "keep"
+    },
+    "c5e4497414cf6283e66d64d8e824faa5": {
+      "verdict": "keep"
+    },
+    "ce6137dccea249d0691a592edea09828": {
+      "verdict": "keep"
+    },
+    "d226404e98ba3afe5b677482eea6b7da": {
+      "verdict": "keep"
+    },
+    "da1071e101105e07162cf566b494c9bc": {
+      "note": "fetch strategy names (SELECT/JOIN) and scope names stripped from the list; descriptions are unlabeled",
+      "reason": "not_self_contained",
+      "verdict": "drop"
+    },
+    "da736a9b85a9fe8c10b06775ee485f39": {
+      "verdict": "keep"
+    },
+    "e025df9f0cdf3acbc99235c5460656cf": {
+      "verdict": "keep"
+    },
+    "e24c2b65e1592220c0835c6ba84c6481": {
+      "verdict": "keep"
+    },
+    "e2d2bdb7c71a46fa8eae80f1bb5bb120": {
+      "verdict": "keep"
+    },
+    "e3a30479049497ad32682720cfe97f98": {
+      "verdict": "keep"
+    },
+    "e70d84f802f3e44bb50ead28bc211015": {
+      "verdict": "keep"
+    },
+    "ebcad308db942b52151f9b45bd3693c8": {
+      "verdict": "keep"
+    },
+    "ec1f649ff81dd8f2b45b4f4a4ae1de3c": {
+      "verdict": "keep"
+    },
+    "f73b60e4c7ed3b202ee3016e607a7d5f": {
+      "note": "EntityGraph mode names (fetchgraph/loadgraph) stripped; two unlabeled descriptions",
+      "reason": "not_self_contained",
+      "verdict": "drop"
+    },
+    "ff6026acbc2cdd8bb8bf5ffcf4dd5e6e": {
+      "verdict": "keep"
+    }
+  },
+  "reviewed_at": "2026-11-16",
+  "source_id": "hibernate-orm"
+}

@@ -1,0 +1,14 @@
+The System Design Primer
+Source: https://raw.githubusercontent.com/donnemartin/system-design-primer/master/LICENSE.txt (read 2026-11-14)
+
+I am providing code and resources in this repository to you under an open source
+license.  Because this is my personal repository, the license you receive to my
+code and resources is from me and not my employer (Facebook).
+
+Copyright 2017 Donne Martin
+
+Creative Commons Attribution 4.0 International License (CC BY 4.0)
+
+http://creativecommons.org/licenses/by/4.0/
+
+Passages stored in this project are excerpts cut by section; text is otherwise unchanged.

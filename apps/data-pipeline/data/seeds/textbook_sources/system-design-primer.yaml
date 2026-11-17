@@ -1,0 +1,62 @@
+source_id: system-design-primer
+name: The System Design Primer
+kind: supplementary
+homepage: https://github.com/donnemartin/system-design-primer
+format: markdown
+# Content is markdown in the repo (default branch: master). Raw endpoint pattern:
+# https://raw.githubusercontent.com/donnemartin/system-design-primer/master/<path>
+# English content files: README.md (root, one long file) and solutions/system_design/<name>/README.md
+# (mint, pastebin, query_cache, sales_rank, scaling_aws, social_graph, twitter, web_crawler).
+# solutions/object_oriented_design/ has no markdown (only .py / .ipynb). README-ja.md, README-zh-Hans.md and
+# README-zh-TW.md are translations, out of scope for language: en.
+content_selector: ""
+language: en
+license: CC-BY-4.0
+license_class: open
+license_url: https://raw.githubusercontent.com/donnemartin/system-design-primer/master/LICENSE.txt
+# Scope sentence in LICENSE.txt and README.md "## License" (README.md raw line 1833, shown there in italics; in
+# LICENSE.txt it wraps over three lines), word for word:
+#   I am providing code and resources in this repository to you under an open source license.  Because this is my personal repository, the license you receive to my code and resources is from me and not my employer (Facebook).
+# The notice then reads "Copyright 2017 Donne Martin", then the CC BY 4.0 line quoted below, then the URL
+# http://creativecommons.org/licenses/by/4.0/ . The statement says "code and resources" together; it does not
+# separate code from prose. GitHub's license detector shows this repo as "Other / NOASSERTION" (non-standard file).
+# README.md captions 27 images with "Source: <third party>" and says "Credits and sources are provided throughout
+# this repo." (## Credits). We copy text only.
+license_quote: "Creative Commons Attribution 4.0 International License (CC BY 4.0)"
+license_checked: 2026-11-14
+robots_checked: 2026-11-14
+robots_note: "Checked 2026-11-14. https://raw.githubusercontent.com/robots.txt returns HTTP 404 (body '404: Not Found'): that host has no robots.txt. https://github.com/robots.txt returns HTTP 200 (916 lines); its User-agent: * group (starts at line 618) has no Crawl-delay and disallows, among many others, /*/raw/, /*/tree/, /*/archive/, /*/blame/, /*/cache/, /*/*/commits/, */tarball/, */zipball/, /*.git$ and query-string patterns such as /*?tab=*, /*?q=*; it does not disallow /*/blob/ or a repo root. So fetch only https://raw.githubusercontent.com/donnemartin/system-design-primer/master/<path> directly; do not use github.com/<owner>/<repo>/raw/ or /tree/ URLs. Separate groups for GPTBot, ClaudeBot, Claude-User, PerplexityBot and similar tokens set Crawl-delay: 1 (apply only if the crawler sends those tokens). Inference, not stated in either file: robots.txt is per host, so github.com rules are not read as governing raw.githubusercontent.com."
+attribution: "The System Design Primer, Copyright 2017 Donne Martin, https://github.com/donnemartin/system-design-primer, licensed under Creative Commons Attribution 4.0 International License (CC BY 4.0), http://creativecommons.org/licenses/by/4.0/. Notice: notices/system-design-primer.txt"
+status: use
+excluded_reason: ""
+pages:
+  - url: https://raw.githubusercontent.com/donnemartin/system-design-primer/master/README.md
+    category: System Design
+    tracks: [java_backend]
+    scenarios: [scn.java.order-api-crud, scn.java.payment-idempotency]
+    topics: []
+    sections: ["Communication"]
+    kind: concept
+    why: "HTTP verb table showing which methods are idempotent or safe, plus REST versus RPC trade-offs, for API design and safe client retries."
+    status: use
+    excluded_reason: ""
+  - url: https://raw.githubusercontent.com/donnemartin/system-design-primer/master/README.md
+    category: System Design
+    tracks: [java_backend]
+    scenarios: [scn.java.flash-sale-inventory]
+    topics: []
+    sections: ["Cache"]
+    kind: concept
+    why: "Cache placement and the cache-aside, write-through, write-behind and refresh-ahead update strategies with their drawbacks, for caching stock counts under traffic spikes."
+    status: use
+    excluded_reason: ""
+  - url: https://raw.githubusercontent.com/donnemartin/system-design-primer/master/README.md
+    category: System Design
+    tracks: [java_backend]
+    scenarios: [scn.java.flash-sale-inventory]
+    topics: []
+    sections: ["Asynchronism"]
+    kind: concept
+    why: "Message queues, task queues and back pressure for absorbing bursts of requests, including the caveat that some queues can deliver a message twice."
+    status: use
+    excluded_reason: ""

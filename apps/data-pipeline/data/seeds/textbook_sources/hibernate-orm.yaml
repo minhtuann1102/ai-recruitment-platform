@@ -1,0 +1,63 @@
+source_id: hibernate-orm
+name: Hibernate ORM User Guide
+kind: official
+# Doc index: https://hibernate.org/orm/documentation/ (7.4 = 'latest stable' on 2026-11-14; 8.0 is 'development').
+# Pinned to 7.4; the guide's canonical link is the moving alias https://docs.hibernate.org/stable/orm/userguide/html_single/
+# (HTTP 200, not compared byte by byte).
+homepage: https://docs.hibernate.org/orm/7.4/userguide/html_single/
+format: html
+# ONE page: Asciidoctor 2.0.23 html_single, about 3.8 MB, about 113,000 words of prose, 1,226 code blocks,
+# 38 h2 / 253 h3 / 624 h4 with id attributes (e.g. #preface, #compatibility), so later page listing needs
+# fragment ids or splitting by h2/h3. The article text is #content. The table of contents (#toc) sits inside #header,
+# and #footnotes and #footer are siblings after #content, so none of them are inside #content. Inside #content
+# strip a.anchor (empty permalink anchor in every heading, 1,138). No breadcrumb or Prev/Next blocks.
+content_selector: "#content"
+language: en
+# No statement names the documentation: the guide page has no copyright line (its footer is only 'Version
+# 7.4.15.Final / Last updated ...'), and its prose has no license sentence. Quote below is the hibernate.org
+# site footer on the doc index page. Project statement (names the project, not the docs), read on
+# https://hibernate.org/community/license/: 'Hibernate projects are licensed under either the ASL 2.0, or in
+# some cases LGPL 2.1.' and 'Hibernate ORM since version 7.0.0.Beta5' is listed as released under ASL 2.0.
+# Repo root LICENSE.txt (https://github.com/hibernate/hibernate-orm) is Apache-2.0 and the guide sources are in
+# documentation/src/main/asciidoc/userguide with no separate license file; README.adoc has no license section.
+license: NOASSERTION
+license_class: restricted
+license_url: https://hibernate.org/orm/documentation/
+license_quote: "Copyright © Hibernate. All rights reserved."
+license_checked: 2026-11-14
+robots_checked: 2026-11-14
+robots_note: "https://docs.hibernate.org/robots.txt (HTTP 200, 24 lines, host that serves the guide) contains only comment lines: a content-signals preamble ('As a condition of accessing this website, you agree to abide by the following content signals') that defines search, ai-input and ai-train and says in clause (c) that if the operator includes no signal for a use, it 'neither grants nor restricts permission'. No User-agent group, no Disallow or Allow lines, no Crawl-delay, no Content-Signal line. /orm/7.4/userguide/html_single/ is not disallowed. https://hibernate.org/robots.txt (HTTP 200) is 'User-agent: *' with an empty 'Disallow:' (allows everything); that host serves the doc index, not the guide."
+attribution: "Hibernate ORM User Guide, Copyright © Hibernate. All rights reserved."
+status: use
+excluded_reason: ""
+pages:
+  - url: https://docs.hibernate.org/orm/7.4/userguide/html_single/
+    category: Backend
+    tracks: [java_backend]
+    scenarios: [scn.java.flash-sale-inventory]
+    topics: []
+    sections: ["11. Locking"]
+    kind: concept
+    why: "Optimistic locking with a version attribute versus pessimistic lock modes, the two strategies for preventing conflicting concurrent updates to a stock row."
+    status: use
+    excluded_reason: ""
+  - url: https://docs.hibernate.org/orm/7.4/userguide/html_single/
+    category: Backend
+    tracks: [java_backend]
+    scenarios: [scn.java.slow-query-incident]
+    topics: []
+    sections: ["12. Fetching"]
+    kind: concept
+    why: "Eager versus lazy fetching, the N+1 select pattern, and entity graph, batch and join fetching strategies in Hibernate."
+    status: use
+    excluded_reason: ""
+  - url: https://docs.hibernate.org/orm/7.4/userguide/html_single/
+    category: Backend
+    tracks: [java_backend]
+    scenarios: [scn.java.slow-query-incident]
+    topics: []
+    sections: ["31. Performance Tuning and Best Practices"]
+    kind: guide
+    why: "Best practices for SQL statement logging (including datasource-proxy statement counts that detect N+1 in tests), fetching, JDBC batching and caching."
+    status: use
+    excluded_reason: ""

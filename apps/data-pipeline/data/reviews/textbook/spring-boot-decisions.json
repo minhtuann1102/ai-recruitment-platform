@@ -1,0 +1,138 @@
+{
+  "approved_by": "auto:canary-gate",
+  "decisions": {
+    "07de3fdbb31a29314cfbe8562defe125": {
+      "remove": [
+        "We do not go into too many details of JPA or Spring Data here.",
+        "You can follow the Accessing Data with JPA guide from spring.io and read the Spring Data JPA and Hibernate reference documentation."
+      ],
+      "verdict": "trim"
+    },
+    "09aee46fecee33d00d5c6e0f34c8a51c": {
+      "verdict": "keep"
+    },
+    "0f641a40506803b7bc9d983e6cfdd22c": {
+      "remove": ["See LazyConnectionDataSourceProxy for more details."],
+      "verdict": "trim"
+    },
+    "12b392291f64542a0f671ad69f2735bf": {
+      "verdict": "keep"
+    },
+    "1f26b2a6c77d5e1243d32dc80067d308": {
+      "remove": ["A typical entity class resembles the following example:\n\nJava"],
+      "verdict": "trim"
+    },
+    "306a76e4e4c107127b592302ebe71a4d": {
+      "verdict": "keep"
+    },
+    "398da9415c756c3588752002ee9569ae": {
+      "verdict": "keep"
+    },
+    "3f8cee326c10ba17b1c325b5193f0567": {
+      "verdict": "keep"
+    },
+    "3fbaffcb0da8a8f2fbc3822559ec87e4": {
+      "verdict": "keep"
+    },
+    "495b32b35991f42dea9bd1cd768a97ff": {
+      "verdict": "keep"
+    },
+    "4ec99a1779949833c34ef7150305fffe": {
+      "remove": [
+        "We have barely scratched the surface of Spring Data JPA.\nFor complete details, see the Spring Data JPA reference documentation ."
+      ],
+      "verdict": "trim"
+    },
+    "5274e835a6e50c66eba556e8a73425ca": {
+      "remove": [
+        "More information on CSRF and the header X-Frame-Options can be found in the Spring Security Reference Guide.",
+        "In simple setups, a SecurityFilterChain like the following can be used:\n\nJava"
+      ],
+      "verdict": "trim"
+    },
+    "552f1c9120e4c6e189b470dd6384eaa8": {
+      "remove": [
+        "The “How-to Guides” section includes a section on how to initialize a database ."
+      ],
+      "verdict": "trim"
+    },
+    "588ac64f864a58c75a8ecd7374cf9acd": {
+      "verdict": "keep"
+    },
+    "6355cfb83b9b72e077b872f72b27d905": {
+      "remove": [
+        "The following example shows a typical Spring Data repository interface definition:\n\nJava"
+      ],
+      "verdict": "trim"
+    },
+    "63856991f2a6111381e85e0c15494851": {
+      "verdict": "keep"
+    },
+    "69303596c7b60f3eb4bfabfa6634f803": {
+      "remove": [
+        "For complete details of Spring Data JDBC, see the reference documentation ."
+      ],
+      "verdict": "trim"
+    },
+    "6ed243297576fc531a2e9f2e56f2e077": {
+      "remove": [
+        "We have barely scratched the surface of Spring Data R2DBC. For complete details, see the Spring Data R2DBC reference documentation ."
+      ],
+      "verdict": "trim"
+    },
+    "7a398bd0ad9c9024bafaea7ef7e0a520": {
+      "remove": [
+        "For instance, if you use the Tomcat connection pool , you could customize many additional settings, as shown in the following example:\n\nProperties"
+      ],
+      "verdict": "trim"
+    },
+    "8cbeebfec81e90bea77f84bf1b75d82b": {
+      "verdict": "keep"
+    },
+    "9925012a19be4136f755afabc6e00426": {
+      "remove": [
+        "The “How-to Guides” section includes a section on how to initialize a database .",
+        "The following example shows how to manually override the database port while the rest of the options are taken from the application configuration:\n\nJava"
+      ],
+      "verdict": "trim"
+    },
+    "a4237149bd16641eb2da5c362bff8729": {
+      "verdict": "keep"
+    },
+    "a765b91bf657032b0b16b7c98506ba73": {
+      "verdict": "keep"
+    },
+    "a7d5864cb3e1a8026efbbb219eb1a467": {
+      "verdict": "keep"
+    },
+    "b2ca653475c58f00ffda8c3292f10d6a": {
+      "verdict": "keep"
+    },
+    "c3a1f36080dd1b079a8d58b1e74df413": {
+      "verdict": "keep"
+    },
+    "c869224c7f5e1f669e18c4542ddaa4d2": {
+      "verdict": "keep"
+    },
+    "d198a12f8c3843ee49053bed1879ba20": {
+      "verdict": "keep"
+    },
+    "e17c26e2fcc8abe37266e4bafdc4f897": {
+      "remove": [
+        "See the Configure a Custom DataSource section of the “How-to Guides” for more advanced examples, typically to take full control over the configuration of the DataSource."
+      ],
+      "verdict": "trim"
+    },
+    "e9dcc755009f4ca1e4955f7e36448b9d": {
+      "verdict": "keep"
+    },
+    "f19354343d6206459f3dacd4ce4431d2": {
+      "verdict": "keep"
+    },
+    "f785f2661d4c4a5f4ed05d5870cce81c": {
+      "verdict": "keep"
+    }
+  },
+  "reviewed_at": "2026-11-16",
+  "source_id": "spring-boot"
+}
