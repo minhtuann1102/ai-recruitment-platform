@@ -1,0 +1,89 @@
+source_id: redis
+name: Redis Documentation
+kind: official
+homepage: https://github.com/redis/docs
+format: markdown
+# Source: markdown files of the docs repository github.com/redis/docs (branch main, path content/...), fetched as
+# https://raw.githubusercontent.com/redis/docs/main/content/<path>. Pages of https://redis.io/docs/latest/ are NOT fetched:
+# the redis.io Website Terms of Use forbid automated access to that site (see robots_note), while the repository LICENSE
+# grants copying under CC BY-NC-SA 4.0. A page https://redis.io/docs/latest/<path>/ is the file content/<path>/_index.md
+# (or content/<path>.md). Files are Hugo markdown: YAML front matter (before the first heading, so dropped), no "# " title
+# line (title is empty) and the first "##" heading becomes the root of the heading path (parser quirk: later "##" headings
+# nest under it), so `sections` is empty on every page. No Hugo shortcodes were found in the listed files.
+content_selector: ""
+language: en
+# Mixed license, restricted because of the NonCommercial term. Portions that were previously in the redis-doc repository
+# (possibly including clients/patterns/distributed-locks, not confirmed per file) are CC BY-SA 4.0 per the LICENSE text;
+# the rest is CC BY-NC-SA 4.0. All six listed files are treated as CC BY-NC-SA 4.0 (the stricter term).
+license: CC-BY-NC-SA-4.0
+license_class: restricted
+license_url: https://github.com/redis/docs/blob/main/LICENSE
+# First paragraph of LICENSE (raw.githubusercontent.com/redis/docs/main/LICENSE), line breaks joined, word for word:
+license_quote: "The Redis Website and Documentation by Redis Ltd. is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License, or, certain portions that were previously available at <https://github.com/redis/redis-doc?tab=readme-ov-file#readme>, are available under the Creative Commons Attribution-ShareAlike 4.0 International Public License at <https://github.com/redis/redis-doc?tab=License-1-ov-file#readme>."
+license_checked: 2026-11-17
+robots_checked: 2026-11-17
+robots_note: "Fetch only https://raw.githubusercontent.com/redis/docs/main/content/<path> (robots.txt on that host returns HTTP 404, same as for system-design-primer; do not use github.com/.../raw/ or /tree/ URLs). https://redis.io/robots.txt (HTTP 200) has User-agent: * with Allow: / and Disallow: /docs/staging/, /search/, /studio/ and others (docs paths allowed) and Content-Signal: search=yes, ai-input=yes, ai-train=yes, BUT the Redis Website Terms of Use (https://redis.io/legal/redis-website-terms-of-use/, read 2026-11-17) say the user will (iv) 'not, use any robot, spider, other automated device to access the Site, make Submissions, monitor or scrape information from this Site, or bypass any of our robot exclusion request (either on headers or anywhere else on the Site), if any'. So redis.io HTML pages are never fetched; the documentation is taken from the CC-licensed GitHub repository. DE to confirm this reading at T038."
+attribution: "The Redis Website and Documentation by Redis Ltd., https://github.com/redis/docs, licensed under Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (https://creativecommons.org/licenses/by-nc-sa/4.0/); passages are excerpts cut by section, text otherwise unchanged. Notice: notices/redis.txt"
+status: use
+excluded_reason: ""
+pages:
+  - url: https://raw.githubusercontent.com/redis/docs/main/content/develop/use-cases/rate-limiter/nodejs/_index.md
+    category: System Design
+    tracks: [nodejs_backend]
+    scenarios: [scn.node.rate-limit-api]
+    topics: []
+    sections: []
+    kind: tutorial
+    why: "Token bucket limiter in Node.js: capacity and refill rate, why a Lua script makes check-and-update atomic across instances, per-user or per-IP keys, EVALSHA, and the fixed window, sliding window and leaky bucket alternatives."
+    status: use
+    excluded_reason: ""
+  - url: https://raw.githubusercontent.com/redis/docs/main/content/develop/use-cases/rate-limiter/_index.md
+    category: System Design
+    tracks: [nodejs_backend]
+    scenarios: [scn.node.rate-limit-api]
+    topics: []
+    sections: []
+    kind: concept
+    why: "Why per-process counters fail behind a load balancer and why a single shared store with quotas per user, IP, API key or tenant is needed, and which algorithms Redis can run."
+    status: use
+    excluded_reason: ""
+  - url: https://raw.githubusercontent.com/redis/docs/main/content/develop/use-cases/pub-sub/nodejs/_index.md
+    category: System Design
+    tracks: [nodejs_backend]
+    scenarios: [scn.node.realtime-notifications]
+    topics: []
+    sections: []
+    kind: tutorial
+    why: "Redis pub/sub as the fan-out layer between Node.js instances: subscribe and pattern subscribe, at-most-once delivery (offline subscribers miss messages), one connection per subscriber, no heavy work in listeners, and sharded pub/sub on a cluster."
+    status: use
+    excluded_reason: ""
+  - url: https://raw.githubusercontent.com/redis/docs/main/content/develop/use-cases/cache-aside/nodejs/_index.md
+    category: System Design
+    tracks: [nodejs_backend]
+    scenarios: [scn.node.cache-stampede]
+    topics: []
+    sections: []
+    kind: tutorial
+    why: "Cache-aside read path in Node.js, what happens when a popular key expires under load, the single-flight lock that lets one request reload while others wait, lock TTL tuning, invalidation on write and TTL versus staleness."
+    status: use
+    excluded_reason: ""
+  - url: https://raw.githubusercontent.com/redis/docs/main/content/develop/use-cases/cache-aside/_index.md
+    category: System Design
+    tracks: [nodejs_backend]
+    scenarios: [scn.node.cache-stampede]
+    topics: []
+    sections: []
+    kind: concept
+    why: "Why cache-aside suffers a cache stampede when many readers miss the same record, and the mitigations (mutex lock, probabilistic early refresh) that Redis scripting makes atomic."
+    status: use
+    excluded_reason: ""
+  - url: https://raw.githubusercontent.com/redis/docs/main/content/develop/clients/patterns/distributed-locks.md
+    category: System Design
+    tracks: [nodejs_backend]
+    scenarios: [scn.node.cache-stampede]
+    topics: []
+    sections: []
+    kind: concept
+    why: "Safety and liveness of a Redis lock (SET NX with expiry, random value, safe release, lock TTL against crashed holders) and the Redlock caveats, which is the mutex used to let a single request rebuild a hot key."
+    status: use
+    excluded_reason: ""

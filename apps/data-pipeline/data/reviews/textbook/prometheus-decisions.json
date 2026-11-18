@@ -1,0 +1,149 @@
+{
+  "source_id": "prometheus",
+  "reviewed_at": "2026-11-18",
+  "approved_by": "auto:canary-gate",
+  "decisions": {
+    "059a32794ab71b50c7e463a925c10e4b": {
+      "verdict": "keep"
+    },
+    "0641cbbd6ff7d741a8edae8292059dbc": {
+      "verdict": "keep"
+    },
+    "153428be3dfd6df785253945f676486f": {
+      "verdict": "trim",
+      "remove": [
+        "The\nfollowing table lists some implications of the different approaches.\n\nNative Histogram\n\nClassic Histogram\n\nSummary\n\nRequired configuration during instrumentation\n\nPick a desired resolution and maybe a strategy to limit the bucket count."
+      ]
+    },
+    "187f405ad1de1c5e9b6ad7a8dc8674b4": {
+      "verdict": "keep"
+    },
+    "24e4674cf5b1f036736fd0556afb23ca": {
+      "verdict": "keep"
+    },
+    "3439f03a5a1255ac21716df16fe481a5": {
+      "verdict": "keep"
+    },
+    "368396e40aff1484ca3536268a704c85": {
+      "verdict": "trim",
+      "remove": ["Note the importance of the last item in the table."]
+    },
+    "3a8efa0b3099daf59bb0528744235adb": {
+      "verdict": "keep"
+    },
+    "3e4ae66f219e8812f9ecef5211e069ba": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "opens 'This calculates the fraction...' and 'Note how the sum aggregates' about a PromQL query not in the passage; bucket-reconciliation/NHCB explanation is worth recovering; unsure"
+    },
+    "41ca5df877808a5c524e902ac2aa535b": {
+      "verdict": "keep"
+    },
+    "43eed75e151fb321dbdb742287740849": {
+      "verdict": "trim",
+      "remove": ["For counting failed queries, see section Failures below."]
+    },
+    "4f26bf0331fe7ead9412a5a70a22b9de": {
+      "verdict": "trim",
+      "remove": [" (see details below )"]
+    },
+    "687b69c3af0101892f07131c235af0a8": {
+      "verdict": "keep"
+    },
+    "76d44523c35b47341763567bcd66b720": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "flattened comparison-table cells starting mid-row; column mapping lost"
+    },
+    "821c2a039ee8b33e330f2b087125c624": {
+      "verdict": "keep"
+    },
+    "82ad79806149781d33b3808ff46b2a9b": {
+      "verdict": "keep"
+    },
+    "83929309ed093869b7d198030237f37a": {
+      "verdict": "keep"
+    },
+    "848a05964f88294dda970d0cdf1a871a": {
+      "verdict": "keep"
+    },
+    "85ef97a9f181778fe1fa650c943259e4": {
+      "verdict": "keep"
+    },
+    "9200e86898025daff051add60fc57e86": {
+      "verdict": "keep"
+    },
+    "9c5083525936a984d32a81ee5ebf271d": {
+      "verdict": "keep"
+    },
+    "a5143fae625b697d6640d42dde4c6682": {
+      "verdict": "keep"
+    },
+    "a789c08f2f1f8971cf9a0bdc7d61a5b5": {
+      "verdict": "keep"
+    },
+    "a871d9ea00ce64d9cffbc1836392041d": {
+      "verdict": "keep"
+    },
+    "aa932fc16b213cf400adb8e7a16e395b": {
+      "verdict": "keep"
+    },
+    "b14c258de101b1c43b4edc8ce45de39e": {
+      "verdict": "keep"
+    },
+    "b46b01af8f08710bf8c17c5c8df69962": {
+      "verdict": "keep"
+    },
+    "b7dcc1b394a9c99c22ef5471aba6b0f3": {
+      "verdict": "keep"
+    },
+    "c480b2e9c277296f668a43fbdf71ee38": {
+      "verdict": "keep"
+    },
+    "c4f671733a1a7487c985822c927a9045": {
+      "verdict": "trim",
+      "remove": [
+        "See the documentation of the instrumentation library you are using\nfor details."
+      ]
+    },
+    "d1b1c9a9859ec10e75f2fca80a1b7774": {
+      "verdict": "trim",
+      "remove": [
+        "You can read everything about native histograms in their specification , but be warned that this is a\nvery technical and detailed document. If you read on here, you can expect a\nmore digestible and usage-focused explanation.",
+        "If you are interested in Prometheus's journey towards native representation of\ncomposite types, you can read more in a blog\npost ."
+      ]
+    },
+    "d8c9aac5a8db341633644389d34f9807": {
+      "verdict": "keep"
+    },
+    "d98db4ff54fa6f8f890cf96eeac6f313": {
+      "verdict": "keep"
+    },
+    "e571c758cea176cb2f99d1e78e078131": {
+      "verdict": "keep"
+    },
+    "e77c1a732a857055debba0947eb7f923": {
+      "verdict": "keep"
+    },
+    "e79d5c96d9a3d34e19b8e2697bbddfce": {
+      "verdict": "keep"
+    },
+    "e9a65b290496e52f6783db8fe0fac803": {
+      "verdict": "trim",
+      "remove": [
+        "(This\ndocument deliberately avoids to explain the details how these boundaries are\ncalculated. See the aforementioned spec for\ndetails.)"
+      ]
+    },
+    "ef011a7f6b46267f8a4fd9276a1c374a": {
+      "verdict": "keep"
+    },
+    "f557206d2ff0119b13308a801502c418": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "flattened comparison-table cells; native/classic/summary column header is in another chunk, so cells cannot be attributed"
+    },
+    "f5c37d059366c6473178bee3c183e019": {
+      "verdict": "keep"
+    }
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "source_id": "nodejs",
+  "reviewed_at": "2026-11-18",
+  "approved_by": "auto:canary-gate",
+  "decisions": {
+    "0404acd357a869c061731cccecddce13": {
+      "verdict": "drop",
+      "reason": "other",
+      "note": "section intro: says the next sections cover ways to operate with streams, no mechanism"
+    },
+    "0e85a95fcc4666c89a977bce16844368": {
+      "verdict": "keep"
+    },
+    "1d54a2f313accb257a95cef043191e8a": {
+      "verdict": "keep"
+    },
+    "1e6ecaf722489cf87cddc7bb0d770296": {
+      "verdict": "keep"
+    },
+    "34ac37a3347cb6004d790c761ba9194f": {
+      "verdict": "keep"
+    },
+    "3a83d2c7e2ad1707123271d7c03c1dbd": {
+      "verdict": "keep"
+    },
+    "79fcbcd83262308be04ae299b1899c2a": {
+      "verdict": "trim",
+      "remove": [
+        "\n\nFor a deeper understanding of backpressure, check the backpressure guide ."
+      ]
+    },
+    "82d3a53b4afc5bbb694caa093b172fc9": {
+      "verdict": "keep"
+    },
+    "87d652681c78436ce1493e6fca1e8772": {
+      "verdict": "keep"
+    },
+    "8943dea063dd6f4ab760b1d3953b11c8": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "opens with \"In this case...\" plus raw output of an example not in the passage; only the last sentence (async pipeline returns a promise rejected on failure) stands alone; unsure"
+    },
+    "92f5f9f929318698491e5ff78887cada": {
+      "verdict": "keep"
+    },
+    "a78296b7a99aaf27ad96e9a5e6380a17": {
+      "verdict": "keep"
+    },
+    "aa69fcf13d869ff7e292b87b820fb2e9": {
+      "verdict": "keep"
+    },
+    "be1e6f316739f3a9fdef11ada1e26f93": {
+      "verdict": "keep"
+    },
+    "c9cbce221199c9f36798fe3574e15466": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "raw /usr/bin/time output of an experiment; \"normal binary\" and zlib.js setup are described outside the passage"
+    },
+    "e64eb9de5ed0f1e40f235a178d23897c": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "second half of the experiment (modified binary vs normal binary): mostly raw time output, comparison depends on the preceding passage; unsure"
+    },
+    "e85b59f85448ffc5f3a8c7d9f294ceba": {
+      "verdict": "keep"
+    },
+    "eef5429039247fe21a81ee3f3d7f0f23": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "code example; closing paragraph depends on \"the previous examples\" and \"the error from the previous examples\""
+    }
+  }
+}

@@ -1,0 +1,172 @@
+{
+  "source_id": "livekit-docs",
+  "reviewed_at": "2026-11-18",
+  "approved_by": "auto:canary-gate",
+  "decisions": {
+    "044d84454cd7c33e27eee47ef32c2c85": {
+      "verdict": "keep"
+    },
+    "06a60fea73574241b6e4e19c921c62d2": {
+      "verdict": "trim",
+      "remove": ["For the full parameter reference, see backchannel_boundary ."]
+    },
+    "0792d0dfe41daf192752abedc31bf716": {
+      "verdict": "keep"
+    },
+    "14fc67e50e1425ebf8994580ffcc397d": {
+      "verdict": "keep"
+    },
+    "16a26eda481b2c6d270d1a1d825828e5": {
+      "verdict": "trim",
+      "remove": [
+        "For a per-stage breakdown of voice agent latency, see Sequential pipeline architecture for voice agents ."
+      ]
+    },
+    "24540c9e5fce2dbbe13e50174fbdf1ec": {
+      "verdict": "keep"
+    },
+    "248d59b28dddd5b2e4ab000419c27766": {
+      "verdict": "trim",
+      "remove": ["LiveKit provides the following fallback mechanisms:"]
+    },
+    "2cc36990b47e0e001e517046b90e4225": {
+      "verdict": "keep"
+    },
+    "339caa151b5fc693971a676984ec01fb": {
+      "verdict": "trim",
+      "remove": [
+        "For realtime models with server-side turn detection, see Interruption in realtime mode for which of these fields are ignored.",
+        "To learn more, see the InterruptionOptions reference."
+      ]
+    },
+    "379aaa28249f4681ee12b8ccb82f0be9": {
+      "verdict": "keep"
+    },
+    "401c6550868647bf404bf1abd556fc7b": {
+      "verdict": "keep"
+    },
+    "4385ac70c1c692de130dc2211d677009": {
+      "verdict": "keep"
+    },
+    "46e39b40e57f3653c5de8d67e1bab7d0": {
+      "verdict": "keep"
+    },
+    "49eaecd61d46921688e7200e57fbdb43": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "one definition sentence plus a lead-in to a list that is not in the passage; definition repeats the overview"
+    },
+    "4a97b02def6ec4c411fb7ee4cb6e81a5": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "refers to 'the config' / ai-coustics model from the recommended starting config, which is not in the passage"
+    },
+    "4d78f194a0e3ab41a1dda909f654ff5b": {
+      "verdict": "keep"
+    },
+    "4e05a5335fe2cda006c57e449853fadb": {
+      "verdict": "keep"
+    },
+    "50c9a25b336675e73615ffaa8a19719c": {
+      "verdict": "keep"
+    },
+    "51f17fc70d1254ebe2a15d06f31076bc": {
+      "verdict": "trim",
+      "remove": [
+        "For a recommended starting config that combines all of these, plus a troubleshooting matrix, see Turn-taking tuning ."
+      ]
+    },
+    "52101e9d168a1d1b5609504e0f919e8e": {
+      "verdict": "keep"
+    },
+    "5f3359b42d5eefff3b8d6944e8f53773": {
+      "verdict": "trim",
+      "remove": [
+        "To learn more, see Interruption mode .",
+        "See the section on tool interruptions for more information on handling interruptions during long-running tool calls."
+      ]
+    },
+    "65bc9eef78fbf122f6a3009308e9182d": {
+      "verdict": "keep"
+    },
+    "733329da6a0db43c0598026f7f6b65ff": {
+      "verdict": "trim",
+      "remove": [
+        "Speech waiting in the queue to play after the current speech is handled differently, as described in the following paragraph."
+      ]
+    },
+    "76e596b933496c248644b3ba746c0845": {
+      "verdict": "drop",
+      "reason": "other",
+      "note": "only states that metrics/usage exist and points to other pages; marginal for grading"
+    },
+    "77bb8fbf326bc5583ea1cff9e0cef7ea": {
+      "verdict": "trim",
+      "remove": [
+        "To learn more, see Adaptive interruption handling on the Quotas and limits page."
+      ]
+    },
+    "79c3a24049b848963b6b6665d728f38d": {
+      "verdict": "keep"
+    },
+    "823ab8a94b7452bb56efc2a271bcb39b": {
+      "verdict": "trim",
+      "remove": [
+        "For the full list of limitations, see Considerations and limitations on the realtime models page.",
+        "To learn more, see Separate TTS configuration ."
+      ]
+    },
+    "94a8d8763810f17237fa31cdf0b9abba": {
+      "verdict": "trim",
+      "remove": ["For a deeper reference on each parameter, see TurnHandlingOptions ."]
+    },
+    "9764796da3c2267c04c15ed3b335f8c7": {
+      "verdict": "keep"
+    },
+    "9771677fcec83759fd6be3495049c080": {
+      "verdict": "drop",
+      "reason": "reference_table",
+      "note": "comparison table flattened one cell per line, no prose; same trade-offs are explained in the following sections"
+    },
+    "9eabc98be7d628faee39c7276dfcbd59": {
+      "verdict": "keep"
+    },
+    "a107b64abc28b4f701a22c73e71284ae": {
+      "verdict": "trim",
+      "remove": ["On this page"]
+    },
+    "a1c44f3c1fe3d150a319a879d4eeae04": {
+      "verdict": "keep"
+    },
+    "a6614679e9313ecef3827b6d62803aa1": {
+      "verdict": "keep"
+    },
+    "b293882095b48b6d3219eecccecadd43": {
+      "verdict": "keep"
+    },
+    "b775ba45124dbacadd24705c56c0f569": {
+      "verdict": "keep"
+    },
+    "d6aa736250fe1707ce00a38d3fbe240c": {
+      "verdict": "keep"
+    },
+    "df9096641fca5c93a4e34fc01fe9b325": {
+      "verdict": "keep"
+    },
+    "e78be467fda522c65cfc6b4947b42129": {
+      "verdict": "drop",
+      "reason": "code_only",
+      "note": "Python/Node.js DuplexModel setup snippet with a one-sentence intro; API usage, no behaviour explained"
+    },
+    "ea50c78d08f002665c0f12ddcf8546d6": {
+      "verdict": "keep"
+    },
+    "eb1b90f81a7e4a9a1add96e9a4c0941f": {
+      "verdict": "trim",
+      "remove": ["Agent feels too slow to respond."]
+    },
+    "ed64e2b3a7e4a6850cc889050d762573": {
+      "verdict": "keep"
+    }
+  }
+}

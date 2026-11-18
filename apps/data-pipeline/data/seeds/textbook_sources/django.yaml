@@ -1,0 +1,68 @@
+source_id: django
+name: Django Documentation
+kind: official
+homepage: https://docs.djangoproject.com/en/stable/
+format: html
+# Page body lives in article#docs-content (sidebar, search box and site footer are outside it). /en/stable/ redirects
+# to the current release (6.1 on 2026-11-17). Headings end with a permalink sign, so `sections` values below carry a
+# trailing " ¶" exactly as the parser sees them.
+content_selector: "#docs-content"
+language: en
+# License class: no statement names the documentation. The docs page "FAQ: General > How is Django licensed?" says
+# "Django is distributed under the 3-clause BSD license." and links the repository LICENSE (BSD-3-Clause text for
+# "source and binary forms" of the software); MANIFEST.in grafts docs/ into the distribution; docs/conf.py has
+# copyright = "Django Software Foundation and contributors". Per rule A.3 this is recorded as restricted with the
+# site footer copyright line as quote. If the team accepts the repository LICENSE as covering docs/, switch to
+# license: BSD-3-Clause, license_class: open and add a notice file (LICENSE text, source
+# https://raw.githubusercontent.com/django/django/main/LICENSE).
+license: NOASSERTION
+license_class: restricted
+license_url: https://docs.djangoproject.com/en/stable/faq/general/
+license_quote: "© 2005-2026 Django Software Foundation and individual contributors. Django is a registered trademark of the Django Software Foundation."
+license_checked: 2026-11-17
+robots_checked: 2026-11-17
+robots_note: "https://docs.djangoproject.com/robots.txt (HTTP 200, 696 lines) has one group, User-agent: *, with 695 Disallow lines for translated trees (/es, /el, /ja, /pl, /pt-br, /ko, /id, /it, /zh-hans, /fr, /ga, per version and section) plus 'Disallow: /*search/?*'. No Disallow for /en/ (checked with grep '^Disallow: /en': none), no Allow, no Crawl-delay, no Sitemap line. /en/stable/ (redirects to /en/6.1/) is allowed. Do not fetch search URLs or translated paths."
+attribution: "Django documentation, © 2005-2026 Django Software Foundation and individual contributors"
+status: use
+excluded_reason: ""
+pages:
+  - url: https://docs.djangoproject.com/en/stable/howto/outputting-csv/
+    category: Backend
+    tracks: [python_backend]
+    scenarios: [scn.py.report-export-timeout]
+    topics: []
+    sections: []
+    kind: guide
+    why: "Writing CSV through a file-like response and the Streaming large CSV files section (StreamingHttpResponse with a generator), which avoid building the whole report in memory before replying."
+    status: use
+    excluded_reason: ""
+  - url: https://docs.djangoproject.com/en/stable/topics/db/optimization/
+    category: Backend
+    tracks: [python_backend]
+    scenarios: [scn.py.report-export-timeout, scn.py.csv-import-pipeline]
+    topics: []
+    sections: []
+    kind: guide
+    why: "Profile first, iterator() for big querysets, values() and only() to fetch less, select_related and prefetch_related against N+1, and bulk create, update and insert: both the export read path and the import write path."
+    status: use
+    excluded_reason: ""
+  - url: https://docs.djangoproject.com/en/stable/topics/db/transactions/
+    category: Backend
+    tracks: [python_backend]
+    scenarios: [scn.py.csv-import-pipeline]
+    topics: []
+    sections: ["Controlling transactions explicitly ¶", "Performing actions after commit ¶"]
+    kind: guide
+    why: "atomic() blocks and savepoints decide whether one bad row fails the whole import or only its batch, and on_commit runs follow-up work only after the data is committed."
+    status: use
+    excluded_reason: ""
+  - url: https://docs.djangoproject.com/en/stable/topics/db/managers/
+    category: Backend
+    tracks: [python_backend]
+    scenarios: [scn.py.multi-tenant-api]
+    topics: []
+    sections: ["Modifying a manager’s initial QuerySet ¶", "Default managers ¶", "Base managers ¶"]
+    kind: guide
+    why: "A custom manager that changes the initial QuerySet can apply the tenant filter in one place, and the default and base manager rules show where that filter is and is not applied."
+    status: use
+    excluded_reason: ""

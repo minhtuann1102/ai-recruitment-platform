@@ -1,0 +1,109 @@
+{
+  "source_id": "sqlalchemy",
+  "reviewed_at": "2026-11-18",
+  "approved_by": "auto:canary-gate",
+  "decisions": {
+    "0394dbcfab7af7c6f4588344f2eb0938": {
+      "verdict": "keep"
+    },
+    "154c50f8562e54aca4137369df738d1b": {
+      "verdict": "trim",
+      "remove": ["\n\nSee also\n\nPopulate Existing"]
+    },
+    "1597ab632e6b322d4b5a8ab4e0a91785": {
+      "verdict": "trim",
+      "remove": ["\n\nSee also\n\nORM “upsert” Statements"]
+    },
+    "20a1f8caccdfcd48ff3618ea3ef54f7d": {
+      "verdict": "keep"
+    },
+    "2c34d327d113c86eb04d5ccc800db5c3": {
+      "verdict": "trim",
+      "remove": [
+        "\nBackground on this feature is at Correlating RETURNING rows to parameter sets ."
+      ]
+    },
+    "2d7e70d79ed8615f5db3ff86c002eda0": {
+      "verdict": "drop",
+      "reason": "nav",
+      "note": "version-added note plus a \"See also\" pointer to another section, no explanation of its own"
+    },
+    "308293e9d029d99f79da9cf3ed8fd284": {
+      "verdict": "keep"
+    },
+    "3465ab8b8a53e7f8c9d22149fe6e332a": {
+      "verdict": "keep"
+    },
+    "36c2b776132926370b91d19361778ee2": {
+      "verdict": "trim",
+      "remove": ["\n\nSee also\n\nLegacy Session Bulk UPDATE Methods"]
+    },
+    "414193c1d6f12fa85eb96d6744c47719": {
+      "verdict": "trim",
+      "remove": [
+        "\n\nSee also\n\nORM Query Events - includes working examples of the\nabove with_loader_criteria() recipes."
+      ]
+    },
+    "521303614379c0b70aece0a392d4d174": {
+      "verdict": "trim",
+      "remove": [
+        "\n\nAdded in version 2.0.23: Added the render_nulls execution option which\nmirrors the behavior of the legacy Session.bulk_insert_mappings.render_nulls parameter."
+      ]
+    },
+    "5decab76e84f4f041bdcc209fc29e11d": {
+      "verdict": "keep"
+    },
+    "71b29d8b809085c2a2574ec269045f5e": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "\"Continuing from the example in the previous section\" - stmt is defined outside the passage; rest is code output"
+    },
+    "752ef913e246a8b87ddab63374e830bb": {
+      "verdict": "keep"
+    },
+    "769b58f65837456d395d5c069c85d678": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "\"review the above sections for background\" and pointer to External Dialects; little explanation of its own; unsure"
+    },
+    "7b6c7d558da66107a854024166514de4": {
+      "verdict": "keep"
+    },
+    "8040ccdbc23f25ec47b0f8d6315d266e": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "\"In the above example, the five parameter dictionaries...\" depends on an example outside the passage; unsure"
+    },
+    "81155020946f6220c7dc89a6e279f42f": {
+      "verdict": "keep"
+    },
+    "8f94b2ba5bfbb13bc93b4db532ca0fad": {
+      "verdict": "keep"
+    },
+    "9a18bf69b12a173891f48231f644df17": {
+      "verdict": "keep"
+    },
+    "af8e40d5b3e2fbb8af54a17ab7b4df99": {
+      "verdict": "keep"
+    },
+    "b325a99aa0d68b1c6c7e84297733351b": {
+      "verdict": "trim",
+      "remove": ["\n\nWarning"]
+    },
+    "d21b9debebe192182f170d57352c98fa": {
+      "verdict": "keep"
+    },
+    "d6aec026f2f4f70e62a2ad82bc073f9b": {
+      "verdict": "keep"
+    },
+    "e60ddf3c1838c0efaa3cad5057f63297": {
+      "verdict": "keep"
+    },
+    "ec18918be667d0d01efdc183410d6de3": {
+      "verdict": "keep"
+    },
+    "fa5f39ba958744040e1c94221fa92d98": {
+      "verdict": "keep"
+    }
+  }
+}

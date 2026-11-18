@@ -1,0 +1,95 @@
+source_id: owasp-llm-top10
+name: OWASP Top 10 for Large Language Model Applications (2025)
+kind: official
+homepage: https://github.com/OWASP/www-project-top-10-for-large-language-model-applications
+format: markdown
+# Content is markdown in the repo (default branch: main), one file per risk in 2_0_vulns/ (LLM00_Preface.md ...
+# LLM10_UnboundedConsumption.md); the rendered pages at https://genai.owasp.org/llmrisk/<slug>/ are Elementor pages
+# whose only h1 is a site banner, so the markdown files are used. Each file starts with "## LLMnn:2025 <name>" (h2,
+# no h1): parse_markdown_page then returns title "" and chunk heading lines start with " > LLMnn:2025 ...". Cosmetic,
+# but a fallback "title = first heading when there is no h1" in docs_section_parser would fix it.
+content_selector: ""
+language: en
+license: CC-BY-SA-4.0
+license_class: open
+license_url: https://raw.githubusercontent.com/OWASP/www-project-top-10-for-large-language-model-applications/main/LICENSE.md
+# The site footer of genai.owasp.org says: "Unless otherwise specified, all content on the site is Creative Commons
+# Attribution-ShareAlike v4.0 and provided without warranty of service or accuracy." (read 2026-11-17).
+license_quote: "This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License."
+license_checked: 2026-11-17
+robots_checked: 2026-11-17
+robots_note: "Pages are fetched from raw.githubusercontent.com, whose /robots.txt returns HTTP 404 (no robots.txt). https://genai.owasp.org/robots.txt (HTTP 200) has User-agent: * with Disallow: /wp-content/uploads/wpo/wpo-plugins-tables-list.json plus a Yoast block 'User-agent: * / Disallow:' (empty, allow all); it is not used for these files. Do not use github.com /raw/ or /tree/ URLs (disallowed in the github.com robots.txt as in system-design-primer.yaml)."
+attribution: "OWASP Top 10 for Large Language Model Applications (2025), OWASP GenAI Security Project, licensed under Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0), https://creativecommons.org/licenses/by-sa/4.0/. Notice: notices/owasp-llm-top10.txt"
+status: use
+excluded_reason: ""
+pages:
+- url: https://raw.githubusercontent.com/OWASP/www-project-top-10-for-large-language-model-applications/main/2_0_vulns/LLM01_PromptInjection.md
+  category: AI
+  tracks: [ai_engineer]
+  scenarios: [scn.ai.prompt-injection-defense]
+  topics: []
+  sections: []
+  kind: concept
+  why: Direct and indirect prompt injection, why the model cannot separate instructions from data, and the layered mitigations (constrained behaviour, input and output filters, least privilege, human approval).
+  status: use
+  excluded_reason: ''
+- url: https://raw.githubusercontent.com/OWASP/www-project-top-10-for-large-language-model-applications/main/2_0_vulns/LLM05_ImproperOutputHandling.md
+  category: AI
+  tracks: [ai_engineer]
+  scenarios: [scn.ai.prompt-injection-defense]
+  topics: []
+  sections: []
+  kind: concept
+  why: Treat model output as untrusted input to downstream systems (validation, encoding, parameterised queries) so an injected prompt cannot become XSS, SQL injection or command execution.
+  status: use
+  excluded_reason: ''
+- url: https://raw.githubusercontent.com/OWASP/www-project-top-10-for-large-language-model-applications/main/2_0_vulns/LLM06_ExcessiveAgency.md
+  category: AI
+  tracks: [ai_engineer]
+  scenarios: [scn.ai.prompt-injection-defense, scn.ai.support-agent-handoff]
+  topics: []
+  sections: []
+  kind: concept
+  why: 'Excessive functionality, permissions and autonomy in tool-using agents, and the fixes: minimal tools, user-scoped permissions, human approval for high-impact actions.'
+  status: use
+  excluded_reason: ''
+- url: https://raw.githubusercontent.com/OWASP/www-project-top-10-for-large-language-model-applications/main/2_0_vulns/LLM07_SystemPromptLeakage.md
+  category: AI
+  tracks: [ai_engineer]
+  scenarios: [scn.ai.prompt-injection-defense]
+  topics: []
+  sections: []
+  kind: concept
+  why: System prompts must not carry secrets or be the security boundary; keep authorisation and guardrails outside the prompt because injected text can extract it.
+  status: use
+  excluded_reason: ''
+- url: https://raw.githubusercontent.com/OWASP/www-project-top-10-for-large-language-model-applications/main/2_0_vulns/LLM08_VectorAndEmbeddingWeaknesses.md
+  category: AI
+  tracks: [ai_engineer]
+  scenarios: [scn.ai.docs-qa-rag]
+  topics: []
+  sections: []
+  kind: concept
+  why: 'Risks in RAG vector stores: access control on retrieved chunks, cross-tenant leakage, poisoned documents and embedding inversion for an internal-docs chatbot.'
+  status: use
+  excluded_reason: ''
+- url: https://raw.githubusercontent.com/OWASP/www-project-top-10-for-large-language-model-applications/main/2_0_vulns/LLM09_Misinformation.md
+  category: AI
+  tracks: [ai_engineer]
+  scenarios: [scn.ai.docs-qa-rag]
+  topics: []
+  sections: []
+  kind: concept
+  why: Hallucination as a security and trust risk, and mitigations such as RAG grounding, verification, citing sources and human review of answers.
+  status: use
+  excluded_reason: ''
+- url: https://raw.githubusercontent.com/OWASP/www-project-top-10-for-large-language-model-applications/main/2_0_vulns/LLM10_UnboundedConsumption.md
+  category: AI
+  tracks: [ai_engineer]
+  scenarios: [scn.ai.llm-cost-reduction]
+  topics: []
+  sections: []
+  kind: concept
+  why: 'Uncontrolled inference cost (denial of wallet): rate limits, input size and token limits, monitoring and throttling, relevant to halving LLM spend safely.'
+  status: use
+  excluded_reason: ''

@@ -1,0 +1,82 @@
+source_id: web-dev
+name: web.dev (Google)
+kind: supplementary
+homepage: https://web.dev/
+format: html
+# Plain HTTP GET returns the full article as static HTML (checked 2026-11-17, UA ai-recruit-data-pipeline/0.1).
+# article.devsite-article holds h1 + author byline + article body (div.devsite-article-body) + rating widget; the
+# sidebar, TOC and footer are outside it. Do NOT use div.devsite-article-body: it excludes the h1 and the parser then
+# nests every h2 under the first h2.
+# KNOWN PARSER ISSUE: the h1 contains a hidden <devsite-actions hidden> tooltip ("Stay organized with collections /
+# Save and categorize content based on your preferences."), so parse_html_page returns that text appended to the page
+# title and every chunk's first line carries it. Fix on the parser side: decompose elements with the `hidden`
+# attribute (or devsite-actions) before reading the h1. The intro section also starts with the author byline
+# ("Philip Walton X GitHub ... Published: ..."); rows below use `sections` so intros are dropped unless a page is
+# listed whole (learn/forms/validation, whose intro is one short summary).
+content_selector: "article.devsite-article"
+language: en
+license: CC-BY-4.0
+license_class: open
+license_url: https://web.dev/articles/lcp
+# Footer of every article, word for word (read on /articles/lcp 2026-11-17); the linked "Google Developers Site
+# Policies" page (https://developers.google.com/terms/site-policies) repeats the same notice and adds: images, audio,
+# video and links to content on other pages "is not covered by the license, unless specifically noted". We copy text
+# only. Code samples are Apache-2.0 but code blocks are mostly dropped by the noise filter anyway.
+license_quote: "Except as otherwise noted, the content of this page is licensed under the Creative Commons Attribution 4.0 License, and code samples are licensed under the Apache 2.0 License."
+license_checked: 2026-11-17
+robots_checked: 2026-11-17
+robots_note: "https://web.dev/robots.txt (HTTP 200) has one group, 'User-agent: *', with 'Disallow: /*?*authuser=' (query strings containing authuser) and a Sitemap line. No Crawl-delay. /articles/* and /learn/* are not disallowed; fetch URLs without query strings."
+attribution: "web.dev, Google LLC and individual authors, https://web.dev, content licensed under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/), code samples under Apache 2.0. Notice: notices/web-dev.txt"
+status: use
+excluded_reason: ""
+pages:
+  - url: https://web.dev/articles/lcp
+    category: Frontend
+    tracks: [frontend_react]
+    scenarios: [scn.fe.slow-page-lcp]
+    topics: []
+    sections: ["What is LCP?"]
+    kind: concept
+    why: "Definition of Largest Contentful Paint, which elements count as the LCP element, when it is reported and the 2.5 s target at the 75th percentile (mobile and desktop segmented), needed to read a mobile LCP regression correctly."
+    status: use
+    excluded_reason: ""
+  - url: https://web.dev/articles/optimize-lcp
+    category: Frontend
+    tracks: [frontend_react]
+    scenarios: [scn.fe.slow-page-lcp]
+    topics: []
+    sections: ["LCP breakdown", "How to optimize each part"]
+    kind: guide
+    why: "Splits LCP into time to first byte, resource load delay, resource load duration and element render delay and gives the fix for each, which is the diagnosis order for a slow home page."
+    status: use
+    excluded_reason: ""
+  - url: https://web.dev/articles/fetch-priority
+    category: Frontend
+    tracks: [frontend_react]
+    scenarios: [scn.fe.slow-page-lcp]
+    topics: []
+    sections: ["When might you need Fetch Priority?", "The fetchpriority attribute"]
+    kind: guide
+    why: "How the browser assigns resource priorities and when fetchpriority=high on the hero (LCP) image, or deferring below-the-fold content, makes the LCP resource load earlier."
+    status: use
+    excluded_reason: ""
+  - url: https://web.dev/articles/virtualize-long-lists-react-window
+    category: Frontend
+    tracks: [frontend_react]
+    scenarios: [scn.fe.job-list-infinite-scroll]
+    topics: []
+    sections: ["Why is this useful?", "react-window", "Lazy loading on scroll", "Overscanning"]
+    kind: guide
+    why: "Windowing renders only the rows in view so thousands of list items do not create thousands of DOM nodes, with fixed vs variable row heights, lazy loading more rows on scroll and overscan."
+    status: use
+    excluded_reason: ""
+  - url: https://web.dev/learn/forms/validation
+    category: Frontend
+    tracks: [frontend_react]
+    scenarios: [scn.fe.multi-step-apply-form]
+    topics: []
+    sections: []
+    kind: guide
+    why: "Built-in constraint validation (required, type, pattern), communicating rules before submit, styling invalid fields and when to add JavaScript validation to an application form."
+    status: use
+    excluded_reason: ""

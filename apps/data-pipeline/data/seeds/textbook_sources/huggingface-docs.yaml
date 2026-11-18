@@ -1,0 +1,145 @@
+source_id: huggingface-docs
+name: Hugging Face Documentation and Learn (transformers, smolagents, evaluate, cookbook, LLM course)
+kind: official
+homepage: https://huggingface.co/docs/
+format: html
+# Doc-builder pages (huggingface.co/docs/<lib>/..., /learn/cookbook/en/..., /learn/llm-course/...) share one layout:
+# the article body is div.prose-doc inside #hf-doc-container; sidebar, version selector and "Update on GitHub" are
+# outside it. Checked on 12 pages. Unversioned URLs redirect to the latest release path (the crawler follows redirects).
+# Every page has a .md twin (e.g. /docs/transformers/index.md) but format markdown only accepts GitHub URLs, so HTML is used.
+content_selector: "div.prose-doc"
+language: en
+license: Apache-2.0
+license_class: open
+license_url: https://raw.githubusercontent.com/huggingface/transformers/main/docs/source/en/cache_explanation.md
+# Header comment of a documentation file (docs/source/en/cache_explanation.md). Docs of smolagents, evaluate, cookbook
+# and the LLM course sit in other repos; their LICENSE is Apache-2.0 (GitHub license metadata checked 2026-11-17 for
+# huggingface/smolagents, evaluate, cookbook, course) but those repos carry no per-file docs statement that was read.
+license_quote: 'Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.'
+license_checked: 2026-11-17
+robots_checked: 2026-11-17
+robots_note: "https://huggingface.co/robots.txt (HTTP 200): User-agent: * / Allow: / ; Sitemap: https://huggingface.co/sitemap.xml. No Disallow, no Crawl-delay. OPERATIONAL RISK measured 2026-11-17 from the project's Windows machine with the crawler's own client settings (httpx, timeout 30, follow_redirects, User-Agent ai-recruit-data-pipeline/0.1, no retry): the first request of a fresh process to huggingface.co, which is robots.txt, failed with ConnectError WinError 10054 (connection forcibly closed) in 6 of 8 runs; later requests in the same process failed about 1 in 8 more often (curl showed the same random resets, exit 35). PoliteFetcher treats a failed robots.txt read as 'Disallow: /' so every row of this source would be skipped as robots-disallowed. Before crawl-textbook for this source, check the log line 'robots checked: ... [200]' and rerun until it shows 200 (or add a retry to PoliteFetcher._load_robots; or try another network). Other hosts of this track (scikit-learn.org, nannyml.readthedocs.io, docs.livekit.io, raw.githubusercontent.com) answered the first request 200 every time."
+attribution: "Hugging Face documentation, Copyright The HuggingFace Team, Apache License 2.0. Notice: notices/huggingface-docs.txt"
+status: use
+excluded_reason: ""
+pages:
+- url: https://huggingface.co/learn/llm-course/chapter5/6
+  category: AI
+  tracks: [ai_engineer]
+  scenarios: [scn.ai.cv-job-matching, scn.ai.docs-qa-rag]
+  topics: []
+  sections: [Using embeddings for semantic search, Creating text embeddings, Using FAISS for efficient similarity search]
+  kind: tutorial
+  why: 'Text embeddings and FAISS similarity search: how documents and queries become vectors and are ranked by nearest neighbours, the core of CV-to-job matching and of the retrieval step in RAG.'
+  status: use
+  excluded_reason: ''
+- url: https://huggingface.co/learn/cookbook/en/advanced_rag
+  category: AI
+  tracks: [ai_engineer]
+  scenarios: [scn.ai.docs-qa-rag]
+  topics: []
+  sections: []
+  kind: tutorial
+  why: End-to-end RAG pipeline with chunking, embedding retrieval, reranking and prompt assembly, plus what to improve in the retriever and the reader.
+  status: use
+  excluded_reason: ''
+- url: https://huggingface.co/learn/cookbook/en/rag_evaluation
+  category: AI
+  tracks: [ai_engineer]
+  scenarios: [scn.ai.docs-qa-rag, scn.ai.model-upgrade-rollout]
+  topics: []
+  sections: []
+  kind: tutorial
+  why: Evaluating RAG with a synthetic question set and an LLM judge, so retriever or model changes are compared on the same benchmark before rollout.
+  status: use
+  excluded_reason: ''
+- url: https://huggingface.co/learn/cookbook/en/llm_judge
+  category: AI
+  tracks: [ai_engineer]
+  scenarios: [scn.ai.model-upgrade-rollout]
+  topics: []
+  sections: []
+  kind: tutorial
+  why: 'Building and improving an LLM-as-a-judge: why a judge needs human-labelled examples and a rubric before its scores can compare an old model with a new one.'
+  status: use
+  excluded_reason: ''
+- url: https://huggingface.co/docs/evaluate/considerations
+  category: AI
+  tracks: [ai_engineer]
+  scenarios: [scn.ai.model-upgrade-rollout]
+  topics: []
+  sections: []
+  kind: concept
+  why: 'Evaluation pitfalls: proper data splits, class imbalance, offline versus online evaluation and trade-offs such as speed and memory that decide whether a new model is acceptable.'
+  status: use
+  excluded_reason: ''
+- url: https://huggingface.co/learn/cookbook/en/semantic_cache_chroma_vector_database
+  category: AI
+  tracks: [ai_engineer]
+  scenarios: [scn.ai.llm-cost-reduction]
+  topics: []
+  sections: []
+  kind: tutorial
+  why: 'Semantic cache: reuse an earlier answer when a new query is close enough in embedding space, so repeated questions skip the LLM call and cost nothing.'
+  status: use
+  excluded_reason: ''
+- url: https://huggingface.co/docs/transformers/quantization/concept_guide
+  category: AI
+  tracks: [ai_engineer]
+  scenarios: [scn.ai.llm-cost-reduction]
+  topics: []
+  sections: []
+  kind: concept
+  why: 'Quantization concepts (int8, int4, FP8, granularity, post-training versus quantization-aware): how smaller number formats cut memory and cost of a self-hosted model.'
+  status: use
+  excluded_reason: ''
+- url: https://huggingface.co/docs/transformers/cache_explanation
+  category: AI
+  tracks: [ai_engineer]
+  scenarios: [scn.ai.llm-cost-reduction]
+  topics: []
+  sections: []
+  kind: concept
+  why: How the key-value cache stores attention keys and values so earlier tokens are not recomputed, the mechanism behind cheap repeated prefixes and faster generation.
+  status: use
+  excluded_reason: ''
+- url: https://huggingface.co/docs/smolagents/conceptual_guides/intro_agents
+  category: AI
+  tracks: [ai_engineer]
+  scenarios: [scn.ai.support-agent-handoff]
+  topics: []
+  sections: []
+  kind: concept
+  why: What an agent is, how much control the LLM gets over the workflow, and when a fixed workflow is better than an agent.
+  status: use
+  excluded_reason: ''
+- url: https://huggingface.co/docs/smolagents/tutorials/building_good_agents
+  category: AI
+  tracks: [ai_engineer]
+  scenarios: [scn.ai.support-agent-handoff]
+  topics: []
+  sections: []
+  kind: guide
+  why: 'Practical rules for reliable agents: simplify the workflow, give clear tool descriptions and information to the LLM, and debug with a stronger model or extra planning.'
+  status: use
+  excluded_reason: ''
+- url: https://huggingface.co/docs/smolagents/examples/plan_customization
+  category: AI
+  tracks: [ai_engineer]
+  scenarios: [scn.ai.support-agent-handoff]
+  topics: []
+  sections: []
+  kind: tutorial
+  why: 'Human-in-the-loop: interrupt the agent after planning with a step callback, let a person review or edit the plan, then resume execution.'
+  status: use
+  excluded_reason: ''
+- url: https://huggingface.co/docs/smolagents/tutorials/secure_code_execution
+  category: AI
+  tracks: [ai_engineer]
+  scenarios: [scn.ai.prompt-injection-defense, scn.ai.support-agent-handoff]
+  topics: []
+  sections: []
+  kind: guide
+  why: Why model-written code must run in a sandbox and what a sandbox restricts, a concrete least-privilege defence when injected instructions reach an agent that can act.
+  status: use
+  excluded_reason: ''

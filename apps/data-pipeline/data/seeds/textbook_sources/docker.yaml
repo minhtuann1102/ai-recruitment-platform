@@ -1,0 +1,96 @@
+source_id: docker
+name: Docker Docs
+kind: official
+homepage: https://github.com/docker/docs
+format: markdown
+# Why GitHub markdown and not the website: the Docker Terms of Use (https://www.docker.com/legal/docker-terms-use/)
+# define "Website" as including docs.docker.com and say you agree not to: "Use automated means (agents, robots,
+# spiders, scrapers, or similar) to access the Website or Services except as permitted by Docker (for example, through
+# documented APIs and within published limits)." To avoid any doubt this source reads the documentation from its public
+# source repository docker/docs (Apache-2.0) through the GitHub API (crawler resolves the blob URLs below), and never
+# fetches docs.docker.com. (docs.docker.com/robots.txt itself says "Content-Signal: ai-train=yes, search=yes,
+# ai-input=yes" with no Disallow, and its footer has a hidden honeypot link /bot-detection/; neither is used here.)
+# Files are Hugo markdown under content/manuals/: YAML front matter (title:), no "# " line, headings from "##". The
+# parser reads the front-matter title. Hugo shortcodes may remain in passages ({{< tabs >}} / {{< tab >}} in volumes.md,
+# {{% param "example_go_version" %}} inside code in multi-stage.md) and "> [!NOTE]" / "> [!TIP]" blockquote markers; the
+# chunk review (trim) handles them. Heading names in `sections` below were checked against the .md files on 2026-11-17.
+content_selector: ""
+language: en
+license: Apache-2.0
+license_class: open
+# Read 2026-11-17. Docs repo README ("Copyright and license" section), https://raw.githubusercontent.com/docker/docs/main/README.md:
+#     "Copyright 2013-2026 Docker, Inc., released under the Apache 2.0 license."
+# It links to the repo LICENSE (https://github.com/docker/docs/blob/main/LICENSE = Apache License, Version 2.0 text;
+# "Copyright 2016 Docker, Inc." in its appendix). The same README says "This is the source for the Docker Docs
+# Website" and "Our docs are completely open source". The repo has no NOTICE file (HTTP 404).
+# Note: the docs.docker.com footer says "Copyright © 2013-2026 Docker Inc. All rights reserved."; the repository
+# statement above is the one that names a license for the documentation text, so it is classified open.
+license_url: https://raw.githubusercontent.com/docker/docs/main/README.md
+license_quote: "Copyright 2013-2026 Docker, Inc., released under the Apache 2.0 license."
+license_checked: 2026-11-17
+robots_checked: 2026-11-17
+robots_note: "Not applicable to docs.docker.com (not fetched, see the comment on format). Files come from GitHub through the REST API contents endpoint (api.github.com), the same way as the system-design-primer source; https://raw.githubusercontent.com/robots.txt returns 404 (no robots.txt on that host). The six files returned HTTP 200 from raw.githubusercontent.com on 2026-11-17 (content/manuals/compose/how-tos/networking.md and startup-order.md, engine/storage/volumes.md, build/building/multi-stage.md and best-practices.md, engine/containers/start-containers-automatically.md). Unauthenticated GitHub API allows 60 requests/hour, enough for 6 files; set GITHUB_TOKEN for more."
+attribution: "Docker Docs, Copyright 2013-2026 Docker, Inc., released under the Apache 2.0 license (https://github.com/docker/docs). Notice: notices/docker.txt"
+status: use
+excluded_reason: ""
+pages:
+  - url: https://github.com/docker/docs/blob/main/content/manuals/compose/how-tos/networking.md
+    category: DevOps
+    tracks: [devops_engineer]
+    scenarios: [scn.devops.dockerize-web-app]
+    topics: []
+    sections: []
+    kind: concept
+    why: "The default Compose network, service-name DNS so the web container reaches the database by name, how ports map between host and container, and custom networks that separate services."
+    status: use
+    excluded_reason: ""
+  - url: https://github.com/docker/docs/blob/main/content/manuals/compose/how-tos/startup-order.md
+    category: DevOps
+    tracks: [devops_engineer]
+    scenarios: [scn.devops.dockerize-web-app]
+    topics: []
+    sections: []
+    kind: guide
+    why: "Compose only waits until a container is running, not ready; depends_on with a healthcheck condition makes the web service wait for a database that accepts connections."
+    status: use
+    excluded_reason: ""
+  - url: https://github.com/docker/docs/blob/main/content/manuals/engine/storage/volumes.md
+    category: DevOps
+    tracks: [devops_engineer]
+    scenarios: [scn.devops.dockerize-web-app]
+    topics: []
+    sections: ["When to use volumes", "A volume's lifecycle", "Mounting a volume over existing data", "Named and anonymous volumes", "Use a volume with Docker Compose"]
+    kind: concept
+    why: "Why database files belong in a named volume that outlives the container, how a volume differs from a bind mount, and how to declare one in a Compose file."
+    status: use
+    excluded_reason: ""
+  - url: https://github.com/docker/docs/blob/main/content/manuals/build/building/multi-stage.md
+    category: DevOps
+    tracks: [devops_engineer]
+    scenarios: [scn.devops.dockerize-web-app]
+    topics: []
+    sections: []
+    kind: guide
+    why: "Multi-stage builds: compile in one stage and copy only the artifact into a small final image, which shrinks the image and keeps build tools out of production."
+    status: use
+    excluded_reason: ""
+  - url: https://github.com/docker/docs/blob/main/content/manuals/build/building/best-practices.md
+    category: DevOps
+    tracks: [devops_engineer]
+    scenarios: [scn.devops.dockerize-web-app]
+    topics: []
+    sections: ["Choose the right base image", "Exclude with .dockerignore", "Create ephemeral containers", "Don't install unnecessary packages", "Decouple applications", "Leverage build cache"]
+    kind: guide
+    why: "Dockerfile practices a team needs: small trusted base image, .dockerignore, stateless disposable containers, one concern per container, and the build cache."
+    status: use
+    excluded_reason: ""
+  - url: https://github.com/docker/docs/blob/main/content/manuals/engine/containers/start-containers-automatically.md
+    category: DevOps
+    tracks: [devops_engineer]
+    scenarios: [scn.devops.container-crashloop]
+    topics: []
+    sections: []
+    kind: concept
+    why: "Docker restart policies (no, on-failure with max-retries, always, unless-stopped) and the rule that a policy only applies once a container has been up for 10 seconds, which governs when a failing container is restarted on a plain Docker host."
+    status: use
+    excluded_reason: ""

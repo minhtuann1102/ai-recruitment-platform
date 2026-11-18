@@ -1,0 +1,177 @@
+{
+  "source_id": "scikit-learn",
+  "reviewed_at": "2026-11-18",
+  "approved_by": "auto:canary-gate",
+  "decisions": {
+    "0176420a3bc3a7e915229bb1c39fd17e": {
+      "verdict": "keep"
+    },
+    "0409c6f1bea2bb35577faec0b33146ea": {
+      "verdict": "keep"
+    },
+    "065c8fcf3306d5adc90d75386ab49dcc": {
+      "verdict": "keep"
+    },
+    "0bc48e7919c038e6dbdf2dc3ada879f9": {
+      "verdict": "keep"
+    },
+    "15ba91bd9c187c9bf20da49048eb41cf": {
+      "verdict": "keep"
+    },
+    "17b913f77cb558c297c4c8775640c4b5": {
+      "verdict": "keep"
+    },
+    "1d938b65361d17f6970579cdbf2ea639": {
+      "verdict": "keep"
+    },
+    "2c19ed87f20e0160751008632732df43": {
+      "verdict": "trim",
+      "remove": [
+        "Here is a visualization of cross-validation behavior for uneven groups:"
+      ]
+    },
+    "367301b9bb29b00771d3cc3a302ed5a5": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "math notation list plus the start of a formula table that continues in the next passage"
+    },
+    "39f50ee1f0aadf30ddcb2354e7b12796": {
+      "verdict": "keep"
+    },
+    "4a01085f807be7c128f9ff7c6239a94e": {
+      "verdict": "keep"
+    },
+    "518425f1fb2f75933ba5fe3bfdb7504f": {
+      "verdict": "keep"
+    },
+    "5a30989b9c7852dadd4556ad750dbed7": {
+      "verdict": "keep"
+    },
+    "6064b1f90e269ca4bf69b9c414c8fd4b": {
+      "verdict": "drop",
+      "reason": "nav",
+      "note": "starts mid-sentence, then only a reference list / see-also"
+    },
+    "644af8fc4c9d8115c15ed2abc978965e": {
+      "verdict": "trim",
+      "remove": ["Right"]
+    },
+    "65bdbf2679c5f6a49d94b67b0eda202e": {
+      "verdict": "keep"
+    },
+    "6603ff7f562ec7b65eedda61a75e1ed1": {
+      "verdict": "keep"
+    },
+    "6d8a2dfe99b8801b0cba193ad0acdcbc": {
+      "verdict": "keep"
+    },
+    "71430c170137da2cb6a9813acfade64b": {
+      "verdict": "keep"
+    },
+    "739e363d0b59d198cc51c86bc5d53edd": {
+      "verdict": "trim",
+      "remove": ["Wrong"]
+    },
+    "748f0be36398d24416de67de668c80ca": {
+      "verdict": "keep"
+    },
+    "77fc7c607da498fe9f46afedaee6123e": {
+      "verdict": "keep"
+    },
+    "7aa51de4422440828db61927110fd870": {
+      "verdict": "keep"
+    },
+    "7be4194001d28451bc621a4f4d53a859": {
+      "verdict": "keep"
+    },
+    "810a2dc41775bf2e23b8eb939d6edccf": {
+      "verdict": "trim",
+      "remove": ["An example of data leakage during preprocessing is detailed below."]
+    },
+    "899e64138fedee982750060d56f5b301": {
+      "verdict": "trim",
+      "remove": ["Wrong"]
+    },
+    "8e48ee9bf3115cec7eedcc742bff9e57": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "arithmetic walk-through of 'the counts array' that is not in the passage"
+    },
+    "8eb1a1ac7595b70305e335daee7cb073": {
+      "verdict": "trim",
+      "remove": ["Here is a visualization of the cross-validation behavior."]
+    },
+    "98dc59d442fcfc20378488c3a85c3955": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "precision/recall/F formulas are missing from the passage and the tp/fp/fn/tn table is mangled"
+    },
+    "a03715e0ea2b49d4e193194b06ed6232": {
+      "verdict": "trim",
+      "remove": [
+        "Several functions allow you to analyze the precision, recall and F-measures\nscore:\n\naverage_precision_score (y_true, y_score, *)\n\nCompute average precision (AP) from prediction scores.\n\nf1_score (y_true, y_pred, *[, labels, ...])\n\nCompute the F1 score, also known as balanced F-score or F-measure.\n\nfbeta_score (y_true, y_pred, *, beta[, ...])\n\nCompute the F-beta score.\n\nprecision_recall_curve (y_true, y_score, *[, ...])"
+      ]
+    },
+    "a7611e0f0ba9123a1560cb16651f014b": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "worked example on a counts array and an undefined transformer; little explanation"
+    },
+    "aa2261d5056d5c070e2e3fe0cd843b25": {
+      "verdict": "trim",
+      "remove": ["Here is a visualization of the cross-validation behavior."]
+    },
+    "aed7db22e1cf180e9ac0d2374f54638b": {
+      "verdict": "keep"
+    },
+    "b1f4b4718c6439af83dcdf22d03f25f2": {
+      "verdict": "drop",
+      "reason": "reference_table",
+      "note": "function-signature list around one useful paragraph: precision_recall_curve is binary-only, average_precision_score supports multiclass/multilabel via OvR"
+    },
+    "b28ed1658066767575ddd00533bdefc6": {
+      "verdict": "keep"
+    },
+    "bb55cd7b96d8608a0ad8cbb1ba97d0bf": {
+      "verdict": "keep"
+    },
+    "c91eaf3f90b2cfaf96dd0bb377d17d05": {
+      "verdict": "trim",
+      "remove": [
+        "Examples\n\nTest with permutations the significance of a classification score\n\nOjala and Garriga. Permutation Tests for Studying Classifier Performance .\nJ. Mach. Learn. Res. 2010."
+      ]
+    },
+    "cbd98c0bcb6d33bdd36a03491727294a": {
+      "verdict": "keep"
+    },
+    "ccde6683471fdd5ac32e0d8e28c13d9d": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "starts 'where n is...' defining symbols of a formula in the previous passage and ends on a dangling colon; also has idf/L2 explanation"
+    },
+    "cd7377b8c4ee29732d3d9b4d40e32098": {
+      "verdict": "keep"
+    },
+    "db8c6b639c75e02b279c64c1768ddd63": {
+      "verdict": "keep"
+    },
+    "e50eeba27f66db89153991010205d315": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "rows of a formula table without header or explanation (continuation of previous passage)"
+    },
+    "e95cda227624525a817339d02cf6d3ba": {
+      "verdict": "drop",
+      "reason": "nav",
+      "note": "mostly an Examples link list; only a one-sentence generic grid-search recommendation whose pipeline sample is missing"
+    },
+    "ecc4379a993ec0232dafcb25d4e3d1a1": {
+      "verdict": "keep"
+    },
+    "fe492578784b70087dffa8515b13efdc": {
+      "verdict": "drop",
+      "reason": "nav",
+      "note": "see-also pointer plus bibliography"
+    }
+  }
+}

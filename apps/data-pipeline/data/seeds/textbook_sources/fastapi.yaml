@@ -1,0 +1,72 @@
+source_id: fastapi
+name: FastAPI Documentation
+kind: official
+homepage: https://fastapi.tiangolo.com/
+format: html
+# Page body lives in article.md-content__inner (sidebar, header and footer are outside it). Every page body opens with
+# the same banner ("Use the official FastAPI skill for your installed version. Install it from your project
+# directory: uvx library-skills / See Develop with AI."), which lands in the intro chunk: trim it in review. Headings
+# end with a permalink sign, so `sections` values below carry a trailing " ¶" exactly as the parser sees them.
+content_selector: "article.md-content__inner"
+language: en
+license: MIT
+license_class: open
+license_url: https://fastapi.tiangolo.com/#license
+license_quote: "This project is licensed under the terms of the MIT license."
+license_checked: 2026-11-17
+robots_checked: 2026-11-17
+robots_note: "https://fastapi.tiangolo.com/robots.txt (HTTP 200) has no User-agent group and no Disallow, Allow or Content-Signal line: the file is only a comment block about Cloudflare content signals, which says that a signal the operator does not include neither grants nor restricts permission. Docs paths are not restricted. Plain requests to /tutorial/ and /advanced/ pages return 200 with full HTML (no challenge page)."
+attribution: "FastAPI documentation, Copyright (c) 2018 Sebastián Ramírez, MIT License (the LICENSE file covers the software and associated documentation files). Notice: notices/fastapi.txt"
+status: use
+excluded_reason: ""
+pages:
+  - url: https://fastapi.tiangolo.com/tutorial/background-tasks/
+    category: Backend
+    tracks: [python_backend]
+    scenarios: [scn.py.report-export-timeout, scn.py.webhook-ingest]
+    topics: []
+    sections: []
+    kind: tutorial
+    why: "BackgroundTasks run after the response is sent in the same process, and the Caveat section says heavy work belongs in a separate queue such as Celery: the line between a quick acknowledge-then-process and a real job queue for exports and webhooks."
+    status: use
+    excluded_reason: ""
+  - url: https://fastapi.tiangolo.com/advanced/custom-response/
+    category: Backend
+    tracks: [python_backend]
+    scenarios: [scn.py.report-export-timeout]
+    topics: []
+    sections: ["StreamingResponse ¶", "FileResponse ¶"]
+    kind: guide
+    why: "StreamingResponse sends a generator or iterator chunk by chunk and FileResponse serves a prepared file, so a large export does not have to be built in memory before the first byte is returned."
+    status: use
+    excluded_reason: ""
+  - url: https://fastapi.tiangolo.com/tutorial/dependencies/
+    category: Backend
+    tracks: [python_backend]
+    scenarios: [scn.py.multi-tenant-api]
+    topics: []
+    sections: []
+    kind: tutorial
+    why: "Dependency injection with Depends lets one shared dependency resolve the current tenant and enforce access for every endpoint instead of repeating checks in each handler."
+    status: use
+    excluded_reason: ""
+  - url: https://fastapi.tiangolo.com/advanced/security/oauth2-scopes/
+    category: Backend
+    tracks: [python_backend]
+    scenarios: [scn.py.multi-tenant-api]
+    topics: []
+    sections: []
+    kind: guide
+    why: "OAuth2 scopes carried in the JWT and checked with SecurityScopes in a dependency tree: how to express and verify per-role permissions on each endpoint of a tenant-aware API."
+    status: use
+    excluded_reason: ""
+  - url: https://fastapi.tiangolo.com/tutorial/request-files/
+    category: Backend
+    tracks: [python_backend]
+    scenarios: [scn.py.csv-import-pipeline]
+    topics: []
+    sections: []
+    kind: tutorial
+    why: "UploadFile keeps a large upload in a spooled temporary file and offers async read methods, so a big CSV is handled without loading the whole body into memory."
+    status: use
+    excluded_reason: ""

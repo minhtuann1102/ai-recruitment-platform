@@ -1,0 +1,289 @@
+{
+  "source_id": "redis",
+  "reviewed_at": "2026-11-18",
+  "approved_by": "auto:canary-gate",
+  "decisions": {
+    "00494122aec2afab7af37aa9a3dee423": {
+      "verdict": "keep"
+    },
+    "024b83e9540b00c81b46512ecca6fc60": {
+      "verdict": "keep"
+    },
+    "0750b25c0d61cb83ba232e4ea687bc5d": {
+      "verdict": "keep"
+    },
+    "09289fb43600e151081c6d51adaf3395": {
+      "verdict": "keep"
+    },
+    "09cf4c935013d4946df51665597c70f3": {
+      "verdict": "trim",
+      "remove": ["This is accomplished with the following command:"]
+    },
+    "0bef41fc267acb84a88d411705a0c7d8": {
+      "verdict": "drop",
+      "reason": "nav",
+      "note": "Learn more command link list"
+    },
+    "0d8c4beb5bbcbfa8975c6d2d20b5548d": {
+      "verdict": "keep"
+    },
+    "1008e8dbf786381dcb07f73f8f9ee975": {
+      "verdict": "keep"
+    },
+    "14495b1b56d3420733dc28b7dd0088f9": {
+      "verdict": "keep"
+    },
+    "1ab123bd1013b53bc1898285a98b5e57": {
+      "verdict": "trim",
+      "remove": [
+        "However we want to also make sure that multiple clients trying to acquire the lock at the same time can’t simultaneously succeed."
+      ]
+    },
+    "1b6e74ed07362a691c347d53d06d941e": {
+      "verdict": "keep"
+    },
+    "1cc4ce92ad4fab7dc82a867971b58051": {
+      "verdict": "keep"
+    },
+    "21fcd3d433f59d3bdcb52f8a2a1420cb": {
+      "verdict": "trim",
+      "remove": [
+        "Please consider thoroughly reviewing the [Analysis of Redlock](#analysis-of-redlock) section at the end of this page.",
+        "Martin Kleppman's article and antirez's answer to it are very relevant."
+      ]
+    },
+    "23c125b537da63102564b125ba5b99ed": {
+      "verdict": "keep"
+    },
+    "2b8809cda1525630a4911e200f7f1d3e": {
+      "verdict": "drop",
+      "reason": "nav",
+      "note": "Learn more link list"
+    },
+    "2f773d9b9c070236e0adf52593e34ad2": {
+      "verdict": "drop",
+      "reason": "nav",
+      "note": "list of third-party libraries and links"
+    },
+    "35def9c387086707dbb7ec9cf6992a02": {
+      "verdict": "drop",
+      "reason": "off_topic",
+      "note": "unsure: outcome/capability claims list, no mechanism or trade-off"
+    },
+    "3c85031aa221695590b5c34c9d2b784c": {
+      "verdict": "trim",
+      "remove": [
+        "However there is another consideration around persistence if we want to target a crash-recovery system model."
+      ]
+    },
+    "41743817ce79df3315c76e489074b54a": {
+      "verdict": "keep"
+    },
+    "437dcf511bb7dbd00abc17c022bf1fe8": {
+      "verdict": "keep"
+    },
+    "47faa5c06fff53cfafc4a47e792fdded": {
+      "verdict": "drop",
+      "reason": "nav",
+      "note": "list of lock library links"
+    },
+    "4ac4b4b3656f3816b7a3c0c06e56f73d": {
+      "verdict": "keep"
+    },
+    "4b95190bfcc548c33d97a8d80db6ff69": {
+      "verdict": "keep"
+    },
+    "513036540591ebbf53167b6e4473ebd2": {
+      "verdict": "keep"
+    },
+    "5abedb3f483964131bc25ce3b78e91a6": {
+      "verdict": "drop",
+      "reason": "off_topic",
+      "note": "demo server run steps and UI tour"
+    },
+    "625553d5823aafe1f4a101c9a5827c44": {
+      "verdict": "keep"
+    },
+    "65cda762954049cf11206f42a0375666": {
+      "verdict": "keep"
+    },
+    "66d3db30d30e20dee0e8307eab7a3251": {
+      "verdict": "keep"
+    },
+    "6976b3fe0c811ce81538b9393cfc070f": {
+      "verdict": "keep"
+    },
+    "6c37ce076e66e195af1477332d137c17": {
+      "verdict": "keep"
+    },
+    "6d64d6bbf1645afbdb9ca0d3822f38cd": {
+      "verdict": "keep"
+    },
+    "6ee98062b69ddb6cf3954e5003483517": {
+      "verdict": "keep"
+    },
+    "70b2bfd208c6e1ed6d1e6d24cb7a0230": {
+      "verdict": "keep"
+    },
+    "72d2a6d9cb36be09604beef2abed2f0d": {
+      "verdict": "drop",
+      "reason": "off_topic",
+      "note": "unsure: outcome/capability claims list, no mechanism or trade-off"
+    },
+    "7389735414be985cd7ef4e033d482a48": {
+      "verdict": "drop",
+      "reason": "nav",
+      "note": "list of third-party libraries and links"
+    },
+    "74babbfaa1fd1727a685009a29ace536": {
+      "verdict": "keep"
+    },
+    "74d9689803f49230eab557e1d16dcdf8": {
+      "verdict": "keep"
+    },
+    "78b1b9aa3cd34776695ecc8c7f85ae4a": {
+      "verdict": "keep"
+    },
+    "7d1c36f7b4926177f4baee79b8e4e2a1": {
+      "verdict": "trim",
+      "remove": ["<!-- TODO: add item about INCREX command when Redis 8.8 is GA -->"]
+    },
+    "7e694096cc5f600fafb4b6648b6f560d": {
+      "verdict": "keep"
+    },
+    "7eac6063d802269584144f73292c70a2": {
+      "verdict": "keep"
+    },
+    "82792b9d8d0a837d0588e58b2cee522d": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "relies on MIN_VALIDITY and the argument from the previous chunk (as expressed above)"
+    },
+    "83e26042c4d5b6dfe5b69e12be7784d4": {
+      "verdict": "keep"
+    },
+    "873ea5dc13f35ce234ed244fe37e49bf": {
+      "verdict": "keep"
+    },
+    "8ca60be141aaf302c315297326416d14": {
+      "verdict": "keep"
+    },
+    "8e3271d00dd72ff397f4e224edbdfc7c": {
+      "verdict": "keep"
+    },
+    "9319f3c69473cd952de7e339668709b3": {
+      "verdict": "keep"
+    },
+    "932d905ba2c75eb788859ccd0d896acb": {
+      "verdict": "keep"
+    },
+    "957345600718cd4da38f384781090a25": {
+      "verdict": "keep"
+    },
+    "96262c4cce7ccf7d92169db9fe739185": {
+      "verdict": "drop",
+      "reason": "off_topic",
+      "note": "demo prerequisites and npm install"
+    },
+    "9a64f71a1e25bcc2abb260e5bc40663e": {
+      "verdict": "keep"
+    },
+    "9d54a493feca63eae6a2c1dca718b1e6": {
+      "verdict": "drop",
+      "reason": "nav",
+      "note": "Learn more link list"
+    },
+    "a198c3f007f48e69d949c45c1bd5576e": {
+      "verdict": "drop",
+      "reason": "off_topic",
+      "note": "demo server install/run steps"
+    },
+    "a6f2bfae6cd59e36362adb3b5d9fbe3e": {
+      "verdict": "keep"
+    },
+    "af23ad2eeb4d156169297a31ac25be73": {
+      "verdict": "keep"
+    },
+    "b278ee00bcb1bea895be03ceca5779f4": {
+      "verdict": "keep"
+    },
+    "b3cf1ff863faec867c659f6cf61e4869": {
+      "verdict": "keep"
+    },
+    "b8b975c6ac889194befe4244fba446f7": {
+      "verdict": "trim",
+      "remove": [
+        "Redis provides the following features that make it a good fit for cache-aside:"
+      ]
+    },
+    "bb2f1896bc0b355e7496945155f3b5d2": {
+      "verdict": "trim",
+      "remove": [
+        "The sections below give example implementations of these other algorithms."
+      ]
+    },
+    "c213316c246c44e648fa102f7945710d": {
+      "verdict": "keep"
+    },
+    "c66859094675d420eb4b5885b143c029": {
+      "verdict": "keep"
+    },
+    "c795b7477991c21c87f9fdf56bbc7d2e": {
+      "verdict": "keep"
+    },
+    "d136d113bdc737c5f89c87fde4e314e9": {
+      "verdict": "keep"
+    },
+    "d1ae3194b39a08ecae78584dbbdf24a2": {
+      "verdict": "trim",
+      "remove": [
+        "This paper contains more information about similar systems requiring a bound *clock drift*: [Leases: an efficient fault-tolerant mechanism for distributed file cache consistency](http://dl.acm.org/citation.cfm?id=74870)."
+      ]
+    },
+    "d3fb5929a04dcd74db5cbacd95520a8a": {
+      "verdict": "keep"
+    },
+    "d4080ca51ca74e72097ef3d1f9b0d914": {
+      "verdict": "keep"
+    },
+    "ddfe65e0e27ed8f90c21c1386a1dfce8": {
+      "verdict": "keep"
+    },
+    "df00d3b4ed221e595d42b43e0246c285": {
+      "verdict": "keep"
+    },
+    "e211912c19b5029dafbbf52c0f988f30": {
+      "verdict": "keep"
+    },
+    "e3df894fb226072677b5d3a858784690": {
+      "verdict": "drop",
+      "reason": "off_topic",
+      "note": "demo scaffolding: mock primary store"
+    },
+    "e57dea4ad5fdf3ce7113b8912eebc905": {
+      "verdict": "drop",
+      "reason": "off_topic",
+      "note": "prerequisites / version requirements"
+    },
+    "e75faf26b3adca1bef1954927ca9d881": {
+      "verdict": "trim",
+      "remove": [
+        "In order to acquire the lock, the client performs the following operations:"
+      ]
+    },
+    "ea9c42c85ed13b7cb2b8cc033778f83c": {
+      "verdict": "drop",
+      "reason": "off_topic",
+      "note": "demo server run steps and UI tour"
+    },
+    "ef19f0774dfc36f3307dc035f4b3256a": {
+      "verdict": "keep"
+    },
+    "f00e1c206d867e30499bb6f2066abcfc": {
+      "verdict": "keep"
+    },
+    "f8fdf671243a2bf1696b69d622667f0a": {
+      "verdict": "keep"
+    }
+  }
+}

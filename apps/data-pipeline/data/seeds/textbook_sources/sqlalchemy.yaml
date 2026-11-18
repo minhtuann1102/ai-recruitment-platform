@@ -1,0 +1,41 @@
+source_id: sqlalchemy
+name: SQLAlchemy 2.0 Documentation
+kind: official
+homepage: https://docs.sqlalchemy.org/en/20/
+format: html
+# Page body lives in #docs-body (sidebar, version header and footer are outside it). Headings end with a permalink
+# sign, so `sections` values below carry a trailing " ¶" (and the curly quotes of the page) exactly as the parser
+# sees them.
+content_selector: "#docs-body"
+language: en
+license: MIT
+license_class: open
+license_url: https://docs.sqlalchemy.org/en/20/copyright.html
+license_quote: "This is the MIT license: https://www.opensource.org/licenses/mit-license.php"
+license_checked: 2026-11-17
+robots_checked: 2026-11-17
+robots_note: "https://docs.sqlalchemy.org/robots.txt answers HTTP 302 to https://www.sqlalchemy.org/docs/stable/robots.txt, which is an HTTP 200 HTML 'Page not found' page with no User-agent or Disallow line: no robots rules exist. Plain requests to /en/20/ pages return 200 with full HTML (no challenge page)."
+attribution: "SQLAlchemy documentation, Copyright (c) 2005-2026 Michael Bayer and contributors, MIT License. Notice: notices/sqlalchemy.txt"
+status: use
+excluded_reason: ""
+pages:
+  - url: https://docs.sqlalchemy.org/en/20/orm/queryguide/dml.html
+    category: Backend
+    tracks: [python_backend]
+    scenarios: [scn.py.webhook-ingest, scn.py.csv-import-pipeline]
+    topics: []
+    sections: ["ORM Bulk INSERT Statements ¶"]
+    kind: guide
+    why: "Bulk INSERT mode optimizes a list of parameter dictionaries for many rows, and the dialect upsert (INSERT ... ON CONFLICT DO UPDATE) resolves duplicate keys inside the database: batch loading for an import and event deduplication for a webhook."
+    status: use
+    excluded_reason: ""
+  - url: https://docs.sqlalchemy.org/en/20/orm/session_events.html
+    category: Backend
+    tracks: [python_backend]
+    scenarios: [scn.py.multi-tenant-api]
+    topics: []
+    sections: ["Adding global WHERE / ON criteria ¶"]
+    kind: guide
+    why: "with_loader_criteria inside the do_orm_execute event adds a WHERE clause for every entity in every query, which is how a tenant filter can be enforced centrally instead of in each query."
+    status: use
+    excluded_reason: ""

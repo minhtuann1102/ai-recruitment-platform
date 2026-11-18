@@ -1,0 +1,152 @@
+{
+  "source_id": "django",
+  "reviewed_at": "2026-11-18",
+  "approved_by": "auto:canary-gate",
+  "decisions": {
+    "145231a0c2068f85808d11258a8e532c": {
+      "verdict": "keep"
+    },
+    "160a4c6fea462003404887905444e230": {
+      "verdict": "keep"
+    },
+    "1bb99a6c0ae150f1b560132e68c152d9": {
+      "verdict": "drop",
+      "reason": "nav",
+      "note": "intro: says the document gathers links to other docs and tips"
+    },
+    "1d4e666d8d50244597b9b2401b08711e": {
+      "verdict": "keep"
+    },
+    "24abb1a03c570786c43df0e8f4177728": {
+      "verdict": "keep"
+    },
+    "2685e3484d796756cce0c9235b7fb46e": {
+      "verdict": "keep"
+    },
+    "30ca74f436dbce950fb4e436740169b1": {
+      "verdict": "keep"
+    },
+    "35bd1a8c6c185e680a300a2b4693e45e": {
+      "verdict": "keep"
+    },
+    "37a3a4d36fd2680c3b5c2523dec04b3b": {
+      "verdict": "keep"
+    },
+    "498b085926421588e86fd4e866c445ad": {
+      "verdict": "trim",
+      "remove": [
+        "We will assume you have done the things listed above. The rest of this document\nfocuses on how to use Django in such a way that you are not doing unnecessary\nwork. This document also does not address other optimization techniques that\napply to all expensive operations, such as general purpose caching ."
+      ]
+    },
+    "4a95ca297279d7f240bb3d13bfcac5a1": {
+      "verdict": "keep"
+    },
+    "4c698adf469c5d200951986d28e59d9b": {
+      "verdict": "keep"
+    },
+    "520d31c80a1cb8af8459bce133664e55": {
+      "verdict": "keep"
+    },
+    "5735a815238528388e6c3dae107dc715": {
+      "verdict": "keep"
+    },
+    "5b2fc351de2ccfccd2d6ec6b1f42ce0b": {
+      "verdict": "keep"
+    },
+    "5b4edf02cef29dd7e41e2696c153f348": {
+      "verdict": "drop",
+      "reason": "other",
+      "note": "document intro only: names the two approaches, no mechanism or behaviour"
+    },
+    "66268b119d0b3b32aef3e5f21847b7cb": {
+      "verdict": "keep"
+    },
+    "67127c30a38d9bd38896daea10b65292": {
+      "verdict": "keep"
+    },
+    "6a2ecc9de80fffdb49e7948fdbcd6c3a": {
+      "verdict": "keep"
+    },
+    "71c0cf8a74fdaee1866ad7e7df90a8c7": {
+      "verdict": "keep"
+    },
+    "757fd685b89f2f211cde64ab9e5c8b11": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "first paragraph explains an example (generate_relationships, add_children, handle_exception) that is not in the passage; the second half (avoid catching exceptions inside atomic) is good and self-contained; unsure"
+    },
+    "8118a60bcf6205db638834f2958f2bbf": {
+      "verdict": "keep"
+    },
+    "828c079aee1e09f0f8f16f34c705e7d2": {
+      "verdict": "keep"
+    },
+    "89505ccc2ae7043b606160be5dfe2c2a": {
+      "verdict": "keep"
+    },
+    "8f670599b598e968a7722614ef52cbf1": {
+      "verdict": "keep"
+    },
+    "8fcb59a4589556371f1e0d98d106b093": {
+      "verdict": "keep"
+    },
+    "96b544c3eae77da3b51df0d4f0d896c1": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "starts mid-procedure (\"Then, create the template\") and refers to \"the given data\" passed in an earlier step"
+    },
+    "a3c59b7e338f2d7610a47cdeb60d0cb9": {
+      "verdict": "trim",
+      "remove": ["[source]"]
+    },
+    "b33f92494a55c5f5c0d821fb4a49b63a": {
+      "verdict": "keep"
+    },
+    "b38fe60d1411d7e93fb924c1aea2f23c": {
+      "verdict": "keep"
+    },
+    "bbf0cf35c0e168c617044199ee085bb6": {
+      "verdict": "keep"
+    },
+    "bde4538bfca63253362a624b49a71d07": {
+      "verdict": "keep"
+    },
+    "c5f299b1420f42e97861e55883e07670": {
+      "verdict": "keep"
+    },
+    "c7876519f43516876a220f2d6807bae6": {
+      "verdict": "keep"
+    },
+    "d2d228b6fba3ae50c2c71f3d3224adbe": {
+      "verdict": "keep"
+    },
+    "d64cf314ef93c1aec2377aba2b53af31": {
+      "verdict": "keep"
+    },
+    "e8e8aa4d2f8fc815063159343aacaa02": {
+      "verdict": "keep"
+    },
+    "eb28aba7d9b51f5884d08c4ce67f1cc8": {
+      "verdict": "keep"
+    },
+    "ee3d2f114b649165a418fc0b2ee66ba4": {
+      "verdict": "keep"
+    },
+    "f3eaf088d6a9a167d6e94b198a551cbc": {
+      "verdict": "keep"
+    },
+    "f58633ea3ede2b77aa88ac33a0311013": {
+      "verdict": "keep"
+    },
+    "fd8e855736b3f2da032dc0929cb321f3": {
+      "verdict": "keep"
+    },
+    "fd97d24f3f2196154dea3dbd0653e0a8": {
+      "verdict": "keep"
+    },
+    "fe14ecf5a370bff1e57cec2913d2c57d": {
+      "verdict": "trim",
+      "remove": ["[source]"]
+    }
+  }
+}

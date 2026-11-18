@@ -1,0 +1,473 @@
+{
+  "source_id": "kubernetes",
+  "reviewed_at": "2026-11-18",
+  "approved_by": "auto:canary-gate",
+  "decisions": {
+    "00460df7a0b15c7a7d2a5e2766ce5641": {
+      "verdict": "keep"
+    },
+    "0190ba808eb12bf15386a4af136a355f": {
+      "verdict": "keep"
+    },
+    "0274398b831844c898d2cf3aa5151511": {
+      "verdict": "trim",
+      "remove": [
+        "For example, when this value is set to 30%, the old ReplicaSet can be scaled down to 70% of desired\nPods immediately when the rolling update starts. Once new Pods are ready, old ReplicaSet can be scaled\ndown further, followed by scaling up the new ReplicaSet, ensuring that the total number of Pods available\nat all times during the update is at least 70% of the desired Pods."
+      ]
+    },
+    "04b9fc8eea3b76ddad5789ce66a842a3": {
+      "verdict": "trim",
+      "remove": [
+        "For general information about subresources in the Kubernetes API, see Kubernetes API Concepts ."
+      ]
+    },
+    "054b5e1ac12dfcd64e85adf446a328a2": {
+      "verdict": "drop",
+      "reason": "code_only",
+      "note": "kubectl command + output, no explanation"
+    },
+    "061419ad2ec4e1f8c28251239b9c8f81": {
+      "verdict": "keep"
+    },
+    "066c96a6b641ac6fe6faceff51dcfeeb": {
+      "verdict": "keep"
+    },
+    "0720b91e2120919be387effab8176b94": {
+      "verdict": "trim",
+      "remove": [
+        "If you need to force-delete Pods that are part of a StatefulSet, refer to the task\ndocumentation for deleting Pods from a StatefulSet ."
+      ]
+    },
+    "07807900f40e71ebc927089cb91f40cc": {
+      "verdict": "trim",
+      "remove": ["See Pod disruption conditions for more details."]
+    },
+    "08f02dec8d428a3f16ba75d2dfa25e8a": {
+      "verdict": "keep"
+    },
+    "0c7df4160d87ed05e95623c5bfb7cc67": {
+      "verdict": "keep"
+    },
+    "100a0f393f115801e1faca414938eea6": {
+      "verdict": "keep"
+    },
+    "11438d6048c471991818a8e439d1fa82": {
+      "verdict": "keep"
+    },
+    "1401001d4198aa32ab05bf234d34408b": {
+      "verdict": "trim",
+      "remove": [
+        "See the algorithm details section below\nfor more information about how the autoscaling algorithm works."
+      ]
+    },
+    "142cdbb5df0a2be996a62f17fca4bb60": {
+      "verdict": "keep"
+    },
+    "14731bc6fc6f36a773e42f39cfa4b8ad": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "middle step of PDB worked example; pod names/state tables not defined in this passage"
+    },
+    "167debbfe1795bd6f1dd314a20851a06": {
+      "verdict": "trim",
+      "remove": [
+        " Sidecar containers and Pod lifecycle explains the behaviour of init containers when you specify the restartPolicy field on it."
+      ]
+    },
+    "176886f4d0b2fbcb0a5080774342211a": {
+      "verdict": "keep"
+    },
+    "1b0e85f2346355ed4b901e9571a4ebf1": {
+      "verdict": "drop",
+      "reason": "code_only",
+      "note": "Event-log rows starting mid-row; the one sentence after it depends on the missing output"
+    },
+    "1cd415c85944df19bab9f433351a554d": {
+      "verdict": "keep"
+    },
+    "214912625bd2d16793682f8af040a076": {
+      "verdict": "keep"
+    },
+    "24d432db30ee62c7d7b3baaabd4baaad": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "'this value' (maxSurge) is defined in previous chunk; unsure"
+    },
+    "2b9a83b46e82ac43bddac3c27e7fc869": {
+      "verdict": "keep"
+    },
+    "2cfbe90732de4e8c3dc8a8ec51c24211": {
+      "verdict": "keep"
+    },
+    "2d33297bf8444f48e45c0ec5b19041cd": {
+      "verdict": "keep"
+    },
+    "2fceb1ba0585d7a1782b5c4c25ce85aa": {
+      "verdict": "keep"
+    },
+    "30571ae09ac68843ee496718b1c450de": {
+      "verdict": "keep"
+    },
+    "3076017bfba196c34225c93c53c6545f": {
+      "verdict": "keep"
+    },
+    "31dfb8060b4176989b0ed7231bf981c2": {
+      "verdict": "keep"
+    },
+    "36b5e5e2d23af667366fc797a07f9cd9": {
+      "verdict": "trim",
+      "remove": [
+        "```\ngraph BT\n\nhpa[HorizontalPodAutoscaler] --> scale[Scale]\n\nsubgraph rc[Deployment]\n    scale\nend\n\nscale -.-> pod1[Pod 1]\nscale -.-> pod2[Pod 2]\nscale -.-> pod3[Pod N]\n\nclassDef hpa fill:#D5A6BD,stroke:#1E1E1D,stroke-width:1px,color:#1E1E1D;\nclassDef rc fill:#F9CB9C,stroke:#1E1E1D,stroke-width:1px,color:#1E1E1D;\nclassDef scale fill:#B6D7A8,stroke:#1E1E1D,stroke-width:1px,color:#1E1E1D;\nclassDef pod fill:#9FC5E8,stroke:#1E1E1D,stroke-width:1px,color:#1E1E1D;\nclass hpa hpa;\nclass rc rc;\nclass scale scale;\nclass pod1,pod2,pod3 pod\n```\n\nFigure 1. HorizontalPodAutoscaler controls the scale of a Deployment and its ReplicaSet"
+      ]
+    },
+    "37bd04fb45de856e89e1922cd3329ea0": {
+      "verdict": "trim",
+      "remove": [
+        "You can find more details on how to implement connections draining in the\ntutorial Pods And Endpoints Termination Flow"
+      ]
+    },
+    "392ca4c8f0645f2dc3d9e32d966b3b31": {
+      "verdict": "keep"
+    },
+    "3a3d49448b29c20e19eaf67c071f69ee": {
+      "verdict": "drop",
+      "reason": "code_only",
+      "note": "kubectl describe deployment output, truncated mid-row, no explanation"
+    },
+    "3fe1de2eb34db1251228188745a8a058": {
+      "verdict": "trim",
+      "remove": [
+        "See Enable Or Disable Feature Gates for more information.\n\n",
+        "For more details about Pod resizing, see Resizing Pods .\nFor detailed instructions on in-place resize, see Resize CPU and Memory Resources assigned to Containers .\n"
+      ]
+    },
+    "414065a6cee2f3802133ff75404c2818": {
+      "verdict": "keep"
+    },
+    "4158014dae9f573474a0bd9767917f0a": {
+      "verdict": "keep"
+    },
+    "47c51991d488c1bf333849079e2bca25": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "Reads a kubectl get rs output from an earlier step; counts refer to missing context"
+    },
+    "4991292435f3b17df759c809b1a075ed": {
+      "verdict": "keep"
+    },
+    "509383ec2421699a108c8db895506f97": {
+      "verdict": "keep"
+    },
+    "542f9a65fe1b1035275a792153186e82": {
+      "verdict": "trim",
+      "remove": ["See Enable Or Disable Feature Gates for more information.\n\n"]
+    },
+    "549848cfd9a24685a24b3afece7a2f60": {
+      "verdict": "keep"
+    },
+    "55881c3f2be0c39c0e332256ea75c501": {
+      "verdict": "keep"
+    },
+    "56efdead460518a4748e515903a34dc5": {
+      "verdict": "trim",
+      "remove": ["See selector ."]
+    },
+    "5aca141cef1f520d0f2568cae36dd42a": {
+      "verdict": "trim",
+      "remove": [
+        "See Enable Or Disable Feature Gates for more information.\n\n",
+        " For more details, see Use TLS with gRPC probes ."
+      ]
+    },
+    "5afa6a954ebebc49321c95a87ec3abc0": {
+      "verdict": "trim",
+      "remove": ["\n\nterminationGracePeriodSeconds"]
+    },
+    "5bbb6fb9a45dcebeafd6eae3ef4a8511": {
+      "verdict": "keep"
+    },
+    "5cb4191d15d79b312ea8a54b2c3546e9": {
+      "verdict": "trim",
+      "remove": [
+        "To learn more about when\na Pod is considered ready, see Container Probes ."
+      ]
+    },
+    "5cd5572ab3535ea075e2f3f5e81fbd9d": {
+      "verdict": "keep"
+    },
+    "5f1e2690f7a586b2b37d6d51a468fc3a": {
+      "verdict": "keep"
+    },
+    "62605c2112e0417f7c0969bd3fb9b973": {
+      "verdict": "keep"
+    },
+    "6375a81554e0e3a1bbfcc66c6eaf2c1c": {
+      "verdict": "keep"
+    },
+    "6536bdb04463d5a465abb99938d55fda": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "'In this example' refers to a manifest that is not in the passage"
+    },
+    "66504a738b69fc4974473c6bd4bfb3f5": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "Fragment starts mid-sentence; field name is in the previous chunk"
+    },
+    "689f2986bf45f2077f22bef03b3a636b": {
+      "verdict": "trim",
+      "remove": [" For more details, see Use HTTP/2 cleartext (h2c) with HTTP probes ."]
+    },
+    "690e12c6df9f090a226ea181340579f4": {
+      "verdict": "trim",
+      "remove": ["See Enable Or Disable Feature Gates for more information.\n\n"]
+    },
+    "6ea11b0cef049fca4fa5e4b020c9b7dd": {
+      "verdict": "keep"
+    },
+    "76b9c8b115ff85f50705f60b4aea66b0": {
+      "verdict": "keep"
+    },
+    "77a1a2e7e128147d604235f5b65932fa": {
+      "verdict": "keep"
+    },
+    "77db71e22024a61fe94a6f1b0e24f6a8": {
+      "verdict": "trim",
+      "remove": [" (Learn about running replicated stateless and stateful applications.)"]
+    },
+    "7962af372940015419541e4d467dafc4": {
+      "verdict": "keep"
+    },
+    "7b8a90ef6ec5334fc4ba78dd1f0ca244": {
+      "verdict": "keep"
+    },
+    "806a8cc336ae3f3cc70eda020940ea2f": {
+      "verdict": "keep"
+    },
+    "844f5a8d087bb0a5f6c2781865f8e7b2": {
+      "verdict": "keep"
+    },
+    "852aa573f648120e4a113cce8f1599ac": {
+      "verdict": "keep"
+    },
+    "87e2a7b39e1b79e61780335b17a41c82": {
+      "verdict": "keep"
+    },
+    "88c361fbd982407175607c2abaf0b009": {
+      "verdict": "keep"
+    },
+    "89903807a6baccacbc1f14cf8d7ae024": {
+      "verdict": "keep"
+    },
+    "8a1d3d52c961b4f0e79e5d78f58fb6a9": {
+      "verdict": "keep"
+    },
+    "8f62040c29201281094777e2dd209e64": {
+      "verdict": "trim",
+      "remove": [
+        " For more details, see gRPC probes .",
+        "\nFor more details, see HTTP probes .",
+        "\nFor more details, see TCP probes ."
+      ]
+    },
+    "902eff02a97b049352491431743f4202": {
+      "verdict": "trim",
+      "remove": [
+        "For more information about resource metrics, see Metrics Server .",
+        "Support for metrics APIs explains the stability guarantees and support status for these\ndifferent APIs."
+      ]
+    },
+    "9222014c16bdba19e0456590be4c49a5": {
+      "verdict": "keep"
+    },
+    "9239ff43bf595393d9a12f079a84d481": {
+      "verdict": "keep"
+    },
+    "940bf4696ced40891f5b4456f1eff3c9": {
+      "verdict": "drop",
+      "reason": "nav",
+      "note": "only a pointer to canary pattern/tutorial; thin; unsure"
+    },
+    "9513daf04fb5107cee2d5435c4774d52": {
+      "verdict": "keep"
+    },
+    "959da884abb7c603e2b1089ec6f328bd": {
+      "verdict": "keep"
+    },
+    "95ac17d0ea36c06214cc072a8b39dc29": {
+      "verdict": "trim",
+      "remove": [
+        "This is a stable feature in Kubernetes, and has been since version v1.35. It was first available in the v1.27 release. You can no longer disable or opt out of this feature or behavior (it is locked); if you explicitly set a value for the associated feature gate InPlacePodVerticalScaling , Kubernetes ignores it but does not report any error."
+      ]
+    },
+    "9c3970c72a69af6bea958e0ea07c3878": {
+      "verdict": "keep"
+    },
+    "9d23384a55d5fa1a25d9a9c6ccc77773": {
+      "verdict": "keep"
+    },
+    "a042c871b67c74962a90b57dc07d6b76": {
+      "verdict": "keep"
+    },
+    "a35525abdc7be86a3f3ce960ccc28251": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "starts with leftover example state; closing factor list depends on example; unsure"
+    },
+    "a9b81467dd267c9849b81acbb1a60687": {
+      "verdict": "keep"
+    },
+    "ad6d699e37f84bb4102bd5f65e54a47b": {
+      "verdict": "keep"
+    },
+    "af4a4241b42aa6915e8771f5b727ad9b": {
+      "verdict": "keep"
+    },
+    "af67d139ad40151f31537855bb925dbd": {
+      "verdict": "keep"
+    },
+    "b02ad1f2752b40485414d90bc37ff2a2": {
+      "verdict": "trim",
+      "remove": [
+        "\n\nTo use this feature, you (or a cluster administrator) will need to enable the H2CContainerProbe feature gate for all relevant components in your cluster.\n\nSee Enable Or Disable Feature Gates for more information."
+      ]
+    },
+    "b1826c2bd79b1564b5c1cbf3d4d862e8": {
+      "verdict": "keep"
+    },
+    "b1a1291b59510965276b00d22d4400ff": {
+      "verdict": "trim",
+      "remove": ["See Enable Or Disable Feature Gates for more information."]
+    },
+    "b31d4ed653baaec56384d92a1a7b3601": {
+      "verdict": "keep"
+    },
+    "b56269bf66eacb5b6fa362040a9c865c": {
+      "verdict": "keep"
+    },
+    "b5a52102c4a26d01ac6b653473c26600": {
+      "verdict": "keep"
+    },
+    "b969f21b0e32871375a3ba8769955433": {
+      "verdict": "keep"
+    },
+    "bbc38c2d8e74ef1b84b0e230c5fb2a7b": {
+      "verdict": "trim",
+      "remove": ["\n\nsuccessThreshold"]
+    },
+    "be6b245c473c2cf70f9ef848f29874e1": {
+      "verdict": "trim",
+      "remove": [
+        " For more details about rollout related commands, read kubectl rollout ."
+      ]
+    },
+    "be82e4706ca652aa39a8914bd142d631": {
+      "verdict": "keep"
+    },
+    "c1d23518acac4c393eac047fb2900a28": {
+      "verdict": "keep"
+    },
+    "c4840368517e181d5241e1884a5f908a": {
+      "verdict": "drop",
+      "reason": "code_only",
+      "note": "kubectl describe output, truncated mid-row, no explanation"
+    },
+    "c4c1d51a0a67a16b57a21403938d9a67": {
+      "verdict": "keep"
+    },
+    "c676ec04205031c8945f8295cfc6acf3": {
+      "verdict": "keep"
+    },
+    "c8564dcd569cf6417c34a67742f55e98": {
+      "verdict": "keep"
+    },
+    "ce762f3226da121c5291bb38b61b1c1d": {
+      "verdict": "keep"
+    },
+    "d003583f3a7153df073cf6967dd2b3b0": {
+      "verdict": "keep"
+    },
+    "d1232b52d8f2e20c08ebf8db304ad28c": {
+      "verdict": "keep"
+    },
+    "d442ac241ceb4980d6a501ca4ab35ee5": {
+      "verdict": "keep"
+    },
+    "d67a2ad85e775129a1400d6f80529be5": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "later step of PDB worked example, depends on state from earlier steps; unsure (does show drain blocked by PDB)"
+    },
+    "d7105af0f8a150fc1ed3810bc6f39585": {
+      "verdict": "trim",
+      "remove": [" For more information on stuck rollouts, read more here ."]
+    },
+    "e3c8b1a9c37190e41b104348daf07e2b": {
+      "verdict": "keep"
+    },
+    "e96d79d2e286713b44a4655007549101": {
+      "verdict": "trim",
+      "remove": [
+        "\n\nTo determine whether a container cannot be scheduled or is being killed due to resource limits,\nsee the Troubleshooting section."
+      ]
+    },
+    "ea808ac3bc3a419804670ff8f5a6183e": {
+      "verdict": "drop",
+      "reason": "code_only",
+      "note": "describe output only"
+    },
+    "eb5683bbfb09e47f455222de589f1f8b": {
+      "verdict": "drop",
+      "reason": "code_only",
+      "note": "Tail of an events table starting mid-row; only the last sentence is prose"
+    },
+    "eca3127a03b1c52f9707e580dcc02df8": {
+      "verdict": "keep"
+    },
+    "ed2bb542a85dd9bd19eecaee70f92476": {
+      "verdict": "keep"
+    },
+    "eefade50da550d9352516aef619f981d": {
+      "verdict": "drop",
+      "reason": "code_only",
+      "note": "event log output only, starts mid-output"
+    },
+    "ef9ce48ee16cbc9aa44cbce1f8be596f": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "Mid-procedure rollout status/get rs commands and outputs; ReplicaSet scaling mechanism is explained better in the following chunk"
+    },
+    "f0fb17380bdd202e137464350323a55e": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "Procedure step (kubectl set image on nginx-deployment created earlier); commands with no mechanism explained"
+    },
+    "f1277b8e5db6f93128992f7095144647": {
+      "verdict": "trim",
+      "remove": [
+        "For general information about working with config files, see deploying applications ,\nconfiguring containers, and using kubectl to manage resources documents."
+      ]
+    },
+    "f4f2bdaac1a932a2d3a700a89b2f3fb2": {
+      "verdict": "keep"
+    },
+    "f6e94e5c940b9884f9fe5a53d3e8f3fb": {
+      "verdict": "keep"
+    },
+    "f77064dc17aa39bad080ad2cff00f152": {
+      "verdict": "trim",
+      "remove": ["Always restarts\n\n"]
+    },
+    "fbb27f170ca88801a13c8634463b00c6": {
+      "verdict": "trim",
+      "remove": [" (learn about Node Autoscaling )"]
+    },
+    "fbd2c1c4e9b628f3d6018aaf34ab0cb4": {
+      "verdict": "trim",
+      "remove": [" See Compute Resources document for more information."]
+    },
+    "fe5e3e2e7d951067344f20d29ec41bc5": {
+      "verdict": "keep"
+    }
+  }
+}

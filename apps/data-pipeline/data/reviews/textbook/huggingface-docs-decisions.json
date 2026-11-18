@@ -1,0 +1,548 @@
+{
+  "source_id": "huggingface-docs",
+  "reviewed_at": "2026-11-18",
+  "approved_by": "auto:canary-gate",
+  "decisions": {
+    "0003d2c271c70a5dfb86d211447875e5": {
+      "verdict": "trim",
+      "remove": [
+        " To learn more about chunking, I recommend you read this great notebook by Greg Kamradt."
+      ]
+    },
+    "00f61853697417cd5ae9ba7c62803609": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "transition step: dataset complete, load pre-generated dataset (code line)"
+    },
+    "09bed5ccaa8c923db9a08c3ba11060d4": {
+      "verdict": "trim",
+      "remove": [" (see the metric card for more information about BLEU limitations)"]
+    },
+    "0ab942de530bef1607a54df3df1ca09a": {
+      "verdict": "drop",
+      "reason": "nav",
+      "note": "intro stub pointing to other guides, no substantive content"
+    },
+    "0e4219596ddfa150103f1fc9af2e5480": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "notebook step: load dataset, login, MAX_ROWS; mostly code"
+    },
+    "100d4c19706a35d073d09a25a6cf131f": {
+      "verdict": "keep"
+    },
+    "10952dc28532f745505af1a4ffdbd8ce": {
+      "verdict": "keep"
+    },
+    "1142bb92815fd8a7f1437cd87ce8f32b": {
+      "verdict": "keep"
+    },
+    "14729c9671a0d635b26dcc0b9bee40b9": {
+      "verdict": "keep"
+    },
+    "172ac13c428205f8e8f4b58eead4605f": {
+      "verdict": "trim",
+      "remove": [
+        "You can try this small exercise to check your understanding of these concepts. "
+      ]
+    },
+    "1787817e015a21d4d26df4a75f717017": {
+      "verdict": "keep"
+    },
+    "17da7fd757ad8dd99cb6ef413ee55f01": {
+      "verdict": "keep"
+    },
+    "19ee24699adaf7dd3294c0ace4e9ef3b": {
+      "verdict": "drop",
+      "reason": "off_topic",
+      "note": "pip install steps and imports"
+    },
+    "1ca03326a1344db1ec71baa982388642": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "start of a chunk-size experiment; one fact (chunk_size counted in characters by default) with no context"
+    },
+    "1d9fe73fc5af3bc9f0c9f8c5a59b8a5e": {
+      "verdict": "keep"
+    },
+    "1e55db7952ca1dab3020f54e6f194f95": {
+      "verdict": "keep"
+    },
+    "1fea84688e61e5e467274e100afab28b": {
+      "verdict": "trim",
+      "remove": [
+        "Create a Blaxel account at blaxel.ai\n\nInstall the required packages:\n\n```\npip install 'smolagents[blaxel]'\n```\n\n"
+      ]
+    },
+    "203a2dcf6ce529fc8884f7f8cce4451e": {
+      "verdict": "keep"
+    },
+    "20b1a6cca04394f25924411fb37a3e49": {
+      "verdict": "drop",
+      "reason": "other",
+      "note": "terse bullet list of retriever tuning options (chunking, embedding model, index, query expansion), little explanation, broken fragments; reviewer may keep"
+    },
+    "21aeb41abbbd76fee9ef55d77360ecb3": {
+      "verdict": "trim",
+      "remove": ["Authored by: Aymeric Roucher"]
+    },
+    "255f98dd267d71bcabd061f408a98527": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "results depend on a graph/data not in the passage; rest is plotting code"
+    },
+    "265bf78d7ba5809d5121750f6fb83ab4": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "helper function step in a procedure; depends on cls_pooling/comments_dataset defined earlier"
+    },
+    "26e358df3dcd471c3dafcce806088605": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "test step depends on the previous output; 'Now let's try another question'"
+    },
+    "29b4466d187d2a55dbf0f2b015bca75d": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "'As you can see' refers to printed template not in passage; placeholder/template syntax listing"
+    },
+    "2e5a2898517e55d02b51b4280e08d3f4": {
+      "verdict": "keep"
+    },
+    "34e2a0ee1d465e9ee6a9114f7b23c4d4": {
+      "verdict": "trim",
+      "remove": [
+        "S = v a l m a x − v a l m i n q m a x − q m i n ",
+        "Z = q m i n − r o u n d ( v a l m i n S ) "
+      ]
+    },
+    "3a1265754492150562f9c6b2eae8233e": {
+      "verdict": "drop",
+      "reason": "nav",
+      "note": "list of resource links"
+    },
+    "3ac438690dd527f5fabc0c750f1481fb": {
+      "verdict": "keep"
+    },
+    "3bf460a1f40b95a7de11c2344a4cb166": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "test step that depends on a previous question/response not in the passage"
+    },
+    "3e3bc0ffe74eb84ff6b4eaa47485bd32": {
+      "verdict": "keep"
+    },
+    "3e4d13412be1cf71a904fedf565cd2ab": {
+      "verdict": "keep"
+    },
+    "3e8711b42a948811c5143e0263e1fe1f": {
+      "verdict": "keep"
+    },
+    "3fa62250fdf00f7097952e0b3f837b82": {
+      "verdict": "keep"
+    },
+    "42a0bffff23151cf5c7b7ce86566d6fa": {
+      "verdict": "keep"
+    },
+    "42b07dc3ca4b57185ec9e08b23328859": {
+      "verdict": "keep"
+    },
+    "482200df9b0ce615e4e06dc32e317b16": {
+      "verdict": "keep"
+    },
+    "49481233dbe24e51c097ce8ea300481e": {
+      "verdict": "keep"
+    },
+    "4b78d903347c0070099467990e6907c5": {
+      "verdict": "keep"
+    },
+    "4b8536f622f39129a3ec19ecf4c7a01c": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "step 2 of an image-generation procedure, does not match the heading; closing congratulations"
+    },
+    "4d2e3183149b534559441da9d8a455cb": {
+      "verdict": "keep"
+    },
+    "4da5e7721d56fe3b08c74e73f5fde131": {
+      "verdict": "trim",
+      "remove": [
+        ": to learn more about sentence embeddings, we recommend reading this guide ",
+        "Regarding distances, you can find a good guide here . In short:"
+      ]
+    },
+    "4e13d7529bae4d92fc105f5cc4148499": {
+      "verdict": "trim",
+      "remove": ["★☆☆"]
+    },
+    "4ea07ef479e8ace2c83bbac32d10bad5": {
+      "verdict": "keep"
+    },
+    "4f07fb69dd29fa2f6003957bc4d7faff": {
+      "verdict": "trim",
+      "remove": [
+        " Check out this thread for a more in-depth discussion of dataset splitting!"
+      ]
+    },
+    "50cb9c6f64d1ea1a0e30a49dc3bb2232": {
+      "verdict": "keep"
+    },
+    "53acbf1bc21eb5ad0c772d0c69c9e44a": {
+      "verdict": "keep"
+    },
+    "5573064a9ac0409d3fd465c5b0ecb5ac": {
+      "verdict": "keep"
+    },
+    "5691cda9a6e484f311f2f6a9291a928f": {
+      "verdict": "keep"
+    },
+    "57719efe1cae01c816230a3a7ee34a11": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "continuation of a bullet list about a tool shown earlier ('there's no logging mechanism...'); tool not in passage"
+    },
+    "590b43290d06cae794760af2b454f034": {
+      "verdict": "keep"
+    },
+    "5b757a2dce57ae0b71daa155aa4e946e": {
+      "verdict": "keep"
+    },
+    "5d92a25d9f1bb5015baa55c53f0832e5": {
+      "verdict": "keep"
+    },
+    "5ded0a104e2a6b6879e55a30720949af": {
+      "verdict": "trim",
+      "remove": [
+        "We are currently working on additional measurements that can be used to quantify different dimensions of bias in both models and datasets — stay tuned for more documentation on this topic!"
+      ]
+    },
+    "62c2dc9e52473f00183474e1527519f0": {
+      "verdict": "trim",
+      "remove": [
+        "If you’re new to quantization in Transformers, start with the Overview ."
+      ]
+    },
+    "63b4e9ad73d45d1e3719ca665f9ed317": {
+      "verdict": "keep"
+    },
+    "6526157e1707e1132f4627d995e828f7": {
+      "verdict": "keep"
+    },
+    "6758764f8c482f819a14f527df58a3cb": {
+      "verdict": "keep"
+    },
+    "68fe8740be9dcd01b141cfae1be70eda": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "query step in a procedure, mostly code"
+    },
+    "6fa2c73adc38c88d5127dcf9605628c0": {
+      "verdict": "trim",
+      "remove": ["Authored by: Pere Martra"]
+    },
+    "71d1a33c90c6de94be443bfc8d61edc5": {
+      "verdict": "trim",
+      "remove": [
+        "```\n!pip install -q faiss-cpu==1.8.0\n```\n\n```\nimport faiss\nfrom sentence_transformers import SentenceTransformer\nimport time\nimport json\n```\n\nThe init_cache() function below initializes the semantic cache."
+      ]
+    },
+    "73762f904c2eaaf85690a0f5e4506c9b": {
+      "verdict": "keep"
+    },
+    "74bae0895337cfd997f21bf2ee1335fd": {
+      "verdict": "trim",
+      "remove": [
+        "Create an E2B account at e2b.dev\n\nInstall the required packages:\n\n```\npip install 'smolagents[e2b]'\n```\n\n",
+        "This is illustrated in the figure below."
+      ]
+    },
+    "753b32ccd408224fd33564ab8738c615": {
+      "verdict": "trim",
+      "remove": ["q = r o u n d ( x S + Z ) ", "x ≈ S ⋅ ( q − Z ) "]
+    },
+    "76d806c639bec6fb97a7c00f4f859b70": {
+      "verdict": "drop",
+      "reason": "off_topic",
+      "note": "closing joke / congratulations"
+    },
+    "7a7f9e6e404dd3ab1b5bcc77418ffa20": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "notebook step: create collection and add(); list of the three add() arguments is cut off (id is in the next passage)"
+    },
+    "7b1e6b8523df5f1f41db409b4ade7e53": {
+      "verdict": "keep"
+    },
+    "813f8f8625cc68e1a0b7037396240c36": {
+      "verdict": "trim",
+      "remove": [
+        "This space lets you visualize how different splitting options affect the chunks you get."
+      ]
+    },
+    "819833b9f5338183242bcd9f88b3b392": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "mostly Jinja placeholder fragments starting mid-list; contains one recommendation (prefer the instructions argument, which is appended to the system prompt); unsure"
+    },
+    "8307031ce94ad216bdf560cd5300b803": {
+      "verdict": "drop",
+      "reason": "off_topic",
+      "note": "setup steps: pip install, device selection, loading a specific model"
+    },
+    "831355f4ab43e1901242ad2b248ae5da": {
+      "verdict": "keep"
+    },
+    "8509a33396bdf4c39eef28fbe5086ced": {
+      "verdict": "keep"
+    },
+    "8da6cbeb9f0f53531cd0963276f245a1": {
+      "verdict": "keep"
+    },
+    "8dd6dc09ffae245a18138b79f70caaf8": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "test step: 'Perfect, behaving as expected', depends on earlier results"
+    },
+    "913b68ca43d3998e12671cc5e85bed86": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "'Not bad! second hit matches' + exercise prompt; refers to output not shown"
+    },
+    "92d9022d1f536c92d2dc31957a4afda8": {
+      "verdict": "keep"
+    },
+    "93c13a310747444db3a2ee0a78cfb41c": {
+      "verdict": "keep"
+    },
+    "94f33fcd1a20627c1074fec31dbd2f92": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "describes a run output ('the user sees a path instead of an image') that is not in the passage; advice is 'use a stronger LLM'; unsure"
+    },
+    "988ecf14f854c81e066d6bbaf5351b62": {
+      "verdict": "keep"
+    },
+    "99d37239bb060511149a5ae915fc1c91": {
+      "verdict": "drop",
+      "reason": "other",
+      "note": "overview bullet list of what the example teaches (names the step-callback interrupt/resume idea only briefly); same kind as the page-intro items; unsure"
+    },
+    "9b74597f99191a66ccd6e4b999b7c1fc": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "helper functions (init_cache, retrieve_cache, store_cache): mostly code with one-line descriptions, relies on earlier setup; link to Faiss wiki"
+    },
+    "9d82115273efea1d84637c5d52f67349": {
+      "verdict": "trim",
+      "remove": [
+        "These functions will be used within the SemanticCache class, which includes the search function and its initialization function."
+      ]
+    },
+    "9ef6c804f0c59b3535627d27ef8a5767": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "one-line lead-in to a code call that prints templates whose output is not included"
+    },
+    "a1668065d3716c0f38f722f64090c8e6": {
+      "verdict": "trim",
+      "remove": [
+        "To learn more about chunking, I recommend you read this great notebook by Greg Kamradt.",
+        "This space lets you visualize how different splitting options affect the chunks you get."
+      ]
+    },
+    "a34ccb4aa357c59a140ab87a67b71e81": {
+      "verdict": "keep"
+    },
+    "a5b809d628e35f045131f86addf6c21f": {
+      "verdict": "keep"
+    },
+    "a6442fd36df3e651f2828a85613d5a39": {
+      "verdict": "trim",
+      "remove": [
+        "Here are other aspects of model performance to consider during evaluation:"
+      ]
+    },
+    "a6a456de958efcfa393970461c820297": {
+      "verdict": "keep"
+    },
+    "a71961c07fdf8bf77980aa1e9706c038": {
+      "verdict": "keep"
+    },
+    "a99f9db496a47960c140eb99a1bb4091": {
+      "verdict": "keep"
+    },
+    "aad47db985192504120111212ede2b9b": {
+      "verdict": "trim",
+      "remove": [
+        "Let’s dig into it and start building our evaluation pipeline! First, we install the required model dependancies.\n\n```\n!pip install -q torch transformers langchain sentence-transformers tqdm openpyxl openai pandas datasets langchain-community ragatouille\n```\n\n```\n%reload_ext autoreload\n%autoreload 2\n```\n\n```\nfrom tqdm.auto import tqdm\nimport pandas as pd\nfrom typing import Optional, List, Tuple\nimport json\nimport datasets\n\npd.set_option(\"display.max_colwidth\", None)\n```\n\n```\nfrom huggingface_hub import notebook_login\n\nnotebook_login()\n```"
+      ]
+    },
+    "ab7acfe54d5e98d96082c4bdb4a71acd": {
+      "verdict": "keep"
+    },
+    "b5558f59f59ac2fa256cf2b3e3490062": {
+      "verdict": "drop",
+      "reason": "off_topic",
+      "note": "notebook intro and author line"
+    },
+    "b59edd20089e0de49171a165bca45ba9": {
+      "verdict": "keep"
+    },
+    "b61db148e5a29a50e24c9ccde82cf814": {
+      "verdict": "keep"
+    },
+    "b7f3677c22a95207533143302ec488d3": {
+      "verdict": "trim",
+      "remove": [
+        "In id we need to inform an unique identificator for each row. I’m creating the ID using the range of MAX_ROWS .",
+        "```\ncollection.add(\n    documents=subset_data[DOCUMENT].tolist(),\n    metadatas=[{TOPIC: topic} for topic in subset_data[TOPIC].tolist()],\n    ids=[f\"id{x}\" for x in range(MAX_ROWS)],\n)\n```",
+        "Let’s define a function to query the ChromaDB Database.\n\n```\ndef query_database(query_text, n_results=10):\n    results = collection.query(query_texts=query_text, n_results=n_results)\n    return results\n```"
+      ]
+    },
+    "b8d589055b3c4d5b1c88de064703ccae": {
+      "verdict": "keep"
+    },
+    "bed096ade6cc2df3e0886162bb9f3266": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "refers to results not shown ('As you can see'); point is to count length in tokens not characters"
+    },
+    "bf3e813e22e18fb5f549aa97c1fd9035": {
+      "verdict": "keep"
+    },
+    "c39a453b6a55a63bf7efb3953cfa0e57": {
+      "verdict": "keep"
+    },
+    "c4e939d20ff36a7a61758afdb5c269a8": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "notebook step: import and create a Chroma client, mostly code"
+    },
+    "c601b2372106f882e044d9e16923ae2f": {
+      "verdict": "keep"
+    },
+    "c98d19fac15a7bfd32349ed573cd7560": {
+      "verdict": "keep"
+    },
+    "c9ff56527bb6a0237c6a64afdb162d93": {
+      "verdict": "drop",
+      "reason": "code_only",
+      "note": "custom Pipeline / StableDiffusion code that does not match the 'Prompt' heading, no explanation"
+    },
+    "cd0a769f2a77cfd8762367acd699c0ee": {
+      "verdict": "trim",
+      "remove": [
+        "Install Docker on your system\n\nInstall the required packages:\n\n```\npip install 'smolagents[docker]'\n```\n\n"
+      ]
+    },
+    "ce12f0b76b1aeb68323850efa2c19f2c": {
+      "verdict": "trim",
+      "remove": [
+        "```\n!pip install huggingface_hub datasets pandas tqdm -q\n```\n\n```\nimport re\nimport pandas as pd\nfrom tqdm.auto import tqdm\nfrom datasets import load_dataset\nfrom huggingface_hub import InferenceClient, notebook_login\n\ntqdm.pandas()  # load tqdm's pandas support\npd.set_option(\"display.max_colwidth\", None)\n\nnotebook_login()\n```\n\n```\nrepo_id = \"mistralai/Mixtral-8x7B-Instruct-v0.1\"\n\nllm_client = InferenceClient(\n    model=repo_id,\n    timeout=120,\n)\n\n# Test your LLM client\nllm_client.text_generation(prompt=\"How are you today?\", max_new_tokens=20)\n```"
+      ]
+    },
+    "d143b1cb1c8aa8739f3ba3506c34543e": {
+      "verdict": "trim",
+      "remove": [
+        "Create a Modal account at modal.com\n\nInstall the required packages:\n\n```\npip install 'smolagents[modal]'\n```\n\n"
+      ]
+    },
+    "d2d681ede92adce0038c4b3898076f38": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "table rows start mid-table without header and the Router row's agency label is in the previous passage; unsure"
+    },
+    "d4c7bac33363452eb5ce5b55862680fc": {
+      "verdict": "drop",
+      "reason": "other",
+      "note": "list of topics the example demonstrates plus link to code; no mechanism"
+    },
+    "d58553f6c91babb075653d89c22af6b0": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "refers to 'this agentic system' from previous passage and ends with a lead-in to an example not included; unsure, could be trim+keep"
+    },
+    "d59ba1b1c0ac1cfbf1dd9dcb8b71564e": {
+      "verdict": "drop",
+      "reason": "other",
+      "note": "mixed: dangling list fragment, model-specific choice and loading code; only valid point is reader max_seq_length must fit ~5x512 tokens of context"
+    },
+    "dc0db7462bbd9a520cbc61f2fb748f99": {
+      "verdict": "keep"
+    },
+    "de464c8c4fa814a48427515a650af581": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "notebook step building a prompt with variables defined earlier; mostly code"
+    },
+    "def3c317a509f744461457ed07683fe6": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "pandas step following previous code"
+    },
+    "dfcacde2554dcb14ac7698c143ae82a0": {
+      "verdict": "keep"
+    },
+    "e0012e6be1f935ce1b5de80181aeddff": {
+      "verdict": "keep"
+    },
+    "e0ea2b883c910daf7abbb6db6d7c3afb": {
+      "verdict": "drop",
+      "reason": "off_topic",
+      "note": "notebook intro, author line, pip install and imports"
+    },
+    "e135576ee1d8318da039550595add278": {
+      "verdict": "keep"
+    },
+    "e24f4a42eed307909ba2675c9cb5923e": {
+      "verdict": "keep"
+    },
+    "e2cdc752d1a75d7768ff3f490e71b724": {
+      "verdict": "keep"
+    },
+    "e44cedf5445e5e4d8fc0d9c60c2a2c94": {
+      "verdict": "drop",
+      "reason": "other",
+      "note": "terse bullet list of reader tuning options (prompt, reranking, bigger model, compression), little explanation; reviewer may keep"
+    },
+    "e71bd36294b88f1d03db63d58bf6384f": {
+      "verdict": "drop",
+      "reason": "other",
+      "note": "page intro that only says what the page demonstrates and points to an example file"
+    },
+    "eb03ac130901bcc0fa476690e3667736": {
+      "verdict": "keep"
+    },
+    "ed942685a71ef95a31bf31c3c79d47b3": {
+      "verdict": "keep"
+    },
+    "f01d42f9ab46993083e5ed91f3dcd9d3": {
+      "verdict": "drop",
+      "reason": "other",
+      "note": "thin: restates what a retriever is plus a tooling choice, dangling 'Options included' fragment"
+    },
+    "f0d9f8ca26a1b1656899b2f64334a001": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "refers to a graph above that is not in the passage"
+    },
+    "f22e7973d5bc14fa95cc455f3430c962": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "opens with 'In the above example' (surf-trip example not in passage); second paragraph is self-contained; unsure"
+    },
+    "f95dfbb49c214e71490c227ec7b319cd": {
+      "verdict": "drop",
+      "reason": "other",
+      "note": "generic intro/promo for the Evaluate library, no mechanism; ends with a dangling lead-in"
+    },
+    "fbc66d2119c3bae54a23844820e6dcdb": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "mid-procedure step ('Great, we have converted the first entry'); only useful fact is that Datasets needs NumPy arrays to index with FAISS"
+    },
+    "fd0828913194e335075bf65aa9c6a991": {
+      "verdict": "keep"
+    }
+  }
+}

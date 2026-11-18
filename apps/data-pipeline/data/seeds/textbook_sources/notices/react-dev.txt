@@ -1,0 +1,10 @@
+React Documentation (react.dev)
+Source: https://raw.githubusercontent.com/reactjs/react.dev/main/README.md, section "License" (read 2026-11-17); full legal text in https://github.com/reactjs/react.dev/blob/main/LICENSE-DOCS.md
+
+Copyright © Meta Platforms, Inc (footer of every react.dev page)
+
+Content submitted to react.dev is CC-BY-4.0 licensed, as found in the LICENSE-DOCS.md file.
+
+Creative Commons Attribution 4.0 International (CC BY 4.0): https://creativecommons.org/licenses/by/4.0/
+
+Passages stored in this project are excerpts cut by section; text is otherwise unchanged.

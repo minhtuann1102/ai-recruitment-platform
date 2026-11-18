@@ -34,7 +34,7 @@ khi chạy dữ liệu lô thử, vì FR-021 bắt soát đoạn trước khi gh
 
 **Purpose**: branch, đường dẫn, thư mục dữ liệu
 
-- [ ] T001 [DE] Merge PR spec/plan (`docs/textbook-ingestion-spec`) sau khi AIE xem; tạo branch `feat/data-pipeline/textbook-pipeline` từ `main` mới nhất
+- [x] T001 [DE] Merge PR spec/plan (`docs/textbook-ingestion-spec`) sau khi AIE xem; tạo branch `feat/data-pipeline/textbook-pipeline` từ `main` mới nhất *(2026-11-17: #97 merged)*
 - [x] T002 [W] Thêm hằng vào `pipeline/settings.py` theo data-model.md §1: `TEXTBOOK_SOURCES_DIR = APP_DIR / "data" / "seeds" / "textbook_sources"`, `TEXTBOOK_RAW_DIR = RAW_DIR / "textbook"`, `TEXTBOOK_PROCESSED_DIR = PROCESSED_DIR / "textbook"`, `TEXTBOOK_REVIEW_WORK_DIR = TEXTBOOK_RAW_DIR / "review"`, `TEXTBOOK_DECISIONS_DIR = APP_DIR / "data" / "reviews" / "textbook"`, `TEXTBOOK_SOURCE_TYPE = "textbook"`, `TEXTBOOK_DATASET_PREFIX = "de_textbook_"`, `SYSTEM_DESIGN_CATEGORY = "System Design"`. Kiểm `.gitignore` gốc đã bao `data/raw/` và `data/processed/`; không thêm dòng nếu đã có
 
 ---
@@ -105,7 +105,7 @@ khi chạy dữ liệu lô thử, vì FR-021 bắt soát đoạn trước khi gh
 
 - [x] T034 [W] Cập nhật `docs/architecture/data-pipeline.md` phần textbook (§ bảng nguồn S3, cây thư mục, phần Processing, ví dụ lệnh): thay phác thảo cũ (`textbook_processor.py`, `run_textbook_pipeline.sh`, 5000+ chunks) bằng cấu trúc thật và 7 lệnh, link tới `specs/012-textbook-ingestion-rag-quality/contracts/`; không chép lại contract
 - [x] T035 [R] `code-reviewer` (opus) review toàn bộ PR-A theo spec + contract; báo cáo vào `plans/reports/`; worker sửa các mục reviewer nêu, chạy lại pytest
-- [ ] T036 [DE] Mở PR-A (conventional commit, không nhắc công cụ AI), CI xanh, merge
+- [x] T036 [DE] Mở PR-A (conventional commit, không nhắc công cụ AI), CI xanh, merge *(2026-11-17: PR-A gộp vào #98, merged)*
 
 ---
 
@@ -115,20 +115,20 @@ khi chạy dữ liệu lô thử, vì FR-021 bắt soát đoạn trước khi gh
 
 **Independent Test**: quickstart §1–§5, §7
 
-- [ ] T037 [P] [W] [US1] Kiểm giấy phép + robots theo hướng dẫn A (`contracts/textbook-review-instructions.md`), **mỗi nguồn một worker**, ghi `data/seeds/textbook_sources/<source_id>.yaml` với `pages: []`: `spring-framework`, `spring-boot`, `spring-data-jpa`, `hibernate-orm`, `postgresql`, `system-design-primer`. Worker phải mở trang giấy phép thật và chép câu nguyên văn; không dựa vào bảng ứng viên ở research R11. Giấy phép chỉ để phân loại `open` / `restricted`, không loại nguồn (R11 sửa 2026-11-14); nguồn chỉ bị loại vì lý do truy cập. *(2026-11-14: `postgresql` → `open`, dùng; `spring-framework` kiểm theo luật cũ, đổi thành `restricted`, dùng; `system-design-primer` đang kiểm)*
-- [ ] T038 [DE] [US1] Duyệt 6 file nguồn: mở `license_url`, đối chiếu `license_quote` và `license_class`; nguồn bị loại vì truy cập thì quyết có cần nguồn thay không
-- [ ] T039 [W] [US1] Lập danh sách trang theo hướng dẫn B cho track `java_backend` (4 tình huống trong `apps/ai-service/app/catalog/java_backend.yaml`) từ các nguồn đã duyệt; ghi `scenario-queries.yaml` cho 4 tình huống; tài liệu Spring / Hibernate dùng category `Backend`, PostgreSQL và System Design Primer dùng `System Design`; `validate-textbook --strict` thoát 0
-- [ ] T040 [DE] [US1] Duyệt danh sách trang: đọc lướt từng trang, bỏ trang tham chiếu API hoặc lạc đề, kiểm `why`
+- [x] T037 [P] [W] [US1] Kiểm giấy phép + robots theo hướng dẫn A (`contracts/textbook-review-instructions.md`), **mỗi nguồn một worker**, ghi `data/seeds/textbook_sources/<source_id>.yaml` với `pages: []`: `spring-framework`, `spring-boot`, `spring-data-jpa`, `hibernate-orm`, `postgresql`, `system-design-primer`. Worker phải mở trang giấy phép thật và chép câu nguyên văn; không dựa vào bảng ứng viên ở research R11. Giấy phép chỉ để phân loại `open` / `restricted`, không loại nguồn (R11 sửa 2026-11-14); nguồn chỉ bị loại vì lý do truy cập. *(2026-11-14: `postgresql` → `open`, dùng; `spring-framework` kiểm theo luật cũ, đổi thành `restricted`, dùng; `system-design-primer` đang kiểm)*
+- [x] T038 [DE] [US1] Duyệt 6 file nguồn: mở `license_url`, đối chiếu `license_quote` và `license_class`; nguồn bị loại vì truy cập thì quyết có cần nguồn thay không *(2026-11-17: DE bỏ duyệt tay nguồn, theo license-policy học thuật)*
+- [x] T039 [W] [US1] Lập danh sách trang theo hướng dẫn B cho track `java_backend` (4 tình huống trong `apps/ai-service/app/catalog/java_backend.yaml`) từ các nguồn đã duyệt; ghi `scenario-queries.yaml` cho 4 tình huống; tài liệu Spring / Hibernate dùng category `Backend`, PostgreSQL và System Design Primer dùng `System Design`; `validate-textbook --strict` thoát 0
+- [x] T040 [DE] [US1] Duyệt danh sách trang: đọc lướt từng trang, bỏ trang tham chiếu API hoặc lạc đề, kiểm `why` *(2026-11-17: duyệt cùng PR #98)*
 - [x] T041 [W] [US1] Chạy lần lượt cho từng nguồn của lô thử: `crawl-textbook --source <S>` (delay mặc định), `process-textbook --source <S>`, `review-textbook-prepare --source <S>`; báo thống kê từng lệnh, số trang bị bỏ kèm lý do, `git status` không có file dưới `data/raw`, `data/processed`. Nguồn bị chặn (mã 4) hoặc `content_selector` sai (0 section): dừng nguồn đó và báo, không đổi cách tải
 - [x] T042 [P] [W] [US1] Soát đoạn theo hướng dẫn C, **mỗi `batch-NN.json` một worker**, ghi `judgments-NN.jsonl`
 - [x] T043 [W] [US1] `review-textbook-score --source <S>` cho từng nguồn; lô bỏ sót đoạn mồi → giao lại lô đó cho worker khác (T042); tới khi thoát 0. Báo số `keep` / `trim` / `drop` và danh sách `drop` + `trim`
 - [x] T044 [DE] [US1] *(2026-11-17: DE bỏ duyệt tay; `review-textbook-score` thoát 0 = qua cổng mồi → `approved_by = "auto:canary-gate"`)* ~~Duyệt danh sách `drop` + `trim` của từng nguồn; đọc mẫu ngẫu nhiên 50 đoạn `keep` (SC-006, không quá 3 đoạn nhiễu; vượt thì siết luật lọc hoặc hướng dẫn C rồi soát lại); điền `approved_by` trong từng `<S>-decisions.json`~~
 - [x] T045 [W] [US1] `process-textbook` lại cho các nguồn của lô thử, `coverage-textbook`; báo bảng tình huống × số đoạn × `keyword_hit` và `gaps`. Tình huống dưới 1 đoạn hoặc trượt truy hồi: đề xuất trang bù (quay lại T039 cho tình huống đó)
-- [ ] T046 [DE] [US1] Mở PR-B (manifest, `scenario-queries.yaml`, decisions; bảng độ phủ và bảng nguồn × giấy phép trong mô tả PR), merge
-- [ ] T047 [DE] [US1] Từ `main` mới nhất: `index-textbook --source <S>` cho từng nguồn, chạy lần hai để xác nhận 0 bản ghi mới, `coverage-textbook --db`, hai câu SQL ở quickstart §5. Cần `.env` có DB + key embedding. Ghi số bản ghi từng `source_type` trước / sau vào task này
+- [x] T046 [DE] [US1] Mở PR-B (manifest, `scenario-queries.yaml`, decisions; bảng độ phủ và bảng nguồn × giấy phép trong mô tả PR), merge *(2026-11-17: PR-B gộp vào #98 (decisions, manifest), merged)*
+- [x] T047 [DE] [US1] Từ `main` mới nhất: `index-textbook --source <S>` cho từng nguồn, chạy lần hai để xác nhận 0 bản ghi mới, `coverage-textbook --db`, hai câu SQL ở quickstart §5. Cần `.env` có DB + key embedding. Ghi số bản ghi từng `source_type` trước / sau vào task này *(2026-11-17: tu `main` sau #99; truoc interview_qa=8356; sau interview_qa=8356, textbook=262; lan 2 inserted=0; coverage --db: 4/4 scn.java keyword #1 + vector hit)*
 - [ ] T048 [DE] [US1] Báo AIE (FR-025): tên dataset, số bản ghi, category đã dùng (`Backend`, `System Design`), việc cần làm (đo nền với cờ tắt → bật `RAG_TEXTBOOK_ENABLED` → khởi động lại → đo lại), kèm 5 câu hỏi ở spec
 - [ ] T049 [AIE] [US1] Đo theo quickstart §7; gửi lại tỉ lệ ý có căn cứ ở lượt scenario, độ trễ lúc bắt đầu buổi và theo lượt, trước và sau; trả lời 5 câu hỏi ở spec
-- [ ] T050 [DE] [US1] Ghi số đo và quyết định vào task này (FR-024): giữ / đổi `TARGET_*_CHARS`; giữ / đổi cách gán category; nạp tiếp hay dừng. AIE chưa đo được trước 23/11 (hết Sprint 3) → quyết theo `coverage-textbook --db`, ghi rõ chưa có số đo từ ai-service
+- [x] T050 [DE] [US1] Ghi số đo và quyết định vào task này (FR-024): giữ / đổi `TARGET_*_CHARS`; giữ / đổi cách gán category; nạp tiếp hay dừng. AIE chưa đo được trước 23/11 (hết Sprint 3) → quyết theo `coverage-textbook --db`, ghi rõ chưa có số đo từ ai-service *(2026-11-18: AIE chưa đo; DE quyết theo `coverage-textbook` — giữ `TARGET_*_CHARS`, giữ cách gán category, nạp tiếp 5 track)*
 
 **Checkpoint**: 4/4 tình huống Java ≥ 1 đoạn trong kho; `interview_qa` không đổi; có quyết định ở T050
 
@@ -144,11 +144,11 @@ Chỉ bắt đầu sau T050. Nếu T050 đổi cỡ đoạn: sửa hằng trong 
 
 Mỗi track lặp đúng chuỗi T037 → T047 (kiểm nguồn [W] → duyệt nguồn [DE] → danh sách trang + truy vấn [W] → duyệt [DE] → crawl / process / prepare [W] → soát [W] → score [W] → duyệt decisions + mẫu 50 đoạn [DE] → process + coverage [W] → PR + index [DE]). Nguồn dùng chung đã duyệt ở track trước không kiểm giấy phép lại, chỉ thêm trang.
 
-- [ ] T051 [US2] Track `nodejs_backend` (4 tình huống; category riêng `Backend`). Ứng viên cần kiểm: Node.js docs, NestJS docs, Redis docs; thêm trang PostgreSQL / System Design Primer nếu tình huống cần
-- [ ] T052 [US2] Track `python_backend` (4 tình huống; `Backend`). Ứng viên: Python docs, FastAPI, Django, Celery, SQLAlchemy
-- [ ] T053 [US2] Track `devops_engineer` (4 tình huống; `DevOps`). Ứng viên: Kubernetes docs, Docker docs, Prometheus docs
-- [ ] T054 [US2] Track `frontend_react` (4 tình huống; `Frontend`). Ứng viên: react.dev (giấy phép đã kiểm ở 005, vẫn ghi `license_url` + `license_quote`), Next.js docs, web.dev, MDN
-- [ ] T055 [US2] Track `ai_engineer` (8 tình huống; `AI`). Ứng viên: scikit-learn user guide, Hugging Face docs, OWASP Top 10 for LLM Applications. Track này dễ thiếu nguồn có giấy phép mở: tình huống không đủ trang thì ghi vào `gaps`, không lấy nguồn chưa duyệt
+- [ ] T051 [US2] Track `nodejs_backend` (4 tình huống; category riêng `Backend`). Ứng viên cần kiểm: Node.js docs, NestJS docs, Redis docs; thêm trang PostgreSQL / System Design Primer nếu tình huống cần *(2026-11-18: soát + score xong (cổng mồi), nodejs, nestjs, redis: 158 đoạn theo track; index sau khi merge)*
+- [ ] T052 [US2] Track `python_backend` (4 tình huống; `Backend`). Ứng viên: Python docs, FastAPI, Django, Celery, SQLAlchemy *(2026-11-18: soát + score xong (cổng mồi), fastapi, django, sqlalchemy: 151 đoạn; celery bị chặn 403/429 khi crawl lại, làm sau; index sau khi merge)*
+- [ ] T053 [US2] Track `devops_engineer` (4 tình huống; `DevOps`). Ứng viên: Kubernetes docs, Docker docs, Prometheus docs *(2026-11-18: soát + score xong (cổng mồi), kubernetes, docker, prometheus: 182 đoạn; index sau khi merge)*
+- [ ] T054 [US2] Track `frontend_react` (4 tình huống; `Frontend`). Ứng viên: react.dev (giấy phép đã kiểm ở 005, vẫn ghi `license_url` + `license_quote`), Next.js docs, web.dev, MDN *(2026-11-18: soát + score xong (cổng mồi), react-dev, web-dev, mdn-web-docs: 153 đoạn; index sau khi merge)*
+- [ ] T055 [US2] Track `ai_engineer` (8 tình huống; `AI`). Ứng viên: scikit-learn user guide, Hugging Face docs, OWASP Top 10 for LLM Applications. Track này dễ thiếu nguồn có giấy phép mở: tình huống không đủ trang thì ghi vào `gaps`, không lấy nguồn chưa duyệt *(2026-11-18: soát + score xong (cổng mồi), scikit-learn, huggingface-docs, owasp-llm-top10, nannyml, livekit-docs: 256 đoạn; index sau khi merge)*
 - [ ] T056 [DE] [US2] Sau mỗi track: báo AIE số bản ghi thêm và nhắc khởi động lại ai-service để nạp lại kho từ khóa
 
 **Checkpoint**: `validate-textbook --strict` và `coverage-textbook --strict` thoát 0, hoặc `gaps` còn lại được DE ghi lý do

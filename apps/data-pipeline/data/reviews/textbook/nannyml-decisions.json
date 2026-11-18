@@ -1,0 +1,154 @@
+{
+  "source_id": "nannyml",
+  "reviewed_at": "2026-11-18",
+  "approved_by": "auto:canary-gate",
+  "decisions": {
+    "1ca33a38a439217a9e8eaa6a0de139db": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "describes a plot that is not in the passage"
+    },
+    "1e7819aee3196c2b4c658877f16a4085": {
+      "verdict": "keep"
+    },
+    "2459fccbd38a71d371d0c50ce8e75ab9": {
+      "verdict": "keep"
+    },
+    "2630ad1b29570eb26b79a415a372be5e": {
+      "verdict": "keep"
+    },
+    "2e41f79452ee3247a3ba96dc4f5c581c": {
+      "verdict": "keep"
+    },
+    "3c9b4350ca957848d5c6f0bb15558cd9": {
+      "verdict": "drop",
+      "reason": "code_only",
+      "note": "tutorial code on butterfly dataset plus one conclusion sentence and tutorial pointer"
+    },
+    "441d65771e28c9a235fb34386223d3f5": {
+      "verdict": "keep"
+    },
+    "4480db1093ae39354698d28cd7a9d282": {
+      "verdict": "keep"
+    },
+    "4e05aa081cd399c3cc7f83757c380b2d": {
+      "verdict": "keep"
+    },
+    "5130e89d54749337f8554dd83f3d264a": {
+      "verdict": "keep"
+    },
+    "52a870fc844189ff62b30bd3672641ad": {
+      "verdict": "keep"
+    },
+    "5737a4c1f25b723cc25da4aa187175db": {
+      "verdict": "trim",
+      "remove": [
+        "This page explains which aspects each drift detection method is able to capture,\nwhat are the important implementation details and in which situations a specific method can be a good choice.\n\n"
+      ]
+    },
+    "656add45df6ae80a6f5a2132402952e8": {
+      "verdict": "trim",
+      "remove": ["You can find more about L-Infinity at Wikipedia . "]
+    },
+    "7d45857a71e20c821d41358d82dc22ea": {
+      "verdict": "keep"
+    },
+    "805083b305b59bdc29bfc8383db40d2d": {
+      "verdict": "keep"
+    },
+    "8554984b0d72f883a9951eaaba4b3097": {
+      "verdict": "keep"
+    },
+    "95f5ffd34a48f364856a99254cb803ba": {
+      "verdict": "keep"
+    },
+    "988b4ed3bbdb9c188ab44c4e9e201b6c": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "describes an image and relies on 'as mentioned above' formula; borderline"
+    },
+    "98cc6a3dfabcfde027aea3dee1fb5eed": {
+      "verdict": "trim",
+      "remove": [
+        "Read more about it on our:ref: sampling error guide <estimation_of_standard_error> ."
+      ]
+    },
+    "9b6cff042b6b05457676e9a49af96be2": {
+      "verdict": "keep"
+    },
+    "9b9f0596775570ea1b6e1f8e0f462d80": {
+      "verdict": "keep"
+    },
+    "9fe6606c579cc25ba1aa0bdf3452028d": {
+      "verdict": "keep"
+    },
+    "a1b5e8ec22d2b67a0728e1acc125ca63": {
+      "verdict": "keep"
+    },
+    "a47e5321eab0789cc221f8b54e64fc8b": {
+      "verdict": "keep"
+    },
+    "a86b1e79ba9e17fb372a70e409c2469c": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "'These results' refers to a plot/results outside the passage; borderline, the point is covered in the previous section"
+    },
+    "aa18ebec016b690c252d2ecf70d8fa58": {
+      "verdict": "trim",
+      "remove": [
+        "The following code creates a plot that clearly shows the\nresulting data drift.\n\n```\n>>> # let's construct a dataframe for visuzlization purposes\n>>> dat1 = datadf.loc[datadf.week == 10, ['feature1', 'feature2']][:1500]\n>>> dat1['week'] = 10\n>>> dat2 = datadf.loc[datadf.week == 16, ['feature1', 'feature2']][:1500]\n>>> dat2['week'] = 16\n>>> data_sample = pd.concat([dat1, dat2], ignore_index=True)\n\n>>> # let's plot\n>>> colors = nml.plots.colors.Colors\n>>> figure = sns.jointplot(\n...     data=data_sample,\n...     x=\"feature1\",\n...     y=\"feature2\",\n...     hue=\"week\",\n...     palette=[colors.BLUE_SKY_CRAYOLA.value, colors.RED_IMPERIAL.value]\n>>> )\n>>> figure.fig.suptitle('Data Distributions before and after rotation drift')\n```"
+      ]
+    },
+    "b13ef6de0fd218a3279b20e549758965": {
+      "verdict": "keep"
+    },
+    "b29a093fc6e66c461923a7d4bfd3198b": {
+      "verdict": "keep"
+    },
+    "b5e1e0fead75503b49509b8756ff115b": {
+      "verdict": "trim",
+      "remove": ["More information can be found in our Reliability of results guide ."]
+    },
+    "b8c5a8ca5e4b9c5b81fe5d24c9ac5048": {
+      "verdict": "keep"
+    },
+    "bf240a446bfa4d562b0dbfa037fdb2d4": {
+      "verdict": "keep"
+    },
+    "ca24bf65da8a8255dc1b2dddf9476f86": {
+      "verdict": "keep"
+    },
+    "cf49881ac8815f758595577ad5017d2b": {
+      "verdict": "keep"
+    },
+    "d642e4e8277701efb85dafbc1f0e5d55": {
+      "verdict": "keep"
+    },
+    "d7f60f0461d7b3ee1fef9050aa0c0e67": {
+      "verdict": "keep"
+    },
+    "e50182ab8f8322c16232e5e91a224c39": {
+      "verdict": "keep"
+    },
+    "e5b1492ec226466d8a2083ad35622b59": {
+      "verdict": "drop",
+      "reason": "code_only",
+      "note": "tutorial code on butterfly dataset plus one conclusion sentence and tutorial pointer"
+    },
+    "ef53975db6a6ced8f14533bf267266a7": {
+      "verdict": "keep"
+    },
+    "f165f072942cac033d58fea26f0ea385": {
+      "verdict": "keep"
+    },
+    "f7262a4eeaa716465c62507aa1deadaf": {
+      "verdict": "keep"
+    },
+    "f9c91357e5b7bf2938fbaf662822adbd": {
+      "verdict": "trim",
+      "remove": [
+        "Look at the simple example shown in implementation details to see a linear regression algorithm used by nanny model to\nestimate the performance of another linear regression child model ."
+      ]
+    }
+  }
+}

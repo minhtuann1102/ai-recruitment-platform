@@ -42,8 +42,8 @@ pages:
     excluded_reason: ""
   - url: https://raw.githubusercontent.com/donnemartin/system-design-primer/master/README.md
     category: System Design
-    tracks: [java_backend]
-    scenarios: [scn.java.flash-sale-inventory]
+    tracks: [java_backend, nodejs_backend, ai_engineer]
+    scenarios: [scn.ai.llm-cost-reduction, scn.java.flash-sale-inventory, scn.node.cache-stampede]
     topics: []
     sections: ["Cache"]
     kind: concept

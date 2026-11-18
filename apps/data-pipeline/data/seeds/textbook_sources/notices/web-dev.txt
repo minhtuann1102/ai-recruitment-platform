@@ -1,0 +1,13 @@
+web.dev
+Source: https://web.dev/articles/lcp (footer, read 2026-11-17) and https://developers.google.com/terms/site-policies (Site Policies, read 2026-11-17)
+
+Except as otherwise noted, the content of this page is licensed under the Creative Commons Attribution 4.0 License, and code samples are licensed under the Apache 2.0 License. For details, see the Google Developers Site Policies.
+
+Attribution text requested by the Site Policies for exact reproductions:
+
+Portions of this page are reproduced from work created and shared by Google and used according to terms described in the Creative Commons 4.0 Attribution License.
+
+Creative Commons Attribution 4.0 International (CC BY 4.0): https://creativecommons.org/licenses/by/4.0/
+Apache License 2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+Each stored passage keeps the address of the web.dev page it was cut from. Passages are excerpts cut by section; text is otherwise unchanged.

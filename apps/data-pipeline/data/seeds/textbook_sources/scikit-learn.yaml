@@ -1,0 +1,75 @@
+source_id: scikit-learn
+name: scikit-learn User Guide
+kind: official
+homepage: https://scikit-learn.org/stable/
+format: html
+# Page body lives in article.bd-article (pydata-sphinx-theme); the left sidebar, "previous/next" footer and site footer
+# are outside it. Headings keep the permalink anchor text: every heading ends with " #" (a.headerlink) and the page
+# title too, e.g. "3.4.4.9. Precision, recall and F-measures #". The `sections` matcher strips the leading number but
+# not the " #", so each `sections` entry below is listed twice, with and without " #" (harmless if the parser later
+# drops the anchor text). Matching is at any level of the heading path: naming an h2 pulls in all its h3 children.
+content_selector: "article.bd-article"
+language: en
+license: BSD-3-Clause
+license_class: open
+license_url: https://scikit-learn.org/stable/about.html
+# The docs site states the license only in the page footer; the LICENSE text is COPYING in the repository
+# (https://raw.githubusercontent.com/scikit-learn/scikit-learn/main/COPYING, BSD 3-Clause, saved in the notice).
+license_quote: "© Copyright 2007 - 2026, scikit-learn developers (BSD License)."
+license_checked: 2026-11-17
+robots_checked: 2026-11-17
+robots_note: "https://scikit-learn.org/robots.txt returns HTTP 404 (GitHub Pages 'File not found' page): no robots.txt, nothing is disallowed (the crawler treats 404 as allow all). No Crawl-delay."
+attribution: "scikit-learn User Guide, Copyright 2007 - 2026 scikit-learn developers, BSD 3-Clause License. Notice: notices/scikit-learn.txt"
+status: use
+excluded_reason: ""
+pages:
+- url: https://scikit-learn.org/stable/modules/feature_extraction.html
+  category: AI
+  tracks: [ai_engineer]
+  scenarios: [scn.ai.cv-job-matching]
+  topics: []
+  sections: [The Bag of Words representation, 'The Bag of Words representation #', "Tf\u2013idf term weighting", "Tf\u2013idf term weighting #", Limitations of the Bag of Words representation, 'Limitations of the Bag of Words representation #']
+  kind: concept
+  why: Bag-of-words and tf-idf turn CV and job text into sparse vectors whose cosine similarity ranks matches, and the limits (word order, synonyms) explain why embeddings are the next step.
+  status: use
+  excluded_reason: ''
+- url: https://scikit-learn.org/stable/common_pitfalls.html
+  category: AI
+  tracks: [ai_engineer]
+  scenarios: [scn.ai.cv-job-matching, scn.ai.model-drift-incident]
+  topics: []
+  sections: [Inconsistent preprocessing, 'Inconsistent preprocessing #', Data leakage, 'Data leakage #']
+  kind: guide
+  why: 'Data leakage and inconsistent preprocessing between training and prediction: leakage inflates offline match metrics, and training-serving skew is a first suspect when a deployed model degrades.'
+  status: use
+  excluded_reason: ''
+- url: https://scikit-learn.org/stable/modules/model_evaluation.html
+  category: AI
+  tracks: [ai_engineer]
+  scenarios: [scn.ai.cv-job-matching]
+  topics: []
+  sections: ['Precision, recall and F-measures', 'Precision, recall and F-measures #', Normalized Discounted Cumulative Gain, 'Normalized Discounted Cumulative Gain #']
+  kind: concept
+  why: 'Precision, recall and F-measure, and NDCG for ranked lists: how to measure whether the top recommended jobs are relevant, not only whether a binary label is right.'
+  status: use
+  excluded_reason: ''
+- url: https://scikit-learn.org/stable/modules/cross_validation.html
+  category: AI
+  tracks: [ai_engineer]
+  scenarios: [scn.ai.cv-job-matching]
+  topics: []
+  sections: [Cross-validation iterators for grouped data, 'Cross-validation iterators for grouped data #']
+  kind: concept
+  why: Grouped cross-validation keeps all CVs of one candidate on the same side of the split, which prevents leakage between train and test when the same person appears many times.
+  status: use
+  excluded_reason: ''
+- url: https://scikit-learn.org/stable/modules/cross_validation.html
+  category: AI
+  tracks: [ai_engineer]
+  scenarios: [scn.ai.model-upgrade-rollout]
+  topics: []
+  sections: [Permutation test score, 'Permutation test score #']
+  kind: concept
+  why: Permutation test score checks whether a score difference is better than chance, the basis for deciding that a new model is really better and not just lucky on one split.
+  status: use
+  excluded_reason: ''

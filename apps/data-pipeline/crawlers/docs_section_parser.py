@@ -7,15 +7,19 @@ KHONG gom ten trang (h1): ten trang di rieng trong "title" (data-model §2); sec
 heading_path rong. parse_sections giu nguyen hanh vi cu (h1 nam trong path) cho react_docs_crawler.
 """
 import re
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 from bs4 import BeautifulSoup, Tag
 
 from pipeline.pii_patterns import scrub_pii
 from pipeline.text_cleaning import clean_text
 
+from .docs_html_cleanup import preserve_code_line_breaks, remove_hidden
+
 HEADING_LEVELS = {"h1": 1, "h2": 2, "h3": 3}
-BLOCK_TAGS = ("h1", "h2", "h3", "p", "li", "pre", "blockquote", "td", "th")
+BLOCK_TAGS = ("h1", "h2", "h3", "p", "li", "pre", "blockquote", "td", "th", "dt", "dd")  # dt/dd: danh sach dinh nghia MDN
+# Block cha de bo block long: dd KHONG tinh (dd chua p/ul/pre thi cac block con tu duoc nhat, giu dong code + ranh gioi)
+_NESTING_PARENT_TAGS = tuple(t for t in BLOCK_TAGS if t != "dd")
 # Phan giao dien, khong phai noi dung (nut copy code, icon, script)
 NOISE_TAGS = ("script", "style", "noscript", "svg", "button", "nav", "iframe")
 
@@ -42,10 +46,15 @@ def content_root(soup: BeautifulSoup, selector: Optional[str]) -> Optional[Tag]:
     return soup.find("article") or soup.find("main")
 
 
-def parse_sections(root: Tag) -> List[Dict]:
-    """Gom block theo heading gan nhat; heading_path = [h1, h2, h3] hien hanh. Bo section rong."""
+def parse_sections(root: Tag, level_stack: bool = False) -> List[Dict]:
+    """Gom block theo heading gan nhat; heading_path = [h1, h2, h3] hien hanh. Bo section rong.
+
+    level_stack=False (react_docs_crawler, 005): path = path[: cap-1] + [heading] - khi thieu h1 cac h2 long vao nhau.
+    level_stack=True (textbook): ngan xep cap, pop khi cap dinh >= cap moi nen h2 lien tiep la anh em (nhu markdown).
+    """
     sections: List[Dict] = []
     path: List[str] = []
+    levels: List[int] = []  # cap cua tung phan tu trong path, chi dung khi level_stack
     buffer: List[str] = []
 
     def flush() -> None:
@@ -56,15 +65,24 @@ def parse_sections(root: Tag) -> List[Dict]:
 
     for element in root.find_all(BLOCK_TAGS):
         # Block long trong block khac (p trong li, li trong li...) da nam trong text cua block ngoai
-        if element.find_parent(BLOCK_TAGS) is not None:
+        if element.find_parent(_NESTING_PARENT_TAGS) is not None:
             continue
+        if element.name == "dd" and element.find(BLOCK_TAGS) is not None:
+            continue  # dd chua block: p / ul / pre / dl long ben trong duoc nhat rieng
         level = HEADING_LEVELS.get(element.name)
         if level is None:
             buffer.append(_block_text(element))
             continue
         flush()
         heading = scrub_pii(clean_text(element.get_text(" ", strip=True)))
-        path[:] = path[: level - 1] + [heading]
+        if level_stack:
+            while levels and levels[-1] >= level:
+                levels.pop()
+                path.pop()
+            levels.append(level)
+            path.append(heading)
+        else:
+            path[:] = path[: level - 1] + [heading]
     flush()
     return sections
 
@@ -85,12 +103,16 @@ def parse_html_page(html: str, selector: Optional[str] = None) -> Optional[Dict]
     root = content_root(soup, selector)
     if root is None:
         return None
-    sections = parse_sections(root)
+    remove_hidden(root)  # truoc khi doc h1 / heading: text an khong lot vao title va heading_path
+    preserve_code_line_breaks(root)
+    sections = parse_sections(root, level_stack=True)
     if not sections:
         return None
     h1 = root.find("h1")
     if h1 is None:
         h1 = soup.find("h1")
+        if h1 is not None:
+            remove_hidden(h1)  # h1 ngoai vung noi dung chua duoc don
     raw_title = h1.get_text(" ", strip=True) if h1 is not None else (soup.title.get_text(strip=True) if soup.title else "")
     title = scrub_pii(clean_text(raw_title))
     return {"title": title, "sections": _drop_title_from_paths(sections, title)}
@@ -99,21 +121,25 @@ def parse_html_page(html: str, selector: Optional[str] = None) -> Optional[Dict]
 def parse_markdown_page(text: str) -> Dict:
     """{title, sections} cua mot file markdown: tach theo dong '#', '##', '###' ngoai khoi ```.
 
-    title = tieu de '#' dau tien ("" neu khong co). Tieu de cap 4+ khong tach, nam trong than section.
+    title = tieu de '#' dau tien; khong co thi lay `title:` trong front-matter YAML (docs Hugo nhu Redis, Docker);
+    ca hai deu khong co thi "". Tieu de cap 4+ khong tach, nam trong than section.
+    heading_path theo ngan xep cap tieu de: hai '##' lien tiep la anh em, ke ca khi file khong co '#'.
     """
     sections: List[Dict] = []
-    path: List[str] = []
+    stack: List[Tuple[int, str]] = []  # (cap, tieu de) tu goc toi tieu de hien tai
     buffer: List[str] = []
-    title = ""
     fence: Optional[str] = None  # dau mo khoi code dang mo (``` hoac ~~~), None = ngoai khoi code
+    lines = text.replace("\r\n", "\n").replace("\r", "\n").split("\n")
+    lines, title = _strip_front_matter(lines)
 
     def flush() -> None:
         body = scrub_pii(clean_text("\n".join(buffer)))
-        if body and path:
-            sections.append({"heading_path": list(path), "text": body})
+        if body and stack:
+            sections.append({"heading_path": [h for _, h in stack], "text": body})
         buffer.clear()
 
-    for line in text.replace("\r\n", "\n").replace("\r", "\n").split("\n"):
+    has_h1 = False
+    for line in lines:
         fence_match = _FENCE_RE.match(line)
         if fence_match and (fence is None or fence_match.group(1) == fence):
             fence = None if fence else fence_match.group(1)
@@ -125,8 +151,25 @@ def parse_markdown_page(text: str) -> Dict:
             continue
         flush()
         level, heading_text = len(heading.group(1)), scrub_pii(clean_text(heading.group(2)))
-        if level == 1 and not title:
-            title = heading_text
-        path[:] = path[: level - 1] + [heading_text]
+        if level == 1 and not has_h1:
+            has_h1, title = True, heading_text
+        while stack and stack[-1][0] >= level:
+            stack.pop()
+        stack.append((level, heading_text))
     flush()
     return {"title": title, "sections": _drop_title_from_paths(sections, title) if title else sections}
+
+
+def _strip_front_matter(lines: List[str]) -> Tuple[List[str], str]:
+    """Bo khoi front-matter YAML (`---` ... `---`) o dau file; tra (dong con lai, gia tri `title:` hoac "")."""
+    if not lines or lines[0].strip() != "---":
+        return lines, ""
+    for end in range(1, len(lines)):
+        if lines[end].strip() == "---":
+            title = ""
+            for line in lines[1:end]:
+                key, _, value = line.partition(":")
+                if key.strip() == "title" and value.strip():
+                    title = scrub_pii(clean_text(value.strip().strip("'\"")))
+            return lines[end + 1:], title
+    return lines, ""

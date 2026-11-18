@@ -1,0 +1,79 @@
+source_id: livekit-docs
+name: LiveKit Agents Documentation (realtime voice agents)
+kind: official
+homepage: https://docs.livekit.io/agents/
+format: html
+# Next.js page: article body is main#main-content (sidebar and top navigation are outside it); a few "related"
+# card titles at the end become short sections that the noise filter drops. Pages are 380-770 KB of HTML: with the
+# crawler settings (httpx, timeout 30, crawler User-Agent) the 5 pages below were fetched in 0.4-1.6 s on 2026-11-17, in
+# two runs; one earlier curl with a browser User-Agent took 90 s for 773 KB and was not reproduced (httpx timeout is
+# per phase, so a slow but steady stream would still finish).
+# https://docs.livekit.io/llms.txt says "Append .md to any page URL for clean Markdown" but format markdown only
+# accepts GitHub URLs, so HTML is used.
+content_selector: "main#main-content"
+language: en
+license: LicenseRef-LiveKit-Docs-All-Rights-Reserved
+license_class: restricted
+license_url: https://docs.livekit.io/agents/logic/turns/
+# No license statement found for the documentation text (livekit/livekit-docs on GitHub is an MIT repo last pushed
+# 2022-08, not the current site). The site footer reads (verbatim): "(c) LiveKit. Engineered and designed worldwide.
+# All rights reserved." Terms of service (https://livekit.io/legal/terms-of-service, read 2026-11-17) have no text
+# on scraping, crawling, robots or automated access.
+license_quote: "© LiveKit. Engineered and designed worldwide. All rights reserved."
+license_checked: 2026-11-17
+robots_checked: 2026-11-17
+robots_note: "https://docs.livekit.io/robots.txt (HTTP 200): User-Agent: * / Allow: / / Disallow: /styleguide; Host: https://docs.livekit.io; Sitemap: https://docs.livekit.io/sitemap.xml. No Crawl-delay. /agents/ is allowed."
+attribution: "LiveKit Agents documentation, (c) LiveKit, All rights reserved (restricted: no open license found), https://docs.livekit.io/agents/"
+status: use
+excluded_reason: ""
+pages:
+- url: https://docs.livekit.io/agents/models/pipelines/
+  category: AI
+  tracks: [ai_engineer]
+  scenarios: [scn.ai.voice-interview-agent]
+  topics: []
+  sections: []
+  kind: concept
+  why: 'Cascaded STT-LLM-TTS pipeline versus realtime speech-to-speech models: strengths, considerations and where latency comes from.'
+  status: use
+  excluded_reason: ''
+- url: https://docs.livekit.io/agents/logic/turns/
+  category: AI
+  tracks: [ai_engineer]
+  scenarios: [scn.ai.voice-interview-agent]
+  topics: []
+  sections: [Overview, Turn detection, Interruptions]
+  kind: concept
+  why: 'Turn detection (VAD, STT endpointing, turn-detector model) and interruptions: how the agent decides the candidate has finished speaking and when to stop talking.'
+  status: use
+  excluded_reason: ''
+- url: https://docs.livekit.io/agents/logic/turns/tuning/
+  category: AI
+  tracks: [ai_engineer]
+  scenarios: [scn.ai.voice-interview-agent]
+  topics: []
+  sections: [Overview, Recommended starting config, Troubleshooting]
+  kind: guide
+  why: 'Tuning end-of-turn delay, interruption thresholds and preemptive generation (starting the LLM before the turn is confirmed): the latency versus cutting-the-candidate-off trade-off.'
+  status: use
+  excluded_reason: ''
+- url: https://docs.livekit.io/agents/logic/turns/adaptive-interruption-handling/
+  category: AI
+  tracks: [ai_engineer]
+  scenarios: [scn.ai.voice-interview-agent]
+  topics: []
+  sections: []
+  kind: concept
+  why: A model that separates real barge-in from backchannel cues ("uh-huh"), incidental sounds and background noise after VAD, so the agent does not stop speaking on every sound.
+  status: use
+  excluded_reason: ''
+- url: https://docs.livekit.io/agents/logic/fallback-strategies/
+  category: AI
+  tracks: [ai_engineer]
+  scenarios: [scn.ai.voice-interview-agent]
+  topics: []
+  sections: []
+  kind: guide
+  why: Fallback to a second STT, LLM or TTS provider when one fails, so a live interview does not drop on a provider outage.
+  status: use
+  excluded_reason: ''
