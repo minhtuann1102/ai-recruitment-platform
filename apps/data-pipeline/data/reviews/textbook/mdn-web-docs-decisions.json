@@ -1,0 +1,232 @@
+{
+  "source_id": "mdn-web-docs",
+  "reviewed_at": "2026-11-18",
+  "approved_by": "auto:canary-gate",
+  "decisions": {
+    "084d6565207ca2541b2b5e6b2fa6cec2": {
+      "verdict": "keep"
+    },
+    "0ec5ed9c5bea5f0dcb1f6b003981a4bc": {
+      "verdict": "trim",
+      "remove": ["\n\nSee also: Element Link ."]
+    },
+    "1a988757e92ddc78e4517ba2bf5653d9": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "relies on thumbnails/FileUpload code from the previous example"
+    },
+    "1cf0247bc69b8294ad129fae64d77236": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "later steps of the XHR upload procedure; depends on earlier steps"
+    },
+    "1ddd6f18bfe045ff1943380fb3324d7f": {
+      "verdict": "keep"
+    },
+    "1e4f9d8c4fe8a9d7f87bdbc7870afae8": {
+      "verdict": "keep"
+    },
+    "2368e4200e35011f4491fa720bccd03d": {
+      "verdict": "keep"
+    },
+    "29e9a8e6802b344f963a76dbd86027c9": {
+      "verdict": "keep"
+    },
+    "2d5d220a84c9c3242b809b34654b5b26": {
+      "verdict": "keep"
+    },
+    "347c6d204799aa42c25625a067756927": {
+      "verdict": "drop",
+      "reason": "other",
+      "note": "tutorial intro describing the example ping app plus GitHub link and Deno install hint; no mechanism or limit; unsure"
+    },
+    "35fc02c8bc53090db8b2a455b38705f1": {
+      "verdict": "keep"
+    },
+    "387a5f2cc7c2968cc4dd4b850848d9f8": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "'if you run our example' exercise plus web.dev link; only the notRestoredReasons sentence is standalone; unsure"
+    },
+    "39318f6eb1474826921c1d36448be7ea": {
+      "verdict": "keep"
+    },
+    "3abfd428a1451e4e1661a3925455a9aa": {
+      "verdict": "keep"
+    },
+    "3b2a33620e7ab2b642dbb7d561af6dc7": {
+      "verdict": "keep"
+    },
+    "3cc712d9c101545ec8b2acd34b11520d": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "refers to FileUpload() 'shown above'; middle of an upload procedure"
+    },
+    "3e0fde9e3ba79b2f07d6f92e58587959": {
+      "verdict": "keep"
+    },
+    "3fe0b09733d269ca3daa687d97beacb7": {
+      "verdict": "keep"
+    },
+    "432f910abd656bb75e09cc2f7d1b2810": {
+      "verdict": "keep"
+    },
+    "45a8b149102e5cc5e411253fcfe19c58": {
+      "verdict": "keep"
+    },
+    "46990d1eb132b503928fc68c9b9ca894": {
+      "verdict": "keep"
+    },
+    "46d0c48860ade1f6bedef7582bbe848f": {
+      "verdict": "keep"
+    },
+    "4c8731f6375460f7c3bf34e3d2d5c7fd": {
+      "verdict": "keep"
+    },
+    "50d03a056124d9e53db5262de73ee15d": {
+      "verdict": "keep"
+    },
+    "50ebfc92ccae2410683750a3da4f3eee": {
+      "verdict": "keep"
+    },
+    "546d45ba669330e24015e35cc059928d": {
+      "verdict": "keep"
+    },
+    "5b91ea5d1d47cc568da5bef9de9ba463": {
+      "verdict": "keep"
+    },
+    "5f8784445c45648d268ab1e99d707c51": {
+      "verdict": "keep"
+    },
+    "6171ff187424be7c1fee3d6c82ea8084": {
+      "verdict": "keep"
+    },
+    "66fec42d50785b2217537eb61ede1d35": {
+      "verdict": "trim",
+      "remove": ["\n\ndelay"]
+    },
+    "671755e43c880ad798d6fb2be982f61a": {
+      "verdict": "keep"
+    },
+    "69b0ad43a8ab8bbceebfde6a995b004b": {
+      "verdict": "keep"
+    },
+    "73263e3b263f18aac95505eb02be61bb": {
+      "verdict": "keep"
+    },
+    "7426c100c53ae3675ce3097f5a8a26a6": {
+      "verdict": "keep"
+    },
+    "77d546b27eee8f38437645882542a85a": {
+      "verdict": "keep"
+    },
+    "7c62952f853129c8ccf0fa1bd08d6ddb": {
+      "verdict": "trim",
+      "remove": [
+        "This feature is well established and works across many devices and browser versions. It’s been available across browsers since January 2020.\n\n* Some parts of this feature may have varying levels of support.\n\nSee full compatibility\n\nLearn more\n\n"
+      ]
+    },
+    "7c898fde0efacb24e331fadb3e8085f0": {
+      "verdict": "keep"
+    },
+    "7db8ee2442c482830c2251adf9e73731": {
+      "verdict": "keep"
+    },
+    "8467cb00b1b4d1a3270a4d9bcf3ce9d3": {
+      "verdict": "keep"
+    },
+    "85d64f22565c7ed941ad4c680ab5d584": {
+      "verdict": "keep"
+    },
+    "87a72756163194190ca8e0095c38b35e": {
+      "verdict": "keep"
+    },
+    "889e3ca81ac0ac16320f78774d9d92e0": {
+      "verdict": "keep"
+    },
+    "8b1aef650dc49096aa4ff4004649104d": {
+      "verdict": "keep"
+    },
+    "914e9a6c6067487e863c07196999dac8": {
+      "verdict": "keep"
+    },
+    "9261c7f0975300995d76b4b18e76eb12": {
+      "verdict": "keep"
+    },
+    "9534fde55e36f04edcd9e4f74e701b54": {
+      "verdict": "keep"
+    },
+    "954d63ae083d28e803b4d7eaced342dc": {
+      "verdict": "keep"
+    },
+    "987a82104cc27b02ef14df8b911f12bf": {
+      "verdict": "keep"
+    },
+    "9f8efb8565d610255b80c05676c308ad": {
+      "verdict": "trim",
+      "remove": ["\n\nthreshold"]
+    },
+    "a4ad0fa18f1106b338c9cfc0614a3d12": {
+      "verdict": "keep"
+    },
+    "a9759b947236355e5069dc69e615100f": {
+      "verdict": "keep"
+    },
+    "aafff826bf5fae9e9f4f877b2d7abcff": {
+      "verdict": "keep"
+    },
+    "ae52c0acec8be89c49205957932258d0": {
+      "verdict": "keep"
+    },
+    "b2e27dce4c71a72afa13d87f67a250e8": {
+      "verdict": "keep"
+    },
+    "ba47ebd1967879cb56209d0bee762fa0": {
+      "verdict": "keep"
+    },
+    "bcbf1f5f3747c85da009a5238c3ec7c1": {
+      "verdict": "keep"
+    },
+    "d4f582d07487551dbc08458635735e1b": {
+      "verdict": "keep"
+    },
+    "da0b653958b05a3e947fe6bf07b8c4ee": {
+      "verdict": "keep"
+    },
+    "db8a7652bbed7e5f7ddc6f16761846d1": {
+      "verdict": "keep"
+    },
+    "de6361b246ca7a4dc67896a1211ec90c": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "describes 'the code above' (PHP generator) which is not in the passage"
+    },
+    "df76b00b9da6767c2126173f628e5d82": {
+      "verdict": "trim",
+      "remove": ["\n\nrootMargin"]
+    },
+    "eacb083b89a577288dfcba0ec8de01dc": {
+      "verdict": "keep"
+    },
+    "ec438db52228673a3b1ec4506c5e9cb0": {
+      "verdict": "keep"
+    },
+    "f4a06de62d7c9c99210f79242ac0f757": {
+      "verdict": "keep"
+    },
+    "f843099414d6dbea41509a58db6d63c0": {
+      "verdict": "keep"
+    },
+    "fce36cf024b0f2e6191d116994d409f2": {
+      "verdict": "keep"
+    },
+    "fe12a56a235a56c1374ff3668d25b538": {
+      "verdict": "drop",
+      "reason": "other",
+      "note": "only example error messages shown on sites; no mechanism, limit or practice; unsure"
+    },
+    "ff8a7affa8c7e9a2d5c16cc20f55f542": {
+      "verdict": "keep"
+    }
+  }
+}

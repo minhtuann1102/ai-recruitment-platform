@@ -1,0 +1,255 @@
+{
+  "source_id": "web-dev",
+  "reviewed_at": "2026-11-18",
+  "approved_by": "auto:canary-gate",
+  "decisions": {
+    "056159ade4300343381ef54911027daa": {
+      "verdict": "trim",
+      "remove": [
+        "Font (rel=preload)\n\n⬆◉\n\n⬇\n\nImport\n\n◉\n\nImage (in viewport - after layout)\n\n⬆◉\n\n⬇\n\nImage (first 5 images > 10,000px2)\n\n⬆\n\n◉\n\n⬇\n\nImage\n\n⬆\n\n◉⬇\n\nMedia (video/audio)\n\n◉\n\nXHR (sync) - deprecated\n\n◉\n\nXHR/fetch* (async)\n\n⬆◉\n\n⬇\n\nPrefetch\n\n◉\n\nXSL\n\n◉"
+      ]
+    },
+    "0b9cf566307dd21c7cbfb7fb2dd59983": {
+      "verdict": "keep"
+    },
+    "0e67f2a56806ff6aa570c0bdeb3fc397": {
+      "verdict": "trim",
+      "remove": ["For Chromium-based browsers, these include:"]
+    },
+    "0ed2bde56f271fe081a58021a267996b": {
+      "verdict": "trim",
+      "remove": [
+        "Take a look at the documentation to see\nexamples of virtualized grids."
+      ]
+    },
+    "10ca188e7edbaed2a60652eb858e2af0": {
+      "verdict": "keep"
+    },
+    "1f42552e4065af55a03f4a0746e05da2": {
+      "verdict": "trim",
+      "remove": [
+        "For specific guidance on optimizing TTFB, consult the optimize TTFB guide ."
+      ]
+    },
+    "207a2aefcd07d83aeeb49ee2d4dab3b2": {
+      "verdict": "keep"
+    },
+    "229fb763db4685667e632299eee1b840": {
+      "verdict": "keep"
+    },
+    "39278dda17ea97cba0bde6fc879605a2": {
+      "verdict": "keep"
+    },
+    "3df927171627bc0c9c378ea34370f9f1": {
+      "verdict": "keep"
+    },
+    "3e790dc93fb014b3f5530c7e6579e1e8": {
+      "verdict": "keep"
+    },
+    "3f744362239d8b9ff11663b558fd16db": {
+      "verdict": "drop",
+      "reason": "other",
+      "note": "Library intro blurb (react-window is a small third-party library), no mechanism or recommendation"
+    },
+    "42969940cb9eea3bdbc6926aeabe5698": {
+      "verdict": "keep"
+    },
+    "433d3f134ebb7558d8e48fbc397595e1": {
+      "verdict": "trim",
+      "remove": [
+        "You can apply the fetchpriority attribute to different resources as shown in the following table to increase or reduce their computed priority. fetchpriority=\"auto\" (◉) in each row marks the default priority for that type of resource. (also available as a Google Doc ).",
+        "Load in layout-blocking phase\n\nLoad one at a time in layout-blocking phase\n\nBlink Priority\n\nVeryHigh\n\nHigh\n\nMedium\n\nLow\n\nVeryLow\n\nDevTools Priority\n\nHighest\n\nHigh\n\nMedium\n\nLow\n\nLowest\n\nMain Resource\n\n◉\n\nCSS (early**)\n\n⬆◉\n\n⬇\n\nCSS (late**)\n\n⬆\n\n◉\n\n⬇\n\nCSS (media mismatch***)\n\n⬆***\n\n◉⬇\n\nScript (early** or not from preload scanner)\n\n⬆◉\n\n⬇\n\nScript (late**)\n\n⬆\n\n◉\n\n⬇\n\nScript (async/defer)\n\n⬆\n\n◉⬇\n\nFont\n\n◉"
+      ]
+    },
+    "43f3d99db8065644a3f2bf2f095dfe97": {
+      "verdict": "trim",
+      "remove": [
+        "Note: For a visual overview of the context presented in this guide, see A Deep Dive into Optimizing LCP from Google I/O '22:"
+      ]
+    },
+    "4436eacc1ab3a4873d8456a86ac2ee58": {
+      "verdict": "keep"
+    },
+    "491efc3ee205a6330c6a4f8976183e86": {
+      "verdict": "keep"
+    },
+    "4c2ccab913fe3ac6e8f2a363df39ed3b": {
+      "verdict": "keep"
+    },
+    "4d95562430f0859a34cc237996594dac": {
+      "verdict": "keep"
+    },
+    "55b0c9bbc3a41cf5b6c69afb7c8d8506": {
+      "verdict": "keep"
+    },
+    "57a5b9268104a5a45769d125799d7b45": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "Refers to a loadMore method and ListComponent from a code example that is not in the passage"
+    },
+    "59f8edbe94f33b7b243ab36aa49a616a": {
+      "verdict": "keep"
+    },
+    "5fe000c16e50418c1d83608d1d0f76f3": {
+      "verdict": "trim",
+      "remove": [
+        "The following guides go into great detail about how to reduce the size of both:\n\nServe the optimal image size\n\nUse modern image formats\n\nCompress images\n\nReduce web font size"
+      ]
+    },
+    "6168d08d18be56d8a953d2b2693cb766": {
+      "verdict": "keep"
+    },
+    "617c1f3eabe087f6180f7ab1eceea360": {
+      "verdict": "keep"
+    },
+    "64f0a5b41c0b6d16f516310b591d9a0e": {
+      "verdict": "trim",
+      "remove": [
+        "Give the demo a try.\nAfter your change, you should not be able to submit the form if you enter less than eight characters."
+      ]
+    },
+    "65a710ef54379c4daa97f640dcbc8cc4": {
+      "verdict": "keep"
+    },
+    "6cdb61d0f5421ecaf4461d2c1d6aaf2c": {
+      "verdict": "keep"
+    },
+    "6d458c91e4e937fae9dc642a57b508fb": {
+      "verdict": "keep"
+    },
+    "71e06ab5a0b1bc8bb34b8c435527e6ac": {
+      "verdict": "trim",
+      "remove": [
+        "For example, the following visualization shows these resources highlighted on a network waterfall diagram from a typical page load, where the LCP element requires an image request to render."
+      ]
+    },
+    "779e0dd38aaeb6101ed1cbd8187bec82": {
+      "verdict": "drop",
+      "reason": "other",
+      "note": "Transitional intro to the next four sections; no mechanism or recommendation"
+    },
+    "7950390b77f162325512a6e71dc3795f": {
+      "verdict": "trim",
+      "remove": [
+        "You’ll find a detailed look at using validation with JavaScript in a later module.",
+        "Learn more about implementing real-time validation with JavaScript in an upcoming module."
+      ]
+    },
+    "79963d43fee4ef85f4d9ab88e8f24437": {
+      "verdict": "keep"
+    },
+    "7aff07edb22cb58dffdaa6c88e562526": {
+      "verdict": "keep"
+    },
+    "7e8d4462237437c5bdb494d240510fec": {
+      "verdict": "trim",
+      "remove": [
+        "To learn more about the research and methodology behind this recommendation, see: Defining the Core Web Vitals metrics thresholds ."
+      ]
+    },
+    "7ec13f59fb3833587aed89d3d94543ca": {
+      "verdict": "keep"
+    },
+    "8a8895ce35b89b316d9163d900c61fae": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "Exclusion list for LCP heuristics; its lead-in ('heuristics exclude non-contentful elements, for Chromium these include:') is in the previous chunk, so alone it reads like elements that are counted"
+    },
+    "8f53e0b2b61dbbc43af0207d25cd613b": {
+      "verdict": "keep"
+    },
+    "9113ffa497db53b35a3a4a7b7f9a2907": {
+      "verdict": "trim",
+      "remove": [
+        "There are more ways to adapt your styles based on validation.\nIn the module about CSS you will learn more about styling forms."
+      ]
+    },
+    "9454c1d3956c03808683b15494876393": {
+      "verdict": "keep"
+    },
+    "973c95c45d72b29f4ca48139f658f8a3": {
+      "verdict": "keep"
+    },
+    "a127769c88e8c52b5d12b0ee8fd142eb": {
+      "verdict": "keep"
+    },
+    "a6cebdb9356cccfc3e6e548991722c5e": {
+      "verdict": "keep"
+    },
+    "a6ec055188781e1ccab1884e2dab38cd": {
+      "verdict": "keep"
+    },
+    "afcd55fd7768afc5562c39443ff41bf2": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "Describes InfiniteLoader wrapping and a demo ('In here', 'now a request is made') whose code is not in the passage; props explanation partly usable, unsure"
+    },
+    "b962440fa29f3382af2b66ee6ebd73dd": {
+      "verdict": "trim",
+      "remove": [
+        "After you have optimized your LCP resource priority and discovery time, your network waterfall should look like this (with the LCP resource starting at the same time as the first resource):"
+      ]
+    },
+    "bf5b6318c14e6bbf2589a640ad8aa9d5": {
+      "verdict": "keep"
+    },
+    "bfc59b4dc6980eb0dd567c7014fc370a": {
+      "verdict": "keep"
+    },
+    "c43ad8fb2517459e892ffc5c7f5c14f5": {
+      "verdict": "trim",
+      "remove": [
+        "You learned in the previous module how to help users avoid having to repeatedly re-enter information in forms.\nHow can you help users enter data that's valid?"
+      ]
+    },
+    "cd1b9334b90e3d5cbefb2590494689e4": {
+      "verdict": "trim",
+      "remove": ["The following diagram might help summarize this:"]
+    },
+    "d075095d26153ea4959c49db7c6c75e4": {
+      "verdict": "keep"
+    },
+    "d0b62f0399d06478b09c63287f3f37ca": {
+      "verdict": "drop",
+      "reason": "other",
+      "note": "Transition teaser to the next section; no mechanism or recommendation"
+    },
+    "d7c1ba0b2021a5b6b136b883216159a6": {
+      "verdict": "keep"
+    },
+    "d8eb70a11bb5c74ae706711809f31a9a": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "Describes timelines/screenshots that are not in the passage ('in both of the timelines', 'first example')"
+    },
+    "e35fc805465f143e8a84b325e5c93b14": {
+      "verdict": "keep"
+    },
+    "e95f7afe91fddf7c6105a25e59e2419a": {
+      "verdict": "keep"
+    },
+    "eb80d73eb9e17ea2496645a5b15832f5": {
+      "verdict": "keep"
+    },
+    "efef73bd53e9dde031173c19009b3a94": {
+      "verdict": "trim",
+      "remove": [
+        "The following sections explain how to address the most common causes of unnecessary element render delay."
+      ]
+    },
+    "f0d11d00408a40b9426e267e7acc5b6f": {
+      "verdict": "keep"
+    },
+    "f23ba94757d4a171283954a0072172e2": {
+      "verdict": "drop",
+      "reason": "other",
+      "note": "Quiz questions without answers or explanation"
+    },
+    "f5df8efccfb4d0d1fecbba05c86bb988": {
+      "verdict": "keep"
+    },
+    "f8b79d30872567d25ded9a91805dea57": {
+      "verdict": "keep"
+    }
+  }
+}

@@ -1,0 +1,287 @@
+{
+  "source_id": "nestjs",
+  "reviewed_at": "2026-11-18",
+  "approved_by": "auto:canary-gate",
+  "decisions": {
+    "00bb7df0803eb9131d92c9809fe910b5": {
+      "verdict": "keep"
+    },
+    "01a2570b1ee79bcad75faab6a6eb446d": {
+      "verdict": "keep"
+    },
+    "05cb932582b01e3ddb705c8d091d5fd8": {
+      "verdict": "keep"
+    },
+    "073abda7f207276973d844093d624bfd": {
+      "verdict": "keep"
+    },
+    "0b5eddaf26cd563be66f05a242cb9108": {
+      "verdict": "trim",
+      "remove": [
+        "This is useful when the factory function or the class constructor needs additional dependencies."
+      ]
+    },
+    "1000458572004f1bc6013e0b7a7f26c5": {
+      "verdict": "keep"
+    },
+    "11e1057b3559165804cdf70e53039503": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "refers to 'the example above', 'this guard', 'as shown above' (a WebSocket throttler guard) that are not in the passage; unsure"
+    },
+    "12d4a253539444d471372104e56d3f0c": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "'set up the custom adapter' refers to a custom adapter not in the passage; useWebSocketAdapter/WsAdapter already covered elsewhere; unsure"
+    },
+    "1a2e089caf5ebbadb14fe0b5042cc878": {
+      "verdict": "keep"
+    },
+    "1bbfeb4c6c10ac6e68662824686e63df": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "opens mid-list; never names the 'multipart' FastifyAdapter option (stem in another chunk); content is valuable (lazy modules / global interceptor pitfalls) so reviewer should recheck; unsure"
+    },
+    "1cbff2266d95c3a0982eee49645ab983": {
+      "verdict": "keep"
+    },
+    "26a981923b6d46b19093a43332860009": {
+      "verdict": "keep"
+    },
+    "2c9478eb91d9b46ffe11d336240a8f70": {
+      "verdict": "keep"
+    },
+    "2e48786782b0aabb53d2f493f3b62bc0": {
+      "verdict": "keep"
+    },
+    "2fa3cf39d661f6cb342756d3bc2f7e32": {
+      "verdict": "keep"
+    },
+    "327c2842200d9251afbdca52e30ce2ca": {
+      "verdict": "keep"
+    },
+    "35866fb6713d7c27459bdf0119bf482a": {
+      "verdict": "keep"
+    },
+    "3d2660c620ce244191494d17f6cd0022": {
+      "verdict": "keep"
+    },
+    "3e5b7effbcba786eb8f8464e9c07e81f": {
+      "verdict": "keep"
+    },
+    "3fe154d83e02cdd16a96aa5d3fed3f9c": {
+      "verdict": "keep"
+    },
+    "41e062f0aa5de30dac82309a4a82472b": {
+      "verdict": "keep"
+    },
+    "42d1324a4dccf215d51322ee2408ad1a": {
+      "verdict": "keep"
+    },
+    "434ef7e0369c33393fe4c6f5d5e96adb": {
+      "verdict": "keep"
+    },
+    "4491295b0cc4905bb88a5639bae9f9a0": {
+      "verdict": "trim",
+      "remove": ["A working example is available in the 28-sse sample ."]
+    },
+    "464b3d6d6e47e9924d5b14aef3afba77": {
+      "verdict": "keep"
+    },
+    "46786df606d6d40ac34514c21d0044f7": {
+      "verdict": "trim",
+      "remove": [
+        "Official enterprise support Providing technical guidance Performing in-depth code reviews Mentoring team members Advising best practices Explore more"
+      ]
+    },
+    "46802eabb97a669ce136386fc8ada788": {
+      "verdict": "keep"
+    },
+    "4818f2eecbd261080552932b138555c8": {
+      "verdict": "keep"
+    },
+    "492c268b17c4b474e21061dcdcae3122": {
+      "verdict": "keep"
+    },
+    "49714d2e4fd7835d9bdee9cbe7997b04": {
+      "verdict": "keep"
+    },
+    "5190729af318d75046ef51de76b688c8": {
+      "verdict": "keep"
+    },
+    "5413df564f9419388a7b556ff73eeb3f": {
+      "verdict": "trim",
+      "remove": [
+        "This works as long as ThrottlerConfigService implements the ThrottlerOptionsFactory interface."
+      ]
+    },
+    "54fa1e9a38f384612b4821a88af3b165": {
+      "verdict": "keep"
+    },
+    "56507b4caa5f14f021bbe09840c959ff": {
+      "verdict": "keep"
+    },
+    "58259136405b356fb262ffc089d799af": {
+      "verdict": "keep"
+    },
+    "60f86fd87c36021bc02ad63ef0a45b79": {
+      "verdict": "keep"
+    },
+    "65c1bf550e3c9598bcc4273b785afc3d": {
+      "verdict": "keep"
+    },
+    "67f64f6b0a1d5a15cfb441c04ca424c9": {
+      "verdict": "keep"
+    },
+    "72428d03c1ac59c48696361833161d1d": {
+      "verdict": "drop",
+      "reason": "off_topic",
+      "note": "migration-to-v5 change notes ('now ...') = version history; no baseline given; ttl-in-ms warning is the only useful bit and appears elsewhere; unsure"
+    },
+    "75201f441e143d0921c5a82516d947e9": {
+      "verdict": "keep"
+    },
+    "7a1dfe72c002048c5e7facff4630e988": {
+      "verdict": "keep"
+    },
+    "7a907cbebfa9bbe61c69fd5680e52afd": {
+      "verdict": "keep"
+    },
+    "7b0cba4c87912dee3f8a29ce873051cc": {
+      "verdict": "keep"
+    },
+    "7b59ca8dc1d624aeea88bb34d6bf6b0e": {
+      "verdict": "keep"
+    },
+    "7b87820bb7e8adc78a8882817b82d39a": {
+      "verdict": "keep"
+    },
+    "7d10f1e10f227e42ce8542ff2b590d3f": {
+      "verdict": "keep"
+    },
+    "7fef1f76ba733f0e6759b5076bfaaace": {
+      "verdict": "keep"
+    },
+    "88807654d979c6e4ba85a862567d5384": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "only an intro sentence ('A simplified implementation could look like this:') whose code is not in the passage"
+    },
+    "8d9759218edfc198bbde67f0419ee5cc": {
+      "verdict": "keep"
+    },
+    "8dd9b71fa9a79d7feaa040c33eb5fff0": {
+      "verdict": "keep"
+    },
+    "8e798503ff7aa1e1b9c4c40c3224db65": {
+      "verdict": "trim",
+      "remove": ["The WsAdapter takes two more limits:"]
+    },
+    "8ed6bb933fa8329155c73506edd72e1f": {
+      "verdict": "trim",
+      "remove": ["A working example is available in the 02-gateways sample ."]
+    },
+    "8f41295ff0df80761c688e3981391d5f": {
+      "verdict": "keep"
+    },
+    "93a454268e0be9da33744ce54f95d73c": {
+      "verdict": "keep"
+    },
+    "95945c819bd044e78be1ed09f4fd8da0": {
+      "verdict": "keep"
+    },
+    "976825918b572234fc35b1e35c0e02c5": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "mid-list option descriptions; first entry has no name (label in previous chunk), refers to 'the table below'; unsure"
+    },
+    "9ab63ba2076ea8f00fabaf393253fd5d": {
+      "verdict": "keep"
+    },
+    "9bb35b2bce0e49a0435d4db3f33d566a": {
+      "verdict": "keep"
+    },
+    "9f7411d748f85af344c6d24529d05b1e": {
+      "verdict": "keep"
+    },
+    "a07847ef340ffb124f0e5f4820df1442": {
+      "verdict": "keep"
+    },
+    "af3ff609e6b1089fc279ab1ec4dc9d71": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "mid-list ThrottlerModule option descriptions; stem is in another chunk, bare 'skipIf' start, refers to 'the table above'; reference-style option list; unsure"
+    },
+    "b011e53736d4592ecc24497a322b1689": {
+      "verdict": "keep"
+    },
+    "b1393a9c3589f75800e7094fa88f450e": {
+      "verdict": "keep"
+    },
+    "b35532cadf7c11cd0fa27204b27a7f20": {
+      "verdict": "trim",
+      "remove": ["ignoreUserAgents"]
+    },
+    "b41143dd018d91b34a86347342a2eb89": {
+      "verdict": "keep"
+    },
+    "b4ede72c5df4177114fe5852e59dddef": {
+      "verdict": "keep"
+    },
+    "c13c08a7afd9074a6eece674c5d64044": {
+      "verdict": "keep"
+    },
+    "c5905ab8e19e1f5e4f5faa13b350ec64": {
+      "verdict": "keep"
+    },
+    "c6a6b074eea03894d3312946ccbe2123": {
+      "verdict": "keep"
+    },
+    "c743f03923b6685c676c9beafce65e73": {
+      "verdict": "keep"
+    },
+    "c8b1612d22a95086ae372d440a495090": {
+      "verdict": "keep"
+    },
+    "d545fc9ec762c8b2b8a7b71275007d78": {
+      "verdict": "drop",
+      "reason": "reference_table",
+      "note": "mostly an Express-to-Fastify API name mapping table (flattened); only the ExpressAdapter hint explains behaviour; unsure"
+    },
+    "e3e23cfee13dd21df4a4c433be211677": {
+      "verdict": "keep"
+    },
+    "e85df3856a083af7f6f63c8a79e01cb9": {
+      "verdict": "keep"
+    },
+    "e88722c3e7144aa462f7e9b6e4c6699c": {
+      "verdict": "trim",
+      "remove": ["A working example of file uploads is available here ."]
+    },
+    "e98ca958891395fc2b97f6a7cd871f54": {
+      "verdict": "keep"
+    },
+    "eb019c155bdd1d76fe65775c52057a92": {
+      "verdict": "keep"
+    },
+    "ebabb3b3ff56972433a2db934a079591": {
+      "verdict": "keep"
+    },
+    "ebadbf65dfe7ac56d2e4c57fdb8c676d": {
+      "verdict": "keep"
+    },
+    "ed380479d2fe8dc4a4df763de3f1c9a7": {
+      "verdict": "keep"
+    },
+    "f3d8808139b5701487341da562f353bb": {
+      "verdict": "keep"
+    },
+    "fafca9b351060c423fa53de63c4b40ca": {
+      "verdict": "keep"
+    },
+    "fd9b655f42ad59ed1c70daa9501e0eaa": {
+      "verdict": "trim",
+      "remove": ["First, install the required packages."]
+    }
+  }
+}

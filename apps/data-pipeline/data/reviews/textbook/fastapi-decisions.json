@@ -1,0 +1,199 @@
+{
+  "source_id": "fastapi",
+  "reviewed_at": "2026-11-18",
+  "approved_by": "auto:canary-gate",
+  "decisions": {
+    "004ff41cf6c783a856373c05d59656eb": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "Mid-tutorial step; the Danger warning is cut off before it says what to do instead (unsure)"
+    },
+    "01472e131116ddb1130465e5e5252020": {
+      "verdict": "trim",
+      "remove": [
+        "Note\n\nIf you don't know, check the Async: \"In a hurry?\" section about async and await in the docs."
+      ]
+    },
+    "037eeda84d9f5be8ce21b6aec13f60a2": {
+      "verdict": "keep"
+    },
+    "068691cab2c4eca2ed856457ade7144f": {
+      "verdict": "keep"
+    },
+    "0a4761ee8eb5f59aa67284f0e89b5b6e": {
+      "verdict": "keep"
+    },
+    "0af81de575374e4555ff2c46c0f9ceed": {
+      "verdict": "trim",
+      "remove": ["Tip\n\nPrefer to use the Annotated version if possible."]
+    },
+    "16403fa06026f6046ce39d7edb350e1c": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "Refers to scopes 'we are now declaring' (me, items) from earlier code; ends on a colon where an image was (unsure)"
+    },
+    "1d5721d50742c96a4b68a2fc8be818c9": {
+      "verdict": "trim",
+      "remove": [
+        "Prefer to use the Annotated version if possible.",
+        "Note\n\nFastAPI added support for Annotated (and started recommending it) in version 0.95.0.\n\nIf you have an older version, you would get errors when trying to use Annotated .\n\nMake sure you Upgrade the FastAPI version to at least 0.95.1 before using Annotated ."
+      ]
+    },
+    "28343c8b7a4f146741cafc8e363b5beb": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "Mid-tutorial step ('Now update the dependency ... used by the dependencies above'); needs earlier code (unsure)"
+    },
+    "28722e164fb4f985016848c4bdd65149": {
+      "verdict": "keep"
+    },
+    "303c1221aac962c09bc763ce70643003": {
+      "verdict": "trim",
+      "remove": ["Here's what the hierarchy of dependencies and scopes looks like:"]
+    },
+    "37f0ea81460c1c7fea77ca119143516f": {
+      "verdict": "drop",
+      "reason": "code_only",
+      "note": "Multiple-upload example with HTML form; only one-line explanation plus a note on importing HTMLResponse from starlette"
+    },
+    "3a87666e3d30f55a4c0ad2d5cd8c3d4a": {
+      "verdict": "keep"
+    },
+    "3c1c49af61087981ce0047fa765e89a1": {
+      "verdict": "keep"
+    },
+    "3e6d21fd30f1a65259276da5ee5ef81f": {
+      "verdict": "keep"
+    },
+    "438ce10bed8e858275a18c6248edc102": {
+      "verdict": "trim",
+      "remove": [
+        "Use the official FastAPI skill for your installed version. Install it from your project directory:\n\n```\nuvx library-skills\n```\n\nSee Develop with AI .",
+        "In this section you will see how to manage authentication and authorization with the same OAuth2 with scopes in your FastAPI application.",
+        "But if you know you need it, or you are curious, keep reading."
+      ]
+    },
+    "4f4f2ea7bb1b566f6f2d68f2521ad4fa": {
+      "verdict": "keep"
+    },
+    "50653518b81c2dad9b58b341f6700331": {
+      "verdict": "keep"
+    },
+    "5e2740d2dd25828e601baa08e0bcb41b": {
+      "verdict": "keep"
+    },
+    "620f84d73132df817c93a39008eacd7a": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "Mid-tutorial step referring to 'the HTTPException we created before'; last paragraph (validate token data with Pydantic) is useful but passage depends on earlier steps (unsure)"
+    },
+    "6e169321b1646b55a07be347d4efde40": {
+      "verdict": "keep"
+    },
+    "6e44fde54896ac8ad9e3af16e14807aa": {
+      "verdict": "trim",
+      "remove": ["Prefer to use the Annotated version if possible."]
+    },
+    "722d79099b2b783b69ee9db8b82b59ee": {
+      "verdict": "trim",
+      "remove": [
+        "If you want to read more about these encodings and form fields, head to the MDN web docs for POST ."
+      ]
+    },
+    "750c2b76d728d09a561851c1ccab18be": {
+      "verdict": "keep"
+    },
+    "76fe9bba8783ccef6bc5ff5396d6bffa": {
+      "verdict": "keep"
+    },
+    "7d9be4b65c320fa008227d4741c91a7c": {
+      "verdict": "keep"
+    },
+    "833bb28b587a65b4f11604d6371a03aa": {
+      "verdict": "trim",
+      "remove": ["Tip\n\nPrefer to use the Annotated version if possible."]
+    },
+    "853c8c132af5456dd5c55f681ddb78be": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "Intro sentences to an example that is in the next passage"
+    },
+    "86a5a837ff6028b02e16cc4f84f01fcb": {
+      "verdict": "drop",
+      "reason": "other",
+      "note": "Bare list of things FastAPI DI is 'compatible with'; no mechanism or limit explained"
+    },
+    "8b8a5329466dd156cbfd2c49d937f4ca": {
+      "verdict": "drop",
+      "reason": "off_topic",
+      "note": "Marketing-style claim that DI replaces plug-ins plus a forward reference to later chapters; no mechanism (unsure)"
+    },
+    "8e1a8a739f1e39f7791fbbae2a13f055": {
+      "verdict": "trim",
+      "remove": [
+        "Use the official FastAPI skill for your installed version. Install it from your project directory:\n\n```\nuvx library-skills\n```\n\nSee Develop with AI ."
+      ]
+    },
+    "927bfdf629d7f9947c27095dc377eef1": {
+      "verdict": "keep"
+    },
+    "931fb60969a12ada8feefcbcb9be3939": {
+      "verdict": "keep"
+    },
+    "94e52f0975de1b7fd5748d867f934923": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "Single sentence that defers to another section (Dependencies in path operation decorators); only says Security with scopes can go in decorator dependencies (unsure)"
+    },
+    "9885fe932231ab73781a63d1d4756796": {
+      "verdict": "keep"
+    },
+    "9fba9a1f90fc1573c6b72ffe8904df46": {
+      "verdict": "keep"
+    },
+    "a93a8c7e58900941553244a906d4599d": {
+      "verdict": "drop",
+      "reason": "off_topic",
+      "note": "After the install boilerplate only two generic marketing sentences about FastAPI DI; no mechanism"
+    },
+    "b444ad17c65c3d7518224bdca2a747cb": {
+      "verdict": "drop",
+      "reason": "off_topic",
+      "note": "After install boilerplate: how to install python-multipart (uv add) before using File; installation step"
+    },
+    "b7d47478aff00a98a1ffa7b0155e4477": {
+      "verdict": "keep"
+    },
+    "bed281729fb78cdd69e7cff76e5b79ac": {
+      "verdict": "trim",
+      "remove": [
+        "Prefer to use the Annotated version if possible.",
+        "Tip\n\nYou'll see what other \"things\", apart from functions, can be used as dependencies in the next chapter."
+      ]
+    },
+    "cae208544e10692f6a893f1037af7d71": {
+      "verdict": "keep"
+    },
+    "d22b5c340993557dff767808f1a5e732": {
+      "verdict": "keep"
+    },
+    "e518600a7e9476b494750557625eb27a": {
+      "verdict": "keep"
+    },
+    "e6d2730ff70129bc6a345ba8918053c6": {
+      "verdict": "keep"
+    },
+    "f141b39a8aafe04e49f5c755b823419e": {
+      "verdict": "keep"
+    },
+    "f86ba6f6055ba2844d02e0339781dbfc": {
+      "verdict": "keep"
+    },
+    "fd1815017dfcd6a7e82d138c6bb3a99a": {
+      "verdict": "trim",
+      "remove": [
+        "You can see more details in Starlette's official docs for Background Tasks ."
+      ]
+    }
+  }
+}

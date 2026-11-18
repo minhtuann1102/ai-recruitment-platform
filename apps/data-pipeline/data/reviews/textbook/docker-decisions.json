@@ -1,0 +1,180 @@
+{
+  "source_id": "docker",
+  "reviewed_at": "2026-11-18",
+  "approved_by": "auto:canary-gate",
+  "decisions": {
+    "00c01fb1f4af779a18fa238b38c6bab2": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "Steps 4-5 of a procedure (docker ps / attach output); depends on earlier steps"
+    },
+    "067582a74c03b08e4d052d49d28de31f": {
+      "verdict": "keep"
+    },
+    "0a4f05ce34af385f24badb1fe61a47c3": {
+      "verdict": "keep"
+    },
+    "10e8862c5545ee1479572abfcffb97cd": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "Introduces a list of --restart values; the list itself is not in the passage"
+    },
+    "17eca8c911551483afc6209526139b0f": {
+      "verdict": "keep"
+    },
+    "20d07784f50b7cd057040425a7bf7b0e": {
+      "verdict": "keep"
+    },
+    "33e38eb25314b56e40e486c13ef63625": {
+      "verdict": "keep"
+    },
+    "3565d27ae6f65b996370ea25bf067537": {
+      "verdict": "keep"
+    },
+    "35d257ed7ab158bdaa7217820b695e43": {
+      "verdict": "keep"
+    },
+    "3a5f5a3374d8c5102c92a6b595408cd1": {
+      "verdict": "trim",
+      "remove": [
+        "For information on creating one, see\n[Dockerignore file](/manuals/build/concepts/context.md#dockerignore-files)."
+      ]
+    },
+    "4b78c2561fead6f70a15791b7f86b800": {
+      "verdict": "keep"
+    },
+    "4cb0555eb8d92fa06ae15e0abacd6f9f": {
+      "verdict": "keep"
+    },
+    "5d20ddcf892f7fb79cf3ab2f7b8864f8": {
+      "verdict": "keep"
+    },
+    "602b3a99870bc9595a5c55e1e65b6f6d": {
+      "verdict": "keep"
+    },
+    "66ff59a813ee2478a86ab451e8c775e6": {
+      "verdict": "keep"
+    },
+    "7086263a7ab7c93ddb75aeea24941f78": {
+      "verdict": "keep"
+    },
+    "7199c630de91294511c3678acfd20e91": {
+      "verdict": "keep"
+    },
+    "7daae98c09c44376a9e0d56a10a26049": {
+      "verdict": "keep"
+    },
+    "82204558f8c54d55a9333213d6602201": {
+      "verdict": "trim",
+      "remove": [
+        "For more information about using volumes with Compose, refer to the\n[Volumes](/reference/compose-file/volumes.md)\nsection in the Compose specification."
+      ]
+    },
+    "91222ed0b051df7b53fcb5ed581f6463": {
+      "verdict": "keep"
+    },
+    "973fadc9a17d39dbe4f2df472e7a0e8f": {
+      "verdict": "trim",
+      "remove": [
+        "To learn more, see the [overlay network driver documentation](/manuals/engine/network/drivers/overlay.md)."
+      ]
+    },
+    "9f7db1d39808d39f61f8132dff79d90b": {
+      "verdict": "keep"
+    },
+    "a46933ca7fd75ac6c025805f888d2370": {
+      "verdict": "keep"
+    },
+    "a5b0b3715cee84fbf53d5bd5500e71c1": {
+      "verdict": "trim",
+      "remove": [
+        "When you pick your base image, look out for the badges indicating that the\nimage is part of these programs.",
+        "![Docker Hub Official and Verified Publisher images](../images/hub-official-images.webp)"
+      ]
+    },
+    "b09fb8114ae29f09795510cdb9d63b34": {
+      "verdict": "keep"
+    },
+    "b9e7e1dc30100cce007f300f74e3c81a": {
+      "verdict": "trim",
+      "remove": [
+        "See the [links reference](/reference/compose-file/services.md#links) for more information."
+      ]
+    },
+    "bcc9e98c7e8d601ebdd3ff8f849b18b2": {
+      "verdict": "keep"
+    },
+    "c756f82a1f33a5f90691c14884514cc1": {
+      "verdict": "keep"
+    },
+    "c8a1027d517b376e918b490c330abd8b": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "First paragraph states foreground CLI exits on container stop regardless of restart policy, but rest is steps 1-3 of a procedure with code, continued in next passage"
+    },
+    "c909da6e4fd1ca6edf026dd0221569d4": {
+      "verdict": "keep"
+    },
+    "c960fa433851ed35e1cd3867c346d24b": {
+      "verdict": "keep"
+    },
+    "cb017fed1a0fc4ddf77a198d81389d8d": {
+      "verdict": "trim",
+      "remove": [
+        "For more information about the Docker build cache and how to optimize your builds,\nsee [Docker build cache](/manuals/build/cache/_index.md)."
+      ]
+    },
+    "cbf9577de75987b4f15b93b7d8435ea2": {
+      "verdict": "keep"
+    },
+    "cc86ef724597704d2c84b9dddb9d37a1": {
+      "verdict": "keep"
+    },
+    "d2beae8c6c201ffc25bcf7b93d1a1e98": {
+      "verdict": "keep"
+    },
+    "dc81b17b43e8ed528e7ffed8c0d0fd15": {
+      "verdict": "trim",
+      "remove": [
+        "{{< tabs >}}\n{{< tab name=\"`--mount`\" >}}",
+        "{{< /tab >}}\n{{< tab name=\"`-v`\" >}}",
+        "{{< /tab >}}\n{{< /tabs >}}"
+      ]
+    },
+    "dcc8a78b05ca7b829df54b742208fb6c": {
+      "verdict": "keep"
+    },
+    "e8707b97f830494b70e01a4f0c6f09a1": {
+      "verdict": "keep"
+    },
+    "eb6d0399b03be749edf3d5d4ebfe98c6": {
+      "verdict": "keep"
+    },
+    "ee5a8e83a4f843c25e05ced0f1a0fc76": {
+      "verdict": "keep"
+    },
+    "f13fcf101604a6311137b91845978606": {
+      "verdict": "keep"
+    },
+    "f33d8d651c720b747a54629f9982cbfe": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "One-line intro to debugging steps that are not in the passage; only gives the order config -> attachment -> connectivity"
+    },
+    "f49a57fe1a3ec7264034b989e06ae2d6": {
+      "verdict": "trim",
+      "remove": [
+        "Refer to [Processes](https://12factor.net/processes) under _The Twelve-factor App_\nmethodology to get a feel for the motivations of running containers in such a\nstateless fashion."
+      ]
+    },
+    "f639fb74b762be48a983145cb8f0682e": {
+      "verdict": "keep"
+    },
+    "fba2c3107666478ec7330683fa94cac4": {
+      "verdict": "keep"
+    },
+    "fe9996f4d82dcfb7af1455b79d1c563a": {
+      "verdict": "keep"
+    }
+  }
+}

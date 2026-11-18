@@ -1,0 +1,224 @@
+{
+  "source_id": "owasp-llm-top10",
+  "reviewed_at": "2026-11-18",
+  "approved_by": "auto:canary-gate",
+  "decisions": {
+    "000a7ce20af7e4387b583879c0ba5923": {
+      "verdict": "keep"
+    },
+    "004a8c328de2a1725c6a1acd7da19fcc": {
+      "verdict": "drop",
+      "reason": "nav",
+      "note": "reference links list"
+    },
+    "024426d06dff6f6c77e95bc2f3251b91": {
+      "verdict": "keep"
+    },
+    "034199d7ef48ab50a1546058e684391f": {
+      "verdict": "keep"
+    },
+    "100d842c0830a0a5ae85e3ce3d3843bf": {
+      "verdict": "keep"
+    },
+    "170eee2014c0d65469dacd99070fe6ca": {
+      "verdict": "keep"
+    },
+    "174a158b80eaf023122b52bf95ff121d": {
+      "verdict": "keep"
+    },
+    "1d1e36f9f507fb6399810dcf7be778ef": {
+      "verdict": "keep"
+    },
+    "20cbf43cb55c7764c31341d2bdac7429": {
+      "verdict": "keep"
+    },
+    "22b59a61ae66b0982abd7fad246c9bbf": {
+      "verdict": "keep"
+    },
+    "251557f1aeb7bd42b1f213615a2edd02": {
+      "verdict": "keep"
+    },
+    "282a49c6155371f11593926992c92e60": {
+      "verdict": "keep"
+    },
+    "2ecaa3ffd3b9c5db3da12c9a9ef424c4": {
+      "verdict": "keep"
+    },
+    "32ded529ab5b9a4deeecb8ce7a2ea68b": {
+      "verdict": "keep"
+    },
+    "34e3c9c35c6bcd628f18811aaf7f75fd": {
+      "verdict": "keep"
+    },
+    "36bd1b9ee015b02a76830e3d608e41cc": {
+      "verdict": "keep"
+    },
+    "385c9ac3c9873668d2ceca92208f0198": {
+      "verdict": "keep"
+    },
+    "401aa01689ac432ceeddb46a6858c47d": {
+      "verdict": "keep"
+    },
+    "413ddaa89557a4ec4b6d0270d1b6ba70": {
+      "verdict": "keep"
+    },
+    "482939b004f0457488fde1f364cecf8b": {
+      "verdict": "drop",
+      "reason": "nav",
+      "note": "related frameworks links list"
+    },
+    "4a1faa7d9e131fdd5cbf95e6049e279e": {
+      "verdict": "keep"
+    },
+    "4cbf7b1fd59553fcad6bfbf8c5d4bcd1": {
+      "verdict": "keep"
+    },
+    "4cec3e24c5222dd367be3de0bae57311": {
+      "verdict": "drop",
+      "reason": "nav",
+      "note": "reference links list"
+    },
+    "5d157777e75350c33d4d209e0375a775": {
+      "verdict": "keep"
+    },
+    "60e4418b83caa30b504e38bdf0658fa3": {
+      "verdict": "keep"
+    },
+    "61d3de01638ef73f5a76416a873079b4": {
+      "verdict": "drop",
+      "reason": "nav",
+      "note": "reference links list"
+    },
+    "628fe5461fdedf147b07c02dd3497fdb": {
+      "verdict": "keep"
+    },
+    "62b6e4135507af6553e4885139389be7": {
+      "verdict": "keep"
+    },
+    "63a4923bd9f9082f1a0712f86ce74966": {
+      "verdict": "keep"
+    },
+    "6c47532a63e8e4630b2971e7fa59b6ea": {
+      "verdict": "keep"
+    },
+    "6c52dff4ddd4b028f7370e221914f376": {
+      "verdict": "keep"
+    },
+    "7129cf5b7ebfa63845665d5caf2a3e2e": {
+      "verdict": "keep"
+    },
+    "7173e9819533176fbbfe2ff2726e9776": {
+      "verdict": "keep"
+    },
+    "741831405b8ec59032228201e0582513": {
+      "verdict": "keep"
+    },
+    "7744ab4d7ed8e01a553a86bf2e10a532": {
+      "verdict": "keep"
+    },
+    "819a5409a99e4caa8421aaac17b0cce1": {
+      "verdict": "keep"
+    },
+    "85024de208a7f1caf35bf1d782859211": {
+      "verdict": "keep"
+    },
+    "85b1811788fc29a0ea9625658b08d830": {
+      "verdict": "drop",
+      "reason": "nav",
+      "note": "reference links list"
+    },
+    "8d4362b995453ac9b950f01e95327cf0": {
+      "verdict": "drop",
+      "reason": "nav",
+      "note": "related frameworks links list"
+    },
+    "8ec229c6214f8a456e6ee155c5851022": {
+      "verdict": "trim",
+      "remove": [
+        "\n(Ref. link: [KFF](https://www.kff.org/health-misinformation-monitor/volume-05/))",
+        "\n(Ref. link: [Lasso](https://www.lasso.security/blog/ai-package-hallucinations))"
+      ]
+    },
+    "8f50bea1e4a59a9b1ed74daad74dc011": {
+      "verdict": "keep"
+    },
+    "94eddc187f9cdafc81f5b07d05e73d44": {
+      "verdict": "trim",
+      "remove": [
+        "\n(Ref. link: [BBC](https://www.bbc.com/travel/article/20240222-air-canada-chatbot-misinformation-what-travellers-should-know))",
+        "\n(Ref. link: [LegalDive](https://www.legaldive.com/news/chatgpt-fake-legal-cases-generative-ai-hallucinations/651557/))"
+      ]
+    },
+    "9998af2840b04228e078403516cc46a3": {
+      "verdict": "keep"
+    },
+    "9a5fdf69edc80cb38031c8ca07de0279": {
+      "verdict": "keep"
+    },
+    "9c0da656eddd9c0afa25941eedf92fcf": {
+      "verdict": "keep"
+    },
+    "9e2d8e601b4c55f7c2d5282ecbc4f09d": {
+      "verdict": "drop",
+      "reason": "nav",
+      "note": "reference links list"
+    },
+    "a39fe81a3043756d53112552f72e5000": {
+      "verdict": "keep"
+    },
+    "a54520c2e363e1056272cd9dfbacd1fe": {
+      "verdict": "drop",
+      "reason": "nav",
+      "note": "reference links list"
+    },
+    "aa8c15ef056550099c98bf2e0d2355c9": {
+      "verdict": "keep"
+    },
+    "adeb598aa1e5be01cbbdab2460cd3ce9": {
+      "verdict": "keep"
+    },
+    "bc2aed7439c7d50212106c8d1c187731": {
+      "verdict": "keep"
+    },
+    "c0dfa41145ce9b5e34815c91f247796e": {
+      "verdict": "keep"
+    },
+    "c309b791b61d8380bc484e57a13a7584": {
+      "verdict": "keep"
+    },
+    "cd9d3c6f41fdca67c3fd35597c696217": {
+      "verdict": "keep"
+    },
+    "d073363dac30cca9431b197ab5bc542e": {
+      "verdict": "keep"
+    },
+    "d62110c1e1854d7a8bd82a365161156e": {
+      "verdict": "keep"
+    },
+    "eb884ce25586371af93098bede4e66f6": {
+      "verdict": "keep"
+    },
+    "ed3ba46bef573e6187f9fd40e459b129": {
+      "verdict": "drop",
+      "reason": "nav",
+      "note": "reference links list"
+    },
+    "f9e84c736df3fe355da708a78e91412d": {
+      "verdict": "keep"
+    },
+    "fb775930ae90a037e5e58172a24a0b76": {
+      "verdict": "drop",
+      "reason": "nav",
+      "note": "related frameworks links list"
+    },
+    "fc35f5833a26e65d563bd4159d1eb7ca": {
+      "verdict": "keep"
+    },
+    "fcba22f7a0b9b48a84933e343da1753d": {
+      "verdict": "keep"
+    },
+    "fe3fdfb6f158150da95c97f8fa530e38": {
+      "verdict": "keep"
+    }
+  }
+}

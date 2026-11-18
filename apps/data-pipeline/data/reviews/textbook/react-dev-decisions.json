@@ -1,0 +1,173 @@
+{
+  "source_id": "react-dev",
+  "reviewed_at": "2026-11-18",
+  "approved_by": "auto:canary-gate",
+  "decisions": {
+    "04031d9dfbedd369a329ae1050c2db2e": {
+      "verdict": "keep"
+    },
+    "05f9adfe130a7e2fa8893c2ef9cb7332": {
+      "verdict": "keep"
+    },
+    "064ea9085eb5561bdb2757391c89c6bc": {
+      "verdict": "keep"
+    },
+    "0906fd01b7468a1cb886654ee24c628e": {
+      "verdict": "keep"
+    },
+    "1070a7e07eccf81850df3ee3ba92f4f9": {
+      "verdict": "keep"
+    },
+    "118ff5d4b142893ff90b2c5238723530": {
+      "verdict": "keep"
+    },
+    "15dd4f007812ea0f89ecd1f2544eb5f9": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "tip refers to 'this flow' from previous text and ends with a stray image caption 'Form states'"
+    },
+    "1624cffd74e30f575689f6cb7c3c4a14": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "tutorial step: mostly mock code, depends on earlier form example"
+    },
+    "1b413983041d252b93f3395f67915a58": {
+      "verdict": "keep"
+    },
+    "1b48e9118c9daecb434edef29411d9df": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "poses a question about console output; answer is in the next passage"
+    },
+    "2138c5f670902e5e533fcf310cb58827": {
+      "verdict": "keep"
+    },
+    "24bebf97c8ddd21181dcf7f41b5e84d0": {
+      "verdict": "keep"
+    },
+    "28c589a0c369a03a49ad6cf7999cb881": {
+      "verdict": "trim",
+      "remove": [
+        "To see what this feels like in practice with a few more components, read Thinking in React."
+      ]
+    },
+    "3cd523f120d65a3e11b11e86844ab491": {
+      "verdict": "keep"
+    },
+    "44b8b5d3685f0738274e0e6caf228e55": {
+      "verdict": "keep"
+    },
+    "493a6fd80bd7c83ed6e4899d5cef1b2f": {
+      "verdict": "keep"
+    },
+    "5424224b0d341917fd0bb1b8bc27651e": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "'Try editing' interactive instruction plus prototype code; thin explanation"
+    },
+    "54ac2fc59c938a5d626f181d09adffe2": {
+      "verdict": "keep"
+    },
+    "56f979967d106baf789bda5ebfdb6989": {
+      "verdict": "trim",
+      "remove": [
+        "Try editing the hardcoded isActive values in the Accordion component and see the result on the screen."
+      ]
+    },
+    "5bd8c12ffa0090bdc42e2d49a241d075": {
+      "verdict": "keep"
+    },
+    "68414404f4921b9d3a46c8e4d9690ace": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "outline of 5 steps, refers to form implemented 'above'; no explanation"
+    },
+    "6c1abb033088bab73fc3ee997fdf1762": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "opens with 'sandboxes above' reference; core claim (each item needs a key) is thin and covered by other chunks"
+    },
+    "6e1b541d59c24ad947a9673a0df5a799": {
+      "verdict": "keep"
+    },
+    "6faf0661c950f761d908f6a5bd8be5fe": {
+      "verdict": "keep"
+    },
+    "8430e49b36730250da91bf5919f34f01": {
+      "verdict": "keep"
+    },
+    "870c232083f3853e1913c24d663d5b24": {
+      "verdict": "keep"
+    },
+    "95a2d0e9df77445d338a4a95cd0735c3": {
+      "verdict": "keep"
+    },
+    "99cf5ccc9230822242500dc1279b05ea": {
+      "verdict": "keep"
+    },
+    "9d999a689d596846befb6bdef4a3ce97": {
+      "verdict": "keep"
+    },
+    "9fbe9e3fee8a08338b1184045554f4dd": {
+      "verdict": "keep"
+    },
+    "a478e3a37f431eb2f9a4a98ac08dfb58": {
+      "verdict": "trim",
+      "remove": ["Illustrated by Rachel Lee Nabors"]
+    },
+    "a97fa1100fc0564b03ee4f65e4df5603": {
+      "verdict": "keep"
+    },
+    "b76e7e9645269c55a0c05cb89467d5a4": {
+      "verdict": "keep"
+    },
+    "b97948a6710bc0d729891741da308a89": {
+      "verdict": "keep"
+    },
+    "bada00a1a32ccfd8b3748915cff29394": {
+      "verdict": "keep"
+    },
+    "cd0c11c9fa9a619fa422630056979252": {
+      "verdict": "keep"
+    },
+    "cd5e861ca17c288ee32993a7e54dcaf4": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "setup step of a multi-part ChatRoom example ('So far, so good'); mechanism explained in next passages"
+    },
+    "d33a41fd26e87ed2a41ef110a0532ea8": {
+      "verdict": "keep"
+    },
+    "d77890d839c8f66b0fee7f765057646a": {
+      "verdict": "keep"
+    },
+    "e88e70986101ed78d774e8bb5703a3dd": {
+      "verdict": "keep"
+    },
+    "e8e66d5835349bbe841b739928a4da71": {
+      "verdict": "keep"
+    },
+    "f0e5afcca391bc0ea8a30032b5e8c6e0": {
+      "verdict": "keep"
+    },
+    "f11721863f005a6f4d6d247e3a6ea032": {
+      "verdict": "drop",
+      "reason": "other",
+      "note": "marginal tip (storybook-style page showing all states); mostly code importing Form.js from earlier step"
+    },
+    "f1ea1a6f1a5da93a9e23b50e249d01f2": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "'In this example' refers to a sandbox not in the passage; only describes the layout"
+    },
+    "f771793f1da8df75d90cc5d4bd5cc561": {
+      "verdict": "keep"
+    },
+    "fb75acca0c2ad5b7fa17453ccfe10180": {
+      "verdict": "keep"
+    },
+    "fcf44cecc0e70c6dbb51831d7a559d0a": {
+      "verdict": "keep"
+    }
+  }
+}

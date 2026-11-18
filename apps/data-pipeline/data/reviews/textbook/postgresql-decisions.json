@@ -1,10 +1,23 @@
 {
+  "source_id": "postgresql",
+  "reviewed_at": "2026-11-18",
   "approved_by": "auto:canary-gate",
   "decisions": {
+    "01874959a081f896f6856b6f759d18e8": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "Unsure: rhetorical lead-in listing three options (disallow, cascade, 'something else?') without explaining them; the answers are in the following passages."
+    },
+    "022a09c64b3046bc75e1f96d8ce7dd4e": {
+      "verdict": "keep"
+    },
     "02b2b42f4847fae3d2225d1e354200d9": {
       "verdict": "keep"
     },
     "044a8d87a708cbb73a494a812a46aca8": {
+      "verdict": "keep"
+    },
+    "0564af2371ad17c179b421c02d797f89": {
       "verdict": "keep"
     },
     "06efcb1e00b840dc8636cc6433f61cec": {
@@ -12,10 +25,28 @@
       "reason": "not_self_contained",
       "verdict": "drop"
     },
+    "0863a6a364f70350f0fe6bde51cd10e2": {
+      "verdict": "keep"
+    },
+    "094bd5154660dd3ad72fb171f44ebfa4": {
+      "verdict": "keep"
+    },
     "09bc66c00ccc341608e60734405136a7": {
       "verdict": "keep"
     },
+    "09dfe7baed5b20c39af24036744584a4": {
+      "verdict": "keep"
+    },
     "0a0c725bd76d8a009c105a3073f74c00": {
+      "verdict": "keep"
+    },
+    "0acb6a6e6ba519a8fd6c1b9690c9a71b": {
+      "verdict": "keep"
+    },
+    "0ade89f94a7bc6dfd9bcdb78aa0dc72e": {
+      "verdict": "keep"
+    },
+    "0bd1d8be7f2c630d6f1132fc2bafedf9": {
       "verdict": "keep"
     },
     "0c7f630dee4ad0182d956956d32d8e6b": {
@@ -29,13 +60,40 @@
     "10b9cb82a790ea3e7b97cc80ce0c82a6": {
       "verdict": "keep"
     },
+    "128bd721ad136b09ba6789d300c857cc": {
+      "verdict": "keep"
+    },
+    "13d233124d1eb53c21676a2fba257d87": {
+      "verdict": "keep"
+    },
     "14ee3d62727a8087afedc490edd13f02": {
+      "verdict": "keep"
+    },
+    "19e06e9e74c13da306015c580920b478": {
+      "verdict": "trim",
+      "remove": [
+        "Prev\n\nUp\n\nNext\n\n11.11. Indexes and Collations\n\nHome\n\nChapter 12. Full Text Search"
+      ]
+    },
+    "1cf73b897104129166778a692fbefd21": {
       "verdict": "keep"
     },
     "1cfa90a77ace36a2cf886b6c0d20a03e": {
       "verdict": "keep"
     },
+    "1d225fb43fdd161e87816e73001be0ce": {
+      "verdict": "keep"
+    },
     "20289b872fb711235ae05330c7926c43": {
+      "verdict": "keep"
+    },
+    "214d9c985fe879ce2b363b704e90268e": {
+      "verdict": "keep"
+    },
+    "21771565d679ba6f042ae0dc17aa70a8": {
+      "verdict": "keep"
+    },
+    "22a2bb659e5a747995392bd8f77a9387": {
       "verdict": "keep"
     },
     "237fb862f29a8ec8758fcfe3da334af0": {
@@ -44,8 +102,19 @@
     "23ae6c70332801822526e5cbbb7587a6": {
       "verdict": "keep"
     },
+    "24f5e837c51a0c9c3fdda2bd00c54a66": {
+      "verdict": "keep"
+    },
+    "2506af3565d615d48c13979cd085d29a": {
+      "verdict": "keep"
+    },
     "25129c052bf6d9e172fbc977ed2487da": {
       "verdict": "keep"
+    },
+    "25e45e8147f52114de1edcc230a93ece": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "describes 'this variant of our IN query' without the original query or plan"
     },
     "26479635062e414ac45ef3776ae942ef": {
       "verdict": "keep"
@@ -56,10 +125,48 @@
     "2ae4a2ba5724a990dd6fb00caa2534f8": {
       "verdict": "keep"
     },
+    "2affe17bf1679ebaabd83cf5ec4b5582": {
+      "verdict": "trim",
+      "remove": ["ACCESS EXCLUSIVE ( AccessExclusiveLock )"]
+    },
+    "2bf9c03c10213db3d98825aecfbbd110": {
+      "verdict": "keep"
+    },
+    "2f8f2a98f64ad5ec40677e84cf2d2334": {
+      "verdict": "keep"
+    },
+    "32f6439d95dd2e4f0cfce11a451afb12": {
+      "verdict": "keep"
+    },
+    "3322f4f16c0a9398f1c5bca840166f3c": {
+      "verdict": "keep"
+    },
+    "332bba0e2c5455a7952e1ed226521a84": {
+      "verdict": "trim",
+      "remove": [
+        "5.5.1. Check Constraints\n\n5.5.2. Not-Null Constraints\n\n5.5.3. Unique Constraints\n\n5.5.4. Primary Keys\n\n5.5.5. Foreign Keys\n\n5.5.6. Exclusion Constraints"
+      ]
+    },
     "33b3b58363bc5e30f851eee9174e29b4": {
       "verdict": "keep"
     },
+    "3518a0e12a8d8c2160b80848581e55fd": {
+      "verdict": "keep"
+    },
     "375927bf6fb6bc03c1ef42ca106bded1": {
+      "verdict": "keep"
+    },
+    "3799bc0f9f4ec2473916911955c67e91": {
+      "verdict": "keep"
+    },
+    "37e9e6231a6483b46f65cb48da047ede": {
+      "verdict": "trim",
+      "remove": [
+        "The functions provided to manipulate advisory locks are described in Section 9.28.10 .",
+        "Prev\n\nUp\n\nNext\n\n13.2. Transaction Isolation\n\nHome\n\n13.4. Data Consistency Checks at the Application Level"
+      ]
+    },
+    "38e34cd1fa80f624b20fa3cbfc2d243e": {
       "verdict": "keep"
     },
     "38e37f03964c3cb5cc06c2a83a623c54": {
@@ -73,6 +180,18 @@
     "399208b775334478e53f05be0d929a8a": {
       "verdict": "keep"
     },
+    "3a18c74649aa4d6309beea37f8aeb0ca": {
+      "verdict": "keep"
+    },
+    "3a3951d482ca293393a1c4c7d6ca5eef": {
+      "verdict": "keep"
+    },
+    "3ad7d7bdfd975ca9a88f24409ce141a8": {
+      "verdict": "keep"
+    },
+    "3e9fbef82279797f38d5d7d4d7f3be58": {
+      "verdict": "keep"
+    },
     "3f736515d68f108560f6e56a675c1b1a": {
       "remove": [
         "Table 13.2. Conflicting Lock Modes\n\nRequested Lock Mode\n\nExisting Lock Mode\n\nACCESS SHARE\n\nROW SHARE\n\nROW EXCL.\n\nSHARE UPDATE EXCL.\n\nSHARE\n\nSHARE ROW EXCL.\n\nEXCL.\n\nACCESS EXCL.\n\nACCESS SHARE\n\nX\n\nROW SHARE\n\nX\n\nX\n\nROW EXCL.\n\nX\n\nX\n\nX\n\nX\n\nSHARE UPDATE EXCL.\n\nX\n\nX\n\nX\n\nX\n\nX\n\nSHARE\n\nX\n\nX\n\nX\n\nX\n\nX\n\nSHARE ROW EXCL.\n\nX\n\nX\n\nX\n\nX\n\nX\n\nX\n\nEXCL.\n\nX\n\nX\n\nX\n\nX\n\nX\n\nX\n\nX\n\nACCESS EXCL.\n\nX\n\nX\n\nX\n\nX\n\nX\n\nX\n\nX\n\nX"
@@ -82,13 +201,23 @@
     "3f73b96657480563ae6ed299ab322a4e": {
       "verdict": "keep"
     },
+    "3fd36dbaef46be0cda50b6a4a90bc09b": {
+      "verdict": "trim",
+      "remove": ["Row-Level Lock Modes\n\nFOR UPDATE"]
+    },
     "3ff78595cae7bd90d6356ad721de1ddb": {
+      "verdict": "keep"
+    },
+    "4040e2cfe75aff2525deded5d69a8bfd": {
       "verdict": "keep"
     },
     "42172b8bae208e2d855ba0ab5944a99b": {
       "verdict": "keep"
     },
     "423356fa31ea1a4ecbb2bca9185ca926": {
+      "verdict": "keep"
+    },
+    "431ef3bdeb24f162f909359570885f7c": {
       "verdict": "keep"
     },
     "451217f4ff203bf5829aa02332d6c584": {
@@ -104,7 +233,38 @@
       ],
       "verdict": "trim"
     },
+    "48c7315b47e32eebb75663b1317e3d35": {
+      "verdict": "trim",
+      "remove": [
+        "See also CREATE TABLE ... CONSTRAINT ... EXCLUDE for details.",
+        "Prev\n\nUp\n\nNext\n\n5.4. Generated Columns\n\nHome\n\n5.6. System Columns"
+      ]
+    },
+    "4927c4561f8b9570fc04748ea4a84855": {
+      "verdict": "keep"
+    },
+    "4a0a57bb2b8468fee1f358882f687888": {
+      "verdict": "trim",
+      "remove": ["As an example, consider the following table design:"]
+    },
+    "4a40556e8242337b350382dbe8f1265f": {
+      "verdict": "keep"
+    },
     "4b8a64ab7f4783684984ac55be57cfb8": {
+      "verdict": "keep"
+    },
+    "4bc39a157860d40e6f3ee3f6eeda2a2f": {
+      "verdict": "keep"
+    },
+    "4bdf9793d30662b031bab09d9b814d28": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "Refers to 'the first two constraints' and 'the third one' of an example that is in the previous chunk; short and only meaningful with that example."
+    },
+    "4ccad151c63a9b6a3c5dbbad9a25a78c": {
+      "verdict": "keep"
+    },
+    "4d014b104e0431f7b574ce2d5b2ea1b9": {
       "verdict": "keep"
     },
     "4e5dd4586887a9d7a8104c8da1d9bb35": {
@@ -113,11 +273,20 @@
     "4e6179bcf446a480261563a46c14dc85": {
       "verdict": "keep"
     },
+    "4f7de0bab98fbbbb89b7bf0eeeccb349": {
+      "verdict": "keep"
+    },
+    "50489b0a73034ee4a2265fe1198cee46": {
+      "verdict": "keep"
+    },
     "509c0630f79c3793bb545c1fa5c44c96": {
       "remove": [
         "Prev\n\nUp\n\nNext\n\n11.11. Indexes and Collations\n\nHome\n\nChapter 12. Full Text Search"
       ],
       "verdict": "trim"
+    },
+    "52cf3c9f0bb178527121ec996c180309": {
+      "verdict": "keep"
     },
     "542837b6327b6d4a10e9f6c9c63fad9b": {
       "verdict": "keep"
@@ -128,22 +297,68 @@
     "553a6032eeb5153f6f6c68f177957494": {
       "verdict": "keep"
     },
+    "5774717569fe931b4b0aaef906472c52": {
+      "verdict": "keep"
+    },
     "5782692d6ec7884cbac4cf6c42f5de8a": {
       "remove": [
         "Prev\n\nUp\n\nNext\n\nChapter 14. Performance Tips\n\nHome\n\n14.2. Statistics Used by the Planner"
       ],
       "verdict": "trim"
     },
+    "58a33733eed79934668233f68a5a01f1": {
+      "verdict": "keep"
+    },
     "593892dfeb5a7640604b7f6677410207": {
+      "verdict": "keep"
+    },
+    "597efe7b56cdb1623290a9591d9f809d": {
       "verdict": "keep"
     },
     "5b04c361be7755fa7231a4d50288356a": {
       "verdict": "keep"
     },
+    "5b44d3e6e946ec26bcd6488549427971": {
+      "verdict": "trim",
+      "remove": ["14.1.1. EXPLAIN Basics\n\n14.1.2. EXPLAIN ANALYZE\n\n14.1.3. Caveats"]
+    },
+    "5bf081485cb52c3e40d841d4841c2c45": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "starts mid-sentence ('and her transaction...'), relies on alice/mallory scenario from previous passage"
+    },
     "5c685a9c9cab7cdb9f94e5663571b29b": {
       "verdict": "keep"
     },
+    "5c7bad30df5794d71c5c0e4eafb1d6dc": {
+      "verdict": "keep"
+    },
     "5cf6fd1e56ac67f39d20f1c1976ab85f": {
+      "verdict": "keep"
+    },
+    "5d4c3a33b5c26851034d973e455ed1ca": {
+      "verdict": "keep"
+    },
+    "5d551be8baa3e702dab7751c7e906def": {
+      "verdict": "trim",
+      "remove": [
+        "13.2.1. Read Committed Isolation Level\n\n13.2.2. Repeatable Read Isolation Level\n\n13.2.3. Serializable Isolation Level",
+        "The phenomena which are prohibited at various levels are:\n\ndirty read"
+      ]
+    },
+    "5ddfa11808effa429bdae8bd613f0f7d": {
+      "verdict": "keep"
+    },
+    "5eb9e008b924702321a2055be0731d3a": {
+      "verdict": "keep"
+    },
+    "5fe84b3561687a9171ef8bec4e383958": {
+      "verdict": "keep"
+    },
+    "60077810ad35bde7d16a79f9a6da2b98": {
+      "verdict": "keep"
+    },
+    "61978cf871ed825f45f46d53666e3110": {
       "verdict": "keep"
     },
     "63e922133d2c3100329f61db96ffcebf": {
@@ -152,11 +367,26 @@
     "65c2d59f760b3c7ae4c3a7a94c0ac19a": {
       "verdict": "keep"
     },
+    "685ceda62ff42e65caf381e1872d0901": {
+      "verdict": "keep"
+    },
     "68a82d706334ae8dd943f84e0c2d3a35": {
+      "verdict": "keep"
+    },
+    "6a37cc40b9dc92101d769817aea79e3d": {
+      "verdict": "keep"
+    },
+    "6a6c5c1e70b4abb118895cdf3766b4a7": {
       "verdict": "keep"
     },
     "6b2f020a85b11e673a8ba40e3f7e3251": {
       "verdict": "keep"
+    },
+    "6c15ef5ffaabe9095be113cc6c78fe6f": {
+      "verdict": "trim",
+      "remove": [
+        "For additional details see CREATE POLICY and ALTER TABLE .\n\nPrev\n\nUp\n\nNext\n\n5.8. Privileges\n\nHome\n\n5.10. Schemas"
+      ]
     },
     "6c709cc414ea1336a65af43034549298": {
       "verdict": "keep"
@@ -170,13 +400,27 @@
     "6e74a7b9877cc77ce83422c10250e2a5": {
       "verdict": "keep"
     },
+    "6fa0a4bcbe3d6f86ba1a31b7b5654120": {
+      "verdict": "keep"
+    },
+    "6fec64376b0a911ad1204f55121bb0e5": {
+      "verdict": "keep"
+    },
     "70678359f77f10569644ecbf6623ff86": {
       "note": "version history note (pre-9.1); refers to behaviour described elsewhere",
       "reason": "off_topic",
       "verdict": "drop"
     },
+    "70add956d9b1a1811deebf4e800c9266": {
+      "verdict": "keep"
+    },
     "70bfdeac99dc7f42f3748c99ca01b653": {
       "verdict": "keep"
+    },
+    "71024c90b0f1daff89b302d20812cbca": {
+      "verdict": "drop",
+      "reason": "nav",
+      "note": "mostly a subsection TOC plus a one-line intro with no mechanism"
     },
     "710abf6627877fb24c1447f44899fa02": {
       "note": "lock mode names stripped from list; cannot tell which mode each paragraph describes",
@@ -189,6 +433,9 @@
     "73db407d6cd3b619865d7a61b532bfdf": {
       "verdict": "keep"
     },
+    "74e4a5f5016be205e7c5bf530f157ca0": {
+      "verdict": "keep"
+    },
     "75074d6318a1bca554c9a723b52a2d8b": {
       "verdict": "keep"
     },
@@ -198,10 +445,33 @@
       ],
       "verdict": "trim"
     },
+    "77ca7c05084538b01eec5e3a2d0e0335": {
+      "verdict": "keep"
+    },
     "7b4bfb981bc30779386e412206b2d3b5": {
       "verdict": "keep"
     },
+    "7bc1d8a97a52256941c3c6e6a381d98a": {
+      "verdict": "trim",
+      "remove": [
+        "Table 13.2. Conflicting Lock Modes\n\nRequested Lock Mode\n\nExisting Lock Mode\n\nACCESS SHARE\n\nROW SHARE\n\nROW EXCL.\n\nSHARE UPDATE EXCL.\n\nSHARE\n\nSHARE ROW EXCL.\n\nEXCL.\n\nACCESS EXCL.\n\nACCESS SHARE\n\nX\n\nROW SHARE\n\nX\n\nX\n\nROW EXCL.\n\nX\n\nX\n\nX\n\nX\n\nSHARE UPDATE EXCL.\n\nX\n\nX\n\nX\n\nX\n\nX\n\nSHARE\n\nX\n\nX\n\nX\n\nX\n\nX\n\nSHARE ROW EXCL.\n\nX\n\nX\n\nX\n\nX\n\nX\n\nX\n\nEXCL.\n\nX\n\nX\n\nX\n\nX\n\nX\n\nX\n\nX\n\nACCESS EXCL.\n\nX\n\nX\n\nX\n\nX\n\nX\n\nX\n\nX\n\nX"
+      ]
+    },
+    "7bc7bd0b461a73421f7a6888716bb165": {
+      "verdict": "trim",
+      "remove": [
+        "Prev\n\nUp\n\nNext\n\nChapter 14. Performance Tips\n\nHome\n\n14.2. Statistics Used by the Planner"
+      ]
+    },
     "7c17c5fe162ee650845b00aabf9b7fd0": {
+      "verdict": "keep"
+    },
+    "7c7f5be4ef458adcc538f057e8f22456": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "Middle of the two-transaction deadlock walkthrough: step-by-step narration of SQL statements shown in neighbouring passages; no standalone mechanism."
+    },
+    "7c869720a52d89536a7b526760a5407a": {
       "verdict": "keep"
     },
     "7ce86b43d99e1117fed7b05604c65cfe": {
@@ -210,13 +480,27 @@
     "7ec29ad4b3164c34e2d2d1d555a31c7f": {
       "verdict": "keep"
     },
+    "803b52a68a0d020a75220143a6fdeae6": {
+      "verdict": "keep"
+    },
     "80d5be27f9ee34b15205d8e005d28e54": {
+      "verdict": "keep"
+    },
+    "8164019b55e9fc8efba6343fcb4a60af": {
       "verdict": "keep"
     },
     "81a037753db164765bd3c5541845d6f1": {
       "verdict": "keep"
     },
     "81c6be1b04833c0da42dd0c953b8041f": {
+      "verdict": "keep"
+    },
+    "81ec15c68a3148902dafa26fc2e95fd9": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "refers to 'this rather artificial example' not in passage; subplan notation point only"
+    },
+    "83dce9edf86e0699c52eef4f01272f60": {
       "verdict": "keep"
     },
     "84548074ca4a077785ff24fa3c5a48c7": {
@@ -228,6 +512,11 @@
     "85134c93cf14b78c8cdcdb7c6ccfb814": {
       "verdict": "keep"
     },
+    "853761319130353b046c815af85f1cd6": {
+      "verdict": "drop",
+      "reason": "off_topic",
+      "note": "Version-history note (behaviour prior to 9.1); no mechanism beyond what the Repeatable Read passages already give."
+    },
     "85fa76796cb076e09889044eaca83894": {
       "verdict": "keep"
     },
@@ -236,6 +525,10 @@
     },
     "89bbc7d37f84f331f975d7cecad94543": {
       "verdict": "keep"
+    },
+    "8a068a00eca4ff67f8a1883a77b6ecb9": {
+      "verdict": "trim",
+      "remove": ["It's a matter of taste."]
     },
     "8c1186c11fe4cacfe653df5d21fa5079": {
       "verdict": "keep"
@@ -247,6 +540,15 @@
       "verdict": "keep"
     },
     "93e64f84798e59c8082d024f9dbf1444": {
+      "verdict": "keep"
+    },
+    "950f439d3c93d22ebdab4bb1c76fd23d": {
+      "verdict": "trim",
+      "remove": [
+        "Possible\n\nRepeatable read\n\nNot possible\n\nNot possible\n\nAllowed, but not in PG\n\nPossible\n\nSerializable\n\nNot possible\n\nNot possible\n\nNot possible\n\nNot possible"
+      ]
+    },
+    "9523b03b53539255849eeda5d6ec8aea": {
       "verdict": "keep"
     },
     "95ce14f293574c37cc70567a19a76363": {
@@ -271,6 +573,16 @@
     "99589391f4470491c6f1798c24aebbea": {
       "verdict": "keep"
     },
+    "9a49ae17675e76a3415f075f7a1b54ed": {
+      "verdict": "keep"
+    },
+    "9c14992bacdf19992d9c8bdb30b85f4e": {
+      "verdict": "trim",
+      "remove": ["(We saw this happening in the polygon_tbl example above.)"]
+    },
+    "9eae983e085a4626bef028c5a5c86ecb": {
+      "verdict": "keep"
+    },
     "9ecbb7d6cfcb65c5e3a12516655cbf35": {
       "remove": ["It's a matter of taste.\n\n"],
       "verdict": "trim"
@@ -281,14 +593,29 @@
       ],
       "verdict": "trim"
     },
+    "a1c7ba38eeb026c9907507ee7d949e1f": {
+      "verdict": "keep"
+    },
     "a5f32d4ec5fb05b199260e4fac3b438a": {
       "remove": ["\n\nRow-Level Lock Modes"],
       "verdict": "trim"
+    },
+    "a7a4bf49a25c8016a0b53c0af0b88643": {
+      "verdict": "keep"
+    },
+    "a8ca0c363e3857f1104893648bcf158b": {
+      "verdict": "keep"
     },
     "a939f220a01201770ba9153426cb79e7": {
       "note": "lock mode names stripped from list; cannot tell which mode each paragraph describes",
       "reason": "not_self_contained",
       "verdict": "drop"
+    },
+    "a987ecce9a3db334c5cea5734ad5cfc3": {
+      "verdict": "keep"
+    },
+    "a9aa230c9ec5e4f69085326fbf84f3f8": {
+      "verdict": "keep"
     },
     "ab946a742ba86deec022ff958854768d": {
       "verdict": "keep"
@@ -296,11 +623,31 @@
     "ac3eddee6bb70374a577036780ebcc3a": {
       "verdict": "keep"
     },
+    "ac40f272e7cbaf4956942f3cbdd9318d": {
+      "verdict": "keep"
+    },
     "ae03745efa57f580434c6dfd52e5e495": {
+      "verdict": "keep"
+    },
+    "ae0637d5f30d86554fd4314589266374": {
       "verdict": "keep"
     },
     "ae2772b0112788f6b9b845233fd13005": {
       "verdict": "keep"
+    },
+    "af319f86a9e39f6d8595ce02f46a99b7": {
+      "verdict": "keep"
+    },
+    "af9fd96dff01992483bee22906f0bc73": {
+      "verdict": "keep"
+    },
+    "afa5f9f31f0528773c722ece035e4cef": {
+      "verdict": "keep"
+    },
+    "afcc4e3c024cab717c83b77592bc5c06": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "Unsure: opens with 'But this requires visiting both indexes' (refers to a plan in the previous chunk), then a bare LIMIT EXPLAIN example whose explanation is in the next chunk."
     },
     "b027eedd719ec583de877658edb51e16": {
       "verdict": "keep"
@@ -308,7 +655,30 @@
     "b57096341ff5ee9b23ac5131ee13e45f": {
       "verdict": "keep"
     },
+    "b665b8c9b27ceadb73120a40de9fbe19": {
+      "verdict": "keep"
+    },
     "b83110d8d0ac3d30de385cbe9861eefb": {
+      "verdict": "keep"
+    },
+    "b8eda5cd68115cc56fe991304ecc5b07": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "race-condition scenario; relies on a users/information table design not in passage and ends mid-sentence before the query"
+    },
+    "b96a3231747384504545b5d34ab1d022": {
+      "verdict": "keep"
+    },
+    "b99780f5163f6f37d5ddd2394314e23d": {
+      "verdict": "trim",
+      "remove": [
+        "Table 13.3. Conflicting Row-Level Locks\n\nRequested Lock Mode\n\nCurrent Lock Mode\n\nFOR KEY SHARE\n\nFOR SHARE\n\nFOR NO KEY UPDATE\n\nFOR UPDATE\n\nFOR KEY SHARE\n\nX\n\nFOR SHARE\n\nX\n\nX\n\nFOR NO KEY UPDATE\n\nX\n\nX\n\nX\n\nFOR UPDATE\n\nX\n\nX\n\nX\n\nX"
+      ]
+    },
+    "baad6128c3964fb613e214b58d1a234a": {
+      "verdict": "keep"
+    },
+    "bc1d0c97ebb047adb91a0d9338488a94": {
       "verdict": "keep"
     },
     "bcce77fc38820de6a7522d671f251255": {
@@ -317,7 +687,13 @@
     "bde069e7bdb11b48e27a2fc4501d3d23": {
       "verdict": "keep"
     },
+    "bde0d86c05f540c34949841e9e4dde73": {
+      "verdict": "keep"
+    },
     "beb6c5e25b6a92166fd7133121f0d151": {
+      "verdict": "keep"
+    },
+    "bedad49a78d535c4372c7a1182d49023": {
       "verdict": "keep"
     },
     "bf562f4b5aad5ae7abc8d8393c3c8aa9": {
@@ -329,7 +705,25 @@
       ],
       "verdict": "trim"
     },
+    "c196ea6acd49192bb8c21b4e06d9d54c": {
+      "verdict": "keep"
+    },
     "c2b180b97c0f40841acfecd752bd785e": {
+      "verdict": "keep"
+    },
+    "c2e53d92315e90243e4193cf943dbd73": {
+      "verdict": "trim",
+      "remove": [
+        "Prev\n\nUp\n\nNext\n\n14.3. Controlling the Planner with Explicit JOIN Clauses\n\nHome\n\n14.5. Non-Durable Settings"
+      ]
+    },
+    "c3252c34519369ee0d298f5a27ba43d3": {
+      "verdict": "keep"
+    },
+    "c42dbddc8c1b46529a74f9ec2f196ef9": {
+      "verdict": "keep"
+    },
+    "c455b227fc4d77b06b8d234c730183d8": {
       "verdict": "keep"
     },
     "c491ebbf9ac21509f42efa41175b2639": {
@@ -338,12 +732,28 @@
     "c657f4d36db03c60ca9fc5dab40f3aea": {
       "verdict": "keep"
     },
+    "c6f9898e4d7eb4d8d3afa9d57b0235c6": {
+      "verdict": "keep"
+    },
+    "c71319d63fe6623e7b8635eb6961d6d6": {
+      "verdict": "keep"
+    },
+    "c8dc7a7c0c77361b3267b8d9499f0a3a": {
+      "verdict": "keep"
+    },
+    "c937bcdea6e7e54d56257988f43d7057": {
+      "verdict": "trim",
+      "remove": ["FOR SHARE"]
+    },
     "c9db7add5b7c8a0e04604e6dff58011d": {
       "remove": [
         "See also CREATE TABLE ... CONSTRAINT ... EXCLUDE for details.\n\n",
         "\n\nPrev\n\nUp\n\nNext\n\n5.4. Generated Columns\n\nHome\n\n5.6. System Columns"
       ],
       "verdict": "trim"
+    },
+    "cad47b32789996edb700454d139f84b7": {
+      "verdict": "keep"
     },
     "cc321125336b62445f785ad471c5867d": {
       "remove": ["Not possible\n\nNot possible\n\n"],
@@ -352,18 +762,36 @@
     "cca17d48beecb1317d1ccff05f849a16": {
       "verdict": "keep"
     },
+    "ccf66a36b4d2969e51acd5b6628463fc": {
+      "verdict": "keep"
+    },
+    "cf51a622b00954da8eb1bc38cc023565": {
+      "verdict": "keep"
+    },
+    "cfc3c282e5e9cc95407c1c7283c9f68a": {
+      "verdict": "keep"
+    },
     "cff7930400f83d50a67b61ae1a8808c3": {
       "note": "lock mode names stripped from list; starts with tail of previous mode",
       "reason": "not_self_contained",
       "verdict": "drop"
     },
+    "d08cfecf8a454951a20625309100f367": {
+      "verdict": "keep"
+    },
     "d0fd305b90e7a6cea8597867e887c432": {
+      "verdict": "keep"
+    },
+    "d1002e73b8eefc8a03ada920ab87e9cf": {
       "verdict": "keep"
     },
     "d19750d91c4c0a89d4abbe7816c16e4b": {
       "verdict": "keep"
     },
     "d1a7c3805cc494a6d9dbfc424a3c4813": {
+      "verdict": "keep"
+    },
+    "d23ae5a1fd4643c4524f23421f476023": {
       "verdict": "keep"
     },
     "d24c3ad356095c9cde48f50f16c9c1c1": {
@@ -373,6 +801,21 @@
       "verdict": "keep"
     },
     "d56ca86f7defb7664a735a5dcee31a5f": {
+      "verdict": "keep"
+    },
+    "d58c68646f61b25414296fc7c3764bfa": {
+      "verdict": "keep"
+    },
+    "d65c67f25fe9897e03857cc0abd548ff": {
+      "verdict": "trim",
+      "remove": [
+        "More information about updating and deleting data is in Chapter 6 . Also see the description of foreign key constraint syntax in the reference documentation for CREATE TABLE ."
+      ]
+    },
+    "d7ba2d78310ee9e8fc9aa3476f5be4a2": {
+      "verdict": "keep"
+    },
+    "d7cb78abc402dce6566fb0a6c324c3a3": {
       "verdict": "keep"
     },
     "d83fd0850704ba0e4362eabf1d2e7a12": {
@@ -385,14 +828,46 @@
     "d87e1da6a8c643d3423c55e2b104fcca": {
       "verdict": "keep"
     },
+    "d893994d78e7e4cea58d9e6892d58cb2": {
+      "verdict": "keep"
+    },
+    "d898c863a10b63e930bb6e73f7483c2d": {
+      "verdict": "keep"
+    },
     "d8b32f074e4888c378f32cfb548fc951": {
+      "verdict": "keep"
+    },
+    "d8c7e7a103824f9b4a9c07f2b4778ebd": {
+      "verdict": "keep"
+    },
+    "d97555c266a21fcccfe4459a33f06e23": {
       "verdict": "keep"
     },
     "da436ad367b04a12f7658339db88c98c": {
       "verdict": "keep"
     },
+    "db9aa9501e1e16f3e72416674a12c28d": {
+      "verdict": "keep"
+    },
     "dc2114cf27b63c22e44ca52dc4740d1f": {
       "verdict": "keep"
+    },
+    "dc8eecf8b886af2823c5bae68c72f864": {
+      "verdict": "keep"
+    },
+    "e0120d77e40e71f1901ecb7d508b033d": {
+      "verdict": "keep"
+    },
+    "e0d13a0122e35826e056c751c3794c5c": {
+      "verdict": "keep"
+    },
+    "e10bacf92ac51a9f6bc0f34b548a7688": {
+      "verdict": "keep"
+    },
+    "e223cd5f66356217e815a71eeb89e2f7": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "Unsure: body of the ACCESS EXCLUSIVE lock mode but the mode name is only in the previous chunk (opens with 'Conflicts with locks of all modes'); mechanism is clear, name is missing."
     },
     "e320f11885a83531b675210c6b5758ee": {
       "note": "middle steps of the deadlock example, depends on previous and next passage",
@@ -400,6 +875,9 @@
       "verdict": "drop"
     },
     "e357ff5e8485878cd7399a9f2b14ca0a": {
+      "verdict": "keep"
+    },
+    "e44e7496ea6fc26b58e12f15265fb69c": {
       "verdict": "keep"
     },
     "e452c5232bb28ad7ae3e3afa25b7174f": {
@@ -418,13 +896,68 @@
     "eb4716a4e98ed4dddebdd99be81d05f1": {
       "verdict": "keep"
     },
+    "eb5620db2f26effd5658f93b2ea4c19c": {
+      "verdict": "keep"
+    },
+    "eb674377256dad94578f8b98e4f5188e": {
+      "verdict": "keep"
+    },
+    "edac7c8dbffb9043013fc67dec622a2c": {
+      "verdict": "keep"
+    },
+    "edc9dcfa0dc0d1ba84b27e5c1273e844": {
+      "verdict": "keep"
+    },
+    "f3918ceb033d3b9fc5ad4177566353e7": {
+      "verdict": "keep"
+    },
+    "f511feed70db54f0b5eda7a319ab29e3": {
+      "verdict": "keep"
+    },
+    "f5640cb8c2a5c1534ec42ae9585c48f4": {
+      "verdict": "trim",
+      "remove": [
+        "13.3.1. Table-Level Locks\n\n13.3.2. Row-Level Locks\n\n13.3.3. Page-Level Locks\n\n13.3.4. Deadlocks\n\n13.3.5. Advisory Locks"
+      ]
+    },
+    "f74d883dfe15a4c42bd4cd2be68956cb": {
+      "verdict": "keep"
+    },
+    "f82311ba6c43f073488a9e1919de3b54": {
+      "verdict": "keep"
+    },
+    "f9aa072cdf175bac2598d3de5bedf8fa": {
+      "verdict": "keep"
+    },
+    "faaee4d5d79fb4deb42617d3a1546842": {
+      "verdict": "trim",
+      "remove": [
+        "Prev\n\nUp\n\nNext\n\n13.1. Introduction\n\nHome\n\n13.3. Explicit Locking"
+      ]
+    },
+    "fb58c2b967f738b27e465a52ea86674e": {
+      "verdict": "trim",
+      "remove": ["For example, we might get a result like this:"]
+    },
     "fc56a3dd15eb2b7abfee25d0c295dcca": {
+      "verdict": "keep"
+    },
+    "fd32169ce563bef0dfee8aaae5705fab": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "starts mid-sentence (lowercase) and refers to a plan with a Limit node that is not in the passage"
+    },
+    "fdd7cd84838b51b47c9e20fe34aee974": {
       "verdict": "keep"
     },
     "ff043df634ef736a68cc36e54a67a58a": {
       "verdict": "keep"
+    },
+    "ffac9bd8bcd15d230c0d1f6d306b5bef": {
+      "verdict": "trim",
+      "remove": [
+        "The SQL standard and PostgreSQL-implemented transaction isolation levels are described in Table 13.1 .\n\nTable 13.1. Transaction Isolation Levels\n\nIsolation Level\n\nDirty Read\n\nNonrepeatable Read\n\nPhantom Read\n\nSerialization Anomaly\n\nRead uncommitted\n\nAllowed, but not in PG\n\nPossible\n\nPossible\n\nPossible\n\nRead committed\n\nNot possible\n\nPossible\n\nPossible"
+      ]
     }
-  },
-  "reviewed_at": "2026-11-16",
-  "source_id": "postgresql"
+  }
 }
