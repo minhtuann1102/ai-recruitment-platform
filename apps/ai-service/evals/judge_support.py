@@ -25,6 +25,7 @@ from app.llm.usage import UsageCollector
 from app.plan_snippets import memory_retriever
 from app.prompts.store import PromptStore, wrap_untrusted
 from app.rag.models import SearchFilters
+from evals.sim_runs import session_maps
 
 PROMPTS = PromptStore(Path(__file__).with_name("prompts"))
 REPORTS = Path(__file__).resolve().parents[3] / "plans" / "reports"
@@ -199,7 +200,8 @@ def main() -> None:
     parser.add_argument("--out", type=Path)
     args = parser.parse_args()
     items = [i for run in args.runs
-             for i in items_from_sessions(json.loads(run.read_text("utf-8"))["sessions"], run.stem)]
+             for k, sessions in enumerate(session_maps(json.loads(run.read_text("utf-8"))))
+             for i in items_from_sessions(sessions, f"{run.stem}-r{k}")]
     out = args.out or REPORTS / f"judge-support-{datetime.now():%y%m%d-%H%M}.json"
     out.parent.mkdir(parents=True, exist_ok=True)
 

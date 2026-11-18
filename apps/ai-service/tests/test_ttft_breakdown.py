@@ -41,10 +41,10 @@ def test_fit_line_recovers_slope_and_intercept():
 
 
 def test_multi_run_file_reads_sessions_by_run():
-    from evals.ttft_breakdown import _session_maps
+    from evals.sim_runs import session_maps
     one = _sessions([])
-    assert _session_maps({"sessions": one}) == [one]
-    assert _session_maps({"sessions_by_run": [one, one]}) == [one, one]
+    assert session_maps({"sessions": one}) == [one]
+    assert session_maps({"sessions_by_run": [one, one]}) == [one, one]
 
 
 def test_empty_input():
