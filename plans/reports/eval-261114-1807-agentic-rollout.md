@@ -1,7 +1,7 @@
 # Agentic ai-service: runbook đo, bảng rollout, kết quả (phase 06)
 
 - Ngày soạn: 2026-11-14. Kế hoạch: `plans/261114-1549-agentic-ai-service/`. Mốc: `plans/reports/aie-reply-261114-1448-agentic-ai-service.md` mục 8 (đề xuất AIE, **nhóm chưa thống nhất**).
-- **Trạng thái (đo 2026-11-14/15, commit `9444594`): đo được một phần.** Khóa mới chạy được gate Evaluator (bước 7, 8, 11, 14, 17), probe (bước 1), sim C0 và C1 (3 run, full) và `ttft_breakdown`. Giữa sim C2 thì OpenRouter **hết credit (HTTP 402)**: C2 bị nhiễm (76/87 phiên lỗi, bỏ), C3/C4/C5/skewed không có phiên nào. Còn chặn [BLOCKED-CREDIT]: `judge_support`, C2-C5, skewed, `/api/start` C3/C4, đọc notes. Dữ liệu thô ở máy người đo, không commit: `plans/reports/agentic-measure/` (sim 6-7 MB/file, có hội thoại persona).
+- **Trạng thái (2026-11-19, commit `9a1cc2c`): đo gần đủ.** Đã có sim C0-C5 + skewed (3 run), `judge_support` ×3 trên C0/C1, injection C2, `/api/start` P95 (mục 4). Credit OpenRouter hết lần hai lúc ~04:19 ngày 2026-11-19: 5 gate cuối (holdout v10, sourced v11, 3 gate `--lookup`) bị nhiễm (APIStatusError 402), bỏ. Còn: chạy lại 5 gate đó, hiệu chỉnh ngưỡng (bước 5), đọc tay notes (bước 19, nhưng C5 không có ghi chú nào, xem mục 4). Dữ liệu thô ở máy người đo, không commit: `plans/reports/agentic-measure/`.
 - Không đổi mặc định nào. Cờ nào cũng giữ tắt cho đến khi bảng mục 4 được điền và owner duyệt.
 
 ## 1. Quy ước chạy
@@ -70,26 +70,34 @@ Biến cấu hình cho 6 cấu hình ma trận (C0 là baseline; các biến kh�
 
 Ghi chú: "overrule" dùng `overrule_rate_llm` (bỏ lượt `sensitive_kind`); chờ owner xác nhận dùng số này hay tỷ lệ đầy đủ.
 
-## 4. Bảng kết quả (đo một phần)
+## 4. Bảng kết quả
 
-Ngày đo 2026-11-14/15, commit `9444594`, 29 persona × 3 run, `--serve`, chạy tuần tự (pooler Supabase 15 client, `maxconn=0` mọi bước). Số `knowledge_chunks` chưa ghi. C2-C5: [BLOCKED-CREDIT].
+Đo C0 2026-11-14 (commit `9444594`); C1 đo lại, C2, C3 ngày 2026-11-18; C4, C5, skewed, `judge_support` ngày 2026-11-19 (commit `9a1cc2c`; bản sửa chỉ đụng `tool_loop`, không ảnh hưởng C0/C2). **Không cùng ngày** như quy ước mục 1: chênh nhỏ (≤ 0,3 s TTFT) coi là nhiễu. 29 persona × 3 run, `--serve`, tuần tự, `maxconn=0`, 0 phiên lỗi mọi cấu hình. Số `knowledge_chunks` chưa ghi.
 
-| Chỉ số | Mốc | C0 | C1 | C2-C5 | Đạt? |
-|---|---|---|---|---|---|
-| TTFT P95 lượt tra cứu (s) | ≤ 7,5 | n/a | **9,65** (P50 7,41; 132 lượt) | – | **C1 trượt** |
-| TTFT P95 toàn phiên (s), tăng so C0 | ≤ +0,3 | 6,84 | 8,71 (**+1,86**) | – | **C1 trượt** |
-| TTFT P50 toàn phiên (s) | – | 4,78 | 4,95 | – | |
-| Tỷ lệ gọi công cụ (lượt đủ điều kiện) | ≤ 30% | 0 | **37,6%** (132/351) | – | **C1 trượt** |
-| Lượt Evaluator mock (degraded) | – | 3 | **20** + 17 `evaluator_lookup_fallback` | – | C1 xấu hơn |
-| Độ đúng `supported` câu AI / kho | ≥ 0,65 / ≥ 0,71 | [BLOCKED-CREDIT] | [BLOCKED-CREDIT] | – | chưa đo |
-| Band golden (main): within1 / mae | không giảm | v8 0,961 / 0,547 | `--lookup` 0,950 / 0,632 | – | lookup giảm nhẹ |
-| Trích nguồn sai id (main / holdout) | không tăng | 0 / 0 | **31 / 43** | – | **C1 trượt** |
-| `misconception_rate`, `ta_le1_rate` | không tăng | 0,072 / 0,394 | 0,048 / 0,389 | – | đạt |
-| Stdev gộp (/10), CI95 | ≤ 1,2× và ≤ 0,5 | 0,353 [0,28; 0,42] | 0,471 (1,33×) | – | C1 vượt 1,2× (cổng này chỉ áp cho hybrid) |
-| Gap strong − weak | giảm ≤ 10% | 4,19 (mốc cũ 3,74) | 3,98 (−5%) | – | đạt |
-| `/api/start` P95 (s) | tăng ≤ 0,5 (C3→C4) | 12,5 | 11,2 | [BLOCKED-CREDIT] | chưa đo |
-| Chi phí TB / phiên (USD, giá giả định) | – | 0,0104 | 0,0112 | – | |
-| `overrule_rate_llm`, `jd_priority_violations`, `unsafe_notes`, notes đọc tay | xem mục 3 | n/a | n/a | [BLOCKED-CREDIT] | chưa đo |
+| Chỉ số | Mốc | C0 | C1 tools | C2 hybrid | C3 tools+hybrid | C4 +replan | C5 +notes |
+|---|---|---|---|---|---|---|---|
+| TTFT P95 lượt tra cứu (s) | ≤ 7,5 | n/a | **8,92** (P50 6,37) | n/a | 7,47 | – | – |
+| TTFT P95 toàn phiên (s) | +≤ 0,3 so C0 | 6,84 | **7,77** (+0,93) | 5,94 | **7,52** (+0,68) | **7,53** | 6,44 |
+| Tỷ lệ gọi công cụ | ≤ 30% | 0 | **48,1%** | 0 | 5,4% | – | – |
+| Lượt Evaluator mock / lookup fallback | – | 3 / – | 1 / 2 | 4 / – | 21 / 6 | 15 / – | 15 / – |
+| Độ đúng `supported` câu AI / kho (TB 3 lần judge) | ≥ 0,65 / ≥ 0,71 | 0,82 / 0,99 | 0,85 / 0,99 | – | – | – | – |
+| Stdev gộp (/10) | ≤ 1,2× C0 và ≤ 0,5 | 0,353 | 0,365 | 0,280 | 0,300 | 0,434 (1,23×) | 0,399 |
+| Gap strong − weak | giảm ≤ 10% | 4,19 | 4,34 | 3,71 (**−11%**) | 3,82 (−9%) | 3,55 (**−15%**) | 3,96 (−5%) |
+| Lượt / phiên | – | 9,2 | 9,3 | **13,1** | 12,8 | 13,3 | 13,0 |
+| `/api/start` P95 (s) | +≤ 0,5 (C3→C4) | 12,5 | 11,8 | 15,1 | 14,3 | 12,5 (−1,8) | 11,3 |
+| Chi phí TB / phiên (USD, giá giả định) | – | 0,0104 | 0,0130 | 0,0166 | 0,0168 | 0,0180 | 0,0207 |
+| `overrule_rate_llm` | xem mục 3 | n/a | n/a | 8-12% | 10-13% | – | – |
+| Injection (persona `+injection_attempt`) | 0 lượt LLM đổi hành động | – | – | 42/42 lượt `policy/no_proposal` | như C2 | – | – |
+| Replan: swap / `jd_priority_violations` | – | – | – | – | skewed: `jd_assessed` 0,71 | **0 swap** / 0 (skewed C4: 0 swap) | 0 swap |
+| Notes: phiên có ghi chú / `unsafe_notes` | – | – | – | – | – | – | **0 / 0** |
+
+Judge: v2, chưa hiệu chỉnh; đối chứng (ghép tài liệu topic khác) entailed 0,00-0,01, nên judge phân biệt được.
+
+Nhận định:
+- **C1 (tools)**: bản sửa mục 4b có hiệu quả (mock 20 → 1, lookup fallback 17 → 2; stdev, gap bằng C0). Nhưng không còn bị cắt thì model gọi tool ở 48% lượt, nên TTFT vẫn trượt. Muốn bật thì phải giảm tỷ lệ gọi (prompt hoặc điều kiện đủ lượt).
+- **C2 (hybrid)**: TTFT tốt hơn C0, stdev thấp hơn, injection đạt. Nhưng LLM đề xuất `follow_up` rất nhiều: phiên dài hơn ~40% (9,2 → 13,1 lượt), chi phí +60%, `/api/start` P95 tăng (+2,5 s, chưa rõ vì sao: start không qua policy, có thể do nhà cung cấp lúc đo). Gap giảm 11%, sát mốc. Owner cần quyết phiên dài hơn có chấp nhận được.
+- **C4/C5**: v10/v11 chạy đúng (prompt_version v10/v11 ở mọi lượt; mọi phiên có reserve), nhưng **0 swap và 0 ghi chú trên 87 phiên mỗi cấu hình**. Chưa phân biệt được model luôn trả null (prompt v11 ghi "Mặc định `new_note = null`") hay code bỏ: file sim không lưu output thô `swap`/`new_note` và lý do drop. Cần thêm trường đó vào sim rồi đo lại một ít phiên trước khi kết luận. Phát hiện này cũng làm C4 stdev 0,434 / gap −15% chỉ là nhiễu khác ngày, không phải tác dụng của replan.
+
 
 Gate prompt Evaluator (`run_evaluator`, 3 run; main có nhãn, holdout chưa nhãn nên chỉ có consistency/ordering):
 
@@ -108,7 +116,7 @@ Gate prompt Evaluator (`run_evaluator`, 3 run; main có nhãn, holdout chưa nh�
 
 - `loop_failed` 66/144 (main) và 19/60 (holdout) trên bản chạy tuần tự sạch, log đều `evaluator_lookup_fallback reason=LlmTimeoutError remaining_s≈6,5`.
 - Nguyên nhân: bước đầu (`tool_choice=auto`) bị cắt ở `EVALUATOR_TOOL_DEADLINE_S + FINAL_RESERVE_S` = 2,0 + 1,5 = 3,5 s (`app/llm/tool_loop.py`, `step_until`), trong khi Evaluator viết JSON không gọi tool mất P50 3,65 s / P95 5,6 s (C0). Khoảng nửa số lượt model trả lời thẳng vẫn bị cắt, rồi chấm lại không tools: lượt mất ~3,5 s + một lần chấm, giải thích TTFT P95 lượt tra cứu 9,65 s và mock tăng 3 → 20.
-- **Đã sửa 2026-11-15** (`app/llm/tool_loop.py`): bước `auto` dùng tới `tools_until` = hết ngân sách − `FINAL_RESERVE_S`; `EVALUATOR_TOOL_DEADLINE_S` chỉ còn là hạn chạy một lệnh tra cứu, tính từ lúc lệnh bắt đầu. Test hồi quy: `test_slow_direct_answer_is_not_cut_at_tool_deadline`, `test_tool_deadline_counts_from_tool_start_not_loop_start`. Tool call đến muộn (lệnh + câu trả lời cuối `FINAL_ANSWER_S` = 3,5 s không còn vừa ngân sách) thì vòng lặp dừng với `no_time_for_tool` trước khi chạy lệnh, để caller chấm lại không tools khi còn ≥ 2,5 s (review code). Rủi ro còn lại: retry 5xx hoặc repair kéo dài bước `auto` làm mất fallback; theo dõi tỷ lệ degraded khi đo lại. **Chưa đo lại** (hết credit). Id sai 31/43 nhiều khả năng cũng do model trích `S*` của chunk tra cứu ở lượt bị fallback, cần kiểm khi sửa.
+- **Đã sửa 2026-11-15** (`app/llm/tool_loop.py`): bước `auto` dùng tới `tools_until` = hết ngân sách − `FINAL_RESERVE_S`; `EVALUATOR_TOOL_DEADLINE_S` chỉ còn là hạn chạy một lệnh tra cứu, tính từ lúc lệnh bắt đầu. Test hồi quy: `test_slow_direct_answer_is_not_cut_at_tool_deadline`, `test_tool_deadline_counts_from_tool_start_not_loop_start`. Tool call đến muộn (lệnh + câu trả lời cuối `FINAL_ANSWER_S` = 3,5 s không còn vừa ngân sách) thì vòng lặp dừng với `no_time_for_tool` trước khi chạy lệnh, để caller chấm lại không tools khi còn ≥ 2,5 s (review code). Rủi ro còn lại: retry 5xx hoặc repair kéo dài bước `auto` làm mất fallback; theo dõi tỷ lệ degraded khi đo lại. **Đã đo lại 2026-11-18** (mục 4, cột C1): mock 20 → 1. Gate lookup (id sai 31/43) chưa đo lại: credit hết lần hai trước bước đó.
 - Kết luận hiện tại: **`EVALUATOR_TOOLS` giữ tắt.**
 
 ## 5. Bảng rollout
@@ -126,9 +134,12 @@ Thứ tự bật đề xuất khi đạt cổng: `EVALUATOR_TOOLS`, rồi `POLIC
 
 ## 6. Việc mở
 
-- Đã chạy: bước 1, 2 (3 run thay vì 4), 3, 7, 8, 9, 11, 14, 17; bước 20 chỉ C0/C1.
-- [BLOCKED-CREDIT] (OpenRouter hết credit 2026-11-15 00:05): bước 4, 5, 6 (`judge_support`), 12, 13, 15, 16, 18, 19, 20 (C2-C5). Nạp credit rồi chạy lại tuần tự (`run_seq` một tiến trình một lúc); chạy lại cả gate holdout v10 và sourced v11.
-- Đo lại C1 (bước 6-9) sau bản sửa hạn bước đầu (mục 4b).
+- Đã chạy: bước 1-4, 6-9, 11-13, 15, 16, 18, 20.
+- [BLOCKED-CREDIT] (hết credit lần hai 2026-11-19 ~04:19): gate holdout v10, sourced v11, `run_evaluator --lookup` main/holdout và `run_evaluator_sourced --lookup` (id sai sau bản sửa 4b).
+- Bước 5 (hiệu chỉnh `WEAK_BELOW`/`STRONG_FROM`): dữ liệu C0 đã đủ, chưa làm; cần owner duyệt.
+- Replan/notes 0 đề xuất: thêm vào sim output thô `swap`/`new_note` và lý do drop (metrics `ai_replan_swaps`, `ai_notes_dropped`), đo lại ~10 phiên C5 trước khi kết luận; bước 19 chờ việc này.
+- Tools: giảm tỷ lệ gọi tool (48%) trước khi cân nhắc bật lại.
+- Hybrid: phiên dài hơn ~40% và `/api/start` P95 +2,5 s; owner quyết có chấp nhận.
 - [DE]: textbook scenario java/nodejs (bước 10).
 - Owner: duyệt hiệu chỉnh ngưỡng; chốt mốc mục 3 (gồm stdev gộp); `overrule_rate_llm` hay tỷ lệ đầy đủ; bật cờ nào mặc định.
 - FSD: xem `docs/ai-service/06-api-contract.md` mục "Thông báo gộp cho FSD".
