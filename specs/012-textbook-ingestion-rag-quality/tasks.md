@@ -144,11 +144,11 @@ Chỉ bắt đầu sau T050. Nếu T050 đổi cỡ đoạn: sửa hằng trong 
 
 Mỗi track lặp đúng chuỗi T037 → T047 (kiểm nguồn [W] → duyệt nguồn [DE] → danh sách trang + truy vấn [W] → duyệt [DE] → crawl / process / prepare [W] → soát [W] → score [W] → duyệt decisions + mẫu 50 đoạn [DE] → process + coverage [W] → PR + index [DE]). Nguồn dùng chung đã duyệt ở track trước không kiểm giấy phép lại, chỉ thêm trang.
 
-- [ ] T051 [US2] Track `nodejs_backend` (4 tình huống; category riêng `Backend`). Ứng viên cần kiểm: Node.js docs, NestJS docs, Redis docs; thêm trang PostgreSQL / System Design Primer nếu tình huống cần *(2026-11-18: soát + score xong (cổng mồi), nodejs, nestjs, redis: 158 đoạn theo track; index sau khi merge)*
-- [ ] T052 [US2] Track `python_backend` (4 tình huống; `Backend`). Ứng viên: Python docs, FastAPI, Django, Celery, SQLAlchemy *(2026-11-18: soát + score xong (cổng mồi), fastapi, django, sqlalchemy: 151 đoạn; celery bị chặn 403/429 khi crawl lại, làm sau; index sau khi merge)*
-- [ ] T053 [US2] Track `devops_engineer` (4 tình huống; `DevOps`). Ứng viên: Kubernetes docs, Docker docs, Prometheus docs *(2026-11-18: soát + score xong (cổng mồi), kubernetes, docker, prometheus: 182 đoạn; index sau khi merge)*
-- [ ] T054 [US2] Track `frontend_react` (4 tình huống; `Frontend`). Ứng viên: react.dev (giấy phép đã kiểm ở 005, vẫn ghi `license_url` + `license_quote`), Next.js docs, web.dev, MDN *(2026-11-18: soát + score xong (cổng mồi), react-dev, web-dev, mdn-web-docs: 153 đoạn; index sau khi merge)*
-- [ ] T055 [US2] Track `ai_engineer` (8 tình huống; `AI`). Ứng viên: scikit-learn user guide, Hugging Face docs, OWASP Top 10 for LLM Applications. Track này dễ thiếu nguồn có giấy phép mở: tình huống không đủ trang thì ghi vào `gaps`, không lấy nguồn chưa duyệt *(2026-11-18: soát + score xong (cổng mồi), scikit-learn, huggingface-docs, owasp-llm-top10, nannyml, livekit-docs: 256 đoạn; index sau khi merge)*
+- [x] T051 [US2] Track `nodejs_backend` (4 tình huống; category riêng `Backend`). Ứng viên cần kiểm: Node.js docs, NestJS docs, Redis docs; thêm trang PostgreSQL / System Design Primer nếu tình huống cần *(2026-11-18: soát + score xong (cổng mồi), nodejs, nestjs, redis: 158 đoạn theo track; index 2026-11-18 từ `main` sau #100)*
+- [ ] T052 [US2] Track `python_backend` (4 tình huống; `Backend`). Ứng viên: Python docs, FastAPI, Django, Celery, SQLAlchemy *(2026-11-18: soát + score xong (cổng mồi), fastapi, django, sqlalchemy: 151 đoạn; celery bị chặn 403/429 khi crawl lại, làm sau; index 2026-11-18 từ `main` sau #100)*
+- [x] T053 [US2] Track `devops_engineer` (4 tình huống; `DevOps`). Ứng viên: Kubernetes docs, Docker docs, Prometheus docs *(2026-11-18: soát + score xong (cổng mồi), kubernetes, docker, prometheus: 182 đoạn; index 2026-11-18 từ `main` sau #100)*
+- [x] T054 [US2] Track `frontend_react` (4 tình huống; `Frontend`). Ứng viên: react.dev (giấy phép đã kiểm ở 005, vẫn ghi `license_url` + `license_quote`), Next.js docs, web.dev, MDN *(2026-11-18: soát + score xong (cổng mồi), react-dev, web-dev, mdn-web-docs: 153 đoạn; index 2026-11-18 từ `main` sau #100)*
+- [x] T055 [US2] Track `ai_engineer` (8 tình huống; `AI`). Ứng viên: scikit-learn user guide, Hugging Face docs, OWASP Top 10 for LLM Applications. Track này dễ thiếu nguồn có giấy phép mở: tình huống không đủ trang thì ghi vào `gaps`, không lấy nguồn chưa duyệt *(2026-11-18: soát + score xong (cổng mồi), scikit-learn, huggingface-docs, owasp-llm-top10, nannyml, livekit-docs: 256 đoạn; index 2026-11-18 từ `main` sau #100)*
 - [ ] T056 [DE] [US2] Sau mỗi track: báo AIE số bản ghi thêm và nhắc khởi động lại ai-service để nạp lại kho từ khóa
 
 **Checkpoint**: `validate-textbook --strict` và `coverage-textbook --strict` thoát 0, hoặc `gaps` còn lại được DE ghi lý do
@@ -157,8 +157,8 @@ Mỗi track lặp đúng chuỗi T037 → T047 (kiểm nguồn [W] → duyệt n
 
 ## Phase 8: User Story 3 (dữ liệu) - Báo cáo cuối (Priority: P2) · S3-DE-4, S4-DE-1
 
-- [ ] T057 [W] [US3] Chạy `coverage-textbook --db` trên toàn bộ; soạn `plans/reports/coverage-<ngày>-012-textbook.md`: bảng nguồn × giấy phép × số đoạn, bảng tình huống × số đoạn × `keyword_hit` × `vector_hit`, tổng theo SC-001..SC-005, SC-008, và `gaps`
-- [ ] T058 [DE] [US3] Đối chiếu báo cáo với Success Criteria; ghi kết quả từng SC vào task này; SC không đạt thì quyết bù hay chấp nhận kèm lý do
+- [x] T057 [W] [US3] Chạy `coverage-textbook --db` trên toàn bộ; soạn `plans/reports/coverage-<ngày>-012-textbook.md`: bảng nguồn × giấy phép × số đoạn, bảng tình huống × số đoạn × `keyword_hit` × `vector_hit`, tổng theo SC-001..SC-005, SC-008, và `gaps` *(2026-11-18: `plans/reports/coverage-261118-012-textbook.md`; kho textbook 1.121, lần hai inserted=0, interview_qa 8.356)*
+- [x] T058 [DE] [US3] Đối chiếu báo cáo với Success Criteria; ghi kết quả từng SC vào task này; SC không đạt thì quyết bù hay chấp nhận kèm lý do *(2026-11-18: SC-001..SC-006, SC-008 đạt; SC-007 chưa có số đo AIE. Gaps chấp nhận: scn.py.webhook-ingest, scn.py.csv-import-pipeline chờ celery; scn.java.payment-idempotency trượt vector)*
 
 ---
 
