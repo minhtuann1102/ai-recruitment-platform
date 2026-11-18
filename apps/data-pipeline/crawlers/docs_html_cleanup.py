@@ -7,13 +7,17 @@ from bs4 import Tag
 # Phan tu an khoi nguoi doc: thuoc tinh hidden, aria-hidden="true", devsite-actions (the hoac class; web.dev that la
 # <devsite-actions hidden> trong h1 chua tooltip "Stay organized with collections..." nen lot vao title va moi chunk)
 HIDDEN_SELECTOR = "[hidden], [aria-hidden='true' i], devsite-actions, .devsite-actions"
+# Neo permalink canh tieu de / dinh nghia: "¶" cua Sphinx va MkDocs (a.headerlink: celery, django, sqlalchemy, fastapi),
+# "#" cua pydata-sphinx (scikit-learn, cung a.headerlink) va docs PostgreSQL (a.id_link). Khong xoa thi ky hieu nay
+# dinh vao heading_path va dong dau moi doan.
+PERMALINK_SELECTOR = "a.headerlink, a.id_link"
 # Mot dong code la mot the khoi (react.dev: <div class="cm-line">...<br/></div> trong <pre><code>)
 CODE_LINE_TAGS = ("div", "p", "li")
 
 
 def remove_hidden(root: Tag) -> None:
-    """Xoa phan tu an nam trong root (khong xoa chinh root)."""
-    for element in root.select(HIDDEN_SELECTOR):
+    """Xoa phan tu an va neo permalink nam trong root (khong xoa chinh root)."""
+    for element in root.select(f"{HIDDEN_SELECTOR}, {PERMALINK_SELECTOR}"):
         if not element.decomposed:  # phan tu an long nhau: cha da bi xoa keo theo con
             element.decompose()
 

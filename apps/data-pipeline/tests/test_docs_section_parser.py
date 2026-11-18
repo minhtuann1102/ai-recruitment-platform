@@ -116,6 +116,20 @@ def test_hidden_elements_are_dropped_from_title_headings_and_chunks():
         assert junk not in everything
 
 
+def test_permalink_anchors_are_dropped_from_headings_and_definitions():
+    page = _page(
+        '<h1>Tasks<a class="headerlink" href="#tasks" title="Link to this heading">¶</a></h1><p>Intro.</p>'
+        '<h2>Retrying<a class="headerlink" href="#retrying">&para;</a></h2>'
+        '<dl><dt>Task.retry()<a class="headerlink" href="#retry" title="Link to this definition">¶</a></dt>'
+        '<dd>Re-execute the task.</dd></dl>'
+        '<h2>Locks <a href="#locks" class="id_link">#</a></h2><p>Row locks.</p>'
+        '<h2>C# <a href="#cs">#</a></h2><p>Plain anchors stay.</p>'
+    )
+    assert page["title"] == "Tasks"
+    assert [s["heading_path"] for s in page["sections"]] == [[], ["Retrying"], ["Locks"], ["C# #"]]
+    assert "¶" not in " ".join(s["text"] for s in page["sections"])
+
+
 def test_hidden_elements_outside_content_root_h1_fallback_are_dropped_too():
     html = ('<html><body><h1>Site <span hidden>hidden bit</span>Guide</h1>'
             '<main><h2>Part</h2><p>Text.</p></main></body></html>')
