@@ -49,6 +49,9 @@ POLICY_OVERRULES = Counter("ai_policy_overrules", "Ly do code bac de xuat cua LL
                            "action_not_allowed / no_valid_focus", ["reason"])
 REPLAN_SWAPS = Counter("ai_replan_swaps", "Evaluator v10 de xuat doi topic (REPLAN_ENABLED) va ket qua sau khi code kiem: "
                        "applied / budget / bad_drop / jd_priority / bad_add / not_applicable / untrusted", ["result"])
+REPLAN_OFFERED = Counter("ai_replan_offered", "Luot prompt Evaluator v10+ co replan_context (REPLAN_ENABLED, o ranh gioi "
+                         "co reserve) va LLM tra gi: null (khong de xuat) / proposed (co swap, ket qua o ai_replan_swaps) "
+                         "/ degraded (LLM loi, cham mock)", ["outcome"])
 NOTES_DROPPED = Counter("ai_notes_dropped", "Ghi chu agent (AGENT_NOTES_ENABLED) bi code bo: untrusted / empty / injection / "
                         "pii / too_long / invalid_kind / duplicate / full / unknown_id / bad_status", ["reason"])
 NOTES_RECORDED = Counter("ai_notes_recorded", "Ghi chu agent (AGENT_NOTES_ENABLED) da luu sau khi qua kiem, theo kind", ["kind"])
@@ -111,6 +114,11 @@ def record_policy_decision(decided_by: str, overrule_reason: Optional[str]) -> N
 @_safe
 def record_replan_swap(result: str) -> None:
     REPLAN_SWAPS.labels(result).inc()
+
+
+@_safe
+def record_replan_offered(outcome: str) -> None:
+    REPLAN_OFFERED.labels(outcome).inc()
 
 
 @_safe

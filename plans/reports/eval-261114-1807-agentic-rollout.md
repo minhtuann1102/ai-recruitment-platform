@@ -137,7 +137,7 @@ Thứ tự bật đề xuất khi đạt cổng: `EVALUATOR_TOOLS`, rồi `POLIC
 - Đã chạy: bước 1-4, 6-9, 11-13, 15, 16, 18, 20.
 - [BLOCKED-CREDIT] (hết credit lần hai 2026-11-19 ~04:19): gate holdout v10, sourced v11, `run_evaluator --lookup` main/holdout và `run_evaluator_sourced --lookup` (id sai sau bản sửa 4b).
 - Bước 5 (hiệu chỉnh `WEAK_BELOW`/`STRONG_FROM`): dữ liệu C0 đã đủ, chưa làm; cần owner duyệt.
-- Replan/notes 0 đề xuất: thêm vào sim output thô `swap`/`new_note` và lý do drop (metrics `ai_replan_swaps`, `ai_notes_dropped`), đo lại ~10 phiên C5 trước khi kết luận; bước 19 chờ việc này.
+- Replan/notes 0 đề xuất: sim đã ghi `summary.per_run[].agent_counters` (2026-11-19; `replan.offered{null,proposed,degraded}` / `results`, `notes.recorded` / `dropped` / `proposed`, từ counter Prometheus trong tiến trình). C4 đã có gợi ý: `turn.swap_result` = null ở cả 1153 lượt, mà mọi `swap` khác null đều có kết quả, nên hoặc LLM luôn trả null hoặc `replan_context` không được gửi; `offered` sẽ phân biệt. Cần credit: chạy lại `--matrix quick --runs 1` với C5 (~$0,2) trước khi kết luận; bước 19 chờ việc này.
 - Tools: giảm tỷ lệ gọi tool (48%) trước khi cân nhắc bật lại.
 - Hybrid: phiên dài hơn ~40% và `/api/start` P95 +2,5 s; owner quyết có chấp nhận.
 - [DE]: textbook scenario java/nodejs (bước 10).

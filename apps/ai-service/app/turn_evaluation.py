@@ -6,10 +6,11 @@ import asyncio
 import logging
 from typing import Optional, Tuple
 
+from . import metrics
 from .agents.evaluator import EvaluationInput
 from .agents.evaluator_input import PolicyContext
 from .agent_notes import notes_enabled, notes_for_context
-from .agents.evaluator_output_models import EvaluatorOutputV9
+from .agents.evaluator_output_models import EvaluatorOutputV9, uses_replan
 from .agents.evaluator_provider import Evaluator
 from .evaluator_lookup import lookup_for_turn
 from .llm.usage import UsageCollector
@@ -105,4 +106,8 @@ async def evaluate_turn(req: NextTurnRequest, state: CandidateState, phase: str,
     if with_raw is None:
         return key, extra, await evaluator.evaluate(inp, collector), None
     raw, ev = await with_raw(inp, collector)
+    if inp.replan_context is not None and uses_replan(getattr(evaluator, "prompt_version", "v0")):
+        # prompt that su co replan_context: LLM tra swap null / co de xuat / khong tra loi duoc (degraded, raw None)
+        metrics.record_replan_offered("degraded" if raw is None else "null" if getattr(raw, "swap", None) is None
+                                      else "proposed")
     return key, extra, ev, raw if isinstance(raw, EvaluatorOutputV9) else None

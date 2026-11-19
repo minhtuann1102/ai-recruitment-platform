@@ -39,6 +39,10 @@ class _RecordingEvaluator:
     def supports_lookup(self) -> bool:  # tra cuu (EVALUATOR_TOOLS) van chay duoi lop boc nay
         return getattr(self.inner, "supports_lookup", False)
 
+    @property
+    def prompt_version(self) -> str:  # turn_evaluation dem ai_replan_offered theo ban prompt cua Evaluator that
+        return getattr(self.inner, "prompt_version", "v0")
+
     async def evaluate(self, inp: EvaluationInput, collector: Optional[UsageCollector] = None) -> Evaluation:
         return (await self.evaluate_with_raw(inp, collector))[1]
 
