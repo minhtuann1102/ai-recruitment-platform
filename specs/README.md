@@ -25,7 +25,7 @@ báo cáo, slides) là việc chung của team, không cần spec.
 | 011 | agentic-interview-hardening | S3–S4 | AIE (đề xuất) | Owner chọn | S3-AIE-1..6, S4-AIE-1..5 | 006, 010 | Kế hoạch: [plan](../plans/20261019-1100-ai-interview-brd-implementation/plan.md) (workflow `plans/`) |
 | 012 | [textbook-ingestion-rag-quality](012-textbook-ingestion-rag-quality/spec.md) | S3–S4 | DE (AIE review) | Spec Kit | S3-DE-1..5, S4-DE-1 | 005 (pipeline ghi, crawler), 011 (AIE bật `RAG_TEXTBOOK_ENABLED` và đo) | Merged (2026-11-18) — PR #97–#100; 6 track, 1.121 đoạn trong ai_db; celery (python) crawl + soát xong 2026-11-19 (23 bản ghi), chờ index; chờ AIE đo (SC-007) |
 | 013 | web-frontend | S4 | FSD (đề xuất) | Owner chọn | S4-FSD-1..9 | 004, 007, 008, 010 | Chưa viết |
-| 014 | staging-deploy-monitoring | S4 | DE | Spec Kit | S4-DE-2..4 | 001, mọi service chạy được | Chưa viết |
+| 014 | [staging-deploy-monitoring](014-staging-deploy-monitoring/spec.md) | S4 | DE | Spec Kit | S4-DE-3..4 (seed S4-DE-2 đi theo 009 US4) | 001, mọi service chạy được | Draft spec (2026-11-19): 1 VM GCP + compose, Cloud Monitoring, deploy service đang có + quy trình thêm service |
 | 015 | voice-mode | S4 | DE | Spec Kit | S4-DE-5 | 006, 010, 013 | Chưa viết (Stretch; cần tài khoản STT/TTS) |
 | 016 | [interview-learning-roadmap](016-interview-learning-roadmap/spec.md) | S3 | DE (AIE review) | Spec Kit | S3-DE-6, phần `study_plan` của S3-AIE-1 | 005, 011 (Reporter, finalize), 012 (tùy chọn) | Draft spec (2026-10-21) — ranh giới AIE + FSD chốt 2026-10-24 (chỉ `study_plan`); còn FR-020, FR-024 |
 
