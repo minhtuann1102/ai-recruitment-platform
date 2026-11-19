@@ -111,7 +111,8 @@ Gate prompt Evaluator (`run_evaluator`, 3 run; main có nhãn, holdout chưa nh�
 | v9 + pc (hybrid) | 0,948 / 0,585 / −0,31 | 0,977 | 0,962 | 0,98/0,84, 0,60, 0 | 0,80 / 0,082 / 2 |
 | v10 + pc (replan) | 0,953 / 0,580 / −0,24 | 0,953 | 0,963 | 1,00/0,81, 0,60, 0 | 0,75 / 0,061 / 3 (chạy lại 2026-11-19; lần trước 16 do chạy song song) |
 | v11 + pc (notes) | 0,967 / 0,547 / −0,30 | 0,953 | 0,959 | 0,87/0,88, 0,77, **6** (chạy lại; lần trước 9) | 0,80 / 0,035 / 1 |
-| v12 + pc (notes, mục swap/ghi chú viết lại, 2026-11-20) | 0,959 / 0,585 / −0,34 | 0,930 | 0,990 | [BLOCKED-KEY-LIMIT] | 0,80 / 0,026 / 2 |
+| v12 + pc (notes, mục swap/ghi chú viết lại, 2026-11-20) | 0,959 / 0,585 / −0,34 | 0,930 | 0,990 | — (bị 403 trần khóa) | 0,80 / 0,026 / 2 |
+| v12 + pc, schema bắt buộc (`EvaluatorOutputV12`, 2026-11-20) | 0,959 / 0,564 / −0,26 | 0,953 | 0,964 | 0,89/0,85, 0,77, 0 | — |
 | v8 `--lookup` (sau bản sửa 4b, chạy lại 2026-11-19) | 0,963 / 0,601 / −0,30 | 0,930 | 0,975 | 0,79/0,69, 0,50, 0 | 1,00 / 0,093 / 1 |
 
 Đánh giá: v9/v10 trong nhiễu so v8 (within1 −0,01, `evidence_valid` −0,03): coi là đạt sơ bộ, chờ owner chốt "không giảm" có dung sai. v11 sourced có 9 id sai (chạy song song, 1 run degraded) cần chạy lại khi có credit. Holdout v10 có 16 run degraded (chưa rõ nguyên nhân, log không có 402/EMAXCONN): chạy lại.
@@ -122,6 +123,33 @@ Gate prompt Evaluator (`run_evaluator`, 3 run; main có nhãn, holdout chưa nh�
 - Nguyên nhân: bước đầu (`tool_choice=auto`) bị cắt ở `EVALUATOR_TOOL_DEADLINE_S + FINAL_RESERVE_S` = 2,0 + 1,5 = 3,5 s (`app/llm/tool_loop.py`, `step_until`), trong khi Evaluator viết JSON không gọi tool mất P50 3,65 s / P95 5,6 s (C0). Khoảng nửa số lượt model trả lời thẳng vẫn bị cắt, rồi chấm lại không tools: lượt mất ~3,5 s + một lần chấm, giải thích TTFT P95 lượt tra cứu 9,65 s và mock tăng 3 → 20.
 - **Đã sửa 2026-11-15** (`app/llm/tool_loop.py`): bước `auto` dùng tới `tools_until` = hết ngân sách − `FINAL_RESERVE_S`; `EVALUATOR_TOOL_DEADLINE_S` chỉ còn là hạn chạy một lệnh tra cứu, tính từ lúc lệnh bắt đầu. Test hồi quy: `test_slow_direct_answer_is_not_cut_at_tool_deadline`, `test_tool_deadline_counts_from_tool_start_not_loop_start`. Tool call đến muộn (lệnh + câu trả lời cuối `FINAL_ANSWER_S` = 3,5 s không còn vừa ngân sách) thì vòng lặp dừng với `no_time_for_tool` trước khi chạy lệnh, để caller chấm lại không tools khi còn ≥ 2,5 s (review code). Rủi ro còn lại: retry 5xx hoặc repair kéo dài bước `auto` làm mất fallback; theo dõi tỷ lệ degraded khi đo lại. **Đã đo lại 2026-11-18** (mục 4, cột C1): mock 20 → 1. Gate lookup đo lại 2026-11-19: id sai 0/0 (31/43 cũ là lỗi đếm của `run_evaluator`, không phải model).
 - Kết luận hiện tại: **`EVALUATOR_TOOLS` giữ tắt.**
+
+### 4c. So sánh model Evaluator (2026-11-20)
+
+Chỉ đổi `LLM_MODEL_EVALUATOR`; các agent khác vẫn gpt-4o-mini. Luna chạy với `LLM_REASONING_EVALUATOR=off`. Cùng gate như mục 4: 3 run cho main, holdout và sourced; quick C5 v12 gồm 10 phiên, đủ cờ; sim C0 full 2 run, riêng gpt-4o-mini 3 run (2026-11-14). Số thô ở `plans/reports/agentic-measure/models/` (local, không commit). Giá OpenRouter (USD/1M token vào/ra): gpt-4o-mini 0,15/0,6, gpt-6-luna 0,1/0,5, gemini-2.5-flash-lite 0,1/0,4, gpt-4.1-mini 0,4/1,6. Chi phí trong bảng không tính giảm giá cache.
+
+| Model | main v8 within1 / mae / bias | type acc | holdout ordering / std | sourced v8 `supported` P/R, `contradicted` R | main v12 within1 / mae | sim C0 stdev / gap strong−weak | điểm TB weak / average / strong | Evaluator USD/phiên |
+|---|---|---|---|---|---|---|---|---|
+| gpt-4o-mini (hiện tại) | 0,961 / 0,547 / −0,28 | 0,953 | 0,75 / 0,034 | 0,98/0,79, 0,57 | 0,959 / 0,564 | 0,353 / **4,19** | 1,8 / 3,5 / 5,9 | 0,0066 |
+| gpt-6-luna | **0,986 / 0,314 / −0,11** | 0,930 | **1,00** / 0,107 | 0,96/1,00, 0,73 | 0,984 / 0,337 | 0,326 / 2,24 | 3,7 / 4,2 / 5,9 | 0,0063 |
+| gpt-4.1-mini | 0,979 / 0,397 / −0,11 | 0,953 | 1,00 / 0,060 | 0,95/0,96, **0,93** | 0,967 / 0,407 | **0,298** / 2,85 | 3,7 / 4,3 / 6,6 | 0,0288 |
+| gemini-2.5-flash-lite (**không tin được**) | 0,956 / 0,317 / −0,20 | 0,977 | 1,00 / 0,000 | 0,84/1,00, 0,50 | 0,983 / 0,379 | 0,665 / 3,99 | 2,8 / 4,3 / 6,8 | 0,0057 |
+
+Quick C5 v12 (ghi chú, swap):
+
+| Model | ghi chú lưu (phiên có) | `to_verify` xác nhận | swap đề xuất / áp dụng | degraded | TTFT P95 |
+|---|---|---|---|---|---|
+| gpt-4o-mini | 28 (7/10) | 6/13 | 0 / 0 | 0/124 | 6,14 s |
+| gpt-6-luna | 37 (8/10), có 4 `risk` | 11/20 (2 bác bỏ) | 0 / 0 | 0/119 | 6,10 s |
+| gpt-4.1-mini | 23 (8/9; 1 phiên lỗi planner JSON) | 1/14 | **6 / 4** (1 `budget`, 1 `untrusted`) | 2/112 | 8,58 s |
+| gemini-2.5-flash-lite | 21 (8/10) | 8/15 | 0 / 0 | 34/74 | 8,68 s |
+
+Nhận xét:
+- **Luna khớp nhãn golden tốt nhất** (MAE giảm 43%, gần hết độ khắt khe −0,28 → −0,11) và rẻ nhất. Sourced tốt hơn: `supported` R 1,00, `contradicted` R 0,73. Nhưng trong sim, gap strong−weak giảm 4,19 → 2,24, giống lần so trước (`eval-261103-1526-evaluator-model-comparison.md`: 3,74 → 2,44). Gap giảm vì luna cho persona weak tới 3,7 thay vì 1,8, còn strong giữ nguyên. Weak và average chỉ cách nhau 0,6 điểm; ở 4o-mini là 1,8. Luna phân tách yếu với trung bình kém hơn, nên chưa thay được.
+- **gpt-4.1-mini** có `contradicted` R tốt nhất (0,93; 4o-mini 0,57) và stdev thấp nhất. Đây cũng là **model duy nhất đề xuất swap** (6 đề xuất, áp dụng 4). Tuy vậy gap vẫn giảm (2,85), weak cũng lên 3,7, `to_verify` gần như không được xác nhận (1/14), TTFT +2,4 s, và chi phí Evaluator gấp ~4 lần.
+- **Flash-Lite bị 429 từ nhà cung cấp**: 12-71 run degraded mỗi gate, sim C0 degraded 100/516 lượt (fallback 14-16%). Số của nó lẫn mock heuristic, nên chưa kết luận được. Muốn so lại phải chạy chậm hoặc qua provider khác.
+- Gap trong sim không phải nhãn đúng: persona weak có thể không đáng 1,8/10. Golden nói 4o-mini khắt khe, sim nói các model khác ép điểm weak lên gần average. Muốn biết bên nào đúng thì phải chấm nhãn cho câu trả lời của persona weak/average trong sim (judge Claude như `judge_support`).
+- Kết luận: **giữ gpt-4o-mini làm Evaluator mặc định.** Không model nào hơn rõ trên mọi trục. Ứng viên đáng đo tiếp là gpt-4.1-mini cho replan, nếu owner chấp nhận chi phí.
 
 ## 5. Bảng rollout
 
@@ -141,7 +169,8 @@ Thứ tự bật đề xuất khi đạt cổng: `EVALUATOR_TOOLS`, rồi `POLIC
 - Đã chạy: bước 1-4, 6-9, 11-13, 15, 16, 18, 20.
 - Đã chạy lại 2026-11-19 (credit lần ba): holdout v10, sourced v11, 3 gate `--lookup` (2 gate `run_evaluator --lookup` chạy hai lần: lần hai sau khi sửa đếm id lạ trong `evals/run_evaluator.py`, dùng chung `valid_source_ids` với gate sourced).
 - Bước 5 (hiệu chỉnh `WEAK_BELOW`/`STRONG_FROM`): dữ liệu C0 đã đủ, chưa làm; cần owner duyệt.
-- Replan/notes: model không đề xuất, cả v11 lẫn v12 (mục 4). [BLOCKED-KEY-LIMIT] OpenRouter trả 403 "Key limit exceeded (total limit)" lúc 2026-11-20 00:18: khóa có trần chi tiêu riêng, owner nâng trần rồi chạy probe + sourced v12. Bước 19 (đọc tay notes) không làm được khi chưa có ghi chú.
+- Replan/notes: v12 + schema bắt buộc thì gpt-4o-mini ghi chú được nhưng không bao giờ đề xuất swap; gpt-4.1-mini có đề xuất swap (mục 4c). Còn bước 19: full C5 với v12 + đọc tay 20 phiên.
+- Model Evaluator (mục 4c): giữ gpt-4o-mini; owner quyết có thử gpt-4.1-mini (đắt ~4 lần) không. Flash-Lite phải đo lại khi hết 429.
 - Tools: giảm tỷ lệ gọi tool (48%) trước khi cân nhắc bật lại.
 - Hybrid: phiên dài hơn ~40% và `/api/start` P95 +2,5 s; owner quyết có chấp nhận.
 - [DE]: textbook scenario java/nodejs (bước 10).
