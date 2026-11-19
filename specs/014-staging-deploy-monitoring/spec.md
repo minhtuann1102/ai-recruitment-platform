@@ -57,9 +57,10 @@ hoặc công cụ gọi API ở bất kỳ đâu.
 **Why this priority**: là cam kết Bắt buộc S4-DE-3 và điều kiện cho mọi việc sau (deploy tự động, giám sát, E2E ở
 Sprint 5). Thiếu nó thì không có gì để demo.
 
-**Independent Test**: từ một máy ngoài mạng nhóm, gọi health của gateway và từng service qua `https://api.<domain>`,
-đăng ký + đăng nhập một tài khoản thử, chạy một phiên phỏng vấn AI đầy đủ (bắt đầu → vài lượt → kết thúc) và nhận
-câu chữ dạng stream từng phần.
+**Independent Test**: từ một máy ngoài mạng nhóm, gọi health của gateway và từng service qua `https://api.<domain>`;
+gọi các endpoint đang chạy được trên `main` của auth / user (đăng ký + đăng nhập nếu luồng đó đã xong ở FSD); với một
+JWT hợp lệ, chạy một phiên phỏng vấn AI đầy đủ (bắt đầu → vài lượt → kết thúc) và nhận câu chữ dạng stream từng phần;
+cùng lời gọi đó không có JWT bị từ chối.
 
 **Acceptance Scenarios**:
 
@@ -179,6 +180,10 @@ thể nó mới; đếm số file phải đổi và thời gian.
 - **Vòng lặp tốn token** (lỗi code gọi LLM liên tục): cảnh báo khi token/ngày gấp 3 trung bình 7 ngày.
 - **Máy khởi động lại** (bảo trì của GCP): mọi container tự chạy lại; staging khỏe lại không cần người.
 - **Secret bị lộ** (commit nhầm): quét secret trong CI chặn; nếu lộ thì đổi khóa, không chỉ xóa commit.
+- **Gọi LLM ẩn danh / lạm dụng**: URL staging công khai, ngân sách LLM không giới hạn cứng → không có đường nào tới
+  ai-service mà không có JWT (trừ health); một tài khoản gọi dồn dập bị giới hạn tốc độ (429) trước khi tốn token.
+- **Luồng đăng nhập của FSD chưa xong**: chưa lấy được JWT qua auth-service thì DE cấp JWT thử bằng khóa ký của
+  staging (lệnh riêng, chỉ chạy trên máy staging) để kiểm US1; không mở route AI không xác thực.
 - **Deploy khi đang có phiên phỏng vấn**: phiên đang stream có thể bị cắt; chấp nhận ở staging, deploy ngoài giờ
   demo.
 - **Service phụ thuộc chưa có** (ví dụ `interview-service` chưa tồn tại nên ai-service chỉ gọi trực tiếp): route
@@ -196,7 +201,11 @@ thể nó mới; đếm số file phải đổi và thời gian.
   trang chủ APISIX, console MinIO) MUST NOT truy cập được từ Internet; các thành phần chỉ dành cho dev MUST NOT chạy ở
   staging.
 - **FR-003**: Mọi lưu lượng công khai MUST đi qua HTTPS với chứng chỉ hợp lệ tự gia hạn; http chuyển hướng sang
-  https. Gateway (APISIX) vẫn là điểm vào duy nhất phía sau lớp TLS (constitution II).
+  https. Gateway (APISIX) vẫn là điểm vào duy nhất phía sau lớp TLS (constitution II); lớp TLS chỉ chuyển tiếp,
+  không định tuyến hay xác thực.
+- **FR-003a**: Mọi route công khai tới ai-service (trừ health) MUST yêu cầu JWT hợp lệ tại gateway, có giới hạn tốc độ
+  theo người dùng; ai-service staging MUST chạy chế độ bắt buộc token nội bộ (thiếu token → từ chối, không mở). Token
+  nội bộ chỉ đi giữa gateway / service với ai-service, MUST NOT tới trình duyệt.
 
 **Đóng gói và chạy service**
 
@@ -307,6 +316,10 @@ thể nó mới; đếm số file phải đổi và thời gian.
 - **FSD**: web frontend (013) và `job-service` / `interview-service` đi vào staging qua US5 khi có code; migration của
   `user-service` (và service sau) phải chạy được trên DB sạch (constitution VI).
 - **AIE**: mốc TTFT cho cảnh báo #3 lấy từ báo cáo eval đã có; AIE xác nhận danh sách metrics AI trên bảng theo dõi.
+- **Sửa code của owner khác**: FR-004 (Dockerfile + health trong `auth-service`, `user-service`,
+  `notification-service`, có thể thêm dependency) là code của FSD; FR-013 (phiên bản trong `/api/health`) và cấu hình
+  token nội bộ ở FR-003a chạm ai-service của AIE. DE làm và nhờ owner review trong PR, hoặc owner tự làm; chốt với
+  FSD / AIE trước khi implement.
 
 ## Ngoài phạm vi
 
