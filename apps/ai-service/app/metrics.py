@@ -51,7 +51,7 @@ REPLAN_SWAPS = Counter("ai_replan_swaps", "Evaluator v10 de xuat doi topic (REPL
                        "applied / budget / bad_drop / jd_priority / bad_add / not_applicable / untrusted", ["result"])
 REPLAN_OFFERED = Counter("ai_replan_offered", "Luot prompt Evaluator v10+ co replan_context (REPLAN_ENABLED, o ranh gioi "
                          "co reserve) va LLM tra gi: null (khong de xuat) / proposed (co swap, ket qua o ai_replan_swaps) "
-                         "/ degraded (LLM loi, cham mock)", ["outcome"])
+                         "/ degraded (LLM loi, cham mock) / skipped (precheck khong goi LLM)", ["outcome"])
 NOTES_DROPPED = Counter("ai_notes_dropped", "Ghi chu agent (AGENT_NOTES_ENABLED) bi code bo: untrusted / empty / injection / "
                         "pii / too_long / invalid_kind / duplicate / full / unknown_id / bad_status", ["reason"])
 NOTES_RECORDED = Counter("ai_notes_recorded", "Ghi chu agent (AGENT_NOTES_ENABLED) da luu sau khi qua kiem, theo kind", ["kind"])

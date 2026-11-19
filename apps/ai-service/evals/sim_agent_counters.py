@@ -2,8 +2,8 @@
 
 File sim chi luu ket qua sau khi code kiem (state.swaps, state.notes, turn.swap_result), nen khi = 0 khong biet LLM
 tra null hay code bo. Ham nay doc chenh lech counter Prometheus cua chinh tien trinh truoc/sau mot run:
-  replan.offered        = {null, proposed, degraded}: luot prompt v10+ co replan_context va LLM tra gi (null = khong
-                          de xuat doi topic; degraded = LLM loi)
+  replan.offered        = {null, proposed, degraded, skipped}: luot prompt v10+ co replan_context va LLM tra gi (null = khong
+                          de xuat doi topic; degraded = LLM loi; skipped = precheck khong goi LLM)
   replan.results        = ket qua code kiem moi de xuat swap (applied / ly do bac), ke ca swap LLM tu y de xuat o
                           luot KHONG co replan_context (nen khong lay offered tru results)
   notes.recorded / notes.dropped = ghi chu LLM de xuat da luu / bi code bo (theo ly do); ca hai = 0 -> LLM luon null

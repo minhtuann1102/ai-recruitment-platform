@@ -47,9 +47,18 @@ def test_proposed_swap_counts_as_proposed_even_when_also_proposed_off_context(mo
     assert c["results"].get("applied") == 1 and sum(c["results"].values()) >= c["offered"]["proposed"]
 
 
-def test_degraded_turn_is_not_counted_as_llm_null(monkeypatch):
-    c = counted(monkeypatch, None)["replan"]  # evaluate_with_raw tra raw None nhu khi LLM loi
-    assert set(c["offered"]) == {"degraded"}
+def test_turn_without_raw_output_is_not_counted_as_llm_null(monkeypatch):
+    # raw None: mock evaluation khong degraded nen la "skipped" (nhu precheck); LLM loi thi ev.degraded -> "degraded"
+    assert set(counted(monkeypatch, None)["replan"]["offered"]) == {"skipped"}
+    monkeypatch.setattr(mock_evaluator, "evaluate", lambda *a: _degraded(*a))
+    assert set(counted(monkeypatch, None)["replan"]["offered"]) == {"degraded"}
+
+
+_real_mock = mock_evaluator.evaluate
+
+
+def _degraded(*args):
+    return _real_mock(*args).model_copy(update={"degraded": True})
 
 
 def test_offered_needs_hybrid_replan_and_v10_prompt(monkeypatch):

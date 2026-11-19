@@ -107,7 +107,9 @@ async def evaluate_turn(req: NextTurnRequest, state: CandidateState, phase: str,
         return key, extra, await evaluator.evaluate(inp, collector), None
     raw, ev = await with_raw(inp, collector)
     if inp.replan_context is not None and uses_replan(getattr(evaluator, "prompt_version", "v0")):
-        # prompt that su co replan_context: LLM tra swap null / co de xuat / khong tra loi duoc (degraded, raw None)
-        metrics.record_replan_offered("degraded" if raw is None else "null" if getattr(raw, "swap", None) is None
-                                      else "proposed")
+        # prompt that su co replan_context: LLM tra swap null / co de xuat; raw None = LLM loi (degraded) hoac precheck
+        # bo qua khong goi LLM (skipped: tra loi rong / "khong biet")
+        outcome = ("degraded" if ev.degraded else "skipped") if raw is None else \
+            "null" if getattr(raw, "swap", None) is None else "proposed"
+        metrics.record_replan_offered(outcome)
     return key, extra, ev, raw if isinstance(raw, EvaluatorOutputV9) else None
