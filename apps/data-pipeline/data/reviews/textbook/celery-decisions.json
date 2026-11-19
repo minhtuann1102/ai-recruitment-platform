@@ -1,0 +1,88 @@
+{
+  "source_id": "celery",
+  "reviewed_at": "2026-11-19",
+  "approved_by": "auto:canary-gate",
+  "decisions": {
+    "0b040d9639b49e7677cc05d1a500c78e": {
+      "verdict": "keep"
+    },
+    "13b6c4a5217653002dd6ded27d566df3": {
+      "verdict": "keep"
+    },
+    "1427e089e3e501276559488988193604": {
+      "verdict": "keep"
+    },
+    "1fd6478b4f943710c7c0d5295e2230d3": {
+      "verdict": "keep"
+    },
+    "25dbb1a48b797c166fa3ca3ef56ddca9": {
+      "verdict": "trim",
+      "remove": ["\n\nSee also\n\nTask result backend settings"]
+    },
+    "3071e077e0b0fcd509693881a32e1dc6": {
+      "verdict": "keep"
+    },
+    "33fe6d4df70557ccc9ff152d6e91faaf": {
+      "verdict": "keep"
+    },
+    "44e0261aee26d4ddb0951e886e81772a": {
+      "verdict": "drop",
+      "reason": "not_self_contained",
+      "note": "State names (PENDING, STARTED, SUCCESS, ...) are missing, so each description and its propagates/ready fields cannot be mapped to a state. Unsure; dropped per tie-break."
+    },
+    "4e2bf5285714a9f018c36a359ecbe4fd": {
+      "verdict": "keep"
+    },
+    "7c5b2f5c8ab94bb2522ea36f6e504a42": {
+      "verdict": "trim",
+      "remove": ["\n\nTask. retry_backoff"]
+    },
+    "985c952e4a288f8bfe55389e95f4a65e": {
+      "verdict": "keep"
+    },
+    "9f702bc3437c6b4707e4bfd52a867b11": {
+      "verdict": "trim",
+      "remove": ["\n\nNote"]
+    },
+    "aac136eedf3dfc96de7216481d26e6e5": {
+      "verdict": "keep"
+    },
+    "ad0e837d751bf449505ff5be5665950e": {
+      "verdict": "keep"
+    },
+    "adf01619a9e27ab737633adfec60fc54": {
+      "verdict": "keep"
+    },
+    "b79e3ebfedbad4aa182b6181ae29f616": {
+      "verdict": "keep"
+    },
+    "baedad3127f454c27db41e6f8bb47b38": {
+      "verdict": "keep"
+    },
+    "bd8d9f5677041975feb0f8e91b5eb75d": {
+      "verdict": "keep"
+    },
+    "c51764fb555f34497a4079d4a6419146": {
+      "verdict": "trim",
+      "remove": ["\n\nTask. retry_jitter"]
+    },
+    "cc8753b8ff4bf6c0db503679c5db9896": {
+      "verdict": "trim",
+      "remove": [
+        "\n\nSee also\n\nThe book Art of Concurrency has a section dedicated to the topic\nof task granularity [AOC1] .\n\nBreshears, Clay. Section 2.2.1, “The Art of Concurrency”.\nO’Reilly Media, Inc. May 15, 2009. ISBN-13 978-[phone]."
+      ]
+    },
+    "d137357914ae277457f4f3c83643731f": {
+      "verdict": "keep"
+    },
+    "d5e5ab752f3fb4cbd99693debd6bc101": {
+      "verdict": "keep"
+    },
+    "faba5ef67d9fc8305a1ee17fac68b375": {
+      "verdict": "keep"
+    },
+    "fef4c18f7f7708a7ae1ff800bf5828c3": {
+      "verdict": "keep"
+    }
+  }
+}

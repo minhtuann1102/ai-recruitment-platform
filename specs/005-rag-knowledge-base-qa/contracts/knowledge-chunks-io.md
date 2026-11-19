@@ -3,6 +3,10 @@
 Hợp đồng chung DE (ghi) ↔ AIE (đọc). Schema bảng: [rag-design.md §3](../../../docs/architecture/rag-design.md)
 (DDL trong `scripts/init-databases.sh`, AIE sở hữu). Hợp đồng này chỉ chốt **giá trị** ghi vào từng cột.
 
+Bản ghi `source_type = 'textbook'` (dataset `de_textbook_<source_id>`, một dataset mỗi nguồn) do spec 012 ghi; ánh xạ
+cột của chúng ở [012 data-model.md §3](../../012-textbook-ingestion-rag-quality/data-model.md). Luật "không bao giờ
+xóa bản ghi khác `dataset`" dưới đây áp cho cả hai loại.
+
 ## Ánh xạ: 1 cặp Q&A → 2 bản ghi
 
 | Cột | `question` | `qa_pair` |
