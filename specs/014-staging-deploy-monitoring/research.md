@@ -99,6 +99,10 @@ Rationale / Alternatives.
   - Health: `HealthModule` dùng chung trong `libs/core` (không thêm terminus): `GET /health` → `{status, version,
     checks: {db?, redis?}}`, 503 khi phụ thuộc bắt buộc lỗi; mỗi service import và khai báo phụ thuộc của nó; route
     APISIX public `/<svc>/health` không JWT.
+- **Cần kiểm trước khi viết migrator**: `user-service` đặt `mikro-orm.useTsNode: false`, `configPaths` gồm
+  `mikro-orm.config.ts` rồi `dist/mikro-orm.config.js`; migration là file TS ở `src/database/migrations`. Chạy
+  `pnpm --filter @ai-recruit/user-service migration:up` trên DB sạch để biết CLI đang nạp TS bằng gì (MikroORM 7 + `tsx`
+  ở root, hay bản JS trong `dist`). Stage `migrator` theo đúng cách đó (giữ `tsx` hoặc build migration ra `dist`).
 - **Owner**: code trong `apps/*-service` và `libs/core` là của FSD → DE mở PR, FSD review (hỏi trước khi làm).
 - **Alternatives**: một Dockerfile mỗi service (lặp, DRY); `@nestjs/terminus` (thêm dependency cho 2 check đơn giản).
 
@@ -136,11 +140,19 @@ Rationale / Alternatives.
 
 ## R12. Giám sát và cảnh báo (FR-015–FR-018)
 
-- **Decision**: Ops Agent trên VM; cấu hình `infra/staging/monitoring/ops-agent.yaml`: receiver `hostmetrics`,
-  receiver `files` / `fluent_forward` cho log container (docker json-file `/var/lib/docker/containers/*/*.log`),
-  receiver `prometheus` scrape `ai-service:8000/metrics` và APISIX `:9091/apisix/prometheus/metrics` (bật plugin
-  `prometheus` global, cổng export chỉ nội bộ). Vì Ops Agent chạy trên host, scrape qua cổng chỉ bind `127.0.0.1`
-  (`127.0.0.1:18000→8000`, `127.0.0.1:19091→9091`), không ra Internet.
+- **Decision**: Ops Agent trên VM; cấu hình `infra/staging/monitoring/ops-agent.yaml`: receiver `hostmetrics`;
+  receiver `prometheus` scrape ai-service `/metrics` và APISIX `/apisix/prometheus/metrics` (bật plugin `prometheus`
+  global). Ops Agent chạy trên host nên scrape qua cổng chỉ bind `127.0.0.1` (`127.0.0.1:18000→8000`,
+  `127.0.0.1:19091→9091`), không ra Internet. APISIX mặc định export ở `127.0.0.1:9091` **trong** container → đặt
+  `plugin_attr.prometheus.export_addr.ip: 0.0.0.0` trong `config-staging.yaml` thì ánh xạ cổng mới tới được.
+- **Log theo tên service** (FR-015, US3 kịch bản 3): file json-file của Docker mang id container, không mang tên. Chọn
+  log driver `json-file` + `labels: com.docker.compose.service` (Docker ghi nhãn vào mỗi dòng `attrs`) rồi Ops Agent
+  receiver `files` (`/var/lib/docker/containers/*/*-json.log`) + processor `parse_json` để đưa `attrs` thành nhãn.
+  **Kiểm ở Đợt D**; không được thì dùng driver `gcplogs` (gửi thẳng Cloud Logging, có tên container, nhưng mất
+  `docker logs` tại máy → chỉ dùng nếu cách đầu hỏng).
+- **Container restart lặp** (cảnh báo #6): daemon không ghi log restart ổn định → cron mỗi phút đọc
+  `docker inspect -f '{{.Name}} {{.RestartCount}}'`, ghi dòng log có cấu trúc `container_restarts name=… count=…`
+  → log-based metric (cùng kiểu với sao lưu ở R11).
 - Uptime check: `https://${STAGING_API_HOST}/ai/api/health` 1 phút / 3 vùng; check chứng chỉ có sẵn trong uptime.
 - Cảnh báo: 8 chính sách JSON trong `infra/staging/monitoring/alerts/`, áp bằng `apply-monitoring.sh`
   (`gcloud monitoring policies create/update` theo `displayName`); kênh email. Dashboard JSON
