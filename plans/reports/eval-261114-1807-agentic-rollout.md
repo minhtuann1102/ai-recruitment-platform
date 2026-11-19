@@ -1,7 +1,7 @@
 # Agentic ai-service: runbook đo, bảng rollout, kết quả (phase 06)
 
 - Ngày soạn: 2026-11-14. Kế hoạch: `plans/261114-1549-agentic-ai-service/`. Mốc: `plans/reports/aie-reply-261114-1448-agentic-ai-service.md` mục 8 (đề xuất AIE, **nhóm chưa thống nhất**).
-- **Trạng thái (2026-11-19, commit `9a1cc2c`): đo gần đủ.** Đã có sim C0-C5 + skewed (3 run), `judge_support` ×3 trên C0/C1, injection C2, `/api/start` P95 (mục 4). Credit OpenRouter hết lần hai lúc ~04:19 ngày 2026-11-19: 5 gate cuối (holdout v10, sourced v11, 3 gate `--lookup`) bị nhiễm (APIStatusError 402), bỏ. Còn: chạy lại 5 gate đó, hiệu chỉnh ngưỡng (bước 5), đọc tay notes (bước 19, nhưng C5 không có ghi chú nào, xem mục 4). Dữ liệu thô ở máy người đo, không commit: `plans/reports/agentic-measure/`.
+- **Trạng thái (2026-11-19, commit `f47ebf0`+): đo xong phần cần credit.** Sim C0-C5 + skewed (3 run), `judge_support` ×3 trên C0/C1, injection C2, `/api/start` P95, 5 gate chạy lại (đêm 2026-11-19, sau khi nạp credit lần ba) và quick C5 có `agent_counters` (mục 4). Còn: hiệu chỉnh ngưỡng (bước 5, cần owner), quyết định sửa prompt v10/v11 (replan/notes không bao giờ đề xuất). Dữ liệu thô ở máy người đo, không commit: `plans/reports/agentic-measure/`.
 - Không đổi mặc định nào. Cờ nào cũng giữ tắt cho đến khi bảng mục 4 được điền và owner duyệt.
 
 ## 1. Quy ước chạy
@@ -80,6 +80,7 @@ Ghi chú: "overrule" dùng `overrule_rate_llm` (bỏ lượt `sensitive_kind`); 
 | TTFT P95 toàn phiên (s) | +≤ 0,3 so C0 | 6,84 | **7,77** (+0,93) | 5,94 | **7,52** (+0,68) | **7,53** | 6,44 |
 | Tỷ lệ gọi công cụ | ≤ 30% | 0 | **48,1%** | 0 | 5,4% | – | – |
 | Lượt Evaluator mock / lookup fallback | – | 3 / – | 1 / 2 | 4 / – | 21 / 6 | 15 / – | 15 / – |
+| Trích nguồn sai id, gate `--lookup` (main / holdout) | không tăng | 0 / 0 | **0 / 0** (đếm lại 2026-11-19; số 31/43 cũ là lỗi đếm: `run_evaluator` coi mọi id là lạ, kể cả id chunk công cụ hợp lệ) | – | – | – | – |
 | Độ đúng `supported` câu AI / kho (TB 3 lần judge) | ≥ 0,65 / ≥ 0,71 | 0,82 / 0,99 | 0,85 / 0,99 | – | – | – | – |
 | Stdev gộp (/10) | ≤ 1,2× C0 và ≤ 0,5 | 0,353 | 0,365 | 0,280 | 0,300 | 0,434 (1,23×) | 0,399 |
 | Gap strong − weak | giảm ≤ 10% | 4,19 | 4,34 | 3,71 (**−11%**) | 3,82 (−9%) | 3,55 (**−15%**) | 3,96 (−5%) |
@@ -96,7 +97,7 @@ Judge: v2, chưa hiệu chỉnh; đối chứng (ghép tài liệu topic khác) 
 Nhận định:
 - **C1 (tools)**: bản sửa mục 4b có hiệu quả (mock 20 → 1, lookup fallback 17 → 2; stdev, gap bằng C0). Nhưng không còn bị cắt thì model gọi tool ở 48% lượt, nên TTFT vẫn trượt. Muốn bật thì phải giảm tỷ lệ gọi (prompt hoặc điều kiện đủ lượt).
 - **C2 (hybrid)**: TTFT tốt hơn C0, stdev thấp hơn, injection đạt. Nhưng LLM đề xuất `follow_up` rất nhiều: phiên dài hơn ~40% (9,2 → 13,1 lượt), chi phí +60%, `/api/start` P95 tăng (+2,5 s, chưa rõ vì sao: start không qua policy, có thể do nhà cung cấp lúc đo). Gap giảm 11%, sát mốc. Owner cần quyết phiên dài hơn có chấp nhận được.
-- **C4/C5**: v10/v11 chạy đúng (prompt_version v10/v11 ở mọi lượt; mọi phiên có reserve), nhưng **0 swap và 0 ghi chú trên 87 phiên mỗi cấu hình**. Chưa phân biệt được model luôn trả null (prompt v11 ghi "Mặc định `new_note = null`") hay code bỏ: file sim không lưu output thô `swap`/`new_note` và lý do drop. Cần thêm trường đó vào sim rồi đo lại một ít phiên trước khi kết luận. Phát hiện này cũng làm C4 stdev 0,434 / gap −15% chỉ là nhiễu khác ngày, không phải tác dụng của replan.
+- **C4/C5**: v10/v11 chạy đúng (prompt_version v10/v11 ở mọi lượt; mọi phiên có reserve), nhưng **0 swap và 0 ghi chú trên 87 phiên mỗi cấu hình**. Quick C5 (10 phiên, 2026-11-19) có `agent_counters`: `replan.offered` = 33 `null` + 7 `degraded`, 0 `proposed`; `notes.proposed` = 0. Tức là **model không bao giờ đề xuất**, code không bỏ gì. Nhiều khả năng do prompt ("Mặc định `new_note = null`", swap chỉ khi chắc) quá chặt với gpt-4o-mini. Replan/notes hiện không có tác dụng: muốn đo phải sửa prompt (v12) hoặc đổi model Evaluator; owner quyết. Stdev 0,434 / gap −15% của C4 vì vậy chỉ là nhiễu khác ngày, không phải tác dụng của replan. `degraded` 7/40 (18%) ở lượt có `replan_context` cao hơn C0 (~1%): cần xem khi sửa prompt.
 
 
 Gate prompt Evaluator (`run_evaluator`, 3 run; main có nhãn, holdout chưa nhãn nên chỉ có consistency/ordering):
@@ -106,9 +107,9 @@ Gate prompt Evaluator (`run_evaluator`, 3 run; main có nhãn, holdout chưa nh�
 | v8 | 0,961 / 0,547 / −0,28 | 0,953 | 0,99 | 0,98/0,79, 0,57, 0 | 0,75 / 0,034 / 3 |
 | v8 + policy-context | 0,967 / 0,541 / −0,25 | 0,977 | 0,99 | 0,97/0,77, 0,50, 0 | 0,75 / 0,041 / 3 |
 | v9 + pc (hybrid) | 0,948 / 0,585 / −0,31 | 0,977 | 0,962 | 0,98/0,84, 0,60, 0 | 0,80 / 0,082 / 2 |
-| v10 + pc (replan) | 0,953 / 0,580 / −0,24 | 0,953 | 0,963 | 1,00/0,81, 0,60, 0 | 0,75 / 0,033 / **16** |
-| v11 + pc (notes) | 0,967 / 0,547 / −0,30 | 0,953 | 0,959 | 0,91/0,87, 0,67, **9** | 0,80 / 0,035 / 1 |
-| v8 `--lookup` | 0,950 / 0,632 / −0,35 | 0,930 | 0,977 | 0,77/0,76, 0,40, 0 | 0,75 / 0,041 / 4 |
+| v10 + pc (replan) | 0,953 / 0,580 / −0,24 | 0,953 | 0,963 | 1,00/0,81, 0,60, 0 | 0,75 / 0,061 / 3 (chạy lại 2026-11-19; lần trước 16 do chạy song song) |
+| v11 + pc (notes) | 0,967 / 0,547 / −0,30 | 0,953 | 0,959 | 0,87/0,88, 0,77, **6** (chạy lại; lần trước 9) | 0,80 / 0,035 / 1 |
+| v8 `--lookup` (sau bản sửa 4b, chạy lại 2026-11-19) | 0,963 / 0,601 / −0,30 | 0,930 | 0,975 | 0,79/0,69, 0,50, 0 | 1,00 / 0,093 / 1 |
 
 Đánh giá: v9/v10 trong nhiễu so v8 (within1 −0,01, `evidence_valid` −0,03): coi là đạt sơ bộ, chờ owner chốt "không giảm" có dung sai. v11 sourced có 9 id sai (chạy song song, 1 run degraded) cần chạy lại khi có credit. Holdout v10 có 16 run degraded (chưa rõ nguyên nhân, log không có 402/EMAXCONN): chạy lại.
 
@@ -116,7 +117,7 @@ Gate prompt Evaluator (`run_evaluator`, 3 run; main có nhãn, holdout chưa nh�
 
 - `loop_failed` 66/144 (main) và 19/60 (holdout) trên bản chạy tuần tự sạch, log đều `evaluator_lookup_fallback reason=LlmTimeoutError remaining_s≈6,5`.
 - Nguyên nhân: bước đầu (`tool_choice=auto`) bị cắt ở `EVALUATOR_TOOL_DEADLINE_S + FINAL_RESERVE_S` = 2,0 + 1,5 = 3,5 s (`app/llm/tool_loop.py`, `step_until`), trong khi Evaluator viết JSON không gọi tool mất P50 3,65 s / P95 5,6 s (C0). Khoảng nửa số lượt model trả lời thẳng vẫn bị cắt, rồi chấm lại không tools: lượt mất ~3,5 s + một lần chấm, giải thích TTFT P95 lượt tra cứu 9,65 s và mock tăng 3 → 20.
-- **Đã sửa 2026-11-15** (`app/llm/tool_loop.py`): bước `auto` dùng tới `tools_until` = hết ngân sách − `FINAL_RESERVE_S`; `EVALUATOR_TOOL_DEADLINE_S` chỉ còn là hạn chạy một lệnh tra cứu, tính từ lúc lệnh bắt đầu. Test hồi quy: `test_slow_direct_answer_is_not_cut_at_tool_deadline`, `test_tool_deadline_counts_from_tool_start_not_loop_start`. Tool call đến muộn (lệnh + câu trả lời cuối `FINAL_ANSWER_S` = 3,5 s không còn vừa ngân sách) thì vòng lặp dừng với `no_time_for_tool` trước khi chạy lệnh, để caller chấm lại không tools khi còn ≥ 2,5 s (review code). Rủi ro còn lại: retry 5xx hoặc repair kéo dài bước `auto` làm mất fallback; theo dõi tỷ lệ degraded khi đo lại. **Đã đo lại 2026-11-18** (mục 4, cột C1): mock 20 → 1. Gate lookup (id sai 31/43) chưa đo lại: credit hết lần hai trước bước đó.
+- **Đã sửa 2026-11-15** (`app/llm/tool_loop.py`): bước `auto` dùng tới `tools_until` = hết ngân sách − `FINAL_RESERVE_S`; `EVALUATOR_TOOL_DEADLINE_S` chỉ còn là hạn chạy một lệnh tra cứu, tính từ lúc lệnh bắt đầu. Test hồi quy: `test_slow_direct_answer_is_not_cut_at_tool_deadline`, `test_tool_deadline_counts_from_tool_start_not_loop_start`. Tool call đến muộn (lệnh + câu trả lời cuối `FINAL_ANSWER_S` = 3,5 s không còn vừa ngân sách) thì vòng lặp dừng với `no_time_for_tool` trước khi chạy lệnh, để caller chấm lại không tools khi còn ≥ 2,5 s (review code). Rủi ro còn lại: retry 5xx hoặc repair kéo dài bước `auto` làm mất fallback; theo dõi tỷ lệ degraded khi đo lại. **Đã đo lại 2026-11-18** (mục 4, cột C1): mock 20 → 1. Gate lookup đo lại 2026-11-19: id sai 0/0 (31/43 cũ là lỗi đếm của `run_evaluator`, không phải model).
 - Kết luận hiện tại: **`EVALUATOR_TOOLS` giữ tắt.**
 
 ## 5. Bảng rollout
@@ -135,9 +136,9 @@ Thứ tự bật đề xuất khi đạt cổng: `EVALUATOR_TOOLS`, rồi `POLIC
 ## 6. Việc mở
 
 - Đã chạy: bước 1-4, 6-9, 11-13, 15, 16, 18, 20.
-- [BLOCKED-CREDIT] (hết credit lần hai 2026-11-19 ~04:19): gate holdout v10, sourced v11, `run_evaluator --lookup` main/holdout và `run_evaluator_sourced --lookup` (id sai sau bản sửa 4b).
+- Đã chạy lại 2026-11-19 (credit lần ba): holdout v10, sourced v11, 3 gate `--lookup` (2 gate `run_evaluator --lookup` chạy hai lần: lần hai sau khi sửa đếm id lạ trong `evals/run_evaluator.py`, dùng chung `valid_source_ids` với gate sourced).
 - Bước 5 (hiệu chỉnh `WEAK_BELOW`/`STRONG_FROM`): dữ liệu C0 đã đủ, chưa làm; cần owner duyệt.
-- Replan/notes 0 đề xuất: sim đã ghi `summary.per_run[].agent_counters` (2026-11-19; `replan.offered{null,proposed,degraded}` / `results`, `notes.recorded` / `dropped` / `proposed`, từ counter Prometheus trong tiến trình). C4 đã có gợi ý: `turn.swap_result` = null ở cả 1153 lượt, mà mọi `swap` khác null đều có kết quả, nên hoặc LLM luôn trả null hoặc `replan_context` không được gửi; `offered` sẽ phân biệt. Cần credit: chạy lại `--matrix quick --runs 1` với C5 (~$0,2) trước khi kết luận; bước 19 chờ việc này.
+- Replan/notes: model không đề xuất (quick C5 `agent_counters`, mục 4). Owner quyết: sửa prompt v10/v11 (bỏ "mặc định null", thêm ví dụ khi nào nên đổi topic / ghi chú) rồi đo lại, hay hoãn hai cờ này. Bước 19 (đọc tay notes) không làm được khi chưa có ghi chú.
 - Tools: giảm tỷ lệ gọi tool (48%) trước khi cân nhắc bật lại.
 - Hybrid: phiên dài hơn ~40% và `/api/start` P95 +2,5 s; owner quyết có chấp nhận.
 - [DE]: textbook scenario java/nodejs (bước 10).
