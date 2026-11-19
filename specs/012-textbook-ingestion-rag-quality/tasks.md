@@ -145,7 +145,7 @@ Chỉ bắt đầu sau T050. Nếu T050 đổi cỡ đoạn: sửa hằng trong 
 Mỗi track lặp đúng chuỗi T037 → T047 (kiểm nguồn [W] → duyệt nguồn [DE] → danh sách trang + truy vấn [W] → duyệt [DE] → crawl / process / prepare [W] → soát [W] → score [W] → duyệt decisions + mẫu 50 đoạn [DE] → process + coverage [W] → PR + index [DE]). Nguồn dùng chung đã duyệt ở track trước không kiểm giấy phép lại, chỉ thêm trang.
 
 - [x] T051 [US2] Track `nodejs_backend` (4 tình huống; category riêng `Backend`). Ứng viên cần kiểm: Node.js docs, NestJS docs, Redis docs; thêm trang PostgreSQL / System Design Primer nếu tình huống cần *(2026-11-18: soát + score xong (cổng mồi), nodejs, nestjs, redis: 158 đoạn theo track; index 2026-11-18 từ `main` sau #100)*
-- [ ] T052 [US2] Track `python_backend` (4 tình huống; `Backend`). Ứng viên: Python docs, FastAPI, Django, Celery, SQLAlchemy *(2026-11-18: soát + score xong (cổng mồi), fastapi, django, sqlalchemy: 151 đoạn; celery bị chặn 403/429 khi crawl lại, làm sau; index 2026-11-18 từ `main` sau #100)*
+- [ ] T052 [US2] Track `python_backend` (4 tình huống; `Backend`). Ứng viên: Python docs, FastAPI, Django, Celery, SQLAlchemy *(2026-11-18: soát + score xong (cổng mồi), fastapi, django, sqlalchemy: 151 đoạn; celery bị chặn 403/429 khi crawl lại, làm sau; index 2026-11-18 từ `main` sau #100. 2026-11-19: celery crawl lại được (HTTP 200), 2 trang → 26 đoạn, soát 1 worker + score qua cổng mồi: 18 keep, 5 trim, 1 drop → 23 bản ghi; chờ index từ `main`)*
 - [x] T053 [US2] Track `devops_engineer` (4 tình huống; `DevOps`). Ứng viên: Kubernetes docs, Docker docs, Prometheus docs *(2026-11-18: soát + score xong (cổng mồi), kubernetes, docker, prometheus: 182 đoạn; index 2026-11-18 từ `main` sau #100)*
 - [x] T054 [US2] Track `frontend_react` (4 tình huống; `Frontend`). Ứng viên: react.dev (giấy phép đã kiểm ở 005, vẫn ghi `license_url` + `license_quote`), Next.js docs, web.dev, MDN *(2026-11-18: soát + score xong (cổng mồi), react-dev, web-dev, mdn-web-docs: 153 đoạn; index 2026-11-18 từ `main` sau #100)*
 - [x] T055 [US2] Track `ai_engineer` (8 tình huống; `AI`). Ứng viên: scikit-learn user guide, Hugging Face docs, OWASP Top 10 for LLM Applications. Track này dễ thiếu nguồn có giấy phép mở: tình huống không đủ trang thì ghi vào `gaps`, không lấy nguồn chưa duyệt *(2026-11-18: soát + score xong (cổng mồi), scikit-learn, huggingface-docs, owasp-llm-top10, nannyml, livekit-docs: 256 đoạn; index 2026-11-18 từ `main` sau #100)*
@@ -173,7 +173,7 @@ Chỉ làm khi AIE đã trả lời câu 5 ở spec và các phase trên đã xo
 
 ## Phase 10: Polish
 
-- [ ] T061 [W] Cập nhật `docs/sprint-plan.md` (S3-DE-1..3 theo bảng "Thay đổi so với sprint plan" của spec, kèm ghi chú ngày và người chốt) và `specs/README.md` (trạng thái 012); cập nhật `specs/005-rag-knowledge-base-qa/contracts/knowledge-chunks-io.md` nếu có mục liệt kê `source_type` / `dataset` để thêm `de_textbook_*`
+- [x] T061 [W] *(2026-11-19: sprint-plan đã ghi từ 11-18; README 012; contract 005 thêm dòng trỏ sang bản ghi textbook)* Cập nhật `docs/sprint-plan.md` (S3-DE-1..3 theo bảng "Thay đổi so với sprint plan" của spec, kèm ghi chú ngày và người chốt) và `specs/README.md` (trạng thái 012); cập nhật `specs/005-rag-knowledge-base-qa/contracts/knowledge-chunks-io.md` nếu có mục liệt kê `source_type` / `dataset` để thêm `de_textbook_*`
 - [ ] T062 [DE] Nhắn AIE cập nhật `docs/ai-service/07-data-storage.md` phần Textbook theo thực tế (AIE sở hữu file đó)
 - [ ] T063 [DE] Chạy lại toàn bộ quickstart §0–§6 một lượt trên `main`; tick `checklists/requirements.md` mục còn lại
 
