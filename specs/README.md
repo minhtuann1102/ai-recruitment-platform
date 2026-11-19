@@ -23,7 +23,7 @@ báo cáo, slides) là việc chung của team, không cần spec.
 | 009 | [jd-crawling-seeding](009-jd-crawling-seeding/spec.md) | S2 | DE | Spec Kit | S2-DE-1..4 | 005 (pipeline), 004 + 007 (migration) | US1 crawl merged (#45), US2 process merged (#47, 341 JD); US5 synthetic (#48): 24 JD bù sàn → 365 JD, 210 đủ điều kiện seed; seed (US4) chờ migration `company_profiles` (004) + job-service (007) |
 | 010 | interview-sessions | S3 | FSD (đề xuất) | Owner chọn | S3-FSD-1..8 | 006, 002 | Chưa viết |
 | 011 | agentic-interview-hardening | S3–S4 | AIE (đề xuất) | Owner chọn | S3-AIE-1..6, S4-AIE-1..5 | 006, 010 | Kế hoạch: [plan](../plans/20261019-1100-ai-interview-brd-implementation/plan.md) (workflow `plans/`) |
-| 012 | [textbook-ingestion-rag-quality](012-textbook-ingestion-rag-quality/spec.md) | S3–S4 | DE (AIE review) | Spec Kit | S3-DE-1..5, S4-DE-1 | 005 (pipeline ghi, crawler), 011 (AIE bật `RAG_TEXTBOOK_ENABLED` và đo) | Merged (2026-11-18) — PR #97–#100; 6 track, 1.121 đoạn trong ai_db; celery (python) crawl + soát xong 2026-11-19 (23 bản ghi), chờ index; chờ AIE đo (SC-007) |
+| 012 | [textbook-ingestion-rag-quality](012-textbook-ingestion-rag-quality/spec.md) | S3–S4 | DE (AIE review) | Spec Kit | S3-DE-1..5, S4-DE-1 | 005 (pipeline ghi, crawler), 011 (AIE bật `RAG_TEXTBOOK_ENABLED` và đo) | Merged (2026-11-18) — PR #97–#102; 6 track, celery index 2026-11-19 (+23 → 1.144 đoạn); chờ AIE đo (SC-007) |
 | 013 | web-frontend | S4 | FSD (đề xuất) | Owner chọn | S4-FSD-1..9 | 004, 007, 008, 010 | Chưa viết |
 | 014 | staging-deploy-monitoring | S4 | DE | Spec Kit | S4-DE-2..4 | 001, mọi service chạy được | Chưa viết |
 | 015 | voice-mode | S4 | DE | Spec Kit | S4-DE-5 | 006, 010, 013 | Chưa viết (Stretch; cần tài khoản STT/TTS) |
