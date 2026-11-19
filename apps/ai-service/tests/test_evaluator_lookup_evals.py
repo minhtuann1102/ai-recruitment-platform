@@ -143,3 +143,19 @@ def test_ttft_breakdown_separates_lookup_and_counts_lookup_fallback():
     assert out["normal"]["turns"] == 3 and out["lookup"]["turns"] == 1 and out["lookup"]["ttft"]["p50"] == 5.0
     assert out["fallback"]["evaluator_lookup_fallback"]["turns"] == 1
     assert "lookup" not in breakdown(turn_rows({"p": {"calls": calls[:3]}}))
+
+
+def test_valid_ids_include_committed_tool_chunks_and_reference():
+    from dataclasses import replace
+    from types import SimpleNamespace
+    from evals.lookup_support import invalid_ids, valid_source_ids
+    inp = base_input()  # topic co reference_snippets + 1 turn chunk
+    base = valid_source_ids(None, inp, "")
+    assert base and "R" not in base and valid_source_ids(None, inp, "dap an")[-1] == "R"
+    tool = SimpleNamespace(committed=True, extend=lambda i: replace(i, turn_snippets=[*i.turn_snippets, "tool chunk"]))
+    extra = f"S{len(base) + 1}"
+    assert extra in valid_source_ids(tool, inp, "") and extra not in base
+    tool.committed = False  # vong lap khong chot: chunk cong cu khong duoc trich
+    assert extra not in valid_source_ids(tool, inp, "")
+    points = [{"source_ids": [extra, " s1 "]}, SimpleNamespace(source_ids=["S99"])]
+    assert invalid_ids(points, valid_source_ids(tool, inp, "")) == 2  # extra (khong chot) + S99; " s1 " hop le

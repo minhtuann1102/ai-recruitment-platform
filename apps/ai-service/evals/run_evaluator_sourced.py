@@ -24,13 +24,14 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from app.agents.evaluator import EvaluationInput, LlmEvaluator, TopicTurn
-from app.evaluator_source_checks import REFERENCE_ID, source_blocks
+from app.evaluator_source_checks import REFERENCE_ID
 from app.llm.gateway import get_gateway
 from app.llm.usage import UsageCollector
 from app.models_interview import Evaluation, PlanTopic, SourceRef
 from evals.label_sheet import load_golden
 from evals.policy_context_support import apply_policy_context
-from evals.lookup_support import attach_lookup, load_lookup_retriever, lookup_fields, lookup_summary
+from evals.lookup_support import (attach_lookup, invalid_ids, load_lookup_retriever, lookup_fields, lookup_summary,
+                                  valid_source_ids)
 from evals.run_evaluator import REPORTS
 
 GOLDEN = Path(__file__).with_name("evaluator_golden_sourced.jsonl")
@@ -71,12 +72,9 @@ async def run_all(samples: List[dict], runs: int, prompt: Optional[str], collect
         async with sem:
             raw, ev = await evaluator.evaluate_with_raw(inp, collector)
         points = [c.model_dump() for c in raw.covered] if raw else []
-        # id hop le gom ca chunk cong cu (S{n+1}..) khi vong lap da chot
-        extended = tool.extend(inp) if tool is not None and tool.committed else inp
-        valid = [i for i, _ in source_blocks([*extended.topic.reference_snippets, *extended.turn_snippets],
-                                             s.get("reference_answer", ""))]
+        valid = valid_source_ids(tool, inp, s.get("reference_answer", ""))  # gom ca chunk cong cu khi da chot
         return {"observed": observed(points, valid), "points": points, "degraded": ev.degraded,
-                "invalid_ids": sum(i.strip().upper() not in valid for p in points for i in p.get("source_ids", [])),
+                "invalid_ids": invalid_ids(points, valid),
                 "r_blocked": blocked_by_reference(ev),
                 "technical_accuracy": ev.scores.technical_accuracy, "misconceptions": len(ev.misconceptions),
                 **lookup_fields(tool)}

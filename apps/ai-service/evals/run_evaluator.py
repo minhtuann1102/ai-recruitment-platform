@@ -25,7 +25,8 @@ from evals.evaluator_metrics import (CRITERIA, agreement, consensus, consistency
                                      rate)
 from evals.label_sheet import SETS, load_golden
 from evals.policy_context_support import apply_policy_context
-from evals.lookup_support import attach_lookup, load_lookup_retriever, lookup_fields, lookup_summary
+from evals.lookup_support import (attach_lookup, invalid_ids, load_lookup_retriever, lookup_fields, lookup_summary,
+                                  valid_source_ids)
 from evals.stt_noise import inherit_labels, plain_samples, stt_samples, stt_summary
 
 REPORTS = Path(__file__).resolve().parents[3] / "plans" / "reports"
@@ -50,12 +51,12 @@ async def run_all(samples: List[dict], runs: int, prompt: str, collector: UsageC
         async with sem:
             raw, ev = await evaluator.evaluate_with_raw(inp, collector)
         quotes = [c.quote for c in raw.covered] if raw else []
-        source_ids = [i for c in (raw.covered if raw else []) for i in getattr(c, "source_ids", [])]
+        # id la: golden khong co tai lieu nen chi [R] (neu co) va chunk cong cu da chot (--lookup) la hop le
+        invented = invalid_ids(raw.covered if raw else [], valid_source_ids(tool, inp, inp.reference_answer))
         return {**ev.scores.model_dump(), "answer_type": ev.answer_type, "turn_score_10": ev.turn_score_10,
                 "degraded": ev.degraded, "llm": raw is not None, "quotes": len(quotes),
                 "valid_quotes": sum(quote_in_answer(q, s["answer"]) for q in quotes),
-                # golden khong co tai lieu: moi id deu la id la (v4 phai tra no_source, source_ids rong)
-                "source_ids": len(source_ids), **lookup_fields(tool)}
+                "source_ids": invented, **lookup_fields(tool)}
 
     results: Dict[str, List[dict]] = {s["id"]: [] for s in samples}
     for r in range(runs):
