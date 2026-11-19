@@ -98,6 +98,7 @@ Nhận định:
 - **C1 (tools)**: bản sửa mục 4b có hiệu quả (mock 20 → 1, lookup fallback 17 → 2; stdev, gap bằng C0). Nhưng không còn bị cắt thì model gọi tool ở 48% lượt, nên TTFT vẫn trượt. Muốn bật thì phải giảm tỷ lệ gọi (prompt hoặc điều kiện đủ lượt).
 - **C2 (hybrid)**: TTFT tốt hơn C0, stdev thấp hơn, injection đạt. Nhưng LLM đề xuất `follow_up` rất nhiều: phiên dài hơn ~40% (9,2 → 13,1 lượt), chi phí +60%, `/api/start` P95 tăng (+2,5 s, chưa rõ vì sao: start không qua policy, có thể do nhà cung cấp lúc đo). Gap giảm 11%, sát mốc. Owner cần quyết phiên dài hơn có chấp nhận được.
 - **C4/C5**: v10/v11 chạy đúng (prompt_version v10/v11 ở mọi lượt; mọi phiên có reserve), nhưng **0 swap và 0 ghi chú trên 87 phiên mỗi cấu hình**. Quick C5 (10 phiên, 2026-11-19) có `agent_counters`: `replan.offered` = 33 `null` + 7 `degraded`, 0 `proposed`; `notes.proposed` = 0. Tức là **model không bao giờ đề xuất**, code không bỏ gì. Nhiều khả năng do prompt ("Mặc định `new_note = null`", swap chỉ khi chắc) quá chặt với gpt-4o-mini. Replan/notes hiện không có tác dụng: muốn đo phải sửa prompt (v12) hoặc đổi model Evaluator; owner quyết. Stdev 0,434 / gap −15% của C4 vì vậy chỉ là nhiễu khác ngày, không phải tác dụng của replan. `degraded` 7/40 (18%) ở lượt có `replan_context` cao hơn C0 (~1%): cần xem khi sửa prompt.
+- **v12 (2026-11-20)**: viết lại mục swap / ghi chú của v11 (bỏ "Mặc định null", thêm 3 trường hợp nên đổi topic, 4 loại ghi chú có ví dụ; phần chấm giữ nguyên từng byte, test `test_evaluator_v12_prompt.py`). Quick C5 với `EVALUATOR_PROMPT_VERSION=v12`: `replan.offered` 35 `null` + 1 `degraded` + 6 `skipped` (precheck), 0 `proposed`; `notes.proposed` 0 trên 89 lượt `answered`/`partial`. **Không đổi gì.** Gate main/holdout v12 trong nhiễu so v11. Kết luận tạm: không phải do câu chữ prompt; nghi gpt-4o-mini ở JSON strict luôn chọn `null` cho trường `anyOf [object, null]`. Kiểm bằng probe gọi Evaluator thật (script ở máy người đo `~/.local/share/ai-service-eval/probe_notes.py`), rồi thử: bắt buộc trường (vd `new_note` luôn là object với `kind = "none"`), hoặc model Evaluator khác. v12 **không** thành mặc định (`NOTES_PROMPT_VERSION` vẫn v11).
 
 
 Gate prompt Evaluator (`run_evaluator`, 3 run; main có nhãn, holdout chưa nhãn nên chỉ có consistency/ordering):
@@ -109,6 +110,7 @@ Gate prompt Evaluator (`run_evaluator`, 3 run; main có nhãn, holdout chưa nh�
 | v9 + pc (hybrid) | 0,948 / 0,585 / −0,31 | 0,977 | 0,962 | 0,98/0,84, 0,60, 0 | 0,80 / 0,082 / 2 |
 | v10 + pc (replan) | 0,953 / 0,580 / −0,24 | 0,953 | 0,963 | 1,00/0,81, 0,60, 0 | 0,75 / 0,061 / 3 (chạy lại 2026-11-19; lần trước 16 do chạy song song) |
 | v11 + pc (notes) | 0,967 / 0,547 / −0,30 | 0,953 | 0,959 | 0,87/0,88, 0,77, **6** (chạy lại; lần trước 9) | 0,80 / 0,035 / 1 |
+| v12 + pc (notes, mục swap/ghi chú viết lại, 2026-11-20) | 0,959 / 0,585 / −0,34 | 0,930 | 0,990 | [BLOCKED-KEY-LIMIT] | 0,80 / 0,026 / 2 |
 | v8 `--lookup` (sau bản sửa 4b, chạy lại 2026-11-19) | 0,963 / 0,601 / −0,30 | 0,930 | 0,975 | 0,79/0,69, 0,50, 0 | 1,00 / 0,093 / 1 |
 
 Đánh giá: v9/v10 trong nhiễu so v8 (within1 −0,01, `evidence_valid` −0,03): coi là đạt sơ bộ, chờ owner chốt "không giảm" có dung sai. v11 sourced có 9 id sai (chạy song song, 1 run degraded) cần chạy lại khi có credit. Holdout v10 có 16 run degraded (chưa rõ nguyên nhân, log không có 402/EMAXCONN): chạy lại.
@@ -138,7 +140,7 @@ Thứ tự bật đề xuất khi đạt cổng: `EVALUATOR_TOOLS`, rồi `POLIC
 - Đã chạy: bước 1-4, 6-9, 11-13, 15, 16, 18, 20.
 - Đã chạy lại 2026-11-19 (credit lần ba): holdout v10, sourced v11, 3 gate `--lookup` (2 gate `run_evaluator --lookup` chạy hai lần: lần hai sau khi sửa đếm id lạ trong `evals/run_evaluator.py`, dùng chung `valid_source_ids` với gate sourced).
 - Bước 5 (hiệu chỉnh `WEAK_BELOW`/`STRONG_FROM`): dữ liệu C0 đã đủ, chưa làm; cần owner duyệt.
-- Replan/notes: model không đề xuất (quick C5 `agent_counters`, mục 4). Owner quyết: sửa prompt v10/v11 (bỏ "mặc định null", thêm ví dụ khi nào nên đổi topic / ghi chú) rồi đo lại, hay hoãn hai cờ này. Bước 19 (đọc tay notes) không làm được khi chưa có ghi chú.
+- Replan/notes: model không đề xuất, cả v11 lẫn v12 (mục 4). [BLOCKED-KEY-LIMIT] OpenRouter trả 403 "Key limit exceeded (total limit)" lúc 2026-11-20 00:18: khóa có trần chi tiêu riêng, owner nâng trần rồi chạy probe + sourced v12. Bước 19 (đọc tay notes) không làm được khi chưa có ghi chú.
 - Tools: giảm tỷ lệ gọi tool (48%) trước khi cân nhắc bật lại.
 - Hybrid: phiên dài hơn ~40% và `/api/start` P95 +2,5 s; owner quyết có chấp nhận.
 - [DE]: textbook scenario java/nodejs (bước 10).
