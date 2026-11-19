@@ -142,3 +142,53 @@ class EvaluatorOutputV11(EvaluatorOutputV10):
 
 def uses_notes(prompt_version: str) -> bool:
     return int(prompt_version.lstrip("v") or 0) >= 11
+
+
+NO_NOTE_KIND = "none"  # v12: new_note.kind khi khong ghi chu
+
+
+def _field(v, name: str):
+    return v.get(name) if isinstance(v, dict) else getattr(v, name, None)
+
+
+class EvaluatorOutputV12(EvaluatorOutputV11):
+    """v12 (2026-11-20): cung truong voi V11, nhung schema strict bat `swap` / `new_note` luon la object. Do probe:
+    gpt-4o-mini voi truong `anyOf [object, null]` tra null o moi luot (ca cau sai ro rang); bat buoc object thi ghi chu
+    dung cho. "Khong de xuat" = swap.drop rong / new_note.kind "none": doi ve None sau parse, code phia sau nhu V11."""
+
+    # Cung ten voi validator cua V10 / V11 de THAY THE (pydantic chi chay ban cua lop con), khong chay hai lan.
+    @field_validator("swap", mode="before")
+    @classmethod
+    def _swap_or_none(cls, v):
+        if not isinstance(v, (dict, SwapProposal)) or not str(_field(v, "drop") or "").strip():
+            return None
+        return v
+
+    @field_validator("new_note", mode="before")
+    @classmethod
+    def _note_or_none(cls, v):
+        if not isinstance(v, (dict, RawNote)) or str(_field(v, "kind") or "").strip().lower() in ("", NO_NOTE_KIND):
+            return None
+        return v
+
+    @classmethod
+    def model_json_schema(cls, *args, **kwargs):
+        schema = super().model_json_schema(*args, **kwargs)
+        props = schema["properties"]
+        props["swap"] = {"$ref": "#/$defs/SwapProposal"}
+        props["new_note"] = {"$ref": "#/$defs/RawNote"}
+        schema["$defs"]["RawNote"]["properties"]["kind"]["enum"] = [NO_NOTE_KIND, "hypothesis", "to_verify", "strength",
+                                                                    "risk"]
+        return schema
+
+
+def uses_required_proposals(prompt_version: str) -> bool:
+    return int(prompt_version.lstrip("v") or 0) >= 12
+
+
+def output_schema(prompt_version: str, sourced: bool, policy: bool, replan: bool, notes: bool):
+    """Model dau ra theo ban prompt (v12 > v11 > v10 > v9 > v4 > co ban)."""
+    if uses_required_proposals(prompt_version):
+        return EvaluatorOutputV12
+    return EvaluatorOutputV11 if notes else EvaluatorOutputV10 if replan else EvaluatorOutputV9 if policy else \
+        EvaluatorOutputV4 if sourced else EvaluatorOutput

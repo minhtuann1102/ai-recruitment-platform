@@ -28,7 +28,7 @@ from .evaluator_lookup_call import call_with_lookup
 from .evaluator_input import EvaluationInput, all_snippets, build_messages, cited_sources, source_refs  # noqa: F401
 from .evaluator_output_models import (CoveredPoint, EvaluatorOutput, EvaluatorOutputV4, RawBands,  # noqa: F401
                                       SourcedCoveredPoint, EvaluatorOutputV9, EvaluatorOutputV10, EvaluatorOutputV11,
-                                      uses_notes, uses_policy, uses_replan, uses_sources)
+                                      output_schema, uses_notes, uses_policy, uses_replan, uses_sources)
 
 log = logging.getLogger("ai_service.evaluator")
 DEFAULT_PROMPT_VERSION = "v8"
@@ -126,8 +126,8 @@ class LlmEvaluator:
             policy = uses_policy(self._prompt.version)  # v9: dau ra them de xuat hanh dong; dau vao them policy_context
             replan = uses_replan(self._prompt.version)  # v10: dau ra them swap; dau vao them replan_context (khi co)
             notes = uses_notes(self._prompt.version)  # v11: dau ra them new_note / note_updates; dau vao them open_notes
-            schema = EvaluatorOutputV11 if notes else EvaluatorOutputV10 if replan else EvaluatorOutputV9 if policy else \
-                EvaluatorOutputV4 if sourced else EvaluatorOutput
+            # v12: swap / new_note bat buoc la object trong schema strict (null lam gpt-4o-mini khong bao gio de xuat)
+            schema = output_schema(self._prompt.version, sourced, policy, replan, notes)
             if inp.lookup is not None and sourced:  # phase 03: 1 ngan sach 10 s cho vong lap tra cuu + fallback
                 result, inp = await call_with_lookup(
                     self._gateway, self.agent, self._prompt.text, lambda text, i: build_messages(text, i, True, policy, replan, notes),
