@@ -40,5 +40,12 @@ def test_fit_line_recovers_slope_and_intercept():
     assert fit_line([1, 1, 1], [1, 2, 3]) is None and fit_line([1, 2], [1, 2]) is None
 
 
+def test_multi_run_file_reads_sessions_by_run():
+    from evals.sim_runs import session_maps
+    one = _sessions([])
+    assert session_maps({"sessions": one}) == [one]
+    assert session_maps({"sessions_by_run": [one, one]}) == [one, one]
+
+
 def test_empty_input():
     assert breakdown([]) == {"turns": 0}

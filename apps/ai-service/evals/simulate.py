@@ -16,7 +16,7 @@ import sys
 from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
-from typing import AsyncIterator, Dict, List
+from typing import AsyncIterator, Dict, List, Optional, Tuple
 
 import httpx
 import uvicorn
@@ -26,9 +26,13 @@ from evals.cost_latency import load_pricing, ops_summary
 from evals.personas import all_personas, skewed_personas
 from evals.sim_language import language
 from evals.sim_lookup_metrics import evaluator_lookup
+from evals.sim_policy_metrics import hybrid_policy
+from evals.sim_notes_metrics import notes_summary
+from evals.sim_replan_metrics import replan_summary
 from evals.sim_style import session_style
 from evals.sim_metrics import (adaptation, constraints, discrimination, end_reasons, grounding, grounding_breakdown,
                                injection, question_bank, rag_health, report_quality)
+from evals.sim_agent_counters import counters_delta, snapshot
 from evals.sim_runs import summarize_runs
 from evals.simulate_session import run_session
 from evals.simulator import LlmSimulator, RuleSimulator
@@ -79,7 +83,9 @@ def summarize(sessions: Dict[str, Dict], personas, pricing: Dict) -> Dict:
             "injection": injection(sessions, personas),
             "language": language(sessions), "question_bank": question_bank(sessions), "style": session_style(sessions),
             "grounding": grounding(sessions), "grounding_breakdown": grounding_breakdown(sessions),
-            "rag_health": rag_health(sessions), "evaluator_lookup": evaluator_lookup(sessions), "ops": ops_summary(sessions, pricing)}
+            "rag_health": rag_health(sessions), "evaluator_lookup": evaluator_lookup(sessions),
+            "hybrid_policy": hybrid_policy(sessions), "replan": replan_summary(sessions), "notes": notes_summary(sessions),
+            "ops": ops_summary(sessions, pricing)}
 
 
 def known_personas() -> Dict:
@@ -114,11 +120,17 @@ async def run_all(ids, simulator, base_url=None, duration=20, concurrency=4, ser
     return out
 
 
-async def run_many(ids, simulator, args, runs: int) -> List[Dict[str, Dict]]:
+async def run_many(ids, simulator, args, runs: int) -> Tuple[List[Dict[str, Dict]], List[Optional[Dict]]]:
     """Moi run noi tiep trong CUNG mot event loop: gateway LLM la singleton giu pool httpx gan voi loop dau tien,
-    asyncio.run moi run se de run sau dung ket noi cua loop da dong."""
-    return [await run_all(ids, simulator, args.base_url, args.duration, args.concurrency, args.serve,
-                          run=i if runs > 1 else None) for i in range(1, runs + 1)]
+    asyncio.run moi run se de run sau dung ket noi cua loop da dong. Tra them counter de xuat tho moi run
+    (sim_agent_counters; None khi --base-url)."""
+    by_run, counters = [], []
+    for i in range(1, runs + 1):
+        before = snapshot()
+        by_run.append(await run_all(ids, simulator, args.base_url, args.duration, args.concurrency, args.serve,
+                                    run=i if runs > 1 else None))
+        counters.append(counters_delta(before, snapshot(), in_process=not args.base_url))
+    return by_run, counters
 
 
 def main() -> None:
@@ -143,7 +155,7 @@ def main() -> None:
     ids = list(dict.fromkeys(ids))
     simulator = LlmSimulator() if args.simulator == "llm" else RuleSimulator()
     runs = args.runs
-    by_run = asyncio.run(run_many(ids, simulator, args, runs))
+    by_run, counters = asyncio.run(run_many(ids, simulator, args, runs))
     target = args.base_url or ("local-server" if args.serve else "in-process")
     missing = [(i, p) for i, sessions in enumerate(by_run, 1) for p in ids if p not in sessions]
     failed = ([p for p in ids if any(p not in s for s in by_run)] if runs == 1
@@ -153,17 +165,25 @@ def main() -> None:
                 "agent_modes": {k: v for k, v in os.environ.items() if k.startswith("AGENT_")}}
     pricing = load_pricing()
     if runs == 1:  # dinh dang cu
-        summary = {"run": run_info, **summarize(by_run[0], personas, pricing)}
+        summary = {"run": run_info, **summarize(by_run[0], personas, pricing), "agent_counters": counters[0]}
         payload = {"summary": summary, "sessions": by_run[0]}
     else:
         summary = {"run": run_info, "pooled": summarize_runs(by_run, personas),
-                   "per_run": [summarize(s, personas, pricing) for s in by_run]}
+                   "per_run": [{**summarize(s, personas, pricing), "agent_counters": c} for s, c in zip(by_run, counters)]}
         payload = {"summary": summary, "sessions_by_run": by_run}
     print(json.dumps(summary, ensure_ascii=False, indent=1))
     out = args.out or REPORTS / f"eval-sim-{datetime.now():%y%m%d-%H%M}.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(payload, ensure_ascii=False, indent=1), "utf-8")
     print(f"Da ghi {out}", file=sys.stderr)
+    violations = [r["replan"]["jd_priority_violations"] for r in ([summary] if runs == 1 else summary["per_run"])]
+    if any(violations):  # bat bien phase 05: khong swap nao bo topic JD uu tien
+        print("FAIL swap bo topic JD uu tien (jd_priority_violations > 0)", file=sys.stderr)
+        sys.exit(1)
+    unsafe = [r["notes"]["unsafe_notes"] for r in ([summary] if runs == 1 else summary["per_run"])]
+    if any(unsafe):  # bat bien phase 07: khong ghi chu nao chua injection / PII / qua dai
+        print("FAIL ghi chu khong an toan (unsafe_notes > 0)", file=sys.stderr)
+        sys.exit(1)
     if failed:  # phien loi bi loai khoi mau so: khong de lan chay "xanh" gia
         sys.exit(1)
 

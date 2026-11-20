@@ -6,7 +6,7 @@
   `context/project-state.md`, `context/quality-criteria.md`
 
 ## Overview
-- Priority: P3. Status: pending. Nhánh: `thang/agentic-rollout`. Effort 0,5d (+ thời gian chạy eval).
+- Priority: P3. Status: docs + runbook xong, đo [BLOCKED-KEY]. Nhánh: `thang/agentic-rollout-docs`. Effort 0,5d (+ thời gian chạy eval).
 - Docs từng hạng mục đã cập nhật trong PR của phase đó; phase này chỉ: chạy đo kết hợp (các cờ cùng bật), đề xuất cờ
   nào bật mặc định, ghi số trước/sau vào 08/09, quyết định vào `decisions.md`.
 
@@ -40,11 +40,11 @@
    `[ai-service] docs: số đo và quyết định bật cờ agentic`.
 
 ## Todo List
-- [ ] [BLOCKED-KEY] ma trận 5 cấu hình × 3 runs
-- [ ] Bảng mốc + báo cáo
-- [ ] Owner duyệt
-- [ ] Đổi mặc định (nếu duyệt) / ghi lý do
-- [ ] Docs 08/09, README A4, context, PR
+- [ ] [BLOCKED-KEY] ma trận cấu hình × 3 runs (runbook: 6 cấu hình C0–C5; chưa chạy)
+- [x] Bảng mốc + báo cáo (`plans/reports/eval-261114-1807-agentic-rollout.md`, bảng kết quả để trống, không có số bịa)
+- [ ] Owner duyệt (chờ số đo)
+- [x] Ghi lý do không đổi mặc định (`context/decisions.md`); đổi mặc định chờ số đo + duyệt
+- [x] Docs 02/06/08/09, README A4, context đồng bộ (bỏ câu "không tool calling" cũ); FSD notice gộp ở docs 06; check_docs 0 lỗi, pytest 1176 pass
 
 ## Success Criteria (bảng mốc tổng)
 | Cờ | Mốc bật mặc định |

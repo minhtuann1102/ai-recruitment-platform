@@ -8,6 +8,7 @@ from typing import Dict, List, Optional
 
 from app.agents.evaluator import EvaluationInput
 from app.evaluator_lookup import TurnLookup, build_lookup, load_lookup_settings
+from app.evaluator_source_checks import source_blocks
 from app.plan_snippets import memory_retriever
 
 
@@ -30,6 +31,20 @@ def attach_lookup(retriever, sample: dict, inp: EvaluationInput) -> Optional[Tur
                               difficulty=inp.difficulty, turn_snippets_=inp.turn_snippets,
                               settings=load_lookup_settings({"EVALUATOR_TOOLS": "true"}))
     return inp.lookup
+
+
+def valid_source_ids(lookup: Optional[TurnLookup], inp: EvaluationInput, reference_answer: str = "") -> List[str]:
+    """Id model duoc trich: tai lieu cua mau + [R] + chunk cong cu (S{n+1}..) khi vong lap da chot (nhu postcheck)."""
+    extended = lookup.extend(inp) if lookup is not None and lookup.committed else inp
+    return [i for i, _ in source_blocks([*extended.topic.reference_snippets, *extended.turn_snippets],
+                                        reference_answer or "")]
+
+
+def invalid_ids(points, valid: List[str]) -> int:
+    """So source id trong output khong thuoc `valid` (chuan hoa hoa/thuong, khoang trang)."""
+    ok = set(valid)
+    return sum(i.strip().upper() not in ok for p in points for i in (p.get("source_ids", []) if isinstance(p, dict)
+                                                                    else getattr(p, "source_ids", [])))
 
 
 def lookup_fields(lookup: Optional[TurnLookup]) -> Dict:

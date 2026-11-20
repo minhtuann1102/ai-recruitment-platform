@@ -1,7 +1,7 @@
 """Dau vao Evaluator va viec dung prompt: EvaluationInput, build_messages, id tai lieu S1..Sn / R, nguon da trich."""
 import json
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, List, Optional, Tuple
 
 from ..evaluator_source_checks import SourcedPoint, label, source_blocks
 from ..models_interview import CitedSource, PlanTopic, SourceRef, TopicTurn
@@ -9,6 +9,30 @@ from ..prompts.store import UNTRUSTED_NOTICE, wrap_untrusted
 
 if TYPE_CHECKING:
     from ..evaluator_lookup import TurnLookup
+
+
+@dataclass
+class PolicyContext:
+    """Trang thai phong van cho prompt v9 (de xuat hanh dong): tinh truoc quyet dinh, tu app/policy.action_budget.
+    focus_used / covered chua chuoi tu ung vien nen boc <untrusted> khi render."""
+    left: int
+    hinted: bool
+    clarifies: int
+    focus_used: List[str]
+    covered: List[str]
+    time_hint: str
+    difficulty: int
+    bounds: dict
+
+
+@dataclass
+class ReplanContext:
+    """Phase 05 (prompt v10): topic technical co the doi va topic du phong con lai. Id / tieu de tu catalog (tin cay, khong
+    phai chuoi ung vien); band la diem trung binh topic hien tai truoc cau tra loi nay (None: chua co)."""
+    pending: List[Tuple[str, str]]  # (id, title) topic technical pending co the bo (khong phai JD uu tien)
+    reserve: List[Tuple[str, str]]  # (id, title) topic du phong chua dung
+    band: Optional[float]
+    swaps_left: int
 
 
 @dataclass
@@ -28,12 +52,19 @@ class EvaluationInput:
     reference_source: Optional[SourceRef] = None  # 03b: cau tu kho cua reference_answer
     spoken: bool = False  # answer la ban ghi STT (answer_source = voice): doi thuat ngu phien am truoc khi cham
     lookup: Optional["TurnLookup"] = None  # phase 03: Evaluator duoc tra cuu kho (chi luot khong R, cho EVALUATOR_TOOLS)
+    policy_context: Optional[PolicyContext] = None  # phase 04: chi dat khi POLICY_MODE=hybrid, chi render voi prompt v9
+    replan_context: Optional[ReplanContext] = None  # phase 05: chi dat khi REPLAN_ENABLED + o ranh gioi co reserve; chi render voi v10
+    notes_context: Optional[List[Tuple[str, str]]] = None  # phase 07: (id, text) ghi chu to_verify open; chi render voi v11
     tool_base_ids: Optional[int] = None  # chi dat sau khi tra cuu co chunk: id S{n} voi n > gia tri nay la chunk cong cu
 
 
-def build_messages(system_prompt: str, inp: EvaluationInput, with_ids: bool = False) -> List[dict]:
+def build_messages(system_prompt: str, inp: EvaluationInput, with_ids: bool = False, policy: bool = False,
+                   replan: bool = False, notes: bool = False) -> List[dict]:
     """Phan tinh (rubric, anchor) o system de huong prompt caching; du lieu nguoi dung boc <untrusted>.
-    with_ids (v4): moi tai lieu doi chieu co id [S1].. / [R] de Evaluator trich nguon."""
+    with_ids (v4): moi tai lieu doi chieu co id [S1].. / [R] de Evaluator trich nguon.
+    policy (v9): them khoi policy_context (trang thai phong van) o CUOI user, sau answer.
+    replan (v10): them khoi replan_context (topic co the doi) sau policy_context, chi khi co (o ranh gioi co reserve).
+    notes (v11): them khoi <untrusted> open_notes (ghi chu to_verify con open; text sinh tu cau tra loi) sau cung."""
     data = {"level": inp.level, "phase": inp.phase, "difficulty": inp.difficulty, "turn_kind": inp.turn_kind,
             "topic": {"title": inp.topic.title, "objective": inp.topic.objective,
                       "key_points": inp.topic.key_points},
@@ -44,12 +75,35 @@ def build_messages(system_prompt: str, inp: EvaluationInput, with_ids: bool = Fa
     texts = [label(i, t) if with_ids else t for i, t in blocks]
     reference = texts.pop() if inp.reference_answer else "(không có)"
     snippets = "\n---\n".join(texts) or "(không có)"
-    user = "\n\n".join([json.dumps(data, ensure_ascii=False), wrap_untrusted("topic_turns", turns),
-                        wrap_untrusted("reference_snippets", snippets),
-                        wrap_untrusted("reference_answer", reference),
-                        wrap_untrusted("answer", inp.answer)])
+    parts = [json.dumps(data, ensure_ascii=False), wrap_untrusted("topic_turns", turns),
+             wrap_untrusted("reference_snippets", snippets), wrap_untrusted("reference_answer", reference),
+             wrap_untrusted("answer", inp.answer)]
+    if policy and inp.policy_context is not None:
+        parts.append(render_policy_context(inp.policy_context))
+    if replan and inp.replan_context is not None:
+        parts.append(render_replan_context(inp.replan_context))
+    if notes and inp.notes_context:
+        parts.append(wrap_untrusted("open_notes", "\n".join(f"{i}: {t}" for i, t in inp.notes_context)))
+    user = "\n\n".join(parts)
     return [{"role": "system", "content": f"{system_prompt}\n\n{UNTRUSTED_NOTICE}"},
             {"role": "user", "content": user}]
+
+
+def render_policy_context(pc: PolicyContext) -> str:
+    """Con so / co do code tinh (tin cay) o JSON; chuoi focus / y da neu tu ung vien boc <untrusted>."""
+    data = {"follow_ups_left": pc.left, "hint_used": pc.hinted, "clarifies_used": pc.clarifies,
+            "time_hint": pc.time_hint, "difficulty": pc.difficulty, "difficulty_bounds": pc.bounds}
+    lists = "focus_used:\n{}\ncovered:\n{}".format("\n".join(pc.focus_used) or "(không có)",
+                                                      "\n".join(pc.covered) or "(không có)")
+    return "policy_context: " + json.dumps(data, ensure_ascii=False) + "\n" + wrap_untrusted("policy_lists", lists)
+
+
+def render_replan_context(rc: ReplanContext) -> str:
+    """Toan bo la du lieu tin cay (id / tieu de catalog, con so do code); khong co chuoi tu ung vien."""
+    data = {"swaps_left": rc.swaps_left, "current_topic_band": rc.band,
+            "pending_technical": [{"id": i, "title": t} for i, t in rc.pending],
+            "reserve": [{"id": i, "title": t} for i, t in rc.reserve]}
+    return "replan_context: " + json.dumps(data, ensure_ascii=False)
 
 
 def all_snippets(inp: EvaluationInput) -> List[str]:

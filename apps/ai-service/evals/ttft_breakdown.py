@@ -18,6 +18,7 @@ from statistics import median
 from typing import Dict, List, Optional, Tuple
 
 from evals.cost_latency import percentile
+from evals.sim_runs import session_maps
 
 TARGET_P50_S, TARGET_P95_S = 3.5, 6.0  # NFR-AI-PERF01
 HOT_TOKENS = 60
@@ -111,7 +112,7 @@ def main(paths: List[str]) -> None:
         if run.get("base_url") in (None, "in-process"):
             print(f"{Path(p).name}: bo qua (in-process, ttft_s = total_s)")
             continue
-        rows = turn_rows(data["sessions"])
+        rows = [r for sessions in session_maps(data) for r in turn_rows(sessions)]
         pooled += rows
         print(Path(p).name, json.dumps(breakdown(rows), ensure_ascii=False))
     if len(paths) > 1:

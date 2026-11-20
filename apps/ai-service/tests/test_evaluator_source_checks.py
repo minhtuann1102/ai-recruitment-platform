@@ -80,7 +80,7 @@ def test_reference_only_turn_uses_r_and_rates_confidence():
 def test_version_parsing_and_bad_prompt_version_degrades_instead_of_500(monkeypatch):
     assert [uses_sources(v) for v in ("v1", "v2", "v3", "v4", "v10")] == [False, False, False, True, True]
     monkeypatch.setenv("AGENT_EVALUATOR_MODE", "llm")
-    monkeypatch.setenv("EVALUATOR_PROMPT_VERSION", "v9")
+    monkeypatch.setenv("EVALUATOR_PROMPT_VERSION", "v99")
     monkeypatch.setenv("LLM_API_KEY", "k")
     monkeypatch.setattr(provider, "_llm", None)
     assert isinstance(provider.get_evaluator(), provider.MockEvaluator)

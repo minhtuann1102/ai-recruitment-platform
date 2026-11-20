@@ -15,6 +15,11 @@ from evals.personas import QUALITIES, Persona
 Scores = Dict[str, List[float]]  # persona_id -> diem tong theo tung run (bo run hong / unscored)
 
 
+def session_maps(data: Dict) -> List[Dict[str, Dict]]:
+    """File sim mot run co `sessions`; file `--runs N` co `sessions_by_run` (danh sach {persona: session})."""
+    return data["sessions_by_run"] if "sessions_by_run" in data else [data["sessions"]]
+
+
 def is_core(p: Optional[Persona]) -> bool:
     """Persona ma tran strong/average/weak, khong adversarial / skewed: diem cua chung moi dung de do nhieu."""
     return p is not None and not p.behaviors and p.quality in QUALITIES

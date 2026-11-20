@@ -2,7 +2,8 @@
 
 Ngan sach B = retry_budget_s cua Evaluator (10 s), tinh tu t0 dau `evaluate_with_raw`: vong lap bi `wait_for` cat o
 B - da troi qua; loi thi chi cham lai khong tools khi con >= MIN_FALLBACK_S, khong thi nem LlmTimeoutError de
-LlmEvaluator dung mock + degraded. Han buoc tool ngan hon B de chua cho cho lan goi cuoi (`FINAL_RESERVE_S`).
+LlmEvaluator dung mock + degraded. `tool_deadline_s` la han chay mot lenh tra cuu; buoc LLM `auto` dung toi B tru
+`FINAL_RESERVE_S` (chua cho lan goi cuoi).
 """
 import asyncio
 import logging

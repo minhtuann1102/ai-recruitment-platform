@@ -149,10 +149,10 @@ Tài liệu này **đi theo kiến trúc đã chốt** và ghi rõ các điểm 
 | Hạng mục | ADR-007 | Tài liệu này | Hệ quả |
 |---|---|---|---|
 | Evaluator | 1 lần cuối phiên, chấm cả transcript | **Mỗi lượt**, chấm câu vừa trả lời | Adapt dựa trên điểm thật, không cần `answer_signal`; thêm ~1 LLM call/lượt vào đường latency |
-| Planner | Mỗi lượt, chọn `deepen/switch/keep` | **1 lần đầu buổi**, sinh interview plan | Quyết định từng lượt chuyển sang policy viết bằng code |
+| Planner | Mỗi lượt, chọn `deepen/switch/keep` | **1 lần đầu buổi**, sinh interview plan | Quyết định từng lượt chuyển sang policy viết bằng code (tùy chọn `POLICY_MODE=hybrid`: LLM đề xuất, code kiểm và quyết, mặc định tắt) |
 | CV Parser, Reporter | Không có | Mới | Thêm endpoint parse CV; Reporter thay phần tổng kết của Evaluator |
 | Ngoại lệ "chấm mọi câu" | — | Câu trả lời **chỉ gồm** cụm "không biết" / "em chưa học" / "pass" (≤ 6 từ) được code gán `dont_know`, **bỏ qua Evaluator**; có nội dung khác thì vẫn chấm (§4.5) | Lượt đó ~1 s thay vì ~3.6 s; nhóm có thể tắt bằng cờ nếu muốn Evaluator chấm tuyệt đối mọi câu |
-| Tool calling (`retrieve_*`) | Agent tự gọi tool | Orchestrator lấy RAG trước rồi đưa vào prompt | Ít vòng LLM hơn, latency thấp hơn, dễ test |
+| Tool calling (`retrieve_*`) | Agent tự gọi tool | Orchestrator lấy RAG trước rồi đưa vào prompt. Ngoại lệ tùy chọn, mặc định tắt: Evaluator tự tra cứu (`EVALUATOR_TOOLS`, vòng lặp tự viết, A4) | Ít vòng LLM hơn, latency thấp hơn, dễ test |
 | RAG `job_description` | Planner dùng `retrieve_topics` trên JD (rag-design.md §4) | **Không dùng JD**; Planner chọn topic từ topic catalog, RAG chỉ lấy `interview_qa` + `textbook` | Owner rag-design cần cập nhật mục 4; dữ liệu JD vẫn phục vụ job-service nếu cần |
 | Contract ai-service | `start / next-turn / finalize` | Giữ 3 tên này + thêm `cv/parse`; **đổi nội dung** request/response, `next-turn` stream SSE | Đổi `AiInterviewClient` phía NestJS |
 | `agent_decision` | `deepen / switch_topic / keep_difficulty` | Thêm cột `action` (6 giá trị), giữ `agent_decision` bằng bảng map (§5) | Migration `interview_db` |

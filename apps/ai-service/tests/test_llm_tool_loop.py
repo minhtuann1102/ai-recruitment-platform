@@ -62,7 +62,7 @@ def test_no_tool_call_sends_full_params_and_returns_data():
     res, calls = go(gw)
     p = client.calls[0]
     assert res.data == Out(answer="ok") and res.tool_calls == 0 and calls == []
-    assert p["tools"] == TOOLS and p["tool_choice"] == "auto" and p["parallel_tool_calls"] is False
+    assert p["tools"] == TOOLS and p["tool_choice"] == "auto" and "parallel_tool_calls" not in p
     assert p["response_format"]["json_schema"]["strict"]
     assert p["extra_body"]["provider"] == {"require_parameters": True}  # base_url mac dinh la OpenRouter
 
@@ -169,6 +169,39 @@ def test_slow_first_step_stays_inside_budget_and_times_out(monkeypatch):
     with pytest.raises(LlmTimeoutError):
         go(gw, budget_s=1.0, step_deadline_s=0.3, collector=col)
     assert time.perf_counter() - t < 1.0 + 0.5 and col.records[0].latency_ms >= 1
+
+
+def test_slow_direct_answer_is_not_cut_at_tool_deadline(monkeypatch):
+    """Hoi quy do 2026-11-14: buoc dau bi cat o step_deadline + reserve (3,5 s) du model khong goi tool."""
+    limit_agent(monkeypatch, "evaluator", 5.0, 5.0)
+    monkeypatch.setattr(tool_loop, "FINAL_RESERVE_S", 0.3)
+    gw, client = make([Slow(0.6, OK)])
+    res, calls = go(gw, step_deadline_s=0.1, budget_s=2.0)
+    assert res.data.answer == "ok" and calls == [] and len(client.calls) == 1
+
+
+def test_tool_deadline_counts_from_tool_start_not_loop_start(monkeypatch):
+    limit_agent(monkeypatch, "evaluator", 5.0, 5.0)
+    monkeypatch.setattr(tool_loop, "FINAL_RESERVE_S", 0.3)
+    gw, client = make([Slow(0.4, CALL()), OK])
+
+    async def slow_tool(name, args):
+        await asyncio.sleep(0.15)
+        return "chunk"
+
+    res, _ = go(gw, slow_tool, step_deadline_s=0.3, budget_s=5.0)
+    tool_msgs = [m for m in client.calls[1]["messages"] if m["role"] == "tool"]
+    assert res.data.answer == "ok" and tool_msgs[0]["content"] == "chunk"
+
+
+def test_late_tool_call_without_time_for_final_answer_raises_before_running_tool(monkeypatch):
+    """Review: tool call den sat het ngan sach thi buoc cuoi khong kip; dung som de caller cham lai khi con gio."""
+    limit_agent(monkeypatch, "evaluator", 5.0, 5.0)
+    gw, client = make([Slow(0.4, CALL()), OK])
+    col = UsageCollector()
+    with pytest.raises(LlmTimeoutError, match=tool_loop.NO_TIME_FOR_TOOL):
+        go(gw, step_deadline_s=0.3, budget_s=3.0, collector=col)  # 0.4 + 0.3 + 3.5 > 3.0
+    assert len(client.calls) == 1 and col.records[0].fallback == "tool_loop_failed"
 
 
 def test_exhausted_budget_caps_first_call_too():

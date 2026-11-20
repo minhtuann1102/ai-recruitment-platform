@@ -42,6 +42,19 @@ TOOLS_UNSUPPORTED = Counter("ai_llm_tools_unsupported", "Lan model/provider tu c
 EVALUATOR_LOOKUP = Counter("ai_evaluator_lookup", "Evaluator tra cuu kho (EVALUATOR_TOOLS): hit / empty / error (query bi "
                            "tu choi) / fallback (vong lap loi, cham lai mot lan khong tools) / budget_exhausted (vong lap loi, het ngan sach nen thang sang mock) / unsupported (latch tools)",
                            ["result"])
+POLICY_DECISIONS = Counter("ai_policy_decisions", "Quyet dinh hanh dong moi luot khi POLICY_MODE=hybrid: llm (de xuat "
+                           "da qua kiem) / policy (luat, do bac hoac khong co de xuat) / forced (thoi gian, turn cap, "
+                           "low_performance)", ["decided_by"])
+POLICY_OVERRULES = Counter("ai_policy_overrules", "Ly do code bac de xuat cua LLM (hybrid): no_proposal / sensitive_kind / "
+                           "action_not_allowed / no_valid_focus", ["reason"])
+REPLAN_SWAPS = Counter("ai_replan_swaps", "Evaluator v10 de xuat doi topic (REPLAN_ENABLED) va ket qua sau khi code kiem: "
+                       "applied / budget / bad_drop / jd_priority / bad_add / not_applicable / untrusted", ["result"])
+REPLAN_OFFERED = Counter("ai_replan_offered", "Luot prompt Evaluator v10+ co replan_context (REPLAN_ENABLED, o ranh gioi "
+                         "co reserve) va LLM tra gi: null (khong de xuat) / proposed (co swap, ket qua o ai_replan_swaps) "
+                         "/ degraded (LLM loi, cham mock) / skipped (precheck khong goi LLM)", ["outcome"])
+NOTES_DROPPED = Counter("ai_notes_dropped", "Ghi chu agent (AGENT_NOTES_ENABLED) bi code bo: untrusted / empty / injection / "
+                        "pii / too_long / invalid_kind / duplicate / full / unknown_id / bad_status", ["reason"])
+NOTES_RECORDED = Counter("ai_notes_recorded", "Ghi chu agent (AGENT_NOTES_ENABLED) da luu sau khi qua kiem, theo kind", ["kind"])
 RAG = Counter("ai_rag_requests", "Trang thai RAG bao trong metadata cua request co dung RAG", ["status"])
 RAG_ERRORS = Counter("ai_rag_errors", "Ma loi RAG trong request (rag_timeout, rag_db_error...)", ["code"])
 TURNS = Counter("ai_turns", "Ket qua cham moi luot next-turn stream xong (luot wrap-up khong cham thi khong dem): "
@@ -89,6 +102,33 @@ def record_tools_unsupported() -> None:
 @_safe
 def record_evaluator_lookup(result: str) -> None:
     EVALUATOR_LOOKUP.labels(result).inc()
+
+
+@_safe
+def record_policy_decision(decided_by: str, overrule_reason: Optional[str]) -> None:
+    POLICY_DECISIONS.labels(decided_by).inc()
+    if overrule_reason:
+        POLICY_OVERRULES.labels(overrule_reason).inc()
+
+
+@_safe
+def record_replan_swap(result: str) -> None:
+    REPLAN_SWAPS.labels(result).inc()
+
+
+@_safe
+def record_replan_offered(outcome: str) -> None:
+    REPLAN_OFFERED.labels(outcome).inc()
+
+
+@_safe
+def record_note_dropped(reason: str) -> None:
+    NOTES_DROPPED.labels(reason).inc()
+
+
+@_safe
+def record_note_recorded(kind: str) -> None:
+    NOTES_RECORDED.labels(kind).inc()  # kind da la mot trong 4 gia tri hop le
 
 
 @_safe

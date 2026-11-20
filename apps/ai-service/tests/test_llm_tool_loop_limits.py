@@ -18,8 +18,8 @@ def test_slow_tool_times_out_inside_budget_and_loop_still_answers():
 
     gw, client = make([CALL(), OK])
     t = time.perf_counter()
-    res, _ = go(gw, slow, budget_s=1.0, step_deadline_s=0.3)
-    assert time.perf_counter() - t < 1.0 + 0.5
+    res, _ = go(gw, slow, budget_s=5.0, step_deadline_s=0.3)  # han cong cu 0.3 s tinh tu luc lenh bat dau
+    assert time.perf_counter() - t < 0.3 + 0.5
     assert client.calls[1]["messages"][-1]["content"] == "error: tool_timeout" and res.data.answer == "ok"
 
 
@@ -44,12 +44,12 @@ def test_only_query_reaches_tool_and_result_is_capped():
 
 
 def test_length_retry_in_tool_step_cannot_eat_final_reserve(monkeypatch):
-    limit_agent(monkeypatch, "evaluator", 5.0, 6.0)
+    limit_agent(monkeypatch, "evaluator", 5.0, 2.5)
     gw, client = make([Slow(0.4, reply("x", finish_reason="length")), Slow(5.0, CALL()), OK])
     t = time.perf_counter()
-    with pytest.raises(LlmError):  # buoc tool het han (0.3 + 1.5 s) du length retry; khong den buoc none
-        go(gw, step_deadline_s=0.3, budget_s=6.0)
-    assert time.perf_counter() - t < 0.3 + tool_loop.FINAL_RESERVE_S + 0.5
+    with pytest.raises(LlmError):  # buoc auto het han o ngan sach - FINAL_RESERVE_S du length retry
+        go(gw, step_deadline_s=0.3, budget_s=2.5)
+    assert time.perf_counter() - t < 2.5 - tool_loop.FINAL_RESERVE_S + 0.5
 
 
 def test_not_found_model_and_transient_errors_do_not_latch():

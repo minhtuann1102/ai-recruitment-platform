@@ -317,6 +317,12 @@ Giữ tên `start / next-turn / finalize` theo constitution IV; **nội dung** �
 | `ai_tokens_total` | `agent`, `kind` (input, output, cached) | Token; nhân với bảng giá để ra chi phí |
 | `ai_llm_tool_calls_total` | `agent` | Lần agent gọi công cụ trong vòng lặp tool calling (2026-11-14); 0 khi chưa agent nào bật |
 | `ai_evaluator_lookup_total` | `result` (`hit`, `empty`, `error`, `fallback`, `budget_exhausted`, `unsupported`) | Evaluator tự tra cứu kho (2026-11-14, `EVALUATOR_TOOLS`): `hit`/`empty` mỗi lần tìm có/không chunk, `error` query bị từ chối, `fallback` vòng lặp lỗi nên chấm lại một lần không tools, `budget_exhausted` vòng lặp lỗi và hết ngân sách nên đi thẳng sang mock, `unsupported` latch tools (chấm lại không tools); 0 khi tắt cờ |
+| `ai_policy_decisions_total` | `decided_by` (`llm`, `policy`, `forced`) | Quyết định hành động mỗi lượt khi `POLICY_MODE=hybrid` (2026-11-14, phase 04): `llm` đề xuất đã qua kiểm, `policy` luật (bác hoặc không có đề xuất), `forced` thời gian / turn cap / `low_performance_stop`. `rules` không đếm |
+| `ai_policy_overrules_total` | `reason` (`no_proposal`, `sensitive_kind`, `action_not_allowed`, `no_valid_focus`) | Lý do code bác đề xuất của LLM (hybrid); tỉ lệ bác của LLM = `ai_policy_overrules_total{reason!~"no_proposal|sensitive_kind"}` / `ai_policy_decisions_total{decided_by!="forced"}` trừ hai loại đó (trùng định nghĩa `overrule_rate_llm` của sim, 09); `no_proposal` đến từ lượt không qua LLM (precheck, im lặng, degraded) hoặc cờ lệch prompt, `sensitive_kind` do code không giao LLM. Mục tiêu ≤ 15% |
+| `ai_replan_swaps_total` | `result` (`applied`, `budget`, `bad_drop`, `jd_priority`, `bad_add`, `not_applicable`, `untrusted`) | Evaluator v10 đề xuất đổi topic (2026-11-14, phase 05, `REPLAN_ENABLED`) và kết quả sau khi code kiểm; chỉ đếm lượt có `swap` khác null. Cờ tắt: 0 |
+| `ai_replan_offered_total` | `outcome` (`null`, `proposed`, `degraded`, `skipped`) | Lượt prompt Evaluator v10+ thật sự có `replan_context` (2026-11-19, phase 05, `REPLAN_ENABLED`) và LLM trả gì: `null` = không đề xuất đổi topic (v12: gồm cả `swap.drop` rỗng), `proposed` = có `swap` (kết quả ở `ai_replan_swaps_total`, vốn đếm cả swap LLM tự đề xuất ở lượt không có `replan_context`), `degraded` = LLM lỗi, `skipped` = precheck không gọi LLM (trả lời rỗng / "không biết"). Cờ tắt hoặc prompt < v10: 0 |
+| `ai_notes_recorded_total` | `kind` (`hypothesis`, `to_verify`, `strength`, `risk`) | Ghi chú agent đã lưu sau khi qua kiểm (2026-11-14, phase 07); 0 khi cờ tắt |
+| `ai_notes_dropped_total` | `reason` (`untrusted`, `empty`, `too_long`, `injection`, `pii`, `invalid_kind`, `duplicate`, `full`, `unknown_id`, `bad_status`) | Ghi chú agent bị code bỏ (2026-11-14, phase 07, `AGENT_NOTES_ENABLED`); 0 khi cờ tắt |
 | `ai_llm_tools_unsupported_total` | không | Lần model/provider từ chối tools + JSON strict (latch theo tiến trình; ≥ 1 lần mỗi process vì các request đang chạy song song có thể cùng đếm) |
 | `ai_rag_requests_total`, `ai_rag_errors_total` | `status` / `code` | Trạng thái RAG trong `metadata.rag`, mã lỗi RAG |
 | `ai_turns_total` | `answer_source` (text, voice), `outcome` (`answer_type`, `degraded`, `low_confidence`) | Kết quả chấm mỗi lượt next-turn stream xong; lượt wrap-up không chấm thì không đếm |
@@ -532,7 +538,13 @@ cứu: từ 2026-11-09 finalize không lọc theo trường này (05 §6). inter
 cho ứng viên (để debug, đối chiếu), chỉ hiển thị `study_plan.resources`.
 
 `reasoning` do **code** sinh từ luật policy đã khớp (không phải LLM), lưu vào `agent_reasoning` để debug.
+
+**Khóa mặc định mới trong `turn` (2026-11-14, phase 04, chỉ có giá trị khi `POLICY_MODE=hybrid`; `rules` luôn `null`):** `decided_by` (`llm|policy|forced`), `proposed_action` (hành động LLM đề xuất, chuẩn hóa: một trong `follow_up|hint|clarify|next_topic` hoặc `invalid` khi rỗng/lạ, không bao giờ là văn bản tự do của LLM), `policy_action` (hành động `decide()` sẽ chọn), `overrule_reason`, `action_reason` (lý do LLM đã qua kiểm, ≤ 20 từ; chứa PII hay chuỗi injection thì bỏ; chỉ có khi `decided_by = llm`). `proposed_action`/`policy_action` là hành động **trước** `apply_action` (`next_topic`, chưa đổi thành `ask_main` như `action`) và trước `low_performance_stop`. Với `hybrid`, `reasoning` có thể bắt đầu bằng `llm: ` (lý do của LLM, không còn hoàn toàn do code). **Báo FSD một lần (gộp phase 04 + 05):** `interview-service` bỏ qua khóa lạ thì không cần đổi; nếu validate schema `turn` nghiêm thì thêm 5 khóa này.
 `session_end = true` thì `question = null`.
+
+**Khóa mặc định mới cho lập lại kế hoạch (2026-11-14, phase 05, cờ `REPLAN_ENABLED=false`; chưa bật cho đến khi FSD xác nhận):** `plan.replan` (`null`, hoặc `{reserve: PlanTopic[], keep_ids: string[]}` với topic dự phòng id `alt1`/`alt2` **không nằm trong `plan.phases`**), `state.swaps` (`[]`, hoặc `[{drop, add, turn, reason}]`), `turn.swap_result` (`null`, hoặc `applied|budget|bad_drop|jd_priority|bad_add|not_applicable|untrusted`; `untrusted` = lượt nhạy cảm `sensitive_kind`, không đổi topic). Cờ tắt: quyết định, request LLM và giá trị y như trước, JSON chỉ thêm ba khóa với giá trị mặc định này (`/api/start` trả `plan.replan: null`, `state.swaps: []`). Cờ bật: `turn.topic_id`/`topics[].topic_id` của báo cáo có thể là `alt1`; `interview-service` **phải** gửi lại nguyên `plan` và `state` ở mọi `/api/next-turn` và `/api/finalize` (không lọc khóa), vì `swaps` và `replan.reserve` đi trong đó. **Câu hỏi gửi FSD (gộp với phase 04):** (a) interview-service có lưu nguyên JSON `plan`/`state` không lọc schema? (b) có tra `turn.topic_id` (giờ có thể là `alt1`) theo plan đã lưu không? `alt*` chỉ có trong `plan.replan.reserve`, không có trong `plan.phases`; (c) UI có hiển thị danh sách topic từ plan (topic bị bỏ sẽ hiện ra mà không được hỏi)? (d) chấp nhận các khóa mặc định mới của phase 04 + 05? **Lỗi mới:** `/api/next-turn` trả `409 session_invalid_state` khi `state.topics` không khớp plan thực tế (vd client mất `plan.replan` nhưng giữ `state.swaps`, hoặc swap giả/trùng); client phải round-trip cả `plan.replan` lẫn `state.swaps`. Chưa có trả lời bằng văn bản: **giữ cờ tắt**.
+
+**Khóa mặc định mới cho ghi chú agent (2026-11-14, phase 07, cờ `AGENT_NOTES_ENABLED=false`):** `state.notes` (`[]`; mỗi phần tử `{id, turn, topic_id, kind, text, status}`, `kind`: `hypothesis|to_verify|strength|risk`, `status`: `open|confirmed|rejected`, `text` ≤ 150 ký tự khi server ghi). Cờ tắt: server không ghi ghi chú; `notes` do client gửi được trả lại nguyên. Phần tử sai (`kind`/`status` ngoài tập, `text` > 300 ký tự, hơn 8 phần tử) trả 422 bất kể cờ. Cần FSD báo cùng đợt với `state.swaps`: interview-service phải lưu nguyên `state` (gồm `notes`) và gửi lại mỗi lượt; thiếu `notes` thì ghi chú mất (không lỗi, state cũ vẫn nạp được). Không thêm khóa nào vào `turn` hay `plan`.
 
 `evaluation.transcript_low_confidence` (2026-11-04): `true` khi lượt voice có `stt_confidence` dưới ngưỡng (ở trên);
 band 0 nhưng không tính điểm, báo cáo coi như lượt kém tin cậy (`confidence` tổng giảm như `degraded`).
@@ -571,6 +583,37 @@ bảng tra; không trùng. Dịch vụ giới hạn số cụm thì cắt đuôi
 ```
 
 Response 200: report theo §6.4 (snake_case) + `metadata` (usage, latency, prompt version của Reporter). Reporter lỗi vẫn trả 200 với `status = "partial"` (chỉ có điểm và nhận xét mẫu); `meta.fallbacks` ghi `reporter_partial`, hoặc `reporter_config_error` nếu thiếu cấu hình. Không lượt nào chấm được thì vẫn 200 với `status = "unscored"`, `overall.score`, `overall.verdict` và các tiêu chí là `null`, không gọi Reporter LLM. Có `jd_profile` thì report có khối `requirements` (design 05 §6.4). Report luôn có `level_signal` (`null` hoặc cờ `above_level` gợi ý thử level cao hơn, design 05 §6.3, thêm 2026-11-03). `end_reason` có thêm giá trị `low_performance` (ai-service tự wrap-up sớm khi ứng viên middle/senior yếu 3 topic technical liên tiếp, hoặc tất cả nếu plan ít hơn 3, design 03 §4.4).
+
+### Thông báo gộp cho FSD / interview-service (2026-11-14, phase 03-07 kế hoạch agentic)
+
+Một danh sách để gửi một lần. Mọi khóa mới có giá trị mặc định; tất cả cờ mặc định tắt (`EVALUATOR_TOOLS`, `POLICY_MODE=rules`, `REPLAN_ENABLED`, `AGENT_NOTES_ENABLED`), tắt thì hành vi y như trước. Chi tiết từng khóa ở các đoạn phía trên.
+
+**Khóa response mới**
+| Nơi | Khóa | Giá trị khi cờ tắt | Phase |
+|---|---|---|---|
+| `metadata.usage.<agent>` | `tool_calls` (chỉ có khi > 0) | không có | 02-03 |
+| `turn` | `decided_by`, `proposed_action`, `policy_action`, `overrule_reason`, `action_reason` | `null` (có giá trị chỉ khi `POLICY_MODE=hybrid`; `reasoning` có thể bắt đầu bằng `llm: `) | 04 |
+| `turn` | `swap_result` (`applied\|budget\|bad_drop\|jd_priority\|bad_add\|not_applicable\|untrusted`) | `null` | 05 |
+| `plan` | `replan` (`{reserve, keep_ids}`, topic dự phòng `alt1`/`alt2` không nằm trong `plan.phases`) | `null` | 05 |
+| `state` | `swaps` (`[{drop, add, turn, reason}]`) | `[]` | 05 |
+| `state` | `notes` (`[{id, turn, topic_id, kind, text, status}]`, tối đa 8) | `[]` | 07 |
+| `turn.topic_id`, `topics[].topic_id` của báo cáo | có thể là `alt1`/`alt2` | chỉ khi `REPLAN_ENABLED` | 05 |
+
+**Mã fallback mới** (`metadata.fallbacks`): `evaluator_lookup_fallback` (phase 03, chỉ khi `EVALUATOR_TOOLS`; lượt vẫn thành công, chấm lại không tools hoặc kèm `evaluator_mock_heuristic`). Metric mới: `ai_llm_tool_calls_total`, `ai_policy_decisions_total`, `ai_policy_overrules_total`, `ai_replan_swaps_total`, `ai_replan_offered_total`, `ai_notes_dropped_total`, `ai_notes_recorded_total` (nhãn đóng, không có dữ liệu cá nhân).
+
+**Hành vi lỗi**
+- `POST /api/next-turn` trả `409 session_invalid_state` khi `state.topics` không khớp plan thực tế (client mất `plan.replan` nhưng giữ `state.swaps`, hoặc swap giả/trùng). Client phải gửi lại cả `plan.replan` và `state.swaps`.
+- `422` khi `state.notes` sai: `kind`/`status` ngoài tập, `text` > 300 ký tự hoặc hơn 8 phần tử. Xảy ra bất kể `AGENT_NOTES_ENABLED`. Server trả lại nguyên `notes` do client gửi khi cờ tắt.
+- Không có mã lỗi mới nào ở phase 03 và 04 (lỗi tra cứu là fallback, không phải lỗi HTTP).
+
+**Câu hỏi cho interview-service / FSD** (chưa có trả lời bằng văn bản; `REPLAN_ENABLED` và `AGENT_NOTES_ENABLED` giữ tắt cho đến khi có)
+1. Có lưu nguyên JSON `plan` và `state` (gồm `plan.replan`, `state.swaps`, `state.notes`) không lọc schema, và gửi lại nguyên ở mọi `/api/next-turn` và `/api/finalize`? Thiếu `notes` thì ghi chú mất (không lỗi); thiếu `plan.replan` hoặc `swaps` thì 409.
+2. Có tra `turn.topic_id` (có thể là `alt1`) theo `plan.phases` đã lưu không? `alt*` chỉ có trong `plan.replan.reserve`.
+3. UI có hiển thị danh sách topic lấy từ plan không (topic bị bỏ sẽ hiện ra mà không được hỏi)? Nếu có, cần `state.swaps`.
+4. Chấp nhận các khóa mặc định mới của `turn`, `plan`, `state` ở bảng trên? Có validate schema `turn` nghiêm không (nếu có thì thêm 5 khóa phase 04 + `swap_result`)?
+5. Có chuyển `turn.reasoning`, `action_reason` hay `proposed_action` ra giao diện ứng viên không? Nếu có thì ai-service phải lọc thêm (chúng có thể chứa lý do do LLM viết).
+6. Xử lý `409 session_invalid_state` và `422` mới thế nào (thử lại, báo lỗi, hay bỏ qua)?
+7. Mã fallback `evaluator_lookup_fallback` có cần hiển thị hoặc lưu riêng không?
 
 ### Interface phía NestJS
 

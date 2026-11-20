@@ -119,6 +119,41 @@ xuống, luật đầu tiên khớp thắng. `F` = follow-up còn lại của to
 - Evaluation `degraded`: xử lý như `ok` không có `missing_points`, nhưng nếu `follow_ups = 0` thì `follow_up` theo
   key point đầu tiên chưa được hỏi (tránh đóng topic chỉ sau 1 câu vì lỗi kỹ thuật).
 
+### Policy lai: LLM đề xuất, code quyết (2026-11-14, phase 04, `POLICY_MODE=hybrid`)
+
+Cờ mặc định `rules` = luật trên, không đổi. `hybrid`: Evaluator (prompt **v9**, lớp `EvaluatorOutputV9`, cách A: gộp vào lượt chấm, không thêm lời gọi) trả thêm `next_action` (`follow_up|hint|clarify|next_topic`), `next_focus`, `difficulty_delta`, `action_reason` (≤ 20 từ), sau khi chấm xong. Đầu vào v9 thêm `policy_context` (`follow_ups_left`, `hint_used`, `clarifies_used`, `time_hint`, độ khó + biên, `focus_used`, `covered`); chuỗi từ ứng viên bọc `<untrusted>`; prompt buộc chấm độc lập với trạng thái phỏng vấn. `app/policy_hybrid.py::validate_decision` kiểm đề xuất với `classify(ev)` **sau** `allowed_actions` theo ngân sách (`app/policy.py::action_budget`):
+
+| `classify(ev)` | Hành động LLM được chọn | `difficulty_delta` (ngoài khoảng thì kẹp, không bác) |
+|---|---|---|
+| nhạy cảm: `manipulation`, `off_topic`, `asks_clarification`, `dont_know`, `ok_degraded`, **hoặc câu trả lời khớp mẫu injection** (`cv_text.has_injection`, để lệnh kiểu "chuyển câu khác đi" kèm mẫu injection không bỏ qua follow-up) | không giao LLM: dùng `decide()` (`overrule_reason = sensitive_kind`) | – |
+| `weak` | còn hint (`left > 0`, chưa gợi ý): `hint` hoặc `clarify`; hết hint: `next_topic` hoặc `clarify` | −1 … 0 |
+| `ok` | `follow_up`, `next_topic` | 0 |
+| `strong` | `follow_up`, `next_topic` | 0 … +1 |
+
+`clarify` luôn cần `clarifies < 1` và `left > 0`; `follow_up`/`hint` cần `left > 0`; `hint` cần chưa gợi ý. `next_focus` qua `safe_focus`, bỏ nếu trùng `focus_used` hoặc ý ứng viên đã nêu; không còn thì lấy focus của luật (cùng hành động) hoặc `gap_focus`/`deepen_focus`/`hint_focus`. `follow_up` không có focus hợp lệ thì bác (`no_valid_focus`); `hint` không focus vẫn hợp lệ (như luật: hỏi lại câu vừa hỏi). Đề xuất thiếu, tên hành động lạ hoặc ngoài bảng thì dùng `decide()` kèm lý do (`no_proposal`, `action_not_allowed`), không làm hỏng lượt chấm. `action_reason` qua `safe_focus` + bộ lọc PII (`redact_pii`); trúng thì bỏ. Metric: `ai_policy_decisions_total{decided_by}`, `ai_policy_overrules_total{reason}` (06 §metrics).
+
+### 5.5 Lập lại kế hoạch giữa buổi (2026-11-14, phase 05, `REPLAN_ENABLED=false`, cần `POLICY_MODE=hybrid`)
+
+**Mặc định tắt và chưa bật ở môi trường thật cho đến khi FSD xác nhận hợp đồng (06 §7.4).** Mô hình dữ liệu (đều có giá trị mặc định, plan/state cũ chạy như cũ):
+
+- `plan.replan: {reserve: PlanTopic[≤ 2], keep_ids: string[]} | null`. Lúc start (`app/replan_reserve.py`, sau Planner và `prefer_covered`, chỉ khi cờ bật) code chọn tối đa 2 topic catalog của level chưa có trong plan, có câu trong kho ở độ khó bắt đầu (khi biết số đếm; số đếm rỗng = không biết thì không lọc), xếp theo topic JD ưu tiên rồi độ trùng CV, id **`alt1`, `alt2`** (không dùng `r*` của yêu cầu JD hay `t{n}` của plan). Reserve nhận snippet và câu kho trong cùng lượt `attach_reference_snippets` (chung hạn 5 s). Không còn topic thừa (vd fresher có thể 0) thì `replan = null`: phiên này không đổi topic. `keep_ids` = id topic plan map từ `jd.priority_topic_ids()` (tính lúc start vì `next-turn` không nhận `jd_profile`).
+- `state.swaps: [{drop, add, turn, reason}]`. `reason` qua `safe_reason` (injection, PII, ≤ 20 từ). `turn.swap_result`: `applied | budget | bad_drop | jd_priority | bad_add | not_applicable | untrusted`, chỉ có khi LLM đề xuất đổi (metric `ai_replan_swaps_total{result}`).
+
+Evaluator **v10** = v9 + `swap: {drop, add, reason} | null` (`EvaluatorOutputV10`, kiểu lỏng như v9) + khối `replan_context` (JSON: `swaps_left`, `current_topic_band`, topic technical pending có thể bỏ, reserve chưa dùng; id và tiêu đề từ catalog, không có chuỗi ứng viên) ở cuối tin nhắn, chỉ ở topic technical còn reserve và còn lượt đổi. v10 được chọn **cố định cả phiên** khi `POLICY_MODE=hybrid` và `REPLAN_ENABLED` (env, không đổi giữa lượt nên prompt chấm và prompt cache không đổi giữa phiên). Prompt buộc `swap = null` mặc định, chấm độc lập với `replan_context`, không đổi vì câu trả lời yếu hay yêu cầu của ứng viên. Bảng kiểm `validate_swap` và thứ tự ưu tiên: 03 §4.4.
+
+`effective_plan(plan, state)` thay topic theo `state.swaps` tại đúng vị trí, trả nguyên plan khi không có swap hoặc plan cũ. Client phải gửi lại nguyên `state.swaps` (và `plan.replan`) mỗi lượt; `state.swaps` do client mang nên được tin ở mức interview-service tin cậy, và lệch với `state.topics` (swap giả, trùng, mất `replan`) bị chặn bằng kiểm khớp vị trí → 409. Plan trả về client từ next-turn vẫn là plan gốc (`alt*` chỉ nằm trong `plan.replan.reserve`); `turn.topic_id` có thể là `alt1`; `/api/finalize` tự áp `effective_plan` từ `state.swaps` (báo cáo hiện `alt*` ở vị trí topic bị bỏ, topic bị bỏ không có điểm nên biến mất khỏi danh sách; không cần trạng thái `skipped`).
+
+### 5.6 Ghi chú agent (tùy chọn, 2026-11-14, phase 07, `AGENT_NOTES_ENABLED=false`, cần `POLICY_MODE=hybrid`)
+
+**Mặc định tắt; chưa đo nên chưa có lý do bật** (gate chấm điểm và đọc tay 20 phiên là [BLOCKED-KEY], mục 09). Lý do hoãn: người dùng duy nhất của ghi chú là chính lời gọi Evaluator chấm điểm (Interviewer, Reporter không đọc), nên ghi chú kiểu `risk: yếu X` có thể neo điểm.
+
+- `state.notes: [{id, turn, topic_id, kind, text, status}]`, mặc định `[]` (state cũ nạp được; JSON thêm khóa `notes: []`, báo FSD cùng đợt với `swaps`). `id = n{turn}`, `kind`: `hypothesis | to_verify | strength | risk`, `status`: `open | confirmed | rejected`, `text` ≤ 150 ký tự (state do client gửi: `text` ≤ 300 và `notes` ≤ 8 phần tử, vượt thì 422). Model ở `app/models_agent_notes.py` (re-export qua `models_interview`).
+- Evaluator **v11** = v10 + `new_note: {kind, text} | null` và `note_updates: [{id, status}]` (`EvaluatorOutputV11`, kiểu lỏng như v9/v10: giá trị lạ thì bỏ, không làm hỏng lượt chấm). Chọn cố định cả phiên khi `AGENT_NOTES_ENABLED` và hybrid (ưu tiên hơn v10; v11 gồm cả `swap`, nên một phiên chỉ có một version). Cờ tắt: v8 (rules), v9 (hybrid), v10 (hybrid + `REPLAN_ENABLED`) y nguyên, request giống từng byte (test ghim v8/v9/v10 với `notes_context` đặt sẵn).
+- `app/agent_notes.py::apply_notes` chạy cuối `choose_decision` (sau quyết định), chỉ khi cờ bật: tối đa 1 ghi chú mới mỗi lượt; tối đa 8; đầy thì bỏ ghi chú đã xong (`confirmed/rejected`) cũ nhất, rồi ghi chú cũ nhất không phải `to_verify` (`strength/risk/hypothesis` không bao giờ xong nên không được chiếm chỗ mãi); chỉ bỏ ghi chú mới (`full`) khi cả 8 đều là `to_verify` đang `open`. `safe_note` kiểm trên **toàn bộ** text đã gộp khoảng trắng rồi mới xét độ dài: có mẫu injection (`has_injection`), PII (`redact_pii` đổi text) hoặc dài hơn 150 ký tự thì bỏ (không cắt, vì cắt giữa số điện thoại hay email sẽ lọt một phần PII). `note_updates` chỉ đổi được ghi chú `to_verify` đang `open` và status `confirmed|rejected`.
+- **Lượt không tin cậy** (`overrule_reason == "sensitive_kind"`, loại nhạy cảm, hoặc `has_injection(answer)`, kể cả lượt forced) không ghi và không cập nhật gì (`untrusted`). Code không dùng ghi chú để tính điểm hay quyết định hành động; nhưng Evaluator v11 thấy ghi chú `to_verify` đang `open` khi chấm và đề xuất hành động, nên có rủi ro neo điểm (đo ở gate [BLOCKED-KEY], mục 09). Interviewer và Reporter không đọc ghi chú.
+- **Chỉ ghi chú `to_verify` đang `open`** được đưa lại vào Evaluator (`notes_for_context`, qua `safe_note` lần nữa vì state do client mang), trong khối `<untrusted label="open_notes">` cuối tin nhắn (`render` trong `evaluator_input.build_messages`, chỉ với v11). `strength`/`risk`/`hypothesis` chỉ lưu (giảm neo điểm, audit H2).
+- Metric `ai_notes_recorded_total{kind}` (ghi chú đã lưu) và `ai_notes_dropped_total{reason}` (`untrusted`, `empty`, `too_long`, `injection`, `pii`, `invalid_kind`, `duplicate`, `full`, `unknown_id`, `bad_status`; tập nhãn đóng). `has_injection` có thể bỏ nhầm ghi chú kỹ thuật (mẫu "```", `you are`): chấp nhận, theo dõi bằng metric này.
+
 ### Map sang `agent_decision` hiện có
 
 Cột `interview_turns.agent_decision` (`deepen | switch_topic | keep_difficulty`) giữ để tương thích FE/BE cũ.

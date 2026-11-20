@@ -122,8 +122,9 @@ def test_all_runs_share_one_event_loop(monkeypatch):
 
     monkeypatch.setattr(simulate, "run_all", fake_run_all)
     args = type("A", (), {"base_url": None, "duration": 20, "concurrency": 1, "serve": False})()
-    out = asyncio.run(run_many(["a"], None, args, 3))
+    out, counters = asyncio.run(run_many(["a"], None, args, 3))
     assert len(out) == 3 and len(set(loops)) == 1 and kwargs == [1, 2, 3]
+    assert len(counters) == 3 and all(c["replan"]["offered"] == {} for c in counters)  # counter de xuat tho moi run
     assert asyncio.run(run_many(["a"], None, args, 1)) and kwargs[-1] is None  # 1 run: sid cu
 
 

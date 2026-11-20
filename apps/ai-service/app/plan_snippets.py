@@ -168,6 +168,8 @@ async def attach_reference_snippets(plan: InterviewPlan, catalog: TrackCatalog, 
         return plan
     out = plan.model_copy(deep=True)
     flat = [(ph.phase, t) for ph in out.phases for t in ph.topics]
+    if out.replan is not None:  # phase 05: topic du phong (technical) cung nhan snippet + cau kho, chung han 5 s
+        flat += [("technical", t) for t in out.replan.reserve]
     tasks = [asyncio.ensure_future(_topic_references(retriever, phase, t, catalog, collector)) for phase, t in flat]
     try:
         _, pending = await asyncio.wait(tasks, timeout=SNIPPET_DEADLINE_S)
