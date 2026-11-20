@@ -133,7 +133,7 @@ Chỉ đổi `LLM_MODEL_EVALUATOR`; các agent khác vẫn gpt-4o-mini. Luna ch�
 | gpt-4o-mini (hiện tại) | 0,961 / 0,547 / −0,28 | 0,953 | 0,75 / 0,034 | 0,98/0,79, 0,57 | 0,959 / 0,564 | 0,353 / **4,19** | 1,8 / 3,5 / 5,9 | 0,0066 |
 | gpt-6-luna | **0,986 / 0,314 / −0,11** | 0,930 | **1,00** / 0,107 | 0,96/1,00, 0,73 | 0,984 / 0,337 | 0,326 / 2,24 | 3,7 / 4,2 / 5,9 | 0,0063 |
 | gpt-4.1-mini | 0,979 / 0,397 / −0,11 | 0,953 | 1,00 / 0,060 | 0,95/0,96, **0,93** | 0,967 / 0,407 | **0,298** / 2,85 | 3,7 / 4,3 / 6,6 | 0,0288 |
-| gemini-2.5-flash-lite (**không tin được**) | 0,956 / 0,317 / −0,20 | 0,977 | 1,00 / 0,000 | 0,84/1,00, 0,50 | 0,983 / 0,379 | 0,665 / 3,99 | 2,8 / 4,3 / 6,8 | 0,0057 |
+| gemini-2.5-flash-lite (chạy chậm lại) | 0,953 / 0,326 / −0,21 | 0,977 | 1,00 / 0,000 | 0,86/1,00, 0,50 | 0,985 / 0,343 (43 run degraded) | 0,402 / 3,91 | 2,6 / 4,3 / 6,7 | 0,0075 |
 
 Quick C5 v12 (ghi chú, swap):
 
@@ -142,13 +142,32 @@ Quick C5 v12 (ghi chú, swap):
 | gpt-4o-mini | 28 (7/10) | 6/13 | 0 / 0 | 0/124 | 6,14 s |
 | gpt-6-luna | 37 (8/10), có 4 `risk` | 11/20 (2 bác bỏ) | 0 / 0 | 0/119 | 6,10 s |
 | gpt-4.1-mini | 23 (8/9; 1 phiên lỗi planner JSON) | 1/14 | **6 / 4** (1 `budget`, 1 `untrusted`) | 2/112 | 8,58 s |
-| gemini-2.5-flash-lite | 21 (8/10) | 8/15 | 0 / 0 | 34/74 | 8,68 s |
+| gemini-2.5-flash-lite (chạy chậm lại) | 29 (8/10) | 8/20 | 0 / 0 | 28/81 | 5,26 s |
 
 Nhận xét:
 - **Luna khớp nhãn golden tốt nhất** (MAE giảm 43%, gần hết độ khắt khe −0,28 → −0,11) và rẻ nhất. Sourced tốt hơn: `supported` R 1,00, `contradicted` R 0,73. Nhưng trong sim, gap strong−weak giảm 4,19 → 2,24, giống lần so trước (`eval-261103-1526-evaluator-model-comparison.md`: 3,74 → 2,44). Gap giảm vì luna cho persona weak tới 3,7 thay vì 1,8, còn strong giữ nguyên. Weak và average chỉ cách nhau 0,6 điểm; ở 4o-mini là 1,8. Luna phân tách yếu với trung bình kém hơn, nên chưa thay được.
 - **gpt-4.1-mini** có `contradicted` R tốt nhất (0,93; 4o-mini 0,57) và stdev thấp nhất. Đây cũng là **model duy nhất đề xuất swap** (6 đề xuất, áp dụng 4). Tuy vậy gap vẫn giảm (2,85), weak cũng lên 3,7, `to_verify` gần như không được xác nhận (1/14), TTFT +2,4 s, và chi phí Evaluator gấp ~4 lần.
-- **Flash-Lite bị 429 từ nhà cung cấp**: 12-71 run degraded mỗi gate, sim C0 degraded 100/516 lượt (fallback 14-16%). Số của nó lẫn mock heuristic, nên chưa kết luận được. Muốn so lại phải chạy chậm hoặc qua provider khác.
+- **Flash-Lite**: lần đầu bị 429 rất nhiều (số cũ ở `models/stale-flashlite-429/`). Đã chạy lại chậm (`--concurrency 1` cho gate, mới thêm vào `run_evaluator` và `run_evaluator_sourced`; sim dùng 2). Gate v8 lần này sạch: MAE 0,33, nhưng `contradicted` R chỉ 0,50 và `supported` P 0,86, đều kém 4o-mini. Lỗi chính giờ không còn là 429 mà là `LlmOutputError`: output JSON không parse được ở ~8% lượt sim C0 (48/591, fallback 6-7%), 30/43 run degraded của main v12, 28/81 lượt quick C5. Ưu điểm: TTFT P95 4,9 s (4o-mini 6,6 s), Evaluator P95 3,8 s. Không dùng được trên đường nóng khi tỷ lệ lỗi output còn như vậy.
 - Gap trong sim không phải nhãn đúng: persona weak có thể không đáng 1,8/10. Golden nói 4o-mini khắt khe, sim nói các model khác ép điểm weak lên gần average. Muốn biết bên nào đúng thì phải chấm nhãn cho câu trả lời của persona weak/average trong sim (judge Claude như `judge_support`).
+- Kiểm thêm luna (2026-11-20). **Golden theo dải điểm nhãn**, lỗi có dấu / lỗi tuyệt đối (thang tổng 4 tiêu chí):
+
+  | Dải | 4o-mini | luna |
+  |---|---|---|
+  | thấp (≤5) | +0,22 / 1,42 | +0,31 / 1,16 |
+  | giữa (6-10) | −1,27 / 1,87 | −0,67 / 1,13 |
+  | cao (≥11) | −2,19 / 2,19 | −0,96 / 1,00 |
+
+  Trên golden, luna không nâng điểm câu yếu hơn 4o-mini và tốt hơn ở mọi dải.
+- Nhưng trong sim C0, luna chấm `dont_know` 0/203 lượt weak (4o-mini 83/209). Câu kiểu "mình không chắc lắm, hình như là callback hay Promise gì đó" được luna chấm `partial`/`answered` ~4/10. Với ngưỡng `WEAK_BELOW`/`STRONG_FROM` hiện tại (hiệu chỉnh theo thang 4o-mini), hành vi phỏng vấn kém đi:
+
+  | Chỉ số | 4o-mini | luna | 4.1-mini | flash-lite |
+  |---|---|---|---|---|
+  | `slope_direction_ok` | 0,56-0,69 | 0,375 | 0,31-0,38 | 0,56-0,75 |
+  | `gap_recall` | 0,87-0,96 | 0,83-0,87 | | |
+  | phiên `turn_cap` (2 run) | 0 | 6 | 15 | 4 |
+
+  Luna tốt hơn ở vai chấm điểm, nhưng đổi luna mà giữ ngưỡng thì phiên thích ứng sai hướng nhiều hơn.
+- **Không đổi Evaluator sang luna lúc này.** Muốn đổi phải làm cùng bước 5: hiệu chỉnh lại ngưỡng trên thang của luna, rồi chạy lại sim C0 và so `slope_direction_ok`, `gap_recall`, `turn_cap`.
 - Kết luận: **giữ gpt-4o-mini làm Evaluator mặc định.** Không model nào hơn rõ trên mọi trục. Ứng viên đáng đo tiếp là gpt-4.1-mini cho replan, nếu owner chấp nhận chi phí.
 
 ## 5. Bảng rollout
@@ -170,7 +189,7 @@ Thứ tự bật đề xuất khi đạt cổng: `EVALUATOR_TOOLS`, rồi `POLIC
 - Đã chạy lại 2026-11-19 (credit lần ba): holdout v10, sourced v11, 3 gate `--lookup` (2 gate `run_evaluator --lookup` chạy hai lần: lần hai sau khi sửa đếm id lạ trong `evals/run_evaluator.py`, dùng chung `valid_source_ids` với gate sourced).
 - Bước 5 (hiệu chỉnh `WEAK_BELOW`/`STRONG_FROM`): dữ liệu C0 đã đủ, chưa làm; cần owner duyệt.
 - Replan/notes: v12 + schema bắt buộc thì gpt-4o-mini ghi chú được nhưng không bao giờ đề xuất swap; gpt-4.1-mini có đề xuất swap (mục 4c). Còn bước 19: full C5 với v12 + đọc tay 20 phiên.
-- Model Evaluator (mục 4c): giữ gpt-4o-mini; owner quyết có thử gpt-4.1-mini (đắt ~4 lần) không. Flash-Lite phải đo lại khi hết 429.
+- Model Evaluator (mục 4c): giữ gpt-4o-mini. Luna là ứng viên, nhưng phải đi cùng hiệu chỉnh ngưỡng (bước 5). gpt-4.1-mini đắt ~4 lần, chỉ đáng cân nhắc nếu cần replan. Flash-Lite lỗi output ~8%.
 - Tools: giảm tỷ lệ gọi tool (48%) trước khi cân nhắc bật lại.
 - Hybrid: phiên dài hơn ~40% và `/api/start` P95 +2,5 s; owner quyết có chấp nhận.
 - [DE]: textbook scenario java/nodejs (bước 10).
