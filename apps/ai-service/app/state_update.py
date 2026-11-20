@@ -4,7 +4,7 @@ from typing import List, Optional, Tuple
 from .mock_evaluator import is_scored, turn_score
 from .models_interview import CandidateState, Evaluation, PlanTopic, Tagged
 
-STRONG_BAND, WEAK_BAND = 3.0, 1.5  # momentum cho topic sau (gia dinh, chinh sau phien gia lap)
+from .score_thresholds import score_thresholds  # momentum cho topic sau: cung nguong voi policy
 
 
 def _clamp(v: int, state: CandidateState) -> int:
@@ -63,7 +63,8 @@ def apply_action(state: CandidateState, topics: List[Tuple[str, PlanTopic]], pos
     for i in range(pos, min(target, len(topics))):  # topic hien tai (va topic bi bo qua) dong lai
         state.topics[i].status = "done"
     band = state.topics[pos].score_band
-    state.momentum = 0 if band is None else 1 if band >= STRONG_BAND else -1 if band < WEAK_BAND else 0
+    weak_below, strong_from = score_thresholds()
+    state.momentum = 0 if band is None else 1 if band >= strong_from else -1 if band < weak_below else 0
     state.counters = type(c)()
     if action == "wrap_up" or target >= len(topics):
         state.phase, state.active_topic_id = "wrap_up", None

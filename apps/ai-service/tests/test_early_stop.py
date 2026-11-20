@@ -22,7 +22,7 @@ def state(bands, evaluated=6):
     ((3.0, 0.5, 1.0, 1.4), 6, "middle", "next_phase", True),
     ((0.5, 3.0, 1.0, 1.4), 6, "senior", "next_topic", False),  # chi 2 topic technical yeu
     ((3.0, 0.5, 1.0, 1.4), 5, "senior", "next_topic", False),  # chua du luot duoc cham
-    ((3.0, 0.5, 1.0, 1.5), 6, "senior", "next_topic", False),  # 1.5 khong < WEAK_BAND
+    ((3.0, 0.5, 1.0, 1.5), 6, "senior", "next_topic", False),  # 1.5 khong < nguong yeu (score_thresholds)
     ((3.0, 0.5, 1.0, 1.4), 6, "junior", "next_topic", False),
     ((3.0, 0.5, 1.0, 1.4), 6, "fresher", "next_topic", False),
     ((3.0, 0.5, 1.0, 1.4), 6, "senior", "hint", False),  # chua dong topic: van duoc goi y

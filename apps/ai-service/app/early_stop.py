@@ -8,7 +8,7 @@ Ung vien van duoc goi y truoc khi topic bi danh gia yeu, vi luat khong ghi de fo
 from typing import List, Tuple
 
 from .models_interview import CandidateState, PlanTopic
-from .state_update import WEAK_BAND
+from .score_thresholds import score_thresholds
 
 EARLY_STOP_LEVELS = ("middle", "senior")
 WEAK_TOPICS_TO_STOP = 3
@@ -28,4 +28,5 @@ def low_performance_stop(state: CandidateState, topics: List[Tuple[str, PlanTopi
     bands = [state.topics[i].score_band for i in range(pos + 1)
              if topics[i][0] == "technical" and state.topics[i].score_band is not None]
     recent = bands[-need:] if need else []
-    return need > 0 and len(recent) == need and all(b < WEAK_BAND for b in recent)
+    weak_below = score_thresholds()[0]
+    return need > 0 and len(recent) == need and all(b < weak_below for b in recent)

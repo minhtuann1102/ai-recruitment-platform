@@ -6,9 +6,7 @@ from .models_common import LEVEL_CONFIG
 from .focus import deepen_focus, gap_focus, hint_focus
 from .models_interview import CandidateState, Evaluation, PlanTopic
 from .mock_evaluator import turn_score
-
-WEAK_BELOW = 1.5    # gia dinh mock, chinh sau khi chay ung vien gia lap
-STRONG_FROM = 3.0
+from .score_thresholds import score_thresholds
 
 
 @dataclass
@@ -50,8 +48,8 @@ def classify(ev: Evaluation) -> str:
         return "ok_degraded"
     if ev.answer_type in ("manipulation", "off_topic", "asks_clarification", "dont_know"):
         return ev.answer_type
-    s = turn_score(ev)
-    return "weak" if s < WEAK_BELOW else "strong" if s >= STRONG_FROM else "ok"
+    s, (weak_below, strong_from) = turn_score(ev), score_thresholds()
+    return "weak" if s < weak_below else "strong" if s >= strong_from else "ok"
 
 
 def decide(ev: Evaluation, state: CandidateState, level: str, is_scenario: bool, topic: PlanTopic,
