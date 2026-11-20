@@ -142,6 +142,7 @@ def summarize(samples: List[dict], results: Dict[str, List[dict]]) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--runs", type=int, default=3)
+    parser.add_argument("--concurrency", type=int, default=4, help="so request LLM cung luc; giam khi model bi 429")
     parser.add_argument("--prompt", default=None, help="vd v5; mac dinh v8 (ban ghim)")
     parser.add_argument("--lookup", action="store_true", help="bat Evaluator tra cuu kho (can RAG + AI_DB_URL)")
     parser.add_argument("--policy-context", choices=["none", "default"], default="none",
@@ -149,7 +150,8 @@ def main() -> None:
     parser.add_argument("--out", type=Path)
     args = parser.parse_args()
     samples, collector = load_golden(GOLDEN), UsageCollector()
-    results = asyncio.run(run_all(samples, args.runs, args.prompt, collector, lookup=args.lookup, policy_context=args.policy_context))
+    results = asyncio.run(run_all(samples, args.runs, args.prompt, collector, concurrency=args.concurrency,
+                                  lookup=args.lookup, policy_context=args.policy_context))
     summary = {**summarize(samples, results), "usage": collector.to_metadata()["usage"]}
     if args.lookup:
         summary["lookup"] = lookup_summary([r for runs in results.values() for r in runs])

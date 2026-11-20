@@ -123,6 +123,7 @@ def summarize(samples: List[dict], all_results: Dict[str, List[dict]], labels: D
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--runs", type=int, default=3)
+    parser.add_argument("--concurrency", type=int, default=4, help="so request LLM cung luc; giam khi model bi 429")
     parser.add_argument("--prompt", default=None, help="vd v1; mac dinh v8 (ban ghim)")
     parser.add_argument("--limit", type=int)
     parser.add_argument("--set", choices=sorted(SETS), default="main")
@@ -142,8 +143,8 @@ def main() -> None:
     if noisy:
         samples = [s for s in samples if s["id"] in {n["stt_of"] for n in noisy}] + noisy
     collector = UsageCollector()
-    results = asyncio.run(run_all(samples, args.runs, args.prompt, collector, lookup=args.lookup,
-                                  policy_context=args.policy_context))
+    results = asyncio.run(run_all(samples, args.runs, args.prompt, collector, concurrency=args.concurrency,
+                                  lookup=args.lookup, policy_context=args.policy_context))
     labels = load_labels(args.labels_dir or labels_dir)
     summary = summarize(samples, results, inherit_labels(labels, noisy) if noisy else labels)
     if noisy:
