@@ -168,6 +168,17 @@ Nhận xét:
 
   Luna tốt hơn ở vai chấm điểm, nhưng đổi luna mà giữ ngưỡng thì phiên thích ứng sai hướng nhiều hơn.
 - **Không đổi Evaluator sang luna lúc này.** Muốn đổi phải làm cùng bước 5: hiệu chỉnh lại ngưỡng trên thang của luna, rồi chạy lại sim C0 và so `slope_direction_ok`, `gap_recall`, `turn_cap`.
+- **Hiệu chỉnh ngưỡng cho luna (2026-11-20).** Ngưỡng giờ chỉnh được qua env `POLICY_WEAK_BELOW` / `POLICY_STRONG_FROM` (`app/score_thresholds.py`; mặc định 1,5 / 3,0, giá trị lạ hoặc sai thứ tự thì về mặc định). Một ngưỡng dùng chung cho `classify`, momentum và `low_performance_stop`. Chạy sim C0 full 2 run với luna, ngưỡng mạnh giữ 3,0:
+
+  | Ngưỡng yếu | `slope_direction_ok` | `gap_recall` | `turn_cap` | `correct_reason` | phiên dừng `low_performance` sai (strong/average) | ordered | stdev / gap | lượt/phiên (weak) |
+  |---|---|---|---|---|---|---|---|---|
+  | 4o-mini, 1,5 | 0,56-0,69 | 0,87-0,96 | 0 | 1,00 | 0 | 8/8 | 0,353 / 4,19 | 9,8 |
+  | luna, 1,5 | 0,375 | 0,83-0,87 | 6 | 1,00 | 0 | 5-7/8 | 0,326 / 2,24 | 13,7 |
+  | luna, 1,75 | 0,375-0,56 | 0,79-0,87 | 0 | 0,958 | 2 average | 6/8 | 0,436 / 2,26 | 11,4 |
+  | luna, 2,0 | 0,44-0,56 | 0,83-0,92 | 1 | 0,79-0,83 | 6 average + 3 strong | 6-7/8 | 0,351 / 2,28 | 10,1 |
+
+  Điểm lượt của luna chồng lấn giữa các nhóm: ở ngưỡng 2,0 có 34% lượt của persona strong bị xếp yếu (4o-mini ở 1,5: 11%). Nâng ngưỡng sửa được `turn_cap`, nhưng bắt đầu cắt sớm ứng viên average và strong. Không ngưỡng nào đưa luna về ngang 4o-mini.
+- **Kết luận cuối: không đổi Evaluator sang luna**, ngưỡng giữ 1,5 / 3,0. Cờ env vẫn giữ để lần đổi model sau hiệu chỉnh khỏi phải sửa code.
 - Kết luận: **giữ gpt-4o-mini làm Evaluator mặc định.** Không model nào hơn rõ trên mọi trục. Ứng viên đáng đo tiếp là gpt-4.1-mini cho replan, nếu owner chấp nhận chi phí.
 
 ## 5. Bảng rollout
@@ -189,7 +200,7 @@ Thứ tự bật đề xuất khi đạt cổng: `EVALUATOR_TOOLS`, rồi `POLIC
 - Đã chạy lại 2026-11-19 (credit lần ba): holdout v10, sourced v11, 3 gate `--lookup` (2 gate `run_evaluator --lookup` chạy hai lần: lần hai sau khi sửa đếm id lạ trong `evals/run_evaluator.py`, dùng chung `valid_source_ids` với gate sourced).
 - Bước 5 (hiệu chỉnh `WEAK_BELOW`/`STRONG_FROM`): dữ liệu C0 đã đủ, chưa làm; cần owner duyệt.
 - Replan/notes: v12 + schema bắt buộc thì gpt-4o-mini ghi chú được nhưng không bao giờ đề xuất swap; gpt-4.1-mini có đề xuất swap (mục 4c). Còn bước 19: full C5 với v12 + đọc tay 20 phiên.
-- Model Evaluator (mục 4c): giữ gpt-4o-mini. Luna là ứng viên, nhưng phải đi cùng hiệu chỉnh ngưỡng (bước 5). gpt-4.1-mini đắt ~4 lần, chỉ đáng cân nhắc nếu cần replan. Flash-Lite lỗi output ~8%.
+- Model Evaluator (mục 4c): giữ gpt-4o-mini. Luna đã thử hiệu chỉnh ngưỡng (1,75 và 2,0) mà vẫn kém hơn. gpt-4.1-mini đắt ~4 lần, chỉ đáng cân nhắc nếu cần replan. Flash-Lite lỗi output ~8%.
 - Tools: giảm tỷ lệ gọi tool (48%) trước khi cân nhắc bật lại.
 - Hybrid: phiên dài hơn ~40% và `/api/start` P95 +2,5 s; owner quyết có chấp nhận.
 - [DE]: textbook scenario java/nodejs (bước 10).
