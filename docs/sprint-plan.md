@@ -188,7 +188,7 @@ Sprint 5  07/12 ─ 21/12   Polish, Testing & Báo cáo
 |---|---|---|---|
 | S3-DE-1 | Thu thập Textbook/Tutorial | 10+ nguồn: Node.js docs, React docs, PostgreSQL docs, CS fundamentals, System Design. **Spec 012 (DE chốt 2026-11-14):** docs chính thức đủ 6 track, chỉ trang giải thích; thực tế 23 nguồn | Bắt buộc |
 | S3-DE-2 | Xử lý textbook | Chunk theo chapter/section, metadata: source, topic, difficulty_hint. **Spec 012:** chunk theo section, không gán độ khó | Bắt buộc |
-| S3-DE-3 | Index textbook vào ai_db | ~5000+ chunks. Coverage: Backend, Frontend, DB, System Design. **Spec 012:** đo bằng độ phủ 28 tình huống, trần 1.500 chunk; 2026-11-18 nạp 1.121 chunk (6 track, 28/28 tình huống) | Bắt buộc |
+| S3-DE-3 | Index textbook vào ai_db | ~5000+ chunks. Coverage: Backend, Frontend, DB, System Design. **Spec 012:** đo bằng độ phủ 28 tình huống, trần 1.500 chunk; 2026-11-19 nạp 1.144 chunk (6 track, 23 nguồn, 28/28 tình huống) | Bắt buộc |
 | S3-DE-4 | RAG quality evaluation | Test queries, đánh giá relevance. Điều chỉnh chunk_size nếu cần | Bắt buộc |
 | S3-DE-5 | Dedup | Loại bỏ chunks trùng nội dung trước index | Bắt buộc |
 | S3-DE-6 | Lộ trình học sau phỏng vấn (agentic) | Agent có tool, vòng lặp giới hạn, sinh `study_plan` của report finalize từ `improvements` của Reporter: tài liệu + câu luyện truy được về nguồn, dự phòng = `study_plan` của Reporter; đo chất lượng trên bộ phiên mẫu. Spec 016, AIE + FSD đồng ý 2026-10-24 | Bắt buộc |
