@@ -145,7 +145,7 @@ Sprint 5  07/12 ─ 21/12   Polish, Testing & Báo cáo
 |---|---|---|---|
 | S2-DE-1 | Crawl Job Descriptions | 500+ JD: crawl tối đa từ site tuyển dụng IT cho phép (itviec, topdev, careerviet, careerlink; topcv chặn bot → loại), phần thiếu bù JD synthetic có cờ riêng. Fields: title, company, skills, description. Chốt 2026-10-24 (specs/009 NC-3) | Bắt buộc |
 | S2-DE-2 | Xử lý JD data | Clean, extract skills/tech, chunk theo sections (requirements, responsibilities) | Bắt buộc |
-| S2-DE-3 | Index JD vào ai_db | Embed + lưu JD chunks. Tag `source_type = 'job_description'`. Hạ Stretch 2026-10-24: JD vào Planner qua JD Parser (S2-AIE-6), ai-service không truy hồi JD từ RAG (specs/009 NC-2) | Stretch |
+| S2-DE-3 | Index JD vào ai_db | Embed + lưu JD chunks. Tag `source_type = 'job_description'`. Hạ Stretch 2026-10-24: JD vào Planner qua JD Parser (S2-AIE-6), ai-service không truy hồi JD từ RAG (specs/009 NC-2). **Mở rộng 2026-11-21 (spec 017):** embed JD để gợi ý việc làm theo CV–JD, vẫn không vào RAG phỏng vấn | Stretch |
 | S2-DE-4 | Seed 200 job postings | Dùng crawled JD data seed job_db | Bắt buộc |
 
 **Demo:** Full job lifecycle. AIE: real GPT-4o-mini sinh câu hỏi tiếp (next-turn) qua ai-service.
