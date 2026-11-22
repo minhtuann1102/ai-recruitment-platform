@@ -39,7 +39,7 @@ CREATE TABLE knowledge_chunks (
   content_hash     CHAR(32) NOT NULL UNIQUE,   -- md5(lower(trim(content))), upsert idempotent
   embedding        vector(1536) NOT NULL,
   embedding_model  VARCHAR(50) NOT NULL DEFAULT 'text-embedding-3-small',
-  source_type      VARCHAR(30) NOT NULL,       -- interview_qa | textbook (job_description: Stretch, AI không dùng)
+  source_type      VARCHAR(30) NOT NULL,       -- interview_qa | textbook | job_description (JD chỉ cho gợi ý việc làm 017, RAG phỏng vấn không đọc)
   category         VARCHAR(30),                -- Backend | Frontend | Database | System Design | DevOps | AI (khớp catalog)
   difficulty       VARCHAR(10),                -- easy | medium | hard (null với textbook)
   topic_id         VARCHAR(80),                -- id trong topic catalog; Q&A luôn có, textbook để NULL
@@ -59,6 +59,7 @@ Khác với thiết kế cũ:
 - **`content_hash UNIQUE`.** `ON CONFLICT DO NOTHING` trong `data-pipeline.md` mục 7 hiện **không có tác dụng** vì bảng không có ràng buộc unique, nên chạy lại pipeline sẽ nhân đôi dữ liệu. DE nên dùng `ON CONFLICT (content_hash) DO NOTHING`.
 - **`category`, `difficulty`, `source_type`, `language` là cột thật** thay vì chỉ nằm trong JSONB, vì đó là các điều kiện lọc thường xuyên.
 - **`embedding_model`:** để biết chunk nào cần embed lại nếu đổi model.
+- **`job_description` (spec 017, 2026-11-22):** JD của spec 009 được index vào cùng bảng cho **gợi ý việc làm CV–JD** (`metadata.dataset = 'jd-match'`, một dòng mỗi JD, đọc bởi `app/matching/job_index.py`), **không** phải nguồn RAG phỏng vấn. Mọi truy vấn của `repository.py`, `bm25_index.py` và mặc định `SearchFilters` (`interview_qa`, `textbook`) lọc `source_type` nên không bao giờ trả dòng này; `tests/test_matching_rag_isolation.py` giữ điều đó.
 
 ## 4. Retrieval theo từng agent
 

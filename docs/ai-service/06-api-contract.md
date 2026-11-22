@@ -301,6 +301,7 @@ Giữ tên `start / next-turn / finalize` theo constitution IV; **nội dung** �
 | POST | `/api/start` | Planner → Interviewer | SSE | 40 s (event đầu ≤ 25 s) |
 | POST | `/api/next-turn` | Evaluator → policy → Interviewer | SSE | 45 s (event đầu ≤ 15 s) |
 | POST | `/api/finalize` | (code tính điểm) → Reporter | JSON | 90 s |
+| POST | `/api/match/jobs` | — (code + embedding) | JSON | 10 s (embed tối đa 5 s) |
 | GET | `/api/health` | — | JSON | 5 s |
 | GET | `/api/stt/phrases` | — (code) | JSON | 5 s |
 | GET | `/metrics` | — (code) | text Prometheus | 5 s |
@@ -583,6 +584,66 @@ bảng tra; không trùng. Dịch vụ giới hạn số cụm thì cắt đuôi
 ```
 
 Response 200: report theo §6.4 (snake_case) + `metadata` (usage, latency, prompt version của Reporter). Reporter lỗi vẫn trả 200 với `status = "partial"` (chỉ có điểm và nhận xét mẫu); `meta.fallbacks` ghi `reporter_partial`, hoặc `reporter_config_error` nếu thiếu cấu hình. Không lượt nào chấm được thì vẫn 200 với `status = "unscored"`, `overall.score`, `overall.verdict` và các tiêu chí là `null`, không gọi Reporter LLM. Có `jd_profile` thì report có khối `requirements` (design 05 §6.4). Report luôn có `level_signal` (`null` hoặc cờ `above_level` gợi ý thử level cao hơn, design 05 §6.3, thêm 2026-11-03). `end_reason` có thêm giá trị `low_performance` (ai-service tự wrap-up sớm khi ứng viên middle/senior yếu 3 topic technical liên tiếp, hoặc tất cả nếu plan ít hơn 3, design 03 §4.4).
+
+### POST /api/match/jobs
+
+(2026-11-22, spec 017 US2, `app/matching/`) Gợi ý việc làm theo độ tương đồng CV–JD. Endpoint **nội bộ**, cần `X-Internal-Token` như các endpoint khác. Không gọi LLM sinh văn bản, không lưu vector CV; JD đã index sẵn trong `ai_db.knowledge_chunks` (`source_type = 'job_description'`, `metadata.dataset = 'jd-match'`) và RAG phỏng vấn không đọc các dòng này. Nguồn: `specs/017-cv-jd-matching/contracts/match-jobs-api.md`. GĐ1 người gọi là script demo / trang dev; GĐ2 là job-service.
+
+```jsonc
+{
+  "cv_profile": { "...": "CvProfile, kết quả /api/cv/parse" },
+  "track": "java_backend",              // 1 trong 6 track phỏng vấn; lạ -> 422 unknown_track
+  "level": "middle",                    // fresher | junior | middle | senior; bỏ trống thì suy từ total_years_experience (< 3 Junior, < 5 Mid, còn lại Senior)
+  "as_of": "2026-11-21",                // YYYY-MM-DD, mặc định hôm nay (Asia/Ho_Chi_Minh)
+  "job_ids": ["careerlink:2213041"],    // 1-200 mã; chỉ xét JD trong danh sách (đánh giá, GĐ2)
+  "page": 1,                            // >= 1
+  "page_size": 10                       // 1-50
+}
+```
+
+Lọc cứng trước khi tính điểm: cùng nhóm JD của track (`java_backend` / `nodejs_backend` / `python_backend` = `backend`, `frontend_react` = `frontend`, `devops_engineer` = `devops`, `ai_engineer` = `ai_data`), hạn nộp >= `as_of` (JD không có hạn thì không bị loại), lệch bậc level <= `MATCH_MAX_LEVEL_GAP` (JD không có level hoặc CV không suy ra được bậc thì không lọc). Bậc: Intern 0, Junior / fresher 1, Mid / middle 2, Senior 3, Lead 4, Manager 5.
+
+Điểm: `score = w1·cosine + w2·skill_match + w3·level_fit` (mặc định 0,6 / 0,3 / 0,1). `cosine = max(0, cos(vector CV, vector JD))`; vector CV từ văn bản gồm headline, vai trò, dự án (không có danh sách kỹ năng) nên không lặp lại `skill_match`. `skill_match = |kỹ năng JD ∩ kỹ năng CV| / |kỹ năng JD|` (danh mục kỹ năng của spec 009; bằng 0 và ghi `jd_no_skills` khi JD không có kỹ năng). `level_fit` = 1 cùng bậc, 0,5 lệch 1 bậc hoặc thiếu level, 0 còn lại. Điểm và thành phần làm tròn 4 chữ số; xếp điểm giảm dần, hòa thì `job_id` tăng dần; tối đa `MATCH_MAX_RESULTS` kết quả.
+
+Response 200:
+
+```jsonc
+{
+  "items": [{
+    "job_id": "careerlink:2213041", "title": "Backend Developer (Java)", "group": "backend",
+    "level": "Mid", "deadline": "2026-12-01", "score": 0.712,
+    "components": { "cosine": 0.583, "skill_match": 0.857, "level_fit": 1.0 },   // cosine = null khi degraded
+    "matched_skills": ["Java", "PostgreSQL", "Spring Boot"],                      // tên hiển thị, theo thứ tự slug
+    "missing_skills": ["Kafka"],
+    "notes": []                                                                    // jd_no_skills | jd_no_level
+  }],
+  "page": 1, "page_size": 10,
+  "total": 37,                           // min(số JD qua lọc cứng, MATCH_MAX_RESULTS); trang vượt total -> items: []
+  "metadata": {
+    "as_of": "2026-11-21",
+    "weights": { "cosine": 0.6, "skill_match": 0.3, "level_fit": 0.1 },           // trọng số thực dùng (degraded: cosine 0, w2 / w3 chuẩn hóa lại)
+    "max_level_gap": 1, "candidate_level_rank": 2,
+    "embedding_model": "text-embedding-3-small", "index_size": 360, "index_loaded_at": "2026-11-21T16:02:11Z",
+    "cv_skill_count": 9,                 // số kỹ năng CV (slug) nhận ra được
+    "unknown_skills_count": 2,           // kỹ năng CV ngoài danh mục (chỉ đếm, không trả tên)
+    "degraded": false, "degraded_reason": null,   // embedding_unavailable (thiếu khóa) | embedding_timeout | embedding_error
+    "mock": false,
+    "usage": { "embedding_tokens": 212 },
+    "timing_ms": { "embed": 180, "score": 4, "total": 190 }
+  }
+}
+```
+
+Embedding lỗi hoặc quá `MATCH_EMBED_TIMEOUT_S` (mặc định 5 s) vẫn trả 200: bỏ `cosine`, bật `degraded`. Chỉ mục rỗng (chưa chạy `index-jd-match`) trả 200 với `items: []`, `total: 0`, `index_size: 0`. Văn bản CV không bao giờ vào log, chỉ log số lượng và thời gian.
+
+| HTTP | `error` | Khi nào |
+|---|---|---|
+| 401 | `unauthorized` | Thiếu hoặc sai `X-Internal-Token` |
+| 422 | `invalid_request` | Sai schema: `page_size` > 50, `as_of` sai định dạng, `job_ids` rỗng hoặc > 200, level lạ |
+| 422 | `unknown_track` | `track` không thuộc 6 track (`details.tracks` liệt kê) |
+| 503 | `match_index_unavailable` | Chưa có snapshot và không đọc được `ai_db` (hoặc `AI_DB_URL` trống khi không mock) |
+
+Cấu hình (`apps/ai-service/.env.example`): `MATCH_MOCK` (false; true = chỉ mục mẫu 14 JD + embedding băm, không đọc `ai_db`, không gọi provider, không cần `AI_DB_URL` / `LLM_API_KEY`), `MATCH_WEIGHTS` (`0.6,0.3,0.1`; mỗi số >= 0 và tổng bằng 1, sai thì ai-service không khởi động), `MATCH_MAX_LEVEL_GAP` (1), `MATCH_MAX_RESULTS` (50), `MATCH_INDEX_REFRESH_S` (300), `MATCH_EMBED_TIMEOUT_S` (5). Dùng lại `AI_DB_URL`, `AI_DB_CONNECT_TIMEOUT_S`, `EMBEDDING_MODEL`, `LLM_*`; không phụ thuộc `RAG_ENABLED`.
 
 ### Thông báo gộp cho FSD / interview-service (2026-11-14, phase 03-07 kế hoạch agentic)
 

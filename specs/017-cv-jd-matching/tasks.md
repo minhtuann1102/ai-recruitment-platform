@@ -121,13 +121,13 @@ theo [quickstart.md](quickstart.md) §3.
   - thứ tự điểm giảm dần, hòa thì theo `job_id`; trần `max_results`.
 - [x] T014 [P] [US2] Viết `apps/ai-service/tests/test_matching_settings.py`: mặc định `0.6,0.3,0.1`; trọng số âm, tổng
   ≠ 1 hoặc sai định dạng → `ConfigError`; mock không cần `AI_DB_URL` hay `LLM_API_KEY`.
-- [ ] T015 [P] [US2] Viết `apps/ai-service/tests/test_matching_job_index.py`:
+- [x] T015 [P] [US2] Viết `apps/ai-service/tests/test_matching_job_index.py`:
   - parse dòng ai_db (`embedding::text`, metadata) thành snapshot đã chuẩn hóa L2;
   - lần nạp đầu lỗi → `match_index_unavailable`;
   - snapshot cũ → trả bản cũ ngay, nạp nền; nạp nền lỗi thì giữ bản cũ;
   - mock nạp `mock_jobs.json`;
   - dùng hàm `connect` giả.
-- [ ] T016 [P] [US2] Viết `apps/ai-service/tests/test_matching_router.py` (`MATCH_MOCK=true`):
+- [x] T016 [P] [US2] Viết `apps/ai-service/tests/test_matching_router.py` (`MATCH_MOCK=true`):
   - thiếu token → 401;
   - track lạ → 422 `unknown_track`;
   - `page_size = 51` → 422 `invalid_request`;
@@ -135,10 +135,10 @@ theo [quickstart.md](quickstart.md) §3.
   - item khớp lọc cứng, `matched_skills` / `missing_skills` khớp `skill_match`;
   - trang vượt `total` → `items` rỗng;
   - `job_ids` giới hạn đúng tập JD.
-- [ ] T017 [P] [US2] Viết `apps/ai-service/tests/test_matching_rag_isolation.py`: mọi SQL đọc `knowledge_chunks` trong
+- [x] T017 [P] [US2] Viết `apps/ai-service/tests/test_matching_rag_isolation.py`: mọi SQL đọc `knowledge_chunks` trong
   `app/rag/repository.py` đều lọc `source_type` khác `job_description`; `SearchFilters()` mặc định không có
   `job_description`; `bm25_index` loại chunk `job_description` (SC-006).
-- [ ] T018 [P] [US2] Viết `apps/ai-service/tests/test_matching_service.py`: gateway giả ném lỗi hoặc quá
+- [x] T018 [P] [US2] Viết `apps/ai-service/tests/test_matching_service.py`: gateway giả ném lỗi hoặc quá
   `MATCH_EMBED_TIMEOUT_S` → `degraded = true` với `degraded_reason` tương ứng, vẫn trả kết quả; log không chứa văn bản
   CV (dùng caplog); có `timing_ms.embed`, `score`, `total` và `usage.embedding_tokens`.
 
@@ -157,7 +157,7 @@ theo [quickstart.md](quickstart.md) §3.
 - [x] T022 [US2] Viết `apps/ai-service/app/matching/hash_embedder.py` (băm token vào 1536 chiều, chuẩn hóa L2, tất
   định) và `mock_jobs.json` (~12 JD tự soạn, phủ 4 nhóm và đủ level, có JD hết hạn và JD không level). Không lấy nội dung
   crawl.
-- [ ] T023 [US2] Viết `apps/ai-service/app/matching/job_index.py`:
+- [x] T023 [US2] Viết `apps/ai-service/app/matching/job_index.py`:
   - snapshot (data-model §2);
   - nạp qua một kết nối psycopg async ngắn, read-only (`default_transaction_read_only=on`, `statement_timeout`), đóng
     ngay;
@@ -166,15 +166,15 @@ theo [quickstart.md](quickstart.md) §3.
 - [x] T024 [US2] Viết `apps/ai-service/app/matching/scorer.py` (hàm thuần, numpy) và `models.py` (pydantic request /
   response đúng contract: `page_size` 1–50, `job_ids` ≤ 200, `level` ∈ fresher | junior | middle | senior, `as_of`
   dạng date).
-- [ ] T025 [US2] Viết `apps/ai-service/app/matching/service.py`:
+- [x] T025 [US2] Viết `apps/ai-service/app/matching/service.py`:
   - embed CV qua `get_gateway().embed` với `asyncio.wait_for(MATCH_EMBED_TIMEOUT_S)`, kèm `UsageCollector`;
   - lỗi cấu hình hay provider → degraded; ở chế độ mock dùng `hash_embedder`;
   - gọi scorer, phân trang, dựng metadata;
   - chỉ log số lượng và thời gian.
-- [ ] T026 [US2] Viết `apps/ai-service/app/matching/router.py` (`POST /api/match/jobs`, `ApiError` cho `unknown_track`
+- [x] T026 [US2] Viết `apps/ai-service/app/matching/router.py` (`POST /api/match/jobs`, `ApiError` cho `unknown_track`
   và `match_index_unavailable`), thêm `include_router` vào `apps/ai-service/app/main.py`. Thêm `numpy` (pin `2.4.6`)
   vào `apps/ai-service/requirements.txt` và các biến `MATCH_*` có comment vào `apps/ai-service/.env.example`.
-- [ ] T027 [US2] Cập nhật docs (constitution III):
+- [x] T027 [US2] Cập nhật docs (constitution III):
   - `docs/ai-service/06-api-contract.md`: chép contract endpoint;
   - `docs/architecture/ai-integration.md`: thêm sơ đồ Mermaid luồng gợi ý (pipeline index → ai_db → snapshot → scorer
     → endpoint; GĐ2 job-service nét đứt);

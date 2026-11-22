@@ -172,3 +172,32 @@ Query (category + topic + tóm tắt câu trả lời)
   → cosine similarity (pgvector, top-5) + lọc source_type/category/difficulty
   → khử trùng lặp theo qa_id → chèn vào prompt (≤ ~1500 token)
 ```
+
+## 9. Gợi ý việc làm theo CV (spec 017)
+
+JD đã chuẩn hóa của spec 009 được embed và lưu vào `ai_db.knowledge_chunks` (`source_type = 'job_description'`, `metadata.dataset = 'jd-match'`, mỗi JD một dòng) để **gợi ý việc làm**; chúng **không** vào RAG phỏng vấn (mọi truy vấn RAG lọc `source_type`, có test `tests/test_matching_rag_isolation.py`). `ai-service` giữ một snapshot chỉ mục trong bộ nhớ, lọc cứng rồi tính điểm bằng numpy; embed CV là lượt gọi duy nhất ra ngoài. Contract: [06-api-contract.md](../ai-service/06-api-contract.md) (`POST /api/match/jobs`).
+
+```mermaid
+flowchart LR
+    subgraph DE["data-pipeline (DE)"]
+        JD["JD chuẩn hóa (009)"] -->|"index-jd-match: embed, idempotent theo content_hash"| W["knowledge_chunks writer"]
+    end
+    W --> DB[("ai_db.knowledge_chunks<br/>job_description / jd-match")]
+    subgraph AI["ai-service (stateless)"]
+        SNAP["snapshot trong bộ nhớ<br/>ma trận numpy, làm mới nền mỗi MATCH_INDEX_REFRESH_S"]
+        SCORE["scorer: lọc cứng + cosine, skill_match, level_fit"]
+        EP["POST /api/match/jobs"]
+        SNAP --> SCORE --> EP
+    end
+    DB -->|"một kết nối read-only ngắn"| SNAP
+    CV["CvProfile + track + level"] --> EP
+    EP -->|"embed CV (LlmGateway)"| EMB["embedding provider"]
+    EMB --> SCORE
+    DEMO["script demo / trang dev (GĐ1)"] --> EP
+    JS["job-service (GĐ2, FSD)"] -.->|"X-Internal-Token"| EP
+```
+
+- **Degraded:** embedding lỗi, quá `MATCH_EMBED_TIMEOUT_S` hoặc thiếu khóa thì bỏ cosine, chuẩn hóa lại trọng số w2 : w3, `metadata.degraded = true` kèm lý do; vẫn 200.
+- **Mock:** `MATCH_MOCK=true` dùng chỉ mục mẫu 14 JD tự soạn và embedding băm token tất định, không đọc `ai_db`, không gọi provider; vector giả không bao giờ ghi vào `ai_db`.
+- **Không lưu CV:** ai-service không lưu vector hay văn bản CV; log chỉ có số lượng và thời gian.
+- **GĐ2 (đường nét đứt):** job-service gọi endpoint này, thêm RBAC và cache; chờ FSD (007, 008, 013).
