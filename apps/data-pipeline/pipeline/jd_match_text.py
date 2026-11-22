@@ -62,19 +62,29 @@ def build_match_record(jd: Dict) -> Tuple[Optional[Dict], Optional[str]]:
     }, None
 
 
+def _deadline_key(record: Dict) -> str:
+    return record["metadata"]["deadline"] or ""  # ISO yyyy-mm-dd so sanh duoc theo chuoi; None coi la som nhat
+
+
 def build_match_records(jds: Iterable[Dict]) -> Tuple[List[Dict], List[Dict]]:
-    """JD -> (ban ghi, bi bo [{jd_id, reason}]). Bo no_group truoc; hai JD trung hash thi giu JD dau (reason
-    'duplicate_hash'): moi jd_id toi da mot dong va content_hash la khoa duy nhat cua bang."""
+    """JD -> (ban ghi, bi bo [{jd_id, reason}]). Bo no_group truoc. Hai JD trung hash (dang lai cung noi dung): giu JD co
+    han nop muon nhat, bang nhau thi giu JD dau trong file; ban con lai bi bo voi reason 'duplicate_hash'. Ban giu o
+    cho cua JD xuat hien dau. Moi jd_id toi da mot dong, content_hash la khoa duy nhat cua bang."""
     records: List[Dict] = []
     skipped: List[Dict] = []
-    seen = set()
+    slot: Dict[str, int] = {}  # content_hash -> vi tri trong records
     for jd in jds:
         record, reason = build_match_record(jd)
-        if record is not None and record["content_hash"] in seen:
-            record, reason = None, "duplicate_hash"
         if record is None:
             skipped.append({"jd_id": jd.get("jd_id"), "reason": reason})
             continue
-        seen.add(record["content_hash"])
-        records.append(record)
+        chash = record["content_hash"]
+        if chash not in slot:
+            slot[chash] = len(records)
+            records.append(record)
+            continue
+        kept = records[slot[chash]]
+        if _deadline_key(record) > _deadline_key(kept):  # chi han muon hon han that su moi thay: bang nhau giu JD dau
+            records[slot[chash]], record = record, kept
+        skipped.append({"jd_id": record["metadata"]["jd_id"], "reason": "duplicate_hash"})
     return records, skipped

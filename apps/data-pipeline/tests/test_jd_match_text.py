@@ -95,3 +95,28 @@ def test_build_match_records_skips_no_group_and_duplicate_hash_keeping_first():
     records, skipped = build_match_records(jds)
     assert [r["metadata"]["jd_id"] for r in records] == ["a:1", "c:4"]
     assert skipped == [{"jd_id": "a:2", "reason": "no_group"}, {"jd_id": "b:3", "reason": "duplicate_hash"}]
+
+
+def test_duplicate_hash_keeps_latest_deadline_and_reports_the_loser():
+    jds = [make_jd("a:1", deadline="2026-11-08"), make_jd("a:2", deadline="2026-11-22"), make_jd("a:3", deadline="2026-11-20")]
+    records, skipped = build_match_records(jds)
+    assert [r["metadata"]["jd_id"] for r in records] == ["a:2"]
+    assert skipped == [{"jd_id": "a:1", "reason": "duplicate_hash"}, {"jd_id": "a:3", "reason": "duplicate_hash"}]
+
+
+def test_duplicate_hash_none_deadline_counts_as_earliest_and_ties_keep_first():
+    records, skipped = build_match_records([make_jd("a:1", deadline=None), make_jd("a:2", deadline="2026-11-01")])
+    assert [r["metadata"]["jd_id"] for r in records] == ["a:2"] and [s["jd_id"] for s in skipped] == ["a:1"]
+    records, skipped = build_match_records([make_jd("b:1", deadline="2026-11-05"), make_jd("b:2", deadline="2026-11-05"),
+                                            make_jd("b:3", deadline=None), make_jd("b:4", deadline=None)])
+    assert [r["metadata"]["jd_id"] for r in records] == ["b:1"] and len(skipped) == 3
+    records, _ = build_match_records([make_jd("c:1", deadline=None), make_jd("c:2", deadline=None)])
+    assert [r["metadata"]["jd_id"] for r in records] == ["c:1"]
+
+
+def test_duplicate_hash_winner_keeps_the_slot_of_first_occurrence_and_its_own_metadata():
+    jds = [make_jd("a:1", deadline="2026-11-08", skills=["docker"]), make_jd("z:9", title="Khác"),
+           make_jd("a:2", deadline="2026-11-22", skills=["fastapi"])]
+    records, _ = build_match_records(jds)
+    assert [r["metadata"]["jd_id"] for r in records] == ["a:2", "z:9"]
+    assert records[0]["metadata"]["skills"] == ["fastapi"] and records[0]["metadata"]["deadline"] == "2026-11-22"

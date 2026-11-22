@@ -9,6 +9,7 @@ Ma thoat: 0 xong; 1 loi dau vao / lech model; 2 preflight hoac cau hinh; 3 ghi x
 import argparse
 import json
 import sys
+from collections import Counter
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple
 
@@ -90,9 +91,12 @@ def index_jd_match_records(conn, records: Sequence[Dict], embedder: EmbeddingCli
         embedder.probe()  # chay lai khong co ban ghi moi thi khong goi API
     stats = write_records(conn, plan, embedder.embed, stored_model)
     stats["deleted"] += deleted
-    if partial:
+    if partial and stats.get("cleanup") == "done":  # loi embed da ghi ly do rieng ("skipped (embed_errors > 0)"): giu nguyen
         stats["cleanup"] = "skipped (--limit)"
     stats["embedding_tokens"] = embedder.total_tokens
+    if stats["embed_errors"] and rebuild:
+        print("loi: dataset dang thieu mot phan sau --rebuild; chay lai index-jd-match (khong can --rebuild) de ghi not.",
+              file=sys.stderr)
     return (EXIT_EMBED_ERRORS if stats["embed_errors"] else EXIT_OK), stats
 
 
@@ -130,7 +134,10 @@ def run_index_jd_match(args: argparse.Namespace) -> int:
         command="index-jd-match", records_in=len(jds), chunks_out=len(records), duplicates_dropped=duplicates,
         records_rejected=[{"qa_id": s["jd_id"], "reasons": [s["reason"]]} for s in skipped],
     )
-    report.index = {"input": len(jds), "skipped_no_group": no_group, "skipped_duplicate_hash": duplicates, **stats}
+    # so ban ghi theo group: thay duoc mobile_fullstack (da index nhung chua co track phong van, spec 017)
+    by_group = dict(sorted(Counter(r["metadata"]["group"] for r in records).items()))
+    report.index = {"input": len(jds), "skipped_no_group": no_group, "skipped_duplicate_hash": duplicates,
+                    "by_group": by_group, **stats}
     report.print()
     print(f"ghi {report.write(PROCESSED_DIR)}")
     return code

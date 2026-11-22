@@ -191,11 +191,14 @@ python -m pipeline index-jd-match --limit 20    # chạy thử: không dọn b�
 |---|---|
 | Bản ghi | `knowledge_chunks`: `source_type = 'job_description'`, `metadata.dataset = 'jd-match'`, `chunk_type = 'jd_match_summary'`; `category`, `difficulty`, `topic_id` NULL |
 | Văn bản embed | Tiêu đề, "Cấp bậc", "Nhóm", rồi đoạn yêu cầu (thiếu thì công việc, thiếu nữa thì mô tả), cắt ≤ 1.200 ký tự. **Không** có dòng kỹ năng, để cosine không lặp lại `skill_match` |
-| Bỏ qua | JD `group = null` (`skipped_no_group`); hai JD trùng văn bản thì giữ JD đầu (`skipped_duplicate_hash`) |
+| Bỏ qua | JD `group = null` (`skipped_no_group`); hai JD trùng văn bản (đăng lại) thì giữ JD có hạn nộp muộn nhất, bằng nhau thì JD đầu (`skipped_duplicate_hash`) |
 | Idempotent | `content_hash` = md5 văn bản embed. Chạy lại: không embed lại (`embedded = 0`). JD đổi nội dung: insert hash mới, hash cũ bị dọn trong dataset |
 | Kiểm model | Đọc `embedding_model` đang có của dataset. Khác model cấu hình (tên không có tiền tố provider) thì thoát 1, chưa embed; `--rebuild` xóa dataset (chỉ `source_type = 'job_description'`) rồi ghi lại. Probe provider trước khi xóa |
-| Thống kê | `input`, `skipped_no_group`, `skipped_duplicate_hash`, `embedded`, `embed_errors`, `inserted`, `updated`, `deleted`, `embedding_tokens` (in ra và ghi `data/processed/run-report-index-jd-match-*.json`) |
-| Mã thoát | 0 xong · 1 lỗi đầu vào hoặc lệch model · 2 preflight / cấu hình · 3 còn lỗi embedding (không dọn) |
+| Thống kê | `input`, `skipped_no_group`, `skipped_duplicate_hash`, `by_group` (số bản ghi theo nhóm, thấy được `mobile_fullstack` đã index nhưng chưa có track), `embedded`, `embed_errors`, `inserted`, `updated`, `deleted`, `embedding_tokens` (in ra và ghi `data/processed/run-report-index-jd-match-*.json`) |
+| Mã thoát | 0 xong · 1 lỗi đầu vào hoặc lệch model · 2 preflight / cấu hình · 3 còn lỗi embedding (không dọn; sau `--rebuild` thì dataset đang thiếu, chạy lại không cần `--rebuild`) |
+
+Chạy `--limit` hoặc thoát 3 không dọn bản ghi cũ, nên JD đổi nội dung có thể tạm có hai dòng cùng `jd_id` (hash cũ và
+mới) đến lần chạy đủ kế tiếp; nơi đọc chỉ mục nên khử trùng theo `jd_id`.
 
 Không có chế độ mock: vector giả không bao giờ ghi vào `ai_db` dùng chung. Tham số, thứ tự bước và mã thoát đầy đủ:
 [pipeline-cli-match.md](../../specs/017-cv-jd-matching/contracts/pipeline-cli-match.md); lý do chọn văn bản embed và

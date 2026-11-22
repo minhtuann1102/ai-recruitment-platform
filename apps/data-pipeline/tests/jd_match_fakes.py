@@ -1,9 +1,16 @@
 """Ket noi DB gia (trong bo nho) + embedder gia cho test index-jd-match (spec 017). Khong mang, khong DB that.
 
-FakeDb ap dung THAM SO cua SQL (source_type, dataset, hash), khong chi khop chuoi, de test pham vi xoa co y nghia.
-SQL la ra ngoai tap da biet -> AssertionError, tranh test xanh gia khi code doi cau SQL.
+FakeDb ap dung THAM SO cua SQL (source_type, dataset, hash) va chi nhan dung nhung cau SQL da biet: cac cau co pham vi
+(SELECT model, DELETE --rebuild, DELETE don cua writer) phai khop CHINH XAC chuoi viet tay duoi day (da chuan hoa khoang
+trang), khong import tu module. Code doi WHERE (vd AND -> OR) thi fake nem AssertionError thay vi xanh gia.
 """
 from typing import Dict, List, Optional, Sequence
+
+EXPECTED_MODELS_SQL = (
+    "SELECT DISTINCT embedding_model FROM knowledge_chunks WHERE source_type = %s AND metadata->>'dataset' = %s")
+EXPECTED_REBUILD_DELETE_SQL = "DELETE FROM knowledge_chunks WHERE source_type = %s AND metadata->>'dataset' = %s"
+EXPECTED_CLEANUP_DELETE_SQL = (
+    "DELETE FROM knowledge_chunks WHERE source_type = %s AND metadata->>'dataset' = %s AND NOT (content_hash = ANY(%s))")
 
 
 def make_jd(jd_id="demo:1", **overrides):
@@ -83,7 +90,7 @@ class _FakeCursor:
             self._rows = [(1,)]
         elif sql.startswith("SELECT to_regclass"):
             self._rows = [("knowledge_chunks",)]
-        elif sql.startswith("SELECT DISTINCT embedding_model"):
+        elif sql == EXPECTED_MODELS_SQL:
             db.log.append(("models", tuple(params)))
             self._rows = [(m,) for m in sorted({r["model"] for r in db.of(*params).values()})]
         elif sql.startswith("SELECT content_hash, metadata->>'dataset'"):
@@ -101,17 +108,17 @@ class _FakeCursor:
             if chash in db.rows and db.rows[chash]["dataset"] == dataset:
                 db.rows[chash].update(content=content, metadata=meta.obj)
                 self.rowcount = 1
-        elif sql.startswith("DELETE FROM knowledge_chunks") and "NOT (content_hash" in sql:
+        elif sql == EXPECTED_CLEANUP_DELETE_SQL:
             source_type, dataset, keep = params  # don cung dataset sau khi ghi (writer)
             doomed = [h for h in db.of(source_type, dataset) if h not in keep]
             db.log.append(("delete_cleanup", (source_type, dataset)))
             self._drop(doomed)
-        elif sql.startswith("DELETE FROM knowledge_chunks"):
+        elif sql == EXPECTED_REBUILD_DELETE_SQL:
             source_type, dataset = params  # --rebuild: ca dataset
             db.log.append(("delete_dataset", (source_type, dataset)))
             self._drop(list(db.of(source_type, dataset)))
         else:
-            raise AssertionError(f"SQL la, fake DB chua ho tro: {sql}")
+            raise AssertionError(f"SQL la hoac da doi pham vi, fake DB khong nhan: {sql}")
 
     def _drop(self, hashes: List[str]) -> None:
         for h in hashes:

@@ -64,7 +64,7 @@ theo [quickstart.md](quickstart.md) §3.
   - `language` cắt còn 5 ký tự.
 - [x] T005 [P] [US1] Test lệnh trong `apps/data-pipeline/tests/test_jd_match_index_command.py`, dùng kết nối DB giả và
   embedder giả:
-  - hai JD trùng hash → giữ JD đầu, `skipped_duplicate_hash = 1`;
+  - hai JD trùng hash → giữ JD có hạn nộp muộn nhất (bằng nhau thì JD đầu), `skipped_duplicate_hash = 1`;
   - dataset có `embedding_model` khác cấu hình → mã thoát 1, không gọi embed;
   - `--rebuild` xóa dataset `jd-match` (chỉ dòng `source_type = 'job_description'`) rồi ghi lại;
   - lỗi embed → mã 3, không dọn;
