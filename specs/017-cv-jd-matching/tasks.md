@@ -213,14 +213,16 @@ theo [quickstart.md](quickstart.md) §3.
   `EMBEDDING_PRICE_PER_1M` vào `apps/data-pipeline/.env.example`.
 - [ ] T033 [US3] Viết `apps/data-pipeline/pipeline/match_eval_sheet_command.py`, `match_eval_command.py`,
   `match_eval_report.py`. Đăng ký `match-eval-sheet` và `match-eval` vào `jd_match_cli.py`.
-- [ ] T034 [US3] Soạn `apps/data-pipeline/data/seeds/match_eval/pool.json`: as-of cố định và 36 mã JD thật, 12 mỗi
+- [x] T034 [US3] Soạn `apps/data-pipeline/data/seeds/match_eval/pool.json`: as-of cố định và 36 mã JD thật, 12 mỗi
   nhóm `backend` / `devops` / `ai_data`, có mẫu âm khó (Java, Python, Node cùng `backend`; JD lệch level), mọi JD còn
   hạn tại as-of. Worker `sonnet` đề xuất, DE duyệt.
-- [ ] T035 [US3] Soạn `apps/data-pipeline/data/seeds/match_eval/cvs.json`: 24 `CvProfile` tổng hợp (3 nhóm × 4 hồ sơ ×
+- [x] T035 [US3] Soạn `apps/data-pipeline/data/seeds/match_eval/cvs.json`: 24 `CvProfile` tổng hợp (3 nhóm × 4 hồ sơ ×
   2 level), không có tên, liên hệ hay công ty thật. Mỗi CV phải có ≥ 10 JD trong pool qua lọc cứng. Worker `sonnet`
   soạn, DE duyệt.
-- [ ] T036 [US3] Chạy `match-eval-sheet`, gán nhãn theo cách owner chọn (câu hỏi mở), lưu
-  `apps/data-pipeline/data/seeds/match_eval/labels.json` (ghi `labeled_by`, `method`).
+- [ ] T036 [US3] Gán nhãn theo research R9 (chốt 2026-11-22): worker LLM gán mọi cặp qua lọc cứng theo
+  [label-rubric.md](label-rubric.md), DE gán mù ~2 cặp mỗi CV trên trang artifact, tính kappa; nhãn cuối = nhãn LLM.
+  Lưu `apps/data-pipeline/data/seeds/match_eval/labels.json` (ghi `labeled_by`, `method`, kappa). Khi có
+  `match-eval-sheet`, kiểm tập cặp của endpoint trùng tập đã gán.
 - [ ] T037 [US3] Chạy `match-eval --rounds 4` với ai-service ở chế độ thật, commit
   `specs/017-cv-jd-matching/eval-results.md`. Nếu SC-001 không đạt thì phân tích lỗi trên 3 CV. Review, mở PR-3.
 

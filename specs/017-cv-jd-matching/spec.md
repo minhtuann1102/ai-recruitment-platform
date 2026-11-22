@@ -303,8 +303,10 @@ service, không thuộc DE.
 - **Suy level từ số năm** (khi không có level mục tiêu): cùng ngưỡng `level_from_years` của 009 (< 3 năm Junior, < 5 Mid,
   còn lại Senior).
 - **As-of**: mặc định ngày hiện tại; demo GĐ1 và bộ đánh giá dùng một ngày cố định ghi trong dữ liệu đánh giá.
-- **Người gán nhãn**: DE gán; nếu có người thứ hai (FSD hoặc AIE) thì báo thêm độ đồng thuận. Một người gán là hạn chế
-  ghi rõ trong báo cáo (dễ lạc quan vì cùng người viết CV tổng hợp và gán nhãn).
+- **Người gán nhãn** (owner chốt 2026-11-22): một worker LLM gán mọi cặp theo [label-rubric.md](label-rubric.md),
+  không thấy ghi chú của CV và không thấy kết quả hệ thống. DE gán mù độc lập khoảng 20% số cặp (chọn ngẫu nhiên theo
+  CV, khoảng 2 cặp mỗi CV); báo kappa có trọng số giữa hai người gán, nhãn cuối lấy toàn bộ của LLM để giữ một chuẩn chấm, nhãn DE chỉ dùng đo đồng thuận.
+  Hạn chế ghi trong báo cáo: LLM gán phần lớn nhãn, và bộ CV cũng do LLM soạn.
 - **Không dùng LLM sinh văn bản** trong gợi ý; chỉ dùng embedding. CV đầu vào đã qua CV Parser (đã redact thông tin liên
   hệ).
 - **Model**: embedding mặc định theo constitution IV (`text-embedding-3-small`, 1536 chiều).

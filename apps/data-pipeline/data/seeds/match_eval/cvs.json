@@ -1,0 +1,2739 @@
+[
+  {
+    "cv_id": "be-java-jr",
+    "track": "java_backend",
+    "level": "junior",
+    "note": "Lập trình viên backend Java/Spring Boot mới đi làm khoảng 1,7 năm ở công ty outsource, quen REST API và MySQL, chưa thiết kế hệ thống phân tán.",
+    "cv_profile": {
+      "schema_version": 1,
+      "headline": "Lập trình viên Java Backend Junior (Spring Boot, MySQL, REST API)",
+      "skills": [
+        {
+          "name": "Java",
+          "category": "language",
+          "evidence": "work"
+        },
+        {
+          "name": "Spring Boot",
+          "category": "framework",
+          "evidence": "work"
+        },
+        {
+          "name": "JPA",
+          "category": "framework",
+          "evidence": "work"
+        },
+        {
+          "name": "MySQL",
+          "category": "database",
+          "evidence": "work"
+        },
+        {
+          "name": "RESTful API",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "Git",
+          "category": "tool",
+          "evidence": "work"
+        },
+        {
+          "name": "JUnit",
+          "category": "tool",
+          "evidence": "work"
+        },
+        {
+          "name": "PostgreSQL",
+          "category": "database",
+          "evidence": "project"
+        },
+        {
+          "name": "Docker",
+          "category": "devops",
+          "evidence": "project"
+        },
+        {
+          "name": "OOP",
+          "category": "concept",
+          "evidence": "education"
+        }
+      ],
+      "experiences": [
+        {
+          "role": "Thực tập sinh Java",
+          "company_type": "outsource",
+          "start": "2025-02",
+          "end": "2025-07",
+          "tech": ["Java", "Spring Boot", "MySQL", "Git"],
+          "summary": "Xây dựng các endpoint REST CRUD và sửa lỗi cho module theo dõi đơn hàng nội bộ; viết unit test bằng JUnit dưới sự review của mentor."
+        },
+        {
+          "role": "Lập trình viên Java Backend Junior",
+          "company_type": "outsource",
+          "start": "2025-08",
+          "end": null,
+          "tech": ["Java", "Spring Boot", "JPA", "MySQL", "RESTful API", "JUnit", "Git"],
+          "summary": "Phát triển và bảo trì REST API cho ứng dụng web thương mại điện tử B2C: các module danh mục sản phẩm, giỏ hàng và đơn hàng. Viết truy vấn JPA, sửa lỗi trên production, bổ sung unit test và tham gia code review."
+        }
+      ],
+      "projects": [
+        {
+          "id": "proj-1",
+          "name": "API quản lý thư viện",
+          "role": "Lập trình viên backend (nhóm 3 người)",
+          "tech": ["Java", "Spring Boot", "JPA", "PostgreSQL", "Docker"],
+          "summary": "Đồ án tốt nghiệp: REST API cho mượn, trả sách và quản lý tiền phạt, đăng nhập dựa trên token.",
+          "highlights": [
+            "Kiến trúc phân lớp gồm controller, service và repository",
+            "Cấu hình Docker compose cho môi trường phát triển local"
+          ]
+        }
+      ],
+      "education": [
+        {
+          "degree": "Cử nhân Công nghệ thông tin",
+          "year": 2025
+        }
+      ],
+      "total_years_experience": 1.7,
+      "track_relevance": "high",
+      "flags": {
+        "injection_suspected": false,
+        "truncated": false
+      }
+    }
+  },
+  {
+    "cv_id": "be-java-mid",
+    "track": "java_backend",
+    "level": "middle",
+    "note": "Kỹ sư backend Java khoảng 4,1 năm, đã chuyển từ outsource sang công ty sản phẩm, làm microservice, Kafka và cache Redis, có hướng dẫn một bạn junior.",
+    "cv_profile": {
+      "schema_version": 1,
+      "headline": "Kỹ sư Java Backend, 4 năm kinh nghiệm (Spring Boot, Microservices, Kafka, PostgreSQL)",
+      "skills": [
+        {
+          "name": "Java",
+          "category": "language",
+          "evidence": "work"
+        },
+        {
+          "name": "Spring Boot",
+          "category": "framework",
+          "evidence": "work"
+        },
+        {
+          "name": "JPA",
+          "category": "framework",
+          "evidence": "work"
+        },
+        {
+          "name": "PostgreSQL",
+          "category": "database",
+          "evidence": "work"
+        },
+        {
+          "name": "MySQL",
+          "category": "database",
+          "evidence": "work"
+        },
+        {
+          "name": "Redis",
+          "category": "database",
+          "evidence": "work"
+        },
+        {
+          "name": "Kafka",
+          "category": "tool",
+          "evidence": "work"
+        },
+        {
+          "name": "Microservices",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "RESTful API",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "Docker",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Git",
+          "category": "tool",
+          "evidence": "work"
+        },
+        {
+          "name": "JUnit",
+          "category": "tool",
+          "evidence": "work"
+        }
+      ],
+      "experiences": [
+        {
+          "role": "Lập trình viên Java Backend",
+          "company_type": "outsource",
+          "start": "2022-09",
+          "end": "2024-08",
+          "tech": ["Java", "Spring Boot", "JPA", "MySQL", "RESTful API", "JUnit", "Git"],
+          "summary": "Xây dựng REST API và các job chạy theo lịch cho nhiều hệ thống web của khách hàng (cổng thông tin nhân sự, cửa hàng online). Tối ưu các truy vấn SQL chậm và đưa integration test vào dự án."
+        },
+        {
+          "role": "Kỹ sư Backend",
+          "company_type": "product",
+          "start": "2024-09",
+          "end": null,
+          "tech": [
+            "Java",
+            "Spring Boot",
+            "PostgreSQL",
+            "Redis",
+            "Kafka",
+            "Docker",
+            "Microservices"
+          ],
+          "summary": "Phụ trách các service đơn hàng và trạng thái giao hàng của một nền tảng microservice: thiết kế REST contract, publish event lên Kafka, bổ sung cache Redis giúp giảm p95 latency của các API đọc khoảng 40%. Review pull request và mentor một junior."
+        }
+      ],
+      "projects": [
+        {
+          "id": "proj-1",
+          "name": "Pipeline sự kiện đơn hàng",
+          "role": "Tech lead (nhóm 3 kỹ sư)",
+          "tech": ["Java", "Spring Boot", "Kafka", "PostgreSQL", "Docker"],
+          "summary": "Lan truyền trạng thái đơn hàng giữa các service theo hướng event-driven, với consumer idempotent và xử lý dead-letter.",
+          "highlights": [
+            "Không phát sinh tác dụng phụ trùng lặp nào trong load test",
+            "Contract test giữa các nhóm producer và consumer"
+          ]
+        }
+      ],
+      "education": [
+        {
+          "degree": "Cử nhân Công nghệ thông tin",
+          "year": 2022
+        }
+      ],
+      "total_years_experience": 4.1,
+      "track_relevance": "high",
+      "flags": {
+        "injection_suspected": false,
+        "truncated": false
+      }
+    }
+  },
+  {
+    "cv_id": "be-python-jr",
+    "track": "python_backend",
+    "level": "junior",
+    "note": "Lập trình viên backend Python (FastAPI, Django) khoảng 1,6 năm ở startup, làm API cho ứng dụng học trực tuyến, biết SQL và Redis ở mức cơ bản.",
+    "cv_profile": {
+      "schema_version": 1,
+      "headline": "Lập trình viên Python Backend Junior (FastAPI, Django, PostgreSQL)",
+      "skills": [
+        {
+          "name": "Python",
+          "category": "language",
+          "evidence": "work"
+        },
+        {
+          "name": "FastAPI",
+          "category": "framework",
+          "evidence": "work"
+        },
+        {
+          "name": "Django",
+          "category": "framework",
+          "evidence": "project"
+        },
+        {
+          "name": "PostgreSQL",
+          "category": "database",
+          "evidence": "work"
+        },
+        {
+          "name": "Redis",
+          "category": "database",
+          "evidence": "project"
+        },
+        {
+          "name": "RESTful API",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "SQL",
+          "category": "language",
+          "evidence": "work"
+        },
+        {
+          "name": "Docker",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Git",
+          "category": "tool",
+          "evidence": "work"
+        },
+        {
+          "name": "pytest",
+          "category": "tool",
+          "evidence": "work"
+        }
+      ],
+      "experiences": [
+        {
+          "role": "Thực tập sinh Python",
+          "company_type": "startup",
+          "start": "2025-03",
+          "end": "2025-08",
+          "tech": ["Python", "FastAPI", "PostgreSQL", "Git"],
+          "summary": "Viết các endpoint FastAPI nhỏ và script import dữ liệu cho một sản phẩm học tập; bổ sung test pytest cho code mới."
+        },
+        {
+          "role": "Lập trình viên Python Junior",
+          "company_type": "startup",
+          "start": "2025-09",
+          "end": null,
+          "tech": ["Python", "FastAPI", "PostgreSQL", "Redis", "Docker", "pytest"],
+          "summary": "Bảo trì các REST service cho ứng dụng học tập trên di động: các endpoint xác thực, tiến độ khóa học và thông báo. Viết SQL migration, bổ sung cache Redis và test tự động, deploy bằng Docker."
+        }
+      ],
+      "projects": [
+        {
+          "id": "proj-1",
+          "name": "API theo dõi chi tiêu",
+          "role": "Thực hiện cá nhân",
+          "tech": ["Python", "Django", "PostgreSQL", "Docker"],
+          "summary": "Dự án cá nhân: API chi tiêu nhiều người dùng với danh mục, tổng kết theo tháng và xuất CSV.",
+          "highlights": ["Django REST view có phân trang và lọc"]
+        },
+        {
+          "id": "proj-2",
+          "name": "Dịch vụ rút gọn URL",
+          "role": "Thực hiện cá nhân",
+          "tech": ["Python", "FastAPI", "Redis", "Docker"],
+          "summary": "Dịch vụ nhỏ có giới hạn tốc độ (rate limiting) và thống kê lượt click lưu trong Redis.",
+          "highlights": []
+        }
+      ],
+      "education": [
+        {
+          "degree": "Cử nhân Khoa học máy tính",
+          "year": 2025
+        }
+      ],
+      "total_years_experience": 1.6,
+      "track_relevance": "high",
+      "flags": {
+        "injection_suspected": false,
+        "truncated": false
+      }
+    }
+  },
+  {
+    "cv_id": "be-python-mid",
+    "track": "python_backend",
+    "level": "middle",
+    "note": "Kỹ sư backend Python khoảng 4,0 năm, quen FastAPI/Django, hàng đợi RabbitMQ và triển khai trên AWS, từng nhận trách nhiệm chính cho một dịch vụ ở startup.",
+    "cv_profile": {
+      "schema_version": 1,
+      "headline": "Kỹ sư Python Backend, 4 năm kinh nghiệm (FastAPI, Django, PostgreSQL, RabbitMQ)",
+      "skills": [
+        {
+          "name": "Python",
+          "category": "language",
+          "evidence": "work"
+        },
+        {
+          "name": "FastAPI",
+          "category": "framework",
+          "evidence": "work"
+        },
+        {
+          "name": "Django",
+          "category": "framework",
+          "evidence": "work"
+        },
+        {
+          "name": "PostgreSQL",
+          "category": "database",
+          "evidence": "work"
+        },
+        {
+          "name": "Redis",
+          "category": "database",
+          "evidence": "work"
+        },
+        {
+          "name": "RabbitMQ",
+          "category": "tool",
+          "evidence": "work"
+        },
+        {
+          "name": "Microservices",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "RESTful API",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "Docker",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "AWS",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Git",
+          "category": "tool",
+          "evidence": "work"
+        },
+        {
+          "name": "pytest",
+          "category": "tool",
+          "evidence": "work"
+        }
+      ],
+      "experiences": [
+        {
+          "role": "Lập trình viên Python",
+          "company_type": "outsource",
+          "start": "2022-10",
+          "end": "2024-06",
+          "tech": ["Python", "Django", "Flask", "PostgreSQL", "Git"],
+          "summary": "Xây dựng và bảo trì backend Django và Flask cho các ứng dụng web của khách hàng (đặt chỗ, quản lý nội dung). Viết báo cáo SQL và các job chạy nền."
+        },
+        {
+          "role": "Kỹ sư Backend",
+          "company_type": "startup",
+          "start": "2024-07",
+          "end": null,
+          "tech": [
+            "Python",
+            "FastAPI",
+            "PostgreSQL",
+            "Redis",
+            "RabbitMQ",
+            "Docker",
+            "AWS"
+          ],
+          "summary": "Phụ trách các service thông báo và lập lịch của một nền tảng học tập: service FastAPI, worker RabbitMQ, cache Redis, triển khai trên AWS. Đưa contract test vào dự án và giảm một nửa tỷ lệ job thất bại."
+        }
+      ],
+      "projects": [
+        {
+          "id": "proj-1",
+          "name": "Dịch vụ thông báo bất đồng bộ",
+          "role": "Lập trình viên lead",
+          "tech": ["Python", "FastAPI", "RabbitMQ", "Redis", "Docker"],
+          "summary": "Dịch vụ fan-out gửi thông báo email và push, có cơ chế thử lại và giới hạn tốc độ theo từng người dùng.",
+          "highlights": [
+            "Xử lý khoảng 2 triệu message mỗi ngày",
+            "Chính sách retry và dead-letter được ghi thành tài liệu cho cả nhóm"
+          ]
+        }
+      ],
+      "education": [
+        {
+          "degree": "Cử nhân Khoa học máy tính",
+          "year": 2022
+        }
+      ],
+      "total_years_experience": 4.0,
+      "track_relevance": "high",
+      "flags": {
+        "injection_suspected": false,
+        "truncated": false
+      }
+    }
+  },
+  {
+    "cv_id": "be-node-jr",
+    "track": "nodejs_backend",
+    "level": "junior",
+    "note": "Lập trình viên backend Node.js/TypeScript khoảng 1,7 năm ở startup, làm REST API với Express/NestJS và MongoDB cho ứng dụng đặt món.",
+    "cv_profile": {
+      "schema_version": 1,
+      "headline": "Lập trình viên Node.js Backend Junior (Express, NestJS, MongoDB)",
+      "skills": [
+        {
+          "name": "JavaScript",
+          "category": "language",
+          "evidence": "work"
+        },
+        {
+          "name": "TypeScript",
+          "category": "language",
+          "evidence": "work"
+        },
+        {
+          "name": "Node.js",
+          "category": "framework",
+          "evidence": "work"
+        },
+        {
+          "name": "Express.js",
+          "category": "framework",
+          "evidence": "work"
+        },
+        {
+          "name": "NestJS",
+          "category": "framework",
+          "evidence": "project"
+        },
+        {
+          "name": "MongoDB",
+          "category": "database",
+          "evidence": "work"
+        },
+        {
+          "name": "PostgreSQL",
+          "category": "database",
+          "evidence": "project"
+        },
+        {
+          "name": "RESTful API",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "Git",
+          "category": "tool",
+          "evidence": "work"
+        },
+        {
+          "name": "Docker",
+          "category": "devops",
+          "evidence": "project"
+        },
+        {
+          "name": "Jest",
+          "category": "tool",
+          "evidence": "work"
+        }
+      ],
+      "experiences": [
+        {
+          "role": "Thực tập sinh Node.js",
+          "company_type": "startup",
+          "start": "2025-02",
+          "end": "2025-07",
+          "tech": ["Node.js", "Express.js", "MongoDB", "JavaScript"],
+          "summary": "Viết các endpoint Express nhỏ và truy vấn MongoDB cho một công cụ quản trị nội bộ; sửa các lỗi do tester báo."
+        },
+        {
+          "role": "Lập trình viên Node.js Junior",
+          "company_type": "startup",
+          "start": "2025-08",
+          "end": null,
+          "tech": ["Node.js", "TypeScript", "NestJS", "MongoDB", "RESTful API", "Jest"],
+          "summary": "Xây dựng REST API cho ứng dụng di động đặt đồ ăn: thực đơn, đơn hàng và khuyến mãi. Tích hợp payment sandbox, validate input, viết test Jest và xử lý các báo cáo lỗi trên production."
+        }
+      ],
+      "projects": [
+        {
+          "id": "proj-1",
+          "name": "API bảng công việc",
+          "role": "Thực hiện cá nhân",
+          "tech": ["Node.js", "Express.js", "MongoDB", "TypeScript"],
+          "summary": "API kiểu Kanban với board, thẻ (card) và phân quyền theo vai trò, xác thực bằng token.",
+          "highlights": ["Validate input và xử lý lỗi tập trung"]
+        },
+        {
+          "id": "proj-2",
+          "name": "Backend chat realtime",
+          "role": "Lập trình viên backend (nhóm 2 người)",
+          "tech": ["Node.js", "Express.js", "MongoDB", "Docker"],
+          "summary": "Phòng chat WebSocket với lịch sử tin nhắn lưu trong MongoDB.",
+          "highlights": []
+        }
+      ],
+      "education": [
+        {
+          "degree": "Cử nhân Kỹ thuật phần mềm",
+          "year": 2025
+        }
+      ],
+      "total_years_experience": 1.7,
+      "track_relevance": "high",
+      "flags": {
+        "injection_suspected": false,
+        "truncated": false
+      }
+    }
+  },
+  {
+    "cv_id": "be-node-mid",
+    "track": "nodejs_backend",
+    "level": "middle",
+    "note": "Kỹ sư backend Node.js/TypeScript khoảng 3,9 năm, dùng NestJS với PostgreSQL và Redis ở công ty sản phẩm, từng viết GraphQL API và hướng dẫn thành viên mới.",
+    "cv_profile": {
+      "schema_version": 1,
+      "headline": "Kỹ sư Node.js Backend, 4 năm kinh nghiệm (TypeScript, NestJS, PostgreSQL, Redis)",
+      "skills": [
+        {
+          "name": "TypeScript",
+          "category": "language",
+          "evidence": "work"
+        },
+        {
+          "name": "JavaScript",
+          "category": "language",
+          "evidence": "work"
+        },
+        {
+          "name": "Node.js",
+          "category": "framework",
+          "evidence": "work"
+        },
+        {
+          "name": "NestJS",
+          "category": "framework",
+          "evidence": "work"
+        },
+        {
+          "name": "Express.js",
+          "category": "framework",
+          "evidence": "work"
+        },
+        {
+          "name": "PostgreSQL",
+          "category": "database",
+          "evidence": "work"
+        },
+        {
+          "name": "MongoDB",
+          "category": "database",
+          "evidence": "work"
+        },
+        {
+          "name": "Redis",
+          "category": "database",
+          "evidence": "work"
+        },
+        {
+          "name": "RESTful API",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "GraphQL",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "Docker",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Git",
+          "category": "tool",
+          "evidence": "work"
+        }
+      ],
+      "experiences": [
+        {
+          "role": "Lập trình viên Node.js",
+          "company_type": "outsource",
+          "start": "2022-11",
+          "end": "2024-07",
+          "tech": ["Node.js", "Express.js", "MongoDB", "JavaScript", "Jest"],
+          "summary": "Xây dựng các API Express cho website thương mại điện tử và đặt chỗ của khách hàng; viết test Jest và tối ưu index MongoDB."
+        },
+        {
+          "role": "Kỹ sư Backend",
+          "company_type": "product",
+          "start": "2024-08",
+          "end": null,
+          "tech": [
+            "Node.js",
+            "TypeScript",
+            "NestJS",
+            "PostgreSQL",
+            "Redis",
+            "Docker",
+            "GraphQL",
+            "Microservices"
+          ],
+          "summary": "Phụ trách các service danh mục sản phẩm và tồn kho của một sàn giao dịch (marketplace): module NestJS, thiết kế schema PostgreSQL, cache Redis, GraphQL gateway cho nhóm mobile. Onboard thành viên mới và review pull request."
+        }
+      ],
+      "projects": [
+        {
+          "id": "proj-1",
+          "name": "Dịch vụ đồng bộ tồn kho",
+          "role": "Lập trình viên lead",
+          "tech": ["Node.js", "NestJS", "PostgreSQL", "Redis", "Docker"],
+          "summary": "Dịch vụ giữ số lượng tồn kho nhất quán giữa các kênh bán hàng bằng cập nhật qua hàng đợi (queue).",
+          "highlights": [
+            "Handler cập nhật idempotent",
+            "Đã load test đến 500 request mỗi giây"
+          ]
+        }
+      ],
+      "education": [
+        {
+          "degree": "Cử nhân Kỹ thuật phần mềm",
+          "year": 2022
+        }
+      ],
+      "total_years_experience": 3.9,
+      "track_relevance": "high",
+      "flags": {
+        "injection_suspected": false,
+        "truncated": false
+      }
+    }
+  },
+  {
+    "cv_id": "be-dotnet-jr",
+    "track": "java_backend",
+    "level": "junior",
+    "note": "Lập trình viên .NET (C#, ASP.NET Core) khoảng 1,6 năm ở công ty outsource, làm Web API và stored procedure SQL Server cho hệ thống bán hàng và kho; gán track java_backend vì là track gần nhất (cùng hướng OOP, kiểu tĩnh, kiến trúc phân lớp như Spring).",
+    "cv_profile": {
+      "schema_version": 1,
+      "headline": "Lập trình viên .NET Backend (C#, ASP.NET Core, SQL Server)",
+      "skills": [
+        {
+          "name": "C#",
+          "category": "language",
+          "evidence": "work"
+        },
+        {
+          "name": ".NET",
+          "category": "framework",
+          "evidence": "work"
+        },
+        {
+          "name": "SQL Server",
+          "category": "database",
+          "evidence": "work"
+        },
+        {
+          "name": "SQL",
+          "category": "language",
+          "evidence": "work"
+        },
+        {
+          "name": "RESTful API",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "Git",
+          "category": "tool",
+          "evidence": "work"
+        },
+        {
+          "name": "OOP",
+          "category": "concept",
+          "evidence": "education"
+        },
+        {
+          "name": "JavaScript",
+          "category": "language",
+          "evidence": "listed"
+        },
+        {
+          "name": "Docker",
+          "category": "devops",
+          "evidence": "project"
+        }
+      ],
+      "experiences": [
+        {
+          "role": "Thực tập sinh .NET",
+          "company_type": "outsource",
+          "start": "2025-03",
+          "end": "2025-08",
+          "tech": ["C#", ".NET", "SQL Server"],
+          "summary": "Hỗ trợ xây dựng màn hình quản trị và API CRUD cho hệ thống quản lý nhân sự nội bộ; viết truy vấn SQL Server và sửa lỗi theo yêu cầu."
+        },
+        {
+          "role": "Lập trình viên .NET",
+          "company_type": "outsource",
+          "start": "2025-09",
+          "end": null,
+          "tech": ["C#", ".NET", "SQL Server", "RESTful API", "Git"],
+          "summary": "Phát triển và bảo trì Web API bằng ASP.NET Core cho hệ thống quản lý bán hàng và kho: thiết kế bảng, viết stored procedure, xử lý lỗi sau khi go-live và viết tài liệu API."
+        }
+      ],
+      "projects": [
+        {
+          "id": "proj-1",
+          "name": "Hệ thống quản lý phòng khám",
+          "role": "Thành viên nhóm 4 người (đồ án tốt nghiệp)",
+          "tech": ["C#", ".NET", "SQL Server"],
+          "summary": "Quản lý lịch hẹn, hồ sơ bệnh nhân và hóa đơn với phân quyền theo vai trò.",
+          "highlights": ["Phân lớp Controller - Service - Repository"]
+        }
+      ],
+      "education": [
+        {
+          "degree": "Cử nhân Công nghệ thông tin",
+          "year": 2025
+        }
+      ],
+      "total_years_experience": 1.6,
+      "track_relevance": "high",
+      "flags": {
+        "injection_suspected": false,
+        "truncated": false
+      }
+    }
+  },
+  {
+    "cv_id": "be-dotnet-mid",
+    "track": "java_backend",
+    "level": "middle",
+    "note": "Lập trình viên .NET backend khoảng 4,2 năm, quen ASP.NET Core, microservice và Azure, hiện ở công ty sản phẩm và phụ trách một module nghiệp vụ; gán track java_backend vì là track gần nhất (cùng hướng OOP, kiểu tĩnh, kiến trúc phân lớp như Spring).",
+    "cv_profile": {
+      "schema_version": 1,
+      "headline": "Lập trình viên .NET Backend, 4 năm kinh nghiệm (ASP.NET Core, Microservices, SQL Server, Azure)",
+      "skills": [
+        {
+          "name": "C#",
+          "category": "language",
+          "evidence": "work"
+        },
+        {
+          "name": ".NET",
+          "category": "framework",
+          "evidence": "work"
+        },
+        {
+          "name": "SQL Server",
+          "category": "database",
+          "evidence": "work"
+        },
+        {
+          "name": "SQL",
+          "category": "language",
+          "evidence": "work"
+        },
+        {
+          "name": "RESTful API",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "Microservices",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "Docker",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Azure",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "RabbitMQ",
+          "category": "tool",
+          "evidence": "work"
+        },
+        {
+          "name": "Redis",
+          "category": "database",
+          "evidence": "work"
+        },
+        {
+          "name": "Git",
+          "category": "tool",
+          "evidence": "work"
+        },
+        {
+          "name": "OOP",
+          "category": "concept",
+          "evidence": "work"
+        }
+      ],
+      "experiences": [
+        {
+          "role": "Lập trình viên .NET",
+          "company_type": "outsource",
+          "start": "2022-08",
+          "end": "2024-07",
+          "tech": ["C#", ".NET", "SQL Server", "RESTful API", "Git"],
+          "summary": "Phát triển Web API và dịch vụ nền cho các hệ thống bán hàng, kho và báo cáo của khách hàng; tối ưu truy vấn và viết unit test."
+        },
+        {
+          "role": "Lập trình viên .NET Backend",
+          "company_type": "product",
+          "start": "2024-08",
+          "end": null,
+          "tech": [
+            "C#",
+            ".NET",
+            "SQL Server",
+            "Microservices",
+            "RabbitMQ",
+            "Redis",
+            "Docker",
+            "Azure"
+          ],
+          "summary": "Phụ trách module đơn hàng và giao hàng trong kiến trúc microservice: thiết kế API, xử lý sự kiện qua RabbitMQ, cache Redis, triển khai container lên Azure; review code cho thành viên mới."
+        }
+      ],
+      "projects": [
+        {
+          "id": "proj-1",
+          "name": "Dịch vụ đồng bộ tồn kho",
+          "role": "Phụ trách chính",
+          "tech": ["C#", ".NET", "SQL Server", "RabbitMQ", "Docker"],
+          "summary": "Dịch vụ đồng bộ số lượng tồn kho giữa các kênh bán với cơ chế thử lại và đối soát.",
+          "highlights": [
+            "Giảm sai lệch tồn kho trong báo cáo cuối ngày",
+            "Có kiểm thử tích hợp cho luồng thử lại"
+          ]
+        }
+      ],
+      "education": [
+        {
+          "degree": "Cử nhân Công nghệ thông tin",
+          "year": 2022
+        }
+      ],
+      "total_years_experience": 4.2,
+      "track_relevance": "high",
+      "flags": {
+        "injection_suspected": false,
+        "truncated": false
+      }
+    }
+  },
+  {
+    "cv_id": "do-cloud-jr",
+    "track": "devops_engineer",
+    "level": "junior",
+    "note": "Kỹ sư DevOps mới đi làm khoảng 1,6 năm, thiên về hạ tầng đám mây AWS, Terraform và Kubernetes cho các dịch vụ web ở startup.",
+    "cv_profile": {
+      "schema_version": 1,
+      "headline": "Kỹ sư DevOps Junior (AWS, Docker, Kubernetes, Terraform)",
+      "skills": [
+        {
+          "name": "AWS",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Terraform",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Docker",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Kubernetes",
+          "category": "devops",
+          "evidence": "project"
+        },
+        {
+          "name": "Linux",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Bash",
+          "category": "language",
+          "evidence": "work"
+        },
+        {
+          "name": "Git",
+          "category": "tool",
+          "evidence": "work"
+        },
+        {
+          "name": "GitHub Actions",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "CI/CD",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "Python",
+          "category": "language",
+          "evidence": "listed"
+        }
+      ],
+      "experiences": [
+        {
+          "role": "Thực tập sinh DevOps",
+          "company_type": "startup",
+          "start": "2025-03",
+          "end": "2025-08",
+          "tech": ["AWS", "Linux", "Docker", "Bash", "Git"],
+          "summary": "Bảo trì các instance EC2, viết script Bash để sao lưu và xoay vòng log (log rotation), container hóa hai công cụ nội bộ bằng Docker."
+        },
+        {
+          "role": "Kỹ sư DevOps Junior",
+          "company_type": "startup",
+          "start": "2025-09",
+          "end": null,
+          "tech": [
+            "AWS",
+            "Terraform",
+            "Docker",
+            "Kubernetes",
+            "GitHub Actions",
+            "Linux",
+            "Bash"
+          ],
+          "summary": "Dựng hạ tầng AWS (VPC, EC2, RDS, S3) bằng các module Terraform, deploy service lên cluster Kubernetes managed và duy trì các pipeline GitHub Actions build và deploy chạy ổn định trên cả môi trường staging và production."
+        }
+      ],
+      "projects": [
+        {
+          "id": "proj-1",
+          "name": "Ứng dụng web ba tầng trên AWS",
+          "role": "Thực hiện cá nhân",
+          "tech": ["AWS", "Terraform", "Docker", "Linux"],
+          "summary": "Mô hình tham chiếu gồm load balancer, private subnet và cơ sở dữ liệu managed, được mô tả toàn bộ bằng Terraform.",
+          "highlights": ["Các module tái sử dụng cho network và compute"]
+        },
+        {
+          "id": "proj-2",
+          "name": "Lab Kubernetes tại nhà",
+          "role": "Thực hiện cá nhân",
+          "tech": ["Kubernetes", "Docker", "Linux", "Bash"],
+          "summary": "Cluster ba node dùng để thực hành deploy, ingress và rolling update.",
+          "highlights": []
+        }
+      ],
+      "education": [
+        {
+          "degree": "Cử nhân Công nghệ thông tin",
+          "year": 2025
+        }
+      ],
+      "total_years_experience": 1.6,
+      "track_relevance": "high",
+      "flags": {
+        "injection_suspected": false,
+        "truncated": false
+      }
+    }
+  },
+  {
+    "cv_id": "do-cloud-mid",
+    "track": "devops_engineer",
+    "level": "middle",
+    "note": "Kỹ sư DevOps khoảng 4,1 năm, chuyên hạ tầng đám mây (AWS, một ít Google Cloud), Terraform và Kubernetes, đã chuyển từ outsource sang công ty sản phẩm.",
+    "cv_profile": {
+      "schema_version": 1,
+      "headline": "Kỹ sư DevOps, 4 năm kinh nghiệm (AWS, Kubernetes, Terraform, Docker)",
+      "skills": [
+        {
+          "name": "AWS",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Google Cloud",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Terraform",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Kubernetes",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Docker",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Linux",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Bash",
+          "category": "language",
+          "evidence": "work"
+        },
+        {
+          "name": "Python",
+          "category": "language",
+          "evidence": "work"
+        },
+        {
+          "name": "Git",
+          "category": "tool",
+          "evidence": "work"
+        },
+        {
+          "name": "GitHub Actions",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "CI/CD",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "Networking",
+          "category": "concept",
+          "evidence": "work"
+        }
+      ],
+      "experiences": [
+        {
+          "role": "Kỹ sư DevOps",
+          "company_type": "outsource",
+          "start": "2022-09",
+          "end": "2024-06",
+          "tech": ["AWS", "Linux", "Docker", "Bash", "Terraform", "Git"],
+          "summary": "Dựng và vận hành các môi trường AWS cho nhiều dự án của khách hàng, viết Terraform để tạo các stack lặp lại được và container hóa các ứng dụng legacy."
+        },
+        {
+          "role": "Kỹ sư DevOps",
+          "company_type": "product",
+          "start": "2024-07",
+          "end": null,
+          "tech": [
+            "AWS",
+            "Terraform",
+            "Kubernetes",
+            "Docker",
+            "GitHub Actions",
+            "Python",
+            "Google Cloud"
+          ],
+          "summary": "Vận hành nền tảng Kubernetes và các tài khoản cloud của một nhóm sản phẩm: nâng cấp cluster, rà soát chi phí (giảm khoảng 25% hóa đơn hàng tháng), thư viện module Terraform, và di chuyển một workload sang Google Cloud."
+        }
+      ],
+      "projects": [
+        {
+          "id": "proj-1",
+          "name": "Mẫu cluster đa môi trường",
+          "role": "Phụ trách nền tảng",
+          "tech": ["Kubernetes", "Terraform", "AWS", "Docker"],
+          "summary": "Template tạo các cluster dev, staging và production với network và quy tắc truy cập nhất quán.",
+          "highlights": [
+            "Môi trường mới sẵn sàng trong chưa đầy một giờ",
+            "Runbook nâng cấp được ghi thành tài liệu"
+          ]
+        }
+      ],
+      "education": [
+        {
+          "degree": "Cử nhân Công nghệ thông tin",
+          "year": 2022
+        }
+      ],
+      "total_years_experience": 4.1,
+      "track_relevance": "high",
+      "flags": {
+        "injection_suspected": false,
+        "truncated": false
+      }
+    }
+  },
+  {
+    "cv_id": "do-cicd-jr",
+    "track": "devops_engineer",
+    "level": "junior",
+    "note": "Kỹ sư DevOps mới đi làm khoảng 1,6 năm, tập trung vào pipeline CI/CD với Jenkins, GitLab CI và tự động hóa triển khai bằng Ansible ở công ty outsource.",
+    "cv_profile": {
+      "schema_version": 1,
+      "headline": "Kỹ sư DevOps Junior - CI/CD và tự động hóa release (Jenkins, GitLab CI, Docker)",
+      "skills": [
+        {
+          "name": "Jenkins",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "GitLab CI",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "GitHub Actions",
+          "category": "devops",
+          "evidence": "project"
+        },
+        {
+          "name": "CI/CD",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "Docker",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Git",
+          "category": "tool",
+          "evidence": "work"
+        },
+        {
+          "name": "Linux",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Bash",
+          "category": "language",
+          "evidence": "work"
+        },
+        {
+          "name": "Ansible",
+          "category": "devops",
+          "evidence": "project"
+        },
+        {
+          "name": "Nginx",
+          "category": "devops",
+          "evidence": "listed"
+        }
+      ],
+      "experiences": [
+        {
+          "role": "Thực tập sinh DevOps",
+          "company_type": "outsource",
+          "start": "2025-03",
+          "end": "2025-08",
+          "tech": ["Git", "Linux", "Jenkins", "Bash"],
+          "summary": "Hỗ trợ bảo trì các job Jenkins, sửa các bản build lỗi và viết shell script để đóng gói release artifact."
+        },
+        {
+          "role": "Kỹ sư DevOps Junior",
+          "company_type": "outsource",
+          "start": "2025-09",
+          "end": null,
+          "tech": ["Jenkins", "GitLab CI", "Docker", "Ansible", "Bash", "Linux", "Git"],
+          "summary": "Xây dựng và bảo trì các pipeline CI/CD (build, test, scan, deploy) cho nhiều dự án web, quản lý Git branching và release tag, viết Ansible playbook để deploy lên máy ảo và hỗ trợ lập trình viên khi pipeline bị lỗi."
+        }
+      ],
+      "projects": [
+        {
+          "id": "proj-1",
+          "name": "Thư viện pipeline template",
+          "role": "Thực hiện cá nhân",
+          "tech": ["GitLab CI", "Docker", "Bash"],
+          "summary": "Các pipeline template tái sử dụng cho build, unit test và publish image, được các dự án của nhóm sử dụng.",
+          "highlights": ["Giảm số file pipeline bị copy-paste giữa các repository"]
+        },
+        {
+          "id": "proj-2",
+          "name": "Demo deploy blue-green",
+          "role": "Thực hiện cá nhân",
+          "tech": ["Docker", "Nginx", "Bash", "Jenkins"],
+          "summary": "Chuyển traffic giữa hai phiên bản container với health check và rollback nhanh.",
+          "highlights": []
+        }
+      ],
+      "education": [
+        {
+          "degree": "Cử nhân Khoa học máy tính",
+          "year": 2025
+        }
+      ],
+      "total_years_experience": 1.6,
+      "track_relevance": "high",
+      "flags": {
+        "injection_suspected": false,
+        "truncated": false
+      }
+    }
+  },
+  {
+    "cv_id": "do-cicd-mid",
+    "track": "devops_engineer",
+    "level": "middle",
+    "note": "Kỹ sư DevOps khoảng 4,2 năm, chuyên chuẩn hóa pipeline CI/CD và tự động hóa phát hành cho nhiều dịch vụ, dùng Jenkins, GitLab CI, Ansible và Kubernetes.",
+    "cv_profile": {
+      "schema_version": 1,
+      "headline": "Kỹ sư DevOps, 4 năm kinh nghiệm (CI/CD, Jenkins, GitLab CI, Ansible, Docker, Kubernetes)",
+      "skills": [
+        {
+          "name": "Jenkins",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "GitLab CI",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "GitHub Actions",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "CI/CD",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "Docker",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Kubernetes",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Ansible",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Git",
+          "category": "tool",
+          "evidence": "work"
+        },
+        {
+          "name": "Linux",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Bash",
+          "category": "language",
+          "evidence": "work"
+        },
+        {
+          "name": "Python",
+          "category": "language",
+          "evidence": "work"
+        },
+        {
+          "name": "Nginx",
+          "category": "devops",
+          "evidence": "work"
+        }
+      ],
+      "experiences": [
+        {
+          "role": "Kỹ sư build và release",
+          "company_type": "outsource",
+          "start": "2022-08",
+          "end": "2024-05",
+          "tech": ["Jenkins", "GitLab CI", "Docker", "Bash", "Linux", "Git"],
+          "summary": "Phụ trách build và release cho các dự án của khách hàng: pipeline Jenkins, Docker image, đánh version và checklist release."
+        },
+        {
+          "role": "Kỹ sư DevOps",
+          "company_type": "product",
+          "start": "2024-06",
+          "end": null,
+          "tech": ["GitLab CI", "Jenkins", "Docker", "Kubernetes", "Ansible", "Python"],
+          "summary": "Chuẩn hóa pipeline cho khoảng 25 service bằng các template dùng chung, bổ sung quality gate, tự động hóa rollback và release note, và giảm thời gian pipeline trung bình từ 25 xuống 12 phút."
+        }
+      ],
+      "projects": [
+        {
+          "id": "proj-1",
+          "name": "Pipeline template dùng chung",
+          "role": "Phụ trách chính",
+          "tech": ["GitLab CI", "Docker", "Kubernetes", "Ansible"],
+          "summary": "Các template tập trung cho build, test, scan và deploy, được hầu hết các service trong nhóm áp dụng.",
+          "highlights": [
+            "Onboard tự phục vụ chỉ bằng một merge request",
+            "Tự động rollback khi health check thất bại"
+          ]
+        }
+      ],
+      "education": [
+        {
+          "degree": "Cử nhân Khoa học máy tính",
+          "year": 2022
+        }
+      ],
+      "total_years_experience": 4.2,
+      "track_relevance": "high",
+      "flags": {
+        "injection_suspected": false,
+        "truncated": false
+      }
+    }
+  },
+  {
+    "cv_id": "do-sre-jr",
+    "track": "devops_engineer",
+    "level": "junior",
+    "note": "Kỹ sư vận hành/SRE mới đi làm khoảng 1,6 năm, làm giám sát và cảnh báo (Prometheus, Grafana), trực sự cố phụ và viết script Python tự động hóa.",
+    "cv_profile": {
+      "schema_version": 1,
+      "headline": "Kỹ sư Site Reliability / Vận hành Junior (Linux, Prometheus, Grafana, Python)",
+      "skills": [
+        {
+          "name": "Linux",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Prometheus",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Grafana",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Bash",
+          "category": "language",
+          "evidence": "work"
+        },
+        {
+          "name": "Python",
+          "category": "language",
+          "evidence": "work"
+        },
+        {
+          "name": "Docker",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "AWS",
+          "category": "devops",
+          "evidence": "project"
+        },
+        {
+          "name": "Git",
+          "category": "tool",
+          "evidence": "work"
+        },
+        {
+          "name": "Elasticsearch",
+          "category": "database",
+          "evidence": "project"
+        },
+        {
+          "name": "SRE",
+          "category": "concept",
+          "evidence": "listed"
+        }
+      ],
+      "experiences": [
+        {
+          "role": "Thực tập sinh vận hành",
+          "company_type": "product",
+          "start": "2025-03",
+          "end": "2025-08",
+          "tech": ["Linux", "Bash", "Grafana"],
+          "summary": "Theo dõi dashboard, phân loại cảnh báo (triage alert) và viết shell script để khởi động lại các service bị lỗi."
+        },
+        {
+          "role": "Kỹ sư Site Reliability Junior",
+          "company_type": "product",
+          "start": "2025-09",
+          "end": null,
+          "tech": ["Linux", "Prometheus", "Grafana", "Python", "Docker", "AWS"],
+          "summary": "Vận hành hệ thống giám sát và cảnh báo cho các dịch vụ web production: alert rule, dashboard Grafana, on-call phụ (secondary), timeline sự cố và ghi chú sau sự cố. Tự động hóa các tác vụ lặp lại bằng script Python."
+        }
+      ],
+      "projects": [
+        {
+          "id": "proj-1",
+          "name": "Hệ thống giám sát tại nhà",
+          "role": "Thực hiện cá nhân",
+          "tech": ["Prometheus", "Grafana", "Docker", "Linux"],
+          "summary": "Metric, dashboard và định tuyến cảnh báo cho một vài máy ảo và container.",
+          "highlights": ["Tinh chỉnh ngưỡng cảnh báo để giảm cảnh báo nhiễu"]
+        },
+        {
+          "id": "proj-2",
+          "name": "Tìm kiếm log tập trung",
+          "role": "Thực hiện cá nhân",
+          "tech": ["Elasticsearch", "Docker", "Linux"],
+          "summary": "Thu thập và tìm kiếm log ứng dụng từ nhiều container.",
+          "highlights": []
+        }
+      ],
+      "education": [
+        {
+          "degree": "Cử nhân Công nghệ thông tin",
+          "year": 2025
+        }
+      ],
+      "total_years_experience": 1.6,
+      "track_relevance": "high",
+      "flags": {
+        "injection_suspected": false,
+        "truncated": false
+      }
+    }
+  },
+  {
+    "cv_id": "do-sre-mid",
+    "track": "devops_engineer",
+    "level": "middle",
+    "note": "Kỹ sư SRE khoảng 4,1 năm, phụ trách giám sát, SLO, ứng phó sự cố và post-mortem cho các dịch vụ chạy trên Kubernetes và AWS ở công ty sản phẩm.",
+    "cv_profile": {
+      "schema_version": 1,
+      "headline": "Kỹ sư Site Reliability, 4 năm kinh nghiệm (giám sát, xử lý sự cố, Kubernetes, Prometheus, Grafana)",
+      "skills": [
+        {
+          "name": "Linux",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Prometheus",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Grafana",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Kubernetes",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Docker",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "AWS",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Terraform",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Python",
+          "category": "language",
+          "evidence": "work"
+        },
+        {
+          "name": "Bash",
+          "category": "language",
+          "evidence": "work"
+        },
+        {
+          "name": "SRE",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "Elasticsearch",
+          "category": "database",
+          "evidence": "work"
+        },
+        {
+          "name": "Git",
+          "category": "tool",
+          "evidence": "work"
+        }
+      ],
+      "experiences": [
+        {
+          "role": "Kỹ sư vận hành hệ thống",
+          "company_type": "outsource",
+          "start": "2022-09",
+          "end": "2024-07",
+          "tech": ["Linux", "Bash", "Grafana", "Prometheus", "Docker"],
+          "summary": "Vận hành máy chủ Linux và container cho các hệ thống của khách hàng, thiết lập dashboard và cảnh báo, và xử lý các escalation on-call."
+        },
+        {
+          "role": "Kỹ sư Site Reliability",
+          "company_type": "product",
+          "start": "2024-08",
+          "end": null,
+          "tech": [
+            "Kubernetes",
+            "Prometheus",
+            "Grafana",
+            "Terraform",
+            "Python",
+            "AWS",
+            "Elasticsearch"
+          ],
+          "summary": "Định nghĩa SLI và SLO cho các service cốt lõi, xây dựng hệ thống cảnh báo, dẫn dắt việc xử lý sự cố và viết post-mortem, thực hiện các buổi rà soát capacity và diễn tập sự cố (failure drill), và giảm thời gian khôi phục trung bình khoảng 40%."
+        }
+      ],
+      "projects": [
+        {
+          "id": "proj-1",
+          "name": "Dashboard SLO và chính sách cảnh báo",
+          "role": "Phụ trách chính",
+          "tech": ["Prometheus", "Grafana", "Kubernetes"],
+          "summary": "Dashboard error budget và cảnh báo burn-rate cho các service được dùng nhiều nhất của nhóm.",
+          "highlights": [
+            "Ít cuộc page hơn trong mỗi tuần on-call",
+            "Template sự cố dùng chung được các nhóm khác áp dụng"
+          ]
+        }
+      ],
+      "education": [
+        {
+          "degree": "Cử nhân Công nghệ thông tin",
+          "year": 2022
+        }
+      ],
+      "total_years_experience": 4.1,
+      "track_relevance": "high",
+      "flags": {
+        "injection_suspected": false,
+        "truncated": false
+      }
+    }
+  },
+  {
+    "cv_id": "do-sysadmin-jr",
+    "track": "devops_engineer",
+    "level": "junior",
+    "note": "Kỹ sư hệ thống và mạng mới đi làm khoảng 1,6 năm, quản trị máy chủ Linux/Windows Server và thiết bị mạng Cisco cho văn phòng, có CCNA.",
+    "cv_profile": {
+      "schema_version": 1,
+      "headline": "Kỹ sư hệ thống và mạng (Linux, Windows Server, Cisco CCNA, mạng LAN/WAN)",
+      "skills": [
+        {
+          "name": "Linux",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Networking",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Cisco",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "IT Infrastructure",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "IT Support",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "Bash",
+          "category": "language",
+          "evidence": "project"
+        },
+        {
+          "name": "Nginx",
+          "category": "devops",
+          "evidence": "project"
+        },
+        {
+          "name": "Information Security",
+          "category": "concept",
+          "evidence": "listed"
+        }
+      ],
+      "experiences": [
+        {
+          "role": "Nhân viên IT Helpdesk",
+          "company_type": "other",
+          "start": "2025-03",
+          "end": "2025-08",
+          "tech": ["IT Support", "Networking", "Linux"],
+          "summary": "Hỗ trợ người dùng cuối, cài đặt máy trạm, xử lý sự cố mạng LAN và quản lý tài khoản trên Active Directory."
+        },
+        {
+          "role": "Kỹ sư hệ thống",
+          "company_type": "other",
+          "start": "2025-09",
+          "end": null,
+          "tech": ["Linux", "Networking", "Cisco", "Nginx", "Bash"],
+          "summary": "Quản trị máy chủ Linux và Windows Server của văn phòng, cấu hình switch và router Cisco, VLAN, VPN, firewall, giám sát và sao lưu định kỳ; viết script Bash tự động hóa sao lưu."
+        }
+      ],
+      "projects": [
+        {
+          "id": "proj-1",
+          "name": "Thiết kế mạng cho chi nhánh nhỏ",
+          "role": "Thành viên nhóm 3 người (đồ án)",
+          "tech": ["Cisco", "Networking"],
+          "summary": "Thiết kế sơ đồ mạng, chia VLAN và cấu hình định tuyến cho chi nhánh 50 người dùng.",
+          "highlights": ["Mô phỏng và kiểm tra bằng Packet Tracer"]
+        },
+        {
+          "id": "proj-2",
+          "name": "Máy chủ web Nginx trên Linux",
+          "role": "Thực hiện cá nhân",
+          "tech": ["Linux", "Nginx", "Bash"],
+          "summary": "Dựng máy chủ web, cấu hình HTTPS và sao lưu tự động.",
+          "highlights": []
+        }
+      ],
+      "education": [
+        {
+          "degree": "Cử nhân Mạng máy tính và Truyền thông dữ liệu",
+          "year": 2025
+        }
+      ],
+      "total_years_experience": 1.6,
+      "track_relevance": "high",
+      "flags": {
+        "injection_suspected": false,
+        "truncated": false
+      }
+    }
+  },
+  {
+    "cv_id": "do-sysadmin-mid",
+    "track": "devops_engineer",
+    "level": "middle",
+    "note": "Kỹ sư hạ tầng CNTT khoảng 4,1 năm, quản trị hệ thống máy chủ, mạng Cisco, ảo hóa và sao lưu cho doanh nghiệp, có tự động hóa bằng Ansible.",
+    "cv_profile": {
+      "schema_version": 1,
+      "headline": "Kỹ sư hạ tầng CNTT, 4 năm (Linux, Windows Server, mạng Cisco, ảo hóa, sao lưu)",
+      "skills": [
+        {
+          "name": "Linux",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Networking",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Cisco",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "IT Infrastructure",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "IT Support",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "Bash",
+          "category": "language",
+          "evidence": "work"
+        },
+        {
+          "name": "Nginx",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Ansible",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Docker",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Information Security",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "Cloud Computing",
+          "category": "concept",
+          "evidence": "work"
+        }
+      ],
+      "experiences": [
+        {
+          "role": "Kỹ sư hệ thống",
+          "company_type": "outsource",
+          "start": "2022-09",
+          "end": "2024-07",
+          "tech": ["Linux", "Networking", "Cisco", "Bash", "IT Support"],
+          "summary": "Triển khai và vận hành hạ tầng cho nhiều khách hàng doanh nghiệp: máy chủ Linux và Windows, mạng LAN/WAN, VPN, sao lưu và xử lý sự cố."
+        },
+        {
+          "role": "Kỹ sư hạ tầng",
+          "company_type": "other",
+          "start": "2024-08",
+          "end": null,
+          "tech": ["Linux", "Networking", "Cisco", "Ansible", "Nginx", "Docker"],
+          "summary": "Quản trị hạ tầng của một công ty vừa: máy chủ ảo hóa, firewall, switch, giải pháp sao lưu và khôi phục; dùng Ansible chuẩn hóa cấu hình, rà soát bảo mật định kỳ và lập kế hoạch nâng cấp."
+        }
+      ],
+      "projects": [
+        {
+          "id": "proj-1",
+          "name": "Chuẩn hóa cấu hình máy chủ bằng Ansible",
+          "role": "Phụ trách chính",
+          "tech": ["Ansible", "Linux", "Bash"],
+          "summary": "Viết playbook cài đặt, vá lỗi và kiểm tra cấu hình cho khoảng 40 máy chủ.",
+          "highlights": ["Giảm thời gian dựng máy chủ mới từ nửa ngày xuống dưới một giờ"]
+        }
+      ],
+      "education": [
+        {
+          "degree": "Cử nhân Mạng máy tính và Truyền thông dữ liệu",
+          "year": 2022
+        }
+      ],
+      "total_years_experience": 4.1,
+      "track_relevance": "high",
+      "flags": {
+        "injection_suspected": false,
+        "truncated": false
+      }
+    }
+  },
+  {
+    "cv_id": "ai-ml-jr",
+    "track": "ai_engineer",
+    "level": "junior",
+    "note": "Kỹ sư machine learning mới đi làm khoảng 1,7 năm, huấn luyện mô hình phân loại ảnh và dự báo bằng PyTorch/scikit-learn, đóng gói suy luận bằng Docker.",
+    "cv_profile": {
+      "schema_version": 1,
+      "headline": "Kỹ sư Machine Learning Junior (Python, PyTorch, scikit-learn, computer vision)",
+      "skills": [
+        {
+          "name": "Python",
+          "category": "language",
+          "evidence": "work"
+        },
+        {
+          "name": "PyTorch",
+          "category": "framework",
+          "evidence": "project"
+        },
+        {
+          "name": "scikit-learn",
+          "category": "framework",
+          "evidence": "work"
+        },
+        {
+          "name": "Pandas",
+          "category": "tool",
+          "evidence": "work"
+        },
+        {
+          "name": "NumPy",
+          "category": "tool",
+          "evidence": "work"
+        },
+        {
+          "name": "Machine Learning",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "Deep Learning",
+          "category": "concept",
+          "evidence": "project"
+        },
+        {
+          "name": "Computer Vision",
+          "category": "concept",
+          "evidence": "project"
+        },
+        {
+          "name": "SQL",
+          "category": "language",
+          "evidence": "work"
+        },
+        {
+          "name": "Docker",
+          "category": "devops",
+          "evidence": "project"
+        },
+        {
+          "name": "Git",
+          "category": "tool",
+          "evidence": "work"
+        }
+      ],
+      "experiences": [
+        {
+          "role": "Thực tập sinh AI",
+          "company_type": "product",
+          "start": "2025-02",
+          "end": "2025-07",
+          "tech": ["Python", "Pandas", "scikit-learn"],
+          "summary": "Làm sạch dataset, huấn luyện các bộ phân loại baseline và chuẩn bị notebook đánh giá cho một nhóm phân tích bán lẻ."
+        },
+        {
+          "role": "Kỹ sư Machine Learning Junior",
+          "company_type": "product",
+          "start": "2025-08",
+          "end": null,
+          "tech": ["Python", "PyTorch", "scikit-learn", "Pandas", "SQL", "Docker"],
+          "summary": "Huấn luyện và đánh giá các model phân loại ảnh và dự báo, xây dựng bảng feature bằng SQL và Pandas, đóng gói code inference trong Docker và trình bày kết quả thí nghiệm hằng tuần."
+        }
+      ],
+      "projects": [
+        {
+          "id": "proj-1",
+          "name": "Bộ phân loại ảnh sản phẩm",
+          "role": "Phát triển model (nhóm 2 người)",
+          "tech": ["PyTorch", "Computer Vision", "Python"],
+          "summary": "Fine-tune một mạng tích chập (convolutional network) để phân loại ảnh sản phẩm theo danh mục.",
+          "highlights": [
+            "Data augmentation và lấy mẫu cân bằng theo lớp",
+            "Phân tích lỗi bằng confusion matrix"
+          ]
+        },
+        {
+          "id": "proj-2",
+          "name": "Dự báo nhu cầu bán lẻ",
+          "role": "Thực hiện cá nhân",
+          "tech": ["Python", "scikit-learn", "Pandas"],
+          "summary": "Dự báo doanh số hằng tuần cho từng cửa hàng bằng gradient boosting với các feature về lịch.",
+          "highlights": []
+        }
+      ],
+      "education": [
+        {
+          "degree": "Cử nhân Khoa học dữ liệu",
+          "year": 2025
+        }
+      ],
+      "total_years_experience": 1.7,
+      "track_relevance": "high",
+      "flags": {
+        "injection_suspected": false,
+        "truncated": false
+      }
+    }
+  },
+  {
+    "cv_id": "ai-ml-mid",
+    "track": "ai_engineer",
+    "level": "middle",
+    "note": "Kỹ sư machine learning khoảng 4,1 năm, tự huấn luyện, đánh giá và triển khai mô hình (PyTorch, scikit-learn, FastAPI), có theo dõi suy giảm chất lượng sau triển khai.",
+    "cv_profile": {
+      "schema_version": 1,
+      "headline": "Kỹ sư Machine Learning, 4 năm kinh nghiệm (PyTorch, scikit-learn, triển khai model)",
+      "skills": [
+        {
+          "name": "Python",
+          "category": "language",
+          "evidence": "work"
+        },
+        {
+          "name": "PyTorch",
+          "category": "framework",
+          "evidence": "work"
+        },
+        {
+          "name": "scikit-learn",
+          "category": "framework",
+          "evidence": "work"
+        },
+        {
+          "name": "Pandas",
+          "category": "tool",
+          "evidence": "work"
+        },
+        {
+          "name": "NumPy",
+          "category": "tool",
+          "evidence": "work"
+        },
+        {
+          "name": "Machine Learning",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "Deep Learning",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "Computer Vision",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "SQL",
+          "category": "language",
+          "evidence": "work"
+        },
+        {
+          "name": "Docker",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "FastAPI",
+          "category": "framework",
+          "evidence": "work"
+        },
+        {
+          "name": "Git",
+          "category": "tool",
+          "evidence": "work"
+        }
+      ],
+      "experiences": [
+        {
+          "role": "Data Scientist",
+          "company_type": "outsource",
+          "start": "2022-09",
+          "end": "2024-07",
+          "tech": ["Python", "scikit-learn", "Pandas", "SQL", "Git"],
+          "summary": "Xây dựng các model phân loại và dự báo cho nhiều dự án của khách hàng, từ làm sạch dữ liệu, thiết kế feature đến đánh giá offline và notebook bàn giao."
+        },
+        {
+          "role": "Kỹ sư Machine Learning",
+          "company_type": "product",
+          "start": "2024-08",
+          "end": null,
+          "tech": ["Python", "PyTorch", "scikit-learn", "FastAPI", "Docker", "SQL"],
+          "summary": "Phụ trách các model xếp hạng sản phẩm và gắn thẻ ảnh của một sàn giao dịch (marketplace): huấn luyện, đánh giá offline và online, serving bằng FastAPI, giám sát drift, và giảm 35% độ trễ inference."
+        }
+      ],
+      "projects": [
+        {
+          "id": "proj-1",
+          "name": "Dịch vụ gắn thẻ ảnh",
+          "role": "Phụ trách model",
+          "tech": ["PyTorch", "FastAPI", "Docker", "Computer Vision"],
+          "summary": "Gắn thẻ đa nhãn (multi-label) cho ảnh tin đăng, với inference theo batch và online.",
+          "highlights": [
+            "Huấn luyện lại hằng tuần kèm báo cáo đánh giá tự động",
+            "Theo dõi ngân sách độ trễ (latency budget) theo từng bản release"
+          ]
+        }
+      ],
+      "education": [
+        {
+          "degree": "Cử nhân Khoa học dữ liệu",
+          "year": 2022
+        }
+      ],
+      "total_years_experience": 4.1,
+      "track_relevance": "high",
+      "flags": {
+        "injection_suspected": false,
+        "truncated": false
+      }
+    }
+  },
+  {
+    "cv_id": "ai-de-jr",
+    "track": "ai_engineer",
+    "level": "junior",
+    "note": "Kỹ sư dữ liệu mới đi làm khoảng 1,6 năm, viết pipeline ETL bằng Python/SQL, chạy Airflow hằng ngày và xử lý PySpark cơ bản.",
+    "cv_profile": {
+      "schema_version": 1,
+      "headline": "Kỹ sư dữ liệu Junior (Python, SQL, Spark, Airflow)",
+      "skills": [
+        {
+          "name": "Python",
+          "category": "language",
+          "evidence": "work"
+        },
+        {
+          "name": "SQL",
+          "category": "language",
+          "evidence": "work"
+        },
+        {
+          "name": "Apache Spark",
+          "category": "framework",
+          "evidence": "project"
+        },
+        {
+          "name": "Airflow",
+          "category": "tool",
+          "evidence": "work"
+        },
+        {
+          "name": "ETL",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "PostgreSQL",
+          "category": "database",
+          "evidence": "work"
+        },
+        {
+          "name": "Data Warehouse",
+          "category": "concept",
+          "evidence": "project"
+        },
+        {
+          "name": "Data Engineering",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "Docker",
+          "category": "devops",
+          "evidence": "project"
+        },
+        {
+          "name": "Git",
+          "category": "tool",
+          "evidence": "work"
+        }
+      ],
+      "experiences": [
+        {
+          "role": "Thực tập sinh kỹ sư dữ liệu",
+          "company_type": "product",
+          "start": "2025-03",
+          "end": "2025-08",
+          "tech": ["Python", "SQL", "PostgreSQL"],
+          "summary": "Viết script SQL và Python để nạp các file CSV xuất ra vào PostgreSQL và kiểm tra số dòng."
+        },
+        {
+          "role": "Kỹ sư dữ liệu Junior",
+          "company_type": "product",
+          "start": "2025-09",
+          "end": null,
+          "tech": ["Python", "SQL", "Airflow", "PostgreSQL", "Apache Spark", "ETL"],
+          "summary": "Bảo trì các Airflow DAG chạy hằng ngày chuyển dữ liệu đơn hàng và giao hàng từ các cơ sở dữ liệu vận hành vào data warehouse, viết các phép biến đổi PySpark và SQL, bổ sung kiểm tra chất lượng dữ liệu và sửa các lần nạp bị lỗi."
+        }
+      ],
+      "projects": [
+        {
+          "id": "proj-1",
+          "name": "Pipeline phân tích dữ liệu thương mại điện tử",
+          "role": "Thực hiện cá nhân",
+          "tech": ["Airflow", "PostgreSQL", "Python", "Docker"],
+          "summary": "Quy trình extract, transform và load hằng ngày dữ liệu đơn hàng mẫu công khai vào star schema.",
+          "highlights": ["Thử lại và cảnh báo khi task thất bại"]
+        },
+        {
+          "id": "proj-2",
+          "name": "Xử lý batch bằng PySpark",
+          "role": "Thực hiện cá nhân",
+          "tech": ["Apache Spark", "Python"],
+          "summary": "Tổng hợp vài gigabyte dữ liệu giao thông vận tải mở thành các bản tóm tắt hằng ngày.",
+          "highlights": []
+        }
+      ],
+      "education": [
+        {
+          "degree": "Cử nhân Hệ thống thông tin",
+          "year": 2025
+        }
+      ],
+      "total_years_experience": 1.6,
+      "track_relevance": "high",
+      "flags": {
+        "injection_suspected": false,
+        "truncated": false
+      }
+    }
+  },
+  {
+    "cv_id": "ai-de-mid",
+    "track": "ai_engineer",
+    "level": "middle",
+    "note": "Kỹ sư dữ liệu khoảng 4,0 năm, thiết kế kho dữ liệu trên đám mây, xử lý Spark vài trăm GB mỗi ngày, nạp dữ liệu gần thời gian thực qua Kafka và điều phối bằng Airflow.",
+    "cv_profile": {
+      "schema_version": 1,
+      "headline": "Kỹ sư dữ liệu, 4 năm kinh nghiệm (Spark, Airflow, Kafka, cloud data warehouse)",
+      "skills": [
+        {
+          "name": "Python",
+          "category": "language",
+          "evidence": "work"
+        },
+        {
+          "name": "SQL",
+          "category": "language",
+          "evidence": "work"
+        },
+        {
+          "name": "Apache Spark",
+          "category": "framework",
+          "evidence": "work"
+        },
+        {
+          "name": "Airflow",
+          "category": "tool",
+          "evidence": "work"
+        },
+        {
+          "name": "Kafka",
+          "category": "tool",
+          "evidence": "work"
+        },
+        {
+          "name": "ETL",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "Data Warehouse",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "PostgreSQL",
+          "category": "database",
+          "evidence": "work"
+        },
+        {
+          "name": "Data Engineering",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "AWS",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Docker",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Git",
+          "category": "tool",
+          "evidence": "work"
+        }
+      ],
+      "experiences": [
+        {
+          "role": "Kỹ sư dữ liệu",
+          "company_type": "outsource",
+          "start": "2022-10",
+          "end": "2024-06",
+          "tech": ["Python", "SQL", "PostgreSQL", "Airflow", "ETL", "Git"],
+          "summary": "Xây dựng các pipeline ETL và bảng báo cáo cho các dự án phân tích của khách hàng; lập lịch job bằng Airflow và viết các kiểm tra chất lượng dữ liệu."
+        },
+        {
+          "role": "Kỹ sư dữ liệu",
+          "company_type": "product",
+          "start": "2024-07",
+          "end": null,
+          "tech": ["Python", "Apache Spark", "Airflow", "Kafka", "AWS", "SQL", "Docker"],
+          "summary": "Thiết kế và vận hành data warehouse của một nền tảng logistics: các job Spark xử lý khoảng 200 GB mỗi ngày, ingest gần thời gian thực qua Kafka, điều phối bằng Airflow, test chất lượng dữ liệu và tối ưu chi phí trên AWS."
+        }
+      ],
+      "projects": [
+        {
+          "id": "proj-1",
+          "name": "Tầng ingest sự kiện",
+          "role": "Kỹ sư lead",
+          "tech": ["Kafka", "Apache Spark", "AWS", "Python"],
+          "summary": "Ingest streaming các sự kiện giao hàng vào các bảng warehouse có phân vùng (partition), có xử lý dữ liệu đến muộn.",
+          "highlights": [
+            "Độ mới của dữ liệu được cải thiện từ hàng giờ xuống còn vài phút",
+            "Tự động kiểm tra thay đổi schema"
+          ]
+        }
+      ],
+      "education": [
+        {
+          "degree": "Cử nhân Hệ thống thông tin",
+          "year": 2022
+        }
+      ],
+      "total_years_experience": 4.0,
+      "track_relevance": "high",
+      "flags": {
+        "injection_suspected": false,
+        "truncated": false
+      }
+    }
+  },
+  {
+    "cv_id": "ai-da-jr",
+    "track": "ai_engineer",
+    "level": "junior",
+    "note": "Chuyên viên phân tích dữ liệu mới đi làm khoảng 1,6 năm, viết SQL và dựng dashboard Power BI/Tableau cho phòng kinh doanh và marketing.",
+    "cv_profile": {
+      "schema_version": 1,
+      "headline": "Chuyên viên phân tích dữ liệu (SQL, Power BI, Tableau, Python)",
+      "skills": [
+        {
+          "name": "SQL",
+          "category": "language",
+          "evidence": "work"
+        },
+        {
+          "name": "Power BI",
+          "category": "tool",
+          "evidence": "work"
+        },
+        {
+          "name": "Tableau",
+          "category": "tool",
+          "evidence": "project"
+        },
+        {
+          "name": "Data Analysis",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "Python",
+          "category": "language",
+          "evidence": "project"
+        },
+        {
+          "name": "Pandas",
+          "category": "tool",
+          "evidence": "project"
+        },
+        {
+          "name": "MySQL",
+          "category": "database",
+          "evidence": "work"
+        },
+        {
+          "name": "Data Warehouse",
+          "category": "concept",
+          "evidence": "education"
+        }
+      ],
+      "experiences": [
+        {
+          "role": "Thực tập sinh phân tích dữ liệu",
+          "company_type": "product",
+          "start": "2025-03",
+          "end": "2025-08",
+          "tech": ["SQL", "Power BI", "MySQL"],
+          "summary": "Làm sạch dữ liệu bán hàng, viết truy vấn SQL và dựng báo cáo Power BI hằng tuần cho phòng kinh doanh."
+        },
+        {
+          "role": "Chuyên viên phân tích dữ liệu",
+          "company_type": "product",
+          "start": "2025-09",
+          "end": null,
+          "tech": ["SQL", "Power BI", "Tableau", "MySQL", "Python", "Pandas"],
+          "summary": "Xây dựng dashboard doanh thu, tồn kho và hiệu quả chiến dịch marketing; viết truy vấn tổng hợp, kiểm tra chất lượng số liệu và trình bày kết quả cho quản lý."
+        }
+      ],
+      "projects": [
+        {
+          "id": "proj-1",
+          "name": "Dashboard bán lẻ",
+          "role": "Thực hiện cá nhân (đồ án)",
+          "tech": ["Power BI", "SQL", "MySQL"],
+          "summary": "Dashboard doanh thu theo cửa hàng, nhóm hàng và thời gian trên dữ liệu mẫu.",
+          "highlights": ["Bộ lọc theo khu vực và kỳ báo cáo"]
+        },
+        {
+          "id": "proj-2",
+          "name": "Phân tích hành vi mua hàng",
+          "role": "Thực hiện cá nhân",
+          "tech": ["Python", "Pandas", "Tableau"],
+          "summary": "Phân nhóm khách hàng theo tần suất và giá trị mua trên tập dữ liệu công khai.",
+          "highlights": []
+        }
+      ],
+      "education": [
+        {
+          "degree": "Cử nhân Hệ thống thông tin quản lý",
+          "year": 2025
+        }
+      ],
+      "total_years_experience": 1.6,
+      "track_relevance": "high",
+      "flags": {
+        "injection_suspected": false,
+        "truncated": false
+      }
+    }
+  },
+  {
+    "cv_id": "ai-da-mid",
+    "track": "ai_engineer",
+    "level": "middle",
+    "note": "Chuyên viên phân tích dữ liệu và BI khoảng 4,1 năm, thiết kế mô hình dữ liệu cho báo cáo, thành thạo SQL, Power BI/Tableau và có dùng Python để xử lý số liệu.",
+    "cv_profile": {
+      "schema_version": 1,
+      "headline": "Chuyên viên phân tích dữ liệu và BI, 4 năm (SQL, Power BI, Tableau, Python)",
+      "skills": [
+        {
+          "name": "SQL",
+          "category": "language",
+          "evidence": "work"
+        },
+        {
+          "name": "Power BI",
+          "category": "tool",
+          "evidence": "work"
+        },
+        {
+          "name": "Tableau",
+          "category": "tool",
+          "evidence": "work"
+        },
+        {
+          "name": "Data Analysis",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "Python",
+          "category": "language",
+          "evidence": "work"
+        },
+        {
+          "name": "Pandas",
+          "category": "tool",
+          "evidence": "work"
+        },
+        {
+          "name": "MySQL",
+          "category": "database",
+          "evidence": "work"
+        },
+        {
+          "name": "SQL Server",
+          "category": "database",
+          "evidence": "work"
+        },
+        {
+          "name": "Data Warehouse",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "ETL",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "Looker",
+          "category": "tool",
+          "evidence": "work"
+        }
+      ],
+      "experiences": [
+        {
+          "role": "Chuyên viên BI",
+          "company_type": "outsource",
+          "start": "2022-09",
+          "end": "2024-06",
+          "tech": ["SQL", "Power BI", "MySQL", "SQL Server", "Data Analysis"],
+          "summary": "Dựng báo cáo và dashboard cho nhiều khách hàng bán lẻ và phân phối; viết truy vấn, kiểm tra số liệu và hướng dẫn người dùng đọc báo cáo."
+        },
+        {
+          "role": "Chuyên viên phân tích dữ liệu và BI",
+          "company_type": "product",
+          "start": "2024-07",
+          "end": null,
+          "tech": [
+            "SQL",
+            "Power BI",
+            "Tableau",
+            "Python",
+            "Pandas",
+            "Data Warehouse",
+            "ETL"
+          ],
+          "summary": "Thiết kế mô hình dữ liệu và bộ chỉ số cho báo cáo kinh doanh, phối hợp với kỹ sư dữ liệu để chuẩn hóa bảng trong kho dữ liệu; phân tích hiệu quả khuyến mãi và dự báo doanh thu đơn giản bằng Python."
+        }
+      ],
+      "projects": [
+        {
+          "id": "proj-1",
+          "name": "Bộ chỉ số kinh doanh thống nhất",
+          "role": "Phụ trách chính",
+          "tech": ["Power BI", "SQL", "Data Warehouse"],
+          "summary": "Chuẩn hóa định nghĩa doanh thu, đơn hàng và khách hàng mới cho toàn bộ báo cáo của phòng.",
+          "highlights": [
+            "Một nguồn số liệu chung cho các dashboard",
+            "Tài liệu định nghĩa chỉ số cho người dùng"
+          ]
+        }
+      ],
+      "education": [
+        {
+          "degree": "Cử nhân Hệ thống thông tin quản lý",
+          "year": 2022
+        }
+      ],
+      "total_years_experience": 4.1,
+      "track_relevance": "high",
+      "flags": {
+        "injection_suspected": false,
+        "truncated": false
+      }
+    }
+  },
+  {
+    "cv_id": "ai-llm-jr",
+    "track": "ai_engineer",
+    "level": "junior",
+    "note": "Kỹ sư AI mới đi làm khoảng 1,6 năm, xây trợ lý hỏi đáp dựa trên tài liệu (RAG) và dịch vụ FastAPI cho công ty khởi nghiệp, biết NLP tiếng Việt cơ bản.",
+    "cv_profile": {
+      "schema_version": 1,
+      "headline": "Kỹ sư LLM / Generative AI Junior (Python, RAG, FastAPI)",
+      "skills": [
+        {
+          "name": "Python",
+          "category": "language",
+          "evidence": "work"
+        },
+        {
+          "name": "LLM",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "Generative AI",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "RAG",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "NLP",
+          "category": "concept",
+          "evidence": "project"
+        },
+        {
+          "name": "FastAPI",
+          "category": "framework",
+          "evidence": "work"
+        },
+        {
+          "name": "PostgreSQL",
+          "category": "database",
+          "evidence": "project"
+        },
+        {
+          "name": "Docker",
+          "category": "devops",
+          "evidence": "project"
+        },
+        {
+          "name": "Git",
+          "category": "tool",
+          "evidence": "work"
+        },
+        {
+          "name": "Machine Learning",
+          "category": "concept",
+          "evidence": "education"
+        }
+      ],
+      "experiences": [
+        {
+          "role": "Thực tập sinh AI",
+          "company_type": "startup",
+          "start": "2025-03",
+          "end": "2025-08",
+          "tech": ["Python", "NLP", "Git"],
+          "summary": "Làm sạch các dataset văn bản tiếng Việt, thử các baseline phân loại văn bản và hỗ trợ viết prompt cùng bộ câu hỏi kiểm thử cho một chatbot prototype."
+        },
+        {
+          "role": "Kỹ sư AI Junior",
+          "company_type": "startup",
+          "start": "2025-09",
+          "end": null,
+          "tech": ["Python", "LLM", "RAG", "FastAPI", "PostgreSQL", "Docker"],
+          "summary": "Xây dựng trợ lý hỗ trợ khách hàng trả lời dựa trên FAQ sản phẩm và tài liệu chính sách: chia chunk và embedding tài liệu, retrieval, prompt template, service FastAPI và các bộ đánh giá nhỏ để theo dõi chất lượng câu trả lời."
+        }
+      ],
+      "projects": [
+        {
+          "id": "proj-1",
+          "name": "Bot hỏi đáp ghi chú học tập",
+          "role": "Thực hiện cá nhân",
+          "tech": ["Python", "RAG", "LLM", "FastAPI"],
+          "summary": "Hỏi đáp trên ghi chú bài giảng bằng retrieval, có trích dẫn nguồn.",
+          "highlights": ["Câu trả lời hiển thị đoạn nguồn"]
+        },
+        {
+          "id": "proj-2",
+          "name": "Tóm tắt văn bản tiếng Việt",
+          "role": "Thực hiện cá nhân",
+          "tech": ["Python", "NLP", "Generative AI"],
+          "summary": "Tóm tắt bài báo bằng prompt, có kiểm soát độ dài đơn giản.",
+          "highlights": []
+        }
+      ],
+      "education": [
+        {
+          "degree": "Cử nhân Khoa học máy tính",
+          "year": 2025
+        }
+      ],
+      "total_years_experience": 1.6,
+      "track_relevance": "high",
+      "flags": {
+        "injection_suspected": false,
+        "truncated": false
+      }
+    }
+  },
+  {
+    "cv_id": "ai-llm-mid",
+    "track": "ai_engineer",
+    "level": "middle",
+    "note": "Kỹ sư AI khoảng 4,0 năm, chuyên ứng dụng LLM và RAG: truy xuất kết hợp, bộ câu hỏi đánh giá, theo dõi độ trễ và chi phí, từng hướng dẫn hai kỹ sư mới.",
+    "cv_profile": {
+      "schema_version": 1,
+      "headline": "Kỹ sư LLM / Generative AI, 4 năm kinh nghiệm (RAG, FastAPI, NLP, đánh giá)",
+      "skills": [
+        {
+          "name": "Python",
+          "category": "language",
+          "evidence": "work"
+        },
+        {
+          "name": "LLM",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "Generative AI",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "RAG",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "NLP",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "Machine Learning",
+          "category": "concept",
+          "evidence": "work"
+        },
+        {
+          "name": "FastAPI",
+          "category": "framework",
+          "evidence": "work"
+        },
+        {
+          "name": "PostgreSQL",
+          "category": "database",
+          "evidence": "work"
+        },
+        {
+          "name": "Redis",
+          "category": "database",
+          "evidence": "work"
+        },
+        {
+          "name": "Docker",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "AWS",
+          "category": "devops",
+          "evidence": "work"
+        },
+        {
+          "name": "Git",
+          "category": "tool",
+          "evidence": "work"
+        }
+      ],
+      "experiences": [
+        {
+          "role": "Kỹ sư NLP",
+          "company_type": "outsource",
+          "start": "2022-10",
+          "end": "2024-06",
+          "tech": ["Python", "NLP", "Machine Learning", "scikit-learn", "Git"],
+          "summary": "Xây dựng các model phân loại văn bản và trích xuất thực thể cho các dự án của khách hàng, kèm hướng dẫn gán nhãn, bộ đánh giá và tài liệu bàn giao."
+        },
+        {
+          "role": "Kỹ sư AI",
+          "company_type": "product",
+          "start": "2024-07",
+          "end": null,
+          "tech": [
+            "Python",
+            "LLM",
+            "RAG",
+            "Generative AI",
+            "FastAPI",
+            "PostgreSQL",
+            "Redis",
+            "AWS"
+          ],
+          "summary": "Dẫn dắt một trợ lý tri thức trả lời các câu hỏi nội bộ và từ khách hàng: hybrid retrieval, quản lý phiên bản prompt, các bộ đánh giá offline, giám sát độ trễ và chi phí. Mentor hai kỹ sư."
+        }
+      ],
+      "projects": [
+        {
+          "id": "proj-1",
+          "name": "Trợ lý tri thức",
+          "role": "Tech lead",
+          "tech": ["Python", "RAG", "LLM", "FastAPI", "PostgreSQL"],
+          "summary": "Hỏi đáp trên tài liệu chính sách và sản phẩm, có trích dẫn nguồn và thu thập phản hồi.",
+          "highlights": [
+            "Bộ đánh giá 300 câu hỏi được chạy sau mỗi lần đổi prompt",
+            "Thời gian phản hồi trung vị dưới 3 giây"
+          ]
+        }
+      ],
+      "education": [
+        {
+          "degree": "Cử nhân Khoa học máy tính",
+          "year": 2022
+        }
+      ],
+      "total_years_experience": 4.0,
+      "track_relevance": "high",
+      "flags": {
+        "injection_suspected": false,
+        "truncated": false
+      }
+    }
+  }
+]
