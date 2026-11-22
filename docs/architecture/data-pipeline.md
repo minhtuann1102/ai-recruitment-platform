@@ -174,6 +174,34 @@ def process_jd(jd: dict) -> list[dict]:
 
 **Output Sprint 2:** ~1500+ chunks từ 500 JD (avg ~3 chunks/JD) → index vào ai_db. Seed 200 job postings vào `job_db` dùng JD data.
 
+### Index JD cho gợi ý (017)
+
+Spec: [`specs/017-cv-jd-matching/`](../../specs/017-cv-jd-matching/spec.md). Thay cho thiết kế nhiều chunk ở trên: mỗi JD
+có `group` (track) chỉ cần **một dòng** để so khớp với CV. Dữ liệu này **không** vào RAG phỏng vấn (mọi truy vấn RAG lọc
+`source_type`).
+
+```bash
+cd apps/data-pipeline   # cần .env: EMBEDDING_API_KEY (hoặc LLM_API_KEY), AI_DB_URL
+python -m pipeline index-jd-match               # đọc data/processed/jd_normalized.jsonl (đầu ra process-jd)
+python -m pipeline index-jd-match --rebuild     # xóa dataset jd-match rồi index lại (khi đổi embedding model)
+python -m pipeline index-jd-match --limit 20    # chạy thử: không dọn bản ghi cũ, không dùng chung với --rebuild
+```
+
+| Mục | Giá trị |
+|---|---|
+| Bản ghi | `knowledge_chunks`: `source_type = 'job_description'`, `metadata.dataset = 'jd-match'`, `chunk_type = 'jd_match_summary'`; `category`, `difficulty`, `topic_id` NULL |
+| Văn bản embed | Tiêu đề, "Cấp bậc", "Nhóm", rồi đoạn yêu cầu (thiếu thì công việc, thiếu nữa thì mô tả), cắt ≤ 1.200 ký tự. **Không** có dòng kỹ năng, để cosine không lặp lại `skill_match` |
+| Bỏ qua | JD `group = null` (`skipped_no_group`); hai JD trùng văn bản thì giữ JD đầu (`skipped_duplicate_hash`) |
+| Idempotent | `content_hash` = md5 văn bản embed. Chạy lại: không embed lại (`embedded = 0`). JD đổi nội dung: insert hash mới, hash cũ bị dọn trong dataset |
+| Kiểm model | Đọc `embedding_model` đang có của dataset. Khác model cấu hình (tên không có tiền tố provider) thì thoát 1, chưa embed; `--rebuild` xóa dataset (chỉ `source_type = 'job_description'`) rồi ghi lại. Probe provider trước khi xóa |
+| Thống kê | `input`, `skipped_no_group`, `skipped_duplicate_hash`, `embedded`, `embed_errors`, `inserted`, `updated`, `deleted`, `embedding_tokens` (in ra và ghi `data/processed/run-report-index-jd-match-*.json`) |
+| Mã thoát | 0 xong · 1 lỗi đầu vào hoặc lệch model · 2 preflight / cấu hình · 3 còn lỗi embedding (không dọn) |
+
+Không có chế độ mock: vector giả không bao giờ ghi vào `ai_db` dùng chung. Tham số, thứ tự bước và mã thoát đầy đủ:
+[pipeline-cli-match.md](../../specs/017-cv-jd-matching/contracts/pipeline-cli-match.md); lý do chọn văn bản embed và
+khóa `content_hash`: [research.md](../../specs/017-cv-jd-matching/research.md) R3, R4; schema dòng:
+[data-model.md](../../specs/017-cv-jd-matching/data-model.md) §1.
+
 ---
 
 ## 6. Sprint 3 — Textbook/Tutorial

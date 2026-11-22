@@ -35,7 +35,7 @@ có contract nháp, không có task code.
 
 ## Phase 2: Foundational
 
-- [ ] T003 Cho `EmbeddingClient.embed` trong `apps/data-pipeline/pipeline/embedding_client.py` cộng dồn
+- [x] T003 Cho `EmbeddingClient.embed` trong `apps/data-pipeline/pipeline/embedding_client.py` cộng dồn
   `response.usage.prompt_tokens` vào thuộc tính `total_tokens` (khởi tạo 0, provider không trả `usage` thì giữ nguyên).
   Thêm test vào `apps/data-pipeline/tests/test_embedding_client.py` dùng client OpenAI giả. Không đổi chữ ký `embed`.
 
@@ -53,7 +53,7 @@ theo [quickstart.md](quickstart.md) §3.
 
 ### Tests (viết trước, phải fail trước khi implement)
 
-- [ ] T004 [P] [US1] Test văn bản và bản ghi trong `apps/data-pipeline/tests/test_jd_match_text.py`:
+- [x] T004 [P] [US1] Test văn bản và bản ghi trong `apps/data-pipeline/tests/test_jd_match_text.py`:
   - văn bản có tiêu đề, "Cấp bậc", "Nhóm", đoạn yêu cầu, hoặc công việc / mô tả khi thiếu;
   - **không** có dòng "Kỹ năng";
   - cắt ≤ 1.200 ký tự;
@@ -62,7 +62,7 @@ theo [quickstart.md](quickstart.md) §3.
   - `category`, `difficulty`, `topic_id` là None, `source_type` là `job_description`;
   - JD `group = null` bị loại với lý do `no_group`;
   - `language` cắt còn 5 ký tự.
-- [ ] T005 [P] [US1] Test lệnh trong `apps/data-pipeline/tests/test_jd_match_index_command.py`, dùng kết nối DB giả và
+- [x] T005 [P] [US1] Test lệnh trong `apps/data-pipeline/tests/test_jd_match_index_command.py`, dùng kết nối DB giả và
   embedder giả:
   - hai JD trùng hash → giữ JD đầu, `skipped_duplicate_hash = 1`;
   - dataset có `embedding_model` khác cấu hình → mã thoát 1, không gọi embed;
@@ -72,9 +72,9 @@ theo [quickstart.md](quickstart.md) §3.
 
 ### Implementation
 
-- [ ] T006 [US1] Viết `apps/data-pipeline/pipeline/jd_match_text.py` (< 200 dòng): `build_match_text(jd) -> str` và
+- [x] T006 [US1] Viết `apps/data-pipeline/pipeline/jd_match_text.py` (< 200 dòng): `build_match_text(jd) -> str` và
   `build_match_record(jd) -> (record | None, reason | None)` theo data-model §1 và research R4.
-- [ ] T007 [US1] Viết `apps/data-pipeline/pipeline/jd_match_index_command.py`. Thứ tự:
+- [x] T007 [US1] Viết `apps/data-pipeline/pipeline/jd_match_index_command.py`. Thứ tự:
   1. Nạp `data/processed/jd_normalized.jsonl`.
   2. Dựng bản ghi, kiểm trùng hash.
   3. `require_index_settings`, `preflight`.
@@ -83,10 +83,10 @@ theo [quickstart.md](quickstart.md) §3.
   5. `plan_writes` + `write_records` với `stored_model`.
   6. Run report qua `run_report`.
   Mã thoát theo [contracts/pipeline-cli-match.md](contracts/pipeline-cli-match.md).
-- [ ] T008 [US1] Viết `apps/data-pipeline/pipeline/jd_match_cli.py` (`add_parsers`, `HANDLERS`; lúc này chỉ có
+- [x] T008 [US1] Viết `apps/data-pipeline/pipeline/jd_match_cli.py` (`add_parsers`, `HANDLERS`; lúc này chỉ có
   `index-jd-match [--rebuild] [--limit N]`) và đăng ký vào `apps/data-pipeline/pipeline/__main__.py` bằng một dòng
   import + `HANDLERS.update` như `textbook_cli`.
-- [ ] T009 [US1] Thêm mục "Index JD cho gợi ý (017)" vào `docs/architecture/data-pipeline.md`: lệnh, dataset, văn bản
+- [x] T009 [US1] Thêm mục "Index JD cho gợi ý (017)" vào `docs/architecture/data-pipeline.md`: lệnh, dataset, văn bản
   embed, kiểm model, link contract.
 - [ ] T010 [US1] Chạy `pytest` của pipeline, review bằng `code-reviewer` (opus), mở PR-1. Sau khi merge: chạy
   `python -m pipeline index-jd-match` hai lần từ `main` mới nhất, dán thống kê vào PR (SC-005).

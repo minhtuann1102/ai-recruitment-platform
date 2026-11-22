@@ -21,9 +21,13 @@ class EmbeddingClient:
         self._client = OpenAI(base_url=settings.base_url, api_key=settings.api_key, max_retries=3, timeout=60)
         self._model = settings.embedding_model
         self._dimensions = settings.embedding_dimensions
+        self.total_tokens = 0  # cong don usage.prompt_tokens cua cac lan embed (run report index-jd-match, spec 017)
 
     def embed(self, texts: Sequence[str]) -> List[List[float]]:
         response = self._client.embeddings.create(model=self._model, input=list(texts))
+        tokens = getattr(getattr(response, "usage", None), "prompt_tokens", None)
+        if tokens is not None:  # provider khong tra usage thi giu nguyen
+            self.total_tokens += tokens
         return [item.embedding for item in sorted(response.data, key=lambda d: d.index)]
 
     def probe(self) -> None:
