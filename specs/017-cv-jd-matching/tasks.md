@@ -88,7 +88,7 @@ theo [quickstart.md](quickstart.md) §3.
   import + `HANDLERS.update` như `textbook_cli`.
 - [x] T009 [US1] Thêm mục "Index JD cho gợi ý (017)" vào `docs/architecture/data-pipeline.md`: lệnh, dataset, văn bản
   embed, kiểm model, link contract.
-- [ ] T010 [US1] Chạy `pytest` của pipeline, review bằng `code-reviewer` (opus), mở PR-1. Sau khi merge: chạy
+- [x] T010 [US1] Chạy `pytest` của pipeline, review bằng `code-reviewer` (opus), mở PR-1. Sau khi merge: chạy
   `python -m pipeline index-jd-match` hai lần từ `main` mới nhất, dán thống kê vào PR (SC-005).
 
 **Checkpoint**: chỉ mục JD có trong ai_db; RAG phỏng vấn không đổi.
@@ -239,8 +239,8 @@ Contract nháp [contracts/gd2-job-service-draft.md](contracts/gd2-job-service-dr
 
 ## Phase 7: Polish & Cross-Cutting
 
-- [ ] T038 Cập nhật trạng thái 017 trong `specs/README.md` sau mỗi PR merge, và tick task trong file này.
-- [ ] T039 [P] Ghi thay đổi vào `docs/project-changelog.md` (nếu file có) khi PR-2 và PR-3 merge.
+- [x] T038 Cập nhật trạng thái 017 trong `specs/README.md` sau mỗi PR merge, và tick task trong file này.
+- [x] T039 [P] Ghi thay đổi vào `docs/project-changelog.md` (nếu file có; 2026-11-23: repo chưa có file này, bỏ qua) khi PR-2 và PR-3 merge.
 
 ---
 
