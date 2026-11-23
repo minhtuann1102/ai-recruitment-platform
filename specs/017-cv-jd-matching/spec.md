@@ -263,8 +263,9 @@ service, không thuộc DE.
 - **FR-025**: Nhà tuyển dụng chỉ thấy (a) ứng viên đã ứng tuyển tin đó và (b) ứng viên bật `is_open_to_work` có CV mặc
   định, qua lọc cứng với tin. Ứng viên tắt `is_open_to_work` MUST biến khỏi nhóm (b) ngay lần xem sau. FSD cần thêm "CV
   mặc định" cho ứng viên (004 / 008).
-- **FR-027**: Nhóm (b) cần vector CV lưu sẵn (không thể embed mọi ứng viên mỗi lần xem). Nơi lưu (DB của service sở hữu
-  CV, hay ai_db kèm amendment constitution IV + ADR) chốt ở plan GĐ2; GĐ1 không lưu vector CV (FR-011).
+- **FR-027**: Nhóm (b) cần vector CV lưu sẵn (không thể embed mọi ứng viên mỗi lần xem). **Chốt 2026-11-23: lưu ở DB
+  của service sở hữu CV** (cùng `cv_profile`), không lưu ở ai_db nên không cần sửa constitution IV; GĐ1 không lưu vector
+  CV (FR-011). Chi tiết đường ghi (ai embed, lúc nào) chốt ở plan GĐ2.
 - **FR-026** *(tùy chọn)*: Bắt đầu buổi luyện tập từ một tin MUST truyền JD của tin và danh sách kỹ năng thiếu để Planner
   ưu tiên (US6).
 
