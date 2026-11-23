@@ -34,7 +34,7 @@ Chỉ ghi phần mới. Bảng `knowledge_chunks`: [`docs/architecture/data-mode
 Luật:
 - Mỗi `jd_id` có tối đa một dòng.
 - JD có `group = null` không được index (đếm `skipped_no_group`).
-- Hai JD có văn bản trùng hash: giữ JD đầu tiên, đếm `skipped_duplicate_hash`.
+- Hai JD có văn bản trùng hash: giữ JD có hạn nộp muộn nhất (bằng nhau thì giữ JD đầu), đếm `skipped_duplicate_hash`.
 - Mọi dòng của dataset dùng cùng một `embedding_model` (research R3).
 
 ## 2. Snapshot chỉ mục trong ai-service (bộ nhớ)

@@ -11,8 +11,9 @@ Parser và handler nằm trong `pipeline/jd_match_cli.py`; `__main__.py` chỉ �
   3. Preflight DB.
   4. Kiểm `embedding_model` của dataset `jd-match`; `--rebuild` thì xóa dataset trước.
   5. Gọi `plan_writes` + `write_records`.
-- Thống kê in ra và ghi vào run report: `input`, `skipped_no_group`, `skipped_duplicate_hash`, `embedded`,
-  `embed_errors`, `inserted`, `updated`, `deleted`, `embedding_tokens`.
+- Thống kê in ra và ghi vào run report: `input`, `skipped_no_group`, `skipped_duplicate_hash`, `by_group`
+  (số bản ghi đã index theo `group`, để thấy `mobile_fullstack`), `embedded`, `embed_errors`, `inserted`, `updated`,
+  `deleted`, `embedding_tokens`. Có thêm từ `write_records`: `skipped_other_dataset`, `cleanup`.
 - Mã thoát: 0 xong; 1 lỗi đầu vào hoặc lệch model (chưa có `--rebuild`); 2 preflight hoặc cấu hình; 3 còn lỗi embedding.
 - Không có chế độ mock: vector giả không bao giờ ghi vào ai_db (research R8).
 

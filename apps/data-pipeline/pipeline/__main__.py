@@ -1,7 +1,8 @@
 """CLI: python -m pipeline <lenh> (chay trong apps/data-pipeline/).
 
 Lenh va ma thoat: specs/005-rag-knowledge-base-qa/contracts/pipeline-cli.md;
-lenh JD (crawl-jd...): specs/009-jd-crawling-seeding/contracts/pipeline-cli-jd.md.
+lenh JD (crawl-jd...): specs/009-jd-crawling-seeding/contracts/pipeline-cli-jd.md;
+lenh goi y CV-JD (index-jd-match): specs/017-cv-jd-matching/contracts/pipeline-cli-match.md.
 """
 import argparse
 import sys
@@ -14,6 +15,8 @@ from .crawl_command import run_crawl
 from .db_commands import run_index, run_search
 from .enrich_command import run_enrich
 from .jd_crawl_command import run_crawl_jd
+from .jd_match_cli import HANDLERS as JD_MATCH_HANDLERS
+from .jd_match_cli import add_parsers as add_jd_match_parsers
 from .jd_process_command import run_process_jd
 from .jd_synth_command import run_synth_jd
 from .offline_commands import run_process, run_validate
@@ -66,6 +69,7 @@ HANDLERS: Dict[str, Handler] = {
     "synth-jd": run_synth_jd,
 }
 HANDLERS.update(TEXTBOOK_HANDLERS)  # 7 lenh textbook (spec 012): parser + handler nam o textbook_cli
+HANDLERS.update(JD_MATCH_HANDLERS)  # lenh goi y CV-JD (spec 017): parser + handler nam o jd_match_cli
 
 
 def _add_catalog_option(parser: argparse.ArgumentParser) -> None:
@@ -161,6 +165,7 @@ def build_parser() -> argparse.ArgumentParser:
     synth_jd.add_argument("--limit", type=int, default=None, metavar="N", help="toi da N JD moi lan chay")
     synth_jd.add_argument("--dry-run", action="store_true", help="chi in o thieu, khong goi LLM, khong can key")
     add_textbook_parsers(sub)
+    add_jd_match_parsers(sub)
     return parser
 
 
