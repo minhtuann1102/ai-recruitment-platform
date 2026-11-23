@@ -56,3 +56,10 @@ Kỳ vọng: file `specs/017-cv-jd-matching/eval-results.md` có:
 - mô tả bộ dữ liệu và hạn chế.
 
 Chạy lại lần 2 cho cùng các chỉ số chất lượng.
+
+## Ghi chú chạy local trên Windows
+
+- Máy có phần mềm chặn TLS (lỗi `CERTIFICATE_VERIFY_FAILED` / `Connection error.`): bọc lệnh để dùng kho chứng chỉ
+  Windows, không đổi code: `python -c "import truststore, runpy, sys; truststore.inject_into_ssl(); sys.argv=['pipeline', 'index-jd-match']; runpy.run_module('pipeline', run_name='__main__')"` (cài `truststore` vào venv nếu thiếu).
+- ai-service chế độ thật trên Windows: psycopg async cần `asyncio.WindowsSelectorEventLoopPolicy()` trước khi gọi
+  `uvicorn.run` (Docker / Linux không cần).

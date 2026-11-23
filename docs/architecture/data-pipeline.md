@@ -205,6 +205,20 @@ Không có chế độ mock: vector giả không bao giờ ghi vào `ai_db` dùn
 khóa `content_hash`: [research.md](../../specs/017-cv-jd-matching/research.md) R3, R4; schema dòng:
 [data-model.md](../../specs/017-cv-jd-matching/data-model.md) §1.
 
+### Đánh giá gợi ý (017)
+
+Gọi ai-service đang chạy (`AI_SERVICE_URL`, `AI_SERVICE_INTERNAL_TOKEN`) trên bộ cố định
+`data/seeds/match_eval/{cvs,pool,labels}.json` (24 CV, 36 JD, 264 nhãn):
+
+```bash
+python -m pipeline match-eval-sheet --out data/processed/match_eval/   # bảng soát không điểm + kiểm tập cặp so với nhãn
+python -m pipeline match-eval --rounds 4                               # → specs/017-cv-jd-matching/eval-results.md
+```
+
+`match-eval` tính P@5 / nDCG@5 cho cách đầy đủ, chỉ `skill_match`, chỉ `cosine` (cả tách theo ngôn ngữ JD), độ trễ p50 /
+p95 và chi phí (token × `EMBEDDING_PRICE_PER_1M`, chi phí index lấy từ run report `index-jd-match` đầy đủ mới nhất).
+Từ chối chạy khi phản hồi `degraded` hoặc `mock` (mã 4), thiếu / thừa nhãn (mã 1). Cách gán nhãn: research R9.
+
 ---
 
 ## 6. Sprint 3 — Textbook/Tutorial

@@ -219,11 +219,11 @@ theo [quickstart.md](quickstart.md) §3.
 - [x] T035 [US3] Soạn `apps/data-pipeline/data/seeds/match_eval/cvs.json`: 24 `CvProfile` tổng hợp (3 nhóm × 4 hồ sơ ×
   2 level), không có tên, liên hệ hay công ty thật. Mỗi CV phải có ≥ 10 JD trong pool qua lọc cứng. Worker `sonnet`
   soạn, DE duyệt.
-- [ ] T036 [US3] Gán nhãn theo research R9 (chốt 2026-11-22): worker LLM gán mọi cặp qua lọc cứng theo
+- [x] T036 [US3] Gán nhãn theo research R9 (chốt 2026-11-22): worker LLM gán mọi cặp qua lọc cứng theo
   [label-rubric.md](label-rubric.md), DE gán mù ~2 cặp mỗi CV trên trang artifact, tính kappa; nhãn cuối = nhãn LLM.
   Lưu `apps/data-pipeline/data/seeds/match_eval/labels.json` (ghi `labeled_by`, `method`, kappa). Khi có
   `match-eval-sheet`, kiểm tập cặp của endpoint trùng tập đã gán.
-- [ ] T037 [US3] Chạy `match-eval --rounds 4` với ai-service ở chế độ thật, commit
+- [x] T037 [US3] Chạy `match-eval --rounds 4` với ai-service ở chế độ thật, commit
   `specs/017-cv-jd-matching/eval-results.md`. Nếu SC-001 không đạt thì phân tích lỗi trên 3 CV. Review, mở PR-3.
 
 **Checkpoint**: có bảng số liệu cho báo cáo đồ án.
