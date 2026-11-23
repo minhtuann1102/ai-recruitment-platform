@@ -231,7 +231,15 @@ theo [quickstart.md](quickstart.md) §3.
 ## Phase 6: GĐ2 (US4–US6) — chưa có task code
 
 Contract nháp [contracts/gd2-job-service-draft.md](contracts/gd2-job-service-draft.md) giao FSD. Khi FSD có 007 / 008 /
-013 thì chạy lại `/speckit-plan` cho GĐ2 (chốt FR-027: nơi lưu vector CV).
+013 thì chạy lại `/speckit-plan` cho GĐ2. FR-027 chốt 2026-11-23: vector CV lưu ở DB của service sở hữu CV. Code AI còn
+lại của GĐ2 (endpoint JD → ứng viên, đường ghi vector CV, thêm / gỡ JD) do AIE viết.
+
+Việc DE làm trước được (dữ liệu demo, không phụ thuộc FSD):
+
+- [x] T040 [GĐ2] Sinh 84 CV ứng viên tổng hợp cho demo hai chiều trong
+  `apps/data-pipeline/data/seeds/candidates/candidate_cvs.json`: 6 track × 14 (fresher / junior / middle / senior),
+  tiếng Việt, không PII, `cv_profile` theo `CvProfile`, kỹ năng có trong danh mục, cờ `is_open_to_work` (~70% bật). Test
+  `apps/data-pipeline/tests/test_demo_candidate_cvs.py` kiểm schema. Seed vào DB của FSD làm sau khi có bảng.
 
 ---
 
