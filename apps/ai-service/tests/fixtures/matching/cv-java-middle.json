@@ -1,0 +1,30 @@
+{
+  "cv_profile": {
+    "schema_version": 1,
+    "headline": "Backend Developer 3 năm kinh nghiệm Java",
+    "skills": [
+      {"name": "Java", "category": "language", "evidence": "work"},
+      {"name": "Spring Boot", "category": "framework", "evidence": "work"},
+      {"name": "PostgreSQL", "category": "database", "evidence": "work"},
+      {"name": "Docker", "category": "devops", "evidence": "project"},
+      {"name": "Quantum Basket", "category": "tool", "evidence": "listed"}
+    ],
+    "experiences": [
+      {"role": "Backend Developer", "company_type": "product", "start": "2023-01", "end": null,
+       "tech": ["Java", "Spring Boot", "Kafka"],
+       "summary": "Xây dựng REST API và dịch vụ thanh toán bằng Java Spring Boot, tối ưu truy vấn PostgreSQL."}
+    ],
+    "projects": [
+      {"id": "p1", "name": "Shop API", "role": "Backend", "tech": ["Java", "Redis"],
+       "summary": "API đặt hàng và thanh toán cho cửa hàng trực tuyến.", "highlights": []}
+    ],
+    "education": [{"degree": "Cử nhân CNTT", "year": 2022}],
+    "total_years_experience": 3.0,
+    "track_relevance": "high"
+  },
+  "track": "java_backend",
+  "level": "middle",
+  "as_of": "2026-11-21",
+  "page": 1,
+  "page_size": 10
+}

@@ -1,0 +1,58 @@
+[
+  {
+    "content": "Backend Developer (Java)\nCấp bậc: Mid\nNhóm: backend\nYêu cầu: Có 3 năm kinh nghiệm phát triển dịch vụ backend bằng Java và Spring Boot. Thiết kế REST API, tối ưu truy vấn và index trên PostgreSQL, làm việc với hàng đợi sự kiện Kafka. Viết unit test, tham gia code review và vận hành dịch vụ trên môi trường production.",
+    "metadata": {"dataset": "jd-match", "chunk_type": "jd_match_summary", "jd_id": "mock:backend-java-mid", "title": "Backend Developer (Java)", "group": "backend", "level": "Mid", "deadline": "2030-12-31", "skills": ["java", "kafka", "postgresql", "spring-boot"], "synthetic": true}
+  },
+  {
+    "content": "Junior Java Developer\nCấp bậc: Junior\nNhóm: backend\nYêu cầu: Nắm vững Java core và hướng đối tượng, đã làm bài tập lớn hoặc dự án nhỏ với Spring Boot và MySQL. Biết viết REST API đơn giản, dùng Git, sẵn sàng học hỏi từ đồng nghiệp. Ưu tiên ứng viên mới tốt nghiệp ngành công nghệ thông tin.",
+    "metadata": {"dataset": "jd-match", "chunk_type": "jd_match_summary", "jd_id": "mock:backend-java-junior", "title": "Junior Java Developer", "group": "backend", "level": "Junior", "deadline": "2030-12-31", "skills": ["java", "mysql", "spring-boot"], "synthetic": true}
+  },
+  {
+    "content": "Senior Node.js Engineer\nCấp bậc: Senior\nNhóm: backend\nYêu cầu: Hơn 5 năm xây dựng API bằng Node.js và TypeScript, thiết kế dịch vụ chịu tải cao, dùng MongoDB và Redis làm cache. Dẫn dắt thiết kế kỹ thuật, hướng dẫn thành viên mới và đảm bảo chất lượng mã nguồn.",
+    "metadata": {"dataset": "jd-match", "chunk_type": "jd_match_summary", "jd_id": "mock:backend-node-senior", "title": "Senior Node.js Engineer", "group": "backend", "level": "Senior", "deadline": "2030-12-31", "skills": ["mongodb", "nodejs", "redis", "typescript"], "synthetic": true}
+  },
+  {
+    "content": "Python Backend Developer\nCấp bậc: Mid\nNhóm: backend\nYêu cầu: Kinh nghiệm 2 đến 4 năm lập trình Python, xây dựng web service bằng Django, làm việc với PostgreSQL và Redis. Hiểu về xử lý bất đồng bộ, viết test tự động và tối ưu hiệu năng truy vấn.",
+    "metadata": {"dataset": "jd-match", "chunk_type": "jd_match_summary", "jd_id": "mock:backend-python-mid", "title": "Python Backend Developer", "group": "backend", "level": "Mid", "deadline": "2030-12-31", "skills": ["django", "postgresql", "python", "redis"], "synthetic": true}
+  },
+  {
+    "content": "Backend Intern\nCấp bậc: Intern\nNhóm: backend\nYêu cầu: Sinh viên năm cuối, biết lập trình Python cơ bản và sử dụng Git. Thực tập 3 tháng cùng đội backend, hỗ trợ viết script và tài liệu API dưới sự hướng dẫn của mentor.",
+    "metadata": {"dataset": "jd-match", "chunk_type": "jd_match_summary", "jd_id": "mock:backend-intern", "title": "Backend Intern", "group": "backend", "level": "Intern", "deadline": "2030-12-31", "skills": ["git", "python"], "synthetic": true}
+  },
+  {
+    "content": "Software Engineer (Java Microservices)\nNhóm: backend\nYêu cầu: Phát triển và vận hành các microservice bằng Java, đóng gói bằng Docker. Phối hợp với đội sản phẩm để chia nhỏ nghiệp vụ, theo dõi lỗi và cải thiện độ ổn định của hệ thống.",
+    "metadata": {"dataset": "jd-match", "chunk_type": "jd_match_summary", "jd_id": "mock:backend-java-no-level", "title": "Software Engineer (Java Microservices)", "group": "backend", "level": null, "deadline": "2030-12-31", "skills": ["docker", "java", "microservices"], "synthetic": true}
+  },
+  {
+    "content": "Backend Developer (Java) - tin đã đóng\nCấp bậc: Mid\nNhóm: backend\nYêu cầu: Phát triển dịch vụ Java và Spring Boot cho hệ thống thanh toán. Tin tuyển dụng đã hết hạn nhận hồ sơ, chỉ dùng để kiểm tra bộ lọc còn hạn.",
+    "metadata": {"dataset": "jd-match", "chunk_type": "jd_match_summary", "jd_id": "mock:backend-java-expired", "title": "Backend Developer (Java) - tin đã đóng", "group": "backend", "level": "Mid", "deadline": "2020-06-30", "skills": ["java", "spring-boot"], "synthetic": true}
+  },
+  {
+    "content": "Frontend Developer (React)\nCấp bậc: Junior\nNhóm: frontend\nYêu cầu: Thành thạo HTML, CSS và JavaScript, đã làm giao diện bằng React. Chuyển thiết kế thành giao diện responsive, gọi API và xử lý trạng thái cơ bản. Có tinh thần học hỏi và chú ý chi tiết giao diện.",
+    "metadata": {"dataset": "jd-match", "chunk_type": "jd_match_summary", "jd_id": "mock:frontend-react-junior", "title": "Frontend Developer (React)", "group": "frontend", "level": "Junior", "deadline": "2030-12-31", "skills": ["css", "html", "javascript", "react"], "synthetic": true}
+  },
+  {
+    "content": "Senior Frontend Engineer (React/TypeScript)\nCấp bậc: Senior\nNhóm: frontend\nYêu cầu: Trên 5 năm xây dựng ứng dụng web bằng React, TypeScript và Next.js, quản lý trạng thái bằng Redux. Thiết kế kiến trúc frontend, tối ưu hiệu năng tải trang và hướng dẫn thành viên trong nhóm.",
+    "metadata": {"dataset": "jd-match", "chunk_type": "jd_match_summary", "jd_id": "mock:frontend-react-senior", "title": "Senior Frontend Engineer (React/TypeScript)", "group": "frontend", "level": "Senior", "deadline": "2030-12-31", "skills": ["css", "nextjs", "react", "redux", "typescript"], "synthetic": true}
+  },
+  {
+    "content": "DevOps Engineer\nCấp bậc: Mid\nNhóm: devops\nYêu cầu: Quản lý hạ tầng trên AWS bằng Terraform, triển khai ứng dụng container với Docker và Kubernetes trên Linux. Xây dựng pipeline phát hành, giám sát hệ thống và xử lý sự cố.",
+    "metadata": {"dataset": "jd-match", "chunk_type": "jd_match_summary", "jd_id": "mock:devops-mid", "title": "DevOps Engineer", "group": "devops", "level": "Mid", "deadline": "2030-12-31", "skills": ["aws", "docker", "kubernetes", "linux", "terraform"], "synthetic": true}
+  },
+  {
+    "content": "DevOps Team Lead\nCấp bậc: Lead\nNhóm: devops\nYêu cầu: Dẫn dắt đội DevOps, thiết kế quy trình CI/CD bằng Jenkins, vận hành cụm Kubernetes và hạ tầng AWS bằng Terraform. Đặt tiêu chuẩn bảo mật, chi phí và độ sẵn sàng cho nhiều đội sản phẩm.",
+    "metadata": {"dataset": "jd-match", "chunk_type": "jd_match_summary", "jd_id": "mock:devops-lead", "title": "DevOps Team Lead", "group": "devops", "level": "Lead", "deadline": "2030-12-31", "skills": ["aws", "ci-cd", "jenkins", "kubernetes", "terraform"], "synthetic": true}
+  },
+  {
+    "content": "IT Operations Manager\nCấp bậc: Manager\nNhóm: devops\nYêu cầu: Quản lý đội vận hành hệ thống, lập kế hoạch ngân sách và nhân sự, làm việc với nhà cung cấp và các bộ phận nghiệp vụ. Chịu trách nhiệm mức độ sẵn sàng của dịch vụ nội bộ.",
+    "metadata": {"dataset": "jd-match", "chunk_type": "jd_match_summary", "jd_id": "mock:devops-manager", "title": "IT Operations Manager", "group": "devops", "level": "Manager", "deadline": "2030-12-31", "skills": [], "synthetic": true}
+  },
+  {
+    "content": "Junior AI Engineer\nCấp bậc: Junior\nNhóm: ai_data\nYêu cầu: Biết Python, nắm nền tảng machine learning và đã huấn luyện mô hình bằng PyTorch trong đồ án. Chuẩn bị dữ liệu, chạy thí nghiệm, ghi lại kết quả và phối hợp với kỹ sư senior để đưa mô hình vào sản phẩm.",
+    "metadata": {"dataset": "jd-match", "chunk_type": "jd_match_summary", "jd_id": "mock:ai-data-junior", "title": "Junior AI Engineer", "group": "ai_data", "level": "Junior", "deadline": "2030-12-31", "skills": ["machine-learning", "python", "pytorch"], "synthetic": true}
+  },
+  {
+    "content": "Senior LLM Engineer\nCấp bậc: Senior\nNhóm: ai_data\nYêu cầu: Hơn 4 năm làm việc với Python, xây dựng ứng dụng LLM có truy hồi tri thức (RAG), tinh chỉnh và đánh giá chất lượng câu trả lời. Dùng PyTorch khi cần huấn luyện, theo dõi chi phí và độ trễ của hệ thống trên production.",
+    "metadata": {"dataset": "jd-match", "chunk_type": "jd_match_summary", "jd_id": "mock:ai-data-senior", "title": "Senior LLM Engineer", "group": "ai_data", "level": "Senior", "deadline": "2030-12-31", "skills": ["llm", "python", "pytorch", "rag"], "synthetic": true}
+  }
+]

@@ -24,7 +24,7 @@ Khi merge PR-2, contract này được chép vào `docs/ai-service/06` (constitu
 | `track` | có | Một trong 6 track phỏng vấn; track lạ → 422 `unknown_track` |
 | `level` | không | `fresher` \| `junior` \| `middle` \| `senior`; không có thì suy từ số năm |
 | `as_of` | không | `YYYY-MM-DD`, mặc định ngày hiện tại (Asia/Ho_Chi_Minh) |
-| `job_ids` | không | 1–200 mã; chỉ xét JD trong danh sách (dùng cho đánh giá, sau này cho GĐ2) |
+| `job_ids` | không | 1–200 mã, mỗi mã 1–64 ký tự; chỉ xét JD trong danh sách (dùng cho đánh giá, sau này cho GĐ2) |
 | `page` | không | ≥ 1, mặc định 1 |
 | `page_size` | không | 1–50, mặc định 10 |
 
@@ -71,7 +71,8 @@ Khi merge PR-2, contract này được chép vào `docs/ai-service/06` (constitu
 - Thứ tự: `score` giảm dần; hòa thì `job_id` tăng dần.
 - `total` = min(số JD qua lọc cứng, `MATCH_MAX_RESULTS`). Trang vượt quá `total` thì trả `items: []`, không báo lỗi.
 - `notes`: `jd_no_skills`, `jd_no_level`.
-- `degraded_reason`: `embedding_unavailable` | `embedding_timeout` | `embedding_error`.
+- `degraded_reason`: `embedding_unavailable` | `embedding_timeout` | `embedding_error` | `cv_text_empty` (CV không có
+  headline, kinh nghiệm hay dự án nên không có văn bản để embed; không gọi provider).
 - Văn bản CV không bao giờ được ghi log, chỉ log số lượng và thời gian.
 
 ## Lỗi

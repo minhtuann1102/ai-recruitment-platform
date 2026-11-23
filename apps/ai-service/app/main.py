@@ -28,6 +28,8 @@ from .agents.interviewer import get_interviewer
 from .plan_snippets import close_rag, note_rag_errors, rag_status, warm_rag
 from .question_stream import QuestionStream
 from .dev_play_page import router as dev_play_router
+from .matching.router import router as match_router
+from .matching.service import get_match_service
 from .security import internal_token_middleware
 from .sse import SSE_HEADERS, event
 from .stt_phrase_hints import track_phrases
@@ -44,6 +46,7 @@ log = logging.getLogger("ai_service")
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     check_agent_config()  # staging/production thieu cau hinh LLM: khong khoi dong
+    get_match_service()  # MATCH_WEIGHTS... sai: khong khoi dong (017); khong cham DB, chi muc nap o request dau
     tracing.warm()
     warm = asyncio.ensure_future(warm_rag())  # khong chan khoi dong: nap corpus BM25 o nen
     yield
@@ -59,6 +62,7 @@ app = FastAPI(title="AI Interview Service (Mock)", version="0.2.0", lifespan=lif
 app.middleware("http")(internal_token_middleware)
 app.middleware("http")(metrics.metrics_middleware)  # dang ky sau = boc ngoai: dem ca 401 cua token
 app.include_router(dev_play_router)  # GET /dev/play: trang phong van thu cho dev
+app.include_router(match_router)  # POST /api/match/jobs: goi y viec lam theo CV (017, noi bo)
 
 
 @app.exception_handler(ApiError)

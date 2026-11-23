@@ -105,29 +105,29 @@ theo [quickstart.md](quickstart.md) §3.
 
 ### Tests (viết trước)
 
-- [ ] T011 [P] [US2] Viết `apps/ai-service/tests/test_matching_levels_tracks.py`:
+- [x] T011 [P] [US2] Viết `apps/ai-service/tests/test_matching_levels_tracks.py`:
   - bảng bậc: Intern 0; Junior / fresher / junior 1; Mid / middle 2; Senior / senior 3; Lead 4; Manager 5; None → None;
   - ánh xạ 6 track → nhóm;
   - số năm < 3 → 1, < 5 → 2, còn lại → 3; không có số năm → None.
-- [ ] T012 [P] [US2] Viết `apps/ai-service/tests/test_matching_skill_normalizer.py`: "Spring Boot", "springboot",
+- [x] T012 [P] [US2] Viết `apps/ai-service/tests/test_matching_skill_normalizer.py`: "Spring Boot", "springboot",
   "spring-boot" cho cùng slug (theo bí danh có trong YAML); tên ngoài danh mục được đếm unknown; khóa so khớp dùng NFC,
   chữ thường, gộp khoảng trắng.
-- [ ] T013 [P] [US2] Viết `apps/ai-service/tests/test_matching_scorer.py`:
+- [x] T013 [P] [US2] Viết `apps/ai-service/tests/test_matching_scorer.py`:
   - lọc cùng nhóm, `deadline >= as_of`, lệch bậc ≤ `max_level_gap`, JD không level thì không lọc;
   - `cosine = max(0, cos)`;
   - `skill_match = |S_jd ∩ S_cv| / |S_jd|`, S_jd rỗng → 0 kèm note `jd_no_skills`;
   - `level_fit` 1 / 0,5 / 0, thiếu level → 0,5;
   - chế độ degraded: không có cosine, trọng số w2:w3 được chuẩn hóa lại;
   - thứ tự điểm giảm dần, hòa thì theo `job_id`; trần `max_results`.
-- [ ] T014 [P] [US2] Viết `apps/ai-service/tests/test_matching_settings.py`: mặc định `0.6,0.3,0.1`; trọng số âm, tổng
+- [x] T014 [P] [US2] Viết `apps/ai-service/tests/test_matching_settings.py`: mặc định `0.6,0.3,0.1`; trọng số âm, tổng
   ≠ 1 hoặc sai định dạng → `ConfigError`; mock không cần `AI_DB_URL` hay `LLM_API_KEY`.
-- [ ] T015 [P] [US2] Viết `apps/ai-service/tests/test_matching_job_index.py`:
+- [x] T015 [P] [US2] Viết `apps/ai-service/tests/test_matching_job_index.py`:
   - parse dòng ai_db (`embedding::text`, metadata) thành snapshot đã chuẩn hóa L2;
   - lần nạp đầu lỗi → `match_index_unavailable`;
   - snapshot cũ → trả bản cũ ngay, nạp nền; nạp nền lỗi thì giữ bản cũ;
   - mock nạp `mock_jobs.json`;
   - dùng hàm `connect` giả.
-- [ ] T016 [P] [US2] Viết `apps/ai-service/tests/test_matching_router.py` (`MATCH_MOCK=true`):
+- [x] T016 [P] [US2] Viết `apps/ai-service/tests/test_matching_router.py` (`MATCH_MOCK=true`):
   - thiếu token → 401;
   - track lạ → 422 `unknown_track`;
   - `page_size = 51` → 422 `invalid_request`;
@@ -135,52 +135,52 @@ theo [quickstart.md](quickstart.md) §3.
   - item khớp lọc cứng, `matched_skills` / `missing_skills` khớp `skill_match`;
   - trang vượt `total` → `items` rỗng;
   - `job_ids` giới hạn đúng tập JD.
-- [ ] T017 [P] [US2] Viết `apps/ai-service/tests/test_matching_rag_isolation.py`: mọi SQL đọc `knowledge_chunks` trong
+- [x] T017 [P] [US2] Viết `apps/ai-service/tests/test_matching_rag_isolation.py`: mọi SQL đọc `knowledge_chunks` trong
   `app/rag/repository.py` đều lọc `source_type` khác `job_description`; `SearchFilters()` mặc định không có
   `job_description`; `bm25_index` loại chunk `job_description` (SC-006).
-- [ ] T018 [P] [US2] Viết `apps/ai-service/tests/test_matching_service.py`: gateway giả ném lỗi hoặc quá
+- [x] T018 [P] [US2] Viết `apps/ai-service/tests/test_matching_service.py`: gateway giả ném lỗi hoặc quá
   `MATCH_EMBED_TIMEOUT_S` → `degraded = true` với `degraded_reason` tương ứng, vẫn trả kết quả; log không chứa văn bản
   CV (dùng caplog); có `timing_ms.embed`, `score`, `total` và `usage.embedding_tokens`.
 
 ### Implementation
 
-- [ ] T019 [US2] Viết `apps/ai-service/app/matching/levels_tracks.py` và `settings.py`:
+- [x] T019 [US2] Viết `apps/ai-service/app/matching/levels_tracks.py` và `settings.py`:
   - đọc `MATCH_MOCK`, `MATCH_WEIGHTS`, `MATCH_MAX_LEVEL_GAP`, `MATCH_MAX_RESULTS`, `MATCH_INDEX_REFRESH_S`,
     `MATCH_EMBED_TIMEOUT_S`, `AI_DB_URL`, `AI_DB_CONNECT_TIMEOUT_S`, `EMBEDDING_MODEL` (qua `stored_model_name`);
   - không phụ thuộc `RAG_ENABLED`.
-- [ ] T020 [US2] Chép `apps/data-pipeline/data/seeds/skill_dictionary.yaml` sang
+- [x] T020 [US2] Chép `apps/data-pipeline/data/seeds/skill_dictionary.yaml` sang
   `apps/ai-service/app/matching/skill_dictionary.yaml`. Viết `skill_normalizer.py`: `normalize(names) -> (slugs,
   unknown_count)`, `display_name(slug)`. Thêm `apps/data-pipeline/tests/test_skill_dictionary_copy_in_sync.py` so nội
   dung hai file.
-- [ ] T021 [US2] Viết `apps/ai-service/app/matching/cv_text.py`: văn bản embed của CV theo R4 (không có danh sách kỹ
+- [x] T021 [US2] Viết `apps/ai-service/app/matching/cv_text.py`: văn bản embed của CV theo R4 (không có danh sách kỹ
   năng, ≤ 1.200 ký tự) và tập kỹ năng CV từ `skills[].name`, `experiences[].tech`, `projects[].tech`.
-- [ ] T022 [US2] Viết `apps/ai-service/app/matching/hash_embedder.py` (băm token vào 1536 chiều, chuẩn hóa L2, tất
+- [x] T022 [US2] Viết `apps/ai-service/app/matching/hash_embedder.py` (băm token vào 1536 chiều, chuẩn hóa L2, tất
   định) và `mock_jobs.json` (~12 JD tự soạn, phủ 4 nhóm và đủ level, có JD hết hạn và JD không level). Không lấy nội dung
   crawl.
-- [ ] T023 [US2] Viết `apps/ai-service/app/matching/job_index.py`:
+- [x] T023 [US2] Viết `apps/ai-service/app/matching/job_index.py`:
   - snapshot (data-model §2);
   - nạp qua một kết nối psycopg async ngắn, read-only (`default_transaction_read_only=on`, `statement_timeout`), đóng
     ngay;
   - SQL lọc `source_type`, `dataset`, `embedding_model`;
   - làm mới nền khi tuổi > `MATCH_INDEX_REFRESH_S`, có khóa để không nạp chồng.
-- [ ] T024 [US2] Viết `apps/ai-service/app/matching/scorer.py` (hàm thuần, numpy) và `models.py` (pydantic request /
+- [x] T024 [US2] Viết `apps/ai-service/app/matching/scorer.py` (hàm thuần, numpy) và `models.py` (pydantic request /
   response đúng contract: `page_size` 1–50, `job_ids` ≤ 200, `level` ∈ fresher | junior | middle | senior, `as_of`
   dạng date).
-- [ ] T025 [US2] Viết `apps/ai-service/app/matching/service.py`:
+- [x] T025 [US2] Viết `apps/ai-service/app/matching/service.py`:
   - embed CV qua `get_gateway().embed` với `asyncio.wait_for(MATCH_EMBED_TIMEOUT_S)`, kèm `UsageCollector`;
   - lỗi cấu hình hay provider → degraded; ở chế độ mock dùng `hash_embedder`;
   - gọi scorer, phân trang, dựng metadata;
   - chỉ log số lượng và thời gian.
-- [ ] T026 [US2] Viết `apps/ai-service/app/matching/router.py` (`POST /api/match/jobs`, `ApiError` cho `unknown_track`
+- [x] T026 [US2] Viết `apps/ai-service/app/matching/router.py` (`POST /api/match/jobs`, `ApiError` cho `unknown_track`
   và `match_index_unavailable`), thêm `include_router` vào `apps/ai-service/app/main.py`. Thêm `numpy` (pin `2.4.6`)
   vào `apps/ai-service/requirements.txt` và các biến `MATCH_*` có comment vào `apps/ai-service/.env.example`.
-- [ ] T027 [US2] Cập nhật docs (constitution III):
+- [x] T027 [US2] Cập nhật docs (constitution III):
   - `docs/ai-service/06-api-contract.md`: chép contract endpoint;
   - `docs/architecture/ai-integration.md`: thêm sơ đồ Mermaid luồng gợi ý (pipeline index → ai_db → snapshot → scorer
     → endpoint; GĐ2 job-service nét đứt);
   - `docs/architecture/data-model.md` §5 và `docs/architecture/rag-design.md`: `job_description` được index cho gợi ý,
     không vào RAG.
-- [ ] T028 [US2] Chạy `pytest` của ai-service (toàn bộ, không chỉ test matching) và kiểm quickstart §2 ở chế độ mock.
+- [x] T028 [US2] Chạy `pytest` của ai-service (toàn bộ, không chỉ test matching) và kiểm quickstart §2 ở chế độ mock.
   Review bằng `code-reviewer` (opus), mở PR-2, gắn AIE làm reviewer.
 
 **Checkpoint**: endpoint chạy ở chế độ mock và chế độ thật (quickstart §4); RAG phỏng vấn không đổi.

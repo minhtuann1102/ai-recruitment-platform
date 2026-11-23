@@ -270,7 +270,7 @@ erDiagram
         char content_hash UK "md5, upsert idempotent"
         vector embedding "pgvector, 1536 dims"
         varchar embedding_model "text-embedding-3-small"
-        varchar source_type "interview_qa | textbook"
+        varchar source_type "interview_qa | textbook | job_description"
         varchar topic_id "id trong topic catalog, nullable"
         varchar category "Backend, Frontend, Database, System Design, DevOps, AI"
         varchar difficulty "easy | medium | hard, nullable"
@@ -285,7 +285,7 @@ erDiagram
 - LLM: **OpenAI GPT-4o-mini**. Embedding: **text-embedding-3-small** (1536 dims).
 - Image: `pgvector/pgvector:pg16` (thay vì postgres:16 thông thường).
 - `embedding` dùng cho RAG — truy vấn semantic similarity. Thiết kế đầy đủ: [rag-design.md](rag-design.md).
-- 2 nguồn dùng cho AI: Interview Q&A (`interview_qa`) và Textbook/Tutorial (`textbook`). JD (`job_description`) không còn dùng cho AI; index JD là Stretch của DE.
+- 2 nguồn dùng cho AI: Interview Q&A (`interview_qa`) và Textbook/Tutorial (`textbook`). JD (`job_description`) được index cho **gợi ý việc làm** (spec 017): mỗi JD một dòng, `metadata.dataset = 'jd-match'`, `metadata` có `jd_id, title, group, level, deadline, skills, synthetic`; `ai-service` đọc qua snapshot trong bộ nhớ (`app/matching/`). **Không dùng cho RAG phỏng vấn**: mọi truy vấn RAG lọc `source_type` (có test).
 
 ---
 
