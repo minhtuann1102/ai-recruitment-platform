@@ -180,7 +180,7 @@ theo [quickstart.md](quickstart.md) §3.
     → endpoint; GĐ2 job-service nét đứt);
   - `docs/architecture/data-model.md` §5 và `docs/architecture/rag-design.md`: `job_description` được index cho gợi ý,
     không vào RAG.
-- [ ] T028 [US2] Chạy `pytest` của ai-service (toàn bộ, không chỉ test matching) và kiểm quickstart §2 ở chế độ mock.
+- [x] T028 [US2] Chạy `pytest` của ai-service (toàn bộ, không chỉ test matching) và kiểm quickstart §2 ở chế độ mock.
   Review bằng `code-reviewer` (opus), mở PR-2, gắn AIE làm reviewer.
 
 **Checkpoint**: endpoint chạy ở chế độ mock và chế độ thật (quickstart §4); RAG phỏng vấn không đổi.
