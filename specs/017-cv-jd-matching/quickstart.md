@@ -55,7 +55,7 @@ Kỳ vọng: file `specs/017-cv-jd-matching/eval-results.md` có:
 - chi phí index và chi phí mỗi request;
 - mô tả bộ dữ liệu và hạn chế.
 
-Chạy lại lần 2 cho cùng các chỉ số chất lượng.
+Chạy lại lần 2 cho cùng các chỉ số chất lượng. Phân tích viết tay nằm ở `eval-analysis.md` (lệnh không ghi đè).
 
 ## Ghi chú chạy local trên Windows
 

@@ -69,21 +69,4 @@ Cách tính: CV đều viết tiếng Việt; ngôn ngữ JD lấy từ trườn
 - Mỗi cách tính hòa điểm thì xếp theo `job_id`; `skill_match` là tỉ lệ nên dễ hòa, khi đó thứ hạng baseline phụ thuộc thứ tự `job_id`.
 - Kết quả chỉ đúng với bộ lọc cứng, trọng số và chỉ mục ghi ở mục 1 tại thời điểm chạy.
 
-## 7. Phân tích (viết tay, 2026-11-23)
-
-Mục 1–6 do lệnh sinh; chạy lại lệnh sẽ ghi đè, cần chép lại mục này.
-
-- **Kết luận chính**: kết hợp ba thành phần tốt hơn từng tín hiệu riêng (nDCG@5 0,883 so với 0,847 và 0,842; P@5
-  0,642 so với 0,625 và 0,617). Mức chênh nhỏ trên 24 CV nên chỉ coi là xu hướng, không phải khác biệt có ý nghĩa thống kê.
-- **Theo ngôn ngữ**: trong cặp cùng ngôn ngữ (JD vi), chỉ-cosine (0,875) vượt chỉ-skill (0,795); trong cặp khác ngôn
-  ngữ (JD en), chỉ-cosine (0,903) thua chỉ-skill (0,971). Nhất quán với giả thuyết cosine bị phạt khi CV tiếng Việt gặp
-  JD tiếng Anh, còn `skill_match` không phụ thuộc ngôn ngữ vì so theo slug. Cách đầy đủ giữ được mức gần tốt nhất ở cả
-  hai nhóm. Lưu ý: mỗi tập con chỉ còn vài JD mỗi CV nên nDCG@5 cao hơn mặt bằng chung (dễ xếp đúng khi ít ứng viên) và
-  P@5 thấp (mẫu số nhỏ); chỉ so được giữa các cách tính trong cùng một nhóm, không so giữa hai nhóm.
-- **SC-002 / SC-003**: tính điểm trên toàn chỉ mục 356 JD p95 = 2 ms; toàn bộ yêu cầu p95 ≈ 0,27 s, gần như hết là
-  thời gian embed CV. Index toàn bộ JD ≈ 0,002 USD, mỗi yêu cầu ≈ 0,000005 USD.
-- **Hạn chế thêm** (chi tiết: `plans/reports/labeling-261122-1926-017-eval-labels-and-data-issues.md`):
-  - LLM soạn CV và LLM gán nhãn cuối; DE gán mù 48 cặp, chấm rộng tay hơn LLM (15/19 cặp lệch DE cao hơn).
-  - Chỉ so trong cùng nhóm (lọc cứng theo nhóm) nên không có cặp âm khác nhóm; backend Python / Node có ít JD phù hợp.
-  - Dữ liệu 009 có level lưu lệch nội dung (khoảng 9 JD), thẻ kỹ năng nhiễu và 2 JD xếp nhầm nhóm; các lỗi này ảnh
-    hưởng trực tiếp `level_fit`, `skill_match` và lọc cứng nhưng được giữ nguyên để đo hệ thống trên dữ liệu thật.
+Phân tích và cách đọc số liệu: [eval-analysis.md](eval-analysis.md) (viết tay, không bị ghi đè khi chạy lại lệnh).
