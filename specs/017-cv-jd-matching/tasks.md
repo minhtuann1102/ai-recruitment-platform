@@ -88,7 +88,7 @@ theo [quickstart.md](quickstart.md) §3.
   import + `HANDLERS.update` như `textbook_cli`.
 - [x] T009 [US1] Thêm mục "Index JD cho gợi ý (017)" vào `docs/architecture/data-pipeline.md`: lệnh, dataset, văn bản
   embed, kiểm model, link contract.
-- [ ] T010 [US1] Chạy `pytest` của pipeline, review bằng `code-reviewer` (opus), mở PR-1. Sau khi merge: chạy
+- [x] T010 [US1] Chạy `pytest` của pipeline, review bằng `code-reviewer` (opus), mở PR-1. Sau khi merge: chạy
   `python -m pipeline index-jd-match` hai lần từ `main` mới nhất, dán thống kê vào PR (SC-005).
 
 **Checkpoint**: chỉ mục JD có trong ai_db; RAG phỏng vấn không đổi.
@@ -197,31 +197,33 @@ theo [quickstart.md](quickstart.md) §3.
 
 ### Tests (viết trước)
 
-- [ ] T029 [P] [US3] Viết `apps/data-pipeline/tests/test_match_eval_metrics.py`: P@5 với nhãn ≥ 1; nDCG@5 với gain =
+- [x] T029 [P] [US3] Viết `apps/data-pipeline/tests/test_match_eval_metrics.py`: P@5 với nhãn ≥ 1; nDCG@5 với gain =
   nhãn (ví dụ tính tay); danh sách < 5 phần tử; xếp lại theo thành phần, hòa theo `job_id`; percentile p50 / p95.
-- [ ] T030 [P] [US3] Viết `apps/data-pipeline/tests/test_match_eval_data.py`: kiểm schema `cvs.json` / `pool.json` /
+- [x] T030 [P] [US3] Viết `apps/data-pipeline/tests/test_match_eval_data.py`: kiểm schema `cvs.json` / `pool.json` /
   `labels.json`; nhãn chỉ nhận 0 / 1 / 2; thiếu nhãn cho cặp qua lọc hoặc thừa nhãn → lỗi có liệt kê.
-- [ ] T031 [P] [US3] Viết `apps/data-pipeline/tests/test_match_eval_command.py` với client giả:
+- [x] T031 [P] [US3] Viết `apps/data-pipeline/tests/test_match_eval_command.py` với client giả:
   - phản hồi `degraded` hoặc `mock` → mã 4, không ghi bảng;
   - bảng soát không có điểm hay thứ hạng, thứ tự JD theo seed cố định;
   - bảng markdown có đủ các mục.
 
 ### Implementation
 
-- [ ] T032 [US3] Viết `apps/data-pipeline/pipeline/match_eval_data.py`, `match_eval_client.py` (httpx, header
+- [x] T032 [US3] Viết `apps/data-pipeline/pipeline/match_eval_data.py`, `match_eval_client.py` (httpx, header
   `X-Internal-Token`, timeout) và `match_eval_metrics.py`. Thêm `AI_SERVICE_URL`, `AI_SERVICE_INTERNAL_TOKEN`,
   `EMBEDDING_PRICE_PER_1M` vào `apps/data-pipeline/.env.example`.
-- [ ] T033 [US3] Viết `apps/data-pipeline/pipeline/match_eval_sheet_command.py`, `match_eval_command.py`,
+- [x] T033 [US3] Viết `apps/data-pipeline/pipeline/match_eval_sheet_command.py`, `match_eval_command.py`,
   `match_eval_report.py`. Đăng ký `match-eval-sheet` và `match-eval` vào `jd_match_cli.py`.
-- [ ] T034 [US3] Soạn `apps/data-pipeline/data/seeds/match_eval/pool.json`: as-of cố định và 36 mã JD thật, 12 mỗi
+- [x] T034 [US3] Soạn `apps/data-pipeline/data/seeds/match_eval/pool.json`: as-of cố định và 36 mã JD thật, 12 mỗi
   nhóm `backend` / `devops` / `ai_data`, có mẫu âm khó (Java, Python, Node cùng `backend`; JD lệch level), mọi JD còn
   hạn tại as-of. Worker `sonnet` đề xuất, DE duyệt.
-- [ ] T035 [US3] Soạn `apps/data-pipeline/data/seeds/match_eval/cvs.json`: 24 `CvProfile` tổng hợp (3 nhóm × 4 hồ sơ ×
+- [x] T035 [US3] Soạn `apps/data-pipeline/data/seeds/match_eval/cvs.json`: 24 `CvProfile` tổng hợp (3 nhóm × 4 hồ sơ ×
   2 level), không có tên, liên hệ hay công ty thật. Mỗi CV phải có ≥ 10 JD trong pool qua lọc cứng. Worker `sonnet`
   soạn, DE duyệt.
-- [ ] T036 [US3] Chạy `match-eval-sheet`, gán nhãn theo cách owner chọn (câu hỏi mở), lưu
-  `apps/data-pipeline/data/seeds/match_eval/labels.json` (ghi `labeled_by`, `method`).
-- [ ] T037 [US3] Chạy `match-eval --rounds 4` với ai-service ở chế độ thật, commit
+- [x] T036 [US3] Gán nhãn theo research R9 (chốt 2026-11-22): worker LLM gán mọi cặp qua lọc cứng theo
+  [label-rubric.md](label-rubric.md), DE gán mù ~2 cặp mỗi CV trên trang artifact, tính kappa; nhãn cuối = nhãn LLM.
+  Lưu `apps/data-pipeline/data/seeds/match_eval/labels.json` (ghi `labeled_by`, `method`, kappa). Khi có
+  `match-eval-sheet`, kiểm tập cặp của endpoint trùng tập đã gán.
+- [x] T037 [US3] Chạy `match-eval --rounds 4` với ai-service ở chế độ thật, commit
   `specs/017-cv-jd-matching/eval-results.md`. Nếu SC-001 không đạt thì phân tích lỗi trên 3 CV. Review, mở PR-3.
 
 **Checkpoint**: có bảng số liệu cho báo cáo đồ án.
@@ -237,8 +239,8 @@ Contract nháp [contracts/gd2-job-service-draft.md](contracts/gd2-job-service-dr
 
 ## Phase 7: Polish & Cross-Cutting
 
-- [ ] T038 Cập nhật trạng thái 017 trong `specs/README.md` sau mỗi PR merge, và tick task trong file này.
-- [ ] T039 [P] Ghi thay đổi vào `docs/project-changelog.md` (nếu file có) khi PR-2 và PR-3 merge.
+- [x] T038 Cập nhật trạng thái 017 trong `specs/README.md` sau mỗi PR merge, và tick task trong file này.
+- [x] T039 [P] Ghi thay đổi vào `docs/project-changelog.md` (nếu file có; 2026-11-23: repo chưa có file này, bỏ qua) khi PR-2 và PR-3 merge.
 
 ---
 

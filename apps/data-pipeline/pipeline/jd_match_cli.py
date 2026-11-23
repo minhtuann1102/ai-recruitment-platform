@@ -1,17 +1,23 @@
 """Dang ky lenh goi y viec lam CV-JD vao CLI chinh (spec 017, contracts/pipeline-cli-match.md).
 
-__main__ chi goi add_parsers(sub) va HANDLERS.update(HANDLERS cua file nay), giong textbook_cli. Hien co
-index-jd-match; match-eval-sheet va match-eval them o PR-3 (US3).
+__main__ chi goi add_parsers(sub) va HANDLERS.update(HANDLERS cua file nay), giong textbook_cli. Lenh:
+index-jd-match (US1), match-eval-sheet va match-eval (US3).
 """
 import argparse
 from typing import Callable, Dict
 
 from .jd_match_index_command import run_index_jd_match
+from .match_eval_command import add_parser as add_match_eval_parser
+from .match_eval_command import run_match_eval
+from .match_eval_sheet_command import add_parser as add_match_eval_sheet_parser
+from .match_eval_sheet_command import run_match_eval_sheet
 
 Handler = Callable[[argparse.Namespace], int]
 
 HANDLERS: Dict[str, Handler] = {
     "index-jd-match": run_index_jd_match,
+    "match-eval-sheet": run_match_eval_sheet,
+    "match-eval": run_match_eval,
 }
 
 
@@ -22,3 +28,5 @@ def add_parsers(sub) -> None:
                        help="xoa dataset jd-match (chi source_type job_description) roi index lai; dung khi doi embedding model")
     index.add_argument("--limit", type=int, default=None, metavar="N",
                        help="chi N JD dau (chay thu); khong don ban ghi cu, khong dung chung voi --rebuild")
+    add_match_eval_sheet_parser(sub)
+    add_match_eval_parser(sub)

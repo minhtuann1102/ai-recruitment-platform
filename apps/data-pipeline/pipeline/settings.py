@@ -27,6 +27,12 @@ JD_NORMALIZED_PATH = PROCESSED_DIR / "jd_normalized.jsonl"
 JD_CHUNKS_PATH = PROCESSED_DIR / "jd_chunks.jsonl"
 JD_SEED_MANIFEST_PATH = PROCESSED_DIR / "job-seed-manifest.jsonl"
 
+# Spec 017 (goi y CV-JD) US3: bo danh gia (cvs / pool / labels) commit duoc; bang soat, nhan trung gian va ket qua tho
+# (sheet-*.md, run-*.json) nam ngoai git trong data/processed/match_eval; bang ket qua cuoi commit o specs/
+MATCH_EVAL_SEEDS_DIR = APP_DIR / "data" / "seeds" / "match_eval"
+MATCH_EVAL_RUN_DIR = PROCESSED_DIR / "match_eval"
+MATCH_EVAL_RESULTS_PATH = APP_DIR.parents[1] / "specs" / "017-cv-jd-matching" / "eval-results.md"
+
 # Dau bo du lieu: chi don ban ghi cung dataset (FR-013)
 CURATED_DATASET = "de_interview_qa"  # seed commit trong repo
 CRAWLED_DATASET = "de_crawled_qa"  # crawl + dich, khong commit
@@ -153,4 +159,27 @@ def require_index_settings() -> IndexSettings:
         embedding_model=os.getenv("EMBEDDING_MODEL", "openai/text-embedding-3-small"),
         embedding_dimensions=int(os.getenv("EMBEDDING_DIMENSIONS", "1536")),
         db_url=db_url,
+    )
+
+
+@dataclass(frozen=True)
+class MatchEvalSettings:
+    base_url: str  # khong co dau "/" cuoi
+    token: str  # rong = khong gui header (ai-service dev khong dat token thi khong kiem)
+    embedding_price_per_1m: float  # USD / 1 trieu token embedding
+
+
+def require_match_eval_settings() -> MatchEvalSettings:
+    """Cau hinh match-eval / match-eval-sheet (spec 017): chi goi ai-service qua HTTP, khong can key hay DB."""
+    raw_price = os.getenv("EMBEDDING_PRICE_PER_1M", "").strip() or "0.02"
+    try:
+        price = float(raw_price)
+    except ValueError:
+        price = float("nan")
+    if not price >= 0 or price == float("inf"):  # nan, am, vo cuc deu sai
+        raise ConfigError(f"EMBEDDING_PRICE_PER_1M khong hop le: {raw_price!r} (can so >= 0, USD / 1 trieu token)")
+    return MatchEvalSettings(
+        base_url=(os.getenv("AI_SERVICE_URL", "").strip() or "http://localhost:8000").rstrip("/"),
+        token=os.getenv("AI_SERVICE_INTERNAL_TOKEN", "").strip(),
+        embedding_price_per_1m=price,
     )

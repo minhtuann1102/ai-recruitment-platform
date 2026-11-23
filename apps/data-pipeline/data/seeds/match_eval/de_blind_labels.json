@@ -1,0 +1,104 @@
+{
+  "labeled_by": "de",
+  "labeled_at": "2026-11-22",
+  "stage": "blind (before adjudication and before rubric fix)",
+  "note": "48 cap chon ngau nhien theo CV (2 cap moi CV), gan tren trang khong hien nhan LLM va ghi chu CV; chi dung do dong thuan (research R9)",
+  "labels": {
+    "be-java-mid": {
+      "itviec:1530": 0,
+      "itviec:2159": 2
+    },
+    "do-cloud-mid": {
+      "itviec:2447": 2,
+      "itviec:4034": 2
+    },
+    "ai-de-jr": {
+      "itviec:4317": 1,
+      "itviec:1445": 0
+    },
+    "do-sre-mid": {
+      "itviec:3601": 2,
+      "itviec:4938": 2
+    },
+    "be-node-mid": {
+      "itviec:0557": 0,
+      "itviec:4158": 2
+    },
+    "ai-ml-jr": {
+      "itviec:1353": 1,
+      "itviec:1950": 0
+    },
+    "ai-da-mid": {
+      "itviec:5952": 0,
+      "careerviet:35C84B0C": 0
+    },
+    "be-java-jr": {
+      "careerlink:3659541": 0,
+      "itviec:0557": 1
+    },
+    "be-dotnet-jr": {
+      "careerlink:3660673": 0,
+      "topdev:2137007": 2
+    },
+    "do-cicd-mid": {
+      "itviec:4904": 2,
+      "itviec:4316": 2
+    },
+    "ai-llm-mid": {
+      "careerviet:35C89470": 0,
+      "itviec:1445": 0
+    },
+    "do-sre-jr": {
+      "itviec:4155": 2,
+      "itviec:0220": 1
+    },
+    "be-python-mid": {
+      "itviec:2723": 0,
+      "topdev:2137007": 0
+    },
+    "do-sysadmin-jr": {
+      "itviec:2447": 0,
+      "itviec:0524": 2
+    },
+    "ai-llm-jr": {
+      "itviec:5553": 0,
+      "careerviet:35C8AD4A": 0
+    },
+    "do-cloud-jr": {
+      "itviec:4938": 2,
+      "itviec:4155": 1
+    },
+    "ai-de-mid": {
+      "itviec:4317": 0,
+      "itviec:5553": 2
+    },
+    "do-cicd-jr": {
+      "itviec:0524": 1,
+      "itviec:2447": 2
+    },
+    "be-dotnet-mid": {
+      "careerviet:35C8BE15": 1,
+      "itviec:4158": 0
+    },
+    "be-node-jr": {
+      "careerlink:3660673": 2,
+      "itviec:0557": 0
+    },
+    "do-sysadmin-mid": {
+      "itviec:0524": 2,
+      "itviec:3601": 2
+    },
+    "be-python-jr": {
+      "itviec:1530": 0,
+      "itviec:2723": 0
+    },
+    "ai-ml-mid": {
+      "itviec:1445": 0,
+      "itviec:0423": 1
+    },
+    "ai-da-jr": {
+      "itviec:0452": 0,
+      "itviec:5553": 1
+    }
+  }
+}

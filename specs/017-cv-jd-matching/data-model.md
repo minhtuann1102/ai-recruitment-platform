@@ -76,6 +76,9 @@ Theo Assumptions của spec. Code đặt ở `app/matching/levels_tracks.py`; te
 - `cvs.json`: `[{cv_id, track, level, note, cv_profile}]`. `cv_profile` theo `CvProfile` của ai-service, toàn bộ là dữ
   liệu tổng hợp.
 - `pool.json`: `{as_of, jd_ids: [...]}`. Chỉ có mã JD, không chép nội dung crawl (FR-007 của 009).
-- `labels.json`: `{labeled_by, labeled_at, method, labels: {cv_id: {jd_id: 0|1|2}}}`.
+- `labels.json`: `{labeled_by, labeled_at, method, rubric, pair_set, agreement, final_source, labels: {cv_id: {jd_id:
+  0|1|2}}}`. `agreement` ghi kappa có trọng số giữa DE gán mù và LLM (trước và sau lần sửa rubric), `final_source` đếm
+  số nhãn cuối lấy từ DE và từ LLM. Nhãn DE gán mù (48 cặp) ở `de_blind_labels.json` cùng thư mục, tái lập kappa bằng
+  `python -m pipeline.match_eval_agreement`; nhãn LLM từng lượt nằm ngoài git ở `data/processed/match_eval/`.
 - Bảng soát (`data/processed/match_eval/sheet-*.md`) và kết quả thô (`data/processed/match_eval/run-*.json`) nằm ngoài
   git. Bảng kết quả markdown cuối cùng được commit ở `specs/017-cv-jd-matching/eval-results.md`.

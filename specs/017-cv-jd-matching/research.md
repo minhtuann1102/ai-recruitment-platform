@@ -115,8 +115,22 @@ Mỗi mục: **Decision** / **Rationale** / **Alternatives considered**. Số li
   - **Chi phí**: token lấy từ `metadata.usage` và run report của index, đơn giá đặt trong cấu hình.
 - **Rationale**: có mẫu âm khó thì P@5 mới phân biệt được các cách tính. Xếp lại từ chính các thành phần mà endpoint trả
   về thì DRY và đo đúng code đang chạy.
-- **Chưa chốt**: ai gán nhãn. Spec ghi DE gán. Phương án khác: một worker LLM gán, DE soát ngẫu nhiên 20%. Đang chờ
-  owner chọn (câu hỏi ở cuối plan).
+- **Gán nhãn** (owner chốt 2026-11-22): worker LLM gán mọi cặp theo [label-rubric.md](label-rubric.md); DE gán mù
+  khoảng 20% (2 cặp mỗi CV) trên một trang artifact; báo kappa có trọng số (quadratic). Nhãn cuối lấy toàn bộ của LLM (owner chốt 2026-11-22: DE chấm rộng tay hơn, giữ một chuẩn chặt cho cả 264 cặp); nhãn DE chỉ dùng đo đồng thuận.
+  `labels.json` ghi `method = "llm+de-blind-20"`. Vì gán nhãn trước khi có endpoint (PR-2), tập cặp qua lọc cứng được
+  tính bằng bản sao luật lọc (cùng nhóm, `deadline >= as_of`, lệch bậc ≤ 1, JD không level thì qua). Khi PR-2 merge,
+  `match-eval` kiểm hai tập bằng nhau; cặp chênh thì gán bổ sung.
+- **Ngôn ngữ** (owner chốt 2026-11-22): 24 CV viết tiếng Việt, tên công nghệ giữ tiếng Anh như CV IT trong nước. JD giữ
+  nguyên bản gốc (pool có 18 vi / 17 en / 1 trộn, gần tỉ lệ 009) vì chỉ mục embed bản gốc. Bảng kết quả tách nDCG@5 theo
+  cặp cùng ngôn ngữ và khác ngôn ngữ để thấy cosine có bị phạt khi CV và JD khác ngôn ngữ không.
+- **Người gán xem toàn văn JD** (mô tả + yêu cầu, không cắt); lần gán LLM đầu cắt 2.500 ký tự làm mất phần yêu cầu của
+  một số JD nên bị bỏ, chỉ giữ để so độ ổn định.
+- **Sửa rubric một lần** (2026-11-22, sau lần đo kappa đầu = 0,659 trên 48 cặp): CV và JD backend khác ngôn ngữ chính
+  → 0, trừ khi JD ghi rõ nhận ngôn ngữ khác (tối đa 1). Lý do: nhà tuyển dụng trong nước lọc theo ngôn ngữ chính; DE
+  chấm như vậy từ đầu, rubric cũ lấy "Node → Java" làm ví dụ nhãn 1. 88 cặp backend được LLM gán lại theo rubric mới;
+  báo cáo ghi cả kappa trước và sau khi sửa.
+- **Phương án đã bỏ**: DE gán toàn bộ (tốn thời gian, nhãn một người); LLM gán + DE soát có xem nhãn LLM (không có số
+  đồng thuận độc lập).
 
 ## R10. Thứ tự PR
 

@@ -153,7 +153,7 @@ AIE review một chỗ và không chạm agent hay RAG. Tên file Python dùng s
 |---|---|---|
 | Implement từng task, viết và chạy test | Worker | `sonnet` |
 | Soạn 24 CV tổng hợp + chọn pool 36 JD có mẫu âm khó | Worker, DE duyệt | `sonnet` |
-| Gán nhãn 0/1/2 | Chờ owner chọn (câu hỏi bên dưới) | — |
+| Gán nhãn 0/1/2 | Worker LLM gán hết; DE gán mù ~20% để đo kappa (research R9) | `sonnet` |
 | Review code trước mỗi PR (`code-reviewer`) | Reviewer | `opus` |
 | Đồng ý dùng `knowledge_chunks` + review PR-2 | AIE | — |
 
