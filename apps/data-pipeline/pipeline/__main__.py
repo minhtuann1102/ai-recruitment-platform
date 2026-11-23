@@ -2,7 +2,7 @@
 
 Lenh va ma thoat: specs/005-rag-knowledge-base-qa/contracts/pipeline-cli.md;
 lenh JD (crawl-jd...): specs/009-jd-crawling-seeding/contracts/pipeline-cli-jd.md;
-lenh goi y CV-JD (index-jd-match): specs/017-cv-jd-matching/contracts/pipeline-cli-match.md.
+lenh goi y CV-JD (index-jd-match, match-eval-sheet, match-eval): specs/017-cv-jd-matching/contracts/pipeline-cli-match.md.
 """
 import argparse
 import sys

@@ -197,21 +197,21 @@ theo [quickstart.md](quickstart.md) §3.
 
 ### Tests (viết trước)
 
-- [ ] T029 [P] [US3] Viết `apps/data-pipeline/tests/test_match_eval_metrics.py`: P@5 với nhãn ≥ 1; nDCG@5 với gain =
+- [x] T029 [P] [US3] Viết `apps/data-pipeline/tests/test_match_eval_metrics.py`: P@5 với nhãn ≥ 1; nDCG@5 với gain =
   nhãn (ví dụ tính tay); danh sách < 5 phần tử; xếp lại theo thành phần, hòa theo `job_id`; percentile p50 / p95.
-- [ ] T030 [P] [US3] Viết `apps/data-pipeline/tests/test_match_eval_data.py`: kiểm schema `cvs.json` / `pool.json` /
+- [x] T030 [P] [US3] Viết `apps/data-pipeline/tests/test_match_eval_data.py`: kiểm schema `cvs.json` / `pool.json` /
   `labels.json`; nhãn chỉ nhận 0 / 1 / 2; thiếu nhãn cho cặp qua lọc hoặc thừa nhãn → lỗi có liệt kê.
-- [ ] T031 [P] [US3] Viết `apps/data-pipeline/tests/test_match_eval_command.py` với client giả:
+- [x] T031 [P] [US3] Viết `apps/data-pipeline/tests/test_match_eval_command.py` với client giả:
   - phản hồi `degraded` hoặc `mock` → mã 4, không ghi bảng;
   - bảng soát không có điểm hay thứ hạng, thứ tự JD theo seed cố định;
   - bảng markdown có đủ các mục.
 
 ### Implementation
 
-- [ ] T032 [US3] Viết `apps/data-pipeline/pipeline/match_eval_data.py`, `match_eval_client.py` (httpx, header
+- [x] T032 [US3] Viết `apps/data-pipeline/pipeline/match_eval_data.py`, `match_eval_client.py` (httpx, header
   `X-Internal-Token`, timeout) và `match_eval_metrics.py`. Thêm `AI_SERVICE_URL`, `AI_SERVICE_INTERNAL_TOKEN`,
   `EMBEDDING_PRICE_PER_1M` vào `apps/data-pipeline/.env.example`.
-- [ ] T033 [US3] Viết `apps/data-pipeline/pipeline/match_eval_sheet_command.py`, `match_eval_command.py`,
+- [x] T033 [US3] Viết `apps/data-pipeline/pipeline/match_eval_sheet_command.py`, `match_eval_command.py`,
   `match_eval_report.py`. Đăng ký `match-eval-sheet` và `match-eval` vào `jd_match_cli.py`.
 - [x] T034 [US3] Soạn `apps/data-pipeline/data/seeds/match_eval/pool.json`: as-of cố định và 36 mã JD thật, 12 mỗi
   nhóm `backend` / `devops` / `ai_data`, có mẫu âm khó (Java, Python, Node cùng `backend`; JD lệch level), mọi JD còn
