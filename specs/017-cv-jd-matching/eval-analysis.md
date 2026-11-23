@@ -58,7 +58,11 @@ CV đều tiếng Việt; JD 18 vi / 17 en / 1 trộn.
 - Dữ liệu 009 có level lưu lệch nội dung (khoảng 9 JD), thẻ kỹ năng nhiễu, 2 JD xếp nhầm nhóm
   (`plans/reports/labeling-261122-1926-017-eval-labels-and-data-issues.md`); giữ nguyên để đo hệ thống trên dữ liệu thật.
 
-## Câu hỏi chưa giải quyết
+## Tái lập độ đồng thuận
 
-- Có commit nhãn DE gán mù (48 cặp) và script tính kappa để tái lập 0,718 từ repo không? Hiện chỉ ở
-  `data/processed/match_eval/` (không vào git).
+```bash
+cd apps/data-pipeline
+python -m pipeline.match_eval_agreement data/seeds/match_eval/de_blind_labels.json data/seeds/match_eval/labels.json
+```
+
+Ra `{"n": 48, "weighted_kappa": 0.718, ...}`; test `tests/test_match_eval_agreement.py` khóa con số này.
