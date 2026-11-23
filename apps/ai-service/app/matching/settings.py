@@ -1,22 +1,31 @@
 """Cau hinh goi y viec lam tu bien moi truong (contract match-jobs-api.md muc Cau hinh).
 
 Khong phu thuoc RAG_ENABLED. Khong bao gio doi AI_DB_URL hay LLM_API_KEY o day: chi muc khong doc duoc ai_db thi
-request tra 503 match_index_unavailable (job_index), khong lam app khong khoi dong duoc. Chi sai MATCH_WEIGHTS va
-cac so sai la ConfigError ("service tu choi khoi dong", spec Edge Cases).
+request tra 503 match_index_unavailable (job_index), khong lam app khong khoi dong duoc. Chi bien MATCH_* sai la
+ConfigError ("service tu choi khoi dong", spec Edge Cases). Bien dung chung voi RAG (AI_DB_CONNECT_TIMEOUT_S) sai thi
+ve gia tri mac dinh va ghi canh bao: khong duoc chan khoi dong cua phan phong van (RAG da xu ly mem, plan_snippets).
 """
+import logging
 import math
 import os
 from dataclasses import dataclass
 from typing import Callable, Mapping, Optional, TypeVar
 
 from ..llm.errors import ConfigError
-from ..llm.settings import _flag
 from ..rag.settings import stored_model_name
 
+log = logging.getLogger("ai_service.matching")
+
 DEFAULT_WEIGHTS = "0.6,0.3,0.1"
+DEFAULT_CONNECT_TIMEOUT_S = 3  # cung mac dinh voi rag/settings.py
 WEIGHTS_SUM_TOLERANCE = 1e-6
 
 T = TypeVar("T")
+
+
+def _flag(value: str, default: bool) -> bool:
+    value = (value or "").strip().lower()
+    return default if not value else value in ("1", "true", "yes", "on")
 
 
 @dataclass(frozen=True)
@@ -66,6 +75,16 @@ def _number(env: Mapping[str, str], name: str, default: str, cast: Callable[[str
     return value
 
 
+def _shared_connect_timeout(env: Mapping[str, str]) -> int:
+    """AI_DB_CONNECT_TIMEOUT_S la bien cua RAG (libpq coi 0 la cho vo han nen phai > 0). Sai -> mac dinh + canh bao."""
+    try:
+        return _number(env, "AI_DB_CONNECT_TIMEOUT_S", str(DEFAULT_CONNECT_TIMEOUT_S), int, lambda v: v > 0,
+                       "la so nguyen duong")
+    except ConfigError:
+        log.warning("match_config_fallback var=AI_DB_CONNECT_TIMEOUT_S default=%d", DEFAULT_CONNECT_TIMEOUT_S)
+        return DEFAULT_CONNECT_TIMEOUT_S
+
+
 def load_match_settings(env: Optional[Mapping[str, str]] = None) -> MatchSettings:
     env = os.environ if env is None else env
     return MatchSettings(
@@ -76,7 +95,6 @@ def load_match_settings(env: Optional[Mapping[str, str]] = None) -> MatchSetting
         index_refresh_s=_number(env, "MATCH_INDEX_REFRESH_S", "300", int, lambda v: v >= 1, "la so nguyen >= 1"),
         embed_timeout_s=_number(env, "MATCH_EMBED_TIMEOUT_S", "5", float, lambda v: v > 0, "la so > 0"),
         db_url=(env.get("AI_DB_URL") or "").strip(),
-        # libpq coi 0 la cho vo han nen phai > 0 (giong rag/settings.py)
-        connect_timeout_s=_number(env, "AI_DB_CONNECT_TIMEOUT_S", "3", int, lambda v: v > 0, "la so nguyen duong"),
+        connect_timeout_s=_shared_connect_timeout(env),
         embedding_model=stored_model_name(env.get("EMBEDDING_MODEL") or "text-embedding-3-small"),
     )

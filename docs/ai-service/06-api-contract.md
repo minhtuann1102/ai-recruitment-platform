@@ -595,7 +595,7 @@ Response 200: report theo §6.4 (snake_case) + `metadata` (usage, latency, promp
   "track": "java_backend",              // 1 trong 6 track phỏng vấn; lạ -> 422 unknown_track
   "level": "middle",                    // fresher | junior | middle | senior; bỏ trống thì suy từ total_years_experience (< 3 Junior, < 5 Mid, còn lại Senior)
   "as_of": "2026-11-21",                // YYYY-MM-DD, mặc định hôm nay (Asia/Ho_Chi_Minh)
-  "job_ids": ["careerlink:2213041"],    // 1-200 mã; chỉ xét JD trong danh sách (đánh giá, GĐ2)
+  "job_ids": ["careerlink:2213041"],    // 1-200 mã, mỗi mã 1-64 ký tự; chỉ xét JD trong danh sách (đánh giá, GĐ2)
   "page": 1,                            // >= 1
   "page_size": 10                       // 1-50
 }
@@ -626,7 +626,7 @@ Response 200:
     "embedding_model": "text-embedding-3-small", "index_size": 360, "index_loaded_at": "2026-11-21T16:02:11Z",
     "cv_skill_count": 9,                 // số kỹ năng CV (slug) nhận ra được
     "unknown_skills_count": 2,           // kỹ năng CV ngoài danh mục (chỉ đếm, không trả tên)
-    "degraded": false, "degraded_reason": null,   // embedding_unavailable (thiếu khóa) | embedding_timeout | embedding_error
+    "degraded": false, "degraded_reason": null,   // embedding_unavailable (thiếu khóa) | embedding_timeout | embedding_error | cv_text_empty (CV không có văn bản để embed)
     "mock": false,
     "usage": { "embedding_tokens": 212 },
     "timing_ms": { "embed": 180, "score": 4, "total": 190 }

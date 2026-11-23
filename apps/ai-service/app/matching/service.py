@@ -90,6 +90,9 @@ class MatchService:
                      collector: UsageCollector) -> Tuple[Optional[np.ndarray], Optional[str], float]:
         """(vector CV hoac None, ly do degraded hoac None, giay da cho). Loi nao cung thanh degraded, tru huy task."""
         started, text, dims = time.perf_counter(), build_cv_text(cv), snapshot.matrix.shape[1]
+        if not text.strip():  # khong headline / kinh nghiem / du an: khong gui [""] len provider, khong co cosine
+            log.warning("match_embedding_degraded reason=cv_text_empty")
+            return None, "cv_text_empty", 0.0
         try:
             if self._settings.mock:
                 return hash_embed(text, dims), None, time.perf_counter() - started

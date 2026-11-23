@@ -50,7 +50,8 @@ def test_unknown_track_is_422_unknown_track(match_client):
 
 
 @pytest.mark.parametrize("bad", [{"page_size": 51}, {"page_size": 0}, {"page": 0}, {"level": "lead"},
-                                 {"as_of": "21/11/2026"}, {"job_ids": ["x"] * 201}, {"job_ids": []}])
+                                 {"as_of": "21/11/2026"}, {"job_ids": ["x"] * 201}, {"job_ids": []},
+                                 {"job_ids": ["x" * 65]}])
 def test_invalid_input_is_422_invalid_request(match_client, bad):
     r = call(match_client, **bad)
     assert r.status_code == 422 and r.json()["error"] == "invalid_request"

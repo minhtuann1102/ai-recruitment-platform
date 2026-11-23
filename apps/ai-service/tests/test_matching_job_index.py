@@ -6,15 +6,8 @@ from datetime import datetime, timezone
 import pytest
 
 from app.api_error import ApiError
-from app.matching.job_index import JD_SQL, JobIndex
-from app.matching.settings import load_match_settings
-from fakes.fake_match_index import DSN, ENV, Clock, FakeDb, meta, vec_text
-
-def make_index(db, env=None, clock=None):
-    clock = clock or Clock()
-    return JobIndex(load_match_settings({**ENV, **(env or {})}), connect=db, monotonic=clock,
-                    now=lambda: datetime(2026, 11, 22, 9, 0, 0, tzinfo=timezone.utc)), clock
-
+from app.matching.job_index import JD_SQL
+from fakes.fake_match_index import DSN, FakeDb, make_index, meta, vec_text
 
 
 # --- nap tu ai_db ---------------------------------------------------------------------------------------------
@@ -26,6 +19,7 @@ def test_load_uses_one_short_read_only_connection_and_closes_it():
     assert db.calls == 1 and db.conns[0].closed
     dsn, kw = db.seen[0]
     assert dsn == DSN and kw["autocommit"] is True and kw["connect_timeout"] == 4
+    # lop du phong: tren Supabase vai tro aie_reader moi la noi ep read-only / statement_timeout (Supavisor bo options)
     assert "default_transaction_read_only=on" in kw["options"] and "statement_timeout" in kw["options"]
     sql, params = db.conns[0].executed[0]
     assert sql == JD_SQL and params == ["text-embedding-3-small"]

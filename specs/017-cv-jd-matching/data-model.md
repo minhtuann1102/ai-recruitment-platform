@@ -45,9 +45,11 @@ Luật:
 - `matrix`: ma trận numpy N × 1536, mỗi hàng đã chuẩn hóa L2
 - `embedding_model`, `loaded_at`, `source` (`ai_db` | `mock`)
 
-Vòng đời: chưa có → nạp lần đầu (request đầu chờ, lỗi → 503 `match_index_unavailable`) → còn mới → cũ hơn
-`MATCH_INDEX_REFRESH_S` (request dùng bản cũ, nạp nền) → thay bằng bản mới. Nạp nền lỗi thì giữ bản cũ và ghi log
-`match_index_refresh_failed`.
+Vòng đời: chưa có → nạp lần đầu (một task nạp dùng chung; mỗi request chờ tối đa `AI_DB_CONNECT_TIMEOUT_S` + 5 s,
+quá hạn hoặc lỗi → 503 `match_index_unavailable`; task vẫn chạy tiếp ở nền) → còn mới → cũ hơn `MATCH_INDEX_REFRESH_S`
+(request dùng bản cũ, nạp nền) → thay bằng bản mới. Nạp nền lỗi thì giữ bản cũ và ghi log `match_index_refresh_failed`;
+nạp nền ra rỗng trong khi bản cũ có JD thì cũng giữ bản cũ (log `match_index_refresh_empty`). Sau khi nạp lần đầu lỗi, 5 s
+tiếp theo request khác nhận 503 ngay, không thử lại (tránh mỗi request chờ hết `connect_timeout`).
 
 ## 3. Bảng bậc level và ánh xạ track
 

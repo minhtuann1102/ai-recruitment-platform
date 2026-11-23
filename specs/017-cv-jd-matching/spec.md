@@ -5,7 +5,7 @@
 
 **Created**: 2026-11-21
 
-**Status**: Draft — FR-018, FR-025 chốt 2026-11-21; chờ AIE đồng ý dùng `knowledge_chunks` (Phụ thuộc)
+**Status**: Draft — FR-018, FR-025 chốt 2026-11-21; AIE đồng ý dùng `knowledge_chunks` 2026-11-22 (Phụ thuộc)
 
 **Owner**: DE (chính), AIE review phần trong `apps/ai-service` — **Sprint**: 4 (23/11 → 07/12/2026), **Stretch**
 

@@ -1,5 +1,9 @@
 """Fake dung chung cho test chi muc JD (017): ket noi ai_db gia, dong ho gia, dong (embedding::text, metadata)."""
+from datetime import datetime, timezone
+
 from app.matching.hash_embedder import EMBEDDING_DIMS
+from app.matching.job_index import JobIndex
+from app.matching.settings import load_match_settings
 
 DSN = "postgresql://aie_reader:S3CRET@db.example:5432/ai_db"
 ENV = {"AI_DB_URL": DSN, "MATCH_INDEX_REFRESH_S": "300", "AI_DB_CONNECT_TIMEOUT_S": "4"}
@@ -67,3 +71,10 @@ class Clock:
 
     def __call__(self):
         return self.t
+
+
+def make_index(db, env=None, clock=None, **kwargs):
+    """JobIndex voi ket noi gia, dong ho gia (Clock) va gio nap co dinh; kwargs di thang vao JobIndex."""
+    clock = clock or Clock()
+    return JobIndex(load_match_settings({**ENV, **(env or {})}), connect=db, monotonic=clock,
+                    now=lambda: datetime(2026, 11, 22, 9, 0, 0, tzinfo=timezone.utc), **kwargs), clock

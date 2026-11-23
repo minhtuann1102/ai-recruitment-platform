@@ -1,4 +1,6 @@
 """017 US2 T014: cau hinh MATCH_*; sai trong so -> ConfigError; mock khong can AI_DB_URL / LLM_API_KEY."""
+import logging
+
 import pytest
 
 from app.llm.errors import ConfigError
@@ -62,8 +64,22 @@ def test_weights_sum_tolerance_is_1e_minus_6():
 @pytest.mark.parametrize("name,value", [
     ("MATCH_MAX_LEVEL_GAP", "-1"), ("MATCH_MAX_LEVEL_GAP", "x"), ("MATCH_MAX_RESULTS", "0"),
     ("MATCH_INDEX_REFRESH_S", "0"), ("MATCH_EMBED_TIMEOUT_S", "0"), ("MATCH_EMBED_TIMEOUT_S", "nan"),
-    ("AI_DB_CONNECT_TIMEOUT_S", "0"),
 ])
 def test_bad_numeric_settings_raise_config_error(name, value):
     with pytest.raises(ConfigError, match=name):
         load_match_settings({name: value})
+
+
+@pytest.mark.parametrize("value", ["0", "-1", "3.5", "abc"])
+def test_bad_shared_db_timeout_falls_back_to_the_default_instead_of_stopping_startup(value, caplog):
+    # AI_DB_CONNECT_TIMEOUT_S la bien cua RAG (RAG xu ly mem): chi MATCH_* sai moi duoc chan khoi dong
+    with caplog.at_level(logging.WARNING, logger="ai_service.matching"):
+        s = load_match_settings({"AI_DB_CONNECT_TIMEOUT_S": value})
+    assert s.connect_timeout_s == 3
+    assert "match_config_fallback var=AI_DB_CONNECT_TIMEOUT_S default=3" in caplog.text
+
+
+def test_valid_shared_db_timeout_is_used_without_warning(caplog):
+    with caplog.at_level(logging.WARNING, logger="ai_service.matching"):
+        assert load_match_settings({"AI_DB_CONNECT_TIMEOUT_S": "10"}).connect_timeout_s == 10
+    assert caplog.text == ""

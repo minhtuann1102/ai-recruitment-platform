@@ -1,5 +1,10 @@
 """POST /api/match/jobs (contracts/match-jobs-api.md): endpoint noi bo, X-Internal-Token do middleware kiem.
 
+KHONG goi tracing.start_request o day (va khong them trace theo request o middleware cho route nay): LlmGateway.embed ghi
+observation "embedding" kem input=[van ban CV]; khong co trace dang mo thi observation do la no-op nen CV khong roi khoi
+service. Mo trace thi van ban CV (chi che email / so dien thoai, mask_pii) len Langfuse. Can trace thi bo input truoc.
+Co test: tests/test_matching_tracing_privacy.py.
+
 Loi: 401 (middleware), 422 invalid_request (handler chung trong main.py), 422 unknown_track va 503
 match_index_unavailable (ApiError tu service / job_index).
 """

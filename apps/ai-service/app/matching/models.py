@@ -14,7 +14,7 @@ from ..models_cv import CvProfile
 from .settings import MatchWeights
 
 _ISO_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
-DegradedReason = Literal["embedding_unavailable", "embedding_timeout", "embedding_error"]
+DegradedReason = Literal["embedding_unavailable", "embedding_timeout", "embedding_error", "cv_text_empty"]
 
 
 class MatchJobsRequest(BaseModel):
@@ -22,7 +22,7 @@ class MatchJobsRequest(BaseModel):
     track: str
     level: Optional[Level] = None  # khong co thi suy tu so nam kinh nghiem
     as_of: Optional[date] = None  # mac dinh ngay hien tai (Asia/Ho_Chi_Minh), service dien
-    job_ids: Optional[List[Annotated[str, StringConstraints(min_length=1)]]] = Field(
+    job_ids: Optional[List[Annotated[str, StringConstraints(min_length=1, max_length=64)]]] = Field(
         default=None, min_length=1, max_length=200)  # chi xet cac JD nay (danh gia, GD2)
     page: int = Field(1, ge=1)
     page_size: int = Field(10, ge=1, le=50)

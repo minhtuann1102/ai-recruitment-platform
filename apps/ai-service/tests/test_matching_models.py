@@ -31,14 +31,15 @@ def test_level_values(level):
 
 
 @pytest.mark.parametrize("bad", [{"level": "lead"}, {"level": "Mid"}, {"page": 0}, {"page_size": 0},
-                                 {"page_size": 51}, {"job_ids": []}, {"job_ids": ["x"] * 201}, {"job_ids": [""]}])
+                                 {"page_size": 51}, {"job_ids": []}, {"job_ids": ["x"] * 201}, {"job_ids": [""]},
+                                 {"job_ids": ["x" * 65]}])
 def test_invalid_values_rejected(bad):
     with pytest.raises(ValidationError):
         req(**bad)
 
 
 def test_page_size_and_job_ids_boundaries_accepted():
-    assert req(page_size=50, job_ids=["x"] * 200).page_size == 50 and req(page_size=1).page_size == 1
+    assert req(page_size=50, job_ids=["x" * 64] * 200).page_size == 50 and req(page_size=1).page_size == 1
 
 
 def test_missing_required_fields_rejected():
@@ -96,7 +97,7 @@ def test_degraded_item_and_nullable_fields():
 
 
 def test_degraded_reason_values():
-    for reason in ("embedding_unavailable", "embedding_timeout", "embedding_error"):
+    for reason in ("embedding_unavailable", "embedding_timeout", "embedding_error", "cv_text_empty"):
         assert make_meta(degraded=True, degraded_reason=reason).degraded_reason == reason
     with pytest.raises(ValidationError):
         make_meta(degraded_reason="boom")

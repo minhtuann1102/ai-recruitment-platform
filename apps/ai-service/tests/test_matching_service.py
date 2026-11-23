@@ -4,63 +4,18 @@ import json
 import logging
 import time
 from datetime import date, datetime, timezone
-from pathlib import Path
 
 import pytest
 
 from app.api_error import ApiError
 from app.llm.errors import ConfigError, LlmError, LlmTimeoutError
-from app.llm.usage import CallRecord
-from app.matching.hash_embedder import EMBEDDING_DIMS, hash_embed
 from app.matching.job_index import JobIndexSnapshot, build_mock_snapshot
-from app.matching.models import MatchJobsRequest
 from app.matching.service import MatchService
 from app.matching.settings import load_match_settings
+from fakes.fake_match_service import BODY, FakeGateway, StaticIndex, request, run, service
 
-BODY = json.loads((Path(__file__).parent / "fixtures" / "matching" / "cv-java-middle.json").read_text(encoding="utf-8"))
 SECRET_HEADLINE = "ZXQ-SECRET-HEADLINE-Backend-Wizard"
 SECRET_SUMMARY = "ZXQ-SECRET-SUMMARY-built-quantum-ledger"
-
-
-class StaticIndex:
-    def __init__(self, snapshot):
-        self.snapshot = snapshot
-
-    async def get(self):
-        return self.snapshot
-
-
-class FakeGateway:
-    """embed gia: tra vector, hoac nem loi, hoac cho lau; ghi lai van ban da nhan."""
-
-    def __init__(self, error=None, delay=0.0, tokens=37, dims=EMBEDDING_DIMS):
-        self.error, self.delay, self.tokens, self.dims, self.texts = error, delay, tokens, dims, []
-
-    async def embed(self, texts, *, collector=None):
-        self.texts.extend(texts)
-        if self.delay:
-            await asyncio.sleep(self.delay)
-        if self.error:
-            raise self.error
-        if collector is not None:
-            collector.add(CallRecord("embedding", "text-embedding-3-small", input_tokens=self.tokens))
-        return [hash_embed(t, self.dims).tolist() for t in texts]
-
-
-def request(**override):
-    return MatchJobsRequest.model_validate({**BODY, **override})
-
-
-def service(gateway=None, env=None, snapshot=None, today=date(2026, 11, 22)):
-    settings = load_match_settings({"MATCH_EMBED_TIMEOUT_S": "0.3", **(env or {})})
-    if snapshot is None:
-        snapshot = build_mock_snapshot(datetime(2026, 11, 22, 8, 0, 0, tzinfo=timezone.utc))
-    gw = gateway or FakeGateway()
-    return MatchService(settings, StaticIndex(snapshot), gateway_factory=lambda: gw, today=lambda: today), gw
-
-
-def run(svc, **override):
-    return asyncio.run(svc.recommend(request(**override)))
 
 
 def test_embedding_success_is_not_degraded_and_reports_usage_and_timing():
@@ -191,3 +146,15 @@ def test_page_slice_and_max_results_cap():
     assert res.total == 3 and len(res.items) == 2
     assert [i.job_id for i in run(svc, page=2, page_size=2).items] != [i.job_id for i in res.items]
     assert len(run(svc, page=2, page_size=2).items) == 1 and run(svc, page=3, page_size=2).items == []
+
+
+@pytest.mark.parametrize("env", [{}, {"MATCH_MOCK": "true"}])
+def test_cv_without_any_text_is_degraded_cv_text_empty_without_calling_the_provider(env):
+    svc, gw = service(env=env)
+    empty = {"schema_version": 1, "headline": " ", "skills": [{"name": "Java", "category": "language",
+                                                                 "evidence": "listed"}]}
+    res = run(svc, cv_profile=empty)
+    meta = res.metadata
+    assert meta.degraded and meta.degraded_reason == "cv_text_empty" and gw.texts == []
+    assert all(i.components.cosine is None for i in res.items) and res.total == 5  # van tra theo skill + level
+    assert meta.weights.cosine == 0.0 and meta.usage.embedding_tokens == 0

@@ -52,7 +52,11 @@ Mỗi mục: **Decision** / **Rationale** / **Alternatives considered**. Số li
 
 - **Decision**: giữ một snapshot chỉ mục JD trong bộ nhớ (ma trận numpy đã chuẩn hóa cùng metadata). Request đầu tiên nạp
   snapshot. Sau đó, khi snapshot quá `MATCH_INDEX_REFRESH_S` (mặc định 300 s), một task nền nạp lại, còn request vẫn
-  dùng bản cũ, không chờ. Mỗi lần nạp mở **một kết nối ngắn ở chế độ read-only** rồi đóng. Truy vấn:
+  dùng bản cũ, không chờ. Mỗi lần nạp mở **một kết nối ngắn** rồi đóng; chỉ đọc và `statement_timeout` do vai trò
+  `aie_reader` trên Supabase ép (`scripts/supabase-ai-db-access.sql`), vì Supavisor bỏ tham số `options` lúc kết nối;
+  cờ `default_transaction_read_only=on` + `statement_timeout` trong `options` chỉ là lớp dự phòng. Lần nạp đầu là một
+  task dùng chung, mỗi request chờ nó qua `asyncio.shield` với hạn `AI_DB_CONNECT_TIMEOUT_S` + 5 s (quá hạn → 503;
+  hủy thẳng psycopg có thể treo). Truy vấn:
   `SELECT content_hash, embedding::text, metadata ... WHERE source_type='job_description' AND
   metadata->>'dataset'='jd-match' AND embedding_model=%s`.
 - **Rationale**:
