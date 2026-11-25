@@ -31,6 +31,10 @@ __pycache__/
 apps/data-pipeline/data/raw/
 apps/data-pipeline/data/processed/
 
+# voice-service: ghi am bo do (co dong y cua nguoi ghi) va ket qua tho nam ngoai git (spec 015 FR-023)
+apps/voice-service/evals/audio/
+apps/voice-service/evals/out/
+
 # os
 .DS_Store
 # Ket qua eval tho (transcript tong hop, lon): chi commit bao cao .md

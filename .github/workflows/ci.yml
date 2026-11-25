@@ -36,7 +36,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        app: [ai-service, data-pipeline]
+        app: [ai-service, data-pipeline, voice-service]
     defaults:
       run:
         working-directory: apps/${{ matrix.app }}

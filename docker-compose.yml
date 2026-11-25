@@ -121,6 +121,27 @@ services:
       timeout: 5s
       retries: 3
 
+  # Voice (STT / TTS qua Blaze, chi so trinh bay): service noi bo, giu key Blaze phia server (spec 015, ADR-011).
+  # Cau hinh o apps/voice-service/.env (chep tu .env.example); thieu file thi van len, /api/health bao `unconfigured`.
+  voice-service:
+    build:
+      context: ./apps/voice-service
+      dockerfile: Dockerfile
+    container_name: ai_recruit_voice_service
+    ports:
+      # chi localhost: service khong co route public; cac service khac toi qua mang ai-recruit-network
+      - '127.0.0.1:8020:8020'
+    env_file:
+      - path: ./apps/voice-service/.env
+        required: false
+    networks:
+      - ai-recruit-network
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8020/api/health']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
 #  kafka:
 #    container_name: ai_recruit_kafka
 #    extends:
