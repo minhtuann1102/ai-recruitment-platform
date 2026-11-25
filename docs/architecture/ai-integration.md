@@ -201,3 +201,34 @@ flowchart LR
 - **Mock:** `MATCH_MOCK=true` dùng chỉ mục mẫu 14 JD tự soạn và embedding băm token tất định, không đọc `ai_db`, không gọi provider; vector giả không bao giờ ghi vào `ai_db`.
 - **Không lưu CV:** ai-service không lưu vector hay văn bản CV; log chỉ có số lượng và thời gian.
 - **GĐ2 (đường nét đứt):** job-service gọi endpoint này, thêm RBAC và cache; chờ FSD (007, 008, 013).
+
+## 10. Kênh voice (spec 015)
+
+Voice là **lớp kênh** của chat (quyết định A8, [ADR-011](adr/adr-011-voice-service-cho-tuy-chon-a.md)): `ai-service` vẫn nhận câu trả lời dạng văn bản và **không biết có voice**. Một service nội bộ riêng, `voice-service` (FastAPI, stateless, port 8020), giữ khóa nhà cung cấp Blaze phía server và tính chỉ số trình bày. **Contract đầy đủ:** [specs/015-voice-mode/contracts/voice-service-api.md](../../specs/015-voice-mode/contracts/voice-service-api.md) (nguồn duy nhất, không chép lại ở đây).
+
+```mermaid
+flowchart LR
+    subgraph CALLER["bên gọi (interview-service / server của web, FSD)"]
+        C["voice client"]
+    end
+    subgraph VS["voice-service (stateless, X-Internal-Token)"]
+        T["POST /api/voice/transcribe"]
+        S["POST /api/voice/speak"]
+        M["POST /api/voice/session-summary"]
+    end
+    BL["Blaze: VAD, STT, TTS"]
+    AI["ai-service"]
+    C -->|"audio + consent_confirmed + keywords"| T
+    C -->|"done.question"| S
+    C -->|"metrics các lượt"| M
+    T -->|"VAD rồi STT"| BL
+    S -->|"stream mp3"| BL
+    C -->|"transcript (đã sửa) làm answer, answer_source=voice, không có stt_confidence"| AI
+```
+
+- **Luồng một lượt:** web ghi âm → bên gọi gửi audio kèm `consent_confirmed=true`, danh sách thuật ngữ (`GET /api/stt/phrases` của ai-service), hai mốc thời gian client và giới hạn thời gian câu → nhận `transcript` gốc, `segments`, `metrics` → ứng viên sửa → bên gọi gửi bản sửa vào `/api/next-turn` như chat và lưu bản gốc ở `stt_raw_text` (FSD).
+- **Không có `stt_confidence`:** Blaze không trả độ tin cậy; service không bịa. Thiếu trường này thì ai-service luôn chấm (contract §7.4), nhánh hỏi lại theo độ tin cậy không chạy.
+- **Chỉ số trình bày** (thời gian suy nghĩ, độ dài, tốc độ nói, quãng ngừng dài, tỷ lệ từ đệm) tính bằng code từ bản ghi gốc và mốc thời gian theo từ của STT; tách khỏi điểm kiến thức, chỉ ứng viên xem. Không phân tích con người (tuổi, giới tính, cảm xúc, phát âm).
+- **Riêng tư:** audio chỉ nằm trong bộ nhớ, không ghi đĩa; log không chứa bản ghi, văn bản câu hỏi hay thuật ngữ; không gửi audio tới Blaze khi thiếu `consent_confirmed`.
+- **Lỗi:** `{error, message, details}` như ai-service (`consent_required`, `invalid_audio`, `audio_too_long`, `quota_exceeded`, `provider_rate_limited`, `provider_timeout`, `provider_error`, `provider_unconfigured`...); bên gọi chuyển sang chat khi voice lỗi.
+- **Chạy và cấu hình:** [apps/voice-service/README.md](../../apps/voice-service/README.md); compose: khối `voice-service` trong `docker-compose.yml`.

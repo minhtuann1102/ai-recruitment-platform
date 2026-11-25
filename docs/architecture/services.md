@@ -10,6 +10,7 @@
 | 4 | interview-service | NestJS | `interview_db` | 3304 | — | Mới |
 | 5 | notification-service | NestJS | `notification_db` | 3303 | 3413 | Có sẵn, defer |
 | 6 | ai-service | FastAPI | `ai_db` (tương lai) | 8000 | — | Mock |
+| 7 | voice-service | FastAPI | — (stateless) | 8020 | — | Mới (spec 015) |
 
 > **Ghi chú port:** HTTP port là external (qua APISIX hoặc direct). TCP port là internal (NestJS microservice transport). Interview-service không cần TCP vì không có service nào gọi nó qua TCP — nó là consumer (gọi AI qua REST).
 
@@ -241,6 +242,36 @@ Xem chi tiết contract tại [ai-integration.md](ai-integration.md).
 
 ---
 
+## 7. voice-service
+
+**Trạng thái:** Mới (spec 015, Sprint 4 Stretch). Xem [ADR-011](adr/adr-011-voice-service-cho-tuy-chon-a.md). Service **nội bộ**, DE sở hữu; chưa có route public ở APISIX.
+
+**Trách nhiệm:**
+- Giữ khóa nhà cung cấp giọng nói (Blaze) phía server; trình duyệt không bao giờ thấy khóa
+- Nói thành chữ: VAD chặn lượt không có tiếng, STT kèm danh sách thuật ngữ; trả bản ghi gốc, đoạn có tiếng, chỉ số trình bày của lượt (thời gian suy nghĩ, độ dài, tốc độ nói, quãng ngừng dài, tỷ lệ từ đệm) tính bằng code
+- Chữ thành tiếng: proxy stream mp3 từ TTS
+- Tổng hợp chỉ số trình bày cả phiên thành nhận xét theo mẫu cố định (không LLM, tách khỏi điểm kiến thức)
+
+**DB:** Không có. Không lưu audio, bản ghi hay văn bản câu hỏi (`interview-service` giữ `stt_raw_text` khi FSD làm).
+
+**Giao tiếp:**
+- REST nội bộ, header `X-Internal-Token` (giống `ai-service`); bên gọi là `interview-service` / phần server của web
+- REST client → Blaze (`api.blaze.vn`); không gọi `ai-service`
+
+**API (contract: [voice-service-api.md](../../specs/015-voice-mode/contracts/voice-service-api.md)):**
+
+| Method | Endpoint | Mô tả |
+|---|---|---|
+| POST | /api/voice/transcribe | Audio + `consent_confirmed` → bản ghi, đoạn có tiếng, chỉ số lượt |
+| POST | /api/voice/speak | Văn bản câu hỏi → stream `audio/mpeg` |
+| POST | /api/voice/session-summary | Chỉ số các lượt → tổng hợp + nhận xét |
+| GET | /api/health | Health check (`provider: blaze` hoặc `unconfigured`) |
+| GET | /metrics | Prometheus |
+
+Chạy và cấu hình: [apps/voice-service/README.md](../../apps/voice-service/README.md).
+
+---
+
 ## Đánh giá cách chia service
 
 ### Tại sao gộp application vào job-service?
@@ -268,3 +299,4 @@ Brief đề xuất 7 service riêng biệt. Sau khi đánh giá, gộp `applicat
 | interview-service | Giữ nguyên | Domain riêng biệt |
 | notification-service | Defer enhancement | Đã có skeleton |
 | ai-service | Mock | FastAPI stub trong Docker |
+| (mới, spec 015) voice-service | Thêm | Giữ khóa Blaze phía server, ai-service không biết có voice; xem [ADR-011](adr/adr-011-voice-service-cho-tuy-chon-a.md) |
