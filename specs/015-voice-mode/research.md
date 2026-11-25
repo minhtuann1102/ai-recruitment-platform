@@ -152,7 +152,11 @@ chốt ở task spike (T001–T003 của tasks.md).
 | `GET /v1/audio/voices` | `[]` (chỉ giọng tự tạo) | danh sách giọng cấu hình tay; `HN-Nam-2-BL` chạy |
 | Kết nối | httpx async đôi khi `ConnectError` ở lần nối đầu trên máy này | client có retry ở transport |
 
-Chưa đo: credit thật mỗi lần gọi (owner xem trang tài khoản), định dạng `webm/opus` (cần ghi âm thật).
+Credit: cả spike tốn **15 credit** (≈ 2,3 phút STT batch, ≈ 1 phút STT realtime, ≈ 2 phút audio TTS, vài lần VAD), khớp
+bảng giá. Ước một phiên 20 phút (≈ 8 phút ứng viên nói, ≈ 3–4 phút câu hỏi đọc) ≈ 40–50 credit; tài khoản owner có
+11.000 credit → đủ bộ đo (~30 clip × 2 lượt) và vài trăm phiên demo (SC-007).
+
+Chưa đo: định dạng `webm/opus` và từ đệm trên giọng thật (cần ghi âm thật).
 
 **Quyết định owner (2026-11-25)**: giữ STT batch `blaze-stt-1.5` (chất lượng, mốc theo từ, keywords), sửa SC-001 theo số
 đo; stream realtime để sau khi có web.
