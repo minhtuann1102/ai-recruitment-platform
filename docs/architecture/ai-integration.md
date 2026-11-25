@@ -227,8 +227,8 @@ flowchart LR
 ```
 
 - **Luồng một lượt:** web ghi âm → bên gọi gửi audio kèm `consent_confirmed=true`, danh sách thuật ngữ (`GET /api/stt/phrases` của ai-service), hai mốc thời gian client và giới hạn thời gian câu → nhận `transcript` gốc, `segments`, `metrics` → ứng viên sửa → bên gọi gửi bản sửa vào `/api/next-turn` như chat và lưu bản gốc ở `stt_raw_text` (FSD).
-- **Không có `stt_confidence`:** Blaze không trả độ tin cậy; service không bịa. Thiếu trường này thì ai-service luôn chấm (contract §7.4), nhánh hỏi lại theo độ tin cậy không chạy.
+- **Không có `stt_confidence`:** Blaze không trả độ tin cậy; service không bịa. Thiếu trường này thì ai-service luôn chấm ([06-api-contract.md §7.4](../ai-service/06-api-contract.md)), nhánh hỏi lại theo độ tin cậy không chạy.
 - **Chỉ số trình bày** (thời gian suy nghĩ, độ dài, tốc độ nói, quãng ngừng dài, tỷ lệ từ đệm) tính bằng code từ bản ghi gốc và mốc thời gian theo từ của STT; tách khỏi điểm kiến thức, chỉ ứng viên xem. Không phân tích con người (tuổi, giới tính, cảm xúc, phát âm).
 - **Riêng tư:** audio chỉ nằm trong bộ nhớ, không ghi đĩa; log không chứa bản ghi, văn bản câu hỏi hay thuật ngữ; không gửi audio tới Blaze khi thiếu `consent_confirmed`.
-- **Lỗi:** `{error, message, details}` như ai-service (`consent_required`, `invalid_audio`, `audio_too_long`, `quota_exceeded`, `provider_rate_limited`, `provider_timeout`, `provider_error`, `provider_unconfigured`...); bên gọi chuyển sang chat khi voice lỗi.
+- **Lỗi:** `{error, message, details}` như ai-service (`consent_required`, `length_required`, `invalid_audio`, `audio_too_long`, `quota_exceeded`, `provider_rate_limited`, `provider_timeout`, `provider_error`, `provider_unconfigured`...); bên gọi chuyển sang chat khi voice lỗi.
 - **Chạy và cấu hình:** [apps/voice-service/README.md](../../apps/voice-service/README.md); compose: khối `voice-service` trong `docker-compose.yml`.

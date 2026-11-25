@@ -100,7 +100,7 @@ chỉ số, số lượt vượt ngưỡng, và vài câu nhận xét trung tín
 **Why this priority**: là phần giá trị mới của voice so với chat; cần US1 trước.
 
 **Independent Test**: gửi danh sách chỉ số dựng sẵn (không cần audio), nhận tổng hợp đúng theo công thức; danh sách
-rỗng hoặc toàn lượt chat trả "không có dữ liệu voice".
+rỗng (hoặc toàn lượt chat, bên gọi không gửi lượt nào) trả `voice_turns: 0`, `stats` và `notes` rỗng.
 
 **Acceptance Scenarios**:
 
@@ -204,7 +204,8 @@ vào một file kết quả trong thư mục spec, dùng cho báo cáo đồ án
 - **FR-011**: Hệ thống MUST nhận danh sách chỉ số các lượt (đúng định dạng FR-006, có thể kèm mã topic) và trả: số lượt
   voice, trung vị và khoảng của từng chỉ số, số lượt có quãng ngừng dài, số lượt vượt giới hạn, và 0–4 câu nhận xét
   trung tính bằng tiếng Việt theo mẫu cố định trong code. Không lưu gì giữa các request.
-- **FR-012**: Chỉ số rỗng ở mọi lượt MUST không xuất hiện trong nhận xét. Danh sách rỗng trả "không có dữ liệu voice".
+- **FR-012**: Chỉ số rỗng ở mọi lượt MUST không xuất hiện trong nhận xét. Danh sách rỗng trả `voice_turns: 0`, thống kê
+  rỗng và không có nhận xét (`notes: []`); bên gọi hiển thị "không có dữ liệu voice" (không phải chuỗi do service trả).
 - **FR-013**: Bản tổng hợp MUST NOT chứa hay ảnh hưởng điểm kiến thức. Ghép bản tổng hợp vào báo cáo là việc của bên
   gọi (hoặc thay đổi sau của AIE ở `/api/finalize`); spec này không giả định `/api/finalize` có mục đó.
 
