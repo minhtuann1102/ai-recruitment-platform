@@ -49,7 +49,7 @@ cùng lúc (gọi tuần tự); ~12 ngày tới 07/12
 | IV. AI stateless, dữ liệu phỏng vấn thuộc interview-service | Đạt: voice-service không lưu; `stt_raw_text` lưu ở interview-service (FSD); ai-service không đổi |
 | V. Pipeline tái lập | Không áp dụng (không ghi ai_db); bộ đo chạy lại được theo manifest |
 | VI. Quality gates | Đạt khi thêm `voice-service` vào matrix job `python` của CI, test không mạng |
-| VII. Đơn giản, phạm vi | **Thêm service**: có task S4-DE-5 cần, lý do ở Complexity Tracking + ADR-011. Stretch làm khi task Bắt buộc của DE trong S4 không bị chặn bởi việc này (task Bắt buộc còn lại của DE đang chờ FSD) |
+| VII. Đơn giản, phạm vi | **Thêm service**: có task S4-DE-5 cần, lý do ở Complexity Tracking + ADR-011. **Lệch có chủ ý**: Stretch S4-DE-5 làm trước Bắt buộc S4-DE-3 (deploy staging, 014 còn chờ `/speckit-tasks`, làm được); S4-DE-1 xong qua 012, S4-DE-2 chờ FSD. Owner chọn voice trước ngày 2026-11-25 và chấp nhận rủi ro cho 014; voice-service theo đường "thêm service" của 014 nên không làm 014 nặng thêm |
 
 Kiểm lại sau Phase 1: không đổi.
 

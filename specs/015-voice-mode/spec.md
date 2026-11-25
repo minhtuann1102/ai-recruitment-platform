@@ -60,7 +60,7 @@ chỉ số; chạy lại cùng file cho cùng chỉ số (trừ phần phụ thu
 **Acceptance Scenarios**:
 
 1. **Given** file ghi âm 40 giây trả lời câu hỏi backend, **When** gửi kèm danh sách thuật ngữ của track
-   `backend-python`, **Then** nhận bản
+   `python_backend`, **Then** nhận bản
    ghi, danh sách đoạn có tiếng và chỉ số: độ dài câu trả lời, thời gian có tiếng, tốc độ nói, số quãng ngừng dài, tỷ lệ
    từ đệm (hoặc rỗng nếu không đo được), thời gian suy nghĩ rỗng (không gửi mốc).
 2. **Given** cùng file kèm mốc "câu hỏi đọc xong" và "bắt đầu ghi" cách nhau 4 giây, và giọng nói bắt đầu ở giây thứ

@@ -5,8 +5,12 @@ Kiểm chứng feature chạy đầu-cuối không cần giao diện. Contract: 
 ## 0. Chuẩn bị
 
 - Python 3.11+, Docker (tùy chọn).
-- Trong `.env` ở gốc repo (tự thêm, không commit, không dán key vào chat): `BLAZE_API_KEY=...`, tùy chọn
-  `VOICE_SERVICE_INTERNAL_TOKEN=...`.
+- Trong `apps/voice-service/.env` (chép từ `apps/voice-service/.env.example`; tự thêm, không commit, không dán key vào
+  chat): `BLAZE_API_KEY=...`, tùy chọn `VOICE_SERVICE_INTERNAL_TOKEN=...`. Service nạp file này khi khởi động (như
+  data-pipeline); compose đọc cùng file.
+- Máy có kiểm tra TLS chặn giữa (lỗi `CERTIFICATE_VERIFY_FAILED`): cài bằng `pip install --use-feature=truststore ...`
+  và chạy thử với `truststore` bật (`python -c "import truststore; truststore.inject_into_ssl(); ..."`). Không thêm
+  `truststore` vào `requirements.txt`.
 - Một file ghi âm ngắn trả lời câu hỏi kỹ thuật, ví dụ `sample.webm` (ghi bằng điện thoại hay trình duyệt đều được).
 
 ## 1. Test không mạng (CI làm y hệt)

@@ -8,7 +8,8 @@ Thư mục gốc code: `apps/voice-service/`. File code < 200 dòng.
 
 ## Phase 1: Setup và spike Blaze
 
-- [ ] T001 Spike (cần owner đặt `BLAZE_API_KEY` vào `.env` gốc repo; không đọc `.env`, script nạp bằng `python-dotenv`):
+- [ ] T001 Spike (cần owner đặt `BLAZE_API_KEY` vào `apps/voice-service/.env`; không đọc file, script nạp bằng
+  `python-dotenv`; máy này cần `truststore.inject_into_ssl()` trước khi tạo client httpx):
   script tạm trong scratchpad gọi `POST /v1/audio/voice_activity`, `POST /v1/audio/transcriptions`
   (`timestamps=true`, `refine=false`, `keywords`) với 1 file webm và 1 file wav có từ đệm và thuật ngữ, ghi: định dạng
   được nhận, trường response thật (có mốc theo từ / độ tin cậy không), từ đệm có giữ không, độ trễ, giới hạn `keywords`,
@@ -26,7 +27,7 @@ Thư mục gốc code: `apps/voice-service/`. File code < 200 dòng.
 
 ## Phase 2: Foundational
 
-- [ ] T006 `apps/voice-service/app/config.py`: dataclass đọc env theo bảng "Cấu hình" của data-model.md (mặc định đúng
+- [ ] T006 `apps/voice-service/app/config.py`: `load_dotenv(APP_DIR / ".env")` rồi dataclass đọc env theo bảng "Cấu hình" của data-model.md (mặc định đúng
   bảng), kiểm khoảng hợp lệ (số > 0), `VOICE_TTS_VOICES` tách dấu phẩy, phần tử đầu là mặc định
 - [ ] T007 [P] `app/api_error.py` (`ApiError(status_code, error, message, details)` như ai-service) và handler trả
   `{error, message, details}`
@@ -122,9 +123,9 @@ Thư mục gốc code: `apps/voice-service/`. File code < 200 dòng.
 ## Phase 7: Polish, tích hợp, tài liệu
 
 - [ ] T030 [P] `docker-compose.yml`: khối `voice-service` (build `./apps/voice-service`, container
-  `ai_recruit_voice_service`, port `8020:8020`, `env_file: .env`, healthcheck `/api/health`, network
-  `ai-recruit-network`); `.env.example`: `BLAZE_API_KEY=`, `BLAZE_BASE_URL`, `VOICE_SERVICE_INTERNAL_TOKEN=`,
-  các `VOICE_*` chính
+  `ai_recruit_voice_service`, port `8020:8020`, `env_file: [{path: ./apps/voice-service/.env, required: false}]`, healthcheck `/api/health`, network
+  `ai-recruit-network`); `apps/voice-service/.env.example`: `BLAZE_API_KEY=`, `BLAZE_BASE_URL`,
+  `VOICE_SERVICE_INTERNAL_TOKEN=`, các `VOICE_*` chính; `.gitignore` đã bỏ qua `**/.env`
 - [ ] T031 [P] `.github/workflows/ci.yml`: thêm `voice-service` vào `matrix.app` của job `python`
 - [ ] T032 [P] `docs/architecture/adr/adr-011-voice-service-cho-tuy-chon-a.md` (bối cảnh A8, lý do key phía server,
   phương án bị loại, hệ quả: thêm container, không đổi ai-service)

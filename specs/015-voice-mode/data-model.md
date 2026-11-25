@@ -61,6 +61,8 @@ Ngưỡng sinh nhận xét (cấu hình, chốt sau đo): quãng ngừng khi ≥
 
 ## Cấu hình (env)
 
+Nạp từ `apps/voice-service/.env` (theo mẫu `apps/data-pipeline/pipeline/settings.py`), biến môi trường thật ghi đè.
+
 | Biến | Mặc định | Ý nghĩa |
 |---|---|---|
 | `BLAZE_API_KEY` | — | bắt buộc để gọi nhà cung cấp |
