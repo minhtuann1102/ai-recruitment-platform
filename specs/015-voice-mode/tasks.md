@@ -19,35 +19,35 @@ Thư mục gốc code: `apps/voice-service/`. File code < 200 dòng.
   tài khoản)
 - [x] T003 Ghi kết quả T001–T002 vào mục "Kết quả spike" cuối `specs/015-voice-mode/research.md`; chỉnh mặc định trong
   data-model.md (`VOICE_FILLERS_SUPPORTED`, `VOICE_MAX_KEYWORDS`, gọi song song hay tuần tự, cần ffmpeg không)
-- [ ] T004 Tạo `apps/voice-service/` với `requirements.txt` (fastapi 0.115.6, uvicorn[standard] 0.34.0, pydantic 2.10.4,
+- [x] T004 Tạo `apps/voice-service/` với `requirements.txt` (fastapi 0.115.6, uvicorn[standard] 0.34.0, pydantic 2.10.4,
   python-multipart 0.0.20, httpx 0.28.1, python-dotenv 1.2.1, prometheus-client 0.25.0), `requirements-dev.txt`
   (`-r requirements.txt`, pytest 8.3.4), `Dockerfile` (theo `apps/ai-service/Dockerfile`, port 8020; thêm ffmpeg chỉ
   nếu T003 kết luận cần), `app/__init__.py`, `tests/__init__.py`, `tests/conftest.py`
-- [ ] T005 [P] Thêm `.gitignore` gốc: `apps/voice-service/evals/audio/`, `apps/voice-service/evals/out/`
+- [x] T005 [P] Thêm `.gitignore` gốc: `apps/voice-service/evals/audio/`, `apps/voice-service/evals/out/`
 
 ## Phase 2: Foundational
 
-- [ ] T006 `apps/voice-service/app/config.py`: `load_dotenv(APP_DIR / ".env")` rồi dataclass đọc env theo bảng "Cấu hình" của data-model.md (mặc định đúng
+- [x] T006 `apps/voice-service/app/config.py`: `load_dotenv(APP_DIR / ".env")` rồi dataclass đọc env theo bảng "Cấu hình" của data-model.md (mặc định đúng
   bảng), kiểm khoảng hợp lệ (số > 0), `VOICE_TTS_VOICES` tách dấu phẩy, phần tử đầu là mặc định
-- [ ] T007 [P] `app/api_error.py` (`ApiError(status_code, error, message, details)` như ai-service) và handler trả
+- [x] T007 [P] `app/api_error.py` (`ApiError(status_code, error, message, details)` như ai-service) và handler trả
   `{error, message, details}`
-- [ ] T008 [P] `app/security.py`: middleware `X-Internal-Token` theo mẫu `apps/ai-service/app/security.py` (biến
+- [x] T008 [P] `app/security.py`: middleware `X-Internal-Token` theo mẫu `apps/ai-service/app/security.py` (biến
   `VOICE_SERVICE_INTERNAL_TOKEN`, `OPEN_PATHS = {"/api/health", "/metrics"}`, staging/production thiếu token → 503
   `misconfigured`, so sánh hằng thời gian)
-- [ ] T009 `app/models.py`: Pydantic `SpeechSegment` (`start ≥ 0`, `end > start`), `TurnDeliveryMetrics` (mọi trường
+- [x] T009 `app/models.py`: Pydantic `SpeechSegment` (`start ≥ 0`, `end > start`), `TurnDeliveryMetrics` (mọi trường
   nullable, `filler_ratio` trong [0,1]), `TranscriptionResult`, `SpeakRequest` (`text` 1–1000 ký tự), `SummaryRequest`,
   `SessionDeliverySummary` theo data-model.md
-- [ ] T010 `app/blaze_client.py`: `BlazeClient(httpx.AsyncClient)` với `voice_activity(audio, filename, content_type)`,
+- [x] T010 `app/blaze_client.py`: `BlazeClient(httpx.AsyncClient)` với `voice_activity(audio, filename, content_type)`,
   `transcribe(audio, ..., keywords, language)`, `speak_stream(text, voice)` (async iterator bytes); header
   `Authorization: Bearer`; retry `VOICE_PROVIDER_RETRIES` cho lỗi mạng / 5xx / 429 với backoff 0.5·2^n; map lỗi theo
   research R8 (402 hoặc 429 có code hết credit → `quota_exceeded`, 429 khác → `provider_rate_limited`, timeout / STT
   202 → `provider_timeout`, 5xx → `provider_error`, 400/415 về file → `invalid_audio`); không log nội dung
-- [ ] T011 `app/main.py`: tạo app, middleware token, handler lỗi, `GET /api/health` (`provider: blaze | unconfigured`),
+- [x] T011 `app/main.py`: tạo app, middleware token, handler lỗi, `GET /api/health` (`provider: blaze | unconfigured`),
   `GET /metrics` (Prometheus: `voice_requests_total{endpoint,status,error}`, `voice_provider_seconds{call}`,
   `voice_audio_seconds_total`), lifespan tạo / đóng `BlazeClient`, include 3 router
-- [ ] T012 [P] `tests/test_blaze_client.py`: MockTransport — multipart đúng trường, retry 503 rồi thành công, 429 hết
+- [x] T012 [P] `tests/test_blaze_client.py`: MockTransport — multipart đúng trường, retry 503 rồi thành công, 429 hết
   retry → `provider_rate_limited`, 402 → `quota_exceeded`, 202 → `provider_timeout`, header Bearer có mặt
-- [ ] T013 [P] `tests/test_security_and_health.py`: thiếu / sai token → 401; health mở; `APP_ENV=staging` thiếu token → 503;
+- [x] T013 [P] `tests/test_security_and_health.py`: thiếu / sai token → 401; health mở; `APP_ENV=staging` thiếu token → 503;
   thiếu `BLAZE_API_KEY` → health `unconfigured`, endpoint khác 503 `provider_unconfigured`
 
 **Checkpoint**: `python -m pytest -q` xanh.
@@ -56,25 +56,25 @@ Thư mục gốc code: `apps/voice-service/`. File code < 200 dòng.
 
 **Goal**: `POST /api/voice/transcribe` trả bản ghi, đoạn có tiếng, chỉ số FR-006. **Independent test**: quickstart §3.
 
-- [ ] T014 [P] [US1] `app/transcript_tokens.py`: chuẩn hóa (lowercase, bỏ dấu câu, giữ dấu tiếng Việt), `tokens(text)`,
+- [x] T014 [P] [US1] `app/transcript_tokens.py`: chuẩn hóa (lowercase, bỏ dấu câu, giữ dấu tiếng Việt), `tokens(text)`,
   `count_fillers(tokens, fillers)` khớp cụm dài trước (danh sách research R5), trả số token thuộc từ đệm
-- [ ] T015 [P] [US1] `app/delivery_metrics.py`: `merge_segments`, `compute_turn_metrics(transcript, segments,
+- [x] T015 [P] [US1] `app/delivery_metrics.py`: `merge_segments`, `compute_turn_metrics(transcript, segments,
   question_ended_at, recording_started_at, answer_limit_s, topic_id, config) -> (TurnDeliveryMetrics, warnings)` đúng
   bảng FR-006 và research R5: mốc hợp lệ khi đủ hai mốc, `recording_started_at ≥ question_audio_ended_at`, lệch ≤ 10 phút;
   sai → `thinking_time_s=null` + `invalid_client_timestamps`; `filler_ratio=null` + `fillers_unsupported` khi config tắt;
   làm tròn 2/1/3 chữ số
-- [ ] T016 [P] [US1] `app/audio_validation.py`: đuôi / content-type cho phép (webm, ogg, wav, mp3, m4a), kích thước
+- [x] T016 [P] [US1] `app/audio_validation.py`: đuôi / content-type cho phép (webm, ogg, wav, mp3, m4a), kích thước
   ≤ `VOICE_MAX_UPLOAD_MB` (413 `audio_too_long`), file rỗng / sai loại → 415 `invalid_audio`; `parse_client_time`
   nhận ISO 8601 hoặc epoch ms
-- [ ] T017 [US1] `app/transcribe_route.py`: đọc form theo contract; `consent_confirmed` khác `true` → 400
+- [x] T017 [US1] `app/transcribe_route.py`: đọc form theo contract; `consent_confirmed` khác `true` → 400
   `consent_required` **trước khi** gọi nhà cung cấp; keywords nhận lặp hoặc JSON array, cắt ở `VOICE_MAX_KEYWORDS` +
   `keywords_truncated`; VAD → không đoạn → `no_speech` (không gọi STT); đoạn cuối > `VOICE_MAX_AUDIO_S` → 413; STT
   (tuần tự hoặc song song theo T003) → metrics; ghi thời gian từng lần gọi vào `provider`; không trả `stt_confidence`
-- [ ] T018 [P] [US1] `tests/test_transcript_tokens.py`: từ đệm đơn và cụm ("kiểu như"), "ạ" cuối câu không tính, thuật
+- [x] T018 [P] [US1] `tests/test_transcript_tokens.py`: từ đệm đơn và cụm ("kiểu như"), "ạ" cuối câu không tính, thuật
   ngữ tiếng Anh, chuỗi rỗng
-- [ ] T019 [P] [US1] `tests/test_delivery_metrics.py`: kịch bản 2 của spec US1 (4 s + 1.2 s = 5.2), mốc ngược / thiếu một
+- [x] T019 [P] [US1] `tests/test_delivery_metrics.py`: kịch bản 2 của spec US1 (4 s + 1.2 s = 5.2), mốc ngược / thiếu một
   mốc, quãng ngừng đúng ngưỡng 2.0, đoạn chồng nhau, `over_limit` có / không giới hạn, tất định qua 2 lần gọi
-- [ ] T020 [US1] `tests/test_transcribe_route.py`: MockTransport — luồng đầy đủ, thiếu đồng ý (không có request nào tới
+- [x] T020 [US1] `tests/test_transcribe_route.py`: MockTransport — luồng đầy đủ, thiếu đồng ý (không có request nào tới
   Blaze), im lặng → `no_speech` không gọi STT, file quá lớn, lỗi Blaze → mã lỗi contract, response không có
   `stt_confidence`, log (caplog) không chứa bản ghi
 
@@ -84,27 +84,27 @@ Thư mục gốc code: `apps/voice-service/`. File code < 200 dòng.
 
 **Goal**: `POST /api/voice/speak` stream mp3. **Independent test**: quickstart §4.
 
-- [ ] T021 [US2] `app/speak_route.py`: kiểm `text` 1–`VOICE_MAX_TTS_CHARS` (400 `text_too_long`), `voice` trong danh
+- [x] T021 [US2] `app/speak_route.py`: kiểm `text` 1–`VOICE_MAX_TTS_CHARS` (400 `text_too_long`), `voice` trong danh
   sách (400 `invalid_voice`); lỗi trước byte đầu → JSON; sau đó `StreamingResponse(audio/mpeg)` từ `speak_stream`;
   không log văn bản
-- [ ] T022 [US2] `tests/test_speak_route.py`: MockTransport trả 3 chunk → body ghép đúng, content-type `audio/mpeg`;
+- [x] T022 [US2] `tests/test_speak_route.py`: MockTransport trả 3 chunk → body ghép đúng, content-type `audio/mpeg`;
   text rỗng / quá dài / giọng lạ không gọi Blaze; Blaze 502 trước stream → JSON `provider_error`
 
 ## Phase 5: User Story 3 - Tổng hợp phiên (P2)
 
 **Goal**: `POST /api/voice/session-summary`. **Independent test**: gửi metrics dựng sẵn, không cần audio.
 
-- [ ] T023 [P] [US3] `app/session_summary.py`: `summarize(turns, config) -> SessionDeliverySummary`: `stats` (median,
+- [x] T023 [P] [US3] `app/session_summary.py`: `summarize(turns, config) -> SessionDeliverySummary`: `stats` (median,
   min, max, n) chỉ cho chỉ số có giá trị; `counts`; 0–4 câu nhận xét tiếng Việt theo mẫu cố định, thứ tự quãng ngừng →
   tốc độ → từ đệm → thời gian suy nghĩ, ngưỡng theo data-model.md; không nhắc điểm kiến thức
-- [ ] T024 [US3] `app/summary_route.py` + `tests/test_session_summary.py`: kịch bản spec US3 (3/8 lượt), chỉ số rỗng mọi
+- [x] T024 [US3] `app/summary_route.py` + `tests/test_session_summary.py`: kịch bản spec US3 (3/8 lượt), chỉ số rỗng mọi
   lượt không xuất hiện, `turns: []` → `voice_turns: 0`
 
 ## Phase 6: User Story 4 - Bộ đo (P3)
 
 **Goal**: số liệu SC-001..SC-004, SC-007. **Independent test**: quickstart §6.
 
-- [ ] T025 [P] [US4] `apps/voice-service/evals/wer.py` + `tests/test_wer.py`: Levenshtein theo token (dùng
+- [x] T025 [P] [US4] `apps/voice-service/evals/wer.py` + `tests/test_wer.py`: Levenshtein theo token (dùng
   `transcript_tokens`), tỷ lệ lỗi âm tiết, tỷ lệ nhận đúng thuật ngữ (thuật ngữ = token của bản chuẩn có trong danh
   sách thuật ngữ của track)
 - [ ] T026 [US4] `evals/manifest.jsonl` (24 clip `read` theo `evaluator_golden.jsonl`, ≥ 2 người, 4 track + 6 clip
@@ -122,14 +122,14 @@ Thư mục gốc code: `apps/voice-service/`. File code < 200 dòng.
 
 ## Phase 7: Polish, tích hợp, tài liệu
 
-- [ ] T030 [P] `docker-compose.yml`: khối `voice-service` (build `./apps/voice-service`, container
+- [x] T030 [P] `docker-compose.yml`: khối `voice-service` (build `./apps/voice-service`, container
   `ai_recruit_voice_service`, port `8020:8020`, `env_file: [{path: ./apps/voice-service/.env, required: false}]`, healthcheck `/api/health`, network
   `ai-recruit-network`); `apps/voice-service/.env.example`: `BLAZE_API_KEY=`, `BLAZE_BASE_URL`,
   `VOICE_SERVICE_INTERNAL_TOKEN=`, các `VOICE_*` chính; `.gitignore` đã bỏ qua `**/.env`
-- [ ] T031 [P] `.github/workflows/ci.yml`: thêm `voice-service` vào `matrix.app` của job `python`
-- [ ] T032 [P] `docs/architecture/adr/adr-011-voice-service-cho-tuy-chon-a.md` (bối cảnh A8, lý do key phía server,
+- [x] T031 [P] `.github/workflows/ci.yml`: thêm `voice-service` vào `matrix.app` của job `python`
+- [x] T032 [P] `docs/architecture/adr/adr-011-voice-service-cho-tuy-chon-a.md` (bối cảnh A8, lý do key phía server,
   phương án bị loại, hệ quả: thêm container, không đổi ai-service)
-- [ ] T033 [P] `docs/architecture/ai-integration.md` + `docs/architecture/services.md`: thêm voice-service, link contract;
+- [x] T033 [P] `docs/architecture/ai-integration.md` + `docs/architecture/services.md`: thêm voice-service, link contract;
   `apps/voice-service/README.md` (chạy, env, test)
 - [ ] T034 Nhắn AIE (FR-003: Blaze không trả độ tin cậy; FR-013: tổng hợp trình bày có thể ghép vào finalize sau) và FSD
   (`stt_raw_text`, `media_consent_at`, mốc client, gọi voice-service) — gửi qua PR description / tin nhắn, lưu bản
