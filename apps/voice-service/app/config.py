@@ -16,7 +16,7 @@ APP_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(APP_DIR / ".env")
 
 # tu dem mac dinh (research R5); "a" dung mot minh khong tinh. Ghi de bang VOICE_FILLERS (phan cach dau phay)
-DEFAULT_FILLERS: Tuple[str, ...] = ("ừm", "ừ", "ờ", "à", "ơ", "kiểu như", "thì là", "nói chung là")
+DEFAULT_FILLERS: Tuple[str, ...] = ("ừm", "ừ", "ờ", "à", "ơ", "kiểu như", "nói chung là")  # bo "thì là": cau noi binh thuong ("X thì là Y"), dem nham tren giong that 2026-11-25
 STRICT_ENVS = frozenset({"staging", "production", "prod"})
 
 

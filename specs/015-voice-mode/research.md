@@ -51,7 +51,7 @@ chốt ở task spike (T001–T003 của tasks.md).
     mỗi token là một từ. Gọi chung "âm tiết" trong báo cáo, ghi rõ cách đếm.
   - Tốc độ nói = số âm tiết ÷ thời gian có tiếng (VAD) × 60.
   - Quãng ngừng dài = khoảng giữa hai đoạn VAD liền nhau ≥ `VOICE_LONG_PAUSE_S` (mặc định 2.0).
-  - Từ đệm: danh sách cấu hình (`ừm`, `ừ`, `ờ`, `à`, `ơ`, `ạ` đứng một mình không tính, `kiểu như`, `thì là`, `nói chung
+  - Từ đệm: danh sách cấu hình (`ừm`, `ừ`, `ờ`, `à`, `ơ`, `ạ` đứng một mình không tính, `kiểu như`, `nói chung
     là`), khớp theo cụm token, không phân biệt hoa thường. Tỷ lệ = số token thuộc từ đệm ÷ tổng token.
   - Thời gian suy nghĩ = (`recording_started_at` − `question_audio_ended_at`) + `start` của đoạn VAD đầu tiên; hiệu số
     âm hoặc thiếu mốc → rỗng + cảnh báo `invalid_client_timestamps` / không cảnh báo khi thiếu.

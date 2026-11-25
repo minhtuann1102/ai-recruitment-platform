@@ -185,7 +185,7 @@ vào một file kết quả trong thư mục spec, dùng cho báo cáo đồ án
   | Thời gian có tiếng (giây) | độ dài câu trả lời − tổng các quãng ngừng dài | không có tiếng |
   | Tốc độ nói (âm tiết / phút) | số âm tiết hoặc từ (tách theo khoảng trắng) của bản ghi gốc ÷ thời gian có tiếng | không có tiếng |
   | Số quãng ngừng dài | số khoảng trống giữa hai từ liền nhau ≥ ngưỡng (mặc định 1.5 giây, cấu hình; sửa sau spike); không có mốc theo từ thì dùng khoảng giữa các đoạn có tiếng | không có tiếng |
-  | Tỷ lệ từ đệm | số từ đệm (danh sách cấu hình: "ừm", "ờ", "à", "kiểu như", "thì là"...) ÷ tổng số âm tiết | nhà cung cấp lọc từ đệm (cấu hình) |
+  | Tỷ lệ từ đệm | số từ đệm (danh sách cấu hình: "ừm", "ờ", "à", "kiểu như", "nói chung là"...; bỏ "thì là" sau giọng thật vì là cách nói bình thường) ÷ tổng số âm tiết | nhà cung cấp lọc từ đệm (cấu hình) |
 
 - **FR-007**: Chỉ số MUST tính trên bản ghi **gốc** của nhà cung cấp, không trên bản ứng viên đã sửa.
 - **FR-008**: Hệ thống MUST NOT tính hay trả bất kỳ chỉ số nào về con người: tuổi, giới tính, cảm xúc, độ tự tin, chất

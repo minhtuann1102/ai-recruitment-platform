@@ -86,7 +86,7 @@ Nạp từ `apps/voice-service/.env` (theo mẫu `apps/data-pipeline/pipeline/se
 | `VOICE_PROVIDER_BACKOFF_S` | 0.5 | cơ số backoff: lần thử n chờ cơ số × 2^n |
 | `VOICE_LONG_PAUSE_S` | 1.5 | đổi từ 2.0 sau khi thử giọng thật |
 | `VOICE_FILLERS_SUPPORTED` | true | đặt false nếu Blaze lọc từ đệm (spike: giữ khi `refine=false`) |
-| `VOICE_FILLERS` | ừm, ừ, ờ, à, ơ, kiểu như, thì là, nói chung là | danh sách từ đệm (phân cách dấu phẩy); "ạ" đứng một mình không tính |
+| `VOICE_FILLERS` | ừm, ừ, ờ, à, ơ, kiểu như, nói chung là | danh sách từ đệm (phân cách dấu phẩy); "ạ" đứng một mình không tính |
 | `VOICE_MAX_KEYWORDS` | 100 | mỗi thuật ngữ tối đa 64 ký tự (dài hơn bị bỏ); vượt → cảnh báo `keywords_truncated` |
 | `VOICE_RATE_SLOW_SPM` | 100 | ngưỡng chậm của nhận xét cuối phiên |
 | `VOICE_RATE_FAST_SPM` | 200 | ngưỡng nhanh |

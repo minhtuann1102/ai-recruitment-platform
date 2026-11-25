@@ -23,14 +23,15 @@ def test_nfd_input_is_normalised_to_nfc_before_matching():
     assert fillers_in(decomposed) == 3
 
 
-@pytest.mark.parametrize("text,expected", [("ừm", 1), ("Ừm, à, ơ", 3), ("ờ để em nghĩ", 1), ("thì là", 2)])
+@pytest.mark.parametrize("text,expected", [("ừm", 1), ("Ừm, à, ơ", 3), ("ờ để em nghĩ", 1), ("kiểu như", 2)])
 def test_single_word_fillers(text, expected):
     assert fillers_in(text) == expected
 
 
 def test_multi_word_filler_phrases_count_every_token():
     assert fillers_in("kiểu như là nói chung là ổn") == 5  # "kiểu như" 2 + "nói chung là" 3
-    assert fillers_in("HashMap thì là không an toàn luồng") == 2
+    # "thì là" la cach noi binh thuong, khong phai tu dem (giong that 2026-11-25)
+    assert fillers_in("Docker image thì là một bản mẫu") == 0
 
 
 def test_trailing_a_particle_is_not_a_filler():
