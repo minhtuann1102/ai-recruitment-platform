@@ -56,8 +56,23 @@ def test_huge_body_is_rejected_by_content_length_before_parsing(build_client):
     assert (r.status_code, r.json()["error"]) == (413, "audio_too_long") and fake.requests == []
 
 
+def test_chunked_body_without_content_length_is_411_before_any_read_or_disk_spill(build_client, monkeypatch):
+    def forbidden(self):
+        raise AssertionError("body chunked khong duoc cuon ra dia")
+    monkeypatch.setattr(tempfile.SpooledTemporaryFile, "rollover", forbidden)
+    fake = quiet_blaze()
+
+    def chunks():  # httpx gui Transfer-Encoding: chunked, khong co Content-Length
+        yield b"--b\r\n"
+        yield b"x" * (3 * 1024 * 1024)
+
+    r = build_client(fake).post("/api/voice/transcribe", content=chunks(),
+                                headers={"content-type": "multipart/form-data; boundary=b"})
+    assert (r.status_code, r.json()["error"]) == (411, "length_required") and fake.requests == []
+
+
 @pytest.mark.parametrize("data", [{"language": "fr"}, {"answer_limit_s": "0"}, {"answer_limit_s": "-5"},
-                                  {"answer_limit_s": "abc"}, {"topic_id": "x" * 201}])
+                                  {"answer_limit_s": "abc"}, {"topic_id": "x" * 65}])
 def test_bad_optional_fields_are_400_invalid_request(build_client, data):
     fake = quiet_blaze()
     r = post(build_client(fake), **data)

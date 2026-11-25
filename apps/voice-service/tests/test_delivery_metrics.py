@@ -36,10 +36,16 @@ def test_timestamps_equal_or_ten_minutes_apart_are_valid():
     assert metrics([(1.0, 3.0)], q=100.0, r=700.0)[0].thinking_time_s == 601.0
 
 
+def test_default_long_pause_threshold_is_one_and_a_half_seconds():
+    assert CONFIG.long_pause_s == 1.5
+
+
 def test_pause_exactly_at_threshold_counts_and_just_below_does_not():
-    assert metrics([(0.0, 1.0), (3.0, 4.0)])[0].long_pause_count == 1  # 2.0 >= 2.0
-    assert metrics([(0.0, 1.0), (2.99, 4.0)])[0].long_pause_count == 0
-    assert metrics([(0.0, 5.2), (7.2, 9.0)])[0].long_pause_count == 1  # 7.2 - 5.2 sai so nhi phan van la 2.0
+    assert metrics([(0.0, 1.0), (2.5, 4.0)])[0].long_pause_count == 1  # 1.5 >= 1.5
+    assert metrics([(0.0, 1.0), (2.49, 4.0)])[0].long_pause_count == 0
+    assert metrics([(0.0, 5.2), (6.7, 9.0)])[0].long_pause_count == 1  # 6.7 - 5.2 sai so nhi phan van la 1.5
+    assert metrics([(0.0, 1.0), (3.0, 4.0)], config=replace(CONFIG, long_pause_s=2.0))[0].long_pause_count == 1
+    assert metrics([(0.0, 1.0), (2.9, 4.0)], config=replace(CONFIG, long_pause_s=2.0))[0].long_pause_count == 0
 
 
 def test_full_formulas_duration_speech_time_rate_and_fillers():
@@ -97,3 +103,18 @@ def test_same_input_gives_identical_output_twice():
     first = compute_turn_metrics(args[1], args[0], args[2], args[3], args[4], args[5], CONFIG)
     second = compute_turn_metrics(args[1], list(args[0]), args[2], args[3], args[4], args[5], CONFIG)
     assert first[0].model_dump() == second[0].model_dump() and first[1] == second[1]
+
+
+def test_speech_rate_is_empty_when_speech_time_is_under_three_seconds():
+    # mot tu 0.2 s se ra 300 am tiet / phut: so ao, keo lech trung vi cua phien
+    short, _ = metrics([(0.0, 0.2)], transcript="dạ")
+    assert short.speech_time_s == 0.2 and short.speech_rate_spm is None
+    assert metrics([(0.0, 2.99)], transcript="một hai ba")[0].speech_rate_spm is None
+    assert metrics([(0.0, 3.0)], transcript="một hai ba")[0].speech_rate_spm == 60.0
+    assert short.answer_duration_s == 0.2 and short.filler_ratio == 0.0  # cac chi so khac van co
+
+
+def test_over_limit_compares_the_rounded_duration_the_candidate_sees():
+    m, _ = metrics([(0.0, 20.004)], limit=20.0)
+    assert m.answer_duration_s == 20.0 and m.over_limit is False  # khong hien 20.0 ma over_limit=true
+    assert metrics([(0.0, 20.006)], limit=20.0)[0].over_limit is True

@@ -1,12 +1,10 @@
 """POST /api/voice/transcribe: audio -> VAD (cong "co tieng") -> STT -> ban ghi goc + doan co tieng + chi so luot.
 
-Thu tu kiem (contract): Content-Length -> dong y (400 consent_required, TRUOC moi lan goi nha cung cap) -> truong tuy chon
--> tep audio -> cau hinh nha cung cap (503). Mac dinh tuan tu: VAD truoc, khong co tieng thi tra no_speech va KHONG goi STT
-(tiet kiem credit; goi Starter 1 luong). VOICE_PARALLEL_PROVIDER_CALLS=true: goi VAD + STT cung luc (nhanh hon, nhung
-STT van chay du VAD rong va gioi han VOICE_MAX_AUDIO_S chi chan duoc sau khi STT xong).
+Thu tu kiem (contract): Content-Length (411 / 413) -> dong y (400 consent_required, TRUOC moi lan goi nha cung cap) -> truong tuy chon
+-> tep audio -> cau hinh nha cung cap (503). Luon tuan tu: VAD truoc, khong co tieng thi tra no_speech va KHONG goi STT
+(tiet kiem credit; goi Starter 1 luong).
 Rieng tu: khong ghi audio ra dia, khong log ban ghi / keywords, response khong co stt_confidence.
 """
-import asyncio
 import logging
 import time
 from typing import List, Optional, Tuple
@@ -16,11 +14,12 @@ from fastapi import APIRouter, Request
 from . import metrics
 from .api_error import ApiError
 from .app_state import get_settings, require_blaze
-from .audio_validation import ValidatedAudio, reject_oversized_body, validate_audio
+from .audio_validation import ValidatedAudio, check_content_length, validate_audio
 from .blaze_client import BlazeClient, SttResult
 from .config import Settings
 from .delivery_metrics import WARN_INVALID_TIMESTAMPS, compute_turn_metrics, speech_spans
 from .models import ProviderInfo, SpeechSegment, TranscriptionResult
+from .openapi_docs import TRANSCRIBE_ERRORS, error_responses
 from .transcribe_form import OPENAPI_REQUEST_BODY, TranscribeForm, parse_transcribe_form
 
 log = logging.getLogger("voice_service")
@@ -28,7 +27,8 @@ router = APIRouter()
 
 
 def _check_audio_length(segments: List[SpeechSegment], settings: Settings) -> None:
-    if segments and segments[-1].end > settings.max_audio_s:
+    """Gioi han la uoc luong: moc cuoi cua tieng noi (VAD), khong phai do dai tep (khong parse container)."""
+    if segments and max(s.end for s in segments) > settings.max_audio_s:
         raise ApiError(413, "audio_too_long", "Đoạn ghi âm dài hơn giới hạn cho phép",
                        {"max_audio_s": settings.max_audio_s})
 
@@ -36,34 +36,20 @@ def _check_audio_length(segments: List[SpeechSegment], settings: Settings) -> No
 async def _call_providers(blaze: BlazeClient, settings: Settings, audio: ValidatedAudio, form: TranscribeForm
                           ) -> Tuple[List[SpeechSegment], int, Optional[SttResult], Optional[int]]:
     """(doan VAD, vad_ms, ket qua STT hoac None, stt_ms hoac None). STT None = khong co tieng, khong goi STT."""
-    def vad():
-        return metrics.timed("vad", blaze.voice_activity(audio.data, audio.filename, audio.content_type))
-
-    def stt():
-        return metrics.timed("stt", blaze.transcribe(audio.data, audio.filename, audio.content_type, form.keywords,
-                                                     form.language))
-    if settings.parallel_provider_calls:
-        results = await asyncio.gather(vad(), stt(), return_exceptions=True)
-        for result in results:
-            if isinstance(result, BaseException):
-                raise result
-        (segments, vad_ms), (stt_result, stt_ms) = results
-        if not segments:
-            return segments, vad_ms, None, None
-        _check_audio_length(segments, settings)
-        return segments, vad_ms, stt_result, stt_ms
-    segments, vad_ms = await vad()
+    segments, vad_ms = await metrics.timed("vad", blaze.voice_activity(audio.data, audio.filename, audio.content_type))
     if not segments:
         return segments, vad_ms, None, None
     _check_audio_length(segments, settings)
-    stt_result, stt_ms = await stt()
+    stt_result, stt_ms = await metrics.timed("stt", blaze.transcribe(
+        audio.data, audio.filename, audio.content_type, form.keywords, form.language))
     return segments, vad_ms, stt_result, stt_ms
 
 
-@router.post("/api/voice/transcribe", response_model=TranscriptionResult, openapi_extra=OPENAPI_REQUEST_BODY)
+@router.post("/api/voice/transcribe", response_model=TranscriptionResult, openapi_extra=OPENAPI_REQUEST_BODY,
+             responses=error_responses(TRANSCRIBE_ERRORS))
 async def transcribe(request: Request) -> TranscriptionResult:
     settings = get_settings(request)
-    reject_oversized_body(request.headers.get("content-length"), settings.max_upload_bytes)
+    check_content_length(request.headers.get("content-length"), settings.max_upload_bytes)
     async with request.form() as raw_form:
         form = parse_transcribe_form(raw_form, settings)
         audio = validate_audio(form.upload.filename, form.upload.content_type, await form.upload.read(),

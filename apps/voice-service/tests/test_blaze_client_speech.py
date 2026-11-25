@@ -11,12 +11,19 @@ from tests.helpers import error_body, make_settings
 
 
 class ChunkedBody(httpx.AsyncByteStream):
-    def __init__(self, chunks):
-        self.chunks = chunks
+    """Body stream gia: phat tung chunk, tuy chon nem loi sau chunk cuoi; ghi nhan upstream da dong chua."""
+
+    def __init__(self, chunks, then_raise=None):
+        self.chunks, self.then_raise, self.closed = chunks, then_raise, False
 
     async def __aiter__(self):
         for chunk in self.chunks:
             yield chunk
+        if self.then_raise:
+            raise self.then_raise
+
+    async def aclose(self):
+        self.closed = True
 
 
 def speak(handler, **overrides):
@@ -37,18 +44,7 @@ def test_speech_payload_matches_spike_and_chunks_are_joined():
     assert speak(handler) == b"AAABBBC"
     assert seen["path"] == "/v1/audio/speech"
     assert seen["body"] == {"model": "blaze-tts-1.5-realtime", "input": "Xin chào", "voice": "HN-Nam-2-BL",
-                            "response_format": "mp3"}  # speed / stream_format chi gui khi duoc cau hinh
-
-
-def test_optional_speed_and_stream_format_are_sent_only_when_configured():
-    seen = {}
-
-    def handler(request: httpx.Request) -> httpx.Response:
-        seen["body"] = json.loads(request.content)
-        return httpx.Response(200, content=b"AUDIO")
-
-    speak(handler, tts_speed=1.2, tts_stream_format="audio")
-    assert seen["body"]["speed"] == 1.2 and seen["body"]["stream_format"] == "audio"
+                            "response_format": "mp3"}  # dung 4 truong da xac nhan o spike
 
 
 def test_error_status_before_stream_raises_api_error():
@@ -71,3 +67,31 @@ def test_empty_audio_body_is_provider_error():
     with pytest.raises(ApiError) as err:
         speak(lambda _r: httpx.Response(200, content=b""))
     assert err.value.error == "provider_error"
+
+
+def test_error_in_the_middle_of_the_stream_propagates_and_closes_the_upstream_response():
+    body = ChunkedBody([b"AAA", b"BBB"], then_raise=httpx.ReadError("cut"))
+
+    async def go():
+        client = BlazeClient(make_settings(), transport=httpx.MockTransport(lambda _r: httpx.Response(200, stream=body)))
+        stream = await client.speak_stream("Xin chào", "HN-Nam-2-BL")
+        got = []
+        with pytest.raises(httpx.ReadError):
+            async for chunk in stream:
+                got.append(chunk)
+        return got
+
+    assert asyncio.run(go()) == [b"AAA", b"BBB"]
+    assert body.closed is True  # khong ro ri ket noi toi Blaze
+
+
+def test_stream_closed_by_consumer_early_closes_the_upstream_response():
+    body = ChunkedBody([b"AAA", b"BBB", b"CCC"])
+
+    async def go():
+        client = BlazeClient(make_settings(), transport=httpx.MockTransport(lambda _r: httpx.Response(200, stream=body)))
+        stream = await client.speak_stream("Xin chào", "HN-Nam-2-BL")
+        await stream.aclose()  # route goi qua BackgroundTask khi client ngat
+
+    asyncio.run(go())
+    assert body.closed is True

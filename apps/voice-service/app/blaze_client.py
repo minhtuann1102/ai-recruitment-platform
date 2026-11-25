@@ -1,8 +1,11 @@
 """Client httpx cho Blaze (VAD, STT, TTS). Chi tiet endpoint: specs/015-voice-mode/research.md R3, R7, R8.
 
 - Header `Authorization: Bearer <BLAZE_API_KEY>`; key chi doc tu Settings (env phia server).
-- Thu lai (VOICE_PROVIDER_RETRIES, backoff co so VOICE_PROVIDER_BACKOFF_S * 2^n) cho loi mang, 5xx, 429 khong phai het
-  credit. Het retry -> ApiError theo blaze_errors.py. 4xx khac khong thu lai. STT tra 202 / in_progress -> provider_timeout.
+- Thu lai (VOICE_PROVIDER_RETRIES, backoff co so VOICE_PROVIDER_BACKOFF_S * 2^n) CHI khi request chua toi duoc nha cung
+  cap hoac nha cung cap chua xu ly: loi ket noi (ConnectError / ConnectTimeout), 503, 429 khong phai het credit. KHONG thu
+  lai sau ReadTimeout / loi doc-ghi giua chung hay 500 / 502 / 504: Blaze co the da nhan audio va tinh phi, gui lai se tinh
+  phi lan nua va keo dai cho doi (H1 review). Het retry -> ApiError theo blaze_errors.py. STT 202 / in_progress ->
+  provider_timeout (khong thu lai).
 - Khong log noi dung (audio, ban ghi, keywords, van ban TTS), chi ma trang thai va ten loi.
 - `transport` cho phep test thay bang httpx.MockTransport (khong mang, khong key).
 """
@@ -22,6 +25,8 @@ from .models import SpeechSegment
 
 log = logging.getLogger("voice_service.blaze")
 HTTP_MARGIN_S = 5.0  # httpx doi them de Blaze tu tra 202 (qua `timeout` cua STT) truoc khi ta ngat ket noi
+CONNECT_TIMEOUT_S = 5.0  # ngan: loi ket noi duoc thu lai nen khong can cho lau
+CONNECT_ERRORS = (httpx.ConnectError, httpx.ConnectTimeout)  # request chua toi nha cung cap: an toan de gui lai
 
 
 @dataclass(frozen=True)
@@ -72,7 +77,7 @@ class BlazeClient:
         self._client = httpx.AsyncClient(
             base_url=settings.blaze_base_url, transport=transport or httpx.AsyncHTTPTransport(retries=3),
             headers={"Authorization": f"Bearer {settings.blaze_api_key}"},
-            timeout=httpx.Timeout(settings.provider_timeout_s + HTTP_MARGIN_S))
+            timeout=httpx.Timeout(settings.provider_timeout_s + HTTP_MARGIN_S, connect=CONNECT_TIMEOUT_S))
 
     async def aclose(self) -> None:
         await self._client.aclose()
@@ -84,10 +89,13 @@ class BlazeClient:
         for attempt in range(attempts):
             try:
                 response = await self._client.send(make_request(), stream=stream)
-            except httpx.TimeoutException:
-                error = ApiError(504, "provider_timeout", "Nhà cung cấp giọng nói phản hồi quá thời gian")
-            except httpx.TransportError:
-                error = ApiError(502, "provider_error", "Không kết nối được tới nhà cung cấp giọng nói")
+            except httpx.TransportError as exc:
+                if isinstance(exc, httpx.TimeoutException):
+                    error = ApiError(504, "provider_timeout", "Nhà cung cấp giọng nói phản hồi quá thời gian")
+                else:
+                    error = ApiError(502, "provider_error", "Không kết nối được tới nhà cung cấp giọng nói")
+                if not isinstance(exc, CONNECT_ERRORS):
+                    raise error from None  # co the Blaze da nhan request: khong gui lai (tranh tinh phi hai lan)
             else:
                 if response.status_code < 400:
                     return response
@@ -133,9 +141,12 @@ class BlazeClient:
             data["keywords"] = list(keywords)  # httpx lap truong form cho moi phan tu
         response = await self._send("stt", self._upload_request("/v1/audio/transcriptions", audio, filename, content_type,
                                                                 data), audio=True)
+        in_progress = ApiError(504, "provider_timeout", "Nhận dạng giọng nói chưa xong trong thời gian cho phép")
+        if response.status_code == 202:  # truoc khi parse: 202 co the khong co body JSON
+            raise in_progress
         payload = _json_object(response)
-        if response.status_code == 202 or payload.get("status") == "in_progress":
-            raise ApiError(504, "provider_timeout", "Nhận dạng giọng nói chưa xong trong thời gian cho phép")
+        if payload.get("status") == "in_progress":
+            raise in_progress
         text = payload.get("text")
         if not isinstance(text, str):
             raise ApiError(502, "provider_error", "Nhà cung cấp giọng nói không trả bản ghi")
@@ -144,11 +155,7 @@ class BlazeClient:
 
     async def speak_stream(self, text: str, voice: str) -> SpeechStream:
         """POST /v1/audio/speech -> SpeechStream mp3. Da kiem status va doc chunk dau: loi thi nem ApiError (route tra JSON)."""
-        payload = {"model": self._s.tts_model, "input": text, "voice": voice, "response_format": "mp3"}
-        if self._s.tts_speed != 1.0:
-            payload["speed"] = self._s.tts_speed
-        if self._s.tts_stream_format:
-            payload["stream_format"] = self._s.tts_stream_format
+        payload = {"model": self._s.tts_model, "input": text, "voice": voice, "response_format": "mp3"}  # spike 2026-11-25: 4 truong nay du
         response = await self._send(
             "tts", lambda: self._client.build_request("POST", "/v1/audio/speech", json=payload), audio=False, stream=True)
         return await SpeechStream.open(response)

@@ -33,8 +33,6 @@ class Settings:
     stt_refine: bool = False
     tts_model: str = "blaze-tts-1.5-realtime"
     tts_voices: Tuple[str, ...] = ("HN-Nam-2-BL",)  # phan tu dau la giong mac dinh
-    tts_speed: float = 1.0  # chi gui len Blaze khi khac 1.0 (spike chi xac nhan model/input/voice/response_format)
-    tts_stream_format: str = ""  # vd "audio"; rong = khong gui (spike chua xac nhan tham so nay)
     # bao mat
     internal_token: str = ""
     app_env: str = "dev"
@@ -44,12 +42,11 @@ class Settings:
     max_tts_chars: int = 1000
     max_keywords: int = 100
     # goi nha cung cap
-    provider_timeout_s: float = 60  # spike 2026-11-25: STT ~5 s + 0.15 x do dai audio; cung la `timeout` cua STT
-    provider_retries: int = 2
+    provider_timeout_s: float = 30  # cung la `timeout` (giay) gui cho STT; httpx doi them 5 s de nhan 202 truoc
+    provider_retries: int = 2  # chi thu lai loi ket noi, 503, 429 khong het credit (blaze_client._send)
     provider_backoff_s: float = 0.5  # co so backoff: lan thu n cho backoff * 2^n
-    parallel_provider_calls: bool = False  # goi VAD + STT song song (goi Starter chi 1 luong: mac dinh tuan tu)
     # chi so trinh bay
-    long_pause_s: float = 2.0
+    long_pause_s: float = 1.5  # doi 2.0 -> 1.5 sau khi thu giong that 2026-11-25 (research.md "Giong that")
     fillers_supported: bool = True
     fillers: Tuple[str, ...] = DEFAULT_FILLERS
     # nguong sinh nhan xet cuoi phien (data-model.md)
@@ -62,7 +59,7 @@ class Settings:
         positives = {"max_upload_mb": self.max_upload_mb, "max_audio_s": self.max_audio_s,
                      "max_tts_chars": self.max_tts_chars, "max_keywords": self.max_keywords,
                      "provider_timeout_s": self.provider_timeout_s, "long_pause_s": self.long_pause_s,
-                     "tts_speed": self.tts_speed, "rate_slow_spm": self.rate_slow_spm,
+                     "rate_slow_spm": self.rate_slow_spm,
                      "rate_fast_spm": self.rate_fast_spm, "filler_note_ratio": self.filler_note_ratio,
                      "thinking_note_s": self.thinking_note_s}
         bad = [name for name, value in positives.items() if not value > 0]
@@ -122,8 +119,6 @@ def load_settings(env: Optional[Mapping[str, str]] = None) -> Settings:
         stt_refine=_flag(env, "VOICE_STT_REFINE", d.stt_refine),
         tts_model=env.get("VOICE_TTS_MODEL", "").strip() or d.tts_model,
         tts_voices=_csv(env, "VOICE_TTS_VOICES", d.tts_voices),
-        tts_speed=_num(env, "VOICE_TTS_SPEED", float, d.tts_speed),
-        tts_stream_format=env.get("VOICE_TTS_STREAM_FORMAT", "").strip(),
         internal_token=env.get("VOICE_SERVICE_INTERNAL_TOKEN", "").strip(),
         app_env=env.get("APP_ENV", "").strip() or d.app_env,
         max_upload_mb=_num(env, "VOICE_MAX_UPLOAD_MB", float, d.max_upload_mb),
@@ -133,7 +128,6 @@ def load_settings(env: Optional[Mapping[str, str]] = None) -> Settings:
         provider_timeout_s=_num(env, "VOICE_PROVIDER_TIMEOUT_S", float, d.provider_timeout_s),
         provider_retries=_num(env, "VOICE_PROVIDER_RETRIES", int, d.provider_retries),
         provider_backoff_s=_num(env, "VOICE_PROVIDER_BACKOFF_S", float, d.provider_backoff_s),
-        parallel_provider_calls=_flag(env, "VOICE_PARALLEL_PROVIDER_CALLS", d.parallel_provider_calls),
         long_pause_s=_num(env, "VOICE_LONG_PAUSE_S", float, d.long_pause_s),
         fillers_supported=_flag(env, "VOICE_FILLERS_SUPPORTED", d.fillers_supported),
         fillers=_csv(env, "VOICE_FILLERS", d.fillers),

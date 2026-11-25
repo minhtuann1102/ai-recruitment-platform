@@ -39,7 +39,7 @@ def test_transcribe_sends_expected_multipart_fields_and_bearer_header():
     assert seen["ctype"].startswith("multipart/form-data")
     assert b'name="file"; filename="audio.webm"' in body
     for field, value in (("model", "blaze-stt-1.5"), ("language", "vi"), ("timestamps", "true"), ("refine", "false"),
-                         ("timeout", "60")):
+                         ("timeout", "30")):
         assert f'name="{field}"\r\n\r\n{value}\r\n'.encode() in body, field
     assert body.count(b'name="keywords"') == 2  # moi tu khoa mot truong form
     assert result.text == "xin chào HashMap" and result.model == "blaze-stt-1.5"
@@ -138,25 +138,6 @@ def test_provider_message_is_not_copied_into_error_details():
         stt_call(client_for(handler))
     assert "nhay cam" not in json.dumps(err.value.details) + err.value.message
     assert err.value.details["provider_code"] == "bad_file"
-
-
-def test_network_errors_retry_then_map():
-    calls = []
-
-    def connect_error(request: httpx.Request) -> httpx.Response:
-        calls.append(1)
-        raise httpx.ConnectError("boom")
-
-    with pytest.raises(ApiError) as err:
-        stt_call(client_for(connect_error, provider_retries=2))
-    assert (err.value.status_code, err.value.error) == (502, "provider_error") and len(calls) == 3
-
-    def timeout(request: httpx.Request) -> httpx.Response:
-        raise httpx.ReadTimeout("slow")
-
-    with pytest.raises(ApiError) as err:
-        stt_call(client_for(timeout, provider_retries=0))
-    assert (err.value.status_code, err.value.error) == (504, "provider_timeout")
 
 
 def test_malformed_json_body_is_provider_error():

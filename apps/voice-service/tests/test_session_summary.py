@@ -31,7 +31,7 @@ def test_three_of_eight_turns_with_long_pause_gives_pause_note(client):
     body = summary(client, turns)
     assert body["voice_turns"] == 8
     assert body["counts"]["turns_with_long_pause"] == 3
-    assert body["notes"][0].startswith("3/8 câu trả lời có quãng ngừng dài trên 2 giây.")
+    assert body["notes"][0].startswith("3/8 câu trả lời có quãng ngừng dài trên 1.5 giây.")
     assert body["stats"]["answer_duration_s"] == {"median": 30.0, "min": 30.0, "max": 30.0, "n": 8}
 
 
@@ -99,3 +99,11 @@ def test_invalid_metric_values_are_rejected_with_400(client):
         r = client.post("/api/voice/session-summary", json={"turns": [bad]})
         assert (r.status_code, r.json()["error"]) == (400, "invalid_request")
     assert client.post("/api/voice/session-summary", json={}).status_code == 400
+
+
+def test_more_than_200_turns_or_a_long_topic_id_is_400(client):
+    assert client.post("/api/voice/session-summary", json={"turns": [turn()] * 200}).status_code == 200
+    for body in ({"turns": [turn()] * 201}, {"turns": [turn(topic_id="t" * 65)]}):
+        r = client.post("/api/voice/session-summary", json=body)
+        assert (r.status_code, r.json()["error"]) == (400, "invalid_request")
+    assert client.post("/api/voice/session-summary", json={"turns": [turn(topic_id="t" * 64)]}).status_code == 200

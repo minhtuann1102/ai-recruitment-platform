@@ -3,8 +3,8 @@ import pytest
 from starlette.formparsers import MultiPartParser
 
 from app.api_error import ApiError
-from app.audio_validation import keep_uploads_in_memory, parse_client_time, reject_oversized_body, validate_audio
-from app.config import ConfigError, Settings, load_settings
+from app.audio_validation import check_content_length, parse_client_time, validate_audio
+from app.config import ConfigError, load_settings
 from app.main import create_app
 from tests.helpers import make_settings
 
@@ -48,43 +48,41 @@ def test_parse_client_time_accepts_epoch_ms_and_iso_8601():
     assert parse_client_time(None) is None and parse_client_time("  ") is None
 
 
-@pytest.mark.parametrize("bad", ["hom qua", "nan", "inf", "2026-13-45"])
-def test_parse_client_time_rejects_garbage(bad):
+@pytest.mark.parametrize("bad", ["hom qua", "nan", "inf", "2026-13-45", "1764079200", "1764079200.5", "0", "1577836799999"])
+def test_parse_client_time_rejects_garbage_and_epoch_seconds(bad):  # epoch giay doc nham thanh ms lech 1000 lan
     with pytest.raises(ValueError):
         parse_client_time(bad)
 
 
-def test_oversized_content_length_is_rejected_before_parsing():
-    reject_oversized_body("100", MAX)
-    reject_oversized_body(None, MAX)
-    reject_oversized_body("khong phai so", MAX)
+def test_parse_client_time_accepts_epoch_ms_at_the_2020_floor():
+    assert parse_client_time("1577836800000") == 1577836800.0
+
+
+def test_content_length_is_required_and_bounded_before_parsing():
+    check_content_length("100", MAX)
+    check_content_length(str(MAX + 60 * 1024), MAX)  # trong bien multipart
+    for missing in (None, "", "khong phai so"):
+        with pytest.raises(ApiError) as err:
+            check_content_length(missing, MAX)
+        assert (err.value.status_code, err.value.error) == (411, "length_required")
     with pytest.raises(ApiError) as err:
-        reject_oversized_body(str(MAX + 70 * 1024), MAX)
-    assert err.value.error == "audio_too_long"
+        check_content_length(str(MAX + 70 * 1024), MAX)
+    assert (err.value.status_code, err.value.error) == (413, "audio_too_long")
 
 
 def test_upload_spool_threshold_covers_max_upload_so_audio_never_rolls_to_disk():
     settings = make_settings(max_upload_mb=10)
-    create_app(settings)
+    create_app(settings)  # create_app goi keep_uploads_in_memory
     threshold = getattr(MultiPartParser, "spool_max_size", None) or getattr(MultiPartParser, "max_file_size")
     assert threshold >= settings.max_upload_bytes
 
 
-def test_defaults_match_data_model_table():
-    s = Settings()
-    assert (s.blaze_base_url, s.stt_model, s.tts_model, s.tts_voices) == (
-        "https://api.blaze.vn", "blaze-stt-1.5", "blaze-tts-1.5-realtime", ("HN-Nam-2-BL",))
-    assert (s.max_upload_mb, s.max_audio_s, s.max_tts_chars, s.provider_retries, s.long_pause_s,
-            s.fillers_supported, s.max_keywords, s.app_env) == (10, 300, 1000, 2, 2.0, True, 100, "dev")
-    assert s.provider_timeout_s == 60 and s.parallel_provider_calls is False  # theo ket qua spike
-
-
 def test_load_settings_reads_env_and_splits_voice_list():
     s = load_settings({"BLAZE_API_KEY": " k ", "VOICE_TTS_VOICES": "HN-Nam-2-BL, SG-Nu-1 ,", "VOICE_MAX_UPLOAD_MB": "2.5",
-                       "VOICE_PARALLEL_PROVIDER_CALLS": "TRUE", "BLAZE_BASE_URL": "https://x.test/",
+                       "VOICE_STT_REFINE": "TRUE", "BLAZE_BASE_URL": "https://x.test/",
                        "VOICE_FILLERS": "ừm, kiểu như"})
     assert s.blaze_api_key == "k" and s.tts_voices == ("HN-Nam-2-BL", "SG-Nu-1") and s.default_voice == "HN-Nam-2-BL"
-    assert s.max_upload_mb == 2.5 and s.parallel_provider_calls is True and s.blaze_base_url == "https://x.test"
+    assert s.max_upload_mb == 2.5 and s.stt_refine is True and s.blaze_base_url == "https://x.test"
     assert s.fillers == ("ừm", "kiểu như")
 
 

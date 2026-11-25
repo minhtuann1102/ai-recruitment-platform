@@ -32,14 +32,17 @@ async def timed(call: str, awaitable: Awaitable[T]) -> Tuple[T, int]:
         PROVIDER_SECONDS.labels(call).observe(time.perf_counter() - started)
 
 
-async def metrics_middleware(request: Request, call_next):
-    """Dem moi request (ke ca 401 cua token). Ma loi lay tu request.state.error_code (do handler / security dat)."""
-    response = await call_next(request)
-    path = request.url.path
+def count_request(path: str, ok: bool, error: str = "-") -> None:
     endpoint = path if path in KNOWN_ENDPOINTS else "other"  # route la: khong dung duong dan tho lam nhan
+    REQUESTS.labels(endpoint, "ok" if ok else "error", "-" if ok else error).inc()
+
+
+async def metrics_middleware(request: Request, call_next):
+    """Dem moi request (ke ca 401 cua token). Ma loi lay tu request.state.error_code (do handler / security dat).
+    Loi 500 ngoai du kien khong qua day (xem unexpected_error_handler trong api_error.py)."""
+    response = await call_next(request)
     ok = response.status_code < 400
-    error = "-" if ok else getattr(request.state, "error_code", f"http_{response.status_code}")
-    REQUESTS.labels(endpoint, "ok" if ok else "error", error).inc()
+    count_request(request.url.path, ok, getattr(request.state, "error_code", f"http_{response.status_code}"))
     return response
 
 

@@ -16,6 +16,7 @@ from .api_error import register_error_handlers
 from .audio_validation import keep_uploads_in_memory
 from .blaze_client import BlazeClient
 from .config import Settings, load_settings
+from .openapi_docs import build_openapi
 from .security import internal_token_middleware
 from .speak_route import router as speak_router
 from .summary_route import router as summary_router
@@ -55,6 +56,7 @@ def create_app(settings: Optional[Settings] = None, transport: Optional[httpx.As
     app.include_router(transcribe_router)
     app.include_router(speak_router)
     app.include_router(summary_router)
+    app.openapi = lambda: build_openapi(app)  # Swagger khop hanh vi: bo 422, co body loi (openapi_docs.py)
 
     @app.get("/api/health")
     def health():

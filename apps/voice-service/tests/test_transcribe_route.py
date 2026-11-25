@@ -1,4 +1,4 @@
-"""POST /api/voice/transcribe (T020): luong day du, no_speech, che do song song, VAD du phong. Blaze gia, khong mang."""
+"""POST /api/voice/transcribe (T020): luong day du, no_speech, VAD du phong, canh bao. Blaze gia, khong mang."""
 import httpx
 import pytest
 
@@ -55,20 +55,6 @@ def test_silence_returns_no_speech_without_calling_stt(build_client):
     assert fake.paths() == [VAD]
 
 
-def test_parallel_mode_calls_both_but_still_reports_no_speech_when_vad_is_empty(build_client):
-    fake = happy_blaze(**{VAD: json_reply(vad_payload())})
-    body = post(build_client(fake, parallel_provider_calls=True)).json()
-    assert body["no_speech"] is True and sorted(fake.paths()) == sorted([VAD, STT])
-
-
-def test_parallel_mode_full_flow_matches_sequential(build_client):
-    sequential = post(build_client(happy_blaze())).json()
-    parallel = post(build_client(happy_blaze(), parallel_provider_calls=True)).json()
-    for body in (sequential, parallel):
-        body.pop("provider")
-    assert sequential == parallel
-
-
 def test_stt_without_words_falls_back_to_vad_segments(build_client):
     """blaze-stt-1.0: khong co words -> cung cong thuc tren doan VAD; quang ngung 3 s giua hai doan."""
     payload = {"id": "t", "status": "completed", "model": "blaze-stt-1.0", "text": "một hai ba bốn năm sáu",
@@ -81,6 +67,13 @@ def test_stt_without_words_falls_back_to_vad_segments(build_client):
     assert body["provider"]["stt_model"] == "blaze-stt-1.0"
 
 
+def test_keywords_longer_than_64_chars_are_dropped_with_a_warning(build_client):
+    fake = happy_blaze()
+    body = post(build_client(fake), keywords=["HashMap", "x" * 65, "y" * 64]).json()
+    assert fake.requests[1].content.count(b'name="keywords"') == 2  # HashMap + chuoi 64 ky tu
+    assert b"x" * 65 not in fake.requests[1].content and body["warnings"] == ["keywords_truncated"]
+
+
 def test_keywords_json_array_dedupe_and_truncation_warning(build_client):
     fake = happy_blaze()
     body = post(build_client(fake, max_keywords=2), keywords='["HashMap", "Spring", "HashMap", "Kafka"]').json()
@@ -90,6 +83,8 @@ def test_keywords_json_array_dedupe_and_truncation_warning(build_client):
 
 @pytest.mark.parametrize("extra,warns", [({"recording_started_at": "1764079204000"}, True),
                                          ({"question_audio_ended_at": "hom qua", "recording_started_at": "1"}, True),
+                                         # epoch GIAY (Date.now() / 1000): doc nham thanh ms se lech 1000 lan, phai bi tu choi
+                                         ({"question_audio_ended_at": "1764079200", "recording_started_at": "1764079205"}, True),
                                          ({}, False)])
 def test_bad_or_partial_client_timestamps_warn_but_do_not_fail(build_client, extra, warns):
     body = post(build_client(happy_blaze()), **extra).json()
@@ -116,8 +111,18 @@ def test_provider_errors_use_contract_codes(build_client):
         assert set(r.json()) == {"error", "message", "details"}
 
 
-def test_last_vad_segment_beyond_max_audio_is_413_before_stt(build_client):
-    fake = happy_blaze(**{VAD: json_reply(vad_payload((0.0, 400.0)))})
+@pytest.mark.parametrize("spans", [((0.0, 400.0),), ((0.0, 400.0), (10.0, 20.0))])  # doan cuoi theo start co the ngan hon
+def test_vad_speech_end_beyond_max_audio_is_413_before_stt(build_client, spans):
+    fake = happy_blaze(**{VAD: json_reply(vad_payload(*spans))})
     r = post(build_client(fake, max_audio_s=300))
     assert (r.status_code, r.json()["error"]) == (413, "audio_too_long")
     assert fake.paths() == [VAD]
+
+
+def test_stt_read_timeout_is_one_request_and_504_not_a_billed_retry(build_client):
+    def slow(_request):
+        raise httpx.ReadTimeout("slow")
+    fake = happy_blaze(**{STT: slow})
+    r = post(build_client(fake, provider_retries=2))
+    assert (r.status_code, r.json()["error"]) == (504, "provider_timeout")
+    assert fake.paths() == [VAD, STT]  # dung mot lan STT

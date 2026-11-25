@@ -14,7 +14,8 @@ from .audio_validation import parse_client_time
 from .config import Settings
 
 LANGUAGES = ("vi", "en")
-MAX_TOPIC_ID_CHARS = 200
+MAX_TOPIC_ID_CHARS = 64  # bang gioi han topic_id cua TurnDeliveryMetrics (session-summary nhan lai gia tri nay)
+MAX_KEYWORD_CHARS = 64  # thuat ngu dai hon la rac (hoac loi ben goi): bo, bao keywords_truncated
 
 OPENAPI_REQUEST_BODY = {"requestBody": {"required": True, "content": {"multipart/form-data": {"schema": {
     "type": "object", "required": ["audio", "consent_confirmed"], "properties": {
@@ -42,7 +43,8 @@ class TranscribeForm:
 
 
 def parse_keywords(raw_values: List[str], max_keywords: int) -> Tuple[List[str], bool]:
-    """Truong `keywords` lap nhieu lan, hoac mot gia tri la JSON array. Bo rong / trung, giu thu tu, cat o max_keywords."""
+    """Truong `keywords` lap nhieu lan, hoac mot gia tri la JSON array. Bo rong / trung, giu thu tu. Tu dai hon
+    MAX_KEYWORD_CHARS bi bo; cat o max_keywords. Co tu bi bo hoac bi cat -> truncated=True."""
     items: List[str] = []
     for raw in raw_values:
         text = raw.strip()
@@ -56,7 +58,8 @@ def parse_keywords(raw_values: List[str], max_keywords: int) -> Tuple[List[str],
                 continue
         items.append(text)
     unique = list(dict.fromkeys(i.strip() for i in items if i and i.strip()))
-    return unique[:max_keywords], len(unique) > max_keywords
+    kept = [k for k in unique if len(k) <= MAX_KEYWORD_CHARS]
+    return kept[:max_keywords], len(kept) > max_keywords or len(kept) < len(unique)
 
 
 def _invalid(field: str, message: str) -> ApiError:

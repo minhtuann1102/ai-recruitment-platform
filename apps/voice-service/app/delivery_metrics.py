@@ -7,7 +7,9 @@ tinh tu dau file ("timings"). Dau vao khac: ban ghi GOC (FR-007), hai moc client
 - answer_duration_s = end lon nhat - start dau tien.
 - quang ngung dai = khoang trong giua hai moc lien nhau >= long_pause_s.
 - speech_time_s = answer_duration_s - tong cac quang ngung dai.
-- speech_rate_spm = so token cua ban ghi / speech_time_s x 60.
+- speech_rate_spm = so token cua ban ghi / speech_time_s x 60; rong khi speech_time_s < 3 s (cau qua ngan cho toc do
+  ao: mot tu 0.2 s ra 300 am tiet / phut, keo lech trung vi cua phien).
+- over_limit so sanh answer_duration_s DA lam tron (so ung vien thay) voi gioi han.
 - thinking_time_s = (bat dau ghi - cau hoi doc xong) + start dau tien.
 Lam tron: giay 2 chu so, am tiet / phut 1, ty le 3.
 """
@@ -19,6 +21,7 @@ from .transcript_tokens import count_fillers, tokens
 
 Timing = Tuple[float, float]  # (start, end) giay
 MAX_CLIENT_SKEW_S = 600.0  # hai moc lech qua 10 phut = khong hop le (data-model.md)
+MIN_RATE_SPEECH_S = 3.0  # duoi muc nay khong tinh toc do noi
 MIN_SPAN_S = 0.01  # doan chi co mot tu dai 0 giay van thanh doan hop le cua response
 WARN_INVALID_TIMESTAMPS = "invalid_client_timestamps"
 WARN_FILLERS_UNSUPPORTED = "fillers_unsupported"
@@ -75,7 +78,9 @@ def compute_turn_metrics(transcript: str, timings: Sequence[Timing], question_en
     _, pauses = _split_at_long_pauses(timings, config.long_pause_s)
     speech_time = max(0.0, duration - sum(pauses))
     syllables = tokens(transcript)
-    rate = round(len(syllables) / speech_time * 60, 1) if syllables and speech_time > 0 else None
+    rate = None
+    if syllables and speech_time >= MIN_RATE_SPEECH_S:
+        rate = round(len(syllables) / speech_time * 60, 1)
 
     filler_ratio = None
     if not config.fillers_supported:
@@ -87,7 +92,7 @@ def compute_turn_metrics(transcript: str, timings: Sequence[Timing], question_en
         topic_id=topic_id,
         thinking_time_s=_thinking_time(question_ended_at, recording_started_at, first_start, warnings),
         answer_duration_s=round(duration, 2),
-        over_limit=None if answer_limit_s is None else duration > answer_limit_s,
+        over_limit=None if answer_limit_s is None else round(duration, 2) > answer_limit_s,
         speech_time_s=round(speech_time, 2),
         speech_rate_spm=rate,
         long_pause_count=len(pauses),

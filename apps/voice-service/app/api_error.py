@@ -7,6 +7,8 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from . import metrics
+
 log = logging.getLogger("voice_service")
 
 
@@ -51,7 +53,11 @@ def register_error_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(Exception)
     async def unexpected_error_handler(request: Request, exc: Exception):
-        # chi ghi ten loi: thong diep ngoai le co the chua noi dung nguoi dung
+        # handler nay chi ghi ten loi (thong diep ngoai le co the chua noi dung nguoi dung); Starlette van nem lai loi nay
+        # nen uvicorn ghi traceback day du: khong dam bao log sach cho loi ngoai du kien. Cac duong xu ly chinh bat loi
+        # va tra ApiError, khong de den day.
         log.error("unexpected_error type=%s path=%s", type(exc).__name__, request.url.path)
+        # ServerErrorMiddleware nam ngoai http middleware nen metrics_middleware khong thay loi 500: dem o day
+        metrics.count_request(request.url.path, ok=False, error="internal_error")
         request.state.error_code = "internal_error"
         return error_response(500, "internal_error", "Lỗi nội bộ voice-service")

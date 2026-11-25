@@ -14,13 +14,15 @@ from . import metrics
 from .api_error import ApiError
 from .app_state import get_settings, require_blaze
 from .models import SpeakRequest
+from .openapi_docs import SPEAK_ERRORS, error_responses
 
 log = logging.getLogger("voice_service")
 router = APIRouter()
 
 
-@router.post("/api/voice/speak", response_class=StreamingResponse,
-             responses={200: {"content": {"audio/mpeg": {"schema": {"type": "string", "format": "binary"}}}}})
+@router.post("/api/voice/speak", response_class=StreamingResponse, responses={
+    200: {"description": "Stream mp3 (chunked)", "content": {"audio/mpeg": {"schema": {"type": "string", "format": "binary"}}}},
+    **error_responses(SPEAK_ERRORS)})
 async def speak(body: SpeakRequest, request: Request) -> StreamingResponse:
     settings = get_settings(request)
     text = body.text.strip()

@@ -22,7 +22,7 @@ class SpeechSegment(BaseModel):
 
 class TurnDeliveryMetrics(BaseModel):
     """Chi so trinh bay cua mot luot (FR-006). Moi truong co the rong (null); khong bao 0 thay cho 'khong do duoc'."""
-    topic_id: Optional[str] = None
+    topic_id: Optional[str] = Field(default=None, max_length=64)
     thinking_time_s: Optional[float] = Field(default=None, ge=0)
     answer_duration_s: Optional[float] = Field(default=None, ge=0)
     over_limit: Optional[bool] = None
@@ -54,7 +54,7 @@ class SpeakRequest(BaseModel):
 
 
 class SummaryRequest(BaseModel):
-    turns: List[TurnDeliveryMetrics]
+    turns: List[TurnDeliveryMetrics] = Field(max_length=200)  # phien 20 phut khong co nhieu luot hon the
 
 
 class MetricStats(BaseModel):

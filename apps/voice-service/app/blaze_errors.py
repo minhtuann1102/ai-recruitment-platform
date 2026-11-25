@@ -1,8 +1,8 @@
 """Doi loi tra ve cua Blaze sang ApiError cua voice-service (research R8).
 
 Body loi cua Blaze: {"error": {"message", "type", "code", "param"}}. Chi lay `code` va `type` (chuoi ngan) dua vao
-`details`; KHONG chep `message` cua nha cung cap (co the lap lai noi dung request). Cac gia tri nay chua xac minh bang
-lan goi that (spike T001-T003): QUOTA_MARKERS la phong doan, chinh sau spike.
+`details`; KHONG chep `message` cua nha cung cap (co the lap lai noi dung request). Chua tung thay body loi that cua
+Blaze (spike khong cham 402 / 429): QUOTA_MARKERS la phong doan, chua xac minh cho toi khi co body loi that.
 """
 import json
 from typing import Tuple
@@ -36,8 +36,9 @@ def is_quota_error(status: int, body: bytes) -> bool:
 
 
 def is_retryable(status: int, body: bytes) -> bool:
-    """Loi mang va 5xx da duoc xu ly o client; day la theo ma HTTP: 5xx va 429 (tru het credit) thu lai."""
-    return status >= 500 or (status == 429 and not is_quota_error(status, body))
+    """Chi 503 (qua tai, chua xu ly) va 429 khong phai het credit moi thu lai. KHONG thu lai 500 / 502 / 504: nha cung cap
+    co the da nhan va tinh phi request, gui lai se tinh phi lan nua (H1 review 2026-11-25)."""
+    return status == 503 or (status == 429 and not is_quota_error(status, body))
 
 
 def map_status_error(status: int, body: bytes, audio: bool) -> ApiError:

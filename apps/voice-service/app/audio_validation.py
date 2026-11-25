@@ -3,7 +3,8 @@
 - Dinh dang cho phep: webm, ogg, wav, mp3, m4a (theo duoi tep, khong co duoi thi theo content-type).
 - Kich thuoc <= VOICE_MAX_UPLOAD_MB (413 audio_too_long); tep rong / sai loai -> 415 invalid_audio.
 - Audio chi nam trong bo nho (FR-015): keep_uploads_in_memory chinh nguong cuon ra dia cua Starlette, con
-  reject_oversized_body tu choi body qua lon TRUOC khi parse multipart (khong thi phan vuot nguong van ra dia).
+  check_content_length bat buoc co Content-Length (411) va tu choi body qua lon (413) TRUOC khi parse multipart, nen khong
+  co body nao vuot nguong de cuon ra dia (body chunked khong co Content-Length cung bi chan).
 """
 import math
 from dataclasses import dataclass
@@ -21,6 +22,7 @@ CONTENT_TYPE_EXT = {"audio/webm": ".webm", "video/webm": ".webm", "audio/ogg": "
                     "audio/wav": ".wav", "audio/x-wav": ".wav", "audio/wave": ".wav", "audio/mpeg": ".mp3",
                     "audio/mp3": ".mp3", "audio/mp4": ".m4a", "audio/x-m4a": ".m4a", "audio/m4a": ".m4a"}
 MULTIPART_MARGIN_BYTES = 64 * 1024  # truong form + bien multipart ngoai tep audio
+MIN_EPOCH_MS = 1_577_836_800_000  # 2020-01-01: so nho hon la epoch GIAY (hoac rac), khong phai mili giay
 
 
 @dataclass(frozen=True)
@@ -53,20 +55,22 @@ def keep_uploads_in_memory(max_upload_bytes: int) -> None:
             setattr(MultiPartParser, attr, max_upload_bytes + MULTIPART_MARGIN_BYTES)
 
 
-def reject_oversized_body(content_length: Optional[str], max_upload_bytes: int) -> None:
-    """413 neu Content-Length vuot gioi han + bien multipart, goi truoc request.form(). Khong co / sai header: bo qua."""
+def check_content_length(content_length: Optional[str], max_upload_bytes: int) -> None:
+    """Goi truoc request.form(). Thieu / sai Content-Length -> 411 (nguoi goi la server, luon biet do dai; body chunked co
+    the vuot nguong va cuon ra dia). Qua gioi han + bien multipart -> 413."""
     try:
         size = int(content_length or "")
     except ValueError:
-        return
+        raise ApiError(411, "length_required", "Yêu cầu cần header Content-Length (không dùng chunked)") from None
     if size > max_upload_bytes + MULTIPART_MARGIN_BYTES:
         raise ApiError(413, "audio_too_long", "Yêu cầu vượt giới hạn dung lượng âm thanh",
                        {"max_bytes": max_upload_bytes})
 
 
 def parse_client_time(raw: Optional[str]) -> Optional[float]:
-    """Moc dong ho client -> epoch giay. ISO 8601 (khong co mui gio = UTC) hoac epoch mili giay. Rong / None -> None.
-    ValueError neu co gia tri nhung khong doc duoc (route doi thanh canh bao invalid_client_timestamps)."""
+    """Moc dong ho client -> epoch giay. ISO 8601 (khong co mui gio = UTC) hoac epoch mili giay (>= 2020: so nho hon
+    thuong la epoch giay, doc nham se lech 1000 lan). Rong / None -> None. ValueError neu co gia tri nhung khong hop le
+    (route doi thanh canh bao invalid_client_timestamps)."""
     text = (raw or "").strip()
     if not text:
         return None
@@ -77,6 +81,6 @@ def parse_client_time(raw: Optional[str]) -> Optional[float]:
         if parsed.tzinfo is None:
             parsed = parsed.replace(tzinfo=timezone.utc)
         return parsed.timestamp()
-    if not math.isfinite(value):
-        raise ValueError("moc thoi gian khong huu han")
+    if not math.isfinite(value) or value * 1000.0 < MIN_EPOCH_MS:
+        raise ValueError("moc thoi gian khong hop le (can epoch mili giay >= 2020 hoac ISO 8601)")
     return value
