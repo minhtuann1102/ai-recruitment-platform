@@ -259,8 +259,10 @@ vào một file kết quả trong thư mục spec, dùng cho báo cáo đồ án
 
 ### Measurable Outcomes
 
-- **SC-001**: Với câu trả lời dài ≤ 90 giây, ứng viên nhận bản ghi và chỉ số trong ≤ 5 giây sau khi thả nút ở p95
-  (đo bằng bộ đo US4; ngưỡng xem lại sau lần thử đầu với nhà cung cấp).
+- **SC-001**: Ứng viên nhận bản ghi và chỉ số sau khi thả nút trong ≤ 10 giây ở p95 với câu trả lời ≤ 30 giây, và
+  ≤ 20 giây với câu ≤ 90 giây (đo bằng bộ đo US4). *Sửa 2026-11-25 sau spike*: nhận dạng sau khi ghi xong của nhà cung
+  cấp mất khoảng 5 giây + 0,15 × độ dài câu; mục tiêu cũ ≤ 5 giây chỉ đạt được bằng stream audio trong lúc nói (cần
+  web, để sau). Bên gọi hiện trạng thái "đang nhận dạng".
 - **SC-002**: Trên tập ghi âm thật, ≥ 85% thuật ngữ kỹ thuật được nhận đúng khi có danh sách thuật ngữ; báo cả con số
   khi không có danh sách để thấy mức cải thiện.
 - **SC-003**: Câu hỏi ≤ 300 ký tự bắt đầu phát tiếng trong ≤ 1.5 giây ở p95.

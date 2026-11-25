@@ -131,3 +131,28 @@ chốt ở task spike (T001–T003 của tasks.md).
 - Bảng giá Blaze (2026-11-25): STT `stt-async-1.5` ~2.2 credit/phút; TTS realtime 444 credit/giờ audio. Phiên 20 phút,
   ~8 phút ứng viên nói + ~4 phút câu hỏi đọc → ước ~18 + ~30 = ~48 credit/phiên (chưa tính VAD). Gói Starter 1.000
   credit → ~20 phiên. **[spike]** đo credit thật mỗi lần gọi.
+
+## Kết quả spike (2026-11-25, gọi thật, tài khoản của owner)
+
+Âm thanh thử: TTS Blaze đọc câu trả lời mẫu có từ đệm và thuật ngữ (10 s, 15 s, 30 s); ghi âm giọng thật chưa có (xem
+"Còn mở"). Số đo trên máy owner qua mạng gia đình, mỗi phép 1–2 lần, chỉ để chọn hướng.
+
+| Hạng mục | Kết quả | Hệ quả |
+|---|---|---|
+| STT response (`blaze-stt-1.5`, `-3`) | `id, object, status, model, created_at, filename, text, raw_text, segments[{id, startTime, endTime, text, speaker, words[{text, start, end}]}]` | **Có mốc theo từ**; tài liệu ghi sai tên trường (`start/end` của đoạn thực tế là `startTime/endTime`) |
+| STT `blaze-stt-1.0` | 2.3 s cho 10 s audio, đoạn `{start, end, text, raw_text}`, **không** có `words`, sai thuật ngữ nhiều hơn | không dùng làm mặc định |
+| Độ tin cậy | không có ở mọi mức (đoạn, từ) | giữ R4 |
+| Từ đệm | giữ "Ừm", "À", "kiểu như", "nói chung là" khi `refine=false`; mất "Ờ" một lần | `VOICE_FILLERS_SUPPORTED=true`; cần xác nhận trên giọng thật |
+| `keywords` | sửa rõ: "thread sai phạm" → "thread-safe", "hash map" → "HashMap", "POST" → "put"; "CAS" vẫn ra "CS" | giữ FR-002; giới hạn độ dài chưa chạm (9 từ) |
+| Độ trễ STT batch (1.5) | 10 s audio → 6.3 s; 30 s → 9.4 s (≈ 5 s + 0.15 × độ dài); `timestamps` không đổi độ trễ; `blaze-stt-3` chậm hơn (8.6 s) | **SC-001 (≤ 5 s) không đạt với batch** — xem "Quyết định cần owner" |
+| VAD | 0.2–0.4 s; `start/end` là **chuỗi**; thêm `transcription`, `error_msg`, `executing_time`; gộp cả câu 9.6 s thành 1 đoạn | VAD quá thô cho quãng ngừng → chỉ dùng VAD làm cổng "không có tiếng"; quãng ngừng, thời gian có tiếng tính từ mốc theo từ (thay R3/R5) |
+| Gọi song song VAD + STT | không bị từ chối | giữ tuần tự mặc định (VAD chặn im lặng để đỡ tốn STT) |
+| STT realtime (WebSocket, `blaze-stt-1.5-realtime`) | gửi dần theo nhịp nói: kết quả cuối **2.1 s** sau khi nói xong; gửi cả file một lần: 14 s (xử lý theo thời gian thật); chất lượng kém hơn batch ("thread-safe" → "thoát sếp"), `session.update` (keywords) chỉ nhận khi là tin đầu tiên và tác dụng yếu; sự kiện chỉ có `start_ms/end_ms` theo đoạn, không có mốc theo từ | chỉ nhanh khi client stream audio trong lúc nói (cần web, không còn là "ghi xong mới gửi") |
+| TTS `blaze-tts-1.5-realtime` | byte đầu 0.3–0.8 s cho câu ≤ 300 ký tự; content-type `audio/mp3`; `response_format=pcm` + `sample_rate=16000` chạy được | SC-003 đạt |
+| `GET /v1/audio/voices` | `[]` (chỉ giọng tự tạo) | danh sách giọng cấu hình tay; `HN-Nam-2-BL` chạy |
+| Kết nối | httpx async đôi khi `ConnectError` ở lần nối đầu trên máy này | client có retry ở transport |
+
+Chưa đo: credit thật mỗi lần gọi (owner xem trang tài khoản), định dạng `webm/opus` (cần ghi âm thật).
+
+**Quyết định owner (2026-11-25)**: giữ STT batch `blaze-stt-1.5` (chất lượng, mốc theo từ, keywords), sửa SC-001 theo số
+đo; stream realtime để sau khi có web.

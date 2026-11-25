@@ -8,16 +8,16 @@ Thư mục gốc code: `apps/voice-service/`. File code < 200 dòng.
 
 ## Phase 1: Setup và spike Blaze
 
-- [ ] T001 Spike (cần owner đặt `BLAZE_API_KEY` vào `apps/voice-service/.env`; không đọc file, script nạp bằng
+- [x] T001 Spike (cần owner đặt `BLAZE_API_KEY` vào `apps/voice-service/.env`; không đọc file, script nạp bằng
   `python-dotenv`; máy này cần `truststore.inject_into_ssl()` trước khi tạo client httpx):
   script tạm trong scratchpad gọi `POST /v1/audio/voice_activity`, `POST /v1/audio/transcriptions`
   (`timestamps=true`, `refine=false`, `keywords`) với 1 file webm và 1 file wav có từ đệm và thuật ngữ, ghi: định dạng
   được nhận, trường response thật (có mốc theo từ / độ tin cậy không), từ đệm có giữ không, độ trễ, giới hạn `keywords`,
   lỗi khi gọi song song (gói Starter 1 luồng)
-- [ ] T002 Spike TTS: `POST /v1/audio/speech` với `blaze-tts-1.5-realtime`, giọng `HN-Nam-2-BL`, mp3; ghi tên tham số
+- [x] T002 Spike TTS: `POST /v1/audio/speech` với `blaze-tts-1.5-realtime`, giọng `HN-Nam-2-BL`, mp3; ghi tên tham số
   đúng, thời gian tới byte đầu, danh sách giọng (`GET /v1/audio/voices`), credit tiêu thụ sau T001–T002 (trên trang
   tài khoản)
-- [ ] T003 Ghi kết quả T001–T002 vào mục "Kết quả spike" cuối `specs/015-voice-mode/research.md`; chỉnh mặc định trong
+- [x] T003 Ghi kết quả T001–T002 vào mục "Kết quả spike" cuối `specs/015-voice-mode/research.md`; chỉnh mặc định trong
   data-model.md (`VOICE_FILLERS_SUPPORTED`, `VOICE_MAX_KEYWORDS`, gọi song song hay tuần tự, cần ffmpeg không)
 - [ ] T004 Tạo `apps/voice-service/` với `requirements.txt` (fastapi 0.115.6, uvicorn[standard] 0.34.0, pydantic 2.10.4,
   python-multipart 0.0.20, httpx 0.28.1, python-dotenv 1.2.1, prometheus-client 0.25.0), `requirements-dev.txt`
