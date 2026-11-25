@@ -156,7 +156,21 @@ Credit: cả spike tốn **15 credit** (≈ 2,3 phút STT batch, ≈ 1 phút STT
 bảng giá. Ước một phiên 20 phút (≈ 8 phút ứng viên nói, ≈ 3–4 phút câu hỏi đọc) ≈ 40–50 credit; tài khoản owner có
 11.000 credit → đủ bộ đo (~30 clip × 2 lượt) và vài trăm phiên demo (SC-007).
 
-Chưa đo: định dạng `webm/opus` và từ đệm trên giọng thật (cần ghi âm thật).
+### Giọng thật (2026-11-25, owner tự ghi bằng trình duyệt, webm/opus, 2 clip)
+
+| Hạng mục | sample1 (60 s, cố ý ngập ngừng, Java) | sample2 (23 s, trôi chảy, Docker) |
+|---|---|---|
+| `webm/opus` | nhận trực tiếp (VAD 1.5 s, STT 200) → **không cần ffmpeg** | như trái |
+| STT không keywords | "account code" (ConcurrentHashMap), "trusted" (thread-safe), "CIS" (CAS) | "Doctor English" (Docker image) |
+| STT có keywords | đúng ConcurrentHashMap, thread-safe, CAS, synchronized; còn "push" (put) | đúng Docker image; "lớp GUI" (lớp ghi) cả hai lần |
+| Từ đệm | giữ "Ừ", "Ừm", "ờ", "kiểu như là", "nói chung"; bản có keywords mất 1 "Ừm" | không có |
+| Khoảng trống giữa từ ≥ 1 s | 8 chỗ: 1.2–1.4 s (nghỉ giữa câu), 1.7–2.3 s (chỗ cố ý dừng 2–3 s) | 0 |
+| Độ trễ STT | 12.6–14.6 s | 8.3 s |
+
+Hệ quả: keywords là **bắt buộc thực tế** (bên gọi luôn gửi danh sách của track); ngưỡng quãng ngừng dài đổi mặc định
+**2.0 → 1.5 s** (tách được nghỉ giữa câu và dừng để nghĩ trên mẫu này; chốt lại trên bộ đo); lỗi kiểu "ghi" → "GUI" là
+từ tiếng Việt bị đoán thành tiếng Anh, keywords không sửa được, Evaluator phải chịu (FR-AI-129). Ứng viên bắt đầu nói ở
+giây 4.8 của sample1: phần im lặng đầu bản ghi được cộng vào thời gian suy nghĩ đúng như R5.
 
 **Quyết định owner (2026-11-25)**: giữ STT batch `blaze-stt-1.5` (chất lượng, mốc theo từ, keywords), sửa SC-001 theo số
 đo; stream realtime để sau khi có web.

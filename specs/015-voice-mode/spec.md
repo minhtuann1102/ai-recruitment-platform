@@ -173,17 +173,18 @@ vào một file kết quả trong thư mục spec, dùng cho báo cáo đồ án
 
 **Chỉ số trình bày theo lượt (US1)**
 
-- **FR-006**: Hệ thống MUST tính các chỉ số sau bằng code, tất định với cùng đầu vào (bản ghi gốc + đoạn có tiếng + mốc
-  client):
+- **FR-006**: Hệ thống MUST tính các chỉ số sau bằng code, tất định với cùng đầu vào (bản ghi gốc + mốc theo từ của nhà
+  cung cấp + mốc client). *Sửa 2026-11-25 sau spike*: mốc theo từ thay cho đoạn có tiếng (VAD quá thô); không có mốc
+  theo từ thì dùng đoạn có tiếng với cùng công thức:
 
   | Chỉ số | Định nghĩa | Rỗng khi |
   |---|---|---|
-  | Thời gian suy nghĩ (giây) | (mốc bắt đầu ghi − mốc câu hỏi đọc xong) + thời điểm đoạn có tiếng đầu tiên | thiếu mốc, mốc không hợp lệ |
-  | Độ dài câu trả lời (giây) | từ đầu đoạn có tiếng đầu tới cuối đoạn có tiếng cuối | không có tiếng |
+  | Thời gian suy nghĩ (giây) | (mốc bắt đầu ghi − mốc câu hỏi đọc xong) + thời điểm từ đầu tiên | thiếu mốc, mốc không hợp lệ |
+  | Độ dài câu trả lời (giây) | từ đầu từ đầu tiên tới cuối từ cuối cùng | không có tiếng |
   | Vượt giới hạn | độ dài > giới hạn bên gọi gửi | bên gọi không gửi giới hạn |
-  | Thời gian có tiếng (giây) | tổng độ dài các đoạn có tiếng | không có tiếng |
+  | Thời gian có tiếng (giây) | độ dài câu trả lời − tổng các quãng ngừng dài | không có tiếng |
   | Tốc độ nói (âm tiết / phút) | số âm tiết hoặc từ (tách theo khoảng trắng) của bản ghi gốc ÷ thời gian có tiếng | không có tiếng |
-  | Số quãng ngừng dài | số khoảng trống giữa hai đoạn có tiếng liền nhau ≥ ngưỡng (mặc định 2.0 giây, cấu hình) | không có tiếng |
+  | Số quãng ngừng dài | số khoảng trống giữa hai từ liền nhau ≥ ngưỡng (mặc định 1.5 giây, cấu hình; sửa sau spike); không có mốc theo từ thì dùng khoảng giữa các đoạn có tiếng | không có tiếng |
   | Tỷ lệ từ đệm | số từ đệm (danh sách cấu hình: "ừm", "ờ", "à", "kiểu như", "thì là"...) ÷ tổng số âm tiết | nhà cung cấp lọc từ đệm (cấu hình) |
 
 - **FR-007**: Chỉ số MUST tính trên bản ghi **gốc** của nhà cung cấp, không trên bản ứng viên đã sửa.
@@ -290,7 +291,8 @@ vào một file kết quả trong thư mục spec, dùng cho báo cáo đồ án
   golden Evaluator, nên văn bản mẫu chính là bản ghi chuẩn (không phải gõ tay) và có sẵn nhãn để so điểm. Giới hạn: đọc
   thành tiếng ít từ đệm và quãng ngừng hơn nói tự nhiên, nên chỉ số trình bày được kiểm thêm trên vài câu trả lời nói tự
   do (không cần bản ghi chuẩn). Số lượng chốt ở plan.
-- Ngưỡng quãng ngừng dài 2.0 giây và danh sách từ đệm là mặc định, chỉnh sau khi đo.
+- Ngưỡng quãng ngừng dài 1.5 giây (đổi từ 2.0 sau khi thử giọng thật 2026-11-25) và danh sách từ đệm là mặc định, chỉnh
+  sau khi đo.
 - Thời gian suy nghĩ tính theo đồng hồ của client cho hai mốc, nên không bị lệch giờ giữa máy.
 - Trước khi có interview-service và web, bên gọi là lệnh dòng lệnh / script của DE. Không làm giao diện, không sửa
   `/dev/play` (code của AIE).

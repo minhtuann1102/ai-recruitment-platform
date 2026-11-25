@@ -77,6 +77,6 @@ Nạp từ `apps/voice-service/.env` (theo mẫu `apps/data-pipeline/pipeline/se
 | `VOICE_MAX_TTS_CHARS` | 1000 | |
 | `VOICE_PROVIDER_TIMEOUT_S` | 30 | |
 | `VOICE_PROVIDER_RETRIES` | 2 | |
-| `VOICE_LONG_PAUSE_S` | 2.0 | |
+| `VOICE_LONG_PAUSE_S` | 1.5 | |
 | `VOICE_FILLERS_SUPPORTED` | true | đặt false nếu spike cho thấy Blaze lọc từ đệm |
 | `VOICE_MAX_KEYWORDS` | 100 | chốt sau spike |
