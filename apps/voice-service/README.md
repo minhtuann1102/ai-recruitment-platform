@@ -21,7 +21,11 @@ curl -s localhost:8020/api/health   # {"status":"ok","provider":"blaze"}  (uncon
 
 Docker Compose (từ thư mục gốc repo): `docker compose up -d --build voice-service` (đọc `apps/voice-service/.env`, thiếu file vẫn lên và báo `unconfigured`).
 
-Máy có kiểm tra TLS chặn giữa (`CERTIFICATE_VERIFY_FAILED`): cài bằng `pip install --use-feature=truststore -r requirements-dev.txt` và bật `truststore.inject_into_ssl()` khi chạy. Không thêm `truststore` vào `requirements.txt`.
+Máy có kiểm tra TLS chặn giữa (`CERTIFICATE_VERIFY_FAILED`): cài bằng `pip install --use-feature=truststore -r requirements-dev.txt`, cài riêng `pip install truststore` (chỉ cho máy đó, không thêm vào `requirements.txt`) và chạy service qua lệnh dưới đây. Phải bật `truststore.inject_into_ssl()` **trước khi** import `app.main`, vì client httpx tạo ngữ cảnh SSL ngay lúc import:
+
+```bash
+python -c "import truststore; truststore.inject_into_ssl(); import uvicorn; uvicorn.run('app.main:app', port=8020)"
+```
 
 ## Thử nhanh
 
