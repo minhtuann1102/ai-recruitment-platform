@@ -1,0 +1,30 @@
+{"clip_id": "r01", "golden_id": "q01-strong", "speaker": "s1", "kind": "read", "track": "java_backend"}
+{"clip_id": "r02", "golden_id": "q02-strong", "speaker": "s2", "kind": "read", "track": "java_backend"}
+{"clip_id": "r03", "golden_id": "q01-medium", "speaker": "s1", "kind": "read", "track": "java_backend"}
+{"clip_id": "r04", "golden_id": "q02-medium", "speaker": "s2", "kind": "read", "track": "java_backend"}
+{"clip_id": "r05", "golden_id": "q01-weak", "speaker": "s1", "kind": "read", "track": "java_backend"}
+{"clip_id": "r06", "golden_id": "q02-weak", "speaker": "s2", "kind": "read", "track": "java_backend"}
+{"clip_id": "r07", "golden_id": "q04-strong", "speaker": "s1", "kind": "read", "track": "nodejs_backend"}
+{"clip_id": "r08", "golden_id": "q05-strong", "speaker": "s2", "kind": "read", "track": "nodejs_backend"}
+{"clip_id": "r09", "golden_id": "q04-medium", "speaker": "s1", "kind": "read", "track": "nodejs_backend"}
+{"clip_id": "r10", "golden_id": "q05-medium", "speaker": "s2", "kind": "read", "track": "nodejs_backend"}
+{"clip_id": "r11", "golden_id": "q04-weak", "speaker": "s1", "kind": "read", "track": "nodejs_backend"}
+{"clip_id": "r12", "golden_id": "q05-weak", "speaker": "s2", "kind": "read", "track": "nodejs_backend"}
+{"clip_id": "r13", "golden_id": "q07-strong", "speaker": "s1", "kind": "read", "track": "python_backend"}
+{"clip_id": "r14", "golden_id": "q08-strong", "speaker": "s2", "kind": "read", "track": "python_backend"}
+{"clip_id": "r15", "golden_id": "q07-medium", "speaker": "s1", "kind": "read", "track": "python_backend"}
+{"clip_id": "r16", "golden_id": "q08-medium", "speaker": "s2", "kind": "read", "track": "python_backend"}
+{"clip_id": "r17", "golden_id": "q07-weak", "speaker": "s1", "kind": "read", "track": "python_backend"}
+{"clip_id": "r18", "golden_id": "q08-weak", "speaker": "s2", "kind": "read", "track": "python_backend"}
+{"clip_id": "r19", "golden_id": "q09-strong", "speaker": "s1", "kind": "read", "track": "ai_engineer"}
+{"clip_id": "r20", "golden_id": "q10-strong", "speaker": "s2", "kind": "read", "track": "ai_engineer"}
+{"clip_id": "r21", "golden_id": "q09-medium", "speaker": "s1", "kind": "read", "track": "ai_engineer"}
+{"clip_id": "r22", "golden_id": "q10-medium", "speaker": "s2", "kind": "read", "track": "ai_engineer"}
+{"clip_id": "r23", "golden_id": "q09-weak", "speaker": "s1", "kind": "read", "track": "ai_engineer"}
+{"clip_id": "r24", "golden_id": "q10-weak", "speaker": "s2", "kind": "read", "track": "ai_engineer"}
+{"clip_id": "f01", "speaker": "s1", "kind": "free", "track": "java_backend"}
+{"clip_id": "f02", "speaker": "s2", "kind": "free", "track": "nodejs_backend"}
+{"clip_id": "f03", "speaker": "s1", "kind": "free", "track": "python_backend"}
+{"clip_id": "f04", "speaker": "s2", "kind": "free", "track": "ai_engineer"}
+{"clip_id": "f05", "speaker": "s1", "kind": "free", "track": "java_backend"}
+{"clip_id": "f06", "speaker": "s2", "kind": "free", "track": "nodejs_backend"}
