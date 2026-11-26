@@ -73,13 +73,16 @@ class VoiceEvalClient:
         elapsed = time.perf_counter() - start
         if response.status_code != 200:
             return TranscribeResult(ok=False, elapsed_s=elapsed, status=response.status_code, error=_error_code(response))
-        body = response.json()
-        segments = body.get("segments") or []
-        return TranscribeResult(ok=True, elapsed_s=elapsed, status=200, transcript=body.get("transcript") or "",
-                                no_speech=bool(body.get("no_speech")),
-                                speech_end_s=max((s["end"] for s in segments), default=None),
-                                metrics=body.get("metrics"), warnings=list(body.get("warnings") or []),
-                                stt_model=(body.get("provider") or {}).get("stt_model"))
+        try:  # 200 ma body hong: ghi loi, khong de ca lan do (da ton credit) dung giua chung
+            body = response.json()
+            segments = body.get("segments") or []
+            return TranscribeResult(ok=True, elapsed_s=elapsed, status=200, transcript=body.get("transcript") or "",
+                                    no_speech=bool(body.get("no_speech")),
+                                    speech_end_s=max((float(s["end"]) for s in segments), default=None),
+                                    metrics=body.get("metrics"), warnings=list(body.get("warnings") or []),
+                                    stt_model=(body.get("provider") or {}).get("stt_model"))
+        except (ValueError, KeyError, TypeError, AttributeError):
+            return TranscribeResult(ok=False, elapsed_s=elapsed, status=200, error="bad_response")
 
     def speak(self, text: str) -> SpeakResult:
         start = time.perf_counter()

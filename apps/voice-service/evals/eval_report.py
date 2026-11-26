@@ -14,14 +14,17 @@ def _passed(flag) -> str:
 
 def _recognition(data: Dict) -> List[str]:
     lines = ["## SC-002: thuật ngữ và lỗi âm tiết (clip `read`)", "",
-             "| Chế độ | Clip | Lỗi âm tiết TB | Lỗi âm tiết trung vị | Thuật ngữ đúng | Tỷ lệ |", "|---|---|---|---|---|---|"]
-    for key, label in (("kw", "có keywords"), ("nokw", "không keywords")):
+             "| Chế độ | Clip | Lỗi âm tiết gộp | TB từng clip | Trung vị | Thuật ngữ đúng | Tỷ lệ |",
+             "|---|---|---|---|---|---|---|"]
+    for key, label in (("kw", "có keywords (mọi clip)"), ("kw_pair", "có keywords (cặp)"),
+                       ("nokw_pair", "không keywords (cặp)")):
         s = data["recognition"][key]
-        lines.append(f"| {label} | {s['clips']} | {pct(s['ser_mean'])} | {pct(s['ser_median'])} | "
+        lines.append(f"| {label} | {s['clips']} | {pct(s['ser_pooled'])} | {pct(s['ser_mean'])} | {pct(s['ser_median'])} | "
                      f"{s['terms_found']}/{s['terms_total']} | {pct(s['term_rate'])} |")
     rate = data["recognition"]["kw"]["term_rate"]
-    lines += ["", f"Mục tiêu ≥ {TERM_TARGET:.0%} thuật ngữ đúng khi có keywords: "
-              f"**{_passed(None if rate is None else rate >= TERM_TARGET)}**.", ""]
+    lines += ["", f"Mục tiêu ≥ {TERM_TARGET:.0%} thuật ngữ đúng khi có keywords (dòng mọi clip): "
+              f"**{_passed(None if rate is None else rate >= TERM_TARGET)}**. Hai dòng cặp chỉ gồm clip mà cả hai chế "
+              "độ đều nhận được bản ghi, để so mức cải thiện của keywords.", ""]
     sent = ", ".join(f"{t} {n}" for t, n in sorted(data["keywords_sent"].items()))
     lines += [f"Keywords: gửi đủ danh sách của track như bên gọi thật ({sent} cụm); service cắt theo "
               "`VOICE_MAX_KEYWORDS` (mặc định 100), phần sau không tới nhà cung cấp. Thuật ngữ được chấm theo cả danh "
@@ -32,7 +35,9 @@ def _recognition(data: Dict) -> List[str]:
 def _latency(data: Dict) -> List[str]:
     lines = ["## SC-001: thời gian nhận bản ghi", "",
              "Độ dài câu ước lượng bằng mốc cuối đoạn nói service trả về (không có ffprobe để đọc độ dài file); "
-             "thời gian đo phía bên gọi, gồm cả mạng tới service.", "",
+             "thời gian đo phía bên gọi, gồm cả mạng tới service. Chỉ tính lượt có keywords (bên gọi thật luôn gửi).",
+             f"Lượt có keywords lỗi (không có độ dài): {data['kw_failures']}"
+             + ("; có lượt lỗi nên không kết luận đạt / không đạt." if data["kw_failures"] else "."), "",
              "| Độ dài câu | Lượt | p50 (s) | p95 (s) | Ngưỡng p95 (s) | Kết quả |", "|---|---|---|---|---|---|"]
     for row in data["latency"]:
         lines.append(f"| {row['bucket']} | {row['n']} | {fmt(row['p50'])} | {fmt(row['p95'])} | "
@@ -67,7 +72,8 @@ def _credit(data: Dict) -> List[str]:
     c, s = data["credit"], data["credit"]["session"]
     return ["## SC-007: credit", "",
             f"- Lượt đo này: ~{fmt(c['stt_seconds'] / 60, 1)} phút audio gửi STT (ước lượng theo mốc cuối đoạn nói, "
-            f"cả hai chế độ) → ~{fmt(c['stt_credit'], 1)} credit STT; TTS và VAD chưa tính.",
+            f"cả hai chế độ) → ~{fmt(c['stt_credit'], 1)} credit STT; TTS, VAD và lượt lỗi (đã tới nhà cung cấp "
+            "nhưng không có độ dài) chưa tính.",
             f"- Một phiên {s['session_min']} phút (giả định trong `evals/pricing.json`): STT ~{fmt(s['stt'], 1)} + "
             f"TTS ~{fmt(s['tts'], 1)} = **~{fmt(s['total'], 1)} credit**.", ""]
 
@@ -90,10 +96,13 @@ def build_report(data: Dict) -> str:
     missing = ", ".join(data["missing"]) or "không"
     head = ["# Kết quả bộ đo voice (spec 015 US4)", "",
             f"Chạy {data['date']}, model STT `{data['stt_model'] or '?'}`, lệnh `python -m evals.run_voice_eval`. "
-            f"Clip có file: {data['clips_found']}/{data['clips_total']} (thiếu: {missing}); "
-            f"{data['speakers']} người ghi, mã ẩn danh.", "",
+            f"Clip có file: {data['clips_found']}/{data['clips_total']} (thiếu: {missing}); đã đo {data['clips_measured']} "
+            f"clip; {data['speakers']} người ghi, mã ẩn danh.", "",
             "**Giới hạn:** clip `read` là đọc thành tiếng văn bản mẫu, không phải trả lời thật (ít ngập ngừng, đúng "
-            "thuật ngữ hơn); số mẫu nhỏ nên p95 gần như giá trị lớn nhất.", ""]
+            "thuật ngữ hơn); số mẫu nhỏ nên p95 gần như giá trị lớn nhất. Thuật ngữ = token của bản chuẩn có trong danh "
+            "sách của track (research R10): danh sách có cả token chung (`i`/`o` từ I/O, `test`, `key`, `set`, `model`) "
+            "nên tỷ lệ hơi lạc quan; ngược lại cụm dính liền (`Promise.all` → `promiseall`) bị tính sai khi STT tách "
+            "từ.", ""]
     sc004 = ["## SC-004: chênh điểm Evaluator", "",
              "Chờ AIE thêm tùy chọn đường dẫn cho `run_evaluator --stt` (T029). Mẫu đã xuất: "
              "`apps/voice-service/evals/out/stt_samples.jsonl` (bản STT có keywords của các clip `read`).", ""]

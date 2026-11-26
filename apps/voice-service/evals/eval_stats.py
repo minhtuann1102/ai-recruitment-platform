@@ -30,8 +30,9 @@ def bucket_of(duration_s: Optional[float]) -> Optional[str]:
     return "> 90 s"
 
 
-def latency_table(samples: Iterable[Tuple[Optional[float], float]]) -> List[Dict]:
-    """samples: (do dai cau uoc luong, thoi gian nhan ban ghi). Moi muc: n, p50, p95, nguong, dat?"""
+def latency_table(samples: Iterable[Tuple[Optional[float], float]], failures: int = 0) -> List[Dict]:
+    """samples: (do dai cau uoc luong, thoi gian nhan ban ghi) cua lan co keywords thanh cong. Moi muc: n, p50, p95,
+    nguong, dat? Co lan loi (timeout, 5xx: thuong la lan cham nhat, khong biet do dai) -> khong ket luan (None)."""
     grouped: Dict[str, List[float]] = {}
     for duration, elapsed in samples:
         name = bucket_of(duration)
@@ -42,7 +43,7 @@ def latency_table(samples: Iterable[Tuple[Optional[float], float]]) -> List[Dict
         values = grouped.get(name, [])
         p95 = percentile(values, 95)
         rows.append({"bucket": name, "n": len(values), "p50": percentile(values, 50), "p95": p95, "target": target,
-                     "passed": None if p95 is None else p95 <= target})
+                     "passed": None if p95 is None or failures else p95 <= target})
     if grouped.get("> 90 s"):
         values = grouped["> 90 s"]
         rows.append({"bucket": "> 90 s", "n": len(values), "p50": percentile(values, 50),
@@ -51,11 +52,14 @@ def latency_table(samples: Iterable[Tuple[Optional[float], float]]) -> List[Dict
 
 
 def recognition_summary(rows: List[Dict]) -> Dict:
-    """rows: {ser, terms_found, terms_total} cua cac clip read chay thanh cong trong mot che do (co / khong keywords)."""
+    """rows: {ser, edits, ref_tokens, terms_found, terms_total} cua cac clip read trong mot che do. `ser_pooled` =
+    tong loi / tong token ban chuan (clip dai nang ky hon, khong bi clip weak ngan lan at nhu trung binh tung clip)."""
     sers = [r["ser"] for r in rows]
     found = sum(r["terms_found"] for r in rows)
     total = sum(r["terms_total"] for r in rows)
+    ref = sum(r["ref_tokens"] for r in rows)
     return {"clips": len(rows), "ser_mean": mean(sers) if sers else None, "ser_median": median(sers) if sers else None,
+            "ser_pooled": sum(r["edits"] for r in rows) / ref if ref else None,
             "terms_found": found, "terms_total": total, "term_rate": found / total if total else None}
 
 

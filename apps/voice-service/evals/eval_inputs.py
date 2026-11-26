@@ -11,7 +11,9 @@ from typing import Dict, List, Optional
 
 import httpx
 
-from .build_manifest import EVALS_DIR, GOLDEN, MANIFEST, load_golden
+from app.transcript_tokens import tokens
+
+from .build_manifest import EVALS_DIR, GOLDEN, MANIFEST, load_golden, ref_hash
 
 AUDIO_DIR = EVALS_DIR / "audio"  # gitignore (FR-023)
 PHRASES_DIR = EVALS_DIR / "phrases"
@@ -41,7 +43,8 @@ def find_audio(clip_id: str, audio_dir: Path) -> Optional[Path]:
 
 
 def load_clips(manifest: Path = MANIFEST, golden_path: Path = GOLDEN, audio_dir: Path = AUDIO_DIR) -> List[Clip]:
-    """Clip theo thu tu manifest; clip read tro toi golden khong ton tai -> ValueError (manifest hong)."""
+    """Clip theo thu tu manifest. ValueError (truoc khi goi mang, chua ton credit) khi clip read tro toi golden khong
+    ton tai, ban chuan rong, hoac `answer` da doi so voi luc ghi am (`ref_sha256` lech)."""
     by_id = {r["id"]: r for r in load_golden(golden_path)}
     clips = []
     with manifest.open(encoding="utf-8") as f:
@@ -54,6 +57,11 @@ def load_clips(manifest: Path = MANIFEST, golden_path: Path = GOLDEN, audio_dir:
                 gold = by_id.get(row.get("golden_id"))
                 if gold is None:
                     raise ValueError(f"{row['clip_id']}: golden_id {row.get('golden_id')!r} khong co trong golden")
+                if row.get("ref_sha256") != ref_hash(gold["answer"]):
+                    raise ValueError(f"{row['clip_id']}: answer cua {row['golden_id']} da doi so voi luc ghi am "
+                                     "(ref_sha256 lech); khong cham duoc clip nay")
+                if not tokens(gold["answer"]):
+                    raise ValueError(f"{row['clip_id']}: ban chuan rong")
             clips.append(Clip(clip_id=row["clip_id"], speaker=row["speaker"], kind=row["kind"], track=row["track"],
                               golden_id=row.get("golden_id"), reference=gold["answer"] if gold else None,
                               tier=gold.get("intended_tier") if gold else None,

@@ -1,27 +1,27 @@
-{"clip_id": "r01", "golden_id": "q01-strong", "speaker": "s1", "kind": "read", "track": "java_backend"}
-{"clip_id": "r02", "golden_id": "q02-strong", "speaker": "s2", "kind": "read", "track": "java_backend"}
-{"clip_id": "r03", "golden_id": "q01-medium", "speaker": "s1", "kind": "read", "track": "java_backend"}
-{"clip_id": "r04", "golden_id": "q02-medium", "speaker": "s2", "kind": "read", "track": "java_backend"}
-{"clip_id": "r05", "golden_id": "q01-weak", "speaker": "s1", "kind": "read", "track": "java_backend"}
-{"clip_id": "r06", "golden_id": "q02-weak", "speaker": "s2", "kind": "read", "track": "java_backend"}
-{"clip_id": "r07", "golden_id": "q04-strong", "speaker": "s1", "kind": "read", "track": "nodejs_backend"}
-{"clip_id": "r08", "golden_id": "q05-strong", "speaker": "s2", "kind": "read", "track": "nodejs_backend"}
-{"clip_id": "r09", "golden_id": "q04-medium", "speaker": "s1", "kind": "read", "track": "nodejs_backend"}
-{"clip_id": "r10", "golden_id": "q05-medium", "speaker": "s2", "kind": "read", "track": "nodejs_backend"}
-{"clip_id": "r11", "golden_id": "q04-weak", "speaker": "s1", "kind": "read", "track": "nodejs_backend"}
-{"clip_id": "r12", "golden_id": "q05-weak", "speaker": "s2", "kind": "read", "track": "nodejs_backend"}
-{"clip_id": "r13", "golden_id": "q07-strong", "speaker": "s1", "kind": "read", "track": "python_backend"}
-{"clip_id": "r14", "golden_id": "q08-strong", "speaker": "s2", "kind": "read", "track": "python_backend"}
-{"clip_id": "r15", "golden_id": "q07-medium", "speaker": "s1", "kind": "read", "track": "python_backend"}
-{"clip_id": "r16", "golden_id": "q08-medium", "speaker": "s2", "kind": "read", "track": "python_backend"}
-{"clip_id": "r17", "golden_id": "q07-weak", "speaker": "s1", "kind": "read", "track": "python_backend"}
-{"clip_id": "r18", "golden_id": "q08-weak", "speaker": "s2", "kind": "read", "track": "python_backend"}
-{"clip_id": "r19", "golden_id": "q09-strong", "speaker": "s1", "kind": "read", "track": "ai_engineer"}
-{"clip_id": "r20", "golden_id": "q10-strong", "speaker": "s2", "kind": "read", "track": "ai_engineer"}
-{"clip_id": "r21", "golden_id": "q09-medium", "speaker": "s1", "kind": "read", "track": "ai_engineer"}
-{"clip_id": "r22", "golden_id": "q10-medium", "speaker": "s2", "kind": "read", "track": "ai_engineer"}
-{"clip_id": "r23", "golden_id": "q09-weak", "speaker": "s1", "kind": "read", "track": "ai_engineer"}
-{"clip_id": "r24", "golden_id": "q10-weak", "speaker": "s2", "kind": "read", "track": "ai_engineer"}
+{"clip_id": "r01", "golden_id": "q01-strong", "ref_sha256": "0aa9985bdd86796f", "speaker": "s1", "kind": "read", "track": "java_backend"}
+{"clip_id": "r02", "golden_id": "q02-strong", "ref_sha256": "bc34eae4be39fb2d", "speaker": "s2", "kind": "read", "track": "java_backend"}
+{"clip_id": "r03", "golden_id": "q01-medium", "ref_sha256": "8efc4b4a86135ff6", "speaker": "s1", "kind": "read", "track": "java_backend"}
+{"clip_id": "r04", "golden_id": "q02-medium", "ref_sha256": "549912dc3ee92460", "speaker": "s2", "kind": "read", "track": "java_backend"}
+{"clip_id": "r05", "golden_id": "q01-weak", "ref_sha256": "a33096eacf25fd7d", "speaker": "s1", "kind": "read", "track": "java_backend"}
+{"clip_id": "r06", "golden_id": "q02-weak", "ref_sha256": "1e1be9811a54ff54", "speaker": "s2", "kind": "read", "track": "java_backend"}
+{"clip_id": "r07", "golden_id": "q04-strong", "ref_sha256": "c22422d3ccf4b2e3", "speaker": "s1", "kind": "read", "track": "nodejs_backend"}
+{"clip_id": "r08", "golden_id": "q05-strong", "ref_sha256": "4a62193c9140b410", "speaker": "s2", "kind": "read", "track": "nodejs_backend"}
+{"clip_id": "r09", "golden_id": "q04-medium", "ref_sha256": "2a98f2bae0d869ca", "speaker": "s1", "kind": "read", "track": "nodejs_backend"}
+{"clip_id": "r10", "golden_id": "q05-medium", "ref_sha256": "e8d7d7dc11da8a16", "speaker": "s2", "kind": "read", "track": "nodejs_backend"}
+{"clip_id": "r11", "golden_id": "q04-weak", "ref_sha256": "623c8c29b5ac447b", "speaker": "s1", "kind": "read", "track": "nodejs_backend"}
+{"clip_id": "r12", "golden_id": "q05-weak", "ref_sha256": "dbe6345809268e10", "speaker": "s2", "kind": "read", "track": "nodejs_backend"}
+{"clip_id": "r13", "golden_id": "q07-strong", "ref_sha256": "bf5cea63b4a4b2d4", "speaker": "s1", "kind": "read", "track": "python_backend"}
+{"clip_id": "r14", "golden_id": "q08-strong", "ref_sha256": "214d19a94db36705", "speaker": "s2", "kind": "read", "track": "python_backend"}
+{"clip_id": "r15", "golden_id": "q07-medium", "ref_sha256": "4048752ba7999f24", "speaker": "s1", "kind": "read", "track": "python_backend"}
+{"clip_id": "r16", "golden_id": "q08-medium", "ref_sha256": "98aebe4c66fc9aba", "speaker": "s2", "kind": "read", "track": "python_backend"}
+{"clip_id": "r17", "golden_id": "q07-weak", "ref_sha256": "91c6eb0669258d18", "speaker": "s1", "kind": "read", "track": "python_backend"}
+{"clip_id": "r18", "golden_id": "q08-weak", "ref_sha256": "3af750a40a2b693c", "speaker": "s2", "kind": "read", "track": "python_backend"}
+{"clip_id": "r19", "golden_id": "q09-strong", "ref_sha256": "a68df33c4ebe1b62", "speaker": "s1", "kind": "read", "track": "ai_engineer"}
+{"clip_id": "r20", "golden_id": "q10-strong", "ref_sha256": "c41dfff8ca138470", "speaker": "s2", "kind": "read", "track": "ai_engineer"}
+{"clip_id": "r21", "golden_id": "q09-medium", "ref_sha256": "8decf0cb02ed7781", "speaker": "s1", "kind": "read", "track": "ai_engineer"}
+{"clip_id": "r22", "golden_id": "q10-medium", "ref_sha256": "fc3feff2172c10ad", "speaker": "s2", "kind": "read", "track": "ai_engineer"}
+{"clip_id": "r23", "golden_id": "q09-weak", "ref_sha256": "71f0b81cea145490", "speaker": "s1", "kind": "read", "track": "ai_engineer"}
+{"clip_id": "r24", "golden_id": "q10-weak", "ref_sha256": "29acbf620a047cbd", "speaker": "s2", "kind": "read", "track": "ai_engineer"}
 {"clip_id": "f01", "speaker": "s1", "kind": "free", "track": "java_backend"}
 {"clip_id": "f02", "speaker": "s2", "kind": "free", "track": "nodejs_backend"}
 {"clip_id": "f03", "speaker": "s1", "kind": "free", "track": "python_backend"}

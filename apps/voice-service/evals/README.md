@@ -5,11 +5,15 @@ Kết quả ghi ở `specs/015-voice-mode/eval-results.md`.
 
 | File | Commit? | Nội dung |
 |---|---|---|
-| `manifest.jsonl` | có | 30 clip: `{clip_id, golden_id?, speaker, kind, track}`. Sinh lại: `python -m evals.build_manifest` |
+| `manifest.jsonl` | có | 30 clip: `{clip_id, golden_id?, ref_sha256?, speaker, kind, track}`. **Không sinh lại sau khi đã ghi âm** (xem dưới) |
 | `phrases/<track>.json` | có | danh sách thuật ngữ gửi làm `keywords` (= `GET /api/stt/phrases` của ai-service, ghi commit và ngày sinh) |
 | `pricing.json` | có | đơn giá Blaze 2026-11-25 và giả định một phiên 20 phút |
 | `audio/` | **không** | file ghi âm (gitignore) |
-| `out/` | **không** | `stt_samples.jsonl` và bản ghi thô (gitignore) |
+| `out/` | **không** | `stt_samples.jsonl`; `raw.jsonl` = mọi lần gọi kèm bản ghi thô, ghi ngay khi có (gitignore) |
+
+`ref_sha256` ghim văn bản người ghi đã đọc. AIE sửa `answer` của một mẫu golden thì bộ đo dừng ngay từ đầu (chưa tốn
+credit) thay vì chấm sai; khi đó ghi lại clip đó hoặc bàn với AIE. `python -m evals.build_manifest` (sinh lại) từ chối
+chạy khi `audio/` đã có file, vì `r01`… có thể trỏ sang mẫu golden khác.
 
 ## Clip
 
@@ -54,7 +58,9 @@ python -m evals.run_voice_eval --base-url http://localhost:8020 \
 ```
 
 - Chạy với các clip đã có trong `audio/`, liệt kê clip còn thiếu trong báo cáo. Chưa có clip nào thì dừng và không ghi
-  báo cáo (mã thoát 2). Service báo `provider` khác `blaze` thì dừng (mã thoát 1).
+  báo cáo (mã thoát 2). Service không chạy, báo `provider` khác `blaze`, hoặc trả `unauthorized` / `quota_exceeded` /
+  `provider_unconfigured` / `misconfigured` thì dừng, không ghi đè báo cáo (mã thoát 1); kết quả đã gọi vẫn ở `out/raw.jsonl`.
+- Không thử lại lần gọi lỗi (tránh tính phí hai lần); lỗi được liệt kê trong báo cáo.
 - Clip `read` gọi STT 2 lần (có / không keywords), clip `free` 1 lần; TTS đọc 20 câu hỏi golden. Đủ 30 clip tốn khoảng
   vài chục credit (xem phần credit của báo cáo). `--limit N` chỉ đo N clip đầu và N câu TTS; `--skip-tts` bỏ phần TTS.
 - Token nội bộ lấy từ `VOICE_SERVICE_INTERNAL_TOKEN` (biến môi trường hoặc `.env` của service).
