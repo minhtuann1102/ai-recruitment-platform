@@ -1,12 +1,12 @@
 #!/bin/bash
-# Creates one database per service plus pgvector + knowledge_chunks in ai_db.
+# Creates ai_db with pgvector + knowledge_chunks (local copy of the shared Supabase RAG store).
 # Idempotent: runs from /docker-entrypoint-initdb.d on an empty volume, and again
 # via `make db-ensure` on an existing volume (the entrypoint skips init then).
 set -eo pipefail
 
 PSQL=(psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --no-password)
 
-for db in user_db job_db interview_db notification_db ai_db; do
+for db in ai_db; do
   echo "SELECT 'CREATE DATABASE $db' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '$db')\gexec" \
     | "${PSQL[@]}" --dbname postgres
 done

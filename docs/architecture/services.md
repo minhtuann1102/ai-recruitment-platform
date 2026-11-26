@@ -1,5 +1,7 @@
 # Danh mục Service
 
+> **Phạm vi (2026-11-26):** auth / user / job / interview / notification, gateway và frontend đã chuyển sang repo FSD [hoangtunggg/final_recruitment_project](https://github.com/hoangtunggg/final_recruitment_project). Repo này còn ai-service, voice-service, data-pipeline; phần dưới giữ làm thiết kế toàn hệ thống.
+
 ## Tổng quan
 
 | # | Service | Tech | DB | Port HTTP | Port TCP | Trạng thái |

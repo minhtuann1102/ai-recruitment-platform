@@ -1,5 +1,6 @@
 # Gate for every PR and every push to main (GitHub Flow). No secrets: tests must run offline.
 # Contract: specs/001-platform-foundation/contracts/ci-pipeline.md
+# (its node job was removed 2026-11-26: NestJS services moved to hoangtunggg/final_recruitment_project)
 name: CI
 
 on:
@@ -15,21 +16,6 @@ permissions:
   contents: read
 
 jobs:
-  node:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4 # version read from packageManager in package.json
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm lint
-      - run: pnpm check-types
-      - run: pnpm test
-
   python:
     runs-on: ubuntu-latest
     timeout-minutes: 10

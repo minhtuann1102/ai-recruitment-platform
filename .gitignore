@@ -1,18 +1,9 @@
 .docker/volumes/
 
-**/node_modules
-**/.turbo
-**/tsconfig.tsbuildinfo
-**/dist
 **/.env
 **/.idea
-**/.pnpm-store
 
 /tmp
-**/*.d.ts
-
-**/metadata.ts
-**/tsconfig.build.tsbuildinfo
 **/temp
 
 # logs
@@ -43,3 +34,4 @@ plans/reports/*.json
 .archify
 .omc
 plans/reports/support-*.csv
+node_modules
