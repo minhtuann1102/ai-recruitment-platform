@@ -107,10 +107,10 @@ Thư mục gốc code: `apps/voice-service/`. File code < 200 dòng.
 - [x] T025 [P] [US4] `apps/voice-service/evals/wer.py` + `tests/test_wer.py`: Levenshtein theo token (dùng
   `transcript_tokens`), tỷ lệ lỗi âm tiết, tỷ lệ nhận đúng thuật ngữ (thuật ngữ = token của bản chuẩn có trong danh
   sách thuật ngữ của track)
-- [ ] T026 [US4] `evals/manifest.jsonl` (24 clip `read` theo `evaluator_golden.jsonl`, ≥ 2 người, 4 track + 6 clip
+- [x] T026 [US4] `evals/manifest.jsonl` (24 clip `read` theo `evaluator_golden.jsonl`, ≥ 2 người, 4 track + 6 clip
   `free`), `evals/pricing.json` (đơn giá bảng giá 2026-11-25), `evals/README.md` (cách ghi âm, mẫu xác nhận đồng ý của
   người ghi, mã ẩn danh)
-- [ ] T027 [US4] `evals/run_voice_eval.py`: gọi voice-service theo `--base-url`, chạy STT 2 lần (có / không keywords,
+- [x] T027 [US4] `evals/run_voice_eval.py`: gọi voice-service theo `--base-url`, chạy STT 2 lần (có / không keywords,
   keywords lấy từ `GET /api/stt/phrases` của ai-service hoặc file cache `evals/phrases/<track>.json`), TTS trên 20 câu
   hỏi golden, p50 / p95, credit ước tính cho phiên 20 phút; xuất markdown `--out` và `evals/out/stt_samples.jsonl`
   (`{id, stt_of, noise: ["real_stt"], answer}`); `--limit` để tiết kiệm credit
@@ -134,9 +134,12 @@ Thư mục gốc code: `apps/voice-service/`. File code < 200 dòng.
 - [ ] T034 Nhắn AIE (FR-003: Blaze không trả độ tin cậy; FR-013: tổng hợp trình bày có thể ghép vào finalize sau) và FSD
   (`stt_raw_text`, `media_consent_at`, mốc client, gọi voice-service) — gửi qua PR description / tin nhắn, lưu bản
   nháp trong PR
-- [ ] T035 Kiểm mọi file trong `apps/voice-service/` < 200 dòng; `python -m pytest -q` xanh; chạy quickstart §1–§5, §7
+- [x] T035 Kiểm mọi file trong `apps/voice-service/` < 200 dòng; `python -m pytest -q` xanh; chạy quickstart §1–§5, §7
   với key thật; review bằng `code-reviewer` (opus) trước khi mở PR-1
-- [ ] T036 Cập nhật dòng 015 trong `specs/README.md` và tick task trong file này sau mỗi PR
+  *2026-11-26*: 230 test xanh, mọi file < 200 dòng; quickstart §2–§5, §7 chạy với key thật, đầu vào là clip do TTS
+  đọc (chưa có ghi âm người); bộ đo chạy thử `--limit 1` trên service thật ở commit d316ca9 (trước khi sửa theo review,
+  phần sửa có test giả lập; kết quả không ghi vào eval-results.md); review: plans/reports/code-reviewer-261126-2112-*
+- [x] T036 Cập nhật dòng 015 trong `specs/README.md` và tick task trong file này sau mỗi PR
 
 ## Dependencies
 

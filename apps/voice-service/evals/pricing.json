@@ -1,0 +1,14 @@
+{
+  "source": "Bảng giá Blaze 2026-11-25 (specs/015-voice-mode/research.md R12); spike cùng ngày khớp bảng giá",
+  "stt_model": "blaze-stt-1.5",
+  "stt_credit_per_min": 2.2,
+  "tts_model": "blaze-tts-1.5-realtime",
+  "tts_credit_per_hour_audio": 444,
+  "vad_credit_per_min": null,
+  "session_assumptions": {
+    "session_min": 20,
+    "candidate_speech_min": 8,
+    "question_audio_min": 4,
+    "note": "Phiên 20 phút: ~8 phút ứng viên nói (STT), ~4 phút câu hỏi đọc (TTS); chưa tính VAD (chưa có đơn giá)"
+  }
+}

@@ -66,7 +66,7 @@ cd apps/voice-service
 python -m evals.run_voice_eval --base-url http://localhost:8020 --out ../../specs/015-voice-mode/eval-results.md
 ```
 
-Cần ghi âm trong `evals/audio/` theo `evals/manifest.jsonl`. Phần so điểm Evaluator: xem hướng dẫn trong
+Cần ghi âm trong `evals/audio/` theo `evals/manifest.jsonl`; cách ghi, mẫu xác nhận đồng ý và tùy chọn: [apps/voice-service/evals/README.md](../../apps/voice-service/evals/README.md). Phần so điểm Evaluator: xem hướng dẫn trong
 `eval-results.md` (chạy công cụ của AIE với file `evals/out/stt_samples.jsonl`, cần key LLM hợp lệ).
 
 ## 7. Riêng tư
