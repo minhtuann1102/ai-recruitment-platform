@@ -42,7 +42,8 @@ ngoài repo.
 
 > Tôi, người ghi mã `s_`, đồng ý ghi âm giọng nói của mình để đo chất lượng nhận dạng giọng nói của đồ án AI Recruitment
 > Platform. Tôi biết: file ghi âm được gửi tới voice-service và nhà cung cấp Blaze (xử lý tại Việt Nam, cam kết không lưu);
-> file chỉ nằm trên máy của owner, không đưa lên git hay nơi công khai; báo cáo chỉ có số liệu và mã ẩn danh, không có
+> file ghi âm và bản chép chữ của nó chỉ nằm trên máy của owner, không đưa lên git hay nơi công khai; báo cáo chỉ có số
+> liệu và mã ẩn danh, không có
 > tên tôi hay nội dung phần trả lời tự do; tôi có thể rút lại đồng ý và yêu cầu xóa file bất cứ lúc nào.
 > Ngày: ____ Xác nhận (tin nhắn hoặc chữ ký): ____
 

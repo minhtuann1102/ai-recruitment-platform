@@ -136,8 +136,9 @@ Thư mục gốc code: `apps/voice-service/`. File code < 200 dòng.
   nháp trong PR
 - [x] T035 Kiểm mọi file trong `apps/voice-service/` < 200 dòng; `python -m pytest -q` xanh; chạy quickstart §1–§5, §7
   với key thật; review bằng `code-reviewer` (opus) trước khi mở PR-1
-  *2026-11-26*: 227 test xanh, file lớn nhất 161 dòng; quickstart §2–§5, §7 chạy với key thật, đầu vào là clip do TTS
-  đọc (chưa có ghi âm người); bộ đo chạy thử `--limit 1` trên service thật (kết quả không ghi vào eval-results.md)
+  *2026-11-26*: 230 test xanh, mọi file < 200 dòng; quickstart §2–§5, §7 chạy với key thật, đầu vào là clip do TTS
+  đọc (chưa có ghi âm người); bộ đo chạy thử `--limit 1` trên service thật ở commit d316ca9 (trước khi sửa theo review,
+  phần sửa có test giả lập; kết quả không ghi vào eval-results.md); review: plans/reports/code-reviewer-261126-2112-*
 - [x] T036 Cập nhật dòng 015 trong `specs/README.md` và tick task trong file này sau mỗi PR
 
 ## Dependencies
