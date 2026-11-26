@@ -433,7 +433,7 @@ apps/notification-service/src/modules/send-mail/send-mail.consumer.ts (doi decor
 Đọc kỹ các file trong `docs/architecture/`:
 - [api-contracts.md](architecture/api-contracts.md) — focus section 2 (TCP handlers user-service) và section 3.2-3.3 (user + job HTTP API)
 - [data-model.md](architecture/data-model.md) — section 1 (user_db) và section 2 (job_db)
-- [service-communication.md](service-communication.md) — hiểu TCP transport
+- service-communication.md (TCP transport; đã chuyển sang repo FSD)
 
 #### FSD-6. Cập nhật user-service cho DB riêng (ngày 3-5)
 

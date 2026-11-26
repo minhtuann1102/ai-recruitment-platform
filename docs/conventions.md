@@ -6,13 +6,8 @@
 
 | Loại | Convention | Ví dụ |
 |---|---|---|
-| NestJS module/service/controller | kebab-case | `job-posting.service.ts`, `saved-job.controller.ts` |
-| Entity | kebab-case file, PascalCase class | `job-posting.entity.ts` → `class JobPosting` |
-| DTO | kebab-case | `create-job-posting.dto.ts` |
-| Migration | timestamp prefix | `Migration20261001120000.ts` |
-| Test | `.spec.ts` (unit), `.e2e-spec.ts` (e2e) | `job.service.spec.ts` |
-| React component | kebab-case file, PascalCase export | `job-card.tsx` → `export function JobCard` |
-| Constant/enum | kebab-case file | `app.enum.ts`, `app.constant.ts` |
+| Python module | snake_case | `query_expansion.py` |
+| Test | `test_*.py` (pytest) | `test_voice_turn.py` |
 
 ### Database
 
@@ -38,50 +33,12 @@
 
 | Loại | Pattern | Ví dụ |
 |---|---|---|
-| Feature | `feat/{service}/{mo-ta-ngan}` | `feat/job-service/crud-job-postings` |
-| Fix | `fix/{service}/{mo-ta-ngan}` | `fix/auth-service/refresh-token-expiry` |
+| Feature | `feat/{service}/{mo-ta-ngan}` | `feat/ai-service/rag-retrieval` |
+| Fix | `fix/{service}/{mo-ta-ngan}` | `fix/voice-service/vad-threshold` |
 | Chore | `chore/{mo-ta}` | `chore/rename-project-scope` |
 | Docs | `docs/{mo-ta}` | `docs/architecture-overview` |
 
-## 2. Cấu trúc module NestJS
-
-Mỗi module trong service theo pattern:
-
-```
-apps/{service}/src/
-├── config/
-│   ├── app.config.ts          # service-specific config
-│   ├── database.config.ts     # MikroORM config
-│   └── index.ts
-├── data-access/
-│   ├── {entity}/
-│   │   ├── {entity}.entity.ts
-│   │   ├── {entity}.repository.ts
-│   │   └── index.ts
-│   └── all.entity.ts          # export tat ca entities
-├── database/
-│   └── migrations/            # MikroORM migrations
-├── modules/
-│   ├── app.module.ts          # root module
-│   ├── app.controller.ts      # health check
-│   ├── app.service.ts
-│   ├── auth/                  # JWT/RBAC guard
-│   └── {feature}/
-│       ├── {feature}.module.ts
-│       ├── {feature}.controller.ts
-│       ├── {feature}.service.ts
-│       ├── {feature}.consumer.ts  # TCP handler (neu co)
-│       ├── {feature}.mapper.ts    # entity ↔ DTO mapping
-│       └── dto/
-│           ├── create-{feature}.dto.ts
-│           ├── update-{feature}.dto.ts
-│           ├── get-{features}.dto.ts  # query/filter
-│           └── index.ts
-├── main.ts
-└── mikro-orm.config.ts
-```
-
-## 3. Format lỗi và response API
+## 2. Format lỗi và response API
 
 ### Success Response
 
@@ -134,7 +91,7 @@ Single item không có `meta`:
 | 409 | Conflict (VD: email đã tồn tại) |
 | 500 | Server error |
 
-## 4. Commit Message
+## 3. Commit Message
 
 Dùng **Conventional Commits**:
 
@@ -169,7 +126,7 @@ chore(docker): add MinIO to docker-compose
 - Dòng đầu <= 72 ký tự
 - Imperative mood: "add" không phải "added" hay "adds"
 
-## 5. Pull Request
+## 4. Pull Request
 
 ### Naming
 
@@ -209,13 +166,13 @@ Ví dụ: `[job-service] feat: add job posting CRUD with search and filter`
 - Squash merge khi merge vào main
 - Delete branch sau khi merge
 
-## 6. Branching Strategy (GitHub Flow)
+## 5. Branching Strategy (GitHub Flow)
 
 ```
 main ← nhánh duy nhất lâu dài, luôn build được, được bảo vệ bằng CI
-  ├── feat/job-service/crud
-  ├── feat/user-service/profiles
-  └── fix/auth-service/token-bug
+  ├── feat/ai-service/rag-retrieval
+  ├── feat/data-pipeline/jd-crawl
+  └── fix/voice-service/vad-threshold
 ```
 
 - `main`: nhánh tích hợp duy nhất; branch protection yêu cầu CI xanh + ≥ 1 approve
@@ -224,16 +181,13 @@ main ← nhánh duy nhất lâu dài, luôn build được, được bảo vệ 
   checkout tag
 - Hotfix: như feature branch (`fix/...`), PR vào `main`
 
-## 7. Definition of Done
+## 6. Definition of Done
 
 Một feature/story được coi là **done** khi:
 
 - [ ] Code implement đúng spec
-- [ ] Unit tests pass (coverage >= 60%)
-- [ ] Swagger doc cập nhật
-- [ ] No lint errors (`pnpm lint`)
-- [ ] Type check pass (`pnpm check-types`)
+- [ ] `pytest` pass (CI xanh)
+- [ ] Swagger doc / contract trong `specs/` cập nhật
 - [ ] PR được review và approve
-- [ ] Migration chạy thành công
 - [ ] Manual test trên local environment
 - [ ] Không có secret nào bị commit

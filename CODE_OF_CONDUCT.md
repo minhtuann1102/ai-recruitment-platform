@@ -36,9 +36,7 @@ Reports will be handled confidentially and fairly.
 
 ### How to Report
 
-Please report instances of abusive, harassing, or otherwise unacceptable behavior by contacting the project maintainer(s) directly at:
-
-**nestturbo.maintainer@gmail.com**
+Please report instances of abusive, harassing, or otherwise unacceptable behavior by contacting the project maintainer(s) directly via a GitHub issue or private message to the repository owner.
 
 All reports will be reviewed and investigated, resulting in a response that is deemed necessary and appropriate to the circumstances.
 

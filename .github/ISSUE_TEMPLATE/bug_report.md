@@ -38,6 +38,5 @@ Paste any screenshots or logs here.
 ## 🧱 Environment
 
 - OS:
-- Node version:
-- pnpm version:
+- Python version:
 - Service involved:

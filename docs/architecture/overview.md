@@ -1,5 +1,7 @@
 # Tổng quan kiến trúc
 
+> **Phạm vi (2026-11-26):** auth / user / job / interview / notification, gateway và frontend đã chuyển sang repo FSD [hoangtunggg/final_recruitment_project](https://github.com/hoangtunggg/final_recruitment_project). Repo này còn ai-service, voice-service, data-pipeline; phần dưới giữ làm thiết kế toàn hệ thống.
+
 > Hệ thống tuyển dụng trực tuyến ngành CNTT tích hợp AI Agentic phỏng vấn.
 
 Sơ đồ tương tác của ai-service (mở bằng trình duyệt, nguồn là file `.candidate.json` cùng thư mục): [kiến trúc](diagrams/ai-service-architecture.html), [luồng một buổi phỏng vấn](diagrams/interview-session-sequence.html).
