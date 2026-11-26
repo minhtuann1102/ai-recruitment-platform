@@ -29,12 +29,13 @@ Yêu cầu: Python 3.11, Docker Compose.
 
 ```bash
 cp .env.example .env                       # Postgres local
-cp apps/ai-service/.env.example apps/ai-service/.env
-cp apps/voice-service/.env.example apps/voice-service/.env
-docker compose up -d --build               # db (ai_db local) + ai-service :8000 + voice-service :8020
+cp apps/voice-service/.env.example apps/voice-service/.env   # BLAZE_API_KEY
+docker compose up -d --build               # db (ai_db local) + ai-service :8000 (mock) + voice-service :8020
 ```
 
-Chạy từng app không qua Docker và chạy test: xem README / `.env.example` trong từng thư mục app.
+ai-service trong compose chạy cấu hình mặc định (mock, không đọc `.env`). Chạy với LLM / RAG thật: xem
+[docs/ai-service/README.md](docs/ai-service/README.md) và [context/environment.md](context/environment.md). voice-service:
+[apps/voice-service/README.md](apps/voice-service/README.md). data-pipeline: `apps/data-pipeline/.env.example`.
 
 ```bash
 cd apps/<app> && pip install -r requirements-dev.txt && python -m pytest -q
