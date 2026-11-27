@@ -11,6 +11,7 @@ from evals.sim_replan_metrics import replan_summary
 from evals.simulate import run_all, summarize
 from evals.simulator import RuleSimulator
 from tests.test_replan import sw, v10
+from tests.helpers.seed_session import seed_session
 
 
 def run(coro):
@@ -25,11 +26,12 @@ def test_finalize_and_report_see_the_effective_plan(client, monkeypatch):
     assert swap["add"] in topics and swap["drop"] not in topics  # alt* thay t4 trong bao cao do sim goi /api/finalize
     assert topics[swap["add"]]["title"] == reserve[swap["add"]]["title"]
     keys = ("turn_number", "phase", "topic_id", "turn_kind", "difficulty", "question", "answer", "evaluation")
-    body = {"session_id": "x", "track": "java_backend", "level": "junior", "plan": s["plan"], "end_reason": "plan_complete",
-            "duration_s": 600, "turns": [{k: t[k] for k in keys} for t in s["turns"]],
-            "state": CandidateState(phase="done", swaps=[Swap(**w) for w in s["swaps"]]).model_dump()}
+    body = {"session_id": "x", "end_reason": "plan_complete", "duration_s": 600}
+    transcript = [{**{k: t[k] for k in keys}, "source": "text"} for t in s["turns"]]
+    state = CandidateState(phase="done", swaps=[Swap(**w) for w in s["swaps"]]).model_dump()
+    seed_session(client, "x", s["plan"], state, transcript)
     assert swap["add"] in [t["topic_id"] for t in client.post("/api/finalize", json=body).json()["topics"]]
-    body["state"]["swaps"] = []  # state cu khong co swaps: nhu truoc phase 05 (alt* khong nam trong plan.phases)
+    seed_session(client, "x", s["plan"], {**state, "swaps": []}, transcript)  # state khong co swaps: nhu truoc phase 05
     assert swap["add"] not in [t["topic_id"] for t in client.post("/api/finalize", json=body).json()["topics"]]
 
 

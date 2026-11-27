@@ -6,7 +6,9 @@ import app.turn_steps as turn_steps
 import app.turn_decision as decision
 
 from app import metrics
-from app.models_interview import NextTurnRequest
+from pydantic import ValidationError
+
+from app.models_interview import CandidateState, NextTurnRequest
 from app.turn_engine import finish_turn, next_turn
 from tests.test_agent_notes import dropped, note, run, v11
 from tests.test_policy_hybrid import OK, ev
@@ -103,10 +105,10 @@ def test_recorded_metric_counts_by_kind(monkeypatch):
 
 @pytest.mark.parametrize("bad", [{"kind": "mood", "text": "x"}, {"kind": "risk", "text": "x", "status": "weird"},
                                  {"kind": "risk", "text": "x" * 301}])
-def test_forged_notes_in_state_get_422_through_the_api(monkeypatch, client, bad):
-    req = req_t2(monkeypatch)
-    body = req.model_dump()
-    body["state"]["notes"] = [{"id": "n1", "turn": 1, **bad}]
-    assert client.post("/api/next-turn", json=body).status_code == 422
-    body["state"]["notes"] = [{"id": f"n{i}", "turn": i, "kind": "risk", "text": "x"} for i in range(9)]  # > 8
-    assert client.post("/api/next-turn", json=body).status_code == 422
+def test_forged_notes_in_state_are_rejected_by_the_model(bad):
+    """Phase 04: state khong con den tu request HTTP (422 extra_forbidden), nen gioi han notes kiem o model: state doc
+    tu checkpoint / dung truc tiep van phai tu choi notes sai."""
+    with pytest.raises(ValidationError):
+        CandidateState(notes=[{"id": "n1", "turn": 1, **bad}])
+    with pytest.raises(ValidationError):
+        CandidateState(notes=[{"id": f"n{i}", "turn": i, "kind": "risk", "text": "x"} for i in range(9)])  # > 8

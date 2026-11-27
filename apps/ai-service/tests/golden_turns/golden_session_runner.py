@@ -1,5 +1,9 @@
 """Chay mot kich ban phong van qua HTTP (TestClient) nhu ben goi that va ghi lai moi luot thanh trace JSON.
 
+Phase 04: HTTP chi nhan body slim (session_id, turn_number, answer...); ben goi gia VAN dung lai request day du
+(plan / state / topic_turns / lich su finalize) nhu truoc de ghi vao trace. Fixture khong doi: response phai khop,
+tuc request noi bo dung lai tu checkpoint (topic_turns, turns finalize) bang request cu dung tay.
+
 Dung cho golden trace (plan 261127-1517, phase 01): ghi tu code truoc khi boc LangGraph, roi phase 02 / 04 so trace
 cua code moi voi fixture. Ben goi gia giu plan / state / topic_turns giong interview-service (docs/ai-service/06):
 - topic_turns: cac cap hoi dap TRUOC cau hien tai cua cung topic, toi da 5, reset khi doi topic.
@@ -9,6 +13,7 @@ import json
 from dataclasses import dataclass, field
 from typing import Callable, Dict, List, Optional
 
+SLIM_TURN_KEYS = ("session_id", "turn_number", "answer", "answer_source", "stt_confidence", "elapsed_seconds")
 VOLATILE_KEYS = ("latency_ms",)  # do thoi gian thuc: khong xac dinh, bo khoi trace
 
 
@@ -99,7 +104,7 @@ def run_session(client, session_id: str, track: str, level: str, answer_for: Ans
                 "end_reason": c.state.get("end_reason") or "user_ended", "duration_s": c.turn_number * 60,
                 "turns": c.history, **({"jd_profile": start_extra["jd_profile"]}
                                        if start_extra and "jd_profile" in start_extra else {})}
-        r = client.post("/api/finalize", json=body)
+        r = client.post("/api/finalize", json={k: body[k] for k in ("session_id", "end_reason", "duration_s")})
         trace["finalize"] = {"request": {k: v for k, v in body.items() if k not in ("plan", "state")},
                              "response": _response_record(r)}
     return trace
@@ -110,7 +115,8 @@ def _send(client, c: Caller, fields: Dict, trace: Dict) -> int:
     body = {"session_id": c.session_id, "level": c.level, "track": c.track, "plan": c.plan, "state": c.state,
             "turn_number": c.turn_number, "question": c.question, "turn_kind": c.turn["turn_kind"],
             "topic_turns": list(c.topic_turns), "elapsed_seconds": c.turn_number * 60, **fields}
-    r = client.post("/api/next-turn", json=body)
+    slim = {k: v for k, v in body.items() if k in SLIM_TURN_KEYS}
+    r = client.post("/api/next-turn", json=slim)
     sent = {k: v for k, v in body.items() if k not in ("plan", "state")}  # state da co trong response luot truoc
     trace["turns"].append({"request": sent, "response": _response_record(r)})
     if r.status_code == 200 and not c.ended:

@@ -15,6 +15,7 @@ from app.stt_terms import STT_TERMS
 from app.turn_engine import finish_turn, next_turn, start_session
 from app.voice_turn import REASK, STT_MIN_CONFIDENCE
 from test_question_bank import CaptureEvaluator, FakeRetriever
+from tests.helpers.seed_session import seed_from_next_turn_request
 
 SPOKEN = "Em dùng con ca rừn hát mắp để nhiều thờ rét cùng ghi an toàn"
 LOW = STT_MIN_CONFIDENCE - 0.1
@@ -158,7 +159,7 @@ def test_silent_voice_answer_returns_no_speech_without_scoring():
 
 def test_no_speech_and_empty_text_over_http():
     client, r = TestClient(app), session()
-    body = req(r, "", answer_source="voice").model_dump()
+    body = seed_from_next_turn_request(client, req(r, "", answer_source="voice"))
     out = client.post("/api/next-turn", json=body)
     assert out.status_code == 422 and out.json()["error"] == "voice_no_speech"
     out = client.post("/api/next-turn", json={**body, "answer_source": "text"})

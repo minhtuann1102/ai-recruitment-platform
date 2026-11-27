@@ -97,7 +97,7 @@ function showError(where, err) {
 async function startSession() {
   $("startBtn").disabled = true;
   const track = $("track").value, level = $("level").value;
-  S = { sid: `dev-${Date.now()}`, track, level, duration: Number($("duration").value), turns: [], history: {},
+  S = { sid: `dev-${Date.now()}`, track, level, duration: Number($("duration").value), turns: [],
         calls: [], simElapsed: 0, cv: null, jd: null };
   try {
     if ($("cv").files[0]) {
@@ -136,10 +136,9 @@ async function sendAnswer() {
   if (!answer && voice.answer_source !== "voice") return; // voice rong van gui: ai-service tra voice_no_speech
   voiceReset();
   const turn = S.turn, simBefore = S.simElapsed;
+  // phase 04: body slim, plan / state / cau hoi / lich su nam trong checkpoint cua ai-service (S.* chi de hien thi)
   S.pending = { answer, voice, simBefore, me: bubble("me", answer), body: {
-    session_id: S.sid, level: S.level, track: S.track, plan: S.plan, state: S.state, turn_number: turn.turn_number,
-    question: S.question, turn_kind: turn.turn_kind, answer, elapsed_seconds: elapsedSeconds(answer),
-    topic_turns: (S.history[turn.topic_id] || []).slice(-5), ...voice } };
+    session_id: S.sid, turn_number: turn.turn_number, answer, elapsed_seconds: elapsedSeconds(answer), ...voice } };
   if (voice.answer_source === "voice") {
     S.pending.me.querySelector(".tag").textContent = "giọng nói" +
       (voice.stt_confidence == null ? " · không gửi độ tin cậy" : ` · độ tin cậy ${voice.stt_confidence}`);
@@ -157,7 +156,6 @@ async function runNextTurn() {
     const ev = done.evaluation;
     S.turns.push({ turn_number: turn.turn_number, phase: turn.phase, topic_id: turn.topic_id, turn_kind: turn.turn_kind,
                    difficulty: turn.difficulty, question: S.question, answer, evaluation: ev });
-    (S.history[turn.topic_id] ||= []).push({ q: S.question, a: answer, source: voice.answer_source });
     if (ev) setDebug(me, `điểm lượt ${ev.turn_score_10}/10 · ${ev.answer_type}${ev.degraded ? " · degraded" : ""}` +
       (ev.covered_points.length ? `\nđã nêu: ${ev.covered_points.join("; ")}` : "") +
       (ev.missing_points.length ? `\nthiếu: ${ev.missing_points.join("; ")}` : ""));
@@ -196,9 +194,8 @@ async function finalizeSession(byCandidate) {
   }
   try {
     const durationS = $("clock").value === "real" ? Math.round((Date.now() - S.startedAt) / 1000) : S.simElapsed;
-    S.report = await postJson("/api/finalize", { session_id: S.sid, track: S.track, level: S.level, plan: S.plan,
-      state: S.state, end_reason: S.state.end_reason || "plan_complete", duration_s: durationS, turns: S.turns,
-      jd_profile: S.jd });
+    S.report = await postJson("/api/finalize", { session_id: S.sid,
+      end_reason: S.state.end_reason || "plan_complete", duration_s: durationS });
     $("answerBox").classList.add("hidden");
     renderReport(S.report, $("report"));
     showEnd();

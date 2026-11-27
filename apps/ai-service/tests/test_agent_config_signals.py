@@ -22,6 +22,7 @@ from app.models_interview import CandidateState, FinalizeRequest, FinalizeTurn
 from conftest import parse_sse
 from test_cv_parse import CV_LINES, make_docx
 from test_interview_flow import play, strong
+from tests.helpers.seed_session import seed_from_finalize_request
 
 
 JD_TEXT = "Tuyển lập trình viên Java backend. Yêu cầu: Spring Boot, thiết kế REST API, PostgreSQL, viết unit test. " * 2
@@ -123,7 +124,8 @@ def test_reporter_without_config_is_partial_with_fallback(monkeypatch):
     monkeypatch.delenv("LLM_API_KEY", raising=False)
     monkeypatch.setattr(registry, "_llm_agents", {})
     monkeypatch.setattr("app.llm.gateway._gateway", None)
-    r = TestClient(app).post("/api/finalize", json=json.loads(req.model_dump_json())).json()
+    c = TestClient(app)
+    r = c.post("/api/finalize", json=seed_from_finalize_request(c, req)).json()
     assert r["status"] == "partial" and r["meta"]["fallbacks"] == ["reporter_config_error"]
 
 
@@ -154,9 +156,7 @@ def test_routes_report_config_fallbacks(all_llm_no_key):
     start = parse_sse(c.post("/api/start", json={"session_id": "s", "track": "java_backend", "level": "junior"}).text)
     done = start[-1][1]
     assert done["metadata"]["fallbacks"] == ["planner_config_error", "interviewer_config_error"]
-    body = {"session_id": "s", "level": "junior", "track": "java_backend", "plan": done["plan"], "state": done["state"],
-            "turn_number": 1, "question": done["question"], "turn_kind": done["turn"]["turn_kind"],
-            "answer": "Em dùng HashMap vì tra cứu nhanh.", "elapsed_seconds": 60}
+    body = {"session_id": "s", "turn_number": 1, "answer": "Em dùng HashMap vì tra cứu nhanh.", "elapsed_seconds": 60}
     turn = parse_sse(c.post("/api/next-turn", json=body).text)[-1][1]
     assert turn["metadata"]["fallbacks"] == ["evaluator_config_error", "interviewer_config_error"]
 

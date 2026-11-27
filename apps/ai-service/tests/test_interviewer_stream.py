@@ -119,13 +119,13 @@ def test_safe_focus_drops_injection_and_caps_length():
 
 
 def test_route_streams_llm_tokens_and_records_source(client, monkeypatch):
-    monkeypatch.setattr("app.main.get_interviewer", lambda: make([FakeStream(["Chào bạn, ", "kể về dự án nhé?"])]))
+    monkeypatch.setattr("app.interview_session_routes.get_interviewer", lambda: make([FakeStream(["Chào bạn, ", "kể về dự án nhé?"])]))
     events = parse_sse(client.post("/api/start", json={"session_id": "s", "track": "java_backend",
                                                        "level": "junior"}).text)
     done = events[-1][1]
     assert done["question"] == "Chào bạn, kể về dự án nhé?" and done["turn"]["question_source"] == "ai"
     assert done["state"]["asked_questions"] == ["chao ban, ke ve du an nhe?"]
-    monkeypatch.setattr("app.main.get_interviewer", lambda: make([status_error(500)] * 3))
+    monkeypatch.setattr("app.interview_session_routes.get_interviewer", lambda: make([status_error(500)] * 3))
     events = parse_sse(client.post("/api/start", json={"session_id": "s", "track": "java_backend",
                                                        "level": "junior"}).text)
     assert events[-1][1]["turn"]["question_source"] == "fallback"

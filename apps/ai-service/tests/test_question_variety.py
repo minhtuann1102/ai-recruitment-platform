@@ -106,8 +106,7 @@ def test_state_keeps_topic_coverage_and_only_safe_focus(client):
     done = parse_sse(client.post("/api/start", json={"session_id": "s", "track": "java_backend",
                                                      "level": "junior"}).text)[-1][1]
     topic = done["plan"]["phases"][0]["topics"][0]
-    body = {"session_id": "s", "level": "junior", "track": "java_backend", "plan": done["plan"],
-            "state": done["state"], "turn_number": 1, "question": done["question"], "elapsed_seconds": 60,
+    body = {"session_id": "s", "turn_number": 1, "elapsed_seconds": 60,
             "answer": ". ".join(topic["key_points"]) + ". chi tiết " * 10}
     nd = parse_sse(client.post("/api/next-turn", json=body).text)[-1][1]
     ts = next(t for t in nd["state"]["topics"] if t["id"] == topic["id"])

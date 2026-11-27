@@ -15,6 +15,7 @@ from tests.test_policy_hybrid_turn_engine import ProposalEvaluator
 from tests.test_replan import sw, started
 from tests.test_replan_sim import play
 from tests.test_replan_turn_engine import req_at_t2, run
+from tests.helpers.seed_session import seed_from_finalize_request
 
 
 def finalize_request(session, jd=None, mutate=None):
@@ -37,10 +38,10 @@ def test_jd_requirement_mapped_to_the_swapped_in_topic_counts_as_assessed(client
     jd = JdProfile(requirements=[JdRequirement(id="r1", text="Cache", kind="must", topic_ids=[alt["catalog_ref"]])])
     req, turns = finalize_request(s, jd)
     assert any(t["topic_id"] == "alt1" for t in turns)
-    body = {**req.model_dump(), "jd_profile": jd.model_dump()}
-    block = client.post("/api/finalize", json=body).json()["requirements"]
+    block = client.post("/api/finalize", json=seed_from_finalize_request(client, req)).json()["requirements"]
     assert block["assessed"] == 1 and block["items"][0]["status"] == "assessed" and block["items"][0]["evidence_turns"]
-    body["state"]["swaps"] = []  # khong co swaps: alt* khong nam trong plan.phases -> yeu cau nay not_assessed
+    no_swaps = req.model_copy(update={"state": req.state.model_copy(update={"swaps": []})})
+    body = seed_from_finalize_request(client, no_swaps)  # khong co swaps: alt* khong nam trong plan.phases -> not_assessed
     assert client.post("/api/finalize", json=body).json()["requirements"]["items"][0]["status"] == "not_assessed"
 
 
