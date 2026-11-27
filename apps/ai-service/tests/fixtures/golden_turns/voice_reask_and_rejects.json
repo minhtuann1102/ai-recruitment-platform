@@ -1,0 +1,2385 @@
+{
+ "start": {
+  "request": {
+   "level": "junior",
+   "session_id": "g-voice",
+   "track": "java_backend"
+  },
+  "response": {
+   "events": [
+    [
+     "meta",
+     {
+      "action": "ask_main",
+      "phase": "intro",
+      "topic_index": 1,
+      "topic_total": 6,
+      "turn_number": 1
+     }
+    ],
+    [
+     "token*",
+     {
+      "n": 7,
+      "t": "Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?"
+     }
+    ],
+    [
+     "done",
+     {
+      "metadata": {
+       "fallbacks": [],
+       "prompt_versions": {
+        "mock": "mock-v2"
+       },
+       "rag": {
+        "status": "off"
+       },
+       "usage": {}
+      },
+      "plan": {
+       "level_note": null,
+       "phases": [
+        {
+         "phase": "intro",
+         "time_budget_min": 4,
+         "topics": [
+          {
+           "backup_question": "Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+           "bank_questions": [],
+           "catalog_ref": null,
+           "cv_ref": null,
+           "id": "t1",
+           "key_points": [
+            "Giới thiệu ngắn gọn về nền tảng",
+            "Mô tả một dự án và vai trò của mình",
+            "Nêu công nghệ đã dùng"
+           ],
+           "objective": "Làm quen và nắm bối cảnh kinh nghiệm của ứng viên",
+           "opening_hint": "Mời ứng viên giới thiệu bản thân và dự án gần nhất",
+           "reference_snippets": [],
+           "reference_sources": [],
+           "source": "generic",
+           "start_difficulty": 2,
+           "title": "Giới thiệu bản thân và dự án gần nhất"
+          }
+         ]
+        },
+        {
+         "phase": "technical",
+         "time_budget_min": 18,
+         "topics": [
+          {
+           "backup_question": "Java Collections và HashMap: bạn hiểu như thế nào và đã áp dụng ra sao?",
+           "bank_questions": [],
+           "catalog_ref": "java.core.collections-hashmap",
+           "cv_ref": null,
+           "id": "t2",
+           "key_points": [
+            "Nêu được hashCode và equals",
+            "Nêu được collision và treeification",
+            "Nêu được resize và load factor",
+            "Nêu được ConcurrentHashMap"
+           ],
+           "objective": "Đánh giá hiểu biết về Java Collections và HashMap ở mức junior",
+           "opening_hint": "Bắt đầu bằng câu hỏi tổng quan về Java Collections và HashMap",
+           "reference_snippets": [],
+           "reference_sources": [],
+           "source": "catalog",
+           "start_difficulty": 2,
+           "title": "Java Collections và HashMap"
+          },
+          {
+           "backup_question": "OOP và SOLID trong Java: bạn hiểu như thế nào và đã áp dụng ra sao?",
+           "bank_questions": [],
+           "catalog_ref": "java.core.oop-solid",
+           "cv_ref": null,
+           "id": "t3",
+           "key_points": [
+            "Nêu được encapsulation và polymorphism",
+            "Nêu được abstract class vs interface",
+            "Nêu được composition over inheritance",
+            "Nêu được SOLID"
+           ],
+           "objective": "Đánh giá hiểu biết về OOP và SOLID trong Java ở mức junior",
+           "opening_hint": "Bắt đầu bằng câu hỏi tổng quan về OOP và SOLID trong Java",
+           "reference_snippets": [],
+           "reference_sources": [],
+           "source": "catalog",
+           "start_difficulty": 2,
+           "title": "OOP và SOLID trong Java"
+          },
+          {
+           "backup_question": "Đa luồng và concurrency: bạn hiểu như thế nào và đã áp dụng ra sao?",
+           "bank_questions": [],
+           "catalog_ref": "java.core.concurrency",
+           "cv_ref": null,
+           "id": "t4",
+           "key_points": [
+            "Nêu được thread pool và ExecutorService",
+            "Nêu được synchronized vs Lock",
+            "Nêu được volatile và happens-before",
+            "Nêu được deadlock"
+           ],
+           "objective": "Đánh giá hiểu biết về Đa luồng và concurrency ở mức junior",
+           "opening_hint": "Bắt đầu bằng câu hỏi tổng quan về Đa luồng và concurrency",
+           "reference_snippets": [],
+           "reference_sources": [],
+           "source": "catalog",
+           "start_difficulty": 2,
+           "title": "Đa luồng và concurrency"
+          },
+          {
+           "backup_question": "Spring IoC và Dependency Injection: bạn hiểu như thế nào và đã áp dụng ra sao?",
+           "bank_questions": [],
+           "catalog_ref": "java.spring.ioc-di",
+           "cv_ref": null,
+           "id": "t5",
+           "key_points": [
+            "Nêu được IoC container",
+            "Nêu được bean scope",
+            "Nêu được constructor vs field injection",
+            "Nêu được bean lifecycle"
+           ],
+           "objective": "Đánh giá hiểu biết về Spring IoC và Dependency Injection ở mức junior",
+           "opening_hint": "Bắt đầu bằng câu hỏi tổng quan về Spring IoC và Dependency Injection",
+           "reference_snippets": [],
+           "reference_sources": [],
+           "source": "catalog",
+           "start_difficulty": 2,
+           "title": "Spring IoC và Dependency Injection"
+          }
+         ]
+        },
+        {
+         "phase": "scenario",
+         "time_budget_min": 8,
+         "topics": [
+          {
+           "backup_question": "Tình huống: Thiết kế API quản lý đơn hàng với Spring Boot. Bạn sẽ tiếp cận thế nào?",
+           "bank_questions": [],
+           "catalog_ref": "scn.java.order-api-crud",
+           "cv_ref": null,
+           "id": "t6",
+           "key_points": [
+            "Làm rõ yêu cầu và giả định",
+            "Đề xuất thiết kế hoặc hướng giải quyết cụ thể",
+            "Nêu trade-off và rủi ro"
+           ],
+           "objective": "Đánh giá cách tiếp cận một tình huống thực tế",
+           "opening_hint": "Đưa tình huống: Thiết kế API quản lý đơn hàng với Spring Boot",
+           "reference_snippets": [],
+           "reference_sources": [],
+           "source": "scenario",
+           "start_difficulty": 2,
+           "title": "Thiết kế API quản lý đơn hàng với Spring Boot"
+          }
+         ]
+        }
+       ],
+       "replan": null,
+       "schema_version": 1
+      },
+      "question": "Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+      "state": {
+       "active_topic_id": "t1",
+       "asked_questions": [
+        "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?"
+       ],
+       "counters": {
+        "clarifies": 0,
+        "consecutive_dont_know": 0,
+        "follow_ups": 0,
+        "hints": 0,
+        "stt_reasks": 0
+       },
+       "current_difficulty": 2,
+       "current_qa_id": null,
+       "difficulty_bounds": {
+        "max": 4,
+        "min": 1
+       },
+       "end_reason": null,
+       "evaluated_turns": 0,
+       "gaps": [],
+       "momentum": 0,
+       "notes": [],
+       "phase": "intro",
+       "phase_started_s": 0,
+       "schema_version": 1,
+       "strengths": [],
+       "swaps": [],
+       "topic_index": 1,
+       "topic_started_s": 0,
+       "topics": [
+        {
+         "covered": [],
+         "focus_used": [],
+         "hint_used": false,
+         "id": "t1",
+         "n_scored": 0,
+         "score_band": null,
+         "score_sum": 0.0,
+         "status": "active",
+         "turns": [
+          1
+         ]
+        },
+        {
+         "covered": [],
+         "focus_used": [],
+         "hint_used": false,
+         "id": "t2",
+         "n_scored": 0,
+         "score_band": null,
+         "score_sum": 0.0,
+         "status": "pending",
+         "turns": []
+        },
+        {
+         "covered": [],
+         "focus_used": [],
+         "hint_used": false,
+         "id": "t3",
+         "n_scored": 0,
+         "score_band": null,
+         "score_sum": 0.0,
+         "status": "pending",
+         "turns": []
+        },
+        {
+         "covered": [],
+         "focus_used": [],
+         "hint_used": false,
+         "id": "t4",
+         "n_scored": 0,
+         "score_band": null,
+         "score_sum": 0.0,
+         "status": "pending",
+         "turns": []
+        },
+        {
+         "covered": [],
+         "focus_used": [],
+         "hint_used": false,
+         "id": "t5",
+         "n_scored": 0,
+         "score_band": null,
+         "score_sum": 0.0,
+         "status": "pending",
+         "turns": []
+        },
+        {
+         "covered": [],
+         "focus_used": [],
+         "hint_used": false,
+         "id": "t6",
+         "n_scored": 0,
+         "score_band": null,
+         "score_sum": 0.0,
+         "status": "pending",
+         "turns": []
+        }
+       ],
+       "turn_count": 1,
+       "used_qa_ids": []
+      },
+      "turn": {
+       "action": "ask_main",
+       "action_reason": null,
+       "agent_decision": "switch_topic",
+       "decided_by": null,
+       "difficulty": 2,
+       "overrule_reason": null,
+       "phase": "intro",
+       "policy_action": null,
+       "proposed_action": null,
+       "qa_id": null,
+       "question_source": "ai",
+       "reasoning": null,
+       "swap_result": null,
+       "topic_id": "t1",
+       "turn_kind": "main",
+       "turn_number": 1
+      }
+     }
+    ]
+   ],
+   "status": 200
+  }
+ },
+ "turns": [
+  {
+   "request": {
+    "answer": "Em là lập trình viên Java hai năm kinh nghiệm.",
+    "elapsed_seconds": 60,
+    "level": "junior",
+    "question": "Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+    "session_id": "g-voice",
+    "topic_turns": [],
+    "track": "java_backend",
+    "turn_kind": "main",
+    "turn_number": 1
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "clarify",
+       "phase": "intro",
+       "topic_index": 1,
+       "topic_total": 6,
+       "turn_number": 2
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 10,
+       "t": "Có thể mình hỏi chưa rõ. Ý mình là: Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "off_topic",
+        "confidence": null,
+        "covered_points": [],
+        "degraded": false,
+        "evidence": [],
+        "follow_up_focus": "Giới thiệu ngắn gọn về nền tảng",
+        "gap_tags": [
+         "gioi-ngan",
+         "minh",
+         "cong-dung"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Giới thiệu ngắn gọn về nền tảng",
+         "Mô tả một dự án và vai trò của mình",
+         "Nêu công nghệ đã dùng"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 0,
+         "extensibility": 0,
+         "relevance": 0,
+         "technical_accuracy": 1
+        },
+        "scores_10": {
+         "completeness": 0.0,
+         "extensibility": 0.0,
+         "relevance": 0.0,
+         "technical_accuracy": 2.5
+        },
+        "sources": [],
+        "strength_tags": [],
+        "transcript_low_confidence": false,
+        "turn_number": 1,
+        "turn_score_10": 0.6
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Có thể mình hỏi chưa rõ. Ý mình là: Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t1",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "co the minh hoi chua ro. y minh la: chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?"
+        ],
+        "counters": {
+         "clarifies": 1,
+         "consecutive_dont_know": 0,
+         "follow_ups": 1,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 2,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 1
+        },
+        "end_reason": null,
+        "evaluated_turns": 1,
+        "gaps": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1
+          ]
+         },
+         {
+          "tag": "minh",
+          "turns": [
+           1
+          ]
+         },
+         {
+          "tag": "cong-dung",
+          "turns": [
+           1
+          ]
+         }
+        ],
+        "momentum": 0,
+        "notes": [],
+        "phase": "intro",
+        "phase_started_s": 0,
+        "schema_version": 1,
+        "strengths": [],
+        "swaps": [],
+        "topic_index": 1,
+        "topic_started_s": 0,
+        "topics": [
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 1,
+          "score_band": 0.2,
+          "score_sum": 0.24,
+          "status": "active",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t3",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t6",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 2,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "clarify",
+        "action_reason": null,
+        "agent_decision": "keep_difficulty",
+        "decided_by": null,
+        "difficulty": 2,
+        "overrule_reason": null,
+        "phase": "intro",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "off_topic -> clarify (luật 2)",
+        "swap_result": null,
+        "topic_id": "t1",
+        "turn_kind": "clarify",
+        "turn_number": 2
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "",
+    "answer_source": "voice",
+    "elapsed_seconds": 120,
+    "level": "junior",
+    "question": "Có thể mình hỏi chưa rõ. Ý mình là: Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+    "session_id": "g-voice",
+    "stt_confidence": 0.9,
+    "topic_turns": [
+     {
+      "a": "Em là lập trình viên Java hai năm kinh nghiệm.",
+      "q": "Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+      "source": "text"
+     }
+    ],
+    "track": "java_backend",
+    "turn_kind": "clarify",
+    "turn_number": 2
+   },
+   "response": {
+    "json": {
+     "details": {
+      "retryable": true,
+      "suggest_chat": true
+     },
+     "error": "voice_no_speech",
+     "message": "Micro chưa thu được tiếng. Bạn kiểm tra micro rồi nói lại, hoặc chuyển sang gõ chat nhé."
+    },
+    "status": 422
+   }
+  },
+  {
+   "request": {
+    "answer": "ừm ờ cái đó",
+    "answer_source": "voice",
+    "elapsed_seconds": 120,
+    "level": "junior",
+    "question": "Có thể mình hỏi chưa rõ. Ý mình là: Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+    "session_id": "g-voice",
+    "stt_confidence": 0.2,
+    "topic_turns": [
+     {
+      "a": "Em là lập trình viên Java hai năm kinh nghiệm.",
+      "q": "Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+      "source": "text"
+     }
+    ],
+    "track": "java_backend",
+    "turn_kind": "clarify",
+    "turn_number": 2
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "clarify",
+       "phase": "intro",
+       "topic_index": 1,
+       "topic_total": 6,
+       "turn_number": 3
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 16,
+       "t": "Xin lỗi, mình chưa nghe rõ câu trả lời vừa rồi. Bạn nói lại giúp mình nhé: Có thể mình hỏi chưa rõ. Ý mình là: Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "answered",
+        "confidence": null,
+        "covered_points": [],
+        "degraded": false,
+        "evidence": [],
+        "follow_up_focus": null,
+        "gap_tags": [],
+        "misconceptions": [],
+        "missing_points": [],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 0,
+         "extensibility": 0,
+         "relevance": 0,
+         "technical_accuracy": 0
+        },
+        "scores_10": {
+         "completeness": 0.0,
+         "extensibility": 0.0,
+         "relevance": 0.0,
+         "technical_accuracy": 0.0
+        },
+        "sources": [],
+        "strength_tags": [],
+        "transcript_low_confidence": true,
+        "turn_number": 2,
+        "turn_score_10": 0.0
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Xin lỗi, mình chưa nghe rõ câu trả lời vừa rồi. Bạn nói lại giúp mình nhé: Có thể mình hỏi chưa rõ. Ý mình là: Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t1",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "co the minh hoi chua ro. y minh la: chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "xin loi, minh chua nghe ro cau tra loi vua roi. ban noi lai giup minh nhe: co the minh hoi chua ro. y minh la: chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?"
+        ],
+        "counters": {
+         "clarifies": 1,
+         "consecutive_dont_know": 0,
+         "follow_ups": 1,
+         "hints": 0,
+         "stt_reasks": 1
+        },
+        "current_difficulty": 2,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 1
+        },
+        "end_reason": null,
+        "evaluated_turns": 1,
+        "gaps": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1
+          ]
+         },
+         {
+          "tag": "minh",
+          "turns": [
+           1
+          ]
+         },
+         {
+          "tag": "cong-dung",
+          "turns": [
+           1
+          ]
+         }
+        ],
+        "momentum": 0,
+        "notes": [],
+        "phase": "intro",
+        "phase_started_s": 0,
+        "schema_version": 1,
+        "strengths": [],
+        "swaps": [],
+        "topic_index": 1,
+        "topic_started_s": 0,
+        "topics": [
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 1,
+          "score_band": 0.2,
+          "score_sum": 0.24,
+          "status": "active",
+          "turns": [
+           1,
+           2,
+           3
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t3",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t6",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 3,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "clarify",
+        "action_reason": null,
+        "agent_decision": "keep_difficulty",
+        "decided_by": null,
+        "difficulty": 2,
+        "overrule_reason": null,
+        "phase": "intro",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "fallback",
+        "reasoning": "transcript_low_confidence -> clarify (hỏi lại một lần)",
+        "swap_result": null,
+        "topic_id": "t1",
+        "turn_kind": "clarify",
+        "turn_number": 3
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "ừm ờ cái đó",
+    "answer_source": "voice",
+    "elapsed_seconds": 180,
+    "level": "junior",
+    "question": "Xin lỗi, mình chưa nghe rõ câu trả lời vừa rồi. Bạn nói lại giúp mình nhé: Có thể mình hỏi chưa rõ. Ý mình là: Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+    "session_id": "g-voice",
+    "stt_confidence": 0.2,
+    "topic_turns": [
+     {
+      "a": "Em là lập trình viên Java hai năm kinh nghiệm.",
+      "q": "Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+      "source": "text"
+     },
+     {
+      "a": "ừm ờ cái đó",
+      "q": "Có thể mình hỏi chưa rõ. Ý mình là: Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+      "source": "voice"
+     }
+    ],
+    "track": "java_backend",
+    "turn_kind": "clarify",
+    "turn_number": 3
+   },
+   "response": {
+    "json": {
+     "details": {
+      "retryable": true,
+      "suggest_chat": true
+     },
+     "error": "voice_unclear",
+     "message": "Mình vẫn chưa nghe rõ câu trả lời. Bạn thử gõ câu trả lời vào khung chat nhé."
+    },
+    "status": 422
+   }
+  },
+  {
+   "request": {
+    "answer": "Giới thiệu ngắn gọn về nền tảng. Mô tả một dự án và vai trò của mình. Nêu công nghệ đã dùng. Giới thiệu ngắn gọn về nền tảng. Mô tả một dự án và vai trò của mình. Nêu công nghệ đã dùng. chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết ",
+    "elapsed_seconds": 180,
+    "level": "junior",
+    "question": "Xin lỗi, mình chưa nghe rõ câu trả lời vừa rồi. Bạn nói lại giúp mình nhé: Có thể mình hỏi chưa rõ. Ý mình là: Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+    "session_id": "g-voice",
+    "topic_turns": [
+     {
+      "a": "Em là lập trình viên Java hai năm kinh nghiệm.",
+      "q": "Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+      "source": "text"
+     },
+     {
+      "a": "ừm ờ cái đó",
+      "q": "Có thể mình hỏi chưa rõ. Ý mình là: Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+      "source": "voice"
+     }
+    ],
+    "track": "java_backend",
+    "turn_kind": "clarify",
+    "turn_number": 3
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "follow_up",
+       "phase": "intro",
+       "topic_index": 1,
+       "topic_total": 6,
+       "turn_number": 4
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 8,
+       "t": "Mình muốn đi sâu thêm ý này: Mô tả một dự án và vai trò của mình. Bạn nói rõ hơn giúp mình nhé?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "answered",
+        "confidence": null,
+        "covered_points": [
+         "Giới thiệu ngắn gọn về nền tảng",
+         "Nêu công nghệ đã dùng"
+        ],
+        "degraded": false,
+        "evidence": [
+         {
+          "claim": "Giới thiệu ngắn gọn về nền tảng",
+          "quote": "Giới thiệu ngắn gọn về nền tảng",
+          "source_ids": [],
+          "support": null
+         },
+         {
+          "claim": "Nêu công nghệ đã dùng",
+          "quote": "Nêu công nghệ đã dùng",
+          "source_ids": [],
+          "support": null
+         }
+        ],
+        "follow_up_focus": "Mô tả một dự án và vai trò của mình",
+        "gap_tags": [
+         "minh"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Mô tả một dự án và vai trò của mình"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 3,
+         "extensibility": 2,
+         "relevance": 4,
+         "technical_accuracy": 3
+        },
+        "scores_10": {
+         "completeness": 7.5,
+         "extensibility": 5.0,
+         "relevance": 10.0,
+         "technical_accuracy": 7.5
+        },
+        "sources": [],
+        "strength_tags": [
+         "gioi-ngan",
+         "cong-dung"
+        ],
+        "transcript_low_confidence": false,
+        "turn_number": 3,
+        "turn_score_10": 7.5
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Mình muốn đi sâu thêm ý này: Mô tả một dự án và vai trò của mình. Bạn nói rõ hơn giúp mình nhé?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t1",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "co the minh hoi chua ro. y minh la: chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "xin loi, minh chua nghe ro cau tra loi vua roi. ban noi lai giup minh nhe: co the minh hoi chua ro. y minh la: chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "minh muon di sau them y nay: mo ta mot du an va vai tro cua minh. ban noi ro hon giup minh nhe?"
+        ],
+        "counters": {
+         "clarifies": 1,
+         "consecutive_dont_know": 0,
+         "follow_ups": 2,
+         "hints": 0,
+         "stt_reasks": 1
+        },
+        "current_difficulty": 3,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 1
+        },
+        "end_reason": null,
+        "evaluated_turns": 2,
+        "gaps": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1
+          ]
+         },
+         {
+          "tag": "minh",
+          "turns": [
+           1
+          ]
+         },
+         {
+          "tag": "cong-dung",
+          "turns": [
+           1
+          ]
+         }
+        ],
+        "momentum": 0,
+        "notes": [],
+        "phase": "intro",
+        "phase_started_s": 0,
+        "schema_version": 1,
+        "strengths": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           3
+          ]
+         },
+         {
+          "tag": "cong-dung",
+          "turns": [
+           3
+          ]
+         }
+        ],
+        "swaps": [],
+        "topic_index": 1,
+        "topic_started_s": 0,
+        "topics": [
+         {
+          "covered": [
+           "Giới thiệu ngắn gọn về nền tảng",
+           "Nêu công nghệ đã dùng"
+          ],
+          "focus_used": [
+           "Mô tả một dự án và vai trò của mình"
+          ],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 2,
+          "score_band": 1.6,
+          "score_sum": 3.24,
+          "status": "active",
+          "turns": [
+           1,
+           2,
+           3,
+           4
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t3",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t6",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 4,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "follow_up",
+        "action_reason": null,
+        "agent_decision": "deepen",
+        "decided_by": null,
+        "difficulty": 3,
+        "overrule_reason": null,
+        "phase": "intro",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "strong -> follow_up (luật 10)",
+        "swap_result": null,
+        "topic_id": "t1",
+        "turn_kind": "follow_up",
+        "turn_number": 4
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Giới thiệu ngắn gọn về nền tảng. Mô tả một dự án và vai trò của mình. Nêu công nghệ đã dùng. Giới thiệu ngắn gọn về nền tảng. Mô tả một dự án và vai trò của mình. Nêu công nghệ đã dùng. chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết ",
+    "answer_source": "voice",
+    "elapsed_seconds": 240,
+    "level": "junior",
+    "question": "Mình muốn đi sâu thêm ý này: Mô tả một dự án và vai trò của mình. Bạn nói rõ hơn giúp mình nhé?",
+    "session_id": "g-voice",
+    "stt_confidence": 0.95,
+    "topic_turns": [
+     {
+      "a": "Em là lập trình viên Java hai năm kinh nghiệm.",
+      "q": "Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+      "source": "text"
+     },
+     {
+      "a": "ừm ờ cái đó",
+      "q": "Có thể mình hỏi chưa rõ. Ý mình là: Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+      "source": "voice"
+     },
+     {
+      "a": "Giới thiệu ngắn gọn về nền tảng. Mô tả một dự án và vai trò của mình. Nêu công nghệ đã dùng. Giới thiệu ngắn gọn về nền tảng. Mô tả một dự án và vai trò của mình. Nêu công nghệ đã dùng. chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết ",
+      "q": "Xin lỗi, mình chưa nghe rõ câu trả lời vừa rồi. Bạn nói lại giúp mình nhé: Có thể mình hỏi chưa rõ. Ý mình là: Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+      "source": "text"
+     }
+    ],
+    "track": "java_backend",
+    "turn_kind": "follow_up",
+    "turn_number": 4
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "ask_main",
+       "phase": "technical",
+       "topic_index": 2,
+       "topic_total": 6,
+       "turn_number": 5
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 9,
+       "t": "Giờ mình chuyển sang phần kiến thức chuyên môn nhé. Java Collections và HashMap: bạn hiểu như thế nào và đã áp dụng ra sao?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "answered",
+        "confidence": null,
+        "covered_points": [
+         "Giới thiệu ngắn gọn về nền tảng",
+         "Nêu công nghệ đã dùng"
+        ],
+        "degraded": false,
+        "evidence": [
+         {
+          "claim": "Giới thiệu ngắn gọn về nền tảng",
+          "quote": "Giới thiệu ngắn gọn về nền tảng",
+          "source_ids": [],
+          "support": null
+         },
+         {
+          "claim": "Nêu công nghệ đã dùng",
+          "quote": "Nêu công nghệ đã dùng",
+          "source_ids": [],
+          "support": null
+         }
+        ],
+        "follow_up_focus": "Mô tả một dự án và vai trò của mình",
+        "gap_tags": [
+         "minh"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Mô tả một dự án và vai trò của mình"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 3,
+         "extensibility": 2,
+         "relevance": 4,
+         "technical_accuracy": 3
+        },
+        "scores_10": {
+         "completeness": 7.5,
+         "extensibility": 5.0,
+         "relevance": 10.0,
+         "technical_accuracy": 7.5
+        },
+        "sources": [],
+        "strength_tags": [
+         "gioi-ngan",
+         "cong-dung"
+        ],
+        "transcript_low_confidence": false,
+        "turn_number": 4,
+        "turn_score_10": 7.5
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Giờ mình chuyển sang phần kiến thức chuyên môn nhé. Java Collections và HashMap: bạn hiểu như thế nào và đã áp dụng ra sao?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t2",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "co the minh hoi chua ro. y minh la: chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "xin loi, minh chua nghe ro cau tra loi vua roi. ban noi lai giup minh nhe: co the minh hoi chua ro. y minh la: chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "minh muon di sau them y nay: mo ta mot du an va vai tro cua minh. ban noi ro hon giup minh nhe?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. java collections va hashmap: ban hieu nhu the nao va da ap dung ra sao?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 0,
+         "follow_ups": 0,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 2,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 1
+        },
+        "end_reason": null,
+        "evaluated_turns": 3,
+        "gaps": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1
+          ]
+         },
+         {
+          "tag": "minh",
+          "turns": [
+           1
+          ]
+         },
+         {
+          "tag": "cong-dung",
+          "turns": [
+           1
+          ]
+         }
+        ],
+        "momentum": 0,
+        "notes": [],
+        "phase": "technical",
+        "phase_started_s": 240,
+        "schema_version": 1,
+        "strengths": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "cong-dung",
+          "turns": [
+           3,
+           4
+          ]
+         }
+        ],
+        "swaps": [],
+        "topic_index": 1,
+        "topic_started_s": 240,
+        "topics": [
+         {
+          "covered": [
+           "Giới thiệu ngắn gọn về nền tảng",
+           "Nêu công nghệ đã dùng"
+          ],
+          "focus_used": [
+           "Mô tả một dự án và vai trò của mình"
+          ],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 3,
+          "score_band": 2.1,
+          "score_sum": 6.24,
+          "status": "done",
+          "turns": [
+           1,
+           2,
+           3,
+           4
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "active",
+          "turns": [
+           5
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t3",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t6",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 5,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "ask_main",
+        "action_reason": null,
+        "agent_decision": "switch_topic",
+        "decided_by": null,
+        "difficulty": 2,
+        "overrule_reason": null,
+        "phase": "technical",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "strong -> next_topic (luật 11)",
+        "swap_result": null,
+        "topic_id": "t2",
+        "turn_kind": "main",
+        "turn_number": 5
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Nêu được hashCode và equals. Nêu được collision và treeification. Nêu được resize và load factor. Nêu được ConcurrentHashMap. Nêu được hashCode và equals. Nêu được collision và treeification. Nêu được resize và load factor. Nêu được ConcurrentHashMap. chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết ",
+    "answer_source": "voice",
+    "elapsed_seconds": 300,
+    "level": "junior",
+    "question": "Giờ mình chuyển sang phần kiến thức chuyên môn nhé. Java Collections và HashMap: bạn hiểu như thế nào và đã áp dụng ra sao?",
+    "session_id": "g-voice",
+    "stt_confidence": 0.95,
+    "topic_turns": [],
+    "track": "java_backend",
+    "turn_kind": "main",
+    "turn_number": 5
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "follow_up",
+       "phase": "technical",
+       "topic_index": 2,
+       "topic_total": 6,
+       "turn_number": 6
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 5,
+       "t": "Mình muốn đi sâu thêm ý này: ConcurrentHashMap. Bạn nói rõ hơn giúp mình nhé?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "answered",
+        "confidence": null,
+        "covered_points": [
+         "Nêu được hashCode và equals",
+         "Nêu được collision và treeification",
+         "Nêu được resize và load factor"
+        ],
+        "degraded": false,
+        "evidence": [
+         {
+          "claim": "Nêu được hashCode và equals",
+          "quote": "Nêu được hashCode và equals",
+          "source_ids": [],
+          "support": null
+         },
+         {
+          "claim": "Nêu được collision và treeification",
+          "quote": "Nêu được collision và treeification",
+          "source_ids": [],
+          "support": null
+         },
+         {
+          "claim": "Nêu được resize và load factor",
+          "quote": "Nêu được resize và load factor",
+          "source_ids": [],
+          "support": null
+         }
+        ],
+        "follow_up_focus": "ConcurrentHashMap",
+        "gap_tags": [
+         "concurrenthashmap"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Nêu được ConcurrentHashMap"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 3,
+         "extensibility": 3,
+         "relevance": 4,
+         "technical_accuracy": 3
+        },
+        "scores_10": {
+         "completeness": 7.5,
+         "extensibility": 7.5,
+         "relevance": 10.0,
+         "technical_accuracy": 7.5
+        },
+        "sources": [],
+        "strength_tags": [
+         "equals-hashcode",
+         "collision-treeification",
+         "factor-load"
+        ],
+        "transcript_low_confidence": false,
+        "turn_number": 5,
+        "turn_score_10": 8.1
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Mình muốn đi sâu thêm ý này: ConcurrentHashMap. Bạn nói rõ hơn giúp mình nhé?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t2",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "co the minh hoi chua ro. y minh la: chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "xin loi, minh chua nghe ro cau tra loi vua roi. ban noi lai giup minh nhe: co the minh hoi chua ro. y minh la: chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "minh muon di sau them y nay: mo ta mot du an va vai tro cua minh. ban noi ro hon giup minh nhe?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. java collections va hashmap: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh muon di sau them y nay: concurrenthashmap. ban noi ro hon giup minh nhe?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 0,
+         "follow_ups": 1,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 3,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 1
+        },
+        "end_reason": null,
+        "evaluated_turns": 4,
+        "gaps": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1
+          ]
+         },
+         {
+          "tag": "minh",
+          "turns": [
+           1
+          ]
+         },
+         {
+          "tag": "cong-dung",
+          "turns": [
+           1
+          ]
+         }
+        ],
+        "momentum": 0,
+        "notes": [],
+        "phase": "technical",
+        "phase_started_s": 240,
+        "schema_version": 1,
+        "strengths": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "cong-dung",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "equals-hashcode",
+          "turns": [
+           5
+          ]
+         },
+         {
+          "tag": "collision-treeification",
+          "turns": [
+           5
+          ]
+         },
+         {
+          "tag": "factor-load",
+          "turns": [
+           5
+          ]
+         }
+        ],
+        "swaps": [],
+        "topic_index": 1,
+        "topic_started_s": 240,
+        "topics": [
+         {
+          "covered": [
+           "Giới thiệu ngắn gọn về nền tảng",
+           "Nêu công nghệ đã dùng"
+          ],
+          "focus_used": [
+           "Mô tả một dự án và vai trò của mình"
+          ],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 3,
+          "score_band": 2.1,
+          "score_sum": 6.24,
+          "status": "done",
+          "turns": [
+           1,
+           2,
+           3,
+           4
+          ]
+         },
+         {
+          "covered": [
+           "Nêu được hashCode và equals",
+           "Nêu được collision và treeification",
+           "Nêu được resize và load factor"
+          ],
+          "focus_used": [
+           "ConcurrentHashMap"
+          ],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 1,
+          "score_band": 3.2,
+          "score_sum": 3.2399999999999998,
+          "status": "active",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t3",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t6",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 6,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "follow_up",
+        "action_reason": null,
+        "agent_decision": "deepen",
+        "decided_by": null,
+        "difficulty": 3,
+        "overrule_reason": null,
+        "phase": "technical",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "strong -> follow_up (luật 10)",
+        "swap_result": null,
+        "topic_id": "t2",
+        "turn_kind": "follow_up",
+        "turn_number": 6
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Nêu được hashCode và equals. Nêu được collision và treeification. Nêu được resize và load factor. Nêu được ConcurrentHashMap. Nêu được hashCode và equals. Nêu được collision và treeification. Nêu được resize và load factor. Nêu được ConcurrentHashMap. chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết ",
+    "answer_source": "voice",
+    "elapsed_seconds": 360,
+    "level": "junior",
+    "question": "Mình muốn đi sâu thêm ý này: ConcurrentHashMap. Bạn nói rõ hơn giúp mình nhé?",
+    "session_id": "g-voice",
+    "stt_confidence": 0.95,
+    "topic_turns": [
+     {
+      "a": "Nêu được hashCode và equals. Nêu được collision và treeification. Nêu được resize và load factor. Nêu được ConcurrentHashMap. Nêu được hashCode và equals. Nêu được collision và treeification. Nêu được resize và load factor. Nêu được ConcurrentHashMap. chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết ",
+      "q": "Giờ mình chuyển sang phần kiến thức chuyên môn nhé. Java Collections và HashMap: bạn hiểu như thế nào và đã áp dụng ra sao?",
+      "source": "voice"
+     }
+    ],
+    "track": "java_backend",
+    "turn_kind": "follow_up",
+    "turn_number": 6
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "follow_up",
+       "phase": "technical",
+       "topic_index": 2,
+       "topic_total": 6,
+       "turn_number": 7
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 8,
+       "t": "Mình muốn đi sâu thêm ý này: trade-off khi áp dụng Java Collections và HashMap. Bạn nói rõ hơn giúp mình nhé?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "answered",
+        "confidence": null,
+        "covered_points": [
+         "Nêu được hashCode và equals",
+         "Nêu được collision và treeification",
+         "Nêu được resize và load factor"
+        ],
+        "degraded": false,
+        "evidence": [
+         {
+          "claim": "Nêu được hashCode và equals",
+          "quote": "Nêu được hashCode và equals",
+          "source_ids": [],
+          "support": null
+         },
+         {
+          "claim": "Nêu được collision và treeification",
+          "quote": "Nêu được collision và treeification",
+          "source_ids": [],
+          "support": null
+         },
+         {
+          "claim": "Nêu được resize và load factor",
+          "quote": "Nêu được resize và load factor",
+          "source_ids": [],
+          "support": null
+         }
+        ],
+        "follow_up_focus": "ConcurrentHashMap",
+        "gap_tags": [
+         "concurrenthashmap"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Nêu được ConcurrentHashMap"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 3,
+         "extensibility": 3,
+         "relevance": 4,
+         "technical_accuracy": 3
+        },
+        "scores_10": {
+         "completeness": 7.5,
+         "extensibility": 7.5,
+         "relevance": 10.0,
+         "technical_accuracy": 7.5
+        },
+        "sources": [],
+        "strength_tags": [
+         "equals-hashcode",
+         "collision-treeification",
+         "factor-load"
+        ],
+        "transcript_low_confidence": false,
+        "turn_number": 6,
+        "turn_score_10": 8.1
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Mình muốn đi sâu thêm ý này: trade-off khi áp dụng Java Collections và HashMap. Bạn nói rõ hơn giúp mình nhé?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t2",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "co the minh hoi chua ro. y minh la: chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "xin loi, minh chua nghe ro cau tra loi vua roi. ban noi lai giup minh nhe: co the minh hoi chua ro. y minh la: chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "minh muon di sau them y nay: mo ta mot du an va vai tro cua minh. ban noi ro hon giup minh nhe?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. java collections va hashmap: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh muon di sau them y nay: concurrenthashmap. ban noi ro hon giup minh nhe?",
+         "minh muon di sau them y nay: trade-off khi ap dung java collections va hashmap. ban noi ro hon giup minh nhe?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 0,
+         "follow_ups": 2,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 4,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 1
+        },
+        "end_reason": null,
+        "evaluated_turns": 5,
+        "gaps": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1
+          ]
+         },
+         {
+          "tag": "minh",
+          "turns": [
+           1
+          ]
+         },
+         {
+          "tag": "cong-dung",
+          "turns": [
+           1
+          ]
+         }
+        ],
+        "momentum": 0,
+        "notes": [],
+        "phase": "technical",
+        "phase_started_s": 240,
+        "schema_version": 1,
+        "strengths": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "cong-dung",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "equals-hashcode",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "tag": "collision-treeification",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "tag": "factor-load",
+          "turns": [
+           5,
+           6
+          ]
+         }
+        ],
+        "swaps": [],
+        "topic_index": 1,
+        "topic_started_s": 240,
+        "topics": [
+         {
+          "covered": [
+           "Giới thiệu ngắn gọn về nền tảng",
+           "Nêu công nghệ đã dùng"
+          ],
+          "focus_used": [
+           "Mô tả một dự án và vai trò của mình"
+          ],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 3,
+          "score_band": 2.1,
+          "score_sum": 6.24,
+          "status": "done",
+          "turns": [
+           1,
+           2,
+           3,
+           4
+          ]
+         },
+         {
+          "covered": [
+           "Nêu được hashCode và equals",
+           "Nêu được collision và treeification",
+           "Nêu được resize và load factor"
+          ],
+          "focus_used": [
+           "ConcurrentHashMap",
+           "trade-off khi áp dụng Java Collections và HashMap"
+          ],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 2,
+          "score_band": 3.2,
+          "score_sum": 6.4799999999999995,
+          "status": "active",
+          "turns": [
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t3",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t6",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 7,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "follow_up",
+        "action_reason": null,
+        "agent_decision": "deepen",
+        "decided_by": null,
+        "difficulty": 4,
+        "overrule_reason": null,
+        "phase": "technical",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "strong -> follow_up (luật 10)",
+        "swap_result": null,
+        "topic_id": "t2",
+        "turn_kind": "follow_up",
+        "turn_number": 7
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Nêu được hashCode và equals. Nêu được collision và treeification. Nêu được resize và load factor. Nêu được ConcurrentHashMap. Nêu được hashCode và equals. Nêu được collision và treeification. Nêu được resize và load factor. Nêu được ConcurrentHashMap. chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết ",
+    "answer_source": "voice",
+    "elapsed_seconds": 420,
+    "level": "junior",
+    "question": "Mình muốn đi sâu thêm ý này: trade-off khi áp dụng Java Collections và HashMap. Bạn nói rõ hơn giúp mình nhé?",
+    "session_id": "g-voice",
+    "stt_confidence": 0.95,
+    "topic_turns": [
+     {
+      "a": "Nêu được hashCode và equals. Nêu được collision và treeification. Nêu được resize và load factor. Nêu được ConcurrentHashMap. Nêu được hashCode và equals. Nêu được collision và treeification. Nêu được resize và load factor. Nêu được ConcurrentHashMap. chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết ",
+      "q": "Giờ mình chuyển sang phần kiến thức chuyên môn nhé. Java Collections và HashMap: bạn hiểu như thế nào và đã áp dụng ra sao?",
+      "source": "voice"
+     },
+     {
+      "a": "Nêu được hashCode và equals. Nêu được collision và treeification. Nêu được resize và load factor. Nêu được ConcurrentHashMap. Nêu được hashCode và equals. Nêu được collision và treeification. Nêu được resize và load factor. Nêu được ConcurrentHashMap. chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết ",
+      "q": "Mình muốn đi sâu thêm ý này: ConcurrentHashMap. Bạn nói rõ hơn giúp mình nhé?",
+      "source": "voice"
+     }
+    ],
+    "track": "java_backend",
+    "turn_kind": "follow_up",
+    "turn_number": 7
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "ask_main",
+       "phase": "technical",
+       "topic_index": 3,
+       "topic_total": 6,
+       "turn_number": 8
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 6,
+       "t": "OOP và SOLID trong Java: bạn hiểu như thế nào và đã áp dụng ra sao?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "answered",
+        "confidence": null,
+        "covered_points": [
+         "Nêu được hashCode và equals",
+         "Nêu được collision và treeification",
+         "Nêu được resize và load factor"
+        ],
+        "degraded": false,
+        "evidence": [
+         {
+          "claim": "Nêu được hashCode và equals",
+          "quote": "Nêu được hashCode và equals",
+          "source_ids": [],
+          "support": null
+         },
+         {
+          "claim": "Nêu được collision và treeification",
+          "quote": "Nêu được collision và treeification",
+          "source_ids": [],
+          "support": null
+         },
+         {
+          "claim": "Nêu được resize và load factor",
+          "quote": "Nêu được resize và load factor",
+          "source_ids": [],
+          "support": null
+         }
+        ],
+        "follow_up_focus": "ConcurrentHashMap",
+        "gap_tags": [
+         "concurrenthashmap"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Nêu được ConcurrentHashMap"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 3,
+         "extensibility": 3,
+         "relevance": 4,
+         "technical_accuracy": 3
+        },
+        "scores_10": {
+         "completeness": 7.5,
+         "extensibility": 7.5,
+         "relevance": 10.0,
+         "technical_accuracy": 7.5
+        },
+        "sources": [],
+        "strength_tags": [
+         "equals-hashcode",
+         "collision-treeification",
+         "factor-load"
+        ],
+        "transcript_low_confidence": false,
+        "turn_number": 7,
+        "turn_score_10": 8.1
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "OOP và SOLID trong Java: bạn hiểu như thế nào và đã áp dụng ra sao?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t3",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "co the minh hoi chua ro. y minh la: chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "xin loi, minh chua nghe ro cau tra loi vua roi. ban noi lai giup minh nhe: co the minh hoi chua ro. y minh la: chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "minh muon di sau them y nay: mo ta mot du an va vai tro cua minh. ban noi ro hon giup minh nhe?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. java collections va hashmap: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh muon di sau them y nay: concurrenthashmap. ban noi ro hon giup minh nhe?",
+         "minh muon di sau them y nay: trade-off khi ap dung java collections va hashmap. ban noi ro hon giup minh nhe?",
+         "oop va solid trong java: ban hieu nhu the nao va da ap dung ra sao?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 0,
+         "follow_ups": 0,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 3,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 1
+        },
+        "end_reason": null,
+        "evaluated_turns": 6,
+        "gaps": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1
+          ]
+         },
+         {
+          "tag": "minh",
+          "turns": [
+           1
+          ]
+         },
+         {
+          "tag": "cong-dung",
+          "turns": [
+           1
+          ]
+         }
+        ],
+        "momentum": 1,
+        "notes": [],
+        "phase": "technical",
+        "phase_started_s": 240,
+        "schema_version": 1,
+        "strengths": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "cong-dung",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "equals-hashcode",
+          "turns": [
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "tag": "collision-treeification",
+          "turns": [
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "tag": "factor-load",
+          "turns": [
+           5,
+           6,
+           7
+          ]
+         }
+        ],
+        "swaps": [],
+        "topic_index": 2,
+        "topic_started_s": 420,
+        "topics": [
+         {
+          "covered": [
+           "Giới thiệu ngắn gọn về nền tảng",
+           "Nêu công nghệ đã dùng"
+          ],
+          "focus_used": [
+           "Mô tả một dự án và vai trò của mình"
+          ],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 3,
+          "score_band": 2.1,
+          "score_sum": 6.24,
+          "status": "done",
+          "turns": [
+           1,
+           2,
+           3,
+           4
+          ]
+         },
+         {
+          "covered": [
+           "Nêu được hashCode và equals",
+           "Nêu được collision và treeification",
+           "Nêu được resize và load factor"
+          ],
+          "focus_used": [
+           "ConcurrentHashMap",
+           "trade-off khi áp dụng Java Collections và HashMap"
+          ],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 3,
+          "score_band": 3.2,
+          "score_sum": 9.719999999999999,
+          "status": "done",
+          "turns": [
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t3",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "active",
+          "turns": [
+           8
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t6",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 8,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "ask_main",
+        "action_reason": null,
+        "agent_decision": "switch_topic",
+        "decided_by": null,
+        "difficulty": 3,
+        "overrule_reason": null,
+        "phase": "technical",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "strong -> next_topic (luật 11)",
+        "swap_result": null,
+        "topic_id": "t3",
+        "turn_kind": "main",
+        "turn_number": 8
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  }
+ ]
+}

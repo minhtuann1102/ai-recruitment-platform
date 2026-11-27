@@ -1,8 +1,8 @@
 # Môi trường dev
 
 ## Chạy test
-- Local (Python 3.9, có sẵn venv): `cd apps/ai-service && .venv/bin/python -m pytest -q`
-- **Venv cục bộ Python 3.9 không cài được `requirements.txt` hiện tại** (`langfuse==5.0.4`, `psycopg-pool==3.3.3`, ghi nhận 2026-10-31): `import app` lỗi nếu chưa xử lý.
+- Local: `cd apps/ai-service && .venv/bin/python -m pytest -q`. `.venv` hiện là Python 3.11 (`uv venv --python 3.11` + `uv pip install -r requirements-dev.txt`, dựng lại 2026-11-27, có langgraph).
+- (Cũ) **Venv cục bộ Python 3.9 không cài được `requirements.txt` hiện tại** (`langfuse==5.0.4`, `psycopg-pool==3.3.3`, ghi nhận 2026-10-31): `import app` lỗi nếu chưa xử lý.
 - Không có Docker thì dựng Python 3.11 bằng `uv venv --python 3.11` rồi `uv pip install -r requirements-dev.txt`.
 - Đúng bản CI (Python 3.11) bằng Docker:
   `docker run --rm -v "$PWD":/w -w /w/apps/ai-service python:3.11-slim sh -c "pip install -q -r requirements-dev.txt && python -m pytest -q"`
@@ -42,3 +42,9 @@ DE dựng trên Supabase (PR #32, 9.006 bản ghi). ai-service đọc bằng rol
 
 ## Cổng
 Gateway 9080, ai-service 8000, Postgres host 5534, Redis host 6374. Container prefix `ai_recruit_*`.
+
+## LangGraph (từ 2026-11-27, plan 261127-1517)
+- `/api/next-turn` chạy qua graph LangGraph (`app/turn_graph/`). **Không đặt `LANGSMITH_TRACING` /
+  `LANGCHAIN_TRACING_V2`**: langchain-core sẽ gửi input của graph (cả câu trả lời ứng viên, plan) lên LangSmith. Trace
+  dùng Langfuse như cũ.
+- Import langgraph in `LangChainPendingDeprecationWarning` (`allowed_objects` của serde): vô hại.

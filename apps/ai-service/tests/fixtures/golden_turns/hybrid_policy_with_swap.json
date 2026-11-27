@@ -1,0 +1,1835 @@
+{
+ "start": {
+  "request": {
+   "duration_minutes": 30,
+   "level": "junior",
+   "session_id": "g-hybrid",
+   "track": "java_backend"
+  },
+  "response": {
+   "events": [
+    [
+     "meta",
+     {
+      "action": "ask_main",
+      "phase": "intro",
+      "topic_index": 1,
+      "topic_total": 6,
+      "turn_number": 1
+     }
+    ],
+    [
+     "token*",
+     {
+      "n": 7,
+      "t": "Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?"
+     }
+    ],
+    [
+     "done",
+     {
+      "metadata": {
+       "fallbacks": [],
+       "prompt_versions": {
+        "mock": "mock-v2"
+       },
+       "rag": {
+        "status": "off"
+       },
+       "usage": {}
+      },
+      "plan": {
+       "level_note": null,
+       "phases": [
+        {
+         "phase": "intro",
+         "time_budget_min": 4,
+         "topics": [
+          {
+           "backup_question": "Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+           "bank_questions": [],
+           "catalog_ref": null,
+           "cv_ref": null,
+           "id": "t1",
+           "key_points": [
+            "Giới thiệu ngắn gọn về nền tảng",
+            "Mô tả một dự án và vai trò của mình",
+            "Nêu công nghệ đã dùng"
+           ],
+           "objective": "Làm quen và nắm bối cảnh kinh nghiệm của ứng viên",
+           "opening_hint": "Mời ứng viên giới thiệu bản thân và dự án gần nhất",
+           "reference_snippets": [],
+           "reference_sources": [],
+           "source": "generic",
+           "start_difficulty": 2,
+           "title": "Giới thiệu bản thân và dự án gần nhất"
+          }
+         ]
+        },
+        {
+         "phase": "technical",
+         "time_budget_min": 18,
+         "topics": [
+          {
+           "backup_question": "Java Collections và HashMap: bạn hiểu như thế nào và đã áp dụng ra sao?",
+           "bank_questions": [],
+           "catalog_ref": "java.core.collections-hashmap",
+           "cv_ref": null,
+           "id": "t2",
+           "key_points": [
+            "Nêu được hashCode và equals",
+            "Nêu được collision và treeification",
+            "Nêu được resize và load factor",
+            "Nêu được ConcurrentHashMap"
+           ],
+           "objective": "Đánh giá hiểu biết về Java Collections và HashMap ở mức junior",
+           "opening_hint": "Bắt đầu bằng câu hỏi tổng quan về Java Collections và HashMap",
+           "reference_snippets": [],
+           "reference_sources": [],
+           "source": "catalog",
+           "start_difficulty": 2,
+           "title": "Java Collections và HashMap"
+          },
+          {
+           "backup_question": "OOP và SOLID trong Java: bạn hiểu như thế nào và đã áp dụng ra sao?",
+           "bank_questions": [],
+           "catalog_ref": "java.core.oop-solid",
+           "cv_ref": null,
+           "id": "t3",
+           "key_points": [
+            "Nêu được encapsulation và polymorphism",
+            "Nêu được abstract class vs interface",
+            "Nêu được composition over inheritance",
+            "Nêu được SOLID"
+           ],
+           "objective": "Đánh giá hiểu biết về OOP và SOLID trong Java ở mức junior",
+           "opening_hint": "Bắt đầu bằng câu hỏi tổng quan về OOP và SOLID trong Java",
+           "reference_snippets": [],
+           "reference_sources": [],
+           "source": "catalog",
+           "start_difficulty": 2,
+           "title": "OOP và SOLID trong Java"
+          },
+          {
+           "backup_question": "Đa luồng và concurrency: bạn hiểu như thế nào và đã áp dụng ra sao?",
+           "bank_questions": [],
+           "catalog_ref": "java.core.concurrency",
+           "cv_ref": null,
+           "id": "t4",
+           "key_points": [
+            "Nêu được thread pool và ExecutorService",
+            "Nêu được synchronized vs Lock",
+            "Nêu được volatile và happens-before",
+            "Nêu được deadlock"
+           ],
+           "objective": "Đánh giá hiểu biết về Đa luồng và concurrency ở mức junior",
+           "opening_hint": "Bắt đầu bằng câu hỏi tổng quan về Đa luồng và concurrency",
+           "reference_snippets": [],
+           "reference_sources": [],
+           "source": "catalog",
+           "start_difficulty": 2,
+           "title": "Đa luồng và concurrency"
+          },
+          {
+           "backup_question": "Spring IoC và Dependency Injection: bạn hiểu như thế nào và đã áp dụng ra sao?",
+           "bank_questions": [],
+           "catalog_ref": "java.spring.ioc-di",
+           "cv_ref": null,
+           "id": "t5",
+           "key_points": [
+            "Nêu được IoC container",
+            "Nêu được bean scope",
+            "Nêu được constructor vs field injection",
+            "Nêu được bean lifecycle"
+           ],
+           "objective": "Đánh giá hiểu biết về Spring IoC và Dependency Injection ở mức junior",
+           "opening_hint": "Bắt đầu bằng câu hỏi tổng quan về Spring IoC và Dependency Injection",
+           "reference_snippets": [],
+           "reference_sources": [],
+           "source": "catalog",
+           "start_difficulty": 2,
+           "title": "Spring IoC và Dependency Injection"
+          }
+         ]
+        },
+        {
+         "phase": "scenario",
+         "time_budget_min": 8,
+         "topics": [
+          {
+           "backup_question": "Tình huống: Thiết kế API quản lý đơn hàng với Spring Boot. Bạn sẽ tiếp cận thế nào?",
+           "bank_questions": [],
+           "catalog_ref": "scn.java.order-api-crud",
+           "cv_ref": null,
+           "id": "t6",
+           "key_points": [
+            "Làm rõ yêu cầu và giả định",
+            "Đề xuất thiết kế hoặc hướng giải quyết cụ thể",
+            "Nêu trade-off và rủi ro"
+           ],
+           "objective": "Đánh giá cách tiếp cận một tình huống thực tế",
+           "opening_hint": "Đưa tình huống: Thiết kế API quản lý đơn hàng với Spring Boot",
+           "reference_snippets": [],
+           "reference_sources": [],
+           "source": "scenario",
+           "start_difficulty": 2,
+           "title": "Thiết kế API quản lý đơn hàng với Spring Boot"
+          }
+         ]
+        }
+       ],
+       "replan": {
+        "keep_ids": [],
+        "reserve": [
+         {
+          "backup_question": "Spring @Transactional: bạn hiểu như thế nào và đã áp dụng ra sao?",
+          "bank_questions": [],
+          "catalog_ref": "java.spring.transaction",
+          "cv_ref": null,
+          "id": "alt1",
+          "key_points": [
+           "Nêu được propagation",
+           "Nêu được isolation level",
+           "Nêu được rollback rules",
+           "Nêu được self-invocation proxy"
+          ],
+          "objective": "Đánh giá hiểu biết về Spring @Transactional ở mức junior",
+          "opening_hint": "Bắt đầu bằng câu hỏi tổng quan về Spring @Transactional",
+          "reference_snippets": [],
+          "reference_sources": [],
+          "source": "catalog",
+          "start_difficulty": 2,
+          "title": "Spring @Transactional"
+         },
+         {
+          "backup_question": "Spring Boot auto-configuration và profile: bạn hiểu như thế nào và đã áp dụng ra sao?",
+          "bank_questions": [],
+          "catalog_ref": "java.spring.boot-autoconfig",
+          "cv_ref": null,
+          "id": "alt2",
+          "key_points": [
+           "Nêu được starter",
+           "Nêu được auto-configuration và conditional",
+           "Nêu được profile và externalized config",
+           "Nêu được actuator"
+          ],
+          "objective": "Đánh giá hiểu biết về Spring Boot auto-configuration và profile ở mức junior",
+          "opening_hint": "Bắt đầu bằng câu hỏi tổng quan về Spring Boot auto-configuration và profile",
+          "reference_snippets": [],
+          "reference_sources": [],
+          "source": "catalog",
+          "start_difficulty": 2,
+          "title": "Spring Boot auto-configuration và profile"
+         }
+        ]
+       },
+       "schema_version": 1
+      },
+      "question": "Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+      "state": {
+       "active_topic_id": "t1",
+       "asked_questions": [
+        "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?"
+       ],
+       "counters": {
+        "clarifies": 0,
+        "consecutive_dont_know": 0,
+        "follow_ups": 0,
+        "hints": 0,
+        "stt_reasks": 0
+       },
+       "current_difficulty": 2,
+       "current_qa_id": null,
+       "difficulty_bounds": {
+        "max": 4,
+        "min": 1
+       },
+       "end_reason": null,
+       "evaluated_turns": 0,
+       "gaps": [],
+       "momentum": 0,
+       "notes": [],
+       "phase": "intro",
+       "phase_started_s": 0,
+       "schema_version": 1,
+       "strengths": [],
+       "swaps": [],
+       "topic_index": 1,
+       "topic_started_s": 0,
+       "topics": [
+        {
+         "covered": [],
+         "focus_used": [],
+         "hint_used": false,
+         "id": "t1",
+         "n_scored": 0,
+         "score_band": null,
+         "score_sum": 0.0,
+         "status": "active",
+         "turns": [
+          1
+         ]
+        },
+        {
+         "covered": [],
+         "focus_used": [],
+         "hint_used": false,
+         "id": "t2",
+         "n_scored": 0,
+         "score_band": null,
+         "score_sum": 0.0,
+         "status": "pending",
+         "turns": []
+        },
+        {
+         "covered": [],
+         "focus_used": [],
+         "hint_used": false,
+         "id": "t3",
+         "n_scored": 0,
+         "score_band": null,
+         "score_sum": 0.0,
+         "status": "pending",
+         "turns": []
+        },
+        {
+         "covered": [],
+         "focus_used": [],
+         "hint_used": false,
+         "id": "t4",
+         "n_scored": 0,
+         "score_band": null,
+         "score_sum": 0.0,
+         "status": "pending",
+         "turns": []
+        },
+        {
+         "covered": [],
+         "focus_used": [],
+         "hint_used": false,
+         "id": "t5",
+         "n_scored": 0,
+         "score_band": null,
+         "score_sum": 0.0,
+         "status": "pending",
+         "turns": []
+        },
+        {
+         "covered": [],
+         "focus_used": [],
+         "hint_used": false,
+         "id": "t6",
+         "n_scored": 0,
+         "score_band": null,
+         "score_sum": 0.0,
+         "status": "pending",
+         "turns": []
+        }
+       ],
+       "turn_count": 1,
+       "used_qa_ids": []
+      },
+      "turn": {
+       "action": "ask_main",
+       "action_reason": null,
+       "agent_decision": "switch_topic",
+       "decided_by": null,
+       "difficulty": 2,
+       "overrule_reason": null,
+       "phase": "intro",
+       "policy_action": null,
+       "proposed_action": null,
+       "qa_id": null,
+       "question_source": "ai",
+       "reasoning": null,
+       "swap_result": null,
+       "topic_id": "t1",
+       "turn_kind": "main",
+       "turn_number": 1
+      }
+     }
+    ]
+   ],
+   "status": 200
+  }
+ },
+ "turns": [
+  {
+   "request": {
+    "answer": "Giới thiệu ngắn gọn về nền tảng. Mô tả một dự án và vai trò của mình. Nêu công nghệ đã dùng. Giới thiệu ngắn gọn về nền tảng. Mô tả một dự án và vai trò của mình. Nêu công nghệ đã dùng. chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết ",
+    "elapsed_seconds": 60,
+    "level": "junior",
+    "question": "Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+    "session_id": "g-hybrid",
+    "topic_turns": [],
+    "track": "java_backend",
+    "turn_kind": "main",
+    "turn_number": 1
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "ask_main",
+       "phase": "technical",
+       "topic_index": 2,
+       "topic_total": 6,
+       "turn_number": 2
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 9,
+       "t": "Giờ mình chuyển sang phần kiến thức chuyên môn nhé. Java Collections và HashMap: bạn hiểu như thế nào và đã áp dụng ra sao?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "answered",
+        "confidence": null,
+        "covered_points": [],
+        "degraded": false,
+        "evidence": [],
+        "follow_up_focus": null,
+        "gap_tags": [],
+        "misconceptions": [],
+        "missing_points": [],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 2,
+         "extensibility": 2,
+         "relevance": 2,
+         "technical_accuracy": 2
+        },
+        "scores_10": {
+         "completeness": 5.0,
+         "extensibility": 5.0,
+         "relevance": 5.0,
+         "technical_accuracy": 5.0
+        },
+        "sources": [],
+        "strength_tags": [],
+        "transcript_low_confidence": false,
+        "turn_number": 1,
+        "turn_score_10": 5.0
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Giờ mình chuyển sang phần kiến thức chuyên môn nhé. Java Collections và HashMap: bạn hiểu như thế nào và đã áp dụng ra sao?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t2",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. java collections va hashmap: ban hieu nhu the nao va da ap dung ra sao?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 0,
+         "follow_ups": 0,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 2,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 1
+        },
+        "end_reason": null,
+        "evaluated_turns": 1,
+        "gaps": [],
+        "momentum": 0,
+        "notes": [],
+        "phase": "technical",
+        "phase_started_s": 60,
+        "schema_version": 1,
+        "strengths": [],
+        "swaps": [],
+        "topic_index": 1,
+        "topic_started_s": 60,
+        "topics": [
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 1,
+          "score_band": 2.0,
+          "score_sum": 2.0,
+          "status": "done",
+          "turns": [
+           1
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "active",
+          "turns": [
+           2
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t3",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t6",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 2,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "ask_main",
+        "action_reason": null,
+        "agent_decision": "switch_topic",
+        "decided_by": "llm",
+        "difficulty": 2,
+        "overrule_reason": null,
+        "phase": "technical",
+        "policy_action": "next_topic",
+        "proposed_action": "next_topic",
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "ok -> next_topic (llm)",
+        "swap_result": "not_applicable",
+        "topic_id": "t2",
+        "turn_kind": "main",
+        "turn_number": 2
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Nêu được hashCode và equals. Nêu được collision và treeification. Nêu được resize và load factor. Nêu được ConcurrentHashMap. Nêu được hashCode và equals. Nêu được collision và treeification. Nêu được resize và load factor. Nêu được ConcurrentHashMap. chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết ",
+    "elapsed_seconds": 120,
+    "level": "junior",
+    "question": "Giờ mình chuyển sang phần kiến thức chuyên môn nhé. Java Collections và HashMap: bạn hiểu như thế nào và đã áp dụng ra sao?",
+    "session_id": "g-hybrid",
+    "topic_turns": [],
+    "track": "java_backend",
+    "turn_kind": "main",
+    "turn_number": 2
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "ask_main",
+       "phase": "technical",
+       "topic_index": 3,
+       "topic_total": 6,
+       "turn_number": 3
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 6,
+       "t": "OOP và SOLID trong Java: bạn hiểu như thế nào và đã áp dụng ra sao?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "answered",
+        "confidence": null,
+        "covered_points": [],
+        "degraded": false,
+        "evidence": [],
+        "follow_up_focus": null,
+        "gap_tags": [],
+        "misconceptions": [],
+        "missing_points": [],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 2,
+         "extensibility": 2,
+         "relevance": 2,
+         "technical_accuracy": 2
+        },
+        "scores_10": {
+         "completeness": 5.0,
+         "extensibility": 5.0,
+         "relevance": 5.0,
+         "technical_accuracy": 5.0
+        },
+        "sources": [],
+        "strength_tags": [],
+        "transcript_low_confidence": false,
+        "turn_number": 2,
+        "turn_score_10": 5.0
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "OOP và SOLID trong Java: bạn hiểu như thế nào và đã áp dụng ra sao?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t3",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. java collections va hashmap: ban hieu nhu the nao va da ap dung ra sao?",
+         "oop va solid trong java: ban hieu nhu the nao va da ap dung ra sao?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 0,
+         "follow_ups": 0,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 2,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 1
+        },
+        "end_reason": null,
+        "evaluated_turns": 2,
+        "gaps": [],
+        "momentum": 0,
+        "notes": [],
+        "phase": "technical",
+        "phase_started_s": 60,
+        "schema_version": 1,
+        "strengths": [],
+        "swaps": [
+         {
+          "add": "alt1",
+          "drop": "t4",
+          "reason": "ứng viên đã mạnh phần này",
+          "turn": 2
+         }
+        ],
+        "topic_index": 2,
+        "topic_started_s": 120,
+        "topics": [
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 1,
+          "score_band": 2.0,
+          "score_sum": 2.0,
+          "status": "done",
+          "turns": [
+           1
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 1,
+          "score_band": 2.0,
+          "score_sum": 2.0,
+          "status": "done",
+          "turns": [
+           2
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t3",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "active",
+          "turns": [
+           3
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "alt1",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t6",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 3,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "ask_main",
+        "action_reason": null,
+        "agent_decision": "switch_topic",
+        "decided_by": "llm",
+        "difficulty": 2,
+        "overrule_reason": null,
+        "phase": "technical",
+        "policy_action": "next_topic",
+        "proposed_action": "next_topic",
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "ok -> next_topic (llm)",
+        "swap_result": "applied",
+        "topic_id": "t3",
+        "turn_kind": "main",
+        "turn_number": 3
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Nêu được encapsulation và polymorphism. Nêu được abstract class vs interface. Nêu được composition over inheritance. Nêu được SOLID. Nêu được encapsulation và polymorphism. Nêu được abstract class vs interface. Nêu được composition over inheritance. Nêu được SOLID. chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết ",
+    "elapsed_seconds": 180,
+    "level": "junior",
+    "question": "OOP và SOLID trong Java: bạn hiểu như thế nào và đã áp dụng ra sao?",
+    "session_id": "g-hybrid",
+    "topic_turns": [],
+    "track": "java_backend",
+    "turn_kind": "main",
+    "turn_number": 3
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "ask_main",
+       "phase": "technical",
+       "topic_index": 4,
+       "topic_total": 6,
+       "turn_number": 4
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 5,
+       "t": "Spring @Transactional: bạn hiểu như thế nào và đã áp dụng ra sao?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "answered",
+        "confidence": null,
+        "covered_points": [],
+        "degraded": false,
+        "evidence": [],
+        "follow_up_focus": null,
+        "gap_tags": [],
+        "misconceptions": [],
+        "missing_points": [],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 2,
+         "extensibility": 2,
+         "relevance": 2,
+         "technical_accuracy": 2
+        },
+        "scores_10": {
+         "completeness": 5.0,
+         "extensibility": 5.0,
+         "relevance": 5.0,
+         "technical_accuracy": 5.0
+        },
+        "sources": [],
+        "strength_tags": [],
+        "transcript_low_confidence": false,
+        "turn_number": 3,
+        "turn_score_10": 5.0
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Spring @Transactional: bạn hiểu như thế nào và đã áp dụng ra sao?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "alt1",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. java collections va hashmap: ban hieu nhu the nao va da ap dung ra sao?",
+         "oop va solid trong java: ban hieu nhu the nao va da ap dung ra sao?",
+         "spring @transactional: ban hieu nhu the nao va da ap dung ra sao?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 0,
+         "follow_ups": 0,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 2,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 1
+        },
+        "end_reason": null,
+        "evaluated_turns": 3,
+        "gaps": [],
+        "momentum": 0,
+        "notes": [],
+        "phase": "technical",
+        "phase_started_s": 60,
+        "schema_version": 1,
+        "strengths": [],
+        "swaps": [
+         {
+          "add": "alt1",
+          "drop": "t4",
+          "reason": "ứng viên đã mạnh phần này",
+          "turn": 2
+         }
+        ],
+        "topic_index": 3,
+        "topic_started_s": 180,
+        "topics": [
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 1,
+          "score_band": 2.0,
+          "score_sum": 2.0,
+          "status": "done",
+          "turns": [
+           1
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 1,
+          "score_band": 2.0,
+          "score_sum": 2.0,
+          "status": "done",
+          "turns": [
+           2
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t3",
+          "n_scored": 1,
+          "score_band": 2.0,
+          "score_sum": 2.0,
+          "status": "done",
+          "turns": [
+           3
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "alt1",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "active",
+          "turns": [
+           4
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t6",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 4,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "ask_main",
+        "action_reason": null,
+        "agent_decision": "switch_topic",
+        "decided_by": "llm",
+        "difficulty": 2,
+        "overrule_reason": null,
+        "phase": "technical",
+        "policy_action": "next_topic",
+        "proposed_action": "next_topic",
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "ok -> next_topic (llm)",
+        "swap_result": "budget",
+        "topic_id": "alt1",
+        "turn_kind": "main",
+        "turn_number": 4
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Cảm ơn ạ, em không có câu hỏi.",
+    "elapsed_seconds": 240,
+    "level": "junior",
+    "question": "Spring @Transactional: bạn hiểu như thế nào và đã áp dụng ra sao?",
+    "session_id": "g-hybrid",
+    "topic_turns": [],
+    "track": "java_backend",
+    "turn_kind": "main",
+    "turn_number": 4
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "ask_main",
+       "phase": "technical",
+       "topic_index": 5,
+       "topic_total": 6,
+       "turn_number": 5
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 6,
+       "t": "Spring IoC và Dependency Injection: bạn hiểu như thế nào và đã áp dụng ra sao?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "answered",
+        "confidence": null,
+        "covered_points": [],
+        "degraded": false,
+        "evidence": [],
+        "follow_up_focus": null,
+        "gap_tags": [],
+        "misconceptions": [],
+        "missing_points": [],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 2,
+         "extensibility": 2,
+         "relevance": 2,
+         "technical_accuracy": 2
+        },
+        "scores_10": {
+         "completeness": 5.0,
+         "extensibility": 5.0,
+         "relevance": 5.0,
+         "technical_accuracy": 5.0
+        },
+        "sources": [],
+        "strength_tags": [],
+        "transcript_low_confidence": false,
+        "turn_number": 4,
+        "turn_score_10": 5.0
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Spring IoC và Dependency Injection: bạn hiểu như thế nào và đã áp dụng ra sao?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t5",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. java collections va hashmap: ban hieu nhu the nao va da ap dung ra sao?",
+         "oop va solid trong java: ban hieu nhu the nao va da ap dung ra sao?",
+         "spring @transactional: ban hieu nhu the nao va da ap dung ra sao?",
+         "spring ioc va dependency injection: ban hieu nhu the nao va da ap dung ra sao?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 0,
+         "follow_ups": 0,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 2,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 1
+        },
+        "end_reason": null,
+        "evaluated_turns": 4,
+        "gaps": [],
+        "momentum": 0,
+        "notes": [],
+        "phase": "technical",
+        "phase_started_s": 60,
+        "schema_version": 1,
+        "strengths": [],
+        "swaps": [
+         {
+          "add": "alt1",
+          "drop": "t4",
+          "reason": "ứng viên đã mạnh phần này",
+          "turn": 2
+         }
+        ],
+        "topic_index": 4,
+        "topic_started_s": 240,
+        "topics": [
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 1,
+          "score_band": 2.0,
+          "score_sum": 2.0,
+          "status": "done",
+          "turns": [
+           1
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 1,
+          "score_band": 2.0,
+          "score_sum": 2.0,
+          "status": "done",
+          "turns": [
+           2
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t3",
+          "n_scored": 1,
+          "score_band": 2.0,
+          "score_sum": 2.0,
+          "status": "done",
+          "turns": [
+           3
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "alt1",
+          "n_scored": 1,
+          "score_band": 2.0,
+          "score_sum": 2.0,
+          "status": "done",
+          "turns": [
+           4
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "active",
+          "turns": [
+           5
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t6",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 5,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "ask_main",
+        "action_reason": null,
+        "agent_decision": "switch_topic",
+        "decided_by": "llm",
+        "difficulty": 2,
+        "overrule_reason": null,
+        "phase": "technical",
+        "policy_action": "next_topic",
+        "proposed_action": "next_topic",
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "ok -> next_topic (llm)",
+        "swap_result": "budget",
+        "topic_id": "t5",
+        "turn_kind": "main",
+        "turn_number": 5
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Nêu được IoC container. Nêu được bean scope. Nêu được constructor vs field injection. Nêu được bean lifecycle. Nêu được IoC container. Nêu được bean scope. Nêu được constructor vs field injection. Nêu được bean lifecycle. chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết ",
+    "elapsed_seconds": 300,
+    "level": "junior",
+    "question": "Spring IoC và Dependency Injection: bạn hiểu như thế nào và đã áp dụng ra sao?",
+    "session_id": "g-hybrid",
+    "topic_turns": [],
+    "track": "java_backend",
+    "turn_kind": "main",
+    "turn_number": 5
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "ask_main",
+       "phase": "scenario",
+       "topic_index": 6,
+       "topic_total": 6,
+       "turn_number": 6
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 9,
+       "t": "Tiếp theo là một tình huống thực tế. Tình huống: Thiết kế API quản lý đơn hàng với Spring Boot. Bạn sẽ tiếp cận thế nào?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "answered",
+        "confidence": null,
+        "covered_points": [],
+        "degraded": false,
+        "evidence": [],
+        "follow_up_focus": null,
+        "gap_tags": [],
+        "misconceptions": [],
+        "missing_points": [],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 2,
+         "extensibility": 2,
+         "relevance": 2,
+         "technical_accuracy": 2
+        },
+        "scores_10": {
+         "completeness": 5.0,
+         "extensibility": 5.0,
+         "relevance": 5.0,
+         "technical_accuracy": 5.0
+        },
+        "sources": [],
+        "strength_tags": [],
+        "transcript_low_confidence": false,
+        "turn_number": 5,
+        "turn_score_10": 5.0
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Tiếp theo là một tình huống thực tế. Tình huống: Thiết kế API quản lý đơn hàng với Spring Boot. Bạn sẽ tiếp cận thế nào?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t6",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. java collections va hashmap: ban hieu nhu the nao va da ap dung ra sao?",
+         "oop va solid trong java: ban hieu nhu the nao va da ap dung ra sao?",
+         "spring @transactional: ban hieu nhu the nao va da ap dung ra sao?",
+         "spring ioc va dependency injection: ban hieu nhu the nao va da ap dung ra sao?",
+         "tiep theo la mot tinh huong thuc te. tinh huong: thiet ke api quan ly don hang voi spring boot. ban se tiep can the nao?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 0,
+         "follow_ups": 0,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 2,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 1
+        },
+        "end_reason": null,
+        "evaluated_turns": 5,
+        "gaps": [],
+        "momentum": 0,
+        "notes": [],
+        "phase": "scenario",
+        "phase_started_s": 300,
+        "schema_version": 1,
+        "strengths": [],
+        "swaps": [
+         {
+          "add": "alt1",
+          "drop": "t4",
+          "reason": "ứng viên đã mạnh phần này",
+          "turn": 2
+         }
+        ],
+        "topic_index": 1,
+        "topic_started_s": 300,
+        "topics": [
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 1,
+          "score_band": 2.0,
+          "score_sum": 2.0,
+          "status": "done",
+          "turns": [
+           1
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 1,
+          "score_band": 2.0,
+          "score_sum": 2.0,
+          "status": "done",
+          "turns": [
+           2
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t3",
+          "n_scored": 1,
+          "score_band": 2.0,
+          "score_sum": 2.0,
+          "status": "done",
+          "turns": [
+           3
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "alt1",
+          "n_scored": 1,
+          "score_band": 2.0,
+          "score_sum": 2.0,
+          "status": "done",
+          "turns": [
+           4
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 1,
+          "score_band": 2.0,
+          "score_sum": 2.0,
+          "status": "done",
+          "turns": [
+           5
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t6",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "active",
+          "turns": [
+           6
+          ]
+         }
+        ],
+        "turn_count": 6,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "ask_main",
+        "action_reason": null,
+        "agent_decision": "switch_topic",
+        "decided_by": "llm",
+        "difficulty": 2,
+        "overrule_reason": null,
+        "phase": "scenario",
+        "policy_action": "next_topic",
+        "proposed_action": "next_topic",
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "ok -> next_topic (llm)",
+        "swap_result": "budget",
+        "topic_id": "t6",
+        "turn_kind": "main",
+        "turn_number": 6
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Làm rõ yêu cầu và giả định. Đề xuất thiết kế hoặc hướng giải quyết cụ thể. Nêu trade-off và rủi ro. Làm rõ yêu cầu và giả định. Đề xuất thiết kế hoặc hướng giải quyết cụ thể. Nêu trade-off và rủi ro. chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết chi tiết ",
+    "elapsed_seconds": 360,
+    "level": "junior",
+    "question": "Tiếp theo là một tình huống thực tế. Tình huống: Thiết kế API quản lý đơn hàng với Spring Boot. Bạn sẽ tiếp cận thế nào?",
+    "session_id": "g-hybrid",
+    "topic_turns": [],
+    "track": "java_backend",
+    "turn_kind": "main",
+    "turn_number": 6
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "wrap_up",
+       "phase": "wrap_up",
+       "topic_index": 6,
+       "topic_total": 6,
+       "turn_number": 7
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 7,
+       "t": "Cảm ơn bạn, buổi phỏng vấn đến đây là kết thúc. Bạn còn câu hỏi nào dành cho mình không?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "answered",
+        "confidence": null,
+        "covered_points": [],
+        "degraded": false,
+        "evidence": [],
+        "follow_up_focus": null,
+        "gap_tags": [],
+        "misconceptions": [],
+        "missing_points": [],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 2,
+         "extensibility": 2,
+         "relevance": 2,
+         "technical_accuracy": 2
+        },
+        "scores_10": {
+         "completeness": 5.0,
+         "extensibility": 5.0,
+         "relevance": 5.0,
+         "technical_accuracy": 5.0
+        },
+        "sources": [],
+        "strength_tags": [],
+        "transcript_low_confidence": false,
+        "turn_number": 6,
+        "turn_score_10": 5.0
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Cảm ơn bạn, buổi phỏng vấn đến đây là kết thúc. Bạn còn câu hỏi nào dành cho mình không?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": null,
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. java collections va hashmap: ban hieu nhu the nao va da ap dung ra sao?",
+         "oop va solid trong java: ban hieu nhu the nao va da ap dung ra sao?",
+         "spring @transactional: ban hieu nhu the nao va da ap dung ra sao?",
+         "spring ioc va dependency injection: ban hieu nhu the nao va da ap dung ra sao?",
+         "tiep theo la mot tinh huong thuc te. tinh huong: thiet ke api quan ly don hang voi spring boot. ban se tiep can the nao?",
+         "cam on ban, buoi phong van den day la ket thuc. ban con cau hoi nao danh cho minh khong?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 0,
+         "follow_ups": 0,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 2,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 1
+        },
+        "end_reason": null,
+        "evaluated_turns": 6,
+        "gaps": [],
+        "momentum": 0,
+        "notes": [],
+        "phase": "wrap_up",
+        "phase_started_s": 300,
+        "schema_version": 1,
+        "strengths": [],
+        "swaps": [
+         {
+          "add": "alt1",
+          "drop": "t4",
+          "reason": "ứng viên đã mạnh phần này",
+          "turn": 2
+         }
+        ],
+        "topic_index": 1,
+        "topic_started_s": 300,
+        "topics": [
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 1,
+          "score_band": 2.0,
+          "score_sum": 2.0,
+          "status": "done",
+          "turns": [
+           1
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 1,
+          "score_band": 2.0,
+          "score_sum": 2.0,
+          "status": "done",
+          "turns": [
+           2
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t3",
+          "n_scored": 1,
+          "score_band": 2.0,
+          "score_sum": 2.0,
+          "status": "done",
+          "turns": [
+           3
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "alt1",
+          "n_scored": 1,
+          "score_band": 2.0,
+          "score_sum": 2.0,
+          "status": "done",
+          "turns": [
+           4
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 1,
+          "score_band": 2.0,
+          "score_sum": 2.0,
+          "status": "done",
+          "turns": [
+           5
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t6",
+          "n_scored": 1,
+          "score_band": 2.0,
+          "score_sum": 2.0,
+          "status": "done",
+          "turns": [
+           6
+          ]
+         }
+        ],
+        "turn_count": 7,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "wrap_up",
+        "action_reason": null,
+        "agent_decision": "switch_topic",
+        "decided_by": "llm",
+        "difficulty": 2,
+        "overrule_reason": null,
+        "phase": "wrap_up",
+        "policy_action": "next_topic",
+        "proposed_action": "next_topic",
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "ok -> next_topic (llm)",
+        "swap_result": "not_applicable",
+        "topic_id": null,
+        "turn_kind": "main",
+        "turn_number": 7
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Cảm ơn ạ, em không có câu hỏi.",
+    "elapsed_seconds": 420,
+    "level": "junior",
+    "question": "Cảm ơn bạn, buổi phỏng vấn đến đây là kết thúc. Bạn còn câu hỏi nào dành cho mình không?",
+    "session_id": "g-hybrid",
+    "topic_turns": [],
+    "track": "java_backend",
+    "turn_kind": "main",
+    "turn_number": 7
+   },
+   "response": {
+    "events": [
+     [
+      "done",
+      {
+       "evaluation": null,
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": null,
+       "session_end": true,
+       "state": {
+        "active_topic_id": null,
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. java collections va hashmap: ban hieu nhu the nao va da ap dung ra sao?",
+         "oop va solid trong java: ban hieu nhu the nao va da ap dung ra sao?",
+         "spring @transactional: ban hieu nhu the nao va da ap dung ra sao?",
+         "spring ioc va dependency injection: ban hieu nhu the nao va da ap dung ra sao?",
+         "tiep theo la mot tinh huong thuc te. tinh huong: thiet ke api quan ly don hang voi spring boot. ban se tiep can the nao?",
+         "cam on ban, buoi phong van den day la ket thuc. ban con cau hoi nao danh cho minh khong?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 0,
+         "follow_ups": 0,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 2,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 1
+        },
+        "end_reason": "plan_complete",
+        "evaluated_turns": 6,
+        "gaps": [],
+        "momentum": 0,
+        "notes": [],
+        "phase": "done",
+        "phase_started_s": 300,
+        "schema_version": 1,
+        "strengths": [],
+        "swaps": [
+         {
+          "add": "alt1",
+          "drop": "t4",
+          "reason": "ứng viên đã mạnh phần này",
+          "turn": 2
+         }
+        ],
+        "topic_index": 1,
+        "topic_started_s": 300,
+        "topics": [
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 1,
+          "score_band": 2.0,
+          "score_sum": 2.0,
+          "status": "done",
+          "turns": [
+           1
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 1,
+          "score_band": 2.0,
+          "score_sum": 2.0,
+          "status": "done",
+          "turns": [
+           2
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t3",
+          "n_scored": 1,
+          "score_band": 2.0,
+          "score_sum": 2.0,
+          "status": "done",
+          "turns": [
+           3
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "alt1",
+          "n_scored": 1,
+          "score_band": 2.0,
+          "score_sum": 2.0,
+          "status": "done",
+          "turns": [
+           4
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 1,
+          "score_band": 2.0,
+          "score_sum": 2.0,
+          "status": "done",
+          "turns": [
+           5
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t6",
+          "n_scored": 1,
+          "score_band": 2.0,
+          "score_sum": 2.0,
+          "status": "done",
+          "turns": [
+           6
+          ]
+         }
+        ],
+        "turn_count": 7,
+        "used_qa_ids": []
+       },
+       "turn": null
+      }
+     ]
+    ],
+    "status": 200
+   }
+  }
+ ]
+}

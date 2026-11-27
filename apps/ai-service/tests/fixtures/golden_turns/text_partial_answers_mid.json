@@ -1,0 +1,6244 @@
+{
+ "finalize": {
+  "request": {
+   "duration_s": 960,
+   "end_reason": "plan_complete",
+   "level": "middle",
+   "session_id": "g-partial",
+   "track": "python_backend",
+   "turns": [
+    {
+     "answer": "Em nghĩ là Giới thiệu ngắn gọn về nền tảng.",
+     "difficulty": 3,
+     "evaluation": {
+      "answer_type": "partial",
+      "confidence": null,
+      "covered_points": [
+       "Giới thiệu ngắn gọn về nền tảng"
+      ],
+      "degraded": false,
+      "evidence": [
+       {
+        "claim": "Giới thiệu ngắn gọn về nền tảng",
+        "quote": "Em nghĩ là Giới thiệu ngắn gọn về nền tảng",
+        "source_ids": [],
+        "support": null
+       }
+      ],
+      "follow_up_focus": "Mô tả một dự án và vai trò của mình",
+      "gap_tags": [
+       "minh",
+       "cong-dung"
+      ],
+      "misconceptions": [],
+      "missing_points": [
+       "Mô tả một dự án và vai trò của mình",
+       "Nêu công nghệ đã dùng"
+      ],
+      "prompt_version": null,
+      "reference_missing": false,
+      "scores": {
+       "completeness": 2,
+       "extensibility": 0,
+       "relevance": 4,
+       "technical_accuracy": 2
+      },
+      "scores_10": {
+       "completeness": 5.0,
+       "extensibility": 0.0,
+       "relevance": 10.0,
+       "technical_accuracy": 5.0
+      },
+      "sources": [],
+      "strength_tags": [
+       "gioi-ngan"
+      ],
+      "transcript_low_confidence": false,
+      "turn_number": 1,
+      "turn_score_10": 5.0
+     },
+     "phase": "intro",
+     "question": "Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+     "topic_id": "t1",
+     "turn_kind": "main",
+     "turn_number": 1
+    },
+    {
+     "answer": "Em nghĩ là Giới thiệu ngắn gọn về nền tảng.",
+     "difficulty": 3,
+     "evaluation": {
+      "answer_type": "partial",
+      "confidence": null,
+      "covered_points": [
+       "Giới thiệu ngắn gọn về nền tảng"
+      ],
+      "degraded": false,
+      "evidence": [
+       {
+        "claim": "Giới thiệu ngắn gọn về nền tảng",
+        "quote": "Em nghĩ là Giới thiệu ngắn gọn về nền tảng",
+        "source_ids": [],
+        "support": null
+       }
+      ],
+      "follow_up_focus": "Mô tả một dự án và vai trò của mình",
+      "gap_tags": [
+       "minh",
+       "cong-dung"
+      ],
+      "misconceptions": [],
+      "missing_points": [
+       "Mô tả một dự án và vai trò của mình",
+       "Nêu công nghệ đã dùng"
+      ],
+      "prompt_version": null,
+      "reference_missing": false,
+      "scores": {
+       "completeness": 2,
+       "extensibility": 0,
+       "relevance": 4,
+       "technical_accuracy": 2
+      },
+      "scores_10": {
+       "completeness": 5.0,
+       "extensibility": 0.0,
+       "relevance": 10.0,
+       "technical_accuracy": 5.0
+      },
+      "sources": [],
+      "strength_tags": [
+       "gioi-ngan"
+      ],
+      "transcript_low_confidence": false,
+      "turn_number": 2,
+      "turn_score_10": 5.0
+     },
+     "phase": "intro",
+     "question": "Mình muốn đi sâu thêm ý này: Mô tả một dự án và vai trò của mình. Bạn nói rõ hơn giúp mình nhé?",
+     "topic_id": "t1",
+     "turn_kind": "follow_up",
+     "turn_number": 2
+    },
+    {
+     "answer": "Em nghĩ là Giới thiệu ngắn gọn về nền tảng.",
+     "difficulty": 3,
+     "evaluation": {
+      "answer_type": "partial",
+      "confidence": null,
+      "covered_points": [
+       "Giới thiệu ngắn gọn về nền tảng"
+      ],
+      "degraded": false,
+      "evidence": [
+       {
+        "claim": "Giới thiệu ngắn gọn về nền tảng",
+        "quote": "Em nghĩ là Giới thiệu ngắn gọn về nền tảng",
+        "source_ids": [],
+        "support": null
+       }
+      ],
+      "follow_up_focus": "Mô tả một dự án và vai trò của mình",
+      "gap_tags": [
+       "minh",
+       "cong-dung"
+      ],
+      "misconceptions": [],
+      "missing_points": [
+       "Mô tả một dự án và vai trò của mình",
+       "Nêu công nghệ đã dùng"
+      ],
+      "prompt_version": null,
+      "reference_missing": false,
+      "scores": {
+       "completeness": 2,
+       "extensibility": 0,
+       "relevance": 4,
+       "technical_accuracy": 2
+      },
+      "scores_10": {
+       "completeness": 5.0,
+       "extensibility": 0.0,
+       "relevance": 10.0,
+       "technical_accuracy": 5.0
+      },
+      "sources": [],
+      "strength_tags": [
+       "gioi-ngan"
+      ],
+      "transcript_low_confidence": false,
+      "turn_number": 3,
+      "turn_score_10": 5.0
+     },
+     "phase": "intro",
+     "question": "Mình muốn đi sâu thêm ý này: Nêu công nghệ đã dùng. Bạn nói rõ hơn giúp mình nhé?",
+     "topic_id": "t1",
+     "turn_kind": "follow_up",
+     "turn_number": 3
+    },
+    {
+     "answer": "Em nghĩ là Nêu được iterator protocol.",
+     "difficulty": 3,
+     "evaluation": {
+      "answer_type": "partial",
+      "confidence": null,
+      "covered_points": [
+       "Nêu được iterator protocol"
+      ],
+      "degraded": false,
+      "evidence": [
+       {
+        "claim": "Nêu được iterator protocol",
+        "quote": "Em nghĩ là Nêu được iterator protocol",
+        "source_ids": [],
+        "support": null
+       }
+      ],
+      "follow_up_focus": "yield",
+      "gap_tags": [
+       "yield",
+       "evaluation-lazy",
+       "kiem-tiet"
+      ],
+      "misconceptions": [],
+      "missing_points": [
+       "Nêu được yield",
+       "Nêu được lazy evaluation",
+       "Nêu được tiết kiệm bộ nhớ"
+      ],
+      "prompt_version": null,
+      "reference_missing": false,
+      "scores": {
+       "completeness": 1,
+       "extensibility": 0,
+       "relevance": 4,
+       "technical_accuracy": 2
+      },
+      "scores_10": {
+       "completeness": 2.5,
+       "extensibility": 0.0,
+       "relevance": 10.0,
+       "technical_accuracy": 5.0
+      },
+      "sources": [],
+      "strength_tags": [
+       "iterator-protocol"
+      ],
+      "transcript_low_confidence": false,
+      "turn_number": 4,
+      "turn_score_10": 4.4
+     },
+     "phase": "technical",
+     "question": "Giờ mình chuyển sang phần kiến thức chuyên môn nhé. Iterator và generator: bạn hiểu như thế nào và đã áp dụng ra sao?",
+     "topic_id": "t2",
+     "turn_kind": "main",
+     "turn_number": 4
+    },
+    {
+     "answer": "Em nghĩ là Nêu được iterator protocol.",
+     "difficulty": 3,
+     "evaluation": {
+      "answer_type": "partial",
+      "confidence": null,
+      "covered_points": [
+       "Nêu được iterator protocol"
+      ],
+      "degraded": false,
+      "evidence": [
+       {
+        "claim": "Nêu được iterator protocol",
+        "quote": "Em nghĩ là Nêu được iterator protocol",
+        "source_ids": [],
+        "support": null
+       }
+      ],
+      "follow_up_focus": "yield",
+      "gap_tags": [
+       "yield",
+       "evaluation-lazy",
+       "kiem-tiet"
+      ],
+      "misconceptions": [],
+      "missing_points": [
+       "Nêu được yield",
+       "Nêu được lazy evaluation",
+       "Nêu được tiết kiệm bộ nhớ"
+      ],
+      "prompt_version": null,
+      "reference_missing": false,
+      "scores": {
+       "completeness": 1,
+       "extensibility": 0,
+       "relevance": 4,
+       "technical_accuracy": 2
+      },
+      "scores_10": {
+       "completeness": 2.5,
+       "extensibility": 0.0,
+       "relevance": 10.0,
+       "technical_accuracy": 5.0
+      },
+      "sources": [],
+      "strength_tags": [
+       "iterator-protocol"
+      ],
+      "transcript_low_confidence": false,
+      "turn_number": 5,
+      "turn_score_10": 4.4
+     },
+     "phase": "technical",
+     "question": "Mình muốn đi sâu thêm ý này: yield. Bạn nói rõ hơn giúp mình nhé?",
+     "topic_id": "t2",
+     "turn_kind": "follow_up",
+     "turn_number": 5
+    },
+    {
+     "answer": "Em nghĩ là Nêu được iterator protocol.",
+     "difficulty": 3,
+     "evaluation": {
+      "answer_type": "partial",
+      "confidence": null,
+      "covered_points": [
+       "Nêu được iterator protocol"
+      ],
+      "degraded": false,
+      "evidence": [
+       {
+        "claim": "Nêu được iterator protocol",
+        "quote": "Em nghĩ là Nêu được iterator protocol",
+        "source_ids": [],
+        "support": null
+       }
+      ],
+      "follow_up_focus": "yield",
+      "gap_tags": [
+       "yield",
+       "evaluation-lazy",
+       "kiem-tiet"
+      ],
+      "misconceptions": [],
+      "missing_points": [
+       "Nêu được yield",
+       "Nêu được lazy evaluation",
+       "Nêu được tiết kiệm bộ nhớ"
+      ],
+      "prompt_version": null,
+      "reference_missing": false,
+      "scores": {
+       "completeness": 1,
+       "extensibility": 0,
+       "relevance": 4,
+       "technical_accuracy": 2
+      },
+      "scores_10": {
+       "completeness": 2.5,
+       "extensibility": 0.0,
+       "relevance": 10.0,
+       "technical_accuracy": 5.0
+      },
+      "sources": [],
+      "strength_tags": [
+       "iterator-protocol"
+      ],
+      "transcript_low_confidence": false,
+      "turn_number": 6,
+      "turn_score_10": 4.4
+     },
+     "phase": "technical",
+     "question": "Mình hỏi kỹ hơn một chút nhé: lazy evaluation. Bạn nghĩ sao?",
+     "topic_id": "t2",
+     "turn_kind": "follow_up",
+     "turn_number": 6
+    },
+    {
+     "answer": "Em nghĩ là Nêu được iterator protocol.",
+     "difficulty": 3,
+     "evaluation": {
+      "answer_type": "partial",
+      "confidence": null,
+      "covered_points": [
+       "Nêu được iterator protocol"
+      ],
+      "degraded": false,
+      "evidence": [
+       {
+        "claim": "Nêu được iterator protocol",
+        "quote": "Em nghĩ là Nêu được iterator protocol",
+        "source_ids": [],
+        "support": null
+       }
+      ],
+      "follow_up_focus": "yield",
+      "gap_tags": [
+       "yield",
+       "evaluation-lazy",
+       "kiem-tiet"
+      ],
+      "misconceptions": [],
+      "missing_points": [
+       "Nêu được yield",
+       "Nêu được lazy evaluation",
+       "Nêu được tiết kiệm bộ nhớ"
+      ],
+      "prompt_version": null,
+      "reference_missing": false,
+      "scores": {
+       "completeness": 1,
+       "extensibility": 0,
+       "relevance": 4,
+       "technical_accuracy": 2
+      },
+      "scores_10": {
+       "completeness": 2.5,
+       "extensibility": 0.0,
+       "relevance": 10.0,
+       "technical_accuracy": 5.0
+      },
+      "sources": [],
+      "strength_tags": [
+       "iterator-protocol"
+      ],
+      "transcript_low_confidence": false,
+      "turn_number": 7,
+      "turn_score_10": 4.4
+     },
+     "phase": "technical",
+     "question": "Mình muốn đi sâu thêm ý này: tiết kiệm bộ nhớ. Bạn nói rõ hơn giúp mình nhé?",
+     "topic_id": "t2",
+     "turn_kind": "follow_up",
+     "turn_number": 7
+    },
+    {
+     "answer": "Em nghĩ là Nêu được closure.",
+     "difficulty": 3,
+     "evaluation": {
+      "answer_type": "answered",
+      "confidence": null,
+      "covered_points": [],
+      "degraded": false,
+      "evidence": [],
+      "follow_up_focus": "closure",
+      "gap_tags": [
+       "closure",
+       "functools.wraps",
+       "decorator-tham"
+      ],
+      "misconceptions": [],
+      "missing_points": [
+       "Nêu được closure",
+       "Nêu được functools.wraps",
+       "Nêu được decorator có tham số"
+      ],
+      "prompt_version": null,
+      "reference_missing": false,
+      "scores": {
+       "completeness": 0,
+       "extensibility": 0,
+       "relevance": 1,
+       "technical_accuracy": 1
+      },
+      "scores_10": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 2.5,
+       "technical_accuracy": 2.5
+      },
+      "sources": [],
+      "strength_tags": [],
+      "transcript_low_confidence": false,
+      "turn_number": 8,
+      "turn_score_10": 1.2
+     },
+     "phase": "technical",
+     "question": "Decorator và context manager: bạn hiểu như thế nào và đã áp dụng ra sao?",
+     "topic_id": "t3",
+     "turn_kind": "main",
+     "turn_number": 8
+    },
+    {
+     "answer": "Em nghĩ là Nêu được closure.",
+     "difficulty": 2,
+     "evaluation": {
+      "answer_type": "answered",
+      "confidence": null,
+      "covered_points": [],
+      "degraded": false,
+      "evidence": [],
+      "follow_up_focus": "closure",
+      "gap_tags": [
+       "closure",
+       "functools.wraps",
+       "decorator-tham"
+      ],
+      "misconceptions": [],
+      "missing_points": [
+       "Nêu được closure",
+       "Nêu được functools.wraps",
+       "Nêu được decorator có tham số"
+      ],
+      "prompt_version": null,
+      "reference_missing": false,
+      "scores": {
+       "completeness": 0,
+       "extensibility": 0,
+       "relevance": 1,
+       "technical_accuracy": 1
+      },
+      "scores_10": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 2.5,
+       "technical_accuracy": 2.5
+      },
+      "sources": [],
+      "strength_tags": [],
+      "transcript_low_confidence": false,
+      "turn_number": 9,
+      "turn_score_10": 1.2
+     },
+     "phase": "technical",
+     "question": "Mình gợi ý một hướng nhé: closure. Bạn thử trả lời lại xem?",
+     "topic_id": "t3",
+     "turn_kind": "hint",
+     "turn_number": 9
+    },
+    {
+     "answer": "Em nghĩ là Nêu được type hint và mypy.",
+     "difficulty": 2,
+     "evaluation": {
+      "answer_type": "partial",
+      "confidence": null,
+      "covered_points": [
+       "Nêu được type hint và mypy"
+      ],
+      "degraded": false,
+      "evidence": [
+       {
+        "claim": "Nêu được type hint và mypy",
+        "quote": "Em nghĩ là Nêu được type hint và mypy",
+        "source_ids": [],
+        "support": null
+       }
+      ],
+      "follow_up_focus": "dataclass",
+      "gap_tags": [
+       "dataclass",
+       "pydantic-validation",
+       "optional-union"
+      ],
+      "misconceptions": [],
+      "missing_points": [
+       "Nêu được dataclass",
+       "Nêu được Pydantic validation",
+       "Nêu được Optional và Union"
+      ],
+      "prompt_version": null,
+      "reference_missing": false,
+      "scores": {
+       "completeness": 1,
+       "extensibility": 0,
+       "relevance": 4,
+       "technical_accuracy": 2
+      },
+      "scores_10": {
+       "completeness": 2.5,
+       "extensibility": 0.0,
+       "relevance": 10.0,
+       "technical_accuracy": 5.0
+      },
+      "sources": [],
+      "strength_tags": [
+       "hint-mypy"
+      ],
+      "transcript_low_confidence": false,
+      "turn_number": 10,
+      "turn_score_10": 4.4
+     },
+     "phase": "technical",
+     "question": "Type hint, dataclass và Pydantic: bạn hiểu như thế nào và đã áp dụng ra sao?",
+     "topic_id": "t4",
+     "turn_kind": "main",
+     "turn_number": 10
+    },
+    {
+     "answer": "Em nghĩ là Nêu được type hint và mypy.",
+     "difficulty": 2,
+     "evaluation": {
+      "answer_type": "partial",
+      "confidence": null,
+      "covered_points": [
+       "Nêu được type hint và mypy"
+      ],
+      "degraded": false,
+      "evidence": [
+       {
+        "claim": "Nêu được type hint và mypy",
+        "quote": "Em nghĩ là Nêu được type hint và mypy",
+        "source_ids": [],
+        "support": null
+       }
+      ],
+      "follow_up_focus": "dataclass",
+      "gap_tags": [
+       "dataclass",
+       "pydantic-validation",
+       "optional-union"
+      ],
+      "misconceptions": [],
+      "missing_points": [
+       "Nêu được dataclass",
+       "Nêu được Pydantic validation",
+       "Nêu được Optional và Union"
+      ],
+      "prompt_version": null,
+      "reference_missing": false,
+      "scores": {
+       "completeness": 1,
+       "extensibility": 0,
+       "relevance": 4,
+       "technical_accuracy": 2
+      },
+      "scores_10": {
+       "completeness": 2.5,
+       "extensibility": 0.0,
+       "relevance": 10.0,
+       "technical_accuracy": 5.0
+      },
+      "sources": [],
+      "strength_tags": [
+       "hint-mypy"
+      ],
+      "transcript_low_confidence": false,
+      "turn_number": 11,
+      "turn_score_10": 4.4
+     },
+     "phase": "technical",
+     "question": "Mình hỏi kỹ hơn một chút nhé: dataclass. Bạn nghĩ sao?",
+     "topic_id": "t4",
+     "turn_kind": "follow_up",
+     "turn_number": 11
+    },
+    {
+     "answer": "Em nghĩ là Nêu được type hint và mypy.",
+     "difficulty": 2,
+     "evaluation": {
+      "answer_type": "partial",
+      "confidence": null,
+      "covered_points": [
+       "Nêu được type hint và mypy"
+      ],
+      "degraded": false,
+      "evidence": [
+       {
+        "claim": "Nêu được type hint và mypy",
+        "quote": "Em nghĩ là Nêu được type hint và mypy",
+        "source_ids": [],
+        "support": null
+       }
+      ],
+      "follow_up_focus": "dataclass",
+      "gap_tags": [
+       "dataclass",
+       "pydantic-validation",
+       "optional-union"
+      ],
+      "misconceptions": [],
+      "missing_points": [
+       "Nêu được dataclass",
+       "Nêu được Pydantic validation",
+       "Nêu được Optional và Union"
+      ],
+      "prompt_version": null,
+      "reference_missing": false,
+      "scores": {
+       "completeness": 1,
+       "extensibility": 0,
+       "relevance": 4,
+       "technical_accuracy": 2
+      },
+      "scores_10": {
+       "completeness": 2.5,
+       "extensibility": 0.0,
+       "relevance": 10.0,
+       "technical_accuracy": 5.0
+      },
+      "sources": [],
+      "strength_tags": [
+       "hint-mypy"
+      ],
+      "transcript_low_confidence": false,
+      "turn_number": 12,
+      "turn_score_10": 4.4
+     },
+     "phase": "technical",
+     "question": "Mình hỏi kỹ hơn một chút nhé: Pydantic validation. Bạn nghĩ sao?",
+     "topic_id": "t4",
+     "turn_kind": "follow_up",
+     "turn_number": 12
+    },
+    {
+     "answer": "Em nghĩ là Nêu được type hint và mypy.",
+     "difficulty": 2,
+     "evaluation": {
+      "answer_type": "partial",
+      "confidence": null,
+      "covered_points": [
+       "Nêu được type hint và mypy"
+      ],
+      "degraded": false,
+      "evidence": [
+       {
+        "claim": "Nêu được type hint và mypy",
+        "quote": "Em nghĩ là Nêu được type hint và mypy",
+        "source_ids": [],
+        "support": null
+       }
+      ],
+      "follow_up_focus": "dataclass",
+      "gap_tags": [
+       "dataclass",
+       "pydantic-validation",
+       "optional-union"
+      ],
+      "misconceptions": [],
+      "missing_points": [
+       "Nêu được dataclass",
+       "Nêu được Pydantic validation",
+       "Nêu được Optional và Union"
+      ],
+      "prompt_version": null,
+      "reference_missing": false,
+      "scores": {
+       "completeness": 1,
+       "extensibility": 0,
+       "relevance": 4,
+       "technical_accuracy": 2
+      },
+      "scores_10": {
+       "completeness": 2.5,
+       "extensibility": 0.0,
+       "relevance": 10.0,
+       "technical_accuracy": 5.0
+      },
+      "sources": [],
+      "strength_tags": [
+       "hint-mypy"
+      ],
+      "transcript_low_confidence": false,
+      "turn_number": 13,
+      "turn_score_10": 4.4
+     },
+     "phase": "technical",
+     "question": "Mình muốn đi sâu thêm ý này: Optional và Union. Bạn nói rõ hơn giúp mình nhé?",
+     "topic_id": "t4",
+     "turn_kind": "follow_up",
+     "turn_number": 13
+    },
+    {
+     "answer": "Em nghĩ là Làm rõ yêu cầu và giả định.",
+     "difficulty": 3,
+     "evaluation": {
+      "answer_type": "off_topic",
+      "confidence": null,
+      "covered_points": [],
+      "degraded": false,
+      "evidence": [],
+      "follow_up_focus": "Làm rõ yêu cầu và giả định",
+      "gap_tags": [
+       "dinh",
+       "hoac-huong",
+       "trade"
+      ],
+      "misconceptions": [],
+      "missing_points": [
+       "Làm rõ yêu cầu và giả định",
+       "Đề xuất thiết kế hoặc hướng giải quyết cụ thể",
+       "Nêu trade-off và rủi ro"
+      ],
+      "prompt_version": null,
+      "reference_missing": false,
+      "scores": {
+       "completeness": 0,
+       "extensibility": 0,
+       "relevance": 0,
+       "technical_accuracy": 1
+      },
+      "scores_10": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 2.5
+      },
+      "sources": [],
+      "strength_tags": [],
+      "transcript_low_confidence": false,
+      "turn_number": 14,
+      "turn_score_10": 0.6
+     },
+     "phase": "scenario",
+     "question": "Tiếp theo là một tình huống thực tế. Tình huống: API xuất báo cáo bị timeout với dữ liệu lớn. Bạn sẽ tiếp cận thế nào?",
+     "topic_id": "t5",
+     "turn_kind": "main",
+     "turn_number": 14
+    },
+    {
+     "answer": "Em nghĩ là Làm rõ yêu cầu và giả định.",
+     "difficulty": 3,
+     "evaluation": {
+      "answer_type": "off_topic",
+      "confidence": null,
+      "covered_points": [],
+      "degraded": false,
+      "evidence": [],
+      "follow_up_focus": "Làm rõ yêu cầu và giả định",
+      "gap_tags": [
+       "dinh",
+       "hoac-huong",
+       "trade"
+      ],
+      "misconceptions": [],
+      "missing_points": [
+       "Làm rõ yêu cầu và giả định",
+       "Đề xuất thiết kế hoặc hướng giải quyết cụ thể",
+       "Nêu trade-off và rủi ro"
+      ],
+      "prompt_version": null,
+      "reference_missing": false,
+      "scores": {
+       "completeness": 0,
+       "extensibility": 0,
+       "relevance": 0,
+       "technical_accuracy": 1
+      },
+      "scores_10": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 2.5
+      },
+      "sources": [],
+      "strength_tags": [],
+      "transcript_low_confidence": false,
+      "turn_number": 15,
+      "turn_score_10": 0.6
+     },
+     "phase": "scenario",
+     "question": "Mình hỏi lại cho rõ nhé: Tiếp theo là một tình huống thực tế. Tình huống: API xuất báo cáo bị timeout với dữ liệu lớn. Bạn sẽ tiếp cận thế nào?",
+     "topic_id": "t5",
+     "turn_kind": "clarify",
+     "turn_number": 15
+    },
+    {
+     "answer": "Dạ em chưa rõ ạ.",
+     "difficulty": 3,
+     "evaluation": null,
+     "phase": "wrap_up",
+     "question": "Cảm ơn bạn, buổi phỏng vấn đến đây là kết thúc. Bạn còn câu hỏi nào dành cho mình không?",
+     "topic_id": null,
+     "turn_kind": "main",
+     "turn_number": 16
+    }
+   ]
+  },
+  "response": {
+   "json": {
+    "criteria": {
+     "completeness": 2.3,
+     "extensibility": 0.0,
+     "relevance": 7.7,
+     "technical_accuracy": 4.3
+    },
+    "improvements": [
+     {
+      "evidence_turns": [
+       14,
+       15
+      ],
+      "point": "API xuất báo cáo bị timeout với dữ liệu lớn",
+      "why": "Còn thiếu: Làm rõ yêu cầu và giả định."
+     },
+     {
+      "evidence_turns": [
+       8,
+       9
+      ],
+      "point": "Decorator và context manager",
+      "why": "Còn thiếu: Nêu được closure."
+     },
+     {
+      "evidence_turns": [
+       4,
+       5,
+       6,
+       7
+      ],
+      "point": "Iterator và generator",
+      "why": "Nêu được iterator protocol. Còn thiếu: Nêu được yield."
+     }
+    ],
+    "level_signal": null,
+    "meta": {
+     "degraded_turns": [],
+     "difficulty_trajectory": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      3
+     ],
+     "disclaimer": "Điểm do AI chấm, mang tính tham khảo cho việc luyện tập.",
+     "fallbacks": [],
+     "prompt_versions": {
+      "evaluator": "mock",
+      "reporter": "mock"
+     },
+     "reference_missing_turns": []
+    },
+    "metadata": {
+     "latency_ms_by_agent": {
+      "total": 0
+     },
+     "model": "mock-rule-based",
+     "usage": {}
+    },
+    "overall": {
+     "score": 2.7,
+     "summary": "Kết quả tổng thể 2.7/10: chưa đạt.",
+     "verdict": "below"
+    },
+    "schema_version": 1,
+    "sections": [
+     {
+      "phase": "intro",
+      "score": 5.0,
+      "weight": 0.2
+     },
+     {
+      "phase": "technical",
+      "score": 3.3,
+      "weight": 0.45
+     },
+     {
+      "phase": "scenario",
+      "score": 0.6,
+      "weight": 0.35
+     }
+    ],
+    "session": {
+     "confidence": "high",
+     "duration_s": 960,
+     "end_reason": "plan_complete",
+     "evaluated_turns": 15,
+     "level": "middle",
+     "track": "python_backend"
+    },
+    "status": "complete",
+    "strengths": [],
+    "study_plan": [
+     {
+      "actions": [
+       "Ôn lại: Làm rõ yêu cầu và giả định",
+       "Ôn lại: Đề xuất thiết kế hoặc hướng giải quyết cụ thể",
+       "Ôn lại: Nêu trade-off và rủi ro"
+      ],
+      "priority": "high",
+      "resources": [],
+      "topic": "API xuất báo cáo bị timeout với dữ liệu lớn"
+     },
+     {
+      "actions": [
+       "Ôn lại: Nêu được closure",
+       "Ôn lại: Nêu được functools.wraps",
+       "Ôn lại: Nêu được decorator có tham số"
+      ],
+      "priority": "high",
+      "resources": [],
+      "topic": "Decorator và context manager"
+     },
+     {
+      "actions": [
+       "Ôn lại: Nêu được iterator protocol",
+       "Ôn lại: Nêu được yield",
+       "Ôn lại: Nêu được lazy evaluation"
+      ],
+      "priority": "medium",
+      "resources": [],
+      "topic": "Iterator và generator"
+     }
+    ],
+    "topics": [
+     {
+      "comment": "Nêu được: Giới thiệu ngắn gọn về nền tảng. Còn thiếu: Mô tả một dự án và vai trò của mình.",
+      "difficulty_path": [
+       3,
+       3,
+       3
+      ],
+      "hint_used": false,
+      "phase": "intro",
+      "score": 5.0,
+      "title": "Giới thiệu bản thân và dự án gần nhất",
+      "topic_id": "t1"
+     },
+     {
+      "comment": "Nêu được iterator protocol. Còn thiếu: Nêu được yield.",
+      "difficulty_path": [
+       3,
+       3,
+       3,
+       3
+      ],
+      "hint_used": false,
+      "phase": "technical",
+      "score": 4.4,
+      "title": "Iterator và generator",
+      "topic_id": "t2"
+     },
+     {
+      "comment": "Còn thiếu: Nêu được closure.",
+      "difficulty_path": [
+       3,
+       2
+      ],
+      "hint_used": true,
+      "phase": "technical",
+      "score": 1.2,
+      "title": "Decorator và context manager",
+      "topic_id": "t3"
+     },
+     {
+      "comment": "Nêu được type hint và mypy. Còn thiếu: Nêu được dataclass.",
+      "difficulty_path": [
+       2,
+       2,
+       2,
+       2
+      ],
+      "hint_used": false,
+      "phase": "technical",
+      "score": 4.4,
+      "title": "Type hint, dataclass và Pydantic",
+      "topic_id": "t4"
+     },
+     {
+      "comment": "Còn thiếu: Làm rõ yêu cầu và giả định.",
+      "difficulty_path": [
+       3,
+       3
+      ],
+      "hint_used": false,
+      "phase": "scenario",
+      "score": 0.6,
+      "title": "API xuất báo cáo bị timeout với dữ liệu lớn",
+      "topic_id": "t5"
+     }
+    ],
+    "turns": [
+     {
+      "comment": "Nêu được: Giới thiệu ngắn gọn về nền tảng. Còn thiếu: Mô tả một dự án và vai trò của mình.",
+      "question": "Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+      "scores": {
+       "completeness": 5.0,
+       "extensibility": 0.0,
+       "relevance": 10.0,
+       "technical_accuracy": 5.0
+      },
+      "topic_id": "t1",
+      "turn_kind": "main",
+      "turn_number": 1
+     },
+     {
+      "comment": "Nêu được: Giới thiệu ngắn gọn về nền tảng. Còn thiếu: Mô tả một dự án và vai trò của mình.",
+      "question": "Mình muốn đi sâu thêm ý này: Mô tả một dự án và vai trò của mình. Bạn nói rõ hơn giúp mình nhé?",
+      "scores": {
+       "completeness": 5.0,
+       "extensibility": 0.0,
+       "relevance": 10.0,
+       "technical_accuracy": 5.0
+      },
+      "topic_id": "t1",
+      "turn_kind": "follow_up",
+      "turn_number": 2
+     },
+     {
+      "comment": "Nêu được: Giới thiệu ngắn gọn về nền tảng. Còn thiếu: Mô tả một dự án và vai trò của mình.",
+      "question": "Mình muốn đi sâu thêm ý này: Nêu công nghệ đã dùng. Bạn nói rõ hơn giúp mình nhé?",
+      "scores": {
+       "completeness": 5.0,
+       "extensibility": 0.0,
+       "relevance": 10.0,
+       "technical_accuracy": 5.0
+      },
+      "topic_id": "t1",
+      "turn_kind": "follow_up",
+      "turn_number": 3
+     },
+     {
+      "comment": "Nêu được iterator protocol. Còn thiếu: Nêu được yield.",
+      "question": "Giờ mình chuyển sang phần kiến thức chuyên môn nhé. Iterator và generator: bạn hiểu như thế nào và đã áp dụng ra sao?",
+      "scores": {
+       "completeness": 2.5,
+       "extensibility": 0.0,
+       "relevance": 10.0,
+       "technical_accuracy": 5.0
+      },
+      "topic_id": "t2",
+      "turn_kind": "main",
+      "turn_number": 4
+     },
+     {
+      "comment": "Nêu được iterator protocol. Còn thiếu: Nêu được yield.",
+      "question": "Mình muốn đi sâu thêm ý này: yield. Bạn nói rõ hơn giúp mình nhé?",
+      "scores": {
+       "completeness": 2.5,
+       "extensibility": 0.0,
+       "relevance": 10.0,
+       "technical_accuracy": 5.0
+      },
+      "topic_id": "t2",
+      "turn_kind": "follow_up",
+      "turn_number": 5
+     },
+     {
+      "comment": "Nêu được iterator protocol. Còn thiếu: Nêu được yield.",
+      "question": "Mình hỏi kỹ hơn một chút nhé: lazy evaluation. Bạn nghĩ sao?",
+      "scores": {
+       "completeness": 2.5,
+       "extensibility": 0.0,
+       "relevance": 10.0,
+       "technical_accuracy": 5.0
+      },
+      "topic_id": "t2",
+      "turn_kind": "follow_up",
+      "turn_number": 6
+     },
+     {
+      "comment": "Nêu được iterator protocol. Còn thiếu: Nêu được yield.",
+      "question": "Mình muốn đi sâu thêm ý này: tiết kiệm bộ nhớ. Bạn nói rõ hơn giúp mình nhé?",
+      "scores": {
+       "completeness": 2.5,
+       "extensibility": 0.0,
+       "relevance": 10.0,
+       "technical_accuracy": 5.0
+      },
+      "topic_id": "t2",
+      "turn_kind": "follow_up",
+      "turn_number": 7
+     },
+     {
+      "comment": "Còn thiếu: Nêu được closure.",
+      "question": "Decorator và context manager: bạn hiểu như thế nào và đã áp dụng ra sao?",
+      "scores": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 2.5,
+       "technical_accuracy": 2.5
+      },
+      "topic_id": "t3",
+      "turn_kind": "main",
+      "turn_number": 8
+     },
+     {
+      "comment": "Còn thiếu: Nêu được closure.",
+      "question": "Mình gợi ý một hướng nhé: closure. Bạn thử trả lời lại xem?",
+      "scores": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 2.5,
+       "technical_accuracy": 2.5
+      },
+      "topic_id": "t3",
+      "turn_kind": "hint",
+      "turn_number": 9
+     },
+     {
+      "comment": "Nêu được type hint và mypy. Còn thiếu: Nêu được dataclass.",
+      "question": "Type hint, dataclass và Pydantic: bạn hiểu như thế nào và đã áp dụng ra sao?",
+      "scores": {
+       "completeness": 2.5,
+       "extensibility": 0.0,
+       "relevance": 10.0,
+       "technical_accuracy": 5.0
+      },
+      "topic_id": "t4",
+      "turn_kind": "main",
+      "turn_number": 10
+     },
+     {
+      "comment": "Nêu được type hint và mypy. Còn thiếu: Nêu được dataclass.",
+      "question": "Mình hỏi kỹ hơn một chút nhé: dataclass. Bạn nghĩ sao?",
+      "scores": {
+       "completeness": 2.5,
+       "extensibility": 0.0,
+       "relevance": 10.0,
+       "technical_accuracy": 5.0
+      },
+      "topic_id": "t4",
+      "turn_kind": "follow_up",
+      "turn_number": 11
+     },
+     {
+      "comment": "Nêu được type hint và mypy. Còn thiếu: Nêu được dataclass.",
+      "question": "Mình hỏi kỹ hơn một chút nhé: Pydantic validation. Bạn nghĩ sao?",
+      "scores": {
+       "completeness": 2.5,
+       "extensibility": 0.0,
+       "relevance": 10.0,
+       "technical_accuracy": 5.0
+      },
+      "topic_id": "t4",
+      "turn_kind": "follow_up",
+      "turn_number": 12
+     },
+     {
+      "comment": "Nêu được type hint và mypy. Còn thiếu: Nêu được dataclass.",
+      "question": "Mình muốn đi sâu thêm ý này: Optional và Union. Bạn nói rõ hơn giúp mình nhé?",
+      "scores": {
+       "completeness": 2.5,
+       "extensibility": 0.0,
+       "relevance": 10.0,
+       "technical_accuracy": 5.0
+      },
+      "topic_id": "t4",
+      "turn_kind": "follow_up",
+      "turn_number": 13
+     },
+     {
+      "comment": "Còn thiếu: Làm rõ yêu cầu và giả định.",
+      "question": "Tiếp theo là một tình huống thực tế. Tình huống: API xuất báo cáo bị timeout với dữ liệu lớn. Bạn sẽ tiếp cận thế nào?",
+      "scores": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 2.5
+      },
+      "topic_id": "t5",
+      "turn_kind": "main",
+      "turn_number": 14
+     },
+     {
+      "comment": "Còn thiếu: Làm rõ yêu cầu và giả định.",
+      "question": "Mình hỏi lại cho rõ nhé: Tiếp theo là một tình huống thực tế. Tình huống: API xuất báo cáo bị timeout với dữ liệu lớn. Bạn sẽ tiếp cận thế nào?",
+      "scores": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 2.5
+      },
+      "topic_id": "t5",
+      "turn_kind": "clarify",
+      "turn_number": 15
+     }
+    ]
+   },
+   "status": 200
+  }
+ },
+ "start": {
+  "request": {
+   "level": "middle",
+   "session_id": "g-partial",
+   "track": "python_backend"
+  },
+  "response": {
+   "events": [
+    [
+     "meta",
+     {
+      "action": "ask_main",
+      "phase": "intro",
+      "topic_index": 1,
+      "topic_total": 5,
+      "turn_number": 1
+     }
+    ],
+    [
+     "token*",
+     {
+      "n": 7,
+      "t": "Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?"
+     }
+    ],
+    [
+     "done",
+     {
+      "metadata": {
+       "fallbacks": [],
+       "prompt_versions": {
+        "mock": "mock-v2"
+       },
+       "rag": {
+        "status": "off"
+       },
+       "usage": {}
+      },
+      "plan": {
+       "level_note": null,
+       "phases": [
+        {
+         "phase": "intro",
+         "time_budget_min": 5,
+         "topics": [
+          {
+           "backup_question": "Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+           "bank_questions": [],
+           "catalog_ref": null,
+           "cv_ref": null,
+           "id": "t1",
+           "key_points": [
+            "Giới thiệu ngắn gọn về nền tảng",
+            "Mô tả một dự án và vai trò của mình",
+            "Nêu công nghệ đã dùng"
+           ],
+           "objective": "Làm quen và nắm bối cảnh kinh nghiệm của ứng viên",
+           "opening_hint": "Mời ứng viên giới thiệu bản thân và dự án gần nhất",
+           "reference_snippets": [],
+           "reference_sources": [],
+           "source": "generic",
+           "start_difficulty": 3,
+           "title": "Giới thiệu bản thân và dự án gần nhất"
+          }
+         ]
+        },
+        {
+         "phase": "technical",
+         "time_budget_min": 16,
+         "topics": [
+          {
+           "backup_question": "Iterator và generator: bạn hiểu như thế nào và đã áp dụng ra sao?",
+           "bank_questions": [],
+           "catalog_ref": "py.core.generators-iterators",
+           "cv_ref": null,
+           "id": "t2",
+           "key_points": [
+            "Nêu được iterator protocol",
+            "Nêu được yield",
+            "Nêu được lazy evaluation",
+            "Nêu được tiết kiệm bộ nhớ"
+           ],
+           "objective": "Đánh giá hiểu biết về Iterator và generator ở mức middle",
+           "opening_hint": "Bắt đầu bằng câu hỏi tổng quan về Iterator và generator",
+           "reference_snippets": [],
+           "reference_sources": [],
+           "source": "catalog",
+           "start_difficulty": 3,
+           "title": "Iterator và generator"
+          },
+          {
+           "backup_question": "Decorator và context manager: bạn hiểu như thế nào và đã áp dụng ra sao?",
+           "bank_questions": [],
+           "catalog_ref": "py.core.decorators-context",
+           "cv_ref": null,
+           "id": "t3",
+           "key_points": [
+            "Nêu được closure",
+            "Nêu được functools.wraps",
+            "Nêu được decorator có tham số",
+            "Nêu được with và contextlib"
+           ],
+           "objective": "Đánh giá hiểu biết về Decorator và context manager ở mức middle",
+           "opening_hint": "Bắt đầu bằng câu hỏi tổng quan về Decorator và context manager",
+           "reference_snippets": [],
+           "reference_sources": [],
+           "source": "catalog",
+           "start_difficulty": 3,
+           "title": "Decorator và context manager"
+          },
+          {
+           "backup_question": "Type hint, dataclass và Pydantic: bạn hiểu như thế nào và đã áp dụng ra sao?",
+           "bank_questions": [],
+           "catalog_ref": "py.core.typing-pydantic",
+           "cv_ref": null,
+           "id": "t4",
+           "key_points": [
+            "Nêu được type hint và mypy",
+            "Nêu được dataclass",
+            "Nêu được Pydantic validation",
+            "Nêu được Optional và Union"
+           ],
+           "objective": "Đánh giá hiểu biết về Type hint, dataclass và Pydantic ở mức middle",
+           "opening_hint": "Bắt đầu bằng câu hỏi tổng quan về Type hint, dataclass và Pydantic",
+           "reference_snippets": [],
+           "reference_sources": [],
+           "source": "catalog",
+           "start_difficulty": 3,
+           "title": "Type hint, dataclass và Pydantic"
+          }
+         ]
+        },
+        {
+         "phase": "scenario",
+         "time_budget_min": 9,
+         "topics": [
+          {
+           "backup_question": "Tình huống: API xuất báo cáo bị timeout với dữ liệu lớn. Bạn sẽ tiếp cận thế nào?",
+           "bank_questions": [],
+           "catalog_ref": "scn.py.report-export-timeout",
+           "cv_ref": null,
+           "id": "t5",
+           "key_points": [
+            "Làm rõ yêu cầu và giả định",
+            "Đề xuất thiết kế hoặc hướng giải quyết cụ thể",
+            "Nêu trade-off và rủi ro"
+           ],
+           "objective": "Đánh giá cách tiếp cận một tình huống thực tế",
+           "opening_hint": "Đưa tình huống: API xuất báo cáo bị timeout với dữ liệu lớn",
+           "reference_snippets": [],
+           "reference_sources": [],
+           "source": "scenario",
+           "start_difficulty": 3,
+           "title": "API xuất báo cáo bị timeout với dữ liệu lớn"
+          }
+         ]
+        }
+       ],
+       "replan": null,
+       "schema_version": 1
+      },
+      "question": "Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+      "state": {
+       "active_topic_id": "t1",
+       "asked_questions": [
+        "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?"
+       ],
+       "counters": {
+        "clarifies": 0,
+        "consecutive_dont_know": 0,
+        "follow_ups": 0,
+        "hints": 0,
+        "stt_reasks": 0
+       },
+       "current_difficulty": 3,
+       "current_qa_id": null,
+       "difficulty_bounds": {
+        "max": 4,
+        "min": 2
+       },
+       "end_reason": null,
+       "evaluated_turns": 0,
+       "gaps": [],
+       "momentum": 0,
+       "notes": [],
+       "phase": "intro",
+       "phase_started_s": 0,
+       "schema_version": 1,
+       "strengths": [],
+       "swaps": [],
+       "topic_index": 1,
+       "topic_started_s": 0,
+       "topics": [
+        {
+         "covered": [],
+         "focus_used": [],
+         "hint_used": false,
+         "id": "t1",
+         "n_scored": 0,
+         "score_band": null,
+         "score_sum": 0.0,
+         "status": "active",
+         "turns": [
+          1
+         ]
+        },
+        {
+         "covered": [],
+         "focus_used": [],
+         "hint_used": false,
+         "id": "t2",
+         "n_scored": 0,
+         "score_band": null,
+         "score_sum": 0.0,
+         "status": "pending",
+         "turns": []
+        },
+        {
+         "covered": [],
+         "focus_used": [],
+         "hint_used": false,
+         "id": "t3",
+         "n_scored": 0,
+         "score_band": null,
+         "score_sum": 0.0,
+         "status": "pending",
+         "turns": []
+        },
+        {
+         "covered": [],
+         "focus_used": [],
+         "hint_used": false,
+         "id": "t4",
+         "n_scored": 0,
+         "score_band": null,
+         "score_sum": 0.0,
+         "status": "pending",
+         "turns": []
+        },
+        {
+         "covered": [],
+         "focus_used": [],
+         "hint_used": false,
+         "id": "t5",
+         "n_scored": 0,
+         "score_band": null,
+         "score_sum": 0.0,
+         "status": "pending",
+         "turns": []
+        }
+       ],
+       "turn_count": 1,
+       "used_qa_ids": []
+      },
+      "turn": {
+       "action": "ask_main",
+       "action_reason": null,
+       "agent_decision": "switch_topic",
+       "decided_by": null,
+       "difficulty": 3,
+       "overrule_reason": null,
+       "phase": "intro",
+       "policy_action": null,
+       "proposed_action": null,
+       "qa_id": null,
+       "question_source": "ai",
+       "reasoning": null,
+       "swap_result": null,
+       "topic_id": "t1",
+       "turn_kind": "main",
+       "turn_number": 1
+      }
+     }
+    ]
+   ],
+   "status": 200
+  }
+ },
+ "turns": [
+  {
+   "request": {
+    "answer": "Em nghĩ là Giới thiệu ngắn gọn về nền tảng.",
+    "elapsed_seconds": 60,
+    "level": "middle",
+    "question": "Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+    "session_id": "g-partial",
+    "topic_turns": [],
+    "track": "python_backend",
+    "turn_kind": "main",
+    "turn_number": 1
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "follow_up",
+       "phase": "intro",
+       "topic_index": 1,
+       "topic_total": 5,
+       "turn_number": 2
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 8,
+       "t": "Mình muốn đi sâu thêm ý này: Mô tả một dự án và vai trò của mình. Bạn nói rõ hơn giúp mình nhé?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "partial",
+        "confidence": null,
+        "covered_points": [
+         "Giới thiệu ngắn gọn về nền tảng"
+        ],
+        "degraded": false,
+        "evidence": [
+         {
+          "claim": "Giới thiệu ngắn gọn về nền tảng",
+          "quote": "Em nghĩ là Giới thiệu ngắn gọn về nền tảng",
+          "source_ids": [],
+          "support": null
+         }
+        ],
+        "follow_up_focus": "Mô tả một dự án và vai trò của mình",
+        "gap_tags": [
+         "minh",
+         "cong-dung"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Mô tả một dự án và vai trò của mình",
+         "Nêu công nghệ đã dùng"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 2,
+         "extensibility": 0,
+         "relevance": 4,
+         "technical_accuracy": 2
+        },
+        "scores_10": {
+         "completeness": 5.0,
+         "extensibility": 0.0,
+         "relevance": 10.0,
+         "technical_accuracy": 5.0
+        },
+        "sources": [],
+        "strength_tags": [
+         "gioi-ngan"
+        ],
+        "transcript_low_confidence": false,
+        "turn_number": 1,
+        "turn_score_10": 5.0
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Mình muốn đi sâu thêm ý này: Mô tả một dự án và vai trò của mình. Bạn nói rõ hơn giúp mình nhé?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t1",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "minh muon di sau them y nay: mo ta mot du an va vai tro cua minh. ban noi ro hon giup minh nhe?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 0,
+         "follow_ups": 1,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 3,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 2
+        },
+        "end_reason": null,
+        "evaluated_turns": 1,
+        "gaps": [],
+        "momentum": 0,
+        "notes": [],
+        "phase": "intro",
+        "phase_started_s": 0,
+        "schema_version": 1,
+        "strengths": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1
+          ]
+         }
+        ],
+        "swaps": [],
+        "topic_index": 1,
+        "topic_started_s": 0,
+        "topics": [
+         {
+          "covered": [
+           "Giới thiệu ngắn gọn về nền tảng"
+          ],
+          "focus_used": [
+           "Mô tả một dự án và vai trò của mình"
+          ],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 1,
+          "score_band": 2.0,
+          "score_sum": 2.0,
+          "status": "active",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t3",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 2,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "follow_up",
+        "action_reason": null,
+        "agent_decision": "deepen",
+        "decided_by": null,
+        "difficulty": 3,
+        "overrule_reason": null,
+        "phase": "intro",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "ok -> follow_up (luật 8)",
+        "swap_result": null,
+        "topic_id": "t1",
+        "turn_kind": "follow_up",
+        "turn_number": 2
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Em nghĩ là Giới thiệu ngắn gọn về nền tảng.",
+    "elapsed_seconds": 120,
+    "level": "middle",
+    "question": "Mình muốn đi sâu thêm ý này: Mô tả một dự án và vai trò của mình. Bạn nói rõ hơn giúp mình nhé?",
+    "session_id": "g-partial",
+    "topic_turns": [
+     {
+      "a": "Em nghĩ là Giới thiệu ngắn gọn về nền tảng.",
+      "q": "Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+      "source": "text"
+     }
+    ],
+    "track": "python_backend",
+    "turn_kind": "follow_up",
+    "turn_number": 2
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "follow_up",
+       "phase": "intro",
+       "topic_index": 1,
+       "topic_total": 5,
+       "turn_number": 3
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 7,
+       "t": "Mình muốn đi sâu thêm ý này: Nêu công nghệ đã dùng. Bạn nói rõ hơn giúp mình nhé?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "partial",
+        "confidence": null,
+        "covered_points": [
+         "Giới thiệu ngắn gọn về nền tảng"
+        ],
+        "degraded": false,
+        "evidence": [
+         {
+          "claim": "Giới thiệu ngắn gọn về nền tảng",
+          "quote": "Em nghĩ là Giới thiệu ngắn gọn về nền tảng",
+          "source_ids": [],
+          "support": null
+         }
+        ],
+        "follow_up_focus": "Mô tả một dự án và vai trò của mình",
+        "gap_tags": [
+         "minh",
+         "cong-dung"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Mô tả một dự án và vai trò của mình",
+         "Nêu công nghệ đã dùng"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 2,
+         "extensibility": 0,
+         "relevance": 4,
+         "technical_accuracy": 2
+        },
+        "scores_10": {
+         "completeness": 5.0,
+         "extensibility": 0.0,
+         "relevance": 10.0,
+         "technical_accuracy": 5.0
+        },
+        "sources": [],
+        "strength_tags": [
+         "gioi-ngan"
+        ],
+        "transcript_low_confidence": false,
+        "turn_number": 2,
+        "turn_score_10": 5.0
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Mình muốn đi sâu thêm ý này: Nêu công nghệ đã dùng. Bạn nói rõ hơn giúp mình nhé?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t1",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "minh muon di sau them y nay: mo ta mot du an va vai tro cua minh. ban noi ro hon giup minh nhe?",
+         "minh muon di sau them y nay: neu cong nghe da dung. ban noi ro hon giup minh nhe?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 0,
+         "follow_ups": 2,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 3,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 2
+        },
+        "end_reason": null,
+        "evaluated_turns": 2,
+        "gaps": [],
+        "momentum": 0,
+        "notes": [],
+        "phase": "intro",
+        "phase_started_s": 0,
+        "schema_version": 1,
+        "strengths": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1,
+           2
+          ]
+         }
+        ],
+        "swaps": [],
+        "topic_index": 1,
+        "topic_started_s": 0,
+        "topics": [
+         {
+          "covered": [
+           "Giới thiệu ngắn gọn về nền tảng"
+          ],
+          "focus_used": [
+           "Mô tả một dự án và vai trò của mình",
+           "Nêu công nghệ đã dùng"
+          ],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 2,
+          "score_band": 2.0,
+          "score_sum": 4.0,
+          "status": "active",
+          "turns": [
+           1,
+           2,
+           3
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t3",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 3,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "follow_up",
+        "action_reason": null,
+        "agent_decision": "deepen",
+        "decided_by": null,
+        "difficulty": 3,
+        "overrule_reason": null,
+        "phase": "intro",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "ok -> follow_up (luật 8)",
+        "swap_result": null,
+        "topic_id": "t1",
+        "turn_kind": "follow_up",
+        "turn_number": 3
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Em nghĩ là Giới thiệu ngắn gọn về nền tảng.",
+    "elapsed_seconds": 180,
+    "level": "middle",
+    "question": "Mình muốn đi sâu thêm ý này: Nêu công nghệ đã dùng. Bạn nói rõ hơn giúp mình nhé?",
+    "session_id": "g-partial",
+    "topic_turns": [
+     {
+      "a": "Em nghĩ là Giới thiệu ngắn gọn về nền tảng.",
+      "q": "Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+      "source": "text"
+     },
+     {
+      "a": "Em nghĩ là Giới thiệu ngắn gọn về nền tảng.",
+      "q": "Mình muốn đi sâu thêm ý này: Mô tả một dự án và vai trò của mình. Bạn nói rõ hơn giúp mình nhé?",
+      "source": "text"
+     }
+    ],
+    "track": "python_backend",
+    "turn_kind": "follow_up",
+    "turn_number": 3
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "ask_main",
+       "phase": "technical",
+       "topic_index": 2,
+       "topic_total": 5,
+       "turn_number": 4
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 8,
+       "t": "Giờ mình chuyển sang phần kiến thức chuyên môn nhé. Iterator và generator: bạn hiểu như thế nào và đã áp dụng ra sao?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "partial",
+        "confidence": null,
+        "covered_points": [
+         "Giới thiệu ngắn gọn về nền tảng"
+        ],
+        "degraded": false,
+        "evidence": [
+         {
+          "claim": "Giới thiệu ngắn gọn về nền tảng",
+          "quote": "Em nghĩ là Giới thiệu ngắn gọn về nền tảng",
+          "source_ids": [],
+          "support": null
+         }
+        ],
+        "follow_up_focus": "Mô tả một dự án và vai trò của mình",
+        "gap_tags": [
+         "minh",
+         "cong-dung"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Mô tả một dự án và vai trò của mình",
+         "Nêu công nghệ đã dùng"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 2,
+         "extensibility": 0,
+         "relevance": 4,
+         "technical_accuracy": 2
+        },
+        "scores_10": {
+         "completeness": 5.0,
+         "extensibility": 0.0,
+         "relevance": 10.0,
+         "technical_accuracy": 5.0
+        },
+        "sources": [],
+        "strength_tags": [
+         "gioi-ngan"
+        ],
+        "transcript_low_confidence": false,
+        "turn_number": 3,
+        "turn_score_10": 5.0
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Giờ mình chuyển sang phần kiến thức chuyên môn nhé. Iterator và generator: bạn hiểu như thế nào và đã áp dụng ra sao?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t2",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "minh muon di sau them y nay: mo ta mot du an va vai tro cua minh. ban noi ro hon giup minh nhe?",
+         "minh muon di sau them y nay: neu cong nghe da dung. ban noi ro hon giup minh nhe?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. iterator va generator: ban hieu nhu the nao va da ap dung ra sao?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 0,
+         "follow_ups": 0,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 3,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 2
+        },
+        "end_reason": null,
+        "evaluated_turns": 3,
+        "gaps": [],
+        "momentum": 0,
+        "notes": [],
+        "phase": "technical",
+        "phase_started_s": 180,
+        "schema_version": 1,
+        "strengths": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1,
+           2,
+           3
+          ]
+         }
+        ],
+        "swaps": [],
+        "topic_index": 1,
+        "topic_started_s": 180,
+        "topics": [
+         {
+          "covered": [
+           "Giới thiệu ngắn gọn về nền tảng"
+          ],
+          "focus_used": [
+           "Mô tả một dự án và vai trò của mình",
+           "Nêu công nghệ đã dùng"
+          ],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 3,
+          "score_band": 2.0,
+          "score_sum": 6.0,
+          "status": "done",
+          "turns": [
+           1,
+           2,
+           3
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "active",
+          "turns": [
+           4
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t3",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 4,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "ask_main",
+        "action_reason": null,
+        "agent_decision": "switch_topic",
+        "decided_by": null,
+        "difficulty": 3,
+        "overrule_reason": null,
+        "phase": "technical",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "ok -> next_topic (luật 9)",
+        "swap_result": null,
+        "topic_id": "t2",
+        "turn_kind": "main",
+        "turn_number": 4
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Em nghĩ là Nêu được iterator protocol.",
+    "elapsed_seconds": 240,
+    "level": "middle",
+    "question": "Giờ mình chuyển sang phần kiến thức chuyên môn nhé. Iterator và generator: bạn hiểu như thế nào và đã áp dụng ra sao?",
+    "session_id": "g-partial",
+    "topic_turns": [],
+    "track": "python_backend",
+    "turn_kind": "main",
+    "turn_number": 4
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "follow_up",
+       "phase": "technical",
+       "topic_index": 2,
+       "topic_total": 5,
+       "turn_number": 5
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 5,
+       "t": "Mình muốn đi sâu thêm ý này: yield. Bạn nói rõ hơn giúp mình nhé?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "partial",
+        "confidence": null,
+        "covered_points": [
+         "Nêu được iterator protocol"
+        ],
+        "degraded": false,
+        "evidence": [
+         {
+          "claim": "Nêu được iterator protocol",
+          "quote": "Em nghĩ là Nêu được iterator protocol",
+          "source_ids": [],
+          "support": null
+         }
+        ],
+        "follow_up_focus": "yield",
+        "gap_tags": [
+         "yield",
+         "evaluation-lazy",
+         "kiem-tiet"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Nêu được yield",
+         "Nêu được lazy evaluation",
+         "Nêu được tiết kiệm bộ nhớ"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 1,
+         "extensibility": 0,
+         "relevance": 4,
+         "technical_accuracy": 2
+        },
+        "scores_10": {
+         "completeness": 2.5,
+         "extensibility": 0.0,
+         "relevance": 10.0,
+         "technical_accuracy": 5.0
+        },
+        "sources": [],
+        "strength_tags": [
+         "iterator-protocol"
+        ],
+        "transcript_low_confidence": false,
+        "turn_number": 4,
+        "turn_score_10": 4.4
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Mình muốn đi sâu thêm ý này: yield. Bạn nói rõ hơn giúp mình nhé?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t2",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "minh muon di sau them y nay: mo ta mot du an va vai tro cua minh. ban noi ro hon giup minh nhe?",
+         "minh muon di sau them y nay: neu cong nghe da dung. ban noi ro hon giup minh nhe?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. iterator va generator: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh muon di sau them y nay: yield. ban noi ro hon giup minh nhe?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 0,
+         "follow_ups": 1,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 3,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 2
+        },
+        "end_reason": null,
+        "evaluated_turns": 4,
+        "gaps": [
+         {
+          "tag": "yield",
+          "turns": [
+           4
+          ]
+         },
+         {
+          "tag": "evaluation-lazy",
+          "turns": [
+           4
+          ]
+         },
+         {
+          "tag": "kiem-tiet",
+          "turns": [
+           4
+          ]
+         }
+        ],
+        "momentum": 0,
+        "notes": [],
+        "phase": "technical",
+        "phase_started_s": 180,
+        "schema_version": 1,
+        "strengths": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1,
+           2,
+           3
+          ]
+         }
+        ],
+        "swaps": [],
+        "topic_index": 1,
+        "topic_started_s": 180,
+        "topics": [
+         {
+          "covered": [
+           "Giới thiệu ngắn gọn về nền tảng"
+          ],
+          "focus_used": [
+           "Mô tả một dự án và vai trò của mình",
+           "Nêu công nghệ đã dùng"
+          ],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 3,
+          "score_band": 2.0,
+          "score_sum": 6.0,
+          "status": "done",
+          "turns": [
+           1,
+           2,
+           3
+          ]
+         },
+         {
+          "covered": [
+           "Nêu được iterator protocol"
+          ],
+          "focus_used": [
+           "yield"
+          ],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 1,
+          "score_band": 1.8,
+          "score_sum": 1.7600000000000002,
+          "status": "active",
+          "turns": [
+           4,
+           5
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t3",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 5,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "follow_up",
+        "action_reason": null,
+        "agent_decision": "deepen",
+        "decided_by": null,
+        "difficulty": 3,
+        "overrule_reason": null,
+        "phase": "technical",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "ok -> follow_up (luật 8)",
+        "swap_result": null,
+        "topic_id": "t2",
+        "turn_kind": "follow_up",
+        "turn_number": 5
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Em nghĩ là Nêu được iterator protocol.",
+    "elapsed_seconds": 300,
+    "level": "middle",
+    "question": "Mình muốn đi sâu thêm ý này: yield. Bạn nói rõ hơn giúp mình nhé?",
+    "session_id": "g-partial",
+    "topic_turns": [
+     {
+      "a": "Em nghĩ là Nêu được iterator protocol.",
+      "q": "Giờ mình chuyển sang phần kiến thức chuyên môn nhé. Iterator và generator: bạn hiểu như thế nào và đã áp dụng ra sao?",
+      "source": "text"
+     }
+    ],
+    "track": "python_backend",
+    "turn_kind": "follow_up",
+    "turn_number": 5
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "follow_up",
+       "phase": "technical",
+       "topic_index": 2,
+       "topic_total": 5,
+       "turn_number": 6
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 4,
+       "t": "Mình hỏi kỹ hơn một chút nhé: lazy evaluation. Bạn nghĩ sao?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "partial",
+        "confidence": null,
+        "covered_points": [
+         "Nêu được iterator protocol"
+        ],
+        "degraded": false,
+        "evidence": [
+         {
+          "claim": "Nêu được iterator protocol",
+          "quote": "Em nghĩ là Nêu được iterator protocol",
+          "source_ids": [],
+          "support": null
+         }
+        ],
+        "follow_up_focus": "yield",
+        "gap_tags": [
+         "yield",
+         "evaluation-lazy",
+         "kiem-tiet"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Nêu được yield",
+         "Nêu được lazy evaluation",
+         "Nêu được tiết kiệm bộ nhớ"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 1,
+         "extensibility": 0,
+         "relevance": 4,
+         "technical_accuracy": 2
+        },
+        "scores_10": {
+         "completeness": 2.5,
+         "extensibility": 0.0,
+         "relevance": 10.0,
+         "technical_accuracy": 5.0
+        },
+        "sources": [],
+        "strength_tags": [
+         "iterator-protocol"
+        ],
+        "transcript_low_confidence": false,
+        "turn_number": 5,
+        "turn_score_10": 4.4
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Mình hỏi kỹ hơn một chút nhé: lazy evaluation. Bạn nghĩ sao?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t2",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "minh muon di sau them y nay: mo ta mot du an va vai tro cua minh. ban noi ro hon giup minh nhe?",
+         "minh muon di sau them y nay: neu cong nghe da dung. ban noi ro hon giup minh nhe?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. iterator va generator: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh muon di sau them y nay: yield. ban noi ro hon giup minh nhe?",
+         "minh hoi ky hon mot chut nhe: lazy evaluation. ban nghi sao?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 0,
+         "follow_ups": 2,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 3,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 2
+        },
+        "end_reason": null,
+        "evaluated_turns": 5,
+        "gaps": [
+         {
+          "tag": "yield",
+          "turns": [
+           4,
+           5
+          ]
+         },
+         {
+          "tag": "evaluation-lazy",
+          "turns": [
+           4,
+           5
+          ]
+         },
+         {
+          "tag": "kiem-tiet",
+          "turns": [
+           4,
+           5
+          ]
+         }
+        ],
+        "momentum": 0,
+        "notes": [],
+        "phase": "technical",
+        "phase_started_s": 180,
+        "schema_version": 1,
+        "strengths": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1,
+           2,
+           3
+          ]
+         }
+        ],
+        "swaps": [],
+        "topic_index": 1,
+        "topic_started_s": 180,
+        "topics": [
+         {
+          "covered": [
+           "Giới thiệu ngắn gọn về nền tảng"
+          ],
+          "focus_used": [
+           "Mô tả một dự án và vai trò của mình",
+           "Nêu công nghệ đã dùng"
+          ],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 3,
+          "score_band": 2.0,
+          "score_sum": 6.0,
+          "status": "done",
+          "turns": [
+           1,
+           2,
+           3
+          ]
+         },
+         {
+          "covered": [
+           "Nêu được iterator protocol"
+          ],
+          "focus_used": [
+           "yield",
+           "lazy evaluation"
+          ],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 2,
+          "score_band": 1.8,
+          "score_sum": 3.5200000000000005,
+          "status": "active",
+          "turns": [
+           4,
+           5,
+           6
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t3",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 6,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "follow_up",
+        "action_reason": null,
+        "agent_decision": "deepen",
+        "decided_by": null,
+        "difficulty": 3,
+        "overrule_reason": null,
+        "phase": "technical",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "ok -> follow_up (luật 8)",
+        "swap_result": null,
+        "topic_id": "t2",
+        "turn_kind": "follow_up",
+        "turn_number": 6
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Em nghĩ là Nêu được iterator protocol.",
+    "elapsed_seconds": 360,
+    "level": "middle",
+    "question": "Mình hỏi kỹ hơn một chút nhé: lazy evaluation. Bạn nghĩ sao?",
+    "session_id": "g-partial",
+    "topic_turns": [
+     {
+      "a": "Em nghĩ là Nêu được iterator protocol.",
+      "q": "Giờ mình chuyển sang phần kiến thức chuyên môn nhé. Iterator và generator: bạn hiểu như thế nào và đã áp dụng ra sao?",
+      "source": "text"
+     },
+     {
+      "a": "Em nghĩ là Nêu được iterator protocol.",
+      "q": "Mình muốn đi sâu thêm ý này: yield. Bạn nói rõ hơn giúp mình nhé?",
+      "source": "text"
+     }
+    ],
+    "track": "python_backend",
+    "turn_kind": "follow_up",
+    "turn_number": 6
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "follow_up",
+       "phase": "technical",
+       "topic_index": 2,
+       "topic_total": 5,
+       "turn_number": 7
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 6,
+       "t": "Mình muốn đi sâu thêm ý này: tiết kiệm bộ nhớ. Bạn nói rõ hơn giúp mình nhé?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "partial",
+        "confidence": null,
+        "covered_points": [
+         "Nêu được iterator protocol"
+        ],
+        "degraded": false,
+        "evidence": [
+         {
+          "claim": "Nêu được iterator protocol",
+          "quote": "Em nghĩ là Nêu được iterator protocol",
+          "source_ids": [],
+          "support": null
+         }
+        ],
+        "follow_up_focus": "yield",
+        "gap_tags": [
+         "yield",
+         "evaluation-lazy",
+         "kiem-tiet"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Nêu được yield",
+         "Nêu được lazy evaluation",
+         "Nêu được tiết kiệm bộ nhớ"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 1,
+         "extensibility": 0,
+         "relevance": 4,
+         "technical_accuracy": 2
+        },
+        "scores_10": {
+         "completeness": 2.5,
+         "extensibility": 0.0,
+         "relevance": 10.0,
+         "technical_accuracy": 5.0
+        },
+        "sources": [],
+        "strength_tags": [
+         "iterator-protocol"
+        ],
+        "transcript_low_confidence": false,
+        "turn_number": 6,
+        "turn_score_10": 4.4
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Mình muốn đi sâu thêm ý này: tiết kiệm bộ nhớ. Bạn nói rõ hơn giúp mình nhé?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t2",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "minh muon di sau them y nay: mo ta mot du an va vai tro cua minh. ban noi ro hon giup minh nhe?",
+         "minh muon di sau them y nay: neu cong nghe da dung. ban noi ro hon giup minh nhe?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. iterator va generator: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh muon di sau them y nay: yield. ban noi ro hon giup minh nhe?",
+         "minh hoi ky hon mot chut nhe: lazy evaluation. ban nghi sao?",
+         "minh muon di sau them y nay: tiet kiem bo nho. ban noi ro hon giup minh nhe?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 0,
+         "follow_ups": 3,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 3,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 2
+        },
+        "end_reason": null,
+        "evaluated_turns": 6,
+        "gaps": [
+         {
+          "tag": "yield",
+          "turns": [
+           4,
+           5,
+           6
+          ]
+         },
+         {
+          "tag": "evaluation-lazy",
+          "turns": [
+           4,
+           5,
+           6
+          ]
+         },
+         {
+          "tag": "kiem-tiet",
+          "turns": [
+           4,
+           5,
+           6
+          ]
+         }
+        ],
+        "momentum": 0,
+        "notes": [],
+        "phase": "technical",
+        "phase_started_s": 180,
+        "schema_version": 1,
+        "strengths": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1,
+           2,
+           3
+          ]
+         }
+        ],
+        "swaps": [],
+        "topic_index": 1,
+        "topic_started_s": 180,
+        "topics": [
+         {
+          "covered": [
+           "Giới thiệu ngắn gọn về nền tảng"
+          ],
+          "focus_used": [
+           "Mô tả một dự án và vai trò của mình",
+           "Nêu công nghệ đã dùng"
+          ],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 3,
+          "score_band": 2.0,
+          "score_sum": 6.0,
+          "status": "done",
+          "turns": [
+           1,
+           2,
+           3
+          ]
+         },
+         {
+          "covered": [
+           "Nêu được iterator protocol"
+          ],
+          "focus_used": [
+           "yield",
+           "lazy evaluation",
+           "tiết kiệm bộ nhớ"
+          ],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 3,
+          "score_band": 1.8,
+          "score_sum": 5.280000000000001,
+          "status": "active",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t3",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 7,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "follow_up",
+        "action_reason": null,
+        "agent_decision": "deepen",
+        "decided_by": null,
+        "difficulty": 3,
+        "overrule_reason": null,
+        "phase": "technical",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "ok -> follow_up (luật 8)",
+        "swap_result": null,
+        "topic_id": "t2",
+        "turn_kind": "follow_up",
+        "turn_number": 7
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Em nghĩ là Nêu được iterator protocol.",
+    "elapsed_seconds": 420,
+    "level": "middle",
+    "question": "Mình muốn đi sâu thêm ý này: tiết kiệm bộ nhớ. Bạn nói rõ hơn giúp mình nhé?",
+    "session_id": "g-partial",
+    "topic_turns": [
+     {
+      "a": "Em nghĩ là Nêu được iterator protocol.",
+      "q": "Giờ mình chuyển sang phần kiến thức chuyên môn nhé. Iterator và generator: bạn hiểu như thế nào và đã áp dụng ra sao?",
+      "source": "text"
+     },
+     {
+      "a": "Em nghĩ là Nêu được iterator protocol.",
+      "q": "Mình muốn đi sâu thêm ý này: yield. Bạn nói rõ hơn giúp mình nhé?",
+      "source": "text"
+     },
+     {
+      "a": "Em nghĩ là Nêu được iterator protocol.",
+      "q": "Mình hỏi kỹ hơn một chút nhé: lazy evaluation. Bạn nghĩ sao?",
+      "source": "text"
+     }
+    ],
+    "track": "python_backend",
+    "turn_kind": "follow_up",
+    "turn_number": 7
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "ask_main",
+       "phase": "technical",
+       "topic_index": 3,
+       "topic_total": 5,
+       "turn_number": 8
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 5,
+       "t": "Decorator và context manager: bạn hiểu như thế nào và đã áp dụng ra sao?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "partial",
+        "confidence": null,
+        "covered_points": [
+         "Nêu được iterator protocol"
+        ],
+        "degraded": false,
+        "evidence": [
+         {
+          "claim": "Nêu được iterator protocol",
+          "quote": "Em nghĩ là Nêu được iterator protocol",
+          "source_ids": [],
+          "support": null
+         }
+        ],
+        "follow_up_focus": "yield",
+        "gap_tags": [
+         "yield",
+         "evaluation-lazy",
+         "kiem-tiet"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Nêu được yield",
+         "Nêu được lazy evaluation",
+         "Nêu được tiết kiệm bộ nhớ"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 1,
+         "extensibility": 0,
+         "relevance": 4,
+         "technical_accuracy": 2
+        },
+        "scores_10": {
+         "completeness": 2.5,
+         "extensibility": 0.0,
+         "relevance": 10.0,
+         "technical_accuracy": 5.0
+        },
+        "sources": [],
+        "strength_tags": [
+         "iterator-protocol"
+        ],
+        "transcript_low_confidence": false,
+        "turn_number": 7,
+        "turn_score_10": 4.4
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Decorator và context manager: bạn hiểu như thế nào và đã áp dụng ra sao?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t3",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "minh muon di sau them y nay: mo ta mot du an va vai tro cua minh. ban noi ro hon giup minh nhe?",
+         "minh muon di sau them y nay: neu cong nghe da dung. ban noi ro hon giup minh nhe?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. iterator va generator: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh muon di sau them y nay: yield. ban noi ro hon giup minh nhe?",
+         "minh hoi ky hon mot chut nhe: lazy evaluation. ban nghi sao?",
+         "minh muon di sau them y nay: tiet kiem bo nho. ban noi ro hon giup minh nhe?",
+         "decorator va context manager: ban hieu nhu the nao va da ap dung ra sao?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 0,
+         "follow_ups": 0,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 3,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 2
+        },
+        "end_reason": null,
+        "evaluated_turns": 7,
+        "gaps": [
+         {
+          "tag": "yield",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "tag": "evaluation-lazy",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "tag": "kiem-tiet",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         }
+        ],
+        "momentum": 0,
+        "notes": [],
+        "phase": "technical",
+        "phase_started_s": 180,
+        "schema_version": 1,
+        "strengths": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1,
+           2,
+           3
+          ]
+         }
+        ],
+        "swaps": [],
+        "topic_index": 2,
+        "topic_started_s": 420,
+        "topics": [
+         {
+          "covered": [
+           "Giới thiệu ngắn gọn về nền tảng"
+          ],
+          "focus_used": [
+           "Mô tả một dự án và vai trò của mình",
+           "Nêu công nghệ đã dùng"
+          ],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 3,
+          "score_band": 2.0,
+          "score_sum": 6.0,
+          "status": "done",
+          "turns": [
+           1,
+           2,
+           3
+          ]
+         },
+         {
+          "covered": [
+           "Nêu được iterator protocol"
+          ],
+          "focus_used": [
+           "yield",
+           "lazy evaluation",
+           "tiết kiệm bộ nhớ"
+          ],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 4,
+          "score_band": 1.8,
+          "score_sum": 7.040000000000001,
+          "status": "done",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t3",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "active",
+          "turns": [
+           8
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 8,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "ask_main",
+        "action_reason": null,
+        "agent_decision": "switch_topic",
+        "decided_by": null,
+        "difficulty": 3,
+        "overrule_reason": null,
+        "phase": "technical",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "ok -> next_topic (luật 9)",
+        "swap_result": null,
+        "topic_id": "t3",
+        "turn_kind": "main",
+        "turn_number": 8
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Em nghĩ là Nêu được closure.",
+    "elapsed_seconds": 480,
+    "level": "middle",
+    "question": "Decorator và context manager: bạn hiểu như thế nào và đã áp dụng ra sao?",
+    "session_id": "g-partial",
+    "topic_turns": [],
+    "track": "python_backend",
+    "turn_kind": "main",
+    "turn_number": 8
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "hint",
+       "phase": "technical",
+       "topic_index": 3,
+       "topic_total": 5,
+       "turn_number": 9
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 5,
+       "t": "Mình gợi ý một hướng nhé: closure. Bạn thử trả lời lại xem?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "answered",
+        "confidence": null,
+        "covered_points": [],
+        "degraded": false,
+        "evidence": [],
+        "follow_up_focus": "closure",
+        "gap_tags": [
+         "closure",
+         "functools.wraps",
+         "decorator-tham"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Nêu được closure",
+         "Nêu được functools.wraps",
+         "Nêu được decorator có tham số"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 0,
+         "extensibility": 0,
+         "relevance": 1,
+         "technical_accuracy": 1
+        },
+        "scores_10": {
+         "completeness": 0.0,
+         "extensibility": 0.0,
+         "relevance": 2.5,
+         "technical_accuracy": 2.5
+        },
+        "sources": [],
+        "strength_tags": [],
+        "transcript_low_confidence": false,
+        "turn_number": 8,
+        "turn_score_10": 1.2
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Mình gợi ý một hướng nhé: closure. Bạn thử trả lời lại xem?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t3",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "minh muon di sau them y nay: mo ta mot du an va vai tro cua minh. ban noi ro hon giup minh nhe?",
+         "minh muon di sau them y nay: neu cong nghe da dung. ban noi ro hon giup minh nhe?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. iterator va generator: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh muon di sau them y nay: yield. ban noi ro hon giup minh nhe?",
+         "minh hoi ky hon mot chut nhe: lazy evaluation. ban nghi sao?",
+         "minh muon di sau them y nay: tiet kiem bo nho. ban noi ro hon giup minh nhe?",
+         "decorator va context manager: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: closure. ban thu tra loi lai xem?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 0,
+         "follow_ups": 1,
+         "hints": 1,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 2,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 2
+        },
+        "end_reason": null,
+        "evaluated_turns": 8,
+        "gaps": [
+         {
+          "tag": "yield",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "tag": "evaluation-lazy",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "tag": "kiem-tiet",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "tag": "closure",
+          "turns": [
+           8
+          ]
+         },
+         {
+          "tag": "functools.wraps",
+          "turns": [
+           8
+          ]
+         },
+         {
+          "tag": "decorator-tham",
+          "turns": [
+           8
+          ]
+         }
+        ],
+        "momentum": 0,
+        "notes": [],
+        "phase": "technical",
+        "phase_started_s": 180,
+        "schema_version": 1,
+        "strengths": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1,
+           2,
+           3
+          ]
+         }
+        ],
+        "swaps": [],
+        "topic_index": 2,
+        "topic_started_s": 420,
+        "topics": [
+         {
+          "covered": [
+           "Giới thiệu ngắn gọn về nền tảng"
+          ],
+          "focus_used": [
+           "Mô tả một dự án và vai trò của mình",
+           "Nêu công nghệ đã dùng"
+          ],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 3,
+          "score_band": 2.0,
+          "score_sum": 6.0,
+          "status": "done",
+          "turns": [
+           1,
+           2,
+           3
+          ]
+         },
+         {
+          "covered": [
+           "Nêu được iterator protocol"
+          ],
+          "focus_used": [
+           "yield",
+           "lazy evaluation",
+           "tiết kiệm bộ nhớ"
+          ],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 4,
+          "score_band": 1.8,
+          "score_sum": 7.040000000000001,
+          "status": "done",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "closure"
+          ],
+          "hint_used": true,
+          "id": "t3",
+          "n_scored": 1,
+          "score_band": 0.5,
+          "score_sum": 0.48,
+          "status": "active",
+          "turns": [
+           8,
+           9
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 9,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "hint",
+        "action_reason": null,
+        "agent_decision": "keep_difficulty",
+        "decided_by": null,
+        "difficulty": 2,
+        "overrule_reason": null,
+        "phase": "technical",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "weak -> hint (luật 6)",
+        "swap_result": null,
+        "topic_id": "t3",
+        "turn_kind": "hint",
+        "turn_number": 9
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Em nghĩ là Nêu được closure.",
+    "elapsed_seconds": 540,
+    "level": "middle",
+    "question": "Mình gợi ý một hướng nhé: closure. Bạn thử trả lời lại xem?",
+    "session_id": "g-partial",
+    "topic_turns": [
+     {
+      "a": "Em nghĩ là Nêu được closure.",
+      "q": "Decorator và context manager: bạn hiểu như thế nào và đã áp dụng ra sao?",
+      "source": "text"
+     }
+    ],
+    "track": "python_backend",
+    "turn_kind": "hint",
+    "turn_number": 9
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "ask_main",
+       "phase": "technical",
+       "topic_index": 4,
+       "topic_total": 5,
+       "turn_number": 10
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 6,
+       "t": "Type hint, dataclass và Pydantic: bạn hiểu như thế nào và đã áp dụng ra sao?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "answered",
+        "confidence": null,
+        "covered_points": [],
+        "degraded": false,
+        "evidence": [],
+        "follow_up_focus": "closure",
+        "gap_tags": [
+         "closure",
+         "functools.wraps",
+         "decorator-tham"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Nêu được closure",
+         "Nêu được functools.wraps",
+         "Nêu được decorator có tham số"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 0,
+         "extensibility": 0,
+         "relevance": 1,
+         "technical_accuracy": 1
+        },
+        "scores_10": {
+         "completeness": 0.0,
+         "extensibility": 0.0,
+         "relevance": 2.5,
+         "technical_accuracy": 2.5
+        },
+        "sources": [],
+        "strength_tags": [],
+        "transcript_low_confidence": false,
+        "turn_number": 9,
+        "turn_score_10": 1.2
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Type hint, dataclass và Pydantic: bạn hiểu như thế nào và đã áp dụng ra sao?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t4",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "minh muon di sau them y nay: mo ta mot du an va vai tro cua minh. ban noi ro hon giup minh nhe?",
+         "minh muon di sau them y nay: neu cong nghe da dung. ban noi ro hon giup minh nhe?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. iterator va generator: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh muon di sau them y nay: yield. ban noi ro hon giup minh nhe?",
+         "minh hoi ky hon mot chut nhe: lazy evaluation. ban nghi sao?",
+         "minh muon di sau them y nay: tiet kiem bo nho. ban noi ro hon giup minh nhe?",
+         "decorator va context manager: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: closure. ban thu tra loi lai xem?",
+         "type hint, dataclass va pydantic: ban hieu nhu the nao va da ap dung ra sao?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 0,
+         "follow_ups": 0,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 2,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 2
+        },
+        "end_reason": null,
+        "evaluated_turns": 9,
+        "gaps": [
+         {
+          "tag": "yield",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "tag": "evaluation-lazy",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "tag": "kiem-tiet",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "tag": "closure",
+          "turns": [
+           8,
+           9
+          ]
+         },
+         {
+          "tag": "functools.wraps",
+          "turns": [
+           8,
+           9
+          ]
+         },
+         {
+          "tag": "decorator-tham",
+          "turns": [
+           8,
+           9
+          ]
+         }
+        ],
+        "momentum": -1,
+        "notes": [],
+        "phase": "technical",
+        "phase_started_s": 180,
+        "schema_version": 1,
+        "strengths": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1,
+           2,
+           3
+          ]
+         }
+        ],
+        "swaps": [],
+        "topic_index": 3,
+        "topic_started_s": 540,
+        "topics": [
+         {
+          "covered": [
+           "Giới thiệu ngắn gọn về nền tảng"
+          ],
+          "focus_used": [
+           "Mô tả một dự án và vai trò của mình",
+           "Nêu công nghệ đã dùng"
+          ],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 3,
+          "score_band": 2.0,
+          "score_sum": 6.0,
+          "status": "done",
+          "turns": [
+           1,
+           2,
+           3
+          ]
+         },
+         {
+          "covered": [
+           "Nêu được iterator protocol"
+          ],
+          "focus_used": [
+           "yield",
+           "lazy evaluation",
+           "tiết kiệm bộ nhớ"
+          ],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 4,
+          "score_band": 1.8,
+          "score_sum": 7.040000000000001,
+          "status": "done",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "closure"
+          ],
+          "hint_used": true,
+          "id": "t3",
+          "n_scored": 2,
+          "score_band": 0.5,
+          "score_sum": 0.96,
+          "status": "done",
+          "turns": [
+           8,
+           9
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "active",
+          "turns": [
+           10
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 10,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "ask_main",
+        "action_reason": null,
+        "agent_decision": "switch_topic",
+        "decided_by": null,
+        "difficulty": 2,
+        "overrule_reason": null,
+        "phase": "technical",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "weak -> next_topic (luật 7)",
+        "swap_result": null,
+        "topic_id": "t4",
+        "turn_kind": "main",
+        "turn_number": 10
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Em nghĩ là Nêu được type hint và mypy.",
+    "elapsed_seconds": 600,
+    "level": "middle",
+    "question": "Type hint, dataclass và Pydantic: bạn hiểu như thế nào và đã áp dụng ra sao?",
+    "session_id": "g-partial",
+    "topic_turns": [],
+    "track": "python_backend",
+    "turn_kind": "main",
+    "turn_number": 10
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "follow_up",
+       "phase": "technical",
+       "topic_index": 4,
+       "topic_total": 5,
+       "turn_number": 11
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 4,
+       "t": "Mình hỏi kỹ hơn một chút nhé: dataclass. Bạn nghĩ sao?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "partial",
+        "confidence": null,
+        "covered_points": [
+         "Nêu được type hint và mypy"
+        ],
+        "degraded": false,
+        "evidence": [
+         {
+          "claim": "Nêu được type hint và mypy",
+          "quote": "Em nghĩ là Nêu được type hint và mypy",
+          "source_ids": [],
+          "support": null
+         }
+        ],
+        "follow_up_focus": "dataclass",
+        "gap_tags": [
+         "dataclass",
+         "pydantic-validation",
+         "optional-union"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Nêu được dataclass",
+         "Nêu được Pydantic validation",
+         "Nêu được Optional và Union"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 1,
+         "extensibility": 0,
+         "relevance": 4,
+         "technical_accuracy": 2
+        },
+        "scores_10": {
+         "completeness": 2.5,
+         "extensibility": 0.0,
+         "relevance": 10.0,
+         "technical_accuracy": 5.0
+        },
+        "sources": [],
+        "strength_tags": [
+         "hint-mypy"
+        ],
+        "transcript_low_confidence": false,
+        "turn_number": 10,
+        "turn_score_10": 4.4
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Mình hỏi kỹ hơn một chút nhé: dataclass. Bạn nghĩ sao?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t4",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "minh muon di sau them y nay: mo ta mot du an va vai tro cua minh. ban noi ro hon giup minh nhe?",
+         "minh muon di sau them y nay: neu cong nghe da dung. ban noi ro hon giup minh nhe?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. iterator va generator: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh muon di sau them y nay: yield. ban noi ro hon giup minh nhe?",
+         "minh hoi ky hon mot chut nhe: lazy evaluation. ban nghi sao?",
+         "minh muon di sau them y nay: tiet kiem bo nho. ban noi ro hon giup minh nhe?",
+         "decorator va context manager: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: closure. ban thu tra loi lai xem?",
+         "type hint, dataclass va pydantic: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh hoi ky hon mot chut nhe: dataclass. ban nghi sao?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 0,
+         "follow_ups": 1,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 2,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 2
+        },
+        "end_reason": null,
+        "evaluated_turns": 10,
+        "gaps": [
+         {
+          "tag": "yield",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "tag": "evaluation-lazy",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "tag": "kiem-tiet",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "tag": "closure",
+          "turns": [
+           8,
+           9
+          ]
+         },
+         {
+          "tag": "functools.wraps",
+          "turns": [
+           8,
+           9
+          ]
+         },
+         {
+          "tag": "decorator-tham",
+          "turns": [
+           8,
+           9
+          ]
+         },
+         {
+          "tag": "dataclass",
+          "turns": [
+           10
+          ]
+         },
+         {
+          "tag": "pydantic-validation",
+          "turns": [
+           10
+          ]
+         },
+         {
+          "tag": "optional-union",
+          "turns": [
+           10
+          ]
+         }
+        ],
+        "momentum": -1,
+        "notes": [],
+        "phase": "technical",
+        "phase_started_s": 180,
+        "schema_version": 1,
+        "strengths": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1,
+           2,
+           3
+          ]
+         }
+        ],
+        "swaps": [],
+        "topic_index": 3,
+        "topic_started_s": 540,
+        "topics": [
+         {
+          "covered": [
+           "Giới thiệu ngắn gọn về nền tảng"
+          ],
+          "focus_used": [
+           "Mô tả một dự án và vai trò của mình",
+           "Nêu công nghệ đã dùng"
+          ],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 3,
+          "score_band": 2.0,
+          "score_sum": 6.0,
+          "status": "done",
+          "turns": [
+           1,
+           2,
+           3
+          ]
+         },
+         {
+          "covered": [
+           "Nêu được iterator protocol"
+          ],
+          "focus_used": [
+           "yield",
+           "lazy evaluation",
+           "tiết kiệm bộ nhớ"
+          ],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 4,
+          "score_band": 1.8,
+          "score_sum": 7.040000000000001,
+          "status": "done",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "closure"
+          ],
+          "hint_used": true,
+          "id": "t3",
+          "n_scored": 2,
+          "score_band": 0.5,
+          "score_sum": 0.96,
+          "status": "done",
+          "turns": [
+           8,
+           9
+          ]
+         },
+         {
+          "covered": [
+           "Nêu được type hint và mypy"
+          ],
+          "focus_used": [
+           "dataclass"
+          ],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 1,
+          "score_band": 1.8,
+          "score_sum": 1.7600000000000002,
+          "status": "active",
+          "turns": [
+           10,
+           11
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 11,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "follow_up",
+        "action_reason": null,
+        "agent_decision": "deepen",
+        "decided_by": null,
+        "difficulty": 2,
+        "overrule_reason": null,
+        "phase": "technical",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "ok -> follow_up (luật 8)",
+        "swap_result": null,
+        "topic_id": "t4",
+        "turn_kind": "follow_up",
+        "turn_number": 11
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Em nghĩ là Nêu được type hint và mypy.",
+    "elapsed_seconds": 660,
+    "level": "middle",
+    "question": "Mình hỏi kỹ hơn một chút nhé: dataclass. Bạn nghĩ sao?",
+    "session_id": "g-partial",
+    "topic_turns": [
+     {
+      "a": "Em nghĩ là Nêu được type hint và mypy.",
+      "q": "Type hint, dataclass và Pydantic: bạn hiểu như thế nào và đã áp dụng ra sao?",
+      "source": "text"
+     }
+    ],
+    "track": "python_backend",
+    "turn_kind": "follow_up",
+    "turn_number": 11
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "follow_up",
+       "phase": "technical",
+       "topic_index": 4,
+       "topic_total": 5,
+       "turn_number": 12
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 4,
+       "t": "Mình hỏi kỹ hơn một chút nhé: Pydantic validation. Bạn nghĩ sao?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "partial",
+        "confidence": null,
+        "covered_points": [
+         "Nêu được type hint và mypy"
+        ],
+        "degraded": false,
+        "evidence": [
+         {
+          "claim": "Nêu được type hint và mypy",
+          "quote": "Em nghĩ là Nêu được type hint và mypy",
+          "source_ids": [],
+          "support": null
+         }
+        ],
+        "follow_up_focus": "dataclass",
+        "gap_tags": [
+         "dataclass",
+         "pydantic-validation",
+         "optional-union"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Nêu được dataclass",
+         "Nêu được Pydantic validation",
+         "Nêu được Optional và Union"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 1,
+         "extensibility": 0,
+         "relevance": 4,
+         "technical_accuracy": 2
+        },
+        "scores_10": {
+         "completeness": 2.5,
+         "extensibility": 0.0,
+         "relevance": 10.0,
+         "technical_accuracy": 5.0
+        },
+        "sources": [],
+        "strength_tags": [
+         "hint-mypy"
+        ],
+        "transcript_low_confidence": false,
+        "turn_number": 11,
+        "turn_score_10": 4.4
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Mình hỏi kỹ hơn một chút nhé: Pydantic validation. Bạn nghĩ sao?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t4",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "minh muon di sau them y nay: mo ta mot du an va vai tro cua minh. ban noi ro hon giup minh nhe?",
+         "minh muon di sau them y nay: neu cong nghe da dung. ban noi ro hon giup minh nhe?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. iterator va generator: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh muon di sau them y nay: yield. ban noi ro hon giup minh nhe?",
+         "minh hoi ky hon mot chut nhe: lazy evaluation. ban nghi sao?",
+         "minh muon di sau them y nay: tiet kiem bo nho. ban noi ro hon giup minh nhe?",
+         "decorator va context manager: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: closure. ban thu tra loi lai xem?",
+         "type hint, dataclass va pydantic: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh hoi ky hon mot chut nhe: dataclass. ban nghi sao?",
+         "minh hoi ky hon mot chut nhe: pydantic validation. ban nghi sao?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 0,
+         "follow_ups": 2,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 2,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 2
+        },
+        "end_reason": null,
+        "evaluated_turns": 11,
+        "gaps": [
+         {
+          "tag": "yield",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "tag": "evaluation-lazy",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "tag": "kiem-tiet",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "tag": "closure",
+          "turns": [
+           8,
+           9
+          ]
+         },
+         {
+          "tag": "functools.wraps",
+          "turns": [
+           8,
+           9
+          ]
+         },
+         {
+          "tag": "decorator-tham",
+          "turns": [
+           8,
+           9
+          ]
+         },
+         {
+          "tag": "dataclass",
+          "turns": [
+           10,
+           11
+          ]
+         },
+         {
+          "tag": "pydantic-validation",
+          "turns": [
+           10,
+           11
+          ]
+         },
+         {
+          "tag": "optional-union",
+          "turns": [
+           10,
+           11
+          ]
+         }
+        ],
+        "momentum": -1,
+        "notes": [],
+        "phase": "technical",
+        "phase_started_s": 180,
+        "schema_version": 1,
+        "strengths": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1,
+           2,
+           3
+          ]
+         }
+        ],
+        "swaps": [],
+        "topic_index": 3,
+        "topic_started_s": 540,
+        "topics": [
+         {
+          "covered": [
+           "Giới thiệu ngắn gọn về nền tảng"
+          ],
+          "focus_used": [
+           "Mô tả một dự án và vai trò của mình",
+           "Nêu công nghệ đã dùng"
+          ],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 3,
+          "score_band": 2.0,
+          "score_sum": 6.0,
+          "status": "done",
+          "turns": [
+           1,
+           2,
+           3
+          ]
+         },
+         {
+          "covered": [
+           "Nêu được iterator protocol"
+          ],
+          "focus_used": [
+           "yield",
+           "lazy evaluation",
+           "tiết kiệm bộ nhớ"
+          ],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 4,
+          "score_band": 1.8,
+          "score_sum": 7.040000000000001,
+          "status": "done",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "closure"
+          ],
+          "hint_used": true,
+          "id": "t3",
+          "n_scored": 2,
+          "score_band": 0.5,
+          "score_sum": 0.96,
+          "status": "done",
+          "turns": [
+           8,
+           9
+          ]
+         },
+         {
+          "covered": [
+           "Nêu được type hint và mypy"
+          ],
+          "focus_used": [
+           "dataclass",
+           "Pydantic validation"
+          ],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 2,
+          "score_band": 1.8,
+          "score_sum": 3.5200000000000005,
+          "status": "active",
+          "turns": [
+           10,
+           11,
+           12
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 12,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "follow_up",
+        "action_reason": null,
+        "agent_decision": "deepen",
+        "decided_by": null,
+        "difficulty": 2,
+        "overrule_reason": null,
+        "phase": "technical",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "ok -> follow_up (luật 8)",
+        "swap_result": null,
+        "topic_id": "t4",
+        "turn_kind": "follow_up",
+        "turn_number": 12
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Em nghĩ là Nêu được type hint và mypy.",
+    "elapsed_seconds": 720,
+    "level": "middle",
+    "question": "Mình hỏi kỹ hơn một chút nhé: Pydantic validation. Bạn nghĩ sao?",
+    "session_id": "g-partial",
+    "topic_turns": [
+     {
+      "a": "Em nghĩ là Nêu được type hint và mypy.",
+      "q": "Type hint, dataclass và Pydantic: bạn hiểu như thế nào và đã áp dụng ra sao?",
+      "source": "text"
+     },
+     {
+      "a": "Em nghĩ là Nêu được type hint và mypy.",
+      "q": "Mình hỏi kỹ hơn một chút nhé: dataclass. Bạn nghĩ sao?",
+      "source": "text"
+     }
+    ],
+    "track": "python_backend",
+    "turn_kind": "follow_up",
+    "turn_number": 12
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "follow_up",
+       "phase": "technical",
+       "topic_index": 4,
+       "topic_total": 5,
+       "turn_number": 13
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 6,
+       "t": "Mình muốn đi sâu thêm ý này: Optional và Union. Bạn nói rõ hơn giúp mình nhé?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "partial",
+        "confidence": null,
+        "covered_points": [
+         "Nêu được type hint và mypy"
+        ],
+        "degraded": false,
+        "evidence": [
+         {
+          "claim": "Nêu được type hint và mypy",
+          "quote": "Em nghĩ là Nêu được type hint và mypy",
+          "source_ids": [],
+          "support": null
+         }
+        ],
+        "follow_up_focus": "dataclass",
+        "gap_tags": [
+         "dataclass",
+         "pydantic-validation",
+         "optional-union"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Nêu được dataclass",
+         "Nêu được Pydantic validation",
+         "Nêu được Optional và Union"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 1,
+         "extensibility": 0,
+         "relevance": 4,
+         "technical_accuracy": 2
+        },
+        "scores_10": {
+         "completeness": 2.5,
+         "extensibility": 0.0,
+         "relevance": 10.0,
+         "technical_accuracy": 5.0
+        },
+        "sources": [],
+        "strength_tags": [
+         "hint-mypy"
+        ],
+        "transcript_low_confidence": false,
+        "turn_number": 12,
+        "turn_score_10": 4.4
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Mình muốn đi sâu thêm ý này: Optional và Union. Bạn nói rõ hơn giúp mình nhé?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t4",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "minh muon di sau them y nay: mo ta mot du an va vai tro cua minh. ban noi ro hon giup minh nhe?",
+         "minh muon di sau them y nay: neu cong nghe da dung. ban noi ro hon giup minh nhe?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. iterator va generator: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh muon di sau them y nay: yield. ban noi ro hon giup minh nhe?",
+         "minh hoi ky hon mot chut nhe: lazy evaluation. ban nghi sao?",
+         "minh muon di sau them y nay: tiet kiem bo nho. ban noi ro hon giup minh nhe?",
+         "decorator va context manager: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: closure. ban thu tra loi lai xem?",
+         "type hint, dataclass va pydantic: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh hoi ky hon mot chut nhe: dataclass. ban nghi sao?",
+         "minh hoi ky hon mot chut nhe: pydantic validation. ban nghi sao?",
+         "minh muon di sau them y nay: optional va union. ban noi ro hon giup minh nhe?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 0,
+         "follow_ups": 3,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 2,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 2
+        },
+        "end_reason": null,
+        "evaluated_turns": 12,
+        "gaps": [
+         {
+          "tag": "yield",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "tag": "evaluation-lazy",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "tag": "kiem-tiet",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "tag": "closure",
+          "turns": [
+           8,
+           9
+          ]
+         },
+         {
+          "tag": "functools.wraps",
+          "turns": [
+           8,
+           9
+          ]
+         },
+         {
+          "tag": "decorator-tham",
+          "turns": [
+           8,
+           9
+          ]
+         },
+         {
+          "tag": "dataclass",
+          "turns": [
+           10,
+           11,
+           12
+          ]
+         },
+         {
+          "tag": "pydantic-validation",
+          "turns": [
+           10,
+           11,
+           12
+          ]
+         },
+         {
+          "tag": "optional-union",
+          "turns": [
+           10,
+           11,
+           12
+          ]
+         }
+        ],
+        "momentum": -1,
+        "notes": [],
+        "phase": "technical",
+        "phase_started_s": 180,
+        "schema_version": 1,
+        "strengths": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1,
+           2,
+           3
+          ]
+         }
+        ],
+        "swaps": [],
+        "topic_index": 3,
+        "topic_started_s": 540,
+        "topics": [
+         {
+          "covered": [
+           "Giới thiệu ngắn gọn về nền tảng"
+          ],
+          "focus_used": [
+           "Mô tả một dự án và vai trò của mình",
+           "Nêu công nghệ đã dùng"
+          ],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 3,
+          "score_band": 2.0,
+          "score_sum": 6.0,
+          "status": "done",
+          "turns": [
+           1,
+           2,
+           3
+          ]
+         },
+         {
+          "covered": [
+           "Nêu được iterator protocol"
+          ],
+          "focus_used": [
+           "yield",
+           "lazy evaluation",
+           "tiết kiệm bộ nhớ"
+          ],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 4,
+          "score_band": 1.8,
+          "score_sum": 7.040000000000001,
+          "status": "done",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "closure"
+          ],
+          "hint_used": true,
+          "id": "t3",
+          "n_scored": 2,
+          "score_band": 0.5,
+          "score_sum": 0.96,
+          "status": "done",
+          "turns": [
+           8,
+           9
+          ]
+         },
+         {
+          "covered": [
+           "Nêu được type hint và mypy"
+          ],
+          "focus_used": [
+           "dataclass",
+           "Pydantic validation",
+           "Optional và Union"
+          ],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 3,
+          "score_band": 1.8,
+          "score_sum": 5.280000000000001,
+          "status": "active",
+          "turns": [
+           10,
+           11,
+           12,
+           13
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 13,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "follow_up",
+        "action_reason": null,
+        "agent_decision": "deepen",
+        "decided_by": null,
+        "difficulty": 2,
+        "overrule_reason": null,
+        "phase": "technical",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "ok -> follow_up (luật 8)",
+        "swap_result": null,
+        "topic_id": "t4",
+        "turn_kind": "follow_up",
+        "turn_number": 13
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Em nghĩ là Nêu được type hint và mypy.",
+    "elapsed_seconds": 780,
+    "level": "middle",
+    "question": "Mình muốn đi sâu thêm ý này: Optional và Union. Bạn nói rõ hơn giúp mình nhé?",
+    "session_id": "g-partial",
+    "topic_turns": [
+     {
+      "a": "Em nghĩ là Nêu được type hint và mypy.",
+      "q": "Type hint, dataclass và Pydantic: bạn hiểu như thế nào và đã áp dụng ra sao?",
+      "source": "text"
+     },
+     {
+      "a": "Em nghĩ là Nêu được type hint và mypy.",
+      "q": "Mình hỏi kỹ hơn một chút nhé: dataclass. Bạn nghĩ sao?",
+      "source": "text"
+     },
+     {
+      "a": "Em nghĩ là Nêu được type hint và mypy.",
+      "q": "Mình hỏi kỹ hơn một chút nhé: Pydantic validation. Bạn nghĩ sao?",
+      "source": "text"
+     }
+    ],
+    "track": "python_backend",
+    "turn_kind": "follow_up",
+    "turn_number": 13
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "ask_main",
+       "phase": "scenario",
+       "topic_index": 5,
+       "topic_total": 5,
+       "turn_number": 14
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 9,
+       "t": "Tiếp theo là một tình huống thực tế. Tình huống: API xuất báo cáo bị timeout với dữ liệu lớn. Bạn sẽ tiếp cận thế nào?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "partial",
+        "confidence": null,
+        "covered_points": [
+         "Nêu được type hint và mypy"
+        ],
+        "degraded": false,
+        "evidence": [
+         {
+          "claim": "Nêu được type hint và mypy",
+          "quote": "Em nghĩ là Nêu được type hint và mypy",
+          "source_ids": [],
+          "support": null
+         }
+        ],
+        "follow_up_focus": "dataclass",
+        "gap_tags": [
+         "dataclass",
+         "pydantic-validation",
+         "optional-union"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Nêu được dataclass",
+         "Nêu được Pydantic validation",
+         "Nêu được Optional và Union"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 1,
+         "extensibility": 0,
+         "relevance": 4,
+         "technical_accuracy": 2
+        },
+        "scores_10": {
+         "completeness": 2.5,
+         "extensibility": 0.0,
+         "relevance": 10.0,
+         "technical_accuracy": 5.0
+        },
+        "sources": [],
+        "strength_tags": [
+         "hint-mypy"
+        ],
+        "transcript_low_confidence": false,
+        "turn_number": 13,
+        "turn_score_10": 4.4
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Tiếp theo là một tình huống thực tế. Tình huống: API xuất báo cáo bị timeout với dữ liệu lớn. Bạn sẽ tiếp cận thế nào?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t5",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "minh muon di sau them y nay: mo ta mot du an va vai tro cua minh. ban noi ro hon giup minh nhe?",
+         "minh muon di sau them y nay: neu cong nghe da dung. ban noi ro hon giup minh nhe?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. iterator va generator: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh muon di sau them y nay: yield. ban noi ro hon giup minh nhe?",
+         "minh hoi ky hon mot chut nhe: lazy evaluation. ban nghi sao?",
+         "minh muon di sau them y nay: tiet kiem bo nho. ban noi ro hon giup minh nhe?",
+         "decorator va context manager: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: closure. ban thu tra loi lai xem?",
+         "type hint, dataclass va pydantic: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh hoi ky hon mot chut nhe: dataclass. ban nghi sao?",
+         "minh hoi ky hon mot chut nhe: pydantic validation. ban nghi sao?",
+         "minh muon di sau them y nay: optional va union. ban noi ro hon giup minh nhe?",
+         "tiep theo la mot tinh huong thuc te. tinh huong: api xuat bao cao bi timeout voi du lieu lon. ban se tiep can the nao?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 0,
+         "follow_ups": 0,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 3,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 2
+        },
+        "end_reason": null,
+        "evaluated_turns": 13,
+        "gaps": [
+         {
+          "tag": "yield",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "tag": "evaluation-lazy",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "tag": "kiem-tiet",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "tag": "closure",
+          "turns": [
+           8,
+           9
+          ]
+         },
+         {
+          "tag": "functools.wraps",
+          "turns": [
+           8,
+           9
+          ]
+         },
+         {
+          "tag": "decorator-tham",
+          "turns": [
+           8,
+           9
+          ]
+         },
+         {
+          "tag": "dataclass",
+          "turns": [
+           10,
+           11,
+           12,
+           13
+          ]
+         },
+         {
+          "tag": "pydantic-validation",
+          "turns": [
+           10,
+           11,
+           12,
+           13
+          ]
+         },
+         {
+          "tag": "optional-union",
+          "turns": [
+           10,
+           11,
+           12,
+           13
+          ]
+         }
+        ],
+        "momentum": 0,
+        "notes": [],
+        "phase": "scenario",
+        "phase_started_s": 780,
+        "schema_version": 1,
+        "strengths": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1,
+           2,
+           3
+          ]
+         }
+        ],
+        "swaps": [],
+        "topic_index": 1,
+        "topic_started_s": 780,
+        "topics": [
+         {
+          "covered": [
+           "Giới thiệu ngắn gọn về nền tảng"
+          ],
+          "focus_used": [
+           "Mô tả một dự án và vai trò của mình",
+           "Nêu công nghệ đã dùng"
+          ],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 3,
+          "score_band": 2.0,
+          "score_sum": 6.0,
+          "status": "done",
+          "turns": [
+           1,
+           2,
+           3
+          ]
+         },
+         {
+          "covered": [
+           "Nêu được iterator protocol"
+          ],
+          "focus_used": [
+           "yield",
+           "lazy evaluation",
+           "tiết kiệm bộ nhớ"
+          ],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 4,
+          "score_band": 1.8,
+          "score_sum": 7.040000000000001,
+          "status": "done",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "closure"
+          ],
+          "hint_used": true,
+          "id": "t3",
+          "n_scored": 2,
+          "score_band": 0.5,
+          "score_sum": 0.96,
+          "status": "done",
+          "turns": [
+           8,
+           9
+          ]
+         },
+         {
+          "covered": [
+           "Nêu được type hint và mypy"
+          ],
+          "focus_used": [
+           "dataclass",
+           "Pydantic validation",
+           "Optional và Union"
+          ],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 4,
+          "score_band": 1.8,
+          "score_sum": 7.040000000000001,
+          "status": "done",
+          "turns": [
+           10,
+           11,
+           12,
+           13
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "active",
+          "turns": [
+           14
+          ]
+         }
+        ],
+        "turn_count": 14,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "ask_main",
+        "action_reason": null,
+        "agent_decision": "switch_topic",
+        "decided_by": null,
+        "difficulty": 3,
+        "overrule_reason": null,
+        "phase": "scenario",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "ok -> next_topic (luật 9)",
+        "swap_result": null,
+        "topic_id": "t5",
+        "turn_kind": "main",
+        "turn_number": 14
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Em nghĩ là Làm rõ yêu cầu và giả định.",
+    "elapsed_seconds": 840,
+    "level": "middle",
+    "question": "Tiếp theo là một tình huống thực tế. Tình huống: API xuất báo cáo bị timeout với dữ liệu lớn. Bạn sẽ tiếp cận thế nào?",
+    "session_id": "g-partial",
+    "topic_turns": [],
+    "track": "python_backend",
+    "turn_kind": "main",
+    "turn_number": 14
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "clarify",
+       "phase": "scenario",
+       "topic_index": 5,
+       "topic_total": 5,
+       "turn_number": 15
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 11,
+       "t": "Mình hỏi lại cho rõ nhé: Tiếp theo là một tình huống thực tế. Tình huống: API xuất báo cáo bị timeout với dữ liệu lớn. Bạn sẽ tiếp cận thế nào?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "off_topic",
+        "confidence": null,
+        "covered_points": [],
+        "degraded": false,
+        "evidence": [],
+        "follow_up_focus": "Làm rõ yêu cầu và giả định",
+        "gap_tags": [
+         "dinh",
+         "hoac-huong",
+         "trade"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Làm rõ yêu cầu và giả định",
+         "Đề xuất thiết kế hoặc hướng giải quyết cụ thể",
+         "Nêu trade-off và rủi ro"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 0,
+         "extensibility": 0,
+         "relevance": 0,
+         "technical_accuracy": 1
+        },
+        "scores_10": {
+         "completeness": 0.0,
+         "extensibility": 0.0,
+         "relevance": 0.0,
+         "technical_accuracy": 2.5
+        },
+        "sources": [],
+        "strength_tags": [],
+        "transcript_low_confidence": false,
+        "turn_number": 14,
+        "turn_score_10": 0.6
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Mình hỏi lại cho rõ nhé: Tiếp theo là một tình huống thực tế. Tình huống: API xuất báo cáo bị timeout với dữ liệu lớn. Bạn sẽ tiếp cận thế nào?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t5",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "minh muon di sau them y nay: mo ta mot du an va vai tro cua minh. ban noi ro hon giup minh nhe?",
+         "minh muon di sau them y nay: neu cong nghe da dung. ban noi ro hon giup minh nhe?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. iterator va generator: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh muon di sau them y nay: yield. ban noi ro hon giup minh nhe?",
+         "minh hoi ky hon mot chut nhe: lazy evaluation. ban nghi sao?",
+         "minh muon di sau them y nay: tiet kiem bo nho. ban noi ro hon giup minh nhe?",
+         "decorator va context manager: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: closure. ban thu tra loi lai xem?",
+         "type hint, dataclass va pydantic: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh hoi ky hon mot chut nhe: dataclass. ban nghi sao?",
+         "minh hoi ky hon mot chut nhe: pydantic validation. ban nghi sao?",
+         "minh muon di sau them y nay: optional va union. ban noi ro hon giup minh nhe?",
+         "tiep theo la mot tinh huong thuc te. tinh huong: api xuat bao cao bi timeout voi du lieu lon. ban se tiep can the nao?",
+         "minh hoi lai cho ro nhe: tiep theo la mot tinh huong thuc te. tinh huong: api xuat bao cao bi timeout voi du lieu lon. ban se tiep can the nao?"
+        ],
+        "counters": {
+         "clarifies": 1,
+         "consecutive_dont_know": 0,
+         "follow_ups": 1,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 3,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 2
+        },
+        "end_reason": null,
+        "evaluated_turns": 14,
+        "gaps": [
+         {
+          "tag": "yield",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "tag": "evaluation-lazy",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "tag": "kiem-tiet",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "tag": "closure",
+          "turns": [
+           8,
+           9
+          ]
+         },
+         {
+          "tag": "functools.wraps",
+          "turns": [
+           8,
+           9
+          ]
+         },
+         {
+          "tag": "decorator-tham",
+          "turns": [
+           8,
+           9
+          ]
+         },
+         {
+          "tag": "dataclass",
+          "turns": [
+           10,
+           11,
+           12,
+           13
+          ]
+         },
+         {
+          "tag": "pydantic-validation",
+          "turns": [
+           10,
+           11,
+           12,
+           13
+          ]
+         },
+         {
+          "tag": "optional-union",
+          "turns": [
+           10,
+           11,
+           12,
+           13
+          ]
+         },
+         {
+          "tag": "dinh",
+          "turns": [
+           14
+          ]
+         }
+        ],
+        "momentum": 0,
+        "notes": [],
+        "phase": "scenario",
+        "phase_started_s": 780,
+        "schema_version": 1,
+        "strengths": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1,
+           2,
+           3
+          ]
+         }
+        ],
+        "swaps": [],
+        "topic_index": 1,
+        "topic_started_s": 780,
+        "topics": [
+         {
+          "covered": [
+           "Giới thiệu ngắn gọn về nền tảng"
+          ],
+          "focus_used": [
+           "Mô tả một dự án và vai trò của mình",
+           "Nêu công nghệ đã dùng"
+          ],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 3,
+          "score_band": 2.0,
+          "score_sum": 6.0,
+          "status": "done",
+          "turns": [
+           1,
+           2,
+           3
+          ]
+         },
+         {
+          "covered": [
+           "Nêu được iterator protocol"
+          ],
+          "focus_used": [
+           "yield",
+           "lazy evaluation",
+           "tiết kiệm bộ nhớ"
+          ],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 4,
+          "score_band": 1.8,
+          "score_sum": 7.040000000000001,
+          "status": "done",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "closure"
+          ],
+          "hint_used": true,
+          "id": "t3",
+          "n_scored": 2,
+          "score_band": 0.5,
+          "score_sum": 0.96,
+          "status": "done",
+          "turns": [
+           8,
+           9
+          ]
+         },
+         {
+          "covered": [
+           "Nêu được type hint và mypy"
+          ],
+          "focus_used": [
+           "dataclass",
+           "Pydantic validation",
+           "Optional và Union"
+          ],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 4,
+          "score_band": 1.8,
+          "score_sum": 7.040000000000001,
+          "status": "done",
+          "turns": [
+           10,
+           11,
+           12,
+           13
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 1,
+          "score_band": 0.2,
+          "score_sum": 0.24,
+          "status": "active",
+          "turns": [
+           14,
+           15
+          ]
+         }
+        ],
+        "turn_count": 15,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "clarify",
+        "action_reason": null,
+        "agent_decision": "keep_difficulty",
+        "decided_by": null,
+        "difficulty": 3,
+        "overrule_reason": null,
+        "phase": "scenario",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "off_topic -> clarify (luật 2)",
+        "swap_result": null,
+        "topic_id": "t5",
+        "turn_kind": "clarify",
+        "turn_number": 15
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Em nghĩ là Làm rõ yêu cầu và giả định.",
+    "elapsed_seconds": 900,
+    "level": "middle",
+    "question": "Mình hỏi lại cho rõ nhé: Tiếp theo là một tình huống thực tế. Tình huống: API xuất báo cáo bị timeout với dữ liệu lớn. Bạn sẽ tiếp cận thế nào?",
+    "session_id": "g-partial",
+    "topic_turns": [
+     {
+      "a": "Em nghĩ là Làm rõ yêu cầu và giả định.",
+      "q": "Tiếp theo là một tình huống thực tế. Tình huống: API xuất báo cáo bị timeout với dữ liệu lớn. Bạn sẽ tiếp cận thế nào?",
+      "source": "text"
+     }
+    ],
+    "track": "python_backend",
+    "turn_kind": "clarify",
+    "turn_number": 15
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "wrap_up",
+       "phase": "wrap_up",
+       "topic_index": 5,
+       "topic_total": 5,
+       "turn_number": 16
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 7,
+       "t": "Cảm ơn bạn, buổi phỏng vấn đến đây là kết thúc. Bạn còn câu hỏi nào dành cho mình không?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "off_topic",
+        "confidence": null,
+        "covered_points": [],
+        "degraded": false,
+        "evidence": [],
+        "follow_up_focus": "Làm rõ yêu cầu và giả định",
+        "gap_tags": [
+         "dinh",
+         "hoac-huong",
+         "trade"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Làm rõ yêu cầu và giả định",
+         "Đề xuất thiết kế hoặc hướng giải quyết cụ thể",
+         "Nêu trade-off và rủi ro"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 0,
+         "extensibility": 0,
+         "relevance": 0,
+         "technical_accuracy": 1
+        },
+        "scores_10": {
+         "completeness": 0.0,
+         "extensibility": 0.0,
+         "relevance": 0.0,
+         "technical_accuracy": 2.5
+        },
+        "sources": [],
+        "strength_tags": [],
+        "transcript_low_confidence": false,
+        "turn_number": 15,
+        "turn_score_10": 0.6
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Cảm ơn bạn, buổi phỏng vấn đến đây là kết thúc. Bạn còn câu hỏi nào dành cho mình không?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": null,
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "minh muon di sau them y nay: mo ta mot du an va vai tro cua minh. ban noi ro hon giup minh nhe?",
+         "minh muon di sau them y nay: neu cong nghe da dung. ban noi ro hon giup minh nhe?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. iterator va generator: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh muon di sau them y nay: yield. ban noi ro hon giup minh nhe?",
+         "minh hoi ky hon mot chut nhe: lazy evaluation. ban nghi sao?",
+         "minh muon di sau them y nay: tiet kiem bo nho. ban noi ro hon giup minh nhe?",
+         "decorator va context manager: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: closure. ban thu tra loi lai xem?",
+         "type hint, dataclass va pydantic: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh hoi ky hon mot chut nhe: dataclass. ban nghi sao?",
+         "minh hoi ky hon mot chut nhe: pydantic validation. ban nghi sao?",
+         "minh muon di sau them y nay: optional va union. ban noi ro hon giup minh nhe?",
+         "tiep theo la mot tinh huong thuc te. tinh huong: api xuat bao cao bi timeout voi du lieu lon. ban se tiep can the nao?",
+         "minh hoi lai cho ro nhe: tiep theo la mot tinh huong thuc te. tinh huong: api xuat bao cao bi timeout voi du lieu lon. ban se tiep can the nao?",
+         "cam on ban, buoi phong van den day la ket thuc. ban con cau hoi nao danh cho minh khong?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 0,
+         "follow_ups": 0,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 3,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 2
+        },
+        "end_reason": null,
+        "evaluated_turns": 15,
+        "gaps": [
+         {
+          "tag": "yield",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "tag": "evaluation-lazy",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "tag": "kiem-tiet",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "tag": "closure",
+          "turns": [
+           8,
+           9
+          ]
+         },
+         {
+          "tag": "functools.wraps",
+          "turns": [
+           8,
+           9
+          ]
+         },
+         {
+          "tag": "decorator-tham",
+          "turns": [
+           8,
+           9
+          ]
+         },
+         {
+          "tag": "dataclass",
+          "turns": [
+           10,
+           11,
+           12,
+           13
+          ]
+         },
+         {
+          "tag": "pydantic-validation",
+          "turns": [
+           10,
+           11,
+           12,
+           13
+          ]
+         },
+         {
+          "tag": "optional-union",
+          "turns": [
+           10,
+           11,
+           12,
+           13
+          ]
+         },
+         {
+          "tag": "dinh",
+          "turns": [
+           14,
+           15
+          ]
+         }
+        ],
+        "momentum": -1,
+        "notes": [],
+        "phase": "wrap_up",
+        "phase_started_s": 780,
+        "schema_version": 1,
+        "strengths": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1,
+           2,
+           3
+          ]
+         }
+        ],
+        "swaps": [],
+        "topic_index": 1,
+        "topic_started_s": 780,
+        "topics": [
+         {
+          "covered": [
+           "Giới thiệu ngắn gọn về nền tảng"
+          ],
+          "focus_used": [
+           "Mô tả một dự án và vai trò của mình",
+           "Nêu công nghệ đã dùng"
+          ],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 3,
+          "score_band": 2.0,
+          "score_sum": 6.0,
+          "status": "done",
+          "turns": [
+           1,
+           2,
+           3
+          ]
+         },
+         {
+          "covered": [
+           "Nêu được iterator protocol"
+          ],
+          "focus_used": [
+           "yield",
+           "lazy evaluation",
+           "tiết kiệm bộ nhớ"
+          ],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 4,
+          "score_band": 1.8,
+          "score_sum": 7.040000000000001,
+          "status": "done",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "closure"
+          ],
+          "hint_used": true,
+          "id": "t3",
+          "n_scored": 2,
+          "score_band": 0.5,
+          "score_sum": 0.96,
+          "status": "done",
+          "turns": [
+           8,
+           9
+          ]
+         },
+         {
+          "covered": [
+           "Nêu được type hint và mypy"
+          ],
+          "focus_used": [
+           "dataclass",
+           "Pydantic validation",
+           "Optional và Union"
+          ],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 4,
+          "score_band": 1.8,
+          "score_sum": 7.040000000000001,
+          "status": "done",
+          "turns": [
+           10,
+           11,
+           12,
+           13
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 2,
+          "score_band": 0.2,
+          "score_sum": 0.48,
+          "status": "done",
+          "turns": [
+           14,
+           15
+          ]
+         }
+        ],
+        "turn_count": 16,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "wrap_up",
+        "action_reason": null,
+        "agent_decision": "switch_topic",
+        "decided_by": null,
+        "difficulty": 3,
+        "overrule_reason": null,
+        "phase": "wrap_up",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "off_topic -> next_topic (luật 3)",
+        "swap_result": null,
+        "topic_id": null,
+        "turn_kind": "main",
+        "turn_number": 16
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Dạ em chưa rõ ạ.",
+    "elapsed_seconds": 960,
+    "level": "middle",
+    "question": "Cảm ơn bạn, buổi phỏng vấn đến đây là kết thúc. Bạn còn câu hỏi nào dành cho mình không?",
+    "session_id": "g-partial",
+    "topic_turns": [],
+    "track": "python_backend",
+    "turn_kind": "main",
+    "turn_number": 16
+   },
+   "response": {
+    "events": [
+     [
+      "done",
+      {
+       "evaluation": null,
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": null,
+       "session_end": true,
+       "state": {
+        "active_topic_id": null,
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "minh muon di sau them y nay: mo ta mot du an va vai tro cua minh. ban noi ro hon giup minh nhe?",
+         "minh muon di sau them y nay: neu cong nghe da dung. ban noi ro hon giup minh nhe?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. iterator va generator: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh muon di sau them y nay: yield. ban noi ro hon giup minh nhe?",
+         "minh hoi ky hon mot chut nhe: lazy evaluation. ban nghi sao?",
+         "minh muon di sau them y nay: tiet kiem bo nho. ban noi ro hon giup minh nhe?",
+         "decorator va context manager: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: closure. ban thu tra loi lai xem?",
+         "type hint, dataclass va pydantic: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh hoi ky hon mot chut nhe: dataclass. ban nghi sao?",
+         "minh hoi ky hon mot chut nhe: pydantic validation. ban nghi sao?",
+         "minh muon di sau them y nay: optional va union. ban noi ro hon giup minh nhe?",
+         "tiep theo la mot tinh huong thuc te. tinh huong: api xuat bao cao bi timeout voi du lieu lon. ban se tiep can the nao?",
+         "minh hoi lai cho ro nhe: tiep theo la mot tinh huong thuc te. tinh huong: api xuat bao cao bi timeout voi du lieu lon. ban se tiep can the nao?",
+         "cam on ban, buoi phong van den day la ket thuc. ban con cau hoi nao danh cho minh khong?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 0,
+         "follow_ups": 0,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 3,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 2
+        },
+        "end_reason": "plan_complete",
+        "evaluated_turns": 15,
+        "gaps": [
+         {
+          "tag": "yield",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "tag": "evaluation-lazy",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "tag": "kiem-tiet",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "tag": "closure",
+          "turns": [
+           8,
+           9
+          ]
+         },
+         {
+          "tag": "functools.wraps",
+          "turns": [
+           8,
+           9
+          ]
+         },
+         {
+          "tag": "decorator-tham",
+          "turns": [
+           8,
+           9
+          ]
+         },
+         {
+          "tag": "dataclass",
+          "turns": [
+           10,
+           11,
+           12,
+           13
+          ]
+         },
+         {
+          "tag": "pydantic-validation",
+          "turns": [
+           10,
+           11,
+           12,
+           13
+          ]
+         },
+         {
+          "tag": "optional-union",
+          "turns": [
+           10,
+           11,
+           12,
+           13
+          ]
+         },
+         {
+          "tag": "dinh",
+          "turns": [
+           14,
+           15
+          ]
+         }
+        ],
+        "momentum": -1,
+        "notes": [],
+        "phase": "done",
+        "phase_started_s": 780,
+        "schema_version": 1,
+        "strengths": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1,
+           2,
+           3
+          ]
+         }
+        ],
+        "swaps": [],
+        "topic_index": 1,
+        "topic_started_s": 780,
+        "topics": [
+         {
+          "covered": [
+           "Giới thiệu ngắn gọn về nền tảng"
+          ],
+          "focus_used": [
+           "Mô tả một dự án và vai trò của mình",
+           "Nêu công nghệ đã dùng"
+          ],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 3,
+          "score_band": 2.0,
+          "score_sum": 6.0,
+          "status": "done",
+          "turns": [
+           1,
+           2,
+           3
+          ]
+         },
+         {
+          "covered": [
+           "Nêu được iterator protocol"
+          ],
+          "focus_used": [
+           "yield",
+           "lazy evaluation",
+           "tiết kiệm bộ nhớ"
+          ],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 4,
+          "score_band": 1.8,
+          "score_sum": 7.040000000000001,
+          "status": "done",
+          "turns": [
+           4,
+           5,
+           6,
+           7
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "closure"
+          ],
+          "hint_used": true,
+          "id": "t3",
+          "n_scored": 2,
+          "score_band": 0.5,
+          "score_sum": 0.96,
+          "status": "done",
+          "turns": [
+           8,
+           9
+          ]
+         },
+         {
+          "covered": [
+           "Nêu được type hint và mypy"
+          ],
+          "focus_used": [
+           "dataclass",
+           "Pydantic validation",
+           "Optional và Union"
+          ],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 4,
+          "score_band": 1.8,
+          "score_sum": 7.040000000000001,
+          "status": "done",
+          "turns": [
+           10,
+           11,
+           12,
+           13
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 2,
+          "score_band": 0.2,
+          "score_sum": 0.48,
+          "status": "done",
+          "turns": [
+           14,
+           15
+          ]
+         }
+        ],
+        "turn_count": 16,
+        "used_qa_ids": []
+       },
+       "turn": null
+      }
+     ]
+    ],
+    "status": 200
+   }
+  }
+ ]
+}

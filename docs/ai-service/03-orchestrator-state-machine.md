@@ -185,6 +185,38 @@ async def run_turn(req: NextTurnRequest) -> AsyncIterator[SseEvent]:
 `/api/start` giống vậy nhưng bước 1 là Planner (+ RAG cho từng topic), không có Evaluator, action luôn là
 `ask_main` topic đầu.
 
+> **Graph LangGraph (2026-11-27, pha A của [12](12-langgraph-wrapper-and-session-memory-proposal.md), nhánh
+> `thang/langgraph-orchestrator`, chờ team duyệt đảo README A4).** `/api/next-turn` chạy lượt qua graph
+> `app/turn_graph/` (LangGraph, **không** checkpointer, API và SSE không đổi). Logic không đổi: thân `next_turn()`
+> cũ tách nguyên văn thành 4 bước ở `app/turn_steps.py`. `turn_engine.next_turn()` gọi tuần tự 4 bước (test, evals
+> in-process); graph gọi từng bước làm node. Node `ask` chạy Interviewer và đẩy event `meta` / `token` / `replace`
+> qua stream writer. `finish_turn` chạy cuối `ask`, nên khi graph xong thì câu hỏi thật đã nằm trong state.
+> Endpoint chạy graph tới event đầu của `ask` **trước** khi mở response (`GraphTurnRun.prime`), nên 409 / 422 của
+> `perceive` vẫn trả đúng mã HTTP như cũ. Graph chạy trong một task asyncio riêng đẩy event vào hàng đợi; client ngắt
+> giữa stream thì `_TurnStream` huỷ task đó, Interviewer bị đóng ngay (không chạy nền tới hết câu).
+> Tương đương được kiểm bằng golden trace ghi từ code cũ (`tests/test_golden_turns_match_fixture.py`, 8 kịch bản)
+> và mô phỏng 10 phiên / 125 lượt giống hệt. Overhead đo bằng mock khoảng 3 ms P50 mỗi lượt. Sơ đồ (xuất bằng
+> `scripts/export_turn_graph_mermaid.py`):
+>
+> ```mermaid
+> graph TD;
+>   __start__([start]) --> perceive;
+>   perceive -. session_end .-> __end__([end]);
+>   perceive -.-> reask;
+>   perceive -.-> evaluate;
+>   reask --> ask;
+>   evaluate --> decide;
+>   decide -. session_end .-> __end__;
+>   decide -. follow_up, hint, clarify, next_topic, next_phase, wrap_up .-> act;
+>   act --> ask;
+>   ask --> __end__;
+> ```
+>
+> `perceive`: đọc state, 409 phiên `done`, câu trả lời cho wrap-up thì đóng phiên (`session_end`), 422 voice / `reask`.
+> `evaluate`: RAG + Evaluator, `record_evaluation`. `decide`: `forced_transition` (quá hạn cứng thì `session_end`) →
+> `choose_decision` (hybrid / luật / `low_performance_stop`, swap). `act`: `apply_action`, chọn câu trong kho, dựng
+> `QuestionSpec` + `TurnInfo`. `/api/start` chưa đi qua graph (node `plan` để pha C).
+
 > **Policy lai (2026-11-14, phase 04, `POLICY_MODE=rules|hybrid`, mặc định `rules`, `app/turn_decision.py`).** Thứ tự quyết định mỗi lượt: **`forced_transition` (hết giờ, turn cap, phase quá hạn, hai lần `dont_know`, topic quá hạn) → (chỉ `hybrid`) đề xuất của Evaluator đã qua `validate_decision` → `decide()` → `low_performance_stop`**. `forced`, `low_performance_stop` và turn cap luôn đứng trên LLM: đề xuất không bao giờ ghi đè chúng (`decided_by = "forced"`). `rules` giữ quyết định và request y như trước (Evaluator prompt v8, không `policy_context`, 5 trường `TurnInfo` mới là `null`). Trong `hybrid`, LLM chọn `follow_up`/`clarify` ở chỗ luật chọn `next_topic` chỉ làm `low_performance_stop` đến muộn hơn (tối đa hết ngân sách hành động của topic), không bao giờ vượt qua nó. Chi tiết bảng hợp lệ ở 04 §5.4, ngưỡng và đo ở 09.
 
 > **Đổi topic giữa buổi (2026-11-14, phase 05, `REPLAN_ENABLED=false`, chỉ có tác dụng khi `POLICY_MODE=hybrid`, `app/replan.py`).** Ở ranh giới topic technical (quyết định cuối của lượt là `next_topic`), Evaluator v10 có thể đề xuất `swap {drop, add, reason}`: đổi **một** topic technical `pending` lấy một topic dự phòng `alt{n}` chuẩn bị lúc start. Code kiểm (`validate_swap`) **sau** `forced_transition` và `low_performance_stop`: không đổi khi `forced` (hết giờ, turn cap, phase quá hạn, hai lần `dont_know`, topic quá hạn) hay khi `low_performance_stop` đã chuyển sang `wrap_up`; chỉ `drop` là topic technical `pending` ở **sau** topic hiện tại, không thuộc `keep_ids` (topic map từ yêu cầu JD), chỉ `add` là topic dự phòng chưa dùng, tối đa `REPLAN_MAX_SWAPS` (mặc định 1, trần 2), không đổi khi `time_hint = hurry`. Đổi **tại chỗ** (cùng vị trí) nên `state.topics[i]` vẫn khớp `flat_topics(plan)[i]` và `topic_budget_s` không đổi. Đề xuất chỉ được xét khi quyết định **không `forced`**, `overrule_reason` **khác `sensitive_kind`** (manipulation, off_topic, dont_know, câu trả lời có mẫu injection: ứng viên không được chọn topic nào bị bỏ; nhãn `untrusted`) và chính LLM đề xuất `next_topic` (`proposed_action`); còn lại `not_applicable`. Mọi lỗi → không đổi (nhãn lý do ở `turn.swap_result`). Nếu `state.topics` không khớp `flat_topics(effective_plan)` (vd client mất `plan.replan` nhưng giữ `state.swaps`) thì `/api/next-turn` trả 409 `session_invalid_state`. Mỗi entry point (next-turn, finalize, sim) gọi `effective_plan(plan, state)` một lần nên mọi reader phía sau (`time_budget`, `early_stop`, `apply_action`, điểm, báo cáo) thấy plan thực tế. Cờ tắt = quyết định, request và giá trị y như trước (04 §5.5, 06).

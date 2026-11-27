@@ -1,0 +1,5031 @@
+{
+ "finalize": {
+  "request": {
+   "duration_s": 780,
+   "end_reason": "plan_complete",
+   "level": "junior",
+   "session_id": "g-weak",
+   "track": "nodejs_backend",
+   "turns": [
+    {
+     "answer": "Em không biết ạ.",
+     "difficulty": 2,
+     "evaluation": {
+      "answer_type": "dont_know",
+      "confidence": null,
+      "covered_points": [],
+      "degraded": false,
+      "evidence": [],
+      "follow_up_focus": "Giới thiệu ngắn gọn về nền tảng",
+      "gap_tags": [
+       "gioi-ngan",
+       "minh",
+       "cong-dung"
+      ],
+      "misconceptions": [],
+      "missing_points": [
+       "Giới thiệu ngắn gọn về nền tảng",
+       "Mô tả một dự án và vai trò của mình",
+       "Nêu công nghệ đã dùng"
+      ],
+      "prompt_version": null,
+      "reference_missing": false,
+      "scores": {
+       "completeness": 0,
+       "extensibility": 0,
+       "relevance": 0,
+       "technical_accuracy": 0
+      },
+      "scores_10": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 0.0
+      },
+      "sources": [],
+      "strength_tags": [],
+      "transcript_low_confidence": false,
+      "turn_number": 1,
+      "turn_score_10": 0.0
+     },
+     "phase": "intro",
+     "question": "Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+     "topic_id": "t1",
+     "turn_kind": "main",
+     "turn_number": 1
+    },
+    {
+     "answer": "Em không biết ạ.",
+     "difficulty": 1,
+     "evaluation": {
+      "answer_type": "dont_know",
+      "confidence": null,
+      "covered_points": [],
+      "degraded": false,
+      "evidence": [],
+      "follow_up_focus": "Giới thiệu ngắn gọn về nền tảng",
+      "gap_tags": [
+       "gioi-ngan",
+       "minh",
+       "cong-dung"
+      ],
+      "misconceptions": [],
+      "missing_points": [
+       "Giới thiệu ngắn gọn về nền tảng",
+       "Mô tả một dự án và vai trò của mình",
+       "Nêu công nghệ đã dùng"
+      ],
+      "prompt_version": null,
+      "reference_missing": false,
+      "scores": {
+       "completeness": 0,
+       "extensibility": 0,
+       "relevance": 0,
+       "technical_accuracy": 0
+      },
+      "scores_10": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 0.0
+      },
+      "sources": [],
+      "strength_tags": [],
+      "transcript_low_confidence": false,
+      "turn_number": 2,
+      "turn_score_10": 0.0
+     },
+     "phase": "intro",
+     "question": "Mình gợi ý một hướng nhé: Giới thiệu ngắn gọn về nền tảng. Bạn thử trả lời lại xem?",
+     "topic_id": "t1",
+     "turn_kind": "hint",
+     "turn_number": 2
+    },
+    {
+     "answer": "Em không biết ạ.",
+     "difficulty": 1,
+     "evaluation": {
+      "answer_type": "dont_know",
+      "confidence": null,
+      "covered_points": [],
+      "degraded": false,
+      "evidence": [],
+      "follow_up_focus": "các pha của event loop",
+      "gap_tags": [
+       "event-loop",
+       "macrotask-microtask",
+       "blocking"
+      ],
+      "misconceptions": [],
+      "missing_points": [
+       "Nêu được các pha của event loop",
+       "Nêu được microtask vs macrotask",
+       "Nêu được blocking vs non-blocking"
+      ],
+      "prompt_version": null,
+      "reference_missing": false,
+      "scores": {
+       "completeness": 0,
+       "extensibility": 0,
+       "relevance": 0,
+       "technical_accuracy": 0
+      },
+      "scores_10": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 0.0
+      },
+      "sources": [],
+      "strength_tags": [],
+      "transcript_low_confidence": false,
+      "turn_number": 3,
+      "turn_score_10": 0.0
+     },
+     "phase": "technical",
+     "question": "Giờ mình chuyển sang phần kiến thức chuyên môn nhé. Event loop của Node.js: bạn hiểu như thế nào và đã áp dụng ra sao?",
+     "topic_id": "t2",
+     "turn_kind": "main",
+     "turn_number": 3
+    },
+    {
+     "answer": "Em không biết ạ.",
+     "difficulty": 1,
+     "evaluation": {
+      "answer_type": "dont_know",
+      "confidence": null,
+      "covered_points": [],
+      "degraded": false,
+      "evidence": [],
+      "follow_up_focus": "các pha của event loop",
+      "gap_tags": [
+       "event-loop",
+       "macrotask-microtask",
+       "blocking"
+      ],
+      "misconceptions": [],
+      "missing_points": [
+       "Nêu được các pha của event loop",
+       "Nêu được microtask vs macrotask",
+       "Nêu được blocking vs non-blocking"
+      ],
+      "prompt_version": null,
+      "reference_missing": false,
+      "scores": {
+       "completeness": 0,
+       "extensibility": 0,
+       "relevance": 0,
+       "technical_accuracy": 0
+      },
+      "scores_10": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 0.0
+      },
+      "sources": [],
+      "strength_tags": [],
+      "transcript_low_confidence": false,
+      "turn_number": 4,
+      "turn_score_10": 0.0
+     },
+     "phase": "technical",
+     "question": "Mình gợi ý một hướng nhé: các pha của event loop. Bạn thử trả lời lại xem?",
+     "topic_id": "t2",
+     "turn_kind": "hint",
+     "turn_number": 4
+    },
+    {
+     "answer": "Em không biết ạ.",
+     "difficulty": 1,
+     "evaluation": {
+      "answer_type": "dont_know",
+      "confidence": null,
+      "covered_points": [],
+      "degraded": false,
+      "evidence": [],
+      "follow_up_focus": "callback hell",
+      "gap_tags": [
+       "callback-hell",
+       "allsettled-promise.all",
+       "async-await"
+      ],
+      "misconceptions": [],
+      "missing_points": [
+       "Nêu được callback hell",
+       "Nêu được Promise.all vs allSettled",
+       "Nêu được xử lý lỗi với async/await"
+      ],
+      "prompt_version": null,
+      "reference_missing": false,
+      "scores": {
+       "completeness": 0,
+       "extensibility": 0,
+       "relevance": 0,
+       "technical_accuracy": 0
+      },
+      "scores_10": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 0.0
+      },
+      "sources": [],
+      "strength_tags": [],
+      "transcript_low_confidence": false,
+      "turn_number": 5,
+      "turn_score_10": 0.0
+     },
+     "phase": "technical",
+     "question": "Bất đồng bộ, Promise và async/await: bạn hiểu như thế nào và đã áp dụng ra sao?",
+     "topic_id": "t3",
+     "turn_kind": "main",
+     "turn_number": 5
+    },
+    {
+     "answer": "Em không biết ạ.",
+     "difficulty": 1,
+     "evaluation": {
+      "answer_type": "dont_know",
+      "confidence": null,
+      "covered_points": [],
+      "degraded": false,
+      "evidence": [],
+      "follow_up_focus": "callback hell",
+      "gap_tags": [
+       "callback-hell",
+       "allsettled-promise.all",
+       "async-await"
+      ],
+      "misconceptions": [],
+      "missing_points": [
+       "Nêu được callback hell",
+       "Nêu được Promise.all vs allSettled",
+       "Nêu được xử lý lỗi với async/await"
+      ],
+      "prompt_version": null,
+      "reference_missing": false,
+      "scores": {
+       "completeness": 0,
+       "extensibility": 0,
+       "relevance": 0,
+       "technical_accuracy": 0
+      },
+      "scores_10": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 0.0
+      },
+      "sources": [],
+      "strength_tags": [],
+      "transcript_low_confidence": false,
+      "turn_number": 6,
+      "turn_score_10": 0.0
+     },
+     "phase": "technical",
+     "question": "Mình gợi ý một hướng nhé: callback hell. Bạn thử trả lời lại xem?",
+     "topic_id": "t3",
+     "turn_kind": "hint",
+     "turn_number": 6
+    },
+    {
+     "answer": "Em không biết ạ.",
+     "difficulty": 1,
+     "evaluation": {
+      "answer_type": "dont_know",
+      "confidence": null,
+      "covered_points": [],
+      "degraded": false,
+      "evidence": [],
+      "follow_up_focus": "thứ tự middleware",
+      "gap_tags": [
+       "middleware",
+       "error-handling",
+       "routing"
+      ],
+      "misconceptions": [],
+      "missing_points": [
+       "Nêu được thứ tự middleware",
+       "Nêu được error-handling middleware",
+       "Nêu được routing"
+      ],
+      "prompt_version": null,
+      "reference_missing": false,
+      "scores": {
+       "completeness": 0,
+       "extensibility": 0,
+       "relevance": 0,
+       "technical_accuracy": 0
+      },
+      "scores_10": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 0.0
+      },
+      "sources": [],
+      "strength_tags": [],
+      "transcript_low_confidence": false,
+      "turn_number": 7,
+      "turn_score_10": 0.0
+     },
+     "phase": "technical",
+     "question": "Express và middleware: bạn hiểu như thế nào và đã áp dụng ra sao?",
+     "topic_id": "t4",
+     "turn_kind": "main",
+     "turn_number": 7
+    },
+    {
+     "answer": "Em không biết ạ.",
+     "difficulty": 1,
+     "evaluation": {
+      "answer_type": "dont_know",
+      "confidence": null,
+      "covered_points": [],
+      "degraded": false,
+      "evidence": [],
+      "follow_up_focus": "thứ tự middleware",
+      "gap_tags": [
+       "middleware",
+       "error-handling",
+       "routing"
+      ],
+      "misconceptions": [],
+      "missing_points": [
+       "Nêu được thứ tự middleware",
+       "Nêu được error-handling middleware",
+       "Nêu được routing"
+      ],
+      "prompt_version": null,
+      "reference_missing": false,
+      "scores": {
+       "completeness": 0,
+       "extensibility": 0,
+       "relevance": 0,
+       "technical_accuracy": 0
+      },
+      "scores_10": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 0.0
+      },
+      "sources": [],
+      "strength_tags": [],
+      "transcript_low_confidence": false,
+      "turn_number": 8,
+      "turn_score_10": 0.0
+     },
+     "phase": "technical",
+     "question": "Mình gợi ý một hướng nhé: thứ tự middleware. Bạn thử trả lời lại xem?",
+     "topic_id": "t4",
+     "turn_kind": "hint",
+     "turn_number": 8
+    },
+    {
+     "answer": "Em không biết ạ.",
+     "difficulty": 1,
+     "evaluation": {
+      "answer_type": "dont_know",
+      "confidence": null,
+      "covered_points": [],
+      "degraded": false,
+      "evidence": [],
+      "follow_up_focus": "module và provider",
+      "gap_tags": [
+       "module-provider",
+       "injection-scope",
+       "guard-interceptor"
+      ],
+      "misconceptions": [],
+      "missing_points": [
+       "Nêu được module và provider",
+       "Nêu được injection scope",
+       "Nêu được guard interceptor pipe"
+      ],
+      "prompt_version": null,
+      "reference_missing": false,
+      "scores": {
+       "completeness": 0,
+       "extensibility": 0,
+       "relevance": 0,
+       "technical_accuracy": 0
+      },
+      "scores_10": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 0.0
+      },
+      "sources": [],
+      "strength_tags": [],
+      "transcript_low_confidence": false,
+      "turn_number": 9,
+      "turn_score_10": 0.0
+     },
+     "phase": "technical",
+     "question": "NestJS module và Dependency Injection: bạn hiểu như thế nào và đã áp dụng ra sao?",
+     "topic_id": "t5",
+     "turn_kind": "main",
+     "turn_number": 9
+    },
+    {
+     "answer": "Em không biết ạ.",
+     "difficulty": 1,
+     "evaluation": {
+      "answer_type": "dont_know",
+      "confidence": null,
+      "covered_points": [],
+      "degraded": false,
+      "evidence": [],
+      "follow_up_focus": "module và provider",
+      "gap_tags": [
+       "module-provider",
+       "injection-scope",
+       "guard-interceptor"
+      ],
+      "misconceptions": [],
+      "missing_points": [
+       "Nêu được module và provider",
+       "Nêu được injection scope",
+       "Nêu được guard interceptor pipe"
+      ],
+      "prompt_version": null,
+      "reference_missing": false,
+      "scores": {
+       "completeness": 0,
+       "extensibility": 0,
+       "relevance": 0,
+       "technical_accuracy": 0
+      },
+      "scores_10": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 0.0
+      },
+      "sources": [],
+      "strength_tags": [],
+      "transcript_low_confidence": false,
+      "turn_number": 10,
+      "turn_score_10": 0.0
+     },
+     "phase": "technical",
+     "question": "Mình gợi ý một hướng nhé: module và provider. Bạn thử trả lời lại xem?",
+     "topic_id": "t5",
+     "turn_kind": "hint",
+     "turn_number": 10
+    },
+    {
+     "answer": "Em không biết ạ.",
+     "difficulty": 1,
+     "evaluation": {
+      "answer_type": "dont_know",
+      "confidence": null,
+      "covered_points": [],
+      "degraded": false,
+      "evidence": [],
+      "follow_up_focus": "Làm rõ yêu cầu và giả định",
+      "gap_tags": [
+       "dinh",
+       "hoac-huong",
+       "trade"
+      ],
+      "misconceptions": [],
+      "missing_points": [
+       "Làm rõ yêu cầu và giả định",
+       "Đề xuất thiết kế hoặc hướng giải quyết cụ thể",
+       "Nêu trade-off và rủi ro"
+      ],
+      "prompt_version": null,
+      "reference_missing": false,
+      "scores": {
+       "completeness": 0,
+       "extensibility": 0,
+       "relevance": 0,
+       "technical_accuracy": 0
+      },
+      "scores_10": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 0.0
+      },
+      "sources": [],
+      "strength_tags": [],
+      "transcript_low_confidence": false,
+      "turn_number": 11,
+      "turn_score_10": 0.0
+     },
+     "phase": "scenario",
+     "question": "Tiếp theo là một tình huống thực tế. Tình huống: Thiết kế dịch vụ upload file lớn. Bạn sẽ tiếp cận thế nào?",
+     "topic_id": "t6",
+     "turn_kind": "main",
+     "turn_number": 11
+    },
+    {
+     "answer": "Em không biết ạ.",
+     "difficulty": 1,
+     "evaluation": {
+      "answer_type": "dont_know",
+      "confidence": null,
+      "covered_points": [],
+      "degraded": false,
+      "evidence": [],
+      "follow_up_focus": "Làm rõ yêu cầu và giả định",
+      "gap_tags": [
+       "dinh",
+       "hoac-huong",
+       "trade"
+      ],
+      "misconceptions": [],
+      "missing_points": [
+       "Làm rõ yêu cầu và giả định",
+       "Đề xuất thiết kế hoặc hướng giải quyết cụ thể",
+       "Nêu trade-off và rủi ro"
+      ],
+      "prompt_version": null,
+      "reference_missing": false,
+      "scores": {
+       "completeness": 0,
+       "extensibility": 0,
+       "relevance": 0,
+       "technical_accuracy": 0
+      },
+      "scores_10": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 0.0
+      },
+      "sources": [],
+      "strength_tags": [],
+      "transcript_low_confidence": false,
+      "turn_number": 12,
+      "turn_score_10": 0.0
+     },
+     "phase": "scenario",
+     "question": "Mình gợi ý một hướng nhé: Làm rõ yêu cầu và giả định. Bạn thử trả lời lại xem?",
+     "topic_id": "t6",
+     "turn_kind": "hint",
+     "turn_number": 12
+    },
+    {
+     "answer": "Em không biết ạ.",
+     "difficulty": 1,
+     "evaluation": null,
+     "phase": "wrap_up",
+     "question": "Cảm ơn bạn, buổi phỏng vấn đến đây là kết thúc. Bạn còn câu hỏi nào dành cho mình không?",
+     "topic_id": null,
+     "turn_kind": "main",
+     "turn_number": 13
+    }
+   ]
+  },
+  "response": {
+   "json": {
+    "criteria": {
+     "completeness": 0.0,
+     "extensibility": 0.0,
+     "relevance": 0.0,
+     "technical_accuracy": 0.0
+    },
+    "improvements": [
+     {
+      "evidence_turns": [
+       1,
+       2
+      ],
+      "point": "Giới thiệu bản thân và dự án gần nhất",
+      "why": "Ứng viên chưa trả lời được câu này."
+     },
+     {
+      "evidence_turns": [
+       3,
+       4
+      ],
+      "point": "Event loop của Node.js",
+      "why": "Ứng viên chưa trả lời được câu này."
+     },
+     {
+      "evidence_turns": [
+       5,
+       6
+      ],
+      "point": "Bất đồng bộ, Promise và async/await",
+      "why": "Ứng viên chưa trả lời được câu này."
+     }
+    ],
+    "level_signal": null,
+    "meta": {
+     "degraded_turns": [],
+     "difficulty_trajectory": [
+      2,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "disclaimer": "Điểm do AI chấm, mang tính tham khảo cho việc luyện tập.",
+     "fallbacks": [],
+     "prompt_versions": {
+      "evaluator": "mock",
+      "reporter": "mock"
+     },
+     "reference_missing_turns": []
+    },
+    "metadata": {
+     "latency_ms_by_agent": {
+      "total": 0
+     },
+     "model": "mock-rule-based",
+     "usage": {}
+    },
+    "overall": {
+     "score": 0.0,
+     "summary": "Kết quả tổng thể 0.0/10: chưa đạt.",
+     "verdict": "below"
+    },
+    "schema_version": 1,
+    "sections": [
+     {
+      "phase": "intro",
+      "score": 0.0,
+      "weight": 0.15
+     },
+     {
+      "phase": "technical",
+      "score": 0.0,
+      "weight": 0.55
+     },
+     {
+      "phase": "scenario",
+      "score": 0.0,
+      "weight": 0.3
+     }
+    ],
+    "session": {
+     "confidence": "high",
+     "duration_s": 780,
+     "end_reason": "plan_complete",
+     "evaluated_turns": 12,
+     "level": "junior",
+     "track": "nodejs_backend"
+    },
+    "status": "complete",
+    "strengths": [],
+    "study_plan": [
+     {
+      "actions": [
+       "Ôn lại: Giới thiệu ngắn gọn về nền tảng",
+       "Ôn lại: Mô tả một dự án và vai trò của mình",
+       "Ôn lại: Nêu công nghệ đã dùng"
+      ],
+      "priority": "high",
+      "resources": [],
+      "topic": "Giới thiệu bản thân và dự án gần nhất"
+     },
+     {
+      "actions": [
+       "Ôn lại: Nêu được các pha của event loop",
+       "Ôn lại: Nêu được microtask vs macrotask",
+       "Ôn lại: Nêu được blocking vs non-blocking"
+      ],
+      "priority": "high",
+      "resources": [],
+      "topic": "Event loop của Node.js"
+     },
+     {
+      "actions": [
+       "Ôn lại: Nêu được callback hell",
+       "Ôn lại: Nêu được Promise.all vs allSettled",
+       "Ôn lại: Nêu được xử lý lỗi với async/await"
+      ],
+      "priority": "high",
+      "resources": [],
+      "topic": "Bất đồng bộ, Promise và async/await"
+     }
+    ],
+    "topics": [
+     {
+      "comment": "Ứng viên chưa trả lời được câu này.",
+      "difficulty_path": [
+       2,
+       1
+      ],
+      "hint_used": true,
+      "phase": "intro",
+      "score": 0.0,
+      "title": "Giới thiệu bản thân và dự án gần nhất",
+      "topic_id": "t1"
+     },
+     {
+      "comment": "Ứng viên chưa trả lời được câu này.",
+      "difficulty_path": [
+       1,
+       1
+      ],
+      "hint_used": true,
+      "phase": "technical",
+      "score": 0.0,
+      "title": "Event loop của Node.js",
+      "topic_id": "t2"
+     },
+     {
+      "comment": "Ứng viên chưa trả lời được câu này.",
+      "difficulty_path": [
+       1,
+       1
+      ],
+      "hint_used": true,
+      "phase": "technical",
+      "score": 0.0,
+      "title": "Bất đồng bộ, Promise và async/await",
+      "topic_id": "t3"
+     },
+     {
+      "comment": "Ứng viên chưa trả lời được câu này.",
+      "difficulty_path": [
+       1,
+       1
+      ],
+      "hint_used": true,
+      "phase": "technical",
+      "score": 0.0,
+      "title": "Express và middleware",
+      "topic_id": "t4"
+     },
+     {
+      "comment": "Ứng viên chưa trả lời được câu này.",
+      "difficulty_path": [
+       1,
+       1
+      ],
+      "hint_used": true,
+      "phase": "technical",
+      "score": 0.0,
+      "title": "NestJS module và Dependency Injection",
+      "topic_id": "t5"
+     },
+     {
+      "comment": "Ứng viên chưa trả lời được câu này.",
+      "difficulty_path": [
+       1,
+       1
+      ],
+      "hint_used": true,
+      "phase": "scenario",
+      "score": 0.0,
+      "title": "Thiết kế dịch vụ upload file lớn",
+      "topic_id": "t6"
+     }
+    ],
+    "turns": [
+     {
+      "comment": "Ứng viên chưa trả lời được câu này.",
+      "question": "Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+      "scores": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 0.0
+      },
+      "topic_id": "t1",
+      "turn_kind": "main",
+      "turn_number": 1
+     },
+     {
+      "comment": "Ứng viên chưa trả lời được câu này.",
+      "question": "Mình gợi ý một hướng nhé: Giới thiệu ngắn gọn về nền tảng. Bạn thử trả lời lại xem?",
+      "scores": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 0.0
+      },
+      "topic_id": "t1",
+      "turn_kind": "hint",
+      "turn_number": 2
+     },
+     {
+      "comment": "Ứng viên chưa trả lời được câu này.",
+      "question": "Giờ mình chuyển sang phần kiến thức chuyên môn nhé. Event loop của Node.js: bạn hiểu như thế nào và đã áp dụng ra sao?",
+      "scores": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 0.0
+      },
+      "topic_id": "t2",
+      "turn_kind": "main",
+      "turn_number": 3
+     },
+     {
+      "comment": "Ứng viên chưa trả lời được câu này.",
+      "question": "Mình gợi ý một hướng nhé: các pha của event loop. Bạn thử trả lời lại xem?",
+      "scores": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 0.0
+      },
+      "topic_id": "t2",
+      "turn_kind": "hint",
+      "turn_number": 4
+     },
+     {
+      "comment": "Ứng viên chưa trả lời được câu này.",
+      "question": "Bất đồng bộ, Promise và async/await: bạn hiểu như thế nào và đã áp dụng ra sao?",
+      "scores": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 0.0
+      },
+      "topic_id": "t3",
+      "turn_kind": "main",
+      "turn_number": 5
+     },
+     {
+      "comment": "Ứng viên chưa trả lời được câu này.",
+      "question": "Mình gợi ý một hướng nhé: callback hell. Bạn thử trả lời lại xem?",
+      "scores": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 0.0
+      },
+      "topic_id": "t3",
+      "turn_kind": "hint",
+      "turn_number": 6
+     },
+     {
+      "comment": "Ứng viên chưa trả lời được câu này.",
+      "question": "Express và middleware: bạn hiểu như thế nào và đã áp dụng ra sao?",
+      "scores": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 0.0
+      },
+      "topic_id": "t4",
+      "turn_kind": "main",
+      "turn_number": 7
+     },
+     {
+      "comment": "Ứng viên chưa trả lời được câu này.",
+      "question": "Mình gợi ý một hướng nhé: thứ tự middleware. Bạn thử trả lời lại xem?",
+      "scores": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 0.0
+      },
+      "topic_id": "t4",
+      "turn_kind": "hint",
+      "turn_number": 8
+     },
+     {
+      "comment": "Ứng viên chưa trả lời được câu này.",
+      "question": "NestJS module và Dependency Injection: bạn hiểu như thế nào và đã áp dụng ra sao?",
+      "scores": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 0.0
+      },
+      "topic_id": "t5",
+      "turn_kind": "main",
+      "turn_number": 9
+     },
+     {
+      "comment": "Ứng viên chưa trả lời được câu này.",
+      "question": "Mình gợi ý một hướng nhé: module và provider. Bạn thử trả lời lại xem?",
+      "scores": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 0.0
+      },
+      "topic_id": "t5",
+      "turn_kind": "hint",
+      "turn_number": 10
+     },
+     {
+      "comment": "Ứng viên chưa trả lời được câu này.",
+      "question": "Tiếp theo là một tình huống thực tế. Tình huống: Thiết kế dịch vụ upload file lớn. Bạn sẽ tiếp cận thế nào?",
+      "scores": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 0.0
+      },
+      "topic_id": "t6",
+      "turn_kind": "main",
+      "turn_number": 11
+     },
+     {
+      "comment": "Ứng viên chưa trả lời được câu này.",
+      "question": "Mình gợi ý một hướng nhé: Làm rõ yêu cầu và giả định. Bạn thử trả lời lại xem?",
+      "scores": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 0.0
+      },
+      "topic_id": "t6",
+      "turn_kind": "hint",
+      "turn_number": 12
+     }
+    ]
+   },
+   "status": 200
+  }
+ },
+ "start": {
+  "request": {
+   "level": "junior",
+   "session_id": "g-weak",
+   "track": "nodejs_backend"
+  },
+  "response": {
+   "events": [
+    [
+     "meta",
+     {
+      "action": "ask_main",
+      "phase": "intro",
+      "topic_index": 1,
+      "topic_total": 6,
+      "turn_number": 1
+     }
+    ],
+    [
+     "token*",
+     {
+      "n": 7,
+      "t": "Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?"
+     }
+    ],
+    [
+     "done",
+     {
+      "metadata": {
+       "fallbacks": [],
+       "prompt_versions": {
+        "mock": "mock-v2"
+       },
+       "rag": {
+        "status": "off"
+       },
+       "usage": {}
+      },
+      "plan": {
+       "level_note": null,
+       "phases": [
+        {
+         "phase": "intro",
+         "time_budget_min": 4,
+         "topics": [
+          {
+           "backup_question": "Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+           "bank_questions": [],
+           "catalog_ref": null,
+           "cv_ref": null,
+           "id": "t1",
+           "key_points": [
+            "Giới thiệu ngắn gọn về nền tảng",
+            "Mô tả một dự án và vai trò của mình",
+            "Nêu công nghệ đã dùng"
+           ],
+           "objective": "Làm quen và nắm bối cảnh kinh nghiệm của ứng viên",
+           "opening_hint": "Mời ứng viên giới thiệu bản thân và dự án gần nhất",
+           "reference_snippets": [],
+           "reference_sources": [],
+           "source": "generic",
+           "start_difficulty": 2,
+           "title": "Giới thiệu bản thân và dự án gần nhất"
+          }
+         ]
+        },
+        {
+         "phase": "technical",
+         "time_budget_min": 18,
+         "topics": [
+          {
+           "backup_question": "Event loop của Node.js: bạn hiểu như thế nào và đã áp dụng ra sao?",
+           "bank_questions": [],
+           "catalog_ref": "node.core.event-loop",
+           "cv_ref": null,
+           "id": "t2",
+           "key_points": [
+            "Nêu được các pha của event loop",
+            "Nêu được microtask vs macrotask",
+            "Nêu được blocking vs non-blocking",
+            "Nêu được libuv thread pool"
+           ],
+           "objective": "Đánh giá hiểu biết về Event loop của Node.js ở mức junior",
+           "opening_hint": "Bắt đầu bằng câu hỏi tổng quan về Event loop của Node.js",
+           "reference_snippets": [],
+           "reference_sources": [],
+           "source": "catalog",
+           "start_difficulty": 2,
+           "title": "Event loop của Node.js"
+          },
+          {
+           "backup_question": "Bất đồng bộ, Promise và async/await: bạn hiểu như thế nào và đã áp dụng ra sao?",
+           "bank_questions": [],
+           "catalog_ref": "node.core.async-promises",
+           "cv_ref": null,
+           "id": "t3",
+           "key_points": [
+            "Nêu được callback hell",
+            "Nêu được Promise.all vs allSettled",
+            "Nêu được xử lý lỗi với async/await",
+            "Nêu được unhandled rejection"
+           ],
+           "objective": "Đánh giá hiểu biết về Bất đồng bộ, Promise và async/await ở mức junior",
+           "opening_hint": "Bắt đầu bằng câu hỏi tổng quan về Bất đồng bộ, Promise và async/await",
+           "reference_snippets": [],
+           "reference_sources": [],
+           "source": "catalog",
+           "start_difficulty": 2,
+           "title": "Bất đồng bộ, Promise và async/await"
+          },
+          {
+           "backup_question": "Express và middleware: bạn hiểu như thế nào và đã áp dụng ra sao?",
+           "bank_questions": [],
+           "catalog_ref": "node.web.express-middleware",
+           "cv_ref": null,
+           "id": "t4",
+           "key_points": [
+            "Nêu được thứ tự middleware",
+            "Nêu được error-handling middleware",
+            "Nêu được routing",
+            "Nêu được body parsing"
+           ],
+           "objective": "Đánh giá hiểu biết về Express và middleware ở mức junior",
+           "opening_hint": "Bắt đầu bằng câu hỏi tổng quan về Express và middleware",
+           "reference_snippets": [],
+           "reference_sources": [],
+           "source": "catalog",
+           "start_difficulty": 2,
+           "title": "Express và middleware"
+          },
+          {
+           "backup_question": "NestJS module và Dependency Injection: bạn hiểu như thế nào và đã áp dụng ra sao?",
+           "bank_questions": [],
+           "catalog_ref": "node.web.nestjs-di",
+           "cv_ref": null,
+           "id": "t5",
+           "key_points": [
+            "Nêu được module và provider",
+            "Nêu được injection scope",
+            "Nêu được guard interceptor pipe",
+            "Nêu được DTO và validation"
+           ],
+           "objective": "Đánh giá hiểu biết về NestJS module và Dependency Injection ở mức junior",
+           "opening_hint": "Bắt đầu bằng câu hỏi tổng quan về NestJS module và Dependency Injection",
+           "reference_snippets": [],
+           "reference_sources": [],
+           "source": "catalog",
+           "start_difficulty": 2,
+           "title": "NestJS module và Dependency Injection"
+          }
+         ]
+        },
+        {
+         "phase": "scenario",
+         "time_budget_min": 8,
+         "topics": [
+          {
+           "backup_question": "Tình huống: Thiết kế dịch vụ upload file lớn. Bạn sẽ tiếp cận thế nào?",
+           "bank_questions": [],
+           "catalog_ref": "scn.node.file-upload-service",
+           "cv_ref": null,
+           "id": "t6",
+           "key_points": [
+            "Làm rõ yêu cầu và giả định",
+            "Đề xuất thiết kế hoặc hướng giải quyết cụ thể",
+            "Nêu trade-off và rủi ro"
+           ],
+           "objective": "Đánh giá cách tiếp cận một tình huống thực tế",
+           "opening_hint": "Đưa tình huống: Thiết kế dịch vụ upload file lớn",
+           "reference_snippets": [],
+           "reference_sources": [],
+           "source": "scenario",
+           "start_difficulty": 2,
+           "title": "Thiết kế dịch vụ upload file lớn"
+          }
+         ]
+        }
+       ],
+       "replan": null,
+       "schema_version": 1
+      },
+      "question": "Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+      "state": {
+       "active_topic_id": "t1",
+       "asked_questions": [
+        "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?"
+       ],
+       "counters": {
+        "clarifies": 0,
+        "consecutive_dont_know": 0,
+        "follow_ups": 0,
+        "hints": 0,
+        "stt_reasks": 0
+       },
+       "current_difficulty": 2,
+       "current_qa_id": null,
+       "difficulty_bounds": {
+        "max": 4,
+        "min": 1
+       },
+       "end_reason": null,
+       "evaluated_turns": 0,
+       "gaps": [],
+       "momentum": 0,
+       "notes": [],
+       "phase": "intro",
+       "phase_started_s": 0,
+       "schema_version": 1,
+       "strengths": [],
+       "swaps": [],
+       "topic_index": 1,
+       "topic_started_s": 0,
+       "topics": [
+        {
+         "covered": [],
+         "focus_used": [],
+         "hint_used": false,
+         "id": "t1",
+         "n_scored": 0,
+         "score_band": null,
+         "score_sum": 0.0,
+         "status": "active",
+         "turns": [
+          1
+         ]
+        },
+        {
+         "covered": [],
+         "focus_used": [],
+         "hint_used": false,
+         "id": "t2",
+         "n_scored": 0,
+         "score_band": null,
+         "score_sum": 0.0,
+         "status": "pending",
+         "turns": []
+        },
+        {
+         "covered": [],
+         "focus_used": [],
+         "hint_used": false,
+         "id": "t3",
+         "n_scored": 0,
+         "score_band": null,
+         "score_sum": 0.0,
+         "status": "pending",
+         "turns": []
+        },
+        {
+         "covered": [],
+         "focus_used": [],
+         "hint_used": false,
+         "id": "t4",
+         "n_scored": 0,
+         "score_band": null,
+         "score_sum": 0.0,
+         "status": "pending",
+         "turns": []
+        },
+        {
+         "covered": [],
+         "focus_used": [],
+         "hint_used": false,
+         "id": "t5",
+         "n_scored": 0,
+         "score_band": null,
+         "score_sum": 0.0,
+         "status": "pending",
+         "turns": []
+        },
+        {
+         "covered": [],
+         "focus_used": [],
+         "hint_used": false,
+         "id": "t6",
+         "n_scored": 0,
+         "score_band": null,
+         "score_sum": 0.0,
+         "status": "pending",
+         "turns": []
+        }
+       ],
+       "turn_count": 1,
+       "used_qa_ids": []
+      },
+      "turn": {
+       "action": "ask_main",
+       "action_reason": null,
+       "agent_decision": "switch_topic",
+       "decided_by": null,
+       "difficulty": 2,
+       "overrule_reason": null,
+       "phase": "intro",
+       "policy_action": null,
+       "proposed_action": null,
+       "qa_id": null,
+       "question_source": "ai",
+       "reasoning": null,
+       "swap_result": null,
+       "topic_id": "t1",
+       "turn_kind": "main",
+       "turn_number": 1
+      }
+     }
+    ]
+   ],
+   "status": 200
+  }
+ },
+ "turns": [
+  {
+   "request": {
+    "answer": "Em không biết ạ.",
+    "elapsed_seconds": 60,
+    "level": "junior",
+    "question": "Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+    "session_id": "g-weak",
+    "topic_turns": [],
+    "track": "nodejs_backend",
+    "turn_kind": "main",
+    "turn_number": 1
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "hint",
+       "phase": "intro",
+       "topic_index": 1,
+       "topic_total": 6,
+       "turn_number": 2
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 7,
+       "t": "Mình gợi ý một hướng nhé: Giới thiệu ngắn gọn về nền tảng. Bạn thử trả lời lại xem?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "dont_know",
+        "confidence": null,
+        "covered_points": [],
+        "degraded": false,
+        "evidence": [],
+        "follow_up_focus": "Giới thiệu ngắn gọn về nền tảng",
+        "gap_tags": [
+         "gioi-ngan",
+         "minh",
+         "cong-dung"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Giới thiệu ngắn gọn về nền tảng",
+         "Mô tả một dự án và vai trò của mình",
+         "Nêu công nghệ đã dùng"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 0,
+         "extensibility": 0,
+         "relevance": 0,
+         "technical_accuracy": 0
+        },
+        "scores_10": {
+         "completeness": 0.0,
+         "extensibility": 0.0,
+         "relevance": 0.0,
+         "technical_accuracy": 0.0
+        },
+        "sources": [],
+        "strength_tags": [],
+        "transcript_low_confidence": false,
+        "turn_number": 1,
+        "turn_score_10": 0.0
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Mình gợi ý một hướng nhé: Giới thiệu ngắn gọn về nền tảng. Bạn thử trả lời lại xem?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t1",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "minh goi y mot huong nhe: gioi thieu ngan gon ve nen tang. ban thu tra loi lai xem?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 1,
+         "follow_ups": 1,
+         "hints": 1,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 1,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 1
+        },
+        "end_reason": null,
+        "evaluated_turns": 1,
+        "gaps": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1
+          ]
+         },
+         {
+          "tag": "minh",
+          "turns": [
+           1
+          ]
+         },
+         {
+          "tag": "cong-dung",
+          "turns": [
+           1
+          ]
+         }
+        ],
+        "momentum": 0,
+        "notes": [],
+        "phase": "intro",
+        "phase_started_s": 0,
+        "schema_version": 1,
+        "strengths": [],
+        "swaps": [],
+        "topic_index": 1,
+        "topic_started_s": 0,
+        "topics": [
+         {
+          "covered": [],
+          "focus_used": [
+           "Giới thiệu ngắn gọn về nền tảng"
+          ],
+          "hint_used": true,
+          "id": "t1",
+          "n_scored": 1,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "active",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t3",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t6",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 2,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "hint",
+        "action_reason": null,
+        "agent_decision": "keep_difficulty",
+        "decided_by": null,
+        "difficulty": 1,
+        "overrule_reason": null,
+        "phase": "intro",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "dont_know -> hint (luật 4)",
+        "swap_result": null,
+        "topic_id": "t1",
+        "turn_kind": "hint",
+        "turn_number": 2
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Em không biết ạ.",
+    "elapsed_seconds": 120,
+    "level": "junior",
+    "question": "Mình gợi ý một hướng nhé: Giới thiệu ngắn gọn về nền tảng. Bạn thử trả lời lại xem?",
+    "session_id": "g-weak",
+    "topic_turns": [
+     {
+      "a": "Em không biết ạ.",
+      "q": "Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+      "source": "text"
+     }
+    ],
+    "track": "nodejs_backend",
+    "turn_kind": "hint",
+    "turn_number": 2
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "ask_main",
+       "phase": "technical",
+       "topic_index": 2,
+       "topic_total": 6,
+       "turn_number": 3
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 9,
+       "t": "Giờ mình chuyển sang phần kiến thức chuyên môn nhé. Event loop của Node.js: bạn hiểu như thế nào và đã áp dụng ra sao?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "dont_know",
+        "confidence": null,
+        "covered_points": [],
+        "degraded": false,
+        "evidence": [],
+        "follow_up_focus": "Giới thiệu ngắn gọn về nền tảng",
+        "gap_tags": [
+         "gioi-ngan",
+         "minh",
+         "cong-dung"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Giới thiệu ngắn gọn về nền tảng",
+         "Mô tả một dự án và vai trò của mình",
+         "Nêu công nghệ đã dùng"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 0,
+         "extensibility": 0,
+         "relevance": 0,
+         "technical_accuracy": 0
+        },
+        "scores_10": {
+         "completeness": 0.0,
+         "extensibility": 0.0,
+         "relevance": 0.0,
+         "technical_accuracy": 0.0
+        },
+        "sources": [],
+        "strength_tags": [],
+        "transcript_low_confidence": false,
+        "turn_number": 2,
+        "turn_score_10": 0.0
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Giờ mình chuyển sang phần kiến thức chuyên môn nhé. Event loop của Node.js: bạn hiểu như thế nào và đã áp dụng ra sao?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t2",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "minh goi y mot huong nhe: gioi thieu ngan gon ve nen tang. ban thu tra loi lai xem?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. event loop cua node.js: ban hieu nhu the nao va da ap dung ra sao?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 0,
+         "follow_ups": 0,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 1,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 1
+        },
+        "end_reason": null,
+        "evaluated_turns": 2,
+        "gaps": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "minh",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "cong-dung",
+          "turns": [
+           1,
+           2
+          ]
+         }
+        ],
+        "momentum": -1,
+        "notes": [],
+        "phase": "technical",
+        "phase_started_s": 120,
+        "schema_version": 1,
+        "strengths": [],
+        "swaps": [],
+        "topic_index": 1,
+        "topic_started_s": 120,
+        "topics": [
+         {
+          "covered": [],
+          "focus_used": [
+           "Giới thiệu ngắn gọn về nền tảng"
+          ],
+          "hint_used": true,
+          "id": "t1",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "active",
+          "turns": [
+           3
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t3",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t6",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 3,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "ask_main",
+        "action_reason": null,
+        "agent_decision": "switch_topic",
+        "decided_by": null,
+        "difficulty": 1,
+        "overrule_reason": null,
+        "phase": "technical",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "two_dont_know -> next_topic (điều kiện ưu tiên, design 03 §4.4)",
+        "swap_result": null,
+        "topic_id": "t2",
+        "turn_kind": "main",
+        "turn_number": 3
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Em không biết ạ.",
+    "elapsed_seconds": 180,
+    "level": "junior",
+    "question": "Giờ mình chuyển sang phần kiến thức chuyên môn nhé. Event loop của Node.js: bạn hiểu như thế nào và đã áp dụng ra sao?",
+    "session_id": "g-weak",
+    "topic_turns": [],
+    "track": "nodejs_backend",
+    "turn_kind": "main",
+    "turn_number": 3
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "hint",
+       "phase": "technical",
+       "topic_index": 2,
+       "topic_total": 6,
+       "turn_number": 4
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 6,
+       "t": "Mình gợi ý một hướng nhé: các pha của event loop. Bạn thử trả lời lại xem?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "dont_know",
+        "confidence": null,
+        "covered_points": [],
+        "degraded": false,
+        "evidence": [],
+        "follow_up_focus": "các pha của event loop",
+        "gap_tags": [
+         "event-loop",
+         "macrotask-microtask",
+         "blocking"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Nêu được các pha của event loop",
+         "Nêu được microtask vs macrotask",
+         "Nêu được blocking vs non-blocking"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 0,
+         "extensibility": 0,
+         "relevance": 0,
+         "technical_accuracy": 0
+        },
+        "scores_10": {
+         "completeness": 0.0,
+         "extensibility": 0.0,
+         "relevance": 0.0,
+         "technical_accuracy": 0.0
+        },
+        "sources": [],
+        "strength_tags": [],
+        "transcript_low_confidence": false,
+        "turn_number": 3,
+        "turn_score_10": 0.0
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Mình gợi ý một hướng nhé: các pha của event loop. Bạn thử trả lời lại xem?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t2",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "minh goi y mot huong nhe: gioi thieu ngan gon ve nen tang. ban thu tra loi lai xem?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. event loop cua node.js: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: cac pha cua event loop. ban thu tra loi lai xem?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 1,
+         "follow_ups": 1,
+         "hints": 1,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 1,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 1
+        },
+        "end_reason": null,
+        "evaluated_turns": 3,
+        "gaps": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "minh",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "cong-dung",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "event-loop",
+          "turns": [
+           3
+          ]
+         },
+         {
+          "tag": "macrotask-microtask",
+          "turns": [
+           3
+          ]
+         },
+         {
+          "tag": "blocking",
+          "turns": [
+           3
+          ]
+         }
+        ],
+        "momentum": -1,
+        "notes": [],
+        "phase": "technical",
+        "phase_started_s": 120,
+        "schema_version": 1,
+        "strengths": [],
+        "swaps": [],
+        "topic_index": 1,
+        "topic_started_s": 120,
+        "topics": [
+         {
+          "covered": [],
+          "focus_used": [
+           "Giới thiệu ngắn gọn về nền tảng"
+          ],
+          "hint_used": true,
+          "id": "t1",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "các pha của event loop"
+          ],
+          "hint_used": true,
+          "id": "t2",
+          "n_scored": 1,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "active",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t3",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t6",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 4,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "hint",
+        "action_reason": null,
+        "agent_decision": "keep_difficulty",
+        "decided_by": null,
+        "difficulty": 1,
+        "overrule_reason": null,
+        "phase": "technical",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "dont_know -> hint (luật 4)",
+        "swap_result": null,
+        "topic_id": "t2",
+        "turn_kind": "hint",
+        "turn_number": 4
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Em không biết ạ.",
+    "elapsed_seconds": 240,
+    "level": "junior",
+    "question": "Mình gợi ý một hướng nhé: các pha của event loop. Bạn thử trả lời lại xem?",
+    "session_id": "g-weak",
+    "topic_turns": [
+     {
+      "a": "Em không biết ạ.",
+      "q": "Giờ mình chuyển sang phần kiến thức chuyên môn nhé. Event loop của Node.js: bạn hiểu như thế nào và đã áp dụng ra sao?",
+      "source": "text"
+     }
+    ],
+    "track": "nodejs_backend",
+    "turn_kind": "hint",
+    "turn_number": 4
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "ask_main",
+       "phase": "technical",
+       "topic_index": 3,
+       "topic_total": 6,
+       "turn_number": 5
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 6,
+       "t": "Bất đồng bộ, Promise và async/await: bạn hiểu như thế nào và đã áp dụng ra sao?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "dont_know",
+        "confidence": null,
+        "covered_points": [],
+        "degraded": false,
+        "evidence": [],
+        "follow_up_focus": "các pha của event loop",
+        "gap_tags": [
+         "event-loop",
+         "macrotask-microtask",
+         "blocking"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Nêu được các pha của event loop",
+         "Nêu được microtask vs macrotask",
+         "Nêu được blocking vs non-blocking"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 0,
+         "extensibility": 0,
+         "relevance": 0,
+         "technical_accuracy": 0
+        },
+        "scores_10": {
+         "completeness": 0.0,
+         "extensibility": 0.0,
+         "relevance": 0.0,
+         "technical_accuracy": 0.0
+        },
+        "sources": [],
+        "strength_tags": [],
+        "transcript_low_confidence": false,
+        "turn_number": 4,
+        "turn_score_10": 0.0
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Bất đồng bộ, Promise và async/await: bạn hiểu như thế nào và đã áp dụng ra sao?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t3",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "minh goi y mot huong nhe: gioi thieu ngan gon ve nen tang. ban thu tra loi lai xem?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. event loop cua node.js: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: cac pha cua event loop. ban thu tra loi lai xem?",
+         "bat dong bo, promise va async/await: ban hieu nhu the nao va da ap dung ra sao?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 0,
+         "follow_ups": 0,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 1,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 1
+        },
+        "end_reason": null,
+        "evaluated_turns": 4,
+        "gaps": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "minh",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "cong-dung",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "event-loop",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "macrotask-microtask",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "blocking",
+          "turns": [
+           3,
+           4
+          ]
+         }
+        ],
+        "momentum": -1,
+        "notes": [],
+        "phase": "technical",
+        "phase_started_s": 120,
+        "schema_version": 1,
+        "strengths": [],
+        "swaps": [],
+        "topic_index": 2,
+        "topic_started_s": 240,
+        "topics": [
+         {
+          "covered": [],
+          "focus_used": [
+           "Giới thiệu ngắn gọn về nền tảng"
+          ],
+          "hint_used": true,
+          "id": "t1",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "các pha của event loop"
+          ],
+          "hint_used": true,
+          "id": "t2",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t3",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "active",
+          "turns": [
+           5
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t6",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 5,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "ask_main",
+        "action_reason": null,
+        "agent_decision": "switch_topic",
+        "decided_by": null,
+        "difficulty": 1,
+        "overrule_reason": null,
+        "phase": "technical",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "two_dont_know -> next_topic (điều kiện ưu tiên, design 03 §4.4)",
+        "swap_result": null,
+        "topic_id": "t3",
+        "turn_kind": "main",
+        "turn_number": 5
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Em không biết ạ.",
+    "elapsed_seconds": 300,
+    "level": "junior",
+    "question": "Bất đồng bộ, Promise và async/await: bạn hiểu như thế nào và đã áp dụng ra sao?",
+    "session_id": "g-weak",
+    "topic_turns": [],
+    "track": "nodejs_backend",
+    "turn_kind": "main",
+    "turn_number": 5
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "hint",
+       "phase": "technical",
+       "topic_index": 3,
+       "topic_total": 6,
+       "turn_number": 6
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 5,
+       "t": "Mình gợi ý một hướng nhé: callback hell. Bạn thử trả lời lại xem?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "dont_know",
+        "confidence": null,
+        "covered_points": [],
+        "degraded": false,
+        "evidence": [],
+        "follow_up_focus": "callback hell",
+        "gap_tags": [
+         "callback-hell",
+         "allsettled-promise.all",
+         "async-await"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Nêu được callback hell",
+         "Nêu được Promise.all vs allSettled",
+         "Nêu được xử lý lỗi với async/await"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 0,
+         "extensibility": 0,
+         "relevance": 0,
+         "technical_accuracy": 0
+        },
+        "scores_10": {
+         "completeness": 0.0,
+         "extensibility": 0.0,
+         "relevance": 0.0,
+         "technical_accuracy": 0.0
+        },
+        "sources": [],
+        "strength_tags": [],
+        "transcript_low_confidence": false,
+        "turn_number": 5,
+        "turn_score_10": 0.0
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Mình gợi ý một hướng nhé: callback hell. Bạn thử trả lời lại xem?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t3",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "minh goi y mot huong nhe: gioi thieu ngan gon ve nen tang. ban thu tra loi lai xem?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. event loop cua node.js: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: cac pha cua event loop. ban thu tra loi lai xem?",
+         "bat dong bo, promise va async/await: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: callback hell. ban thu tra loi lai xem?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 1,
+         "follow_ups": 1,
+         "hints": 1,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 1,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 1
+        },
+        "end_reason": null,
+        "evaluated_turns": 5,
+        "gaps": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "minh",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "cong-dung",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "event-loop",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "macrotask-microtask",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "blocking",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "callback-hell",
+          "turns": [
+           5
+          ]
+         },
+         {
+          "tag": "allsettled-promise.all",
+          "turns": [
+           5
+          ]
+         },
+         {
+          "tag": "async-await",
+          "turns": [
+           5
+          ]
+         }
+        ],
+        "momentum": -1,
+        "notes": [],
+        "phase": "technical",
+        "phase_started_s": 120,
+        "schema_version": 1,
+        "strengths": [],
+        "swaps": [],
+        "topic_index": 2,
+        "topic_started_s": 240,
+        "topics": [
+         {
+          "covered": [],
+          "focus_used": [
+           "Giới thiệu ngắn gọn về nền tảng"
+          ],
+          "hint_used": true,
+          "id": "t1",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "các pha của event loop"
+          ],
+          "hint_used": true,
+          "id": "t2",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "callback hell"
+          ],
+          "hint_used": true,
+          "id": "t3",
+          "n_scored": 1,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "active",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t6",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 6,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "hint",
+        "action_reason": null,
+        "agent_decision": "keep_difficulty",
+        "decided_by": null,
+        "difficulty": 1,
+        "overrule_reason": null,
+        "phase": "technical",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "dont_know -> hint (luật 4)",
+        "swap_result": null,
+        "topic_id": "t3",
+        "turn_kind": "hint",
+        "turn_number": 6
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Em không biết ạ.",
+    "elapsed_seconds": 360,
+    "level": "junior",
+    "question": "Mình gợi ý một hướng nhé: callback hell. Bạn thử trả lời lại xem?",
+    "session_id": "g-weak",
+    "topic_turns": [
+     {
+      "a": "Em không biết ạ.",
+      "q": "Bất đồng bộ, Promise và async/await: bạn hiểu như thế nào và đã áp dụng ra sao?",
+      "source": "text"
+     }
+    ],
+    "track": "nodejs_backend",
+    "turn_kind": "hint",
+    "turn_number": 6
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "ask_main",
+       "phase": "technical",
+       "topic_index": 4,
+       "topic_total": 6,
+       "turn_number": 7
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 5,
+       "t": "Express và middleware: bạn hiểu như thế nào và đã áp dụng ra sao?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "dont_know",
+        "confidence": null,
+        "covered_points": [],
+        "degraded": false,
+        "evidence": [],
+        "follow_up_focus": "callback hell",
+        "gap_tags": [
+         "callback-hell",
+         "allsettled-promise.all",
+         "async-await"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Nêu được callback hell",
+         "Nêu được Promise.all vs allSettled",
+         "Nêu được xử lý lỗi với async/await"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 0,
+         "extensibility": 0,
+         "relevance": 0,
+         "technical_accuracy": 0
+        },
+        "scores_10": {
+         "completeness": 0.0,
+         "extensibility": 0.0,
+         "relevance": 0.0,
+         "technical_accuracy": 0.0
+        },
+        "sources": [],
+        "strength_tags": [],
+        "transcript_low_confidence": false,
+        "turn_number": 6,
+        "turn_score_10": 0.0
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Express và middleware: bạn hiểu như thế nào và đã áp dụng ra sao?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t4",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "minh goi y mot huong nhe: gioi thieu ngan gon ve nen tang. ban thu tra loi lai xem?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. event loop cua node.js: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: cac pha cua event loop. ban thu tra loi lai xem?",
+         "bat dong bo, promise va async/await: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: callback hell. ban thu tra loi lai xem?",
+         "express va middleware: ban hieu nhu the nao va da ap dung ra sao?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 0,
+         "follow_ups": 0,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 1,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 1
+        },
+        "end_reason": null,
+        "evaluated_turns": 6,
+        "gaps": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "minh",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "cong-dung",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "event-loop",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "macrotask-microtask",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "blocking",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "callback-hell",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "tag": "allsettled-promise.all",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "tag": "async-await",
+          "turns": [
+           5,
+           6
+          ]
+         }
+        ],
+        "momentum": -1,
+        "notes": [],
+        "phase": "technical",
+        "phase_started_s": 120,
+        "schema_version": 1,
+        "strengths": [],
+        "swaps": [],
+        "topic_index": 3,
+        "topic_started_s": 360,
+        "topics": [
+         {
+          "covered": [],
+          "focus_used": [
+           "Giới thiệu ngắn gọn về nền tảng"
+          ],
+          "hint_used": true,
+          "id": "t1",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "các pha của event loop"
+          ],
+          "hint_used": true,
+          "id": "t2",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "callback hell"
+          ],
+          "hint_used": true,
+          "id": "t3",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "active",
+          "turns": [
+           7
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t6",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 7,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "ask_main",
+        "action_reason": null,
+        "agent_decision": "switch_topic",
+        "decided_by": null,
+        "difficulty": 1,
+        "overrule_reason": null,
+        "phase": "technical",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "two_dont_know -> next_topic (điều kiện ưu tiên, design 03 §4.4)",
+        "swap_result": null,
+        "topic_id": "t4",
+        "turn_kind": "main",
+        "turn_number": 7
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Em không biết ạ.",
+    "elapsed_seconds": 420,
+    "level": "junior",
+    "question": "Express và middleware: bạn hiểu như thế nào và đã áp dụng ra sao?",
+    "session_id": "g-weak",
+    "topic_turns": [],
+    "track": "nodejs_backend",
+    "turn_kind": "main",
+    "turn_number": 7
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "hint",
+       "phase": "technical",
+       "topic_index": 4,
+       "topic_total": 6,
+       "turn_number": 8
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 5,
+       "t": "Mình gợi ý một hướng nhé: thứ tự middleware. Bạn thử trả lời lại xem?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "dont_know",
+        "confidence": null,
+        "covered_points": [],
+        "degraded": false,
+        "evidence": [],
+        "follow_up_focus": "thứ tự middleware",
+        "gap_tags": [
+         "middleware",
+         "error-handling",
+         "routing"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Nêu được thứ tự middleware",
+         "Nêu được error-handling middleware",
+         "Nêu được routing"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 0,
+         "extensibility": 0,
+         "relevance": 0,
+         "technical_accuracy": 0
+        },
+        "scores_10": {
+         "completeness": 0.0,
+         "extensibility": 0.0,
+         "relevance": 0.0,
+         "technical_accuracy": 0.0
+        },
+        "sources": [],
+        "strength_tags": [],
+        "transcript_low_confidence": false,
+        "turn_number": 7,
+        "turn_score_10": 0.0
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Mình gợi ý một hướng nhé: thứ tự middleware. Bạn thử trả lời lại xem?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t4",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "minh goi y mot huong nhe: gioi thieu ngan gon ve nen tang. ban thu tra loi lai xem?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. event loop cua node.js: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: cac pha cua event loop. ban thu tra loi lai xem?",
+         "bat dong bo, promise va async/await: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: callback hell. ban thu tra loi lai xem?",
+         "express va middleware: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: thu tu middleware. ban thu tra loi lai xem?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 1,
+         "follow_ups": 1,
+         "hints": 1,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 1,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 1
+        },
+        "end_reason": null,
+        "evaluated_turns": 7,
+        "gaps": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "minh",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "cong-dung",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "event-loop",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "macrotask-microtask",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "blocking",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "callback-hell",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "tag": "allsettled-promise.all",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "tag": "async-await",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "tag": "middleware",
+          "turns": [
+           7
+          ]
+         }
+        ],
+        "momentum": -1,
+        "notes": [],
+        "phase": "technical",
+        "phase_started_s": 120,
+        "schema_version": 1,
+        "strengths": [],
+        "swaps": [],
+        "topic_index": 3,
+        "topic_started_s": 360,
+        "topics": [
+         {
+          "covered": [],
+          "focus_used": [
+           "Giới thiệu ngắn gọn về nền tảng"
+          ],
+          "hint_used": true,
+          "id": "t1",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "các pha của event loop"
+          ],
+          "hint_used": true,
+          "id": "t2",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "callback hell"
+          ],
+          "hint_used": true,
+          "id": "t3",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "thứ tự middleware"
+          ],
+          "hint_used": true,
+          "id": "t4",
+          "n_scored": 1,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "active",
+          "turns": [
+           7,
+           8
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t6",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 8,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "hint",
+        "action_reason": null,
+        "agent_decision": "keep_difficulty",
+        "decided_by": null,
+        "difficulty": 1,
+        "overrule_reason": null,
+        "phase": "technical",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "dont_know -> hint (luật 4)",
+        "swap_result": null,
+        "topic_id": "t4",
+        "turn_kind": "hint",
+        "turn_number": 8
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Em không biết ạ.",
+    "elapsed_seconds": 480,
+    "level": "junior",
+    "question": "Mình gợi ý một hướng nhé: thứ tự middleware. Bạn thử trả lời lại xem?",
+    "session_id": "g-weak",
+    "topic_turns": [
+     {
+      "a": "Em không biết ạ.",
+      "q": "Express và middleware: bạn hiểu như thế nào và đã áp dụng ra sao?",
+      "source": "text"
+     }
+    ],
+    "track": "nodejs_backend",
+    "turn_kind": "hint",
+    "turn_number": 8
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "ask_main",
+       "phase": "technical",
+       "topic_index": 5,
+       "topic_total": 6,
+       "turn_number": 9
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 6,
+       "t": "NestJS module và Dependency Injection: bạn hiểu như thế nào và đã áp dụng ra sao?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "dont_know",
+        "confidence": null,
+        "covered_points": [],
+        "degraded": false,
+        "evidence": [],
+        "follow_up_focus": "thứ tự middleware",
+        "gap_tags": [
+         "middleware",
+         "error-handling",
+         "routing"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Nêu được thứ tự middleware",
+         "Nêu được error-handling middleware",
+         "Nêu được routing"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 0,
+         "extensibility": 0,
+         "relevance": 0,
+         "technical_accuracy": 0
+        },
+        "scores_10": {
+         "completeness": 0.0,
+         "extensibility": 0.0,
+         "relevance": 0.0,
+         "technical_accuracy": 0.0
+        },
+        "sources": [],
+        "strength_tags": [],
+        "transcript_low_confidence": false,
+        "turn_number": 8,
+        "turn_score_10": 0.0
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "NestJS module và Dependency Injection: bạn hiểu như thế nào và đã áp dụng ra sao?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t5",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "minh goi y mot huong nhe: gioi thieu ngan gon ve nen tang. ban thu tra loi lai xem?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. event loop cua node.js: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: cac pha cua event loop. ban thu tra loi lai xem?",
+         "bat dong bo, promise va async/await: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: callback hell. ban thu tra loi lai xem?",
+         "express va middleware: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: thu tu middleware. ban thu tra loi lai xem?",
+         "nestjs module va dependency injection: ban hieu nhu the nao va da ap dung ra sao?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 0,
+         "follow_ups": 0,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 1,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 1
+        },
+        "end_reason": null,
+        "evaluated_turns": 8,
+        "gaps": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "minh",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "cong-dung",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "event-loop",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "macrotask-microtask",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "blocking",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "callback-hell",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "tag": "allsettled-promise.all",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "tag": "async-await",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "tag": "middleware",
+          "turns": [
+           7,
+           8
+          ]
+         }
+        ],
+        "momentum": -1,
+        "notes": [],
+        "phase": "technical",
+        "phase_started_s": 120,
+        "schema_version": 1,
+        "strengths": [],
+        "swaps": [],
+        "topic_index": 4,
+        "topic_started_s": 480,
+        "topics": [
+         {
+          "covered": [],
+          "focus_used": [
+           "Giới thiệu ngắn gọn về nền tảng"
+          ],
+          "hint_used": true,
+          "id": "t1",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "các pha của event loop"
+          ],
+          "hint_used": true,
+          "id": "t2",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "callback hell"
+          ],
+          "hint_used": true,
+          "id": "t3",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "thứ tự middleware"
+          ],
+          "hint_used": true,
+          "id": "t4",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           7,
+           8
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "active",
+          "turns": [
+           9
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t6",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 9,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "ask_main",
+        "action_reason": null,
+        "agent_decision": "switch_topic",
+        "decided_by": null,
+        "difficulty": 1,
+        "overrule_reason": null,
+        "phase": "technical",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "two_dont_know -> next_topic (điều kiện ưu tiên, design 03 §4.4)",
+        "swap_result": null,
+        "topic_id": "t5",
+        "turn_kind": "main",
+        "turn_number": 9
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Em không biết ạ.",
+    "elapsed_seconds": 540,
+    "level": "junior",
+    "question": "NestJS module và Dependency Injection: bạn hiểu như thế nào và đã áp dụng ra sao?",
+    "session_id": "g-weak",
+    "topic_turns": [],
+    "track": "nodejs_backend",
+    "turn_kind": "main",
+    "turn_number": 9
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "hint",
+       "phase": "technical",
+       "topic_index": 5,
+       "topic_total": 6,
+       "turn_number": 10
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 5,
+       "t": "Mình gợi ý một hướng nhé: module và provider. Bạn thử trả lời lại xem?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "dont_know",
+        "confidence": null,
+        "covered_points": [],
+        "degraded": false,
+        "evidence": [],
+        "follow_up_focus": "module và provider",
+        "gap_tags": [
+         "module-provider",
+         "injection-scope",
+         "guard-interceptor"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Nêu được module và provider",
+         "Nêu được injection scope",
+         "Nêu được guard interceptor pipe"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 0,
+         "extensibility": 0,
+         "relevance": 0,
+         "technical_accuracy": 0
+        },
+        "scores_10": {
+         "completeness": 0.0,
+         "extensibility": 0.0,
+         "relevance": 0.0,
+         "technical_accuracy": 0.0
+        },
+        "sources": [],
+        "strength_tags": [],
+        "transcript_low_confidence": false,
+        "turn_number": 9,
+        "turn_score_10": 0.0
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Mình gợi ý một hướng nhé: module và provider. Bạn thử trả lời lại xem?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t5",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "minh goi y mot huong nhe: gioi thieu ngan gon ve nen tang. ban thu tra loi lai xem?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. event loop cua node.js: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: cac pha cua event loop. ban thu tra loi lai xem?",
+         "bat dong bo, promise va async/await: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: callback hell. ban thu tra loi lai xem?",
+         "express va middleware: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: thu tu middleware. ban thu tra loi lai xem?",
+         "nestjs module va dependency injection: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: module va provider. ban thu tra loi lai xem?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 1,
+         "follow_ups": 1,
+         "hints": 1,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 1,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 1
+        },
+        "end_reason": null,
+        "evaluated_turns": 9,
+        "gaps": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "minh",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "cong-dung",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "event-loop",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "macrotask-microtask",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "blocking",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "callback-hell",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "tag": "allsettled-promise.all",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "tag": "async-await",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "tag": "middleware",
+          "turns": [
+           7,
+           8
+          ]
+         }
+        ],
+        "momentum": -1,
+        "notes": [],
+        "phase": "technical",
+        "phase_started_s": 120,
+        "schema_version": 1,
+        "strengths": [],
+        "swaps": [],
+        "topic_index": 4,
+        "topic_started_s": 480,
+        "topics": [
+         {
+          "covered": [],
+          "focus_used": [
+           "Giới thiệu ngắn gọn về nền tảng"
+          ],
+          "hint_used": true,
+          "id": "t1",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "các pha của event loop"
+          ],
+          "hint_used": true,
+          "id": "t2",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "callback hell"
+          ],
+          "hint_used": true,
+          "id": "t3",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "thứ tự middleware"
+          ],
+          "hint_used": true,
+          "id": "t4",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           7,
+           8
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "module và provider"
+          ],
+          "hint_used": true,
+          "id": "t5",
+          "n_scored": 1,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "active",
+          "turns": [
+           9,
+           10
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t6",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 10,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "hint",
+        "action_reason": null,
+        "agent_decision": "keep_difficulty",
+        "decided_by": null,
+        "difficulty": 1,
+        "overrule_reason": null,
+        "phase": "technical",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "dont_know -> hint (luật 4)",
+        "swap_result": null,
+        "topic_id": "t5",
+        "turn_kind": "hint",
+        "turn_number": 10
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Em không biết ạ.",
+    "elapsed_seconds": 600,
+    "level": "junior",
+    "question": "Mình gợi ý một hướng nhé: module và provider. Bạn thử trả lời lại xem?",
+    "session_id": "g-weak",
+    "topic_turns": [
+     {
+      "a": "Em không biết ạ.",
+      "q": "NestJS module và Dependency Injection: bạn hiểu như thế nào và đã áp dụng ra sao?",
+      "source": "text"
+     }
+    ],
+    "track": "nodejs_backend",
+    "turn_kind": "hint",
+    "turn_number": 10
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "ask_main",
+       "phase": "scenario",
+       "topic_index": 6,
+       "topic_total": 6,
+       "turn_number": 11
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 8,
+       "t": "Tiếp theo là một tình huống thực tế. Tình huống: Thiết kế dịch vụ upload file lớn. Bạn sẽ tiếp cận thế nào?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "dont_know",
+        "confidence": null,
+        "covered_points": [],
+        "degraded": false,
+        "evidence": [],
+        "follow_up_focus": "module và provider",
+        "gap_tags": [
+         "module-provider",
+         "injection-scope",
+         "guard-interceptor"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Nêu được module và provider",
+         "Nêu được injection scope",
+         "Nêu được guard interceptor pipe"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 0,
+         "extensibility": 0,
+         "relevance": 0,
+         "technical_accuracy": 0
+        },
+        "scores_10": {
+         "completeness": 0.0,
+         "extensibility": 0.0,
+         "relevance": 0.0,
+         "technical_accuracy": 0.0
+        },
+        "sources": [],
+        "strength_tags": [],
+        "transcript_low_confidence": false,
+        "turn_number": 10,
+        "turn_score_10": 0.0
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Tiếp theo là một tình huống thực tế. Tình huống: Thiết kế dịch vụ upload file lớn. Bạn sẽ tiếp cận thế nào?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t6",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "minh goi y mot huong nhe: gioi thieu ngan gon ve nen tang. ban thu tra loi lai xem?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. event loop cua node.js: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: cac pha cua event loop. ban thu tra loi lai xem?",
+         "bat dong bo, promise va async/await: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: callback hell. ban thu tra loi lai xem?",
+         "express va middleware: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: thu tu middleware. ban thu tra loi lai xem?",
+         "nestjs module va dependency injection: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: module va provider. ban thu tra loi lai xem?",
+         "tiep theo la mot tinh huong thuc te. tinh huong: thiet ke dich vu upload file lon. ban se tiep can the nao?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 0,
+         "follow_ups": 0,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 1,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 1
+        },
+        "end_reason": null,
+        "evaluated_turns": 10,
+        "gaps": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "minh",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "cong-dung",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "event-loop",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "macrotask-microtask",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "blocking",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "callback-hell",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "tag": "allsettled-promise.all",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "tag": "async-await",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "tag": "middleware",
+          "turns": [
+           7,
+           8
+          ]
+         }
+        ],
+        "momentum": -1,
+        "notes": [],
+        "phase": "scenario",
+        "phase_started_s": 600,
+        "schema_version": 1,
+        "strengths": [],
+        "swaps": [],
+        "topic_index": 1,
+        "topic_started_s": 600,
+        "topics": [
+         {
+          "covered": [],
+          "focus_used": [
+           "Giới thiệu ngắn gọn về nền tảng"
+          ],
+          "hint_used": true,
+          "id": "t1",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "các pha của event loop"
+          ],
+          "hint_used": true,
+          "id": "t2",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "callback hell"
+          ],
+          "hint_used": true,
+          "id": "t3",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "thứ tự middleware"
+          ],
+          "hint_used": true,
+          "id": "t4",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           7,
+           8
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "module và provider"
+          ],
+          "hint_used": true,
+          "id": "t5",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           9,
+           10
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t6",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "active",
+          "turns": [
+           11
+          ]
+         }
+        ],
+        "turn_count": 11,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "ask_main",
+        "action_reason": null,
+        "agent_decision": "switch_topic",
+        "decided_by": null,
+        "difficulty": 1,
+        "overrule_reason": null,
+        "phase": "scenario",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "two_dont_know -> next_topic (điều kiện ưu tiên, design 03 §4.4)",
+        "swap_result": null,
+        "topic_id": "t6",
+        "turn_kind": "main",
+        "turn_number": 11
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Em không biết ạ.",
+    "elapsed_seconds": 660,
+    "level": "junior",
+    "question": "Tiếp theo là một tình huống thực tế. Tình huống: Thiết kế dịch vụ upload file lớn. Bạn sẽ tiếp cận thế nào?",
+    "session_id": "g-weak",
+    "topic_turns": [],
+    "track": "nodejs_backend",
+    "turn_kind": "main",
+    "turn_number": 11
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "hint",
+       "phase": "scenario",
+       "topic_index": 6,
+       "topic_total": 6,
+       "turn_number": 12
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 7,
+       "t": "Mình gợi ý một hướng nhé: Làm rõ yêu cầu và giả định. Bạn thử trả lời lại xem?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "dont_know",
+        "confidence": null,
+        "covered_points": [],
+        "degraded": false,
+        "evidence": [],
+        "follow_up_focus": "Làm rõ yêu cầu và giả định",
+        "gap_tags": [
+         "dinh",
+         "hoac-huong",
+         "trade"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Làm rõ yêu cầu và giả định",
+         "Đề xuất thiết kế hoặc hướng giải quyết cụ thể",
+         "Nêu trade-off và rủi ro"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 0,
+         "extensibility": 0,
+         "relevance": 0,
+         "technical_accuracy": 0
+        },
+        "scores_10": {
+         "completeness": 0.0,
+         "extensibility": 0.0,
+         "relevance": 0.0,
+         "technical_accuracy": 0.0
+        },
+        "sources": [],
+        "strength_tags": [],
+        "transcript_low_confidence": false,
+        "turn_number": 11,
+        "turn_score_10": 0.0
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Mình gợi ý một hướng nhé: Làm rõ yêu cầu và giả định. Bạn thử trả lời lại xem?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t6",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "minh goi y mot huong nhe: gioi thieu ngan gon ve nen tang. ban thu tra loi lai xem?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. event loop cua node.js: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: cac pha cua event loop. ban thu tra loi lai xem?",
+         "bat dong bo, promise va async/await: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: callback hell. ban thu tra loi lai xem?",
+         "express va middleware: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: thu tu middleware. ban thu tra loi lai xem?",
+         "nestjs module va dependency injection: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: module va provider. ban thu tra loi lai xem?",
+         "tiep theo la mot tinh huong thuc te. tinh huong: thiet ke dich vu upload file lon. ban se tiep can the nao?",
+         "minh goi y mot huong nhe: lam ro yeu cau va gia dinh. ban thu tra loi lai xem?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 1,
+         "follow_ups": 1,
+         "hints": 1,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 1,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 1
+        },
+        "end_reason": null,
+        "evaluated_turns": 11,
+        "gaps": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "minh",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "cong-dung",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "event-loop",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "macrotask-microtask",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "blocking",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "callback-hell",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "tag": "allsettled-promise.all",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "tag": "async-await",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "tag": "middleware",
+          "turns": [
+           7,
+           8
+          ]
+         }
+        ],
+        "momentum": -1,
+        "notes": [],
+        "phase": "scenario",
+        "phase_started_s": 600,
+        "schema_version": 1,
+        "strengths": [],
+        "swaps": [],
+        "topic_index": 1,
+        "topic_started_s": 600,
+        "topics": [
+         {
+          "covered": [],
+          "focus_used": [
+           "Giới thiệu ngắn gọn về nền tảng"
+          ],
+          "hint_used": true,
+          "id": "t1",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "các pha của event loop"
+          ],
+          "hint_used": true,
+          "id": "t2",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "callback hell"
+          ],
+          "hint_used": true,
+          "id": "t3",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "thứ tự middleware"
+          ],
+          "hint_used": true,
+          "id": "t4",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           7,
+           8
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "module và provider"
+          ],
+          "hint_used": true,
+          "id": "t5",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           9,
+           10
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "Làm rõ yêu cầu và giả định"
+          ],
+          "hint_used": true,
+          "id": "t6",
+          "n_scored": 1,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "active",
+          "turns": [
+           11,
+           12
+          ]
+         }
+        ],
+        "turn_count": 12,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "hint",
+        "action_reason": null,
+        "agent_decision": "keep_difficulty",
+        "decided_by": null,
+        "difficulty": 1,
+        "overrule_reason": null,
+        "phase": "scenario",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "dont_know -> hint (luật 4)",
+        "swap_result": null,
+        "topic_id": "t6",
+        "turn_kind": "hint",
+        "turn_number": 12
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Em không biết ạ.",
+    "elapsed_seconds": 720,
+    "level": "junior",
+    "question": "Mình gợi ý một hướng nhé: Làm rõ yêu cầu và giả định. Bạn thử trả lời lại xem?",
+    "session_id": "g-weak",
+    "topic_turns": [
+     {
+      "a": "Em không biết ạ.",
+      "q": "Tiếp theo là một tình huống thực tế. Tình huống: Thiết kế dịch vụ upload file lớn. Bạn sẽ tiếp cận thế nào?",
+      "source": "text"
+     }
+    ],
+    "track": "nodejs_backend",
+    "turn_kind": "hint",
+    "turn_number": 12
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "wrap_up",
+       "phase": "wrap_up",
+       "topic_index": 6,
+       "topic_total": 6,
+       "turn_number": 13
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 7,
+       "t": "Cảm ơn bạn, buổi phỏng vấn đến đây là kết thúc. Bạn còn câu hỏi nào dành cho mình không?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "dont_know",
+        "confidence": null,
+        "covered_points": [],
+        "degraded": false,
+        "evidence": [],
+        "follow_up_focus": "Làm rõ yêu cầu và giả định",
+        "gap_tags": [
+         "dinh",
+         "hoac-huong",
+         "trade"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Làm rõ yêu cầu và giả định",
+         "Đề xuất thiết kế hoặc hướng giải quyết cụ thể",
+         "Nêu trade-off và rủi ro"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 0,
+         "extensibility": 0,
+         "relevance": 0,
+         "technical_accuracy": 0
+        },
+        "scores_10": {
+         "completeness": 0.0,
+         "extensibility": 0.0,
+         "relevance": 0.0,
+         "technical_accuracy": 0.0
+        },
+        "sources": [],
+        "strength_tags": [],
+        "transcript_low_confidence": false,
+        "turn_number": 12,
+        "turn_score_10": 0.0
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Cảm ơn bạn, buổi phỏng vấn đến đây là kết thúc. Bạn còn câu hỏi nào dành cho mình không?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": null,
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "minh goi y mot huong nhe: gioi thieu ngan gon ve nen tang. ban thu tra loi lai xem?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. event loop cua node.js: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: cac pha cua event loop. ban thu tra loi lai xem?",
+         "bat dong bo, promise va async/await: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: callback hell. ban thu tra loi lai xem?",
+         "express va middleware: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: thu tu middleware. ban thu tra loi lai xem?",
+         "nestjs module va dependency injection: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: module va provider. ban thu tra loi lai xem?",
+         "tiep theo la mot tinh huong thuc te. tinh huong: thiet ke dich vu upload file lon. ban se tiep can the nao?",
+         "minh goi y mot huong nhe: lam ro yeu cau va gia dinh. ban thu tra loi lai xem?",
+         "cam on ban, buoi phong van den day la ket thuc. ban con cau hoi nao danh cho minh khong?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 0,
+         "follow_ups": 0,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 1,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 1
+        },
+        "end_reason": null,
+        "evaluated_turns": 12,
+        "gaps": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "minh",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "cong-dung",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "event-loop",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "macrotask-microtask",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "blocking",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "callback-hell",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "tag": "allsettled-promise.all",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "tag": "async-await",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "tag": "middleware",
+          "turns": [
+           7,
+           8
+          ]
+         }
+        ],
+        "momentum": -1,
+        "notes": [],
+        "phase": "wrap_up",
+        "phase_started_s": 600,
+        "schema_version": 1,
+        "strengths": [],
+        "swaps": [],
+        "topic_index": 1,
+        "topic_started_s": 600,
+        "topics": [
+         {
+          "covered": [],
+          "focus_used": [
+           "Giới thiệu ngắn gọn về nền tảng"
+          ],
+          "hint_used": true,
+          "id": "t1",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "các pha của event loop"
+          ],
+          "hint_used": true,
+          "id": "t2",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "callback hell"
+          ],
+          "hint_used": true,
+          "id": "t3",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "thứ tự middleware"
+          ],
+          "hint_used": true,
+          "id": "t4",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           7,
+           8
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "module và provider"
+          ],
+          "hint_used": true,
+          "id": "t5",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           9,
+           10
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "Làm rõ yêu cầu và giả định"
+          ],
+          "hint_used": true,
+          "id": "t6",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           11,
+           12
+          ]
+         }
+        ],
+        "turn_count": 13,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "wrap_up",
+        "action_reason": null,
+        "agent_decision": "switch_topic",
+        "decided_by": null,
+        "difficulty": 1,
+        "overrule_reason": null,
+        "phase": "wrap_up",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "two_dont_know -> next_topic (điều kiện ưu tiên, design 03 §4.4)",
+        "swap_result": null,
+        "topic_id": null,
+        "turn_kind": "main",
+        "turn_number": 13
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Em không biết ạ.",
+    "elapsed_seconds": 780,
+    "level": "junior",
+    "question": "Cảm ơn bạn, buổi phỏng vấn đến đây là kết thúc. Bạn còn câu hỏi nào dành cho mình không?",
+    "session_id": "g-weak",
+    "topic_turns": [],
+    "track": "nodejs_backend",
+    "turn_kind": "main",
+    "turn_number": 13
+   },
+   "response": {
+    "events": [
+     [
+      "done",
+      {
+       "evaluation": null,
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": null,
+       "session_end": true,
+       "state": {
+        "active_topic_id": null,
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "minh goi y mot huong nhe: gioi thieu ngan gon ve nen tang. ban thu tra loi lai xem?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. event loop cua node.js: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: cac pha cua event loop. ban thu tra loi lai xem?",
+         "bat dong bo, promise va async/await: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: callback hell. ban thu tra loi lai xem?",
+         "express va middleware: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: thu tu middleware. ban thu tra loi lai xem?",
+         "nestjs module va dependency injection: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh goi y mot huong nhe: module va provider. ban thu tra loi lai xem?",
+         "tiep theo la mot tinh huong thuc te. tinh huong: thiet ke dich vu upload file lon. ban se tiep can the nao?",
+         "minh goi y mot huong nhe: lam ro yeu cau va gia dinh. ban thu tra loi lai xem?",
+         "cam on ban, buoi phong van den day la ket thuc. ban con cau hoi nao danh cho minh khong?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 0,
+         "follow_ups": 0,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 1,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 4,
+         "min": 1
+        },
+        "end_reason": "plan_complete",
+        "evaluated_turns": 12,
+        "gaps": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "minh",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "cong-dung",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "event-loop",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "macrotask-microtask",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "blocking",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "callback-hell",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "tag": "allsettled-promise.all",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "tag": "async-await",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "tag": "middleware",
+          "turns": [
+           7,
+           8
+          ]
+         }
+        ],
+        "momentum": -1,
+        "notes": [],
+        "phase": "done",
+        "phase_started_s": 600,
+        "schema_version": 1,
+        "strengths": [],
+        "swaps": [],
+        "topic_index": 1,
+        "topic_started_s": 600,
+        "topics": [
+         {
+          "covered": [],
+          "focus_used": [
+           "Giới thiệu ngắn gọn về nền tảng"
+          ],
+          "hint_used": true,
+          "id": "t1",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "các pha của event loop"
+          ],
+          "hint_used": true,
+          "id": "t2",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "callback hell"
+          ],
+          "hint_used": true,
+          "id": "t3",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "thứ tự middleware"
+          ],
+          "hint_used": true,
+          "id": "t4",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           7,
+           8
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "module và provider"
+          ],
+          "hint_used": true,
+          "id": "t5",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           9,
+           10
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [
+           "Làm rõ yêu cầu và giả định"
+          ],
+          "hint_used": true,
+          "id": "t6",
+          "n_scored": 2,
+          "score_band": 0.0,
+          "score_sum": 0.0,
+          "status": "done",
+          "turns": [
+           11,
+           12
+          ]
+         }
+        ],
+        "turn_count": 13,
+        "used_qa_ids": []
+       },
+       "turn": null
+      }
+     ]
+    ],
+    "status": 200
+   }
+  }
+ ]
+}
