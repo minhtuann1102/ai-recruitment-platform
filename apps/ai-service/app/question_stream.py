@@ -9,7 +9,8 @@ import asyncio
 import logging
 import re
 import time
-from typing import AsyncIterator, List, Optional, Tuple
+from contextlib import aclosing
+from typing import AsyncIterator, Callable, List, Optional, Tuple
 
 from .agents.interviewer import QuestionSpec, fallback_question
 from .language_check import wrong_language
@@ -17,6 +18,7 @@ from .llm.usage import CallRecord, UsageCollector
 from .mock_evaluator import fold
 from .sse import chunk_tokens
 from .text_similarity import is_repeat
+from .turn_result import TurnResult, finish_turn
 
 log = logging.getLogger("ai_service.interviewer")
 FIRST_TOKEN_TIMEOUT_S = 5.0
@@ -116,6 +118,22 @@ class QuestionStream:
             yield "replace", {"question": self._fallback(problem)}
         elif self.question != raw.strip():  # da bo markdown: client hien dung cau da lam sach
             yield "replace", {"question": self.question}
+
+
+async def turn_question_events(result: TurnResult, get_interviewer: Callable,
+                               collector: Optional[UsageCollector] = None) -> AsyncIterator[Tuple[str, dict]]:
+    """Event cua mot luot truoc `done`: meta -> token... / replace (Interviewer) -> finish_turn (ghi cau da hoi).
+    Dung chung cho /start (main._stream) va node `ask` cua graph (app/turn_graph). get_interviewer chi goi khi con
+    hoi (loi cau hinh agent thanh event `error` sau `meta`, nhu truoc)."""
+    if result.meta:
+        yield "meta", result.meta
+    if result.spec is None:  # phien ket thuc: khong hoi them
+        return
+    qs = QuestionStream(result.spec, get_interviewer(), result.state.asked_questions, collector)
+    async with aclosing(qs.events()) as events:
+        async for name, data in events:
+            yield name, data
+    finish_turn(result, qs.question, qs.source)
 
 
 async def _close(gen) -> None:

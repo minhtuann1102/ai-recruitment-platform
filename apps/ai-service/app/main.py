@@ -6,7 +6,7 @@ import asyncio
 import logging
 import time
 from contextlib import aclosing, asynccontextmanager, contextmanager
-from typing import Callable, Optional
+from typing import AsyncIterator, Awaitable, Callable, Optional, Tuple
 
 import anyio
 from fastapi import FastAPI, File, Form, Request, UploadFile
@@ -26,7 +26,7 @@ from .models_interview import FinalizeRequest, NextTurnRequest, StartRequest
 from .agents.reporter import get_reporter
 from .agents.interviewer import get_interviewer
 from .plan_snippets import close_rag, note_rag_errors, rag_status, warm_rag
-from .question_stream import QuestionStream
+from .question_stream import turn_question_events
 from .dev_play_page import router as dev_play_router
 from .matching.router import router as match_router
 from .matching.service import get_match_service
@@ -35,7 +35,9 @@ from .sse import SSE_HEADERS, event
 from .stt_phrase_hints import track_phrases
 from . import metrics, tracing
 from .replan import effective_plan
-from .turn_engine import TurnResult, finish_turn, next_turn, start_session
+from .turn_engine import TurnResult, start_session, turn_context
+from .turn_graph.turn_graph_builder import turn_graph
+from .turn_graph.turn_graph_runner import GraphTurnRun
 
 MODEL = "mock-v2"
 TRACE_FLUSH_TIMEOUT_S = 5.0
@@ -48,6 +50,7 @@ async def lifespan(_: FastAPI):
     check_agent_config()  # staging/production thieu cau hinh LLM: khong khoi dong
     get_match_service()  # MATCH_WEIGHTS... sai: khong khoi dong (017); khong cham DB, chi muc nap o request dau
     tracing.warm()
+    turn_graph()  # compile graph mot luot luc khoi dong, request dau khong chiu
     warm = asyncio.ensure_future(warm_rag())  # khong chan khoi dong: nap corpus BM25 o nen
     yield
     warm.cancel()
@@ -165,9 +168,9 @@ class _TurnStream(StreamingResponse):
     request khac). Dong generator va tong ket request ngay tai day, trong context cua chinh request nay; generator
     chua kip chay cung qua day."""
 
-    def __init__(self, content, on_close: Callable[[], None]):
+    def __init__(self, content, on_close: Callable[[], None], cleanup: Optional[Callable[[], Awaitable]] = None):
         super().__init__(content, media_type="text/event-stream", headers=SSE_HEADERS)
-        self._on_close = on_close
+        self._on_close, self._cleanup = on_close, cleanup
 
     async def __call__(self, scope, receive, send) -> None:
         try:
@@ -176,30 +179,30 @@ class _TurnStream(StreamingResponse):
             try:
                 with anyio.CancelScope(shield=True):
                     await self.body_iterator.aclose()
+                    if self._cleanup is not None:  # graph da chay truoc response (prime): huy ca khi generator chua chay
+                        await self._cleanup()
             finally:
                 self._on_close()
 
 
-def _stream(endpoint: str, result: TurnResult, build_done: Callable[[TurnResult], dict], collector: UsageCollector,
-            started: float):
-    """meta -> token... (Interviewer stream, co the replace) -> done. `done` dung SAU khi biet cau hoi cuoi."""
+def _stream(endpoint: str, turn_events: AsyncIterator[Tuple[str, dict]], result_of: Callable[[], TurnResult],
+            build_done: Callable[[TurnResult], dict], collector: UsageCollector, started: float,
+            cleanup: Optional[Callable[[], Awaitable]] = None):
+    """meta -> token... (Interviewer stream, co the replace) -> done. `turn_events` goi finish_turn khi het (cau hoi
+    that da ghi vao state); `done` dung SAU do tu `result_of()`."""
     outcome = {"status": "cancelled", "error": "-", "rag": None}  # client ngat: khong qua hai nhanh gan ben duoi
 
     async def gen():
         try:
-            if result.meta:
-                yield event("meta", result.meta)
-            if result.spec is not None:
-                qs = QuestionStream(result.spec, get_interviewer(), result.state.asked_questions, collector)
-                ttft = None  # chu dau tien cua cau hoi toi client; ghi sau stream khi da biet nguon cau hoi
-                async with aclosing(qs.events()) as events:
-                    async for name, data in events:
-                        if ttft is None and name in ("token", "replace"):
-                            ttft = time.perf_counter() - started
-                        yield event(name, data)
-                if ttft is not None:
-                    metrics.observe_ttft(endpoint, qs.source, ttft)
-                finish_turn(result, qs.question, qs.source)
+            ttft = None  # chu dau tien cua cau hoi toi client; ghi sau stream khi da biet nguon cau hoi
+            async with aclosing(turn_events) as events:
+                async for name, data in events:
+                    if ttft is None and name in ("token", "replace"):
+                        ttft = time.perf_counter() - started
+                    yield event(name, data)
+            result = result_of()
+            if ttft is not None:
+                metrics.observe_ttft(endpoint, result.source, ttft)
             done = build_done(result)
             outcome.update(status="ok", rag=done["metadata"]["rag"]["status"])
             tracing.set_output(done.get("question"))
@@ -209,7 +212,7 @@ def _stream(endpoint: str, result: TurnResult, build_done: Callable[[TurnResult]
             log.exception("stream_failed")
             yield event("error", {"errorCode": "AI_SERVICE_ERROR", "message": "AI tạm thời không phản hồi",
                                   "retryable": True})
-    return _TurnStream(gen(), lambda: _finish_request(endpoint, started, collector, **outcome))
+    return _TurnStream(gen(), lambda: _finish_request(endpoint, started, collector, **outcome), cleanup)
 
 
 @app.get("/metrics", include_in_schema=False)
@@ -231,7 +234,7 @@ async def start(req: StartRequest):
     started, collector = time.perf_counter(), UsageCollector()
     with _logged_failure("start", started, collector):
         r = await start_session(req, collector=collector)
-    return _stream("start", r, lambda x: {
+    return _stream("start", turn_question_events(r, get_interviewer, collector), lambda: r, lambda x: {
         "question": x.question, "turn": x.turn.model_dump(), "plan": x.plan.model_dump(),
         "state": x.state.model_dump(), "metadata": _usage_meta(started, collector)}, collector, started)
 
@@ -243,14 +246,17 @@ async def next_turn_route(req: NextTurnRequest):
                           tags=[req.track, req.level], input={"question": req.question, "answer": req.answer})
     started, collector = time.perf_counter(), UsageCollector()
     with _logged_failure("next_turn", started, collector):
-        r = await next_turn(req, collector=collector)
+        # graph LangGraph (app/turn_graph): chay toi event dau cua Interviewer truoc khi mo response, nen loi
+        # perceive (409 / 422) van tra dung ma HTTP; Evaluator lay tu turn_engine (test / evals patch o do)
+        run = GraphTurnRun(turn_graph(), turn_context(req, collector=collector, interviewer=get_interviewer))
+        await run.prime()
 
     def done(x: TurnResult) -> dict:  # chi goi khi stream toi done: luot loi / bi ngat khong vao ai_turns
         metrics.record_turn(req.answer_source, x.evaluation)
         return {"evaluation": x.evaluation.model_dump() if x.evaluation else None, "question": x.question,
                 "turn": x.turn.model_dump() if x.turn else None, "state": x.state.model_dump(),
                 "session_end": x.session_end, "metadata": _usage_meta(started, collector)}
-    return _stream("next_turn", r, done, collector, started)
+    return _stream("next_turn", run.events(), lambda: run.result, done, collector, started, run.aclose)
 
 
 @app.post("/api/finalize")
