@@ -12,6 +12,7 @@ from app.api_error import ApiError
 from app.turn_engine import turn_context
 from app.turn_graph.turn_graph_builder import DECIDE_ACTIONS, turn_graph, turn_graph_mermaid
 from app.main import app
+from app.session_store.session_checkpointer import thread_config
 from conftest import parse_sse
 from tests.test_policy_hybrid_turn_engine import request
 
@@ -21,29 +22,29 @@ def node_path(req):
     ctx = turn_context(req, interviewer=get_interviewer)
 
     async def go():
-        return [name for update in [u async for u in turn_graph().astream({"ctx": ctx}, stream_mode="updates")]
-                for name in update]
+        updates = turn_graph().astream({}, thread_config(req.session_id), context=ctx, stream_mode="updates")
+        return [name for update in [u async for u in updates] for name in update]
     return asyncio.run(go()), ctx.result
 
 
 def test_answered_turn_goes_perceive_evaluate_decide_act_ask():
     path, result = node_path(request())
-    assert path == ["perceive", "evaluate", "decide", "act", "ask"]
+    assert path == ["perceive", "evaluate", "decide", "act", "ask", "record"]
     assert result.question and result.source == "ai" and result.state.asked_questions  # finish_turn da chay trong ask
 
 
 def test_low_confidence_voice_goes_to_reask_without_evaluating():
     req = request().model_copy(update={"answer_source": "voice", "stt_confidence": 0.2})
     path, result = node_path(req)
-    assert path == ["perceive", "reask", "ask"] and result.turn.action == "clarify" and result.source == "fallback"
+    assert path == ["perceive", "reask", "ask", "record"] and result.turn.action == "clarify" and result.source == "fallback"
 
 
 def test_answer_to_wrap_up_ends_at_perceive_and_hard_limit_ends_at_decide():
     req = request()
     path, result = node_path(req.model_copy(update={"state": req.state.model_copy(update={"phase": "wrap_up"})}))
-    assert path == ["perceive"] and result.session_end and result.question is None
+    assert path == ["perceive", "record"] and result.session_end and result.question is None
     path, result = node_path(req.model_copy(update={"elapsed_seconds": 99999}))
-    assert path == ["perceive", "evaluate", "decide"] and result.state.end_reason == "time_hard_limit"
+    assert path == ["perceive", "evaluate", "decide", "record"] and result.state.end_reason == "time_hard_limit"
 
 
 @pytest.mark.parametrize("update,code", [({"answer_source": "voice", "answer": "", "stt_confidence": 0.9},
@@ -59,7 +60,7 @@ def test_api_errors_leave_the_graph_unwrapped(update, code):
 
 def test_mermaid_diagram_shows_every_node_and_decide_branch():
     mermaid = turn_graph_mermaid()
-    for node in ("perceive", "reask", "evaluate", "decide", "act", "ask"):
+    for node in ("perceive", "reask", "evaluate", "decide", "act", "ask", "record"):
         assert node in mermaid
     for action in DECIDE_ACTIONS:
         assert action in mermaid

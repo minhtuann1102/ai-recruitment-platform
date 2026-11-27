@@ -35,7 +35,12 @@ from .sse import SSE_HEADERS, event
 from .stt_phrase_hints import track_phrases
 from . import metrics, tracing
 from .replan import effective_plan
+from .session_store.session_checkpointer import close_session_store, open_session_store
+from .session_store.session_lock import turn_locks
+from .session_store.session_record import record_start
+from .session_store.session_turn_guard import check_turn, replay_events
 from .turn_engine import TurnResult, start_session, turn_context
+from .turn_result import turn_payload
 from .turn_graph.turn_graph_builder import turn_graph
 from .turn_graph.turn_graph_runner import GraphTurnRun
 
@@ -50,11 +55,13 @@ async def lifespan(_: FastAPI):
     check_agent_config()  # staging/production thieu cau hinh LLM: khong khoi dong
     get_match_service()  # MATCH_WEIGHTS... sai: khong khoi dong (017); khong cham DB, chi muc nap o request dau
     tracing.warm()
+    await open_session_store()  # SESSION_STORE sai: khong khoi dong; truoc khi compile graph (graph giu checkpointer)
     turn_graph()  # compile graph mot luot luc khoi dong, request dau khong chiu
     warm = asyncio.ensure_future(warm_rag())  # khong chan khoi dong: nap corpus BM25 o nen
     yield
     warm.cancel()
     await close_rag()
+    await close_session_store()
     try:  # flush trace co the treo neu Langfuse khong toi duoc: khong giu service luc tat
         await asyncio.wait_for(asyncio.to_thread(tracing.shutdown), TRACE_FLUSH_TIMEOUT_S)
     except asyncio.TimeoutError:
@@ -201,7 +208,7 @@ def _stream(endpoint: str, turn_events: AsyncIterator[Tuple[str, dict]], result_
                         ttft = time.perf_counter() - started
                     yield event(name, data)
             result = result_of()
-            if ttft is not None:
+            if ttft is not None and result is not None:  # replay (result None): khong do TTFT, khong goi LLM
                 metrics.observe_ttft(endpoint, result.source, ttft)
             done = build_done(result)
             outcome.update(status="ok", rag=done["metadata"]["rag"]["status"])
@@ -233,10 +240,27 @@ async def start(req: StartRequest):
     tracing.start_request("start", session_id=safe_session_id(req.session_id), tags=[req.track, req.level])
     started, collector = time.perf_counter(), UsageCollector()
     with _logged_failure("start", started, collector):
-        r = await start_session(req, collector=collector)
-    return _stream("start", turn_question_events(r, get_interviewer, collector), lambda: r, lambda x: {
+        release = turn_locks.hold(req.session_id)  # luot dang chay cua phien cu ghi muon thi de mat checkpoint moi
+        try:
+            r = await start_session(req, collector=collector)
+        except BaseException:
+            release()
+            raise
+
+    async def events():  # cau hoi dau gui xong moi ghi checkpoint dau cua phien (stream dut: /start gui lai)
+        try:
+            async with aclosing(turn_question_events(r, get_interviewer, collector)) as question_events:
+                async for item in question_events:
+                    yield item
+            await record_start(turn_graph(), req, r)  # loi ghi chi log, van gui done
+        finally:
+            release()
+
+    async def cleanup():  # client ngat truoc khi generator chay: van nha khoa
+        release()
+    return _stream("start", events(), lambda: r, lambda x: {
         "question": x.question, "turn": x.turn.model_dump(), "plan": x.plan.model_dump(),
-        "state": x.state.model_dump(), "metadata": _usage_meta(started, collector)}, collector, started)
+        "state": x.state.model_dump(), "metadata": _usage_meta(started, collector)}, collector, started, cleanup)
 
 
 @app.post("/api/next-turn")
@@ -246,16 +270,27 @@ async def next_turn_route(req: NextTurnRequest):
                           tags=[req.track, req.level], input={"question": req.question, "answer": req.answer})
     started, collector = time.perf_counter(), UsageCollector()
     with _logged_failure("next_turn", started, collector):
-        # graph LangGraph (app/turn_graph): chay toi event dau cua Interviewer truoc khi mo response, nen loi
-        # perceive (409 / 422) van tra dung ma HTTP; Evaluator lay tu turn_engine (test / evals patch o do)
-        run = GraphTurnRun(turn_graph(), turn_context(req, collector=collector, interviewer=get_interviewer))
-        await run.prime()
+        release = turn_locks.hold(req.session_id)  # 409 turn_in_progress; nha khi graph xong (hoac loi / replay)
+        replay = run = None
+        try:
+            # app/session_store: luot da xong -> replay; sai thu tu / phien done -> 409; doc checkpoint loi -> 503
+            replay = await check_turn(turn_graph(), req)
+            if replay is None:
+                # graph LangGraph (app/turn_graph): chay toi event dau cua Interviewer truoc khi mo response, nen
+                # loi perceive (409 / 422) van tra dung ma HTTP; Evaluator lay tu turn_engine (test / evals patch)
+                run = GraphTurnRun(turn_graph(), turn_context(req, collector=collector, interviewer=get_interviewer),
+                                   on_finish=release)
+                await run.prime()
+        finally:
+            if run is None:  # replay / loi truoc khi chay graph; co graph thi runner nha khoa khi xong
+                release()
+    if replay is not None:  # luot gui lai sau khi da xong: tra dung `done` cu, metadata danh dau replayed
+        return _stream("next_turn", replay_events(replay), lambda: None, lambda _: {
+            **replay["done"], "metadata": {**_usage_meta(started, collector), "replayed": True}}, collector, started)
 
     def done(x: TurnResult) -> dict:  # chi goi khi stream toi done: luot loi / bi ngat khong vao ai_turns
         metrics.record_turn(req.answer_source, x.evaluation)
-        return {"evaluation": x.evaluation.model_dump() if x.evaluation else None, "question": x.question,
-                "turn": x.turn.model_dump() if x.turn else None, "state": x.state.model_dump(),
-                "session_end": x.session_end, "metadata": _usage_meta(started, collector)}
+        return {**turn_payload(x), "metadata": _usage_meta(started, collector)}
     return _stream("next_turn", run.events(), lambda: run.result, done, collector, started, run.aclose)
 
 

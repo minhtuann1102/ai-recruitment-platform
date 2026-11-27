@@ -21,6 +21,14 @@ def client():
     return TestClient(app)
 
 
+@pytest.fixture(autouse=True)
+def fresh_session_store():
+    """Moi test mot InMemorySaver moi: checkpoint phien cua test truoc (cung session_id) khong lam lech guard."""
+    from app.session_store.session_checkpointer import reset_memory_store
+    reset_memory_store()
+    yield
+
+
 def parse_sse(text: str) -> List[Tuple[str, dict]]:
     """Tach body SSE thanh [(event, data)]."""
     events = []

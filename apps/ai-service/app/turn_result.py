@@ -49,3 +49,10 @@ def flat_topics(plan: InterviewPlan) -> List[Tuple[str, PlanTopic]]:
 def _norm(q: str) -> str:
     # 400 ky tu: cat ngan qua lam Jaccard voi cau day du tut duoi 0.8, bo sot cau lap dai
     return re.sub(r"\s+", " ", fold(q)).strip()[:400]
+
+
+def turn_payload(result: TurnResult, mode: str = "python") -> Dict:
+    """Phan `done` cua next-turn tu ket qua luot (tru metadata). mode="json": ban luu trong checkpoint (replay)."""
+    return {"evaluation": result.evaluation.model_dump(mode=mode) if result.evaluation else None,
+            "question": result.question, "turn": result.turn.model_dump(mode=mode) if result.turn else None,
+            "state": result.state.model_dump(mode=mode), "session_end": result.session_end}
