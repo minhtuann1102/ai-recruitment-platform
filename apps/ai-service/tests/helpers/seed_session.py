@@ -7,17 +7,17 @@ import asyncio
 from typing import Dict, List, Optional
 
 from app.session_store.session_checkpointer import thread_config
-from app.turn_graph.turn_graph_builder import turn_graph
+from app.turn_graph.session_graph_selector import session_graph
 
 DEFAULT_SESSION = {"track": "java_backend", "level": "junior", "duration_minutes": 30, "jd_profile": None}
 
 
 def seed_session(app_or_graph, session_id: str, plan: Dict, state: Dict, transcript: Optional[List[Dict]] = None,
                  turn: Optional[Dict] = None, question: str = "", session: Optional[Dict] = None) -> None:
-    """`app_or_graph`: graph da compile, hoac bat ky gi khac (vd app / TestClient) thi dung turn_graph() hien tai.
+    """`app_or_graph`: graph da compile, hoac bat ky gi khac (vd app / TestClient) thi dung session_graph() hien tai (theo SESSION_GRAPH).
     plan / state / turn / transcript: dict JSON nhu /start tra ve (turn = done["turn"] cua cau dang cho tra loi;
     moi phan tu transcript can topic_id, phase, turn_kind, difficulty, evaluation neu test finalize / topic_turns)."""
-    graph = app_or_graph if hasattr(app_or_graph, "aupdate_state") else turn_graph()
+    graph = app_or_graph if hasattr(app_or_graph, "aupdate_state") else session_graph()
     values = {"session": {**DEFAULT_SESSION, **(session or {})}, "plan": plan, "state": state,
               "transcript": list(transcript or []),
               "turn": turn or {"turn_number": 1, "turn_kind": "main", "topic_id": None}, "question": question, "last_turn": None}

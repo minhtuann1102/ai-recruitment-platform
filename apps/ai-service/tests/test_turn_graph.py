@@ -17,6 +17,8 @@ from conftest import parse_sse
 from tests.test_policy_hybrid_turn_engine import request
 from tests.helpers.seed_session import seed_from_next_turn_request
 
+pytestmark = pytest.mark.usefixtures("session_graph_mode")  # chay ca hai gia tri SESSION_GRAPH
+
 
 def node_path(req):
     """Chay graph, tra (ten node theo thu tu, ket qua luot)."""
@@ -51,7 +53,7 @@ def test_answer_to_wrap_up_ends_at_perceive_and_hard_limit_ends_at_decide():
 @pytest.mark.parametrize("update,code", [({"answer_source": "voice", "answer": "", "stt_confidence": 0.9},
                                           "voice_no_speech"), ({"state_phase": "done"}, "session_invalid_state")])
 def test_api_errors_leave_the_graph_unwrapped(update, code):
-    req = request()
+    req, update = request(), dict(update)  # sao chep: parametrize cua SESSION_GRAPH chay lai cung dict
     if update.pop("state_phase", None):
         req = req.model_copy(update={"state": req.state.model_copy(update={"phase": "done"})})
     with pytest.raises(ApiError) as err:

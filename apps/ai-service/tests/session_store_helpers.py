@@ -4,7 +4,7 @@ import json
 from typing import Dict, List
 
 from app.agents.evaluator_provider import MockEvaluator
-from app.turn_graph.turn_graph_builder import turn_graph
+from app.turn_graph.session_graph_selector import session_graph
 from app.session_store.session_checkpointer import thread_config
 from conftest import parse_sse
 
@@ -37,7 +37,7 @@ def without_metadata(done: Dict) -> Dict:
 
 
 def stored(sid: str) -> Dict:
-    return asyncio.run(turn_graph().aget_state(thread_config(sid))).values
+    return asyncio.run(session_graph().aget_state(thread_config(sid))).values
 
 
 def log_lines(capsys) -> List[str]:

@@ -5,12 +5,15 @@ import json
 
 import httpx
 
+import pytest
 from app.main import app
 from app.session_store.session_lock import turn_locks
 from conftest import parse_sse
 from tests.session_store_helpers import CountingEvaluator, body, start, stored, without_metadata
 from tests.test_turn_graph import SlowInterviewer, post_and_disconnect
 from tests.helpers.seed_session import seed_session
+
+pytestmark = pytest.mark.usefixtures("session_graph_mode")  # chay ca hai gia tri SESSION_GRAPH
 
 GOOD = "Em dùng HashMap với equals và hashCode, độ phức tạp O(1) trung bình."
 

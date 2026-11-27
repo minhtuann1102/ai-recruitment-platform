@@ -19,7 +19,7 @@ from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver  # noqa: E402
 from app.main import app  # noqa: E402
 from app.session_store import session_checkpointer as store  # noqa: E402
 from app.session_store.session_store_settings import load_session_store_settings  # noqa: E402
-from app.turn_graph.turn_graph_builder import turn_graph  # noqa: E402
+from app.turn_graph.session_graph_selector import session_graph  # noqa: E402
 from conftest import parse_sse  # noqa: E402
 from tests.session_store_helpers import CTX, body, without_metadata  # noqa: E402
 
@@ -52,7 +52,9 @@ async def _post(client, path, json):
     return r, (parse_sse(r.text) if r.headers.get("content-type", "").startswith("text/event-stream") else None)
 
 
-def test_full_session_is_recorded_replayed_and_guarded_on_postgres():
+@pytest.mark.parametrize("mode", ["per_turn", "session"])
+def test_full_session_is_recorded_replayed_and_guarded_on_postgres(mode, monkeypatch):
+    monkeypatch.setenv("SESSION_GRAPH", mode)
     async def scenario(client, sid):
         _, start = await _post(client, "/api/start", {"session_id": sid, **CTX})
         d = start[-1][1]
@@ -66,7 +68,7 @@ def test_full_session_is_recorded_replayed_and_guarded_on_postgres():
         last_body = b
         replay_r, replay = await _post(client, "/api/next-turn", last_body)
         stale_r, _ = await _post(client, "/api/next-turn", first_body)
-        snap = await turn_graph().aget_state(store.thread_config(sid))
+        snap = await session_graph().aget_state(store.thread_config(sid))
         async with store._pool.connection() as conn:
             rows = (await (await conn.execute("SELECT count(*) AS n FROM checkpoints WHERE thread_id = %s",
                                               (sid,))).fetchone())["n"]
@@ -79,4 +81,5 @@ def test_full_session_is_recorded_replayed_and_guarded_on_postgres():
     assert stale_r.status_code == 409 and stale_r.json()["error"] == "session_invalid_state"
     assert values["state"] == done["state"] and len(values["transcript"]) == n
     assert values["last_turn"]["turn_number"] == n
-    assert first_done["state"]["turn_count"] == 2 and rows == n + 1  # /start + moi luot mot checkpoint (exit)
+    assert first_done["state"]["turn_count"] == 2
+    assert rows == n + 1  # /start + moi luot mot checkpoint (exit), ca hai che do

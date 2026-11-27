@@ -29,6 +29,14 @@ def fresh_session_store():
     yield
 
 
+@pytest.fixture(params=["per_turn", "session"])
+def session_graph_mode(request, monkeypatch):
+    """Chay test voi ca hai gia tri SESSION_GRAPH (plan 261127-1517 phase 05): file test dung
+    `pytestmark = pytest.mark.usefixtures("session_graph_mode")` de chay lai duoi graph ca phien."""
+    monkeypatch.setenv("SESSION_GRAPH", request.param)
+    return request.param
+
+
 def parse_sse(text: str) -> List[Tuple[str, dict]]:
     """Tach body SSE thanh [(event, data)]."""
     events = []

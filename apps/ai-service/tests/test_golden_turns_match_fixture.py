@@ -10,6 +10,8 @@ import pytest
 from tests.golden_turns.golden_fixture_paths import fixture_path
 from tests.golden_turns.golden_scenarios import SCENARIOS, run_scenario
 
+pytestmark = pytest.mark.usefixtures("session_graph_mode")  # chay ca hai gia tri SESSION_GRAPH
+
 
 @pytest.mark.parametrize("name", sorted(SCENARIOS))
 def test_scenario_matches_golden_fixture(name):

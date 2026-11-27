@@ -19,7 +19,12 @@ log = logging.getLogger("ai_service.session_store")
 
 
 async def stored_values(graph, session_id: str) -> Dict:
-    """Checkpoint cua phien. Loi doc -> 503 (retryable); thread chua co -> 404 session_not_found."""
+    return (await stored_snapshot(graph, session_id))[1]
+
+
+async def stored_snapshot(graph, session_id: str):
+    """(snapshot, values) cua phien. Loi doc -> 503 (retryable); thread chua co -> 404 session_not_found. Graph ca
+    phien can snapshot de tim diem resume (session_resume_point) ma khong doc lai."""
     try:
         snap = await asyncio.wait_for(graph.aget_state(thread_config(session_id)), STORE_TIMEOUT_S)
     except Exception as err:  # TimeoutError khi DB treo: tra 503 nhanh, khong giu khoa phien
@@ -32,7 +37,7 @@ async def stored_values(graph, session_id: str) -> Dict:
     if not values.get("session") or not values.get("turn"):  # thread ghi truoc phase 04: thieu truong de dung request
         log.warning("session_schema_outdated")
         raise ApiError(404, "session_not_found", "Không tìm thấy phiên phỏng vấn")
-    return values
+    return snap, values
 
 
 def _same_answer(last: Dict, req: NextTurnBody) -> bool:
