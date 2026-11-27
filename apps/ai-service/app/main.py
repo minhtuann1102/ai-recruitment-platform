@@ -30,7 +30,8 @@ from .security import internal_token_middleware
 from .stt_phrase_hints import track_phrases
 from . import metrics, tracing
 from .session_store.session_checkpointer import close_session_store, open_session_store
-from .turn_graph.turn_graph_builder import turn_graph
+from .session_store.session_graph_settings import load_session_graph_mode
+from .turn_graph.session_graph_selector import session_graph
 
 TRACE_FLUSH_TIMEOUT_S = 5.0
 configure_logging()  # truoc moi log: uvicorn khong cau hinh logger ai_service
@@ -43,7 +44,8 @@ async def lifespan(_: FastAPI):
     get_match_service()  # MATCH_WEIGHTS... sai: khong khoi dong (017); khong cham DB, chi muc nap o request dau
     tracing.warm()
     await open_session_store()  # SESSION_STORE sai: khong khoi dong; truoc khi compile graph (graph giu checkpointer)
-    turn_graph()  # compile graph mot luot luc khoi dong, request dau khong chiu
+    load_session_graph_mode()  # SESSION_GRAPH sai: khong khoi dong
+    session_graph()  # compile graph (mot luot hoac ca phien theo SESSION_GRAPH) luc khoi dong, request dau khong chiu
     warm = asyncio.ensure_future(warm_rag())  # khong chan khoi dong: nap corpus BM25 o nen
     yield
     warm.cancel()

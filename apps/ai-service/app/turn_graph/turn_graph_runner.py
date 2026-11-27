@@ -15,7 +15,7 @@ ghi checkpoint khi graph xong. `on_finish` (nha khoa phien, goi nhieu lan khong 
 ky ly do gi va o aclose: luc do checkpoint da ghi (hoac luot da huy), request sau cua phien doc dung state.
 """
 import asyncio
-from typing import AsyncIterator, Callable, Optional, Tuple
+from typing import Any, AsyncIterator, Callable, Optional, Tuple
 
 from ..session_store.session_checkpointer import thread_config
 from ..turn_result import TurnResult
@@ -25,8 +25,13 @@ _END = object()  # graph chay xong
 
 
 class GraphTurnRun:
-    def __init__(self, graph, ctx: TurnContext, on_finish: Optional[Callable[[], None]] = None):
+    def __init__(self, graph, ctx: TurnContext, on_finish: Optional[Callable[[], None]] = None,
+                 graph_input: Any = None, config: Optional[dict] = None):
+        """Graph ca phien (phase 05): ctx la SessionRunContext (co .result), graph_input = {} (/start) hoac
+        Command(resume=...), config co the tro checkpoint_id de resume tu diem cho (session_resume_point)."""
         self.ctx = ctx
+        self._input = {} if graph_input is None else graph_input
+        self._config = config or thread_config(ctx.req.session_id)
         self._queue: asyncio.Queue = asyncio.Queue()
         self._first: Optional[Tuple[str, dict]] = None
         self._on_finish = on_finish
@@ -35,7 +40,7 @@ class GraphTurnRun:
     async def _pump(self, graph) -> None:
         try:
             # input {} (khong phai None): luon chay luot moi tu START, ke ca khi checkpoint truoc dung giua `ask`
-            async for item in graph.astream({}, thread_config(self.ctx.req.session_id), context=self.ctx,
+            async for item in graph.astream(self._input, self._config, context=self.ctx,
                                             stream_mode="custom", durability="exit"):
                 self._queue.put_nowait(item)
         except asyncio.CancelledError:

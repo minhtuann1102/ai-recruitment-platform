@@ -1,8 +1,11 @@
 """Luu phien phase 03 (app/session_store): kiem luot voi checkpoint - replay, 409 sai thu tu / phien xong, 503 khi
 doc checkpoint loi, /start gui lai, thread chua co (404), noi dung checkpoint. Moi test mot InMemorySaver moi (conftest)."""
+import pytest
 from app.session_store.session_checkpointer import get_checkpointer
 from conftest import parse_sse
 from tests.session_store_helpers import CountingEvaluator, body, log_lines, start, stored, without_metadata
+
+pytestmark = pytest.mark.usefixtures("session_graph_mode")  # chay ca hai gia tri SESSION_GRAPH
 
 GOOD = "Em dùng HashMap với equals và hashCode, độ phức tạp O(1) trung bình."
 
@@ -116,7 +119,8 @@ def test_full_session_records_every_turn(client):
     assert len(stored("g7")["transcript"]) == n
 
 
-def test_start_while_a_turn_runs_is_rejected_and_failed_start_write_sends_retryable_error(client, monkeypatch):
+def test_start_while_a_turn_runs_is_rejected_and_failed_start_write_sends_retryable_error(client, monkeypatch,
+                                                                                      session_graph_mode):
     from app.session_store.session_lock import turn_locks
     release = turn_locks.hold("g8")
     r = client.post("/api/start", json={"session_id": "g8", "track": "java_backend", "level": "junior"})
@@ -127,6 +131,10 @@ def test_start_while_a_turn_runs_is_rejected_and_failed_start_write_sends_retrya
         raise OSError("db mat ket noi")
     monkeypatch.setattr(get_checkpointer(), "adelete_thread", down)
     r = client.post("/api/start", json={"session_id": "g8", "track": "java_backend", "level": "junior"})
+    if session_graph_mode == "session":  # graph ca phien: thread cu xoa truoc khi chay, loi -> 503 retryable som
+        assert r.status_code == 503 and r.json()["details"]["retryable"] is True
+        assert not turn_locks.busy("g8") and stored("g8") == {}
+        return
     last = parse_sse(r.text)[-1]  # checkpoint la nguon duy nhat: khong gui `done`, FSD goi lai /start ngay
     assert last[0] == "error" and last[1] == {"errorCode": "AI_SERVICE_ERROR", "message": "AI tạm thời không phản hồi",
                                               "retryable": True}

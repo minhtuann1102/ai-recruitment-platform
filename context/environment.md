@@ -58,3 +58,5 @@ Gateway 9080, ai-service 8000, Postgres host 5534, Redis host 6374. Container pr
   `SESSION_STORE=memory`, restart hoặc quá 500 phiên là phiên đang chạy bị 404: staging / production phải dùng `postgres`.
   Trên máy Mac của owner `-p 5545:5432` chạy bình thường. `apps/ai-service/.venv` là Python 3.9, không import được
   `app.main` (`contextlib.aclosing`): chạy test bằng venv Python 3.11 (giống CI).
+- Phase 05 (2026-11-27): `SESSION_GRAPH=per_turn|session` (mặc định `per_turn`). `session` = một graph cả phiên có
+  `interrupt`; đổi `per_turn → session` giữa chừng thì phiên đang chạy bị 404, lùi về `per_turn` thì vẫn chạy tiếp.

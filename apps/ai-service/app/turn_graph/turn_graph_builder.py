@@ -21,7 +21,7 @@ from .turn_graph_nodes import (TurnGraphState, act_node, ask_node, decide_node, 
 DECIDE_ACTIONS = ("follow_up", "hint", "clarify", "next_topic", "next_phase", "wrap_up")
 
 
-def _route(s: TurnGraphState) -> str:
+def route_of(s: TurnGraphState) -> str:
     return s["route"]
 
 
@@ -31,10 +31,10 @@ def build_turn_graph(checkpointer=None):
                        ("decide", decide_node), ("act", act_node), ("ask", ask_node), ("record", record_node)):
         g.add_node(name, node)
     g.add_edge(START, "perceive")
-    g.add_conditional_edges("perceive", _route, {SESSION_END: "record", "reask": "reask", "evaluate": "evaluate"})
+    g.add_conditional_edges("perceive", route_of, {SESSION_END: "record", "reask": "reask", "evaluate": "evaluate"})
     g.add_edge("reask", "ask")
     g.add_edge("evaluate", "decide")
-    g.add_conditional_edges("decide", _route, {SESSION_END: "record", **{a: "act" for a in DECIDE_ACTIONS}})
+    g.add_conditional_edges("decide", route_of, {SESSION_END: "record", **{a: "act" for a in DECIDE_ACTIONS}})
     g.add_edge("act", "ask")
     g.add_edge("ask", "record")
     g.add_edge("record", END)
@@ -52,13 +52,17 @@ def turn_graph():
     return _compiled(get_checkpointer())
 
 
-def turn_graph_mermaid() -> str:
+def mermaid_with_decide_labels(graph) -> str:
     """So do Mermaid cho docs / bao cao. draw_mermaid() gop cac canh cung dich (decide -> act) thanh mot canh mang
     nhan cuoi cung; ghi lai du danh sach hanh dong tren canh do."""
     labels = ", ".join(DECIDE_ACTIONS)  # khong dung "|": ky tu nhan canh cua Mermaid
     lines = []
-    for line in turn_graph().get_graph().draw_mermaid().splitlines():
+    for line in graph.get_graph().draw_mermaid().splitlines():
         if line.strip().startswith("decide -.") and line.rstrip().endswith("-> act;"):
             line = f"\tdecide -. &nbsp;{labels}&nbsp; .-> act;"
         lines.append(line)
     return "\n".join(lines) + "\n"
+
+
+def turn_graph_mermaid() -> str:
+    return mermaid_with_decide_labels(turn_graph())

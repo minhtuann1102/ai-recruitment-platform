@@ -6,8 +6,11 @@
 """
 import time as real_time
 
+import pytest
 from conftest import parse_sse
 from tests.session_store_helpers import body, start, stored
+
+pytestmark = pytest.mark.usefixtures("session_graph_mode")  # chay ca hai gia tri SESSION_GRAPH
 
 GOOD = "Em dùng HashMap với equals và hashCode, độ phức tạp O(1) trung bình."
 
