@@ -26,7 +26,7 @@ không đổi** (không chạy lại eval chất lượng). Không dùng LangCha
 | 03 | [Lưu phiên: checkpointer, khoá, idempotency](phase-03-session-store-checkpointer.md) | B | 2,5d | team duyệt đảo ADR-004 / constitution IV; DE chốt DB (G9) | code xong (chạy song song, mặc định memory), chờ user test |
 | 04 | [API rút gọn + sửa bên gọi](phase-04-slim-api-and-callers.md) | B | 2,5d | 03 | code xong, PR mở 2026-11-27 (voice chưa chạy) |
 | 05 | [Graph cả phiên có `interrupt` (stretch)](phase-05-session-graph-with-interrupt.md) | C | 3d | 04 xong, còn ≥ 5 ngày trước 21/12 | code xong sau cờ `SESSION_GRAPH=session` (mặc định per_turn), PR mở 2026-11-27 |
-| 06 | [Đo độ trễ + cập nhật docs](phase-06-latency-and-docs.md) | – | 0,5d | sau mỗi pha | pending |
+| 06 | [Đo độ trễ + cập nhật docs](phase-06-latency-and-docs.md) | – | 0,5d | sau mỗi pha | xong code + docs 2026-11-27 (đo mock + Postgres local đạt); còn `cost_latency` thật (cần user đồng ý) và đo trên DB đích |
 
 ```
 01 ──► 02 (pha A, tự đứng được) ──► 03 ──► 04 (pha B) ──► 05 (pha C, stretch)

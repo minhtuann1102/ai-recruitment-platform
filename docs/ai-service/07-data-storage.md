@@ -208,8 +208,10 @@ Từ các key này `app/session_store/session_request_builder.py` dựng lại `
 `turn_engine`, Reporter, `report_scoring` không đổi). Không lưu: `TurnContext`, kết quả tạm của lượt. Dữ liệu cá nhân
 (transcript) chỉ ai-service đọc; TTL + xoá theo consent là việc DE (doc 12 mục 9). Kích thước: transcript phình
 ~2 KB/lượt (có `evaluation`); phiên 20 lượt mock ≈ 61 KB ở checkpoint cuối, và mỗi lượt ghi lại cả channel nên tổng
-các checkpoint của phiên tăng theo bình phương số lượt (chưa đo trên Postgres sau phase 04; phase 03: 245 KB / 17 lượt
-khi chưa có `evaluation`).
+các checkpoint của phiên tăng theo bình phương số lượt (phase 03: 245 KB / 17 lượt khi chưa có `evaluation`). Đo phase 06 trên Postgres local, phiên mock ~7 lượt: 15-16
+checkpoint, ~104-114 KB mọi bảng (`checkpoints`, `checkpoint_blobs`, `checkpoint_writes`); mỗi lần trả lời lỗi
+(409 / 422 / bị ngắt) thêm ~1,5 KB và một checkpoint không bao giờ xoá, ở cả `per_turn` lẫn `session`. TTL / dọn khi
+`/finalize` là việc DE. Số liệu: `plans/reports/eval-261127-2346-langgraph-latency.md`.
 
 **Deploy gate:** `SESSION_STORE=memory` giữ bản duy nhất của phiên trong RAM (restart hoặc dọn quá 500 phiên = 404
 `session_not_found` giữa phiên). Chỉ dùng cho dev / test; staging / production phải chạy `postgres` (service chỉ cảnh

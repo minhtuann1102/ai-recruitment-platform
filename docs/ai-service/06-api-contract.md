@@ -313,6 +313,7 @@ Giữ tên `start / next-turn / finalize` theo constitution IV; **nội dung** �
 | `ai_requests_total` | `endpoint` (start, next_turn, finalize, cv_parse, jd_parse), `status` (ok, error, cancelled), `error` (mã lỗi API như `voice_no_speech`, `session_ended`, hoặc tên lỗi; `-` khi ok) | Request AI đã xong, đếm một lần mỗi request |
 | `ai_request_duration_seconds` | `endpoint` | Thời gian cả request; với SSE thì tính tới hết stream |
 | `ai_ttft_seconds` | `endpoint`, `source` (`ai` Interviewer viết, `fallback` câu dự phòng / câu hỏi lại cố định) | Từ lúc nhận request tới token câu hỏi đầu tiên (start, next_turn); xem P95 theo `source="ai"` |
+| `ai_session_checkpoint_seconds` | `op` (`read`, `write`, `list`), `store` (`memory`, `postgres`) | Thời gian một lệnh đọc / ghi / liệt kê checkpoint phiên (2026-11-27, plan 261127-1517 phase 06), gồm cả lần ghi trong graph; bucket 1 ms-1 s. Một lượt `/next-turn` có vài lệnh đọc và ghi: P95 tổng = tổng theo request, xem `evals/session_store_latency.py` |
 | `ai_agent_calls_total` | `agent`, `fallback` (`none` hoặc mã fallback) | Lần gọi agent; tỉ lệ fallback = phần `fallback != "none"` |
 | `ai_agent_latency_seconds` | `agent` | Độ trễ một lần gọi LLM |
 | `ai_tokens_total` | `agent`, `kind` (input, output, cached) | Token; nhân với bảng giá để ra chi phí |
