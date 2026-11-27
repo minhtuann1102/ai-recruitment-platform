@@ -321,7 +321,7 @@ sequenceDiagram
 | Thành phần mục tiêu | Trách nhiệm | File hiện có trong mock (`apps/ai-service/app/`) |
 |---|---|---|
 | API layer | Route, validate Pydantic, SSE, format lỗi | `main.py`, `sse.py`, `api_error.py`, `models_*.py` |
-| Orchestrator (state machine) | Điều phối một lượt: chấm, cập nhật state, policy, hỏi. `/api/next-turn` chạy qua graph LangGraph (pha A doc 12, chờ duyệt) | `turn_engine.py`, `turn_steps.py` (4 bước), `turn_result.py`, `turn_graph/` (graph, node `ask`, runner) |
+| Orchestrator (state machine) | Điều phối một lượt: chấm, cập nhật state, policy, hỏi. `/api/next-turn` chạy qua graph LangGraph (pha A doc 12, chờ duyệt); checkpoint phiên song song (phase 03, `SESSION_STORE`) | `turn_engine.py`, `turn_steps.py` (4 bước), `turn_result.py`, `turn_graph/` (graph, node `ask` / `record`, runner), `session_store/` (checkpointer, guard, khoá) |
 | Policy | Chọn action theo bảng luật | `policy.py` |
 | Agent: CV Parser | Trích `cv_profile` | `mock_cv_parser.py` + `cv_text.py` (phần trích text, redact, injection là code thật) |
 | Agent: Planner | Sinh plan từ catalog | `mock_planner.py` |

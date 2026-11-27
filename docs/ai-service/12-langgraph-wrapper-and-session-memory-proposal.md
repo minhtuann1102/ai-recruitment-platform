@@ -127,7 +127,7 @@ triển khai: [plans/261127-1517-langgraph-orchestrator-session-memory](../../pl
 |---|---|---|
 | G1 | Checkpointer của LangGraph tự ghi sau mỗi bước, hoặc lúc graph xong nếu `durability="exit"`. Graph kết thúc ở `act`, còn Interviewer stream ở ngoài, nên checkpoint ghi **trước** khi có câu hỏi thật. `finish_turn` (`asked_questions`, `question_source`, `qa_id`) lại nằm ngoài checkpoint. Kết quả là mâu thuẫn với quy tắc "chỉ ghi khi tới `done`" ở mục 4 | Đưa Interviewer vào graph thành node `ask`, đẩy token bằng `get_stream_writer()` (`stream_mode="custom"`), `finish_turn` là bước cuối của `ask`. Chạy với `durability="exit"`. Spike 27/11: client ngắt giữa `ask` thì **vẫn** ghi state sau `act` (`next=('ask',)`), nên guard phải resume hoặc lùi checkpoint (câu hỏi mở 7) |
 | G2 | `PostgresSaver` là bản sync, chặn event loop của FastAPI đúng lúc đang stream SSE | Dùng `AsyncPostgresSaver` + `AsyncConnectionPool` |
-| G3 | Chưa chặn chạy đồng thời. Client retry khi lượt đầu còn đang stream thì hai lần chạy cùng gọi LLM và cùng ghi một thread. Quy tắc "trùng `turn_number`" không bắt được, vì lượt đầu chưa ghi gì | Advisory lock Postgres theo `session_id` (`pg_try_advisory_lock`). Lượt thứ hai nhận 409 `turn_in_progress` |
+| G3 | Chưa chặn chạy đồng thời. Client retry khi lượt đầu còn đang stream thì hai lần chạy cùng gọi LLM và cùng ghi một thread. Quy tắc "trùng `turn_number`" không bắt được, vì lượt đầu chưa ghi gì | Advisory lock Postgres theo `session_id` (`pg_try_advisory_lock`). Lượt thứ hai nhận 409 `turn_in_progress`. **Phase 03 (2026-11-27):** làm khoá trong tiến trình trước (ai-service đang chạy một instance); advisory lock là điều kiện trước khi chạy nhiều instance |
 
 **Cải thiện**
 

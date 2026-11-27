@@ -490,6 +490,27 @@ kèm `source` (`text` / `voice`); không có thì coi như cùng nguồn với l
   đi tiếp). Câu trả lời cho câu wrap-up và lượt đã đến điều kiện ưu tiên (hết giờ, turn cap…) không bị chặn: lượt đi
   tiếp, không chấm. Lượt `text` có `answer` rỗng vẫn là 422 `invalid_request` như cũ.
 
+**Lưu phiên trong ai-service (2026-11-27, plan 261127-1517 phase 03, chạy song song, request không đổi).** Mỗi
+`/api/start` và lượt `/api/next-turn` xong được ghi checkpoint LangGraph (`thread_id = session_id`, `SESSION_STORE`
+mặc định `memory`). Lượt vẫn tính từ `plan` / `state` trong request; checkpoint dùng để chống gửi trùng và so lệch.
+Trước khi chạy lượt, ai-service so `turn_number` với lượt đang chờ trả lời trong checkpoint:
+
+- Gửi lại **cùng** `turn_number` + **cùng** `answer` / `answer_source` của lượt vừa xong: 200, stream lại kết quả đã
+  lưu (`meta` → một `token` cả câu → `done` y như lần đầu), không gọi Evaluator / LLM, `metadata.replayed = true`,
+  `metadata.usage = {}`. Dùng cho retry sau mất kết nối.
+- `409 turn_in_progress` (`details.retryable = true`): lượt trước của phiên đang chạy. Gửi lại sau.
+- `409 turn_already_answered`: cùng `turn_number` nhưng `answer` khác lượt đã xong.
+- `409 turn_out_of_order` (`details.expected_turn_number`): `turn_number` cũ hơn hoặc vượt lượt đang chờ.
+- `409 session_invalid_state`: phiên đã kết thúc (như trước).
+- `503 session_store_unavailable` (`details.retryable = true`): không đọc được checkpoint.
+- Phiên chưa có checkpoint (bắt đầu trước khi bật, hoặc `memory` đã restart): chạy bình thường từ request rồi ghi.
+- Stream đứt giữa câu hỏi: checkpoint giữ state trước lượt; gửi lại cùng `turn_number` + `answer` thì lượt chạy lại
+  đầy đủ (chấm lại). Gửi lại `/api/start` cùng `session_id` thì xoá checkpoint cũ, phiên bắt đầu lại (`/api/start`
+  khi lượt của phiên đang chạy: 409 `turn_in_progress`).
+- **Retry phải gửi lại đúng `answer` và `answer_source` cũ.** Nếu ai-service đã ghi lượt mà `done` không tới
+  interview-service, gửi lượt đó với câu trả lời khác (vd ghi âm lại) sẽ nhận 409 `turn_already_answered` mãi; chỉ
+  gửi lại nguyên văn mới nhận được kết quả (replay). Câu hỏi cho FSD: interview-service có giữ nguyên answer khi retry?
+
 Event `done`:
 
 ```jsonc
@@ -666,6 +687,9 @@ Một danh sách để gửi một lần. Mọi khóa mới có giá trị mặc
 - `POST /api/next-turn` trả `409 session_invalid_state` khi `state.topics` không khớp plan thực tế (client mất `plan.replan` nhưng giữ `state.swaps`, hoặc swap giả/trùng). Client phải gửi lại cả `plan.replan` và `state.swaps`.
 - `422` khi `state.notes` sai: `kind`/`status` ngoài tập, `text` > 300 ký tự hoặc hơn 8 phần tử. Xảy ra bất kể `AGENT_NOTES_ENABLED`. Server trả lại nguyên `notes` do client gửi khi cờ tắt.
 - Không có mã lỗi mới nào ở phase 03 và 04 (lỗi tra cứu là fallback, không phải lỗi HTTP).
+- Lưu phiên (plan 261127-1517 phase 03, mục "Lưu phiên trong ai-service" ở `/api/next-turn`): mã mới `409
+  turn_in_progress`, `409 turn_already_answered`, `409 turn_out_of_order`, `503 session_store_unavailable`; lượt gửi
+  lại sau khi đã xong được replay (`metadata.replayed = true`).
 
 **Câu hỏi cho interview-service / FSD** (chưa có trả lời bằng văn bản; `REPLAN_ENABLED` và `AGENT_NOTES_ENABLED` giữ tắt cho đến khi có)
 1. Có lưu nguyên JSON `plan` và `state` (gồm `plan.replan`, `state.swaps`, `state.notes`) không lọc schema, và gửi lại nguyên ở mọi `/api/next-turn` và `/api/finalize`? Thiếu `notes` thì ghi chú mất (không lỗi); thiếu `plan.replan` hoặc `swaps` thì 409.

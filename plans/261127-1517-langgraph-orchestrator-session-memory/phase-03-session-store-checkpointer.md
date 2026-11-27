@@ -5,7 +5,7 @@
 - Code: graph phase 02, `app/rag/settings.py` (mẫu đọc env DB), `app/main.py` (`lifespan`)
 
 ## Overview
-- Priority: P1 · Status: pending · Effort: 2,5d
+- Priority: P1 · Status: code xong 2026-11-27 (nhánh `thang/langgraph-session-store`), chờ user test · Effort: 2,5d
 - Gate: team duyệt đảo ADR-004 / constitution IV; DE chốt DB + pooler. API **chưa** đổi ở phase này: request cũ
   vẫn gửi đủ, ai-service bắt đầu ghi và dùng checkpoint song song, để kiểm trước khi bỏ trường ở phase 04.
 
@@ -24,6 +24,31 @@
   thread không có → 404 · `phase == done` → 409 · `/start` trên thread đã có → 409.
 - Khoá: `pg_try_advisory_lock(hashtext(session_id))` trên một connection giữ suốt stream, không lấy được → 409
   `turn_in_progress`. Bản `memory` dùng `asyncio.Lock` theo session.
+
+## Đã làm (2026-11-27) và chỗ lệch so với thiết kế trên
+- Code: `app/session_store/` (settings, checkpointer, record, guard, lock), node `record` trong graph, `TurnContext`
+  qua runtime context (`context_schema`), `/start` ghi checkpoint đầu (`adelete_thread` + `aupdate_state`).
+- **Lệch 1, stream đứt:** không resume ở `ask`. `ctx` (spec câu hỏi) không lưu được nên resume không có gì để hỏi.
+  Chỉ node `record` ghi key lâu dài, lượt bị ngắt không tới `record` nên checkpoint giữ state trước lượt; gửi lại cùng
+  answer thì chạy lại cả lượt (chấm lại, như hành vi cũ). Không cần lùi checkpoint cha. Run mới (`input={}`) luôn bắt
+  đầu từ START dù checkpoint trước có `next=('ask',)` (spike phase 01, test `test_session_store_concurrency`).
+- **Lệch 2, khoá:** khoá trong tiến trình (`session_lock.py`), không advisory lock. Đủ cho một instance (hiện tại).
+  Chạy nhiều instance phải thêm advisory lock trên một kết nối giữ suốt stream trước khi bật.
+- **Lệch 3, `/start` gửi lại:** xoá thread và ghi lại (không 409), vì interview-service có thể retry `/start`.
+- **Lệch 4, thread không có:** chạy từ request rồi ghi, log `session_thread_missing` (404 để phase 04).
+- Guard: replay → phiên `done` (409 `session_invalid_state`) → cùng lượt answer khác (409 `turn_already_answered`) →
+  sai thứ tự (409 `turn_out_of_order`). Replay chạy trước kiểm `done` nên lượt kết thúc phiên cũng replay được.
+- Review opus ([report](../reports/reviewer-261127-phase03-session-store.md)): đã sửa H1 (pool timeout 3 s +
+  `wait_for` khi đọc / ghi `/start`: DB treo trả 503 nhanh, không giữ khoá), H2 (memory chỉ giữ 500 phiên mới nhất,
+  cảnh báo khi `APP_ENV` staging/production dùng memory), M2 (ghi checkpoint `/start` lỗi chỉ log, vẫn `done`), M3
+  (`/start` giữ khoá phiên), L3 (script không in thông báo lỗi). M1 ghi vào contract (retry phải gửi lại nguyên answer).
+- **Còn mở:** M4 / L4 xoá dữ liệu phiên (transcript, checkpoint của lượt bị từ chối, text lỗi trong
+  `checkpoint_writes`) theo TTL / consent là việc DE (doc 12 mục 9), hoặc ai-service xoá thread ở finalize (chưa
+  chốt). L1 (huỷ đúng lúc ghi checkpoint cuối, retry có thể chấm lại), L5 (đổi qua lại memory / postgres để lại
+  thread cũ) chấp nhận. Staging/prod chạy `SESSION_STORE` nào ở phase 03: chưa chốt.
+- Đo trên Postgres local: phiên 17 lượt ≈ 245 KB (transcript ghi lại cả danh sách mỗi lượt, max 11 KB/blob).
+- Kiểm: 1457 test xanh, golden 8/8 không đổi, test tích hợp Postgres qua, dev-play trên Postgres (start + 3 lượt =
+  4 checkpoint, không có `session_state_mismatch`).
 
 ## Requirements
 - `SESSION_STORE=memory|postgres` (mặc định `memory`: compose mock, test, dev-play). `postgres` cần `SESSION_DB_URL`.
@@ -53,13 +78,13 @@
 6. Chạy local: compose + `SESSION_STORE=postgres` trỏ DB local, chơi 1 phiên dev-play, kiểm bảng checkpoint.
 
 ## Todo List
-- [ ] Settings + saver + pool trong lifespan
-- [ ] Ghi checkpoint `/start` và `/next-turn`
-- [ ] Guard 404 / 409 + replay SSE
-- [ ] Advisory lock / asyncio lock
-- [ ] Test guard, replay, đồng thời, stream đứt
-- [ ] Test tích hợp Postgres local
-- [ ] Chạy local dev-play với Postgres
+- [x] Settings + saver + pool trong lifespan
+- [x] Ghi checkpoint `/start` và `/next-turn`
+- [x] Guard 409 + replay SSE (404 để phase 04)
+- [x] Khoá trong tiến trình (advisory lock khi chạy nhiều instance)
+- [x] Test guard, replay, đồng thời, stream đứt
+- [x] Test tích hợp Postgres local
+- [x] Chạy local dev-play với Postgres
 
 ## Success Criteria
 - Một phiên mock đầy đủ không có log `session_state_mismatch`.

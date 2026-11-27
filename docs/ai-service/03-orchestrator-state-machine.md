@@ -187,7 +187,7 @@ async def run_turn(req: NextTurnRequest) -> AsyncIterator[SseEvent]:
 
 > **Graph LangGraph (2026-11-27, pha A của [12](12-langgraph-wrapper-and-session-memory-proposal.md), nhánh
 > `thang/langgraph-orchestrator`, chờ team duyệt đảo README A4).** `/api/next-turn` chạy lượt qua graph
-> `app/turn_graph/` (LangGraph, **không** checkpointer, API và SSE không đổi). Logic không đổi: thân `next_turn()`
+> `app/turn_graph/` (LangGraph, API và SSE không đổi; pha A không checkpointer, phase 03 thêm checkpointer ở dưới). Logic không đổi: thân `next_turn()`
 > cũ tách nguyên văn thành 4 bước ở `app/turn_steps.py`. `turn_engine.next_turn()` gọi tuần tự 4 bước (test, evals
 > in-process); graph gọi từng bước làm node. Node `ask` chạy Interviewer và đẩy event `meta` / `token` / `replace`
 > qua stream writer. `finish_turn` chạy cuối `ask`, nên khi graph xong thì câu hỏi thật đã nằm trong state.
@@ -201,21 +201,35 @@ async def run_turn(req: NextTurnRequest) -> AsyncIterator[SseEvent]:
 > ```mermaid
 > graph TD;
 >   __start__([start]) --> perceive;
->   perceive -. session_end .-> __end__([end]);
+>   perceive -. session_end .-> record;
 >   perceive -.-> reask;
 >   perceive -.-> evaluate;
 >   reask --> ask;
 >   evaluate --> decide;
->   decide -. session_end .-> __end__;
+>   decide -. session_end .-> record;
 >   decide -. follow_up, hint, clarify, next_topic, next_phase, wrap_up .-> act;
 >   act --> ask;
->   ask --> __end__;
+>   ask --> record;
+>   record --> __end__([end]);
 > ```
 >
 > `perceive`: đọc state, 409 phiên `done`, câu trả lời cho wrap-up thì đóng phiên (`session_end`), 422 voice / `reask`.
 > `evaluate`: RAG + Evaluator, `record_evaluation`. `decide`: `forced_transition` (quá hạn cứng thì `session_end`) →
 > `choose_decision` (hybrid / luật / `low_performance_stop`, swap). `act`: `apply_action`, chọn câu trong kho, dựng
 > `QuestionSpec` + `TurnInfo`. `/api/start` chưa đi qua graph (node `plan` để pha C).
+>
+> **Lưu phiên (2026-11-27, phase 03 của plan 261127-1517, nhánh `thang/langgraph-session-store`, chạy song song).**
+> Graph compile kèm checkpointer của `app/session_store/` (`SESSION_STORE=memory|postgres`, mặc định `memory`;
+> `postgres` dùng `AsyncPostgresSaver` trên pool mở trong `lifespan`, bảng tạo bằng
+> `scripts/setup_session_checkpoint_tables.py`). `thread_id = session_id`, chạy với `durability="exit"`: mỗi lượt
+> một checkpoint khi graph xong. `TurnContext` đi qua runtime context, không vào checkpoint. Chỉ node `record` ghi
+> các key lâu dài (dict JSON): `session`, `plan` (gốc, một lần), `state`, `question`, `transcript` (mỗi lượt một phần
+> tử nhỏ), `last_turn` (đủ để replay, chỉ giữ một lượt). `/api/start` ghi checkpoint đầu sau khi gửi câu hỏi đầu.
+> Trước graph: khoá trong tiến trình theo phiên (409 `turn_in_progress`) → `check_turn` (replay lượt vừa xong, 409
+> sai thứ tự / phiên xong, 503 khi đọc checkpoint lỗi; mã lỗi ở 06 §7.4 `/api/next-turn`). Lượt vẫn tính từ
+> `plan` / `state` của request; lệch với checkpoint thì log `session_state_mismatch` (chỉ tên trường). Lượt bị ngắt
+> giữa `ask` không tới `record` nên checkpoint giữ state trước lượt, gửi lại thì chạy lại cả lượt. Đo trên Postgres
+> local: phiên 17 lượt khoảng 245 KB (transcript ghi lại cả danh sách mỗi lượt, lớn nhất 11 KB).
 
 > **Policy lai (2026-11-14, phase 04, `POLICY_MODE=rules|hybrid`, mặc định `rules`, `app/turn_decision.py`).** Thứ tự quyết định mỗi lượt: **`forced_transition` (hết giờ, turn cap, phase quá hạn, hai lần `dont_know`, topic quá hạn) → (chỉ `hybrid`) đề xuất của Evaluator đã qua `validate_decision` → `decide()` → `low_performance_stop`**. `forced`, `low_performance_stop` và turn cap luôn đứng trên LLM: đề xuất không bao giờ ghi đè chúng (`decided_by = "forced"`). `rules` giữ quyết định và request y như trước (Evaluator prompt v8, không `policy_context`, 5 trường `TurnInfo` mới là `null`). Trong `hybrid`, LLM chọn `follow_up`/`clarify` ở chỗ luật chọn `next_topic` chỉ làm `low_performance_stop` đến muộn hơn (tối đa hết ngân sách hành động của topic), không bao giờ vượt qua nó. Chi tiết bảng hợp lệ ở 04 §5.4, ngưỡng và đo ở 09.
 

@@ -48,3 +48,9 @@ Gateway 9080, ai-service 8000, Postgres host 5534, Redis host 6374. Container pr
   `LANGCHAIN_TRACING_V2`**: langchain-core sẽ gửi input của graph (cả câu trả lời ứng viên, plan) lên LangSmith. Trace
   dùng Langfuse như cũ.
 - Import langgraph in `LangChainPendingDeprecationWarning` (`allowed_objects` của serde): vô hại.
+- Lưu phiên (phase 03): `SESSION_STORE=memory` mặc định, không cần DB. Test Postgres:
+  `SESSION_DB_TEST_URL=postgresql://postgres:pg@127.0.0.1:5546/postgres .venv/bin/python -m pytest -m integration
+  tests/integration/test_session_checkpoint_postgres.py`. Máy dev này: cổng publish của container (`-p 5545:5432`)
+  nhận TCP nhưng bị đóng ngay (server không thấy kết nối), dùng `docker run --network host ... postgres:16-alpine -c
+  port=5546` thay thế. Docker trên máy này đôi khi không stop / rm được container (`permission denied`, AppArmor):
+  cần `sudo systemctl restart docker` (hoặc `sudo aa-remove-unknown`) để dọn.
