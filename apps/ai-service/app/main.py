@@ -23,7 +23,9 @@ from .mock_planner import load_track
 from .models_cv import CvParseResponse
 from .models_jd import JdParseRequest, JdParseResponse
 from .plan_snippets import close_rag, rag_status, warm_rag
+from .dev_interview_page import router as dev_interview_router
 from .dev_play_page import router as dev_play_router
+from .dev_voice_proxy import router as dev_voice_router
 from .matching.router import router as match_router
 from .matching.service import get_match_service
 from .security import internal_token_middleware
@@ -60,6 +62,9 @@ async def lifespan(_: FastAPI):
 app = FastAPI(title="AI Interview Service (Mock)", version="0.2.0", lifespan=lifespan)
 app.middleware("http")(internal_token_middleware)
 app.middleware("http")(metrics.metrics_middleware)  # dang ky sau = boc ngoai: dem ca 401 cua token
+# truoc dev_play_router: route /dev/{name} cua /dev/play se nuot mat /dev/interview
+app.include_router(dev_interview_router)  # GET /dev/interview: phong van thu bang giong noi (dev)
+app.include_router(dev_voice_router)  # /dev/voice/*: proxy voice-service cho trang tren (dev, can token)
 app.include_router(dev_play_router)  # GET /dev/play: trang phong van thu cho dev
 app.include_router(interview_router)  # /api/start, /api/next-turn, /api/finalize (app/interview_session_routes.py)
 app.include_router(match_router)  # POST /api/match/jobs: goi y viec lam theo CV (017, noi bo)
