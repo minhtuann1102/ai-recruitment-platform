@@ -223,11 +223,12 @@ async def run_turn(req: NextTurnRequest) -> AsyncIterator[SseEvent]:
 > `postgres` dùng `AsyncPostgresSaver` trên pool mở trong `lifespan`, bảng tạo bằng
 > `scripts/setup_session_checkpoint_tables.py`). `thread_id = session_id`, chạy với `durability="exit"`: mỗi lượt
 > một checkpoint khi graph xong. `TurnContext` đi qua runtime context, không vào checkpoint. Chỉ node `record` ghi
-> các key lâu dài (dict JSON): `session`, `plan` (gốc, một lần), `state`, `question`, `transcript` (mỗi lượt một phần
-> tử nhỏ), `last_turn` (đủ để replay, chỉ giữ một lượt). `/api/start` ghi checkpoint đầu sau khi gửi câu hỏi đầu.
+> các key lâu dài (dict JSON): `session`, `plan` (gốc, một lần), `state`, `question`, `turn` (câu đang chờ trả lời), `transcript` (mỗi lượt một
+> phần tử, có topic_id / phase / turn_kind / difficulty / evaluation), `last_turn` (đủ để replay, chỉ giữ một lượt). `/api/start` ghi checkpoint đầu sau khi gửi câu hỏi đầu.
 > Trước graph: khoá trong tiến trình theo phiên (409 `turn_in_progress`) → `check_turn` (replay lượt vừa xong, 409
-> sai thứ tự / phiên xong, 503 khi đọc checkpoint lỗi; mã lỗi ở 06 §7.4 `/api/next-turn`). Lượt vẫn tính từ
-> `plan` / `state` của request; lệch với checkpoint thì log `session_state_mismatch` (chỉ tên trường). Lượt bị ngắt
+> sai thứ tự / phiên xong, 503 khi đọc checkpoint lỗi; mã lỗi ở 06 §7.4 `/api/next-turn`). Từ phase 04
+> request nội bộ dựng từ checkpoint (`session_request_builder.py`), HTTP chỉ nhận body slim, thread không có thì 404
+> `session_not_found` (06 §7.4, 07 §8.8). Lượt bị ngắt
 > giữa `ask` không tới `record` nên checkpoint giữ state trước lượt, gửi lại thì chạy lại cả lượt. Đo trên Postgres
 > local: phiên 17 lượt khoảng 245 KB (transcript ghi lại cả danh sách mỗi lượt, lớn nhất 11 KB).
 

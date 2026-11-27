@@ -26,9 +26,10 @@ def start(client, sid: str) -> Dict:
 
 
 def body(sid: str, d: Dict, answer: str, **extra) -> Dict:
-    """Request tra loi cau hoi trong `d` (done cua /start hoac next-turn truoc)."""
-    return {"session_id": sid, **CTX, "plan": extra.pop("plan"), "state": d["state"],
-            "turn_number": d["turn"]["turn_number"], "question": d["question"], "answer": answer, **extra}
+    """Body slim tra loi cau hoi dang cho cua `sid` (d = done cua /start hoac next-turn truoc: chi lay turn_number).
+    `plan=` van nhan de cac test cu khong phai doi cach goi, nhung bi bo: plan nam trong checkpoint."""
+    extra.pop("plan", None)
+    return {"session_id": sid, "turn_number": d["turn"]["turn_number"], "answer": answer, **extra}
 
 
 def without_metadata(done: Dict) -> Dict:

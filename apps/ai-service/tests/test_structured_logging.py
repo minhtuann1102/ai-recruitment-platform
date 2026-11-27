@@ -9,6 +9,7 @@ from test_interview_flow import play, strong
 
 from app.llm.settings import load_llm_settings
 from app.logging_setup import JsonFormatter, RequestContextFilter, bind_request, configure_logging
+from tests.helpers.seed_session import seed_session
 
 SECRET = "BI_MAT_CUA_UNG_VIEN"
 
@@ -62,9 +63,7 @@ def test_routes_tag_every_line_with_session_and_turn_without_content(client, cap
     capsys.readouterr()
     done = parse_sse(client.post("/api/start", json={"session_id": "sess-a", "track": "java_backend",
                                                      "level": "junior"}).text)[-1][1]
-    body = {"session_id": "sess-a", "level": "junior", "track": "java_backend", "plan": done["plan"],
-            "state": done["state"], "turn_number": 1, "question": done["question"],
-            "turn_kind": done["turn"]["turn_kind"], "answer": f"Em làm dự án Java, {SECRET}", "elapsed_seconds": 60}
+    body = {"session_id": "sess-a", "turn_number": 1, "answer": f"Em làm dự án Java, {SECRET}", "elapsed_seconds": 60}
     parse_sse(client.post("/api/next-turn", json=body).text)
     err = capsys.readouterr().err
     lines = [x for x in json_lines(err) if x["event"] == "request_done"]
@@ -77,9 +76,8 @@ def test_request_done_is_logged_when_route_fails_before_streaming(client, capsys
     done = parse_sse(client.post("/api/start", json={"session_id": "sess-e", "track": "java_backend",
                                                      "level": "junior"}).text)[-1][1]
     capsys.readouterr()
-    body = {"session_id": "sess-e", "level": "junior", "track": "java_backend", "plan": done["plan"],
-            "state": {**done["state"], "phase": "done"}, "turn_number": 4, "question": "q", "answer": "a",
-            "elapsed_seconds": 60}
+    seed_session(client, "sess-e", done["plan"], {**done["state"], "phase": "done"}, turn=done["turn"], question="q")
+    body = {"session_id": "sess-e", "turn_number": 4, "answer": "a", "elapsed_seconds": 60}
     assert client.post("/api/next-turn", json=body).status_code == 409
     line = next(x for x in json_lines(capsys.readouterr().err) if x["event"] == "request_done")
     assert (line["session_id"], line["turn_number"]) == ("sess-e", 4)
@@ -87,11 +85,9 @@ def test_request_done_is_logged_when_route_fails_before_streaming(client, capsys
 
 
 def test_finalize_logs_session(client, capsys):
-    plan, state, turns, _ = play(client, "junior", strong)
+    plan, state, turns, _ = play(client, "junior", strong, sid="sess-f")
     capsys.readouterr()
-    r = client.post("/api/finalize", json={"session_id": "sess-f", "track": "java_backend", "level": "junior",
-                                           "plan": plan, "state": state, "end_reason": "plan_complete",
-                                           "duration_s": 1500, "turns": turns})
+    r = client.post("/api/finalize", json={"session_id": "sess-f", "end_reason": "plan_complete", "duration_s": 1500})
     assert r.status_code == 200
     line = next(x for x in json_lines(capsys.readouterr().err) if x["event"] == "request_done")
     assert line["session_id"] == "sess-f" and "status=ok" in line["msg"] and "rag=-" in line["msg"]

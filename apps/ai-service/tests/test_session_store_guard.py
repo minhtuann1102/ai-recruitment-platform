@@ -1,5 +1,5 @@
 """Luu phien phase 03 (app/session_store): kiem luot voi checkpoint - replay, 409 sai thu tu / phien xong, 503 khi
-doc checkpoint loi, /start gui lai, thread chua co, log lech state. Moi test mot InMemorySaver moi (conftest)."""
+doc checkpoint loi, /start gui lai, thread chua co (404), noi dung checkpoint. Moi test mot InMemorySaver moi (conftest)."""
 from app.session_store.session_checkpointer import get_checkpointer
 from conftest import parse_sse
 from tests.session_store_helpers import CountingEvaluator, body, log_lines, start, stored, without_metadata
@@ -22,7 +22,7 @@ def test_resent_turn_replays_done_without_evaluator_or_interviewer(client, monke
 
     def broken():
         raise AssertionError("replay khong duoc goi Interviewer")
-    monkeypatch.setattr("app.main.get_interviewer", broken)
+    monkeypatch.setattr("app.interview_session_routes.get_interviewer", broken)
     again = parse_sse(client.post("/api/next-turn", json=b).text)
     assert [n for n, _ in again] == ["meta", "token", "done"] and ev.calls == 1
     assert again[0][1] == events[0][1] and again[1][1] == {"t": events[-1][1]["question"]}
@@ -76,39 +76,47 @@ def test_resent_start_resets_the_session(client):
     assert r.status_code == 200 and parse_sse(r.text)[-1][0] == "done"
 
 
-def test_missing_thread_runs_from_request_and_starts_recording(client, capsys):
+def test_missing_thread_returns_404_for_next_turn_and_finalize(client):
+    r = client.post("/api/next-turn", json={"session_id": "nope", "turn_number": 1, "answer": GOOD})
+    assert r.status_code == 404 and r.json()["error"] == "session_not_found"
+    r = client.post("/api/finalize", json={"session_id": "nope", "end_reason": "x", "duration_s": 1})
+    assert r.status_code == 404 and r.json()["error"] == "session_not_found"
+    assert stored("nope") == {}  # 404 khong ghi gi vao store
+
+
+def test_old_request_fields_are_rejected_with_422(client):
     d = start(client, "g5")
-    b = body("other", d, GOOD, plan=d["plan"])  # phien bat dau truoc khi bat luu phien
-    r = client.post("/api/next-turn", json=b)
-    assert r.status_code == 200 and "session_thread_missing turn=1" in log_lines(capsys)
-    values = stored("other")
-    assert values["session"] == {"track": "java_backend", "level": "junior"} and values["plan"] == d["plan"]
-    assert values["transcript"] == [{"turn_number": 1, "question": d["question"], "answer": GOOD, "source": "text"}]
+    full = {**body("g5", d, GOOD), "plan": d["plan"], "state": d["state"], "question": d["question"]}
+    r = client.post("/api/next-turn", json=full)
+    assert r.status_code == 422 and r.json()["error"] == "invalid_request"
 
 
-def test_checkpoint_keeps_small_per_turn_values_and_logs_state_drift(client, capsys):
+def test_checkpoint_keeps_small_per_turn_values_and_turn_info(client):
     d, b, r = first_turn(client, "g6")
     done1 = parse_sse(r.text)[-1][1]
     values = stored("g6")
     assert values["state"] == done1["state"] and values["question"] == done1["question"]
     assert values["last_turn"]["turn_number"] == 1 and values["last_turn"]["done"]["state"] == done1["state"]
-    capsys.readouterr()
-    drift = {**done1["state"], "current_difficulty": done1["state"]["current_difficulty"] + 1}
-    client.post("/api/next-turn", json={**body("g6", done1, GOOD, plan=d["plan"]), "state": drift})
-    assert "session_state_mismatch turn=2 fields=state.current_difficulty" in log_lines(capsys)
+    assert values["turn"] == done1["turn"]  # cau dang cho tra loi (luot 2)
+    assert values["session"]["jd_profile"] is None and values["session"]["duration_minutes"] == 30
+    entry = values["transcript"][0]  # topic_id / phase / turn_kind / difficulty lay tu `turn` cua cau da tra loi
+    assert (entry["topic_id"], entry["phase"], entry["turn_kind"], entry["difficulty"]) == (
+        d["turn"]["topic_id"], d["turn"]["phase"], d["turn"]["turn_kind"], d["turn"]["difficulty"])
+    assert entry["evaluation"] == done1["evaluation"]
+    client.post("/api/next-turn", json=body("g6", done1, GOOD, plan=d["plan"]))
     assert len(stored("g6")["transcript"]) == 2
 
 
-def test_full_session_has_no_state_drift(client, capsys):
+def test_full_session_records_every_turn(client):
     d = start(client, "g7")
     done, n = d, 0
     while not done.get("session_end") and n < 40:
         done, n = parse_sse(client.post("/api/next-turn", json=body("g7", done, GOOD, plan=d["plan"])).text)[-1][1], n + 1
-    assert n > 3 and done["session_end"] and not [x for x in log_lines(capsys) if "session_state_mismatch" in x]
+    assert n > 3 and done["session_end"]
     assert len(stored("g7")["transcript"]) == n
 
 
-def test_start_while_a_turn_runs_is_rejected_and_failed_start_write_still_sends_done(client, monkeypatch):
+def test_start_while_a_turn_runs_is_rejected_and_failed_start_write_sends_retryable_error(client, monkeypatch):
     from app.session_store.session_lock import turn_locks
     release = turn_locks.hold("g8")
     r = client.post("/api/start", json={"session_id": "g8", "track": "java_backend", "level": "junior"})
@@ -119,8 +127,10 @@ def test_start_while_a_turn_runs_is_rejected_and_failed_start_write_still_sends_
         raise OSError("db mat ket noi")
     monkeypatch.setattr(get_checkpointer(), "adelete_thread", down)
     r = client.post("/api/start", json={"session_id": "g8", "track": "java_backend", "level": "junior"})
-    assert parse_sse(r.text)[-1][0] == "done" and not turn_locks.busy("g8")
-    assert stored("g8") == {}  # chua ghi: next-turn dau chay tu request roi ghi
+    last = parse_sse(r.text)[-1]  # checkpoint la nguon duy nhat: khong gui `done`, FSD goi lai /start ngay
+    assert last[0] == "error" and last[1] == {"errorCode": "AI_SERVICE_ERROR", "message": "AI tạm thời không phản hồi",
+                                              "retryable": True}
+    assert not turn_locks.busy("g8") and stored("g8") == {}
 
 
 def test_memory_store_keeps_only_the_newest_sessions(client, monkeypatch):
@@ -141,3 +151,52 @@ def test_hanging_store_returns_503_fast_and_frees_the_session(client, monkeypatc
     monkeypatch.setattr("app.session_store.session_turn_guard.STORE_TIMEOUT_S", 0.05)
     r = client.post("/api/next-turn", json=body("g9", d, GOOD, plan=d["plan"]))
     assert r.status_code == 503 and r.json()["error"] == "session_store_unavailable" and not turn_locks.busy("g9")
+
+
+def test_finalize_is_rejected_while_a_turn_runs_and_503_when_store_is_down(client, monkeypatch):
+    from app.session_store.session_lock import turn_locks
+    d = start(client, "f1")
+    client.post("/api/next-turn", json=body("f1", d, GOOD))
+    release = turn_locks.hold("f1")
+    r = client.post("/api/finalize", json={"session_id": "f1", "end_reason": "candidate_ended", "duration_s": 60})
+    assert r.status_code == 409 and r.json()["error"] == "turn_in_progress"
+    release()
+    assert client.post("/api/finalize", json={"session_id": "f1", "end_reason": "candidate_ended", "duration_s": 60}
+                       ).status_code == 200 and not turn_locks.busy("f1")
+
+    async def down(*_a, **_k):
+        raise OSError("db mat ket noi")
+    monkeypatch.setattr(get_checkpointer(), "aget_tuple", down)
+    r = client.post("/api/finalize", json={"session_id": "f1", "end_reason": "candidate_ended", "duration_s": 60})
+    assert r.status_code == 503 and r.json()["error"] == "session_store_unavailable" and not turn_locks.busy("f1")
+
+
+def test_thread_without_session_or_turn_is_404_session_schema_outdated(client, capsys):
+    from tests.helpers.seed_session import seed_session
+    d = start(client, "g10")
+    seed_session(client, "g10", d["plan"], d["state"], question=d["question"], session={"track": "java_backend"})
+    from app.session_store.session_checkpointer import thread_config
+    from app.turn_graph.turn_graph_builder import turn_graph
+    import asyncio
+    # thread kieu phase 03: khong co `turn` (va khong co `session` bat buoc)
+    asyncio.run(turn_graph().aupdate_state(thread_config("g10"), {"turn": None, "session": None}, as_node="record"))
+    capsys.readouterr()
+    for path, b in (("/api/next-turn", {"session_id": "g10", "turn_number": 1, "answer": GOOD}),
+                    ("/api/finalize", {"session_id": "g10", "end_reason": "x", "duration_s": 1})):
+        r = client.post(path, json=b)
+        assert r.status_code == 404 and r.json()["error"] == "session_not_found"
+    assert "session_schema_outdated" in log_lines(capsys)
+
+
+def test_jd_profile_flows_from_start_to_the_finalize_requirements_block(client):
+    jd = {"title": "Backend Java", "requirements": [
+        {"id": "r1", "text": "Spring", "kind": "must", "topic_ids": []},
+        {"id": "r2", "text": "Làm việc nhóm", "kind": "must", "out_of_catalog": True}]}
+    r = client.post("/api/start", json={"session_id": "jd1", "track": "java_backend", "level": "junior",
+                                        "jd_profile": jd})
+    d = parse_sse(r.text)[-1][1]
+    assert stored("jd1")["session"]["jd_profile"]["title"] == "Backend Java"
+    client.post("/api/next-turn", json=body("jd1", d, GOOD))
+    rep = client.post("/api/finalize", json={"session_id": "jd1", "end_reason": "candidate_ended", "duration_s": 60})
+    assert rep.status_code == 200 and "requirements" in rep.json()
+    assert {i["status"] for i in rep.json()["requirements"]["items"]} >= {"out_of_catalog"}

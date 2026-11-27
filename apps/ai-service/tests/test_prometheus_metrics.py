@@ -26,8 +26,7 @@ def start(client, sid=SID):
 
 
 def turn(done, **over):
-    return {"session_id": SID, "level": "junior", "track": "java_backend", "plan": done["plan"],
-            "state": done["state"], "turn_number": 1, "question": done["question"],
+    return {"session_id": SID, "turn_number": 1,
             "answer": "Em dùng HashMap và ConcurrentHashMap khi nhiều thread", "elapsed_seconds": 60, **over}
 
 

@@ -17,6 +17,7 @@ from app.models_jd import JdProfile, JdRequirement
 from app.policy import decide
 from app.report_scoring import build_report
 from fakes.fake_llm import FakeOpenAI, Slow, limit_agent, reply, status_error
+from tests.helpers.seed_session import seed_from_finalize_request
 
 
 @pytest.fixture(scope="module")
@@ -101,13 +102,12 @@ def test_requirements_block(session, client):
         JdRequirement(id="r1", text="A", kind="must", topic_ids=[tech[0].catalog_ref]),
         JdRequirement(id="r2", text="B", kind="nice", topic_ids=["java.never.asked"]),
         JdRequirement(id="r3", text="Làm việc nhóm", kind="must", out_of_catalog=True)])
-    body = json.loads(session.model_dump_json())
-    body["jd_profile"] = jd.model_dump()
+    body = seed_from_finalize_request(client, session.model_copy(update={"jd_profile": jd}))
     block = client.post("/api/finalize", json=body).json()["requirements"]
     assert [i["status"] for i in block["items"]] == ["assessed", "not_assessed", "out_of_catalog"]
     assert block["assessed"] == 1 and block["total"] == 3 and "1/3" in block["summary"]
     assert block["items"][0]["evidence_turns"] and block["items"][1]["band"] is None
-    assert "requirements" not in client.post("/api/finalize", json=json.loads(session.model_dump_json())).json()
+    assert "requirements" not in client.post("/api/finalize", json=seed_from_finalize_request(client, session)).json()
 
 
 def test_degraded_evaluation_moves_on_without_follow_up():

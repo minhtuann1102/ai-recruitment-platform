@@ -13,6 +13,7 @@ from app.llm.settings import load_llm_settings
 from app.models_interview import FinalizeRequest, FinalizeTurn
 from app.report_scoring import build_report
 from fakes.fake_llm import FakeOpenAI, status_error
+from tests.helpers.seed_session import seed_from_finalize_request
 
 
 @pytest.fixture(scope="module")
@@ -79,7 +80,7 @@ def test_eval_metrics_leave_out_unscored_sessions():
 
 
 def test_finalize_route_returns_unscored_as_200(client, session):
-    body = json.loads(with_evals(session, degraded=True).model_dump_json())
+    body = seed_from_finalize_request(client, with_evals(session, degraded=True))
     r = client.post("/api/finalize", json=body)
     assert r.status_code == 200 and r.json()["status"] == "unscored" and r.json()["overall"]["score"] is None
 

@@ -1,6 +1,7 @@
 """Chay mot phien phong van end-to-end qua HTTP nhu interview-service se lam: start -> next-turn... -> finalize.
 
-State, plan, topic_turns giu trong script. Moi cau tra loi cong `30 + 0.4 x so tu` giay vao elapsed_seconds
+Phase 04: ai-service giu state / plan / lich su trong checkpoint; script chi gui body slim (session_id, turn_number,
+answer, elapsed_seconds) va giu plan / state / turns cuc bo de do luong va tra ket qua. Moi cau tra loi cong `30 + 0.4 x so tu` giay vao elapsed_seconds
 (design 09 muc 10.2). TTFT do phia client = tu luc gui request toi event token/replace dau tien; voi ASGI
 in-process (khong --base-url) httpx dem ca body nen TTFT ~ tong thoi gian, chi co y nghia khi goi service that.
 """
@@ -69,7 +70,7 @@ async def run_session(client: httpx.AsyncClient, persona: Persona, simulator, du
     plan_json, plan = done["plan"], InterviewPlan.model_validate(done["plan"])
     state, question, turn, elapsed = done["state"], done["question"], done["turn"], 0
     calls = [{"path": "start", **timing, "metadata": done["metadata"]}]
-    turns, history = [], {}
+    turns = []
     for _ in range(MAX_TURNS):
         # phase 05: topic `alt*` chi co trong plan.replan.reserve; plan thuc te = plan goc + state.swaps moi nhat
         topic = _topic(effective_plan(plan, CandidateState.model_validate(state)), turn["topic_id"])
@@ -78,10 +79,7 @@ async def run_session(client: httpx.AsyncClient, persona: Persona, simulator, du
             state["end_reason"] = "candidate_ended"
             break
         elapsed += int(30 + 0.4 * len(answer.split()))
-        body = {"session_id": sid, "level": persona.level, "track": persona.track, "plan": plan_json,
-                "state": state, "turn_number": turn["turn_number"], "question": question,
-                "turn_kind": turn["turn_kind"], "answer": answer, "elapsed_seconds": elapsed,
-                "topic_turns": history.get(turn["topic_id"], [])[-5:]}
+        body = {"session_id": sid, "turn_number": turn["turn_number"], "answer": answer, "elapsed_seconds": elapsed}
         events, timing = await call_sse(client, "/api/next-turn", body)
         nd = _done(events, "/api/next-turn")
         calls.append({"path": "next-turn", **timing, "metadata": nd["metadata"],
@@ -92,7 +90,6 @@ async def run_session(client: httpx.AsyncClient, persona: Persona, simulator, du
                       "question_source": turn.get("question_source"), "qa_id": turn.get("qa_id"),
                       # phase 04 (hybrid): quyet dinh da dua ra cau hoi nay; rules thi toan None
                       **{k: turn.get(k) for k in POLICY_KEYS}})
-        history.setdefault(turn["topic_id"], []).append({"q": question, "a": answer})
         state = nd["state"]
         if nd["session_end"]:
             break
@@ -103,12 +100,8 @@ async def run_session(client: httpx.AsyncClient, persona: Persona, simulator, du
     if not turns:  # ket thuc truoc khi tra loi cau nao: khong co gi de cham
         return {"persona": persona.id, "plan": plan_json, "turns": [], "report": None, "calls": calls,
                 "elapsed_s": elapsed, "swaps": state.get("swaps", []), "notes": state.get("notes", [])}
-    final = {"session_id": sid, "track": persona.track, "level": persona.level, "plan": plan_json, "state": state,
-             "end_reason": state.get("end_reason") or "plan_complete", "duration_s": elapsed,
-             "turns": [{k: v for k, v in t.items() if k not in ("action", "question_source", "qa_id")}
-                       for t in turns]}
-    if persona.jd_profile:
-        final["jd_profile"] = persona.jd_profile
+    # end_reason cua body chi dung khi state luu chua co (candidate_ended: ung vien bam ket thuc giua chung)
+    final = {"session_id": sid, "end_reason": state.get("end_reason") or "plan_complete", "duration_s": elapsed}
     resp = await client.post("/api/finalize", json=final)
     if resp.status_code != 200:
         raise RuntimeError(f"/api/finalize {resp.status_code}: {resp.text[:300]}")

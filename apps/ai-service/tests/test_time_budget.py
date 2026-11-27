@@ -75,9 +75,7 @@ def _start(client):
 
 
 def _answer(client, done, answer, elapsed, turn_no=1, plan=None):
-    body = {"session_id": "s", "level": "junior", "track": "java_backend", "plan": plan or done["plan"],
-            "state": done["state"], "turn_number": turn_no, "question": done["question"], "answer": answer,
-            "turn_kind": done["turn"]["turn_kind"], "elapsed_seconds": elapsed}
+    body = {"session_id": "s", "turn_number": turn_no, "answer": answer, "elapsed_seconds": elapsed}
     return parse_sse(client.post("/api/next-turn", json=body).text)[-1][1]
 
 

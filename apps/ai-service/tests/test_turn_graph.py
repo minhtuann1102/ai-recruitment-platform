@@ -15,6 +15,7 @@ from app.main import app
 from app.session_store.session_checkpointer import thread_config
 from conftest import parse_sse
 from tests.test_policy_hybrid_turn_engine import request
+from tests.helpers.seed_session import seed_from_next_turn_request
 
 
 def node_path(req):
@@ -116,8 +117,8 @@ def post_and_disconnect(body, after: int, yield_in_send: bool, slow: SlowIntervi
 def test_client_disconnect_mid_question_cancels_the_graph_and_closes_the_interviewer(monkeypatch, capsys, after,
                                                                                     yield_in_send):
     slow = SlowInterviewer()
-    monkeypatch.setattr("app.main.get_interviewer", lambda: slow)
-    sent, at_return, later = post_and_disconnect(json.loads(request().model_dump_json()), after, yield_in_send, slow)
+    monkeypatch.setattr("app.interview_session_routes.get_interviewer", lambda: slow)
+    sent, at_return, later = post_and_disconnect(seed_from_next_turn_request(None, request()), after, yield_in_send, slow)
     assert sent[0]["type"] == "http.response.start" and sent[0]["status"] == 200
     assert at_return[1] and at_return[0] < 20  # Interviewer da dong khi request xong, khong chay tiep trong nen
     assert later == at_return
@@ -136,15 +137,14 @@ def test_every_action_source_is_a_decide_edge():
 
 def done_state_body():
     req = request()
-    return json.loads(req.model_copy(update={"state": req.state.model_copy(update={"phase": "done"})})
-                      .model_dump_json())
+    return seed_from_next_turn_request(None, req.model_copy(update={"state": req.state.model_copy(update={"phase": "done"})}))
 
 
 def test_rejected_turn_does_not_build_evaluator_or_interviewer(client, monkeypatch):
     def broken():
         raise RuntimeError("AGENT_*_MODE sai")
     monkeypatch.setattr("app.turn_engine.get_evaluator", broken)
-    monkeypatch.setattr("app.main.get_interviewer", broken)
+    monkeypatch.setattr("app.interview_session_routes.get_interviewer", broken)
     r = client.post("/api/next-turn", json=done_state_body())
     assert r.status_code == 409 and r.json()["error"] == "session_invalid_state"  # khong thanh 500 vi agent loi
 
@@ -152,8 +152,8 @@ def test_rejected_turn_does_not_build_evaluator_or_interviewer(client, monkeypat
 def test_failure_inside_ask_after_meta_becomes_an_sse_error_event(client, monkeypatch):
     def broken():
         raise RuntimeError("Interviewer khong dung duoc")
-    monkeypatch.setattr("app.main.get_interviewer", broken)
-    r = client.post("/api/next-turn", json=json.loads(request().model_dump_json()))
+    monkeypatch.setattr("app.interview_session_routes.get_interviewer", broken)
+    r = client.post("/api/next-turn", json=seed_from_next_turn_request(None, request()))
     names = [n for n, _ in parse_sse(r.text)]
     assert r.status_code == 200 and names == ["meta", "error"]
     assert parse_sse(r.text)[-1][1]["retryable"] is True

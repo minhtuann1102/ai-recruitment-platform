@@ -24,6 +24,7 @@ class TurnGraphState(TypedDict, total=False):
     plan: dict
     state: dict
     question: str
+    turn: dict
     transcript: Annotated[list, operator.add]
     last_turn: Optional[dict]
 

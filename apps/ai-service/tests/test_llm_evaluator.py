@@ -122,8 +122,7 @@ def test_next_turn_route_uses_llm_evaluator_and_reports_usage(client, monkeypatc
     monkeypatch.setattr("app.turn_engine.get_evaluator", lambda: agent)
     done = parse_sse(client.post("/api/start", json={"session_id": "s", "track": "java_backend",
                                                      "level": "junior"}).text)[-1][1]
-    body = {"session_id": "s", "level": "junior", "track": "java_backend", "plan": done["plan"],
-            "state": done["state"], "turn_number": 1, "question": done["question"], "answer": ANSWER}
+    body = {"session_id": "s", "turn_number": 1, "answer": ANSWER}
     nd = parse_sse(client.post("/api/next-turn", json=body).text)[-1][1]
     assert nd["evaluation"]["evidence"] and nd["metadata"]["usage"]["evaluator"]["input_tokens"] == 10
     assert nd["metadata"]["prompt_versions"] == {"evaluator": "v8"}

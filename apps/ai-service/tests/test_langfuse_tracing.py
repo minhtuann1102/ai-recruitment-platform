@@ -20,7 +20,9 @@ from app import tracing
 from app.cv_text import redact_pii
 from app.llm.gateway import LlmGateway
 from app.llm.settings import load_llm_settings
-from app.main import _TurnStream, app
+from app.main import app
+from app.request_lifecycle_telemetry import TurnStream as _TurnStream
+from tests.helpers.seed_session import seed_session
 
 MSGS = [{"role": "user", "content": "Em ten A, email a.b@gmail.com, so 0912345678"}]
 CTX = {"track": "java_backend", "level": "junior"}
@@ -150,9 +152,7 @@ def test_llm_call_outside_a_request_creates_no_trace(finished):
 
 def test_routes_produce_session_trace_with_answer_and_next_question(client, finished, capsys):
     done = parse_sse(client.post("/api/start", json={"session_id": "sess-r", **CTX}).text)[-1][1]
-    body = {"session_id": "sess-r", "level": "junior", "track": "java_backend", "plan": done["plan"],
-            "state": done["state"], "turn_number": 1, "question": done["question"],
-            "turn_kind": done["turn"]["turn_kind"], "answer": "Em dùng HashMap", "elapsed_seconds": 60}
+    body = {"session_id": "sess-r", "turn_number": 1, "answer": "Em dùng HashMap", "elapsed_seconds": 60}
     next_done = parse_sse(client.post("/api/next-turn", json=body).text)[-1][1]
     spans = finished()
     root = spans["next_turn"].attributes
@@ -167,9 +167,8 @@ def test_routes_produce_session_trace_with_answer_and_next_question(client, fini
 
 def test_route_error_ends_trace_with_error_level(client, finished):
     done = parse_sse(client.post("/api/start", json={"session_id": "sess-x", **CTX}).text)[-1][1]
-    body = {"session_id": "sess-x", "level": "junior", "track": "java_backend", "plan": done["plan"],
-            "state": {**done["state"], "phase": "done"}, "turn_number": 1, "question": "q", "answer": "a",
-            "elapsed_seconds": 60}
+    seed_session(client, "sess-x", done["plan"], {**done["state"], "phase": "done"}, turn=done["turn"], question="q")
+    body = {"session_id": "sess-x", "turn_number": 1, "answer": "a", "elapsed_seconds": 60}
     assert client.post("/api/next-turn", json=body).status_code == 409
     a = finished()["next_turn"].attributes
     assert a["langfuse.observation.level"] == "ERROR" and a["langfuse.observation.status_message"] == "ApiError"
@@ -252,10 +251,8 @@ def test_timeout_on_llm_call_is_not_shown_as_success(finished):
 def test_cv_jd_and_finalize_routes_open_their_own_trace(client, finished):
     r = client.post("/api/jd/parse", json={"track": "java_backend", "jd_text": "Backend Java Spring " * 20})
     assert r.status_code == 200
-    plan, state, turns, _ = play(client, "junior", strong)
-    r = client.post("/api/finalize", json={"session_id": "sess-f", "track": "java_backend", "level": "junior",
-                                           "plan": plan, "state": state, "end_reason": "plan_complete",
-                                           "duration_s": 1500, "turns": turns})
+    plan, state, turns, _ = play(client, "junior", strong, sid="sess-f")
+    r = client.post("/api/finalize", json={"session_id": "sess-f", "end_reason": "plan_complete", "duration_s": 1500})
     assert r.status_code == 200
     spans = finished()
     assert "session.id" not in spans["jd_parse"].attributes
