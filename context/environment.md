@@ -54,3 +54,7 @@ Gateway 9080, ai-service 8000, Postgres host 5534, Redis host 6374. Container pr
   nhận TCP nhưng bị đóng ngay (server không thấy kết nối), dùng `docker run --network host ... postgres:16-alpine -c
   port=5546` thay thế. Docker trên máy này đôi khi không stop / rm được container (`permission denied`, AppArmor):
   cần `sudo systemctl restart docker` (hoặc `sudo aa-remove-unknown`) để dọn.
+- Phase 04 (2026-11-27): checkpoint là nguồn duy nhất của phiên (next-turn / finalize chỉ gửi body gọn). Với
+  `SESSION_STORE=memory`, restart hoặc quá 500 phiên là phiên đang chạy bị 404: staging / production phải dùng `postgres`.
+  Trên máy Mac của owner `-p 5545:5432` chạy bình thường. `apps/ai-service/.venv` là Python 3.9, không import được
+  `app.main` (`contextlib.aclosing`): chạy test bằng venv Python 3.11 (giống CI).

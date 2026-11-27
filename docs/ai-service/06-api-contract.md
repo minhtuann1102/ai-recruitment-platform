@@ -445,30 +445,30 @@ SSE: `meta`, `token`…, `done`. Event `done` nội bộ chứa đủ dữ liệ
 
 ### POST /api/next-turn
 
+**Từ 2026-11-27 (plan 261127-1517 phase 04, breaking change) request chỉ gồm phần mới của lượt.** `plan`, `state`,
+câu hỏi vừa hỏi, `turn_kind`, `topic_turns`, `track`, `level` do ai-service giữ trong checkpoint của phiên (xem 07 §8.8)
+và dựng lại cho `turn_engine`. Mọi khóa ngoài danh sách dưới đây (kể cả `plan`, `state`, `question`, `topic_turns`)
+bị **422 `invalid_request`** (`extra = forbid`), để bên gọi sửa sớm, không bị bỏ qua âm thầm. `/api/start` vẫn trả
+`plan` / `state` / `turn` trong `done` (để hiển thị, lưu bản sao nếu muốn), nhưng không cần gửi lại.
+
 ```jsonc
 {
   "session_id": "0192f3a1-...",
-  "level": "junior",
-  "track": "java_backend",
-  "plan": { "...": "InterviewPlan đã lưu" },
-  "state": { "...": "candidate state đã lưu" },
-  "turn_number": 4,
-  "question": "Ghi 2 bảng trong 1 method, lỗi giữa chừng thì sao?",
-  "turn_kind": "main",
-  "answer": "Em đặt @Transactional ở service layer, nếu lỗi giữa chừng thì cả hai bảng đều rollback ạ.",
-  "topic_turns": [],
-  "elapsed_seconds": 610,
-  "answer_source": "text",   // tùy chọn (2026-11-04): "text" (mặc định) | "voice"
-  "stt_confidence": null     // tùy chọn: 0..1, độ tin cậy dịch vụ STT trả cho bản ghi; chỉ có nghĩa khi voice
+  "turn_number": 4,           // số lượt của câu đang chờ trả lời (= turn.turn_number của done trước)
+  "answer": "Em đặt @Transactional ở service layer, nếu lỗi giữa chừng thì cả hai bảng đều rollback ạ.",  // <= 4000 ký tự
+  "elapsed_seconds": 610,     // tùy chọn, mặc định 0, >= 0. Server dùng max(giá trị này, elapsed lượt trước, giờ thực từ /start): không lùi / dừng được đồng hồ phiên
+  "answer_source": "text",    // tùy chọn (2026-11-04): "text" (mặc định) | "voice"
+  "stt_confidence": null      // tùy chọn: 0..1, độ tin cậy dịch vụ STT trả cho bản ghi; chỉ có nghĩa khi voice
 }
 ```
 
-`topic_turns` = các lượt **trước** trong topic hiện tại (`{ "q", "a" }`, tối đa 5), interview-service lấy theo
-`topic_id`. Không gửi cả transcript: Evaluator chỉ cần ngữ cảnh topic, giữ prompt nhỏ (§9).
+ai-service dựng phần còn lại từ checkpoint: `question` và `turn_kind` = câu và `turn` đã gửi ở lượt trước;
+`topic_turns` = tối đa 5 lượt cuối **cùng topic** với câu đó trong transcript đã lưu (`{q, a, source}`, gồm cả lượt hỏi
+lại vì STT kém); `track` / `level` từ lúc `/api/start`. Phiên không có trong store: **404 `session_not_found`**.
 
 `answer_source` / `stt_confidence` (2026-11-04, voice tùy chọn A, NFR-AI-QUAL17). Hai trường đều tùy chọn; client cũ
-không gửi thì hành vi như trước (`text`). Giá trị viết thường (`"VOICE"` bị 422). Mỗi phần tử `topic_turns` có thể
-kèm `source` (`text` / `voice`); không có thì coi như cùng nguồn với lượt hiện tại.
+không gửi thì hành vi như trước (`text`). Giá trị viết thường (`"VOICE"` bị 422). `source` từng lượt được ai-service
+lưu trong transcript và đưa vào `topic_turns` của các lượt sau.
 - `voice`: `answer` là bản ghi STT. ai-service đổi thuật ngữ phiên âm ("đốc cơ" → Docker, `app/stt_terms.py`) cho
   Evaluator, truy vấn RAG theo lượt, `topic_turns` và Interviewer; `evidence.quote` vẫn trích nguyên văn bản ghi.
   `text` không đổi chữ nào.
@@ -486,24 +486,32 @@ kèm `source` (`text` / `voice`); không có thì coi như cùng nguồn với l
   được cho ứng viên ("Micro
   chưa thu được tiếng. Bạn kiểm tra micro rồi nói lại, hoặc chuyển sang gõ chat nhé."). Không gọi LLM, không chấm,
   **state không đổi**: interview-service hiện thông báo, không lưu lượt, cho ứng viên nói lại hoặc gõ rồi gửi lại
-  **cùng** `turn_number` và `state`, với `elapsed_seconds` **tính lại theo giờ hiện tại** (để hết giờ thì phiên vẫn
+  **cùng** `turn_number`, với `elapsed_seconds` **tính lại theo giờ hiện tại** (để hết giờ thì phiên vẫn
   đi tiếp). Câu trả lời cho câu wrap-up và lượt đã đến điều kiện ưu tiên (hết giờ, turn cap…) không bị chặn: lượt đi
   tiếp, không chấm. Lượt `text` có `answer` rỗng vẫn là 422 `invalid_request` như cũ.
 
-**Lưu phiên trong ai-service (2026-11-27, plan 261127-1517 phase 03, chạy song song, request không đổi).** Mỗi
-`/api/start` và lượt `/api/next-turn` xong được ghi checkpoint LangGraph (`thread_id = session_id`, `SESSION_STORE`
-mặc định `memory`). Lượt vẫn tính từ `plan` / `state` trong request; checkpoint dùng để chống gửi trùng và so lệch.
-Trước khi chạy lượt, ai-service so `turn_number` với lượt đang chờ trả lời trong checkpoint:
+**Lưu phiên trong ai-service (2026-11-27, plan 261127-1517 phase 03 + 04).** Mỗi `/api/start` và lượt
+`/api/next-turn` xong được ghi checkpoint LangGraph (`thread_id = session_id`, `SESSION_STORE` mặc định `memory`).
+Checkpoint là **nguồn sự thật duy nhất** của phiên (bên gọi không gửi được state giả để lách luật). Trước khi chạy
+lượt, ai-service đọc checkpoint rồi so `turn_number` với lượt đang chờ trả lời:
 
 - Gửi lại **cùng** `turn_number` + **cùng** `answer` / `answer_source` của lượt vừa xong: 200, stream lại kết quả đã
   lưu (`meta` → một `token` cả câu → `done` y như lần đầu), không gọi Evaluator / LLM, `metadata.replayed = true`,
   `metadata.usage = {}`. Dùng cho retry sau mất kết nối.
+- `404 session_not_found`: không có checkpoint của `session_id` (chưa `/api/start`, `memory` đã restart hoặc đã dọn
+  phiên cũ), hoặc thread ghi trước phase 04 thiếu `session` / `turn` (log `session_schema_outdated`). Áp dụng cho cả
+  `/api/finalize`. Bên gọi gọi lại `/api/start`.
+- `/api/start` ghi checkpoint đầu **sau** khi gửi xong câu hỏi đầu. Ghi lỗi (DB treo / mất kết nối) thì stream kết thúc
+  bằng event `error` (`errorCode = AI_SERVICE_ERROR`, `retryable = true`) thay vì `done`: bên gọi gọi lại `/api/start`
+  ngay, đừng cho ứng viên trả lời câu 1 (sẽ nhận 404).
+- **`SESSION_STORE=memory` chỉ cho dev / test.** Từ phase 04 checkpoint là bản duy nhất của phiên: restart, hoặc
+  dọn khi quá 500 phiên, làm phiên đang chạy nhận 404 giữa chừng. Staging / production **phải** chạy `postgres`
+  (deploy gate; ai-service chỉ cảnh báo khi khởi động, không chặn).
 - `409 turn_in_progress` (`details.retryable = true`): lượt trước của phiên đang chạy. Gửi lại sau.
 - `409 turn_already_answered`: cùng `turn_number` nhưng `answer` khác lượt đã xong.
 - `409 turn_out_of_order` (`details.expected_turn_number`): `turn_number` cũ hơn hoặc vượt lượt đang chờ.
 - `409 session_invalid_state`: phiên đã kết thúc (như trước).
 - `503 session_store_unavailable` (`details.retryable = true`): không đọc được checkpoint.
-- Phiên chưa có checkpoint (bắt đầu trước khi bật, hoặc `memory` đã restart): chạy bình thường từ request rồi ghi.
 - Stream đứt giữa câu hỏi: checkpoint giữ state trước lượt; gửi lại cùng `turn_number` + `answer` thì lượt chạy lại
   đầy đủ (chấm lại). Gửi lại `/api/start` cùng `session_id` thì xoá checkpoint cũ, phiên bắt đầu lại (`/api/start`
   khi lượt của phiên đang chạy: 409 `turn_in_progress`).
@@ -587,22 +595,27 @@ bảng tra; không trùng. Dịch vụ giới hạn số cụm thì cắt đuôi
 
 ### POST /api/finalize
 
+**Từ 2026-11-27 (phase 04, breaking change)** body chỉ có ba trường; `plan`, `state`, `turns`, `track`, `level`,
+`jd_profile` lấy từ checkpoint (transcript đầy đủ, `evaluation` từng lượt, `jd_profile` gửi ở `/api/start`). Khóa khác
+bị 422 (`extra = forbid`).
+
 ```jsonc
 {
   "session_id": "0192f3a1-...",
-  "track": "java_backend",
-  "level": "junior",
-  "plan": { "...": "InterviewPlan" },
-  "state": { "...": "candidate state cuối" },
-  "end_reason": "plan_complete",
-  "duration_s": 1790,
-  "turns": [
-    { "turn_number": 4, "phase": "technical", "topic_id": "t2", "turn_kind": "main", "difficulty": 3,
-      "question": "...", "answer": "...", "evaluation": { "...": "Evaluation đã lưu" } }
-  ],
-  "jd_profile": { "...": "JdProfile đã lưu khi start, hoặc bỏ trống" }      // thêm 2026-10-22 (FR-AI-056)
+  "end_reason": "candidate_ended", // 1..64 ký tự. Phiên đã done: end_reason đã lưu thắng (cả ở report.session.end_reason). Phiên chưa done: chỉ "candidate_ended" (ứng viên bấm kết thúc) được nhận
+  "duration_s": 1790
 }
 ```
+
+Chỉ tổng kết được phiên đã kết thúc. Phiên chưa `done` (ai-service chưa trả `session_end = true`) mà
+`end_reason` khác `candidate_ended` → **`409 session_not_done`** (`details.phase`, `details.allowed_early_end_reason`).
+Ngoại lệ: phiên đã quá hạn cứng theo giờ server (thời lượng + 3 phút từ `/api/start`, ứng viên bỏ đi) thì vẫn tổng kết,
+`end_reason = time_hard_limit`. Tổng kết phiên chưa done (hai trường hợp trên) ghi state `done` vào checkpoint: next-turn
+sau đó trả `409 session_invalid_state`. Ứng viên bấm kết thúc khi chưa trả lời câu nào: phiên vẫn bị chốt `done`, response `409 session_no_turns` (không có báo cáo).
+
+Lỗi riêng: `404 session_not_found`; `409 session_no_turns` (chưa trả lời lượt nào, không có gì để tổng kết);
+`409 turn_in_progress` (một lượt của phiên đang chạy, gửi lại sau); `503 session_store_unavailable` (`retryable`).
+Finalize phiên đã done không ghi checkpoint và gọi lại được (báo cáo tính lại từ cùng transcript).
 
 Response 200: report theo §6.4 (snake_case) + `metadata` (usage, latency, prompt version của Reporter). Reporter lỗi vẫn trả 200 với `status = "partial"` (chỉ có điểm và nhận xét mẫu); `meta.fallbacks` ghi `reporter_partial`, hoặc `reporter_config_error` nếu thiếu cấu hình. Không lượt nào chấm được thì vẫn 200 với `status = "unscored"`, `overall.score`, `overall.verdict` và các tiêu chí là `null`, không gọi Reporter LLM. Có `jd_profile` thì report có khối `requirements` (design 05 §6.4). Report luôn có `level_signal` (`null` hoặc cờ `above_level` gợi ý thử level cao hơn, design 05 §6.3, thêm 2026-11-03). `end_reason` có thêm giá trị `low_performance` (ai-service tự wrap-up sớm khi ứng viên middle/senior yếu 3 topic technical liên tiếp, hoặc tất cả nếu plan ít hơn 3, design 03 §4.4).
 
@@ -690,6 +703,18 @@ Một danh sách để gửi một lần. Mọi khóa mới có giá trị mặc
 - Lưu phiên (plan 261127-1517 phase 03, mục "Lưu phiên trong ai-service" ở `/api/next-turn`): mã mới `409
   turn_in_progress`, `409 turn_already_answered`, `409 turn_out_of_order`, `503 session_store_unavailable`; lượt gửi
   lại sau khi đã xong được replay (`metadata.replayed = true`).
+
+**API rút gọn (2026-11-27, phase 04, breaking, chưa nối FSD): payload mẫu để interview-service sửa.** Đổi so với các
+mục trên (mục trên và các câu hỏi 1, 2 về "gửi lại nguyên `plan`/`state`" **hết hiệu lực**: ai-service tự giữ):
+- `/api/next-turn`: `{session_id, turn_number, answer, answer_source?, stt_confidence?, elapsed_seconds?}`.
+- `/api/finalize`: `{session_id, end_reason, duration_s}`.
+- Trường cũ (`plan`, `state`, `question`, `turn_kind`, `topic_turns`, `track`, `level`, `turns`, `jd_profile`) gửi thêm = 422.
+- `/api/start` giữ nguyên request và response (vẫn trả `plan`, `state`, `turn`); ai-service ghi checkpoint (kèm
+  `jd_profile`) sau khi gửi xong câu hỏi đầu.
+- Mã lỗi mới: `404 session_not_found`, `409 session_no_turns`, `409 session_not_done` (finalize phiên chưa kết thúc); bỏ hẳn `session_state_mismatch` (chỉ là log phase 03).
+- interview-service vẫn nên lưu `question`, `answer`, `evaluation`, `plan`, `state` từng lượt trong DB của nó (hiển
+  thị, báo cáo, phục hồi); không cần gửi lại cho ai-service. Phiên mất checkpoint (restart `memory`, TTL): phải
+  `/api/start` lại.
 
 **Câu hỏi cho interview-service / FSD** (chưa có trả lời bằng văn bản; `REPLAN_ENABLED` và `AGENT_NOTES_ENABLED` giữ tắt cho đến khi có)
 1. Có lưu nguyên JSON `plan` và `state` (gồm `plan.replan`, `state.swaps`, `state.notes`) không lọc schema, và gửi lại nguyên ở mọi `/api/next-turn` và `/api/finalize`? Thiếu `notes` thì ghi chú mất (không lỗi); thiếu `plan.replan` hoặc `swaps` thì 409.

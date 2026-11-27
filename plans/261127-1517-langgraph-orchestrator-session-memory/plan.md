@@ -24,7 +24,7 @@ không đổi** (không chạy lại eval chất lượng). Không dùng LangCha
 | 01 | [Golden trace + cài dependency](phase-01-golden-trace-and-dependency.md) | A | 0,5d | không | done 2026-11-27 |
 | 02 | [Graph mỗi lượt, Interviewer trong graph](phase-02-per-turn-graph-wrapper.md) | A | 3,5d | team đồng ý đảo README A4 | code xong, chờ user test; README A4 chờ duyệt |
 | 03 | [Lưu phiên: checkpointer, khoá, idempotency](phase-03-session-store-checkpointer.md) | B | 2,5d | team duyệt đảo ADR-004 / constitution IV; DE chốt DB (G9) | code xong (chạy song song, mặc định memory), chờ user test |
-| 04 | [API rút gọn + sửa bên gọi](phase-04-slim-api-and-callers.md) | B | 2,5d | 03 | pending |
+| 04 | [API rút gọn + sửa bên gọi](phase-04-slim-api-and-callers.md) | B | 2,5d | 03 | code xong, PR mở 2026-11-27 (voice chưa chạy) |
 | 05 | [Graph cả phiên có `interrupt` (stretch)](phase-05-session-graph-with-interrupt.md) | C | 3d | 04 xong, còn ≥ 5 ngày trước 21/12 | pending |
 | 06 | [Đo độ trễ + cập nhật docs](phase-06-latency-and-docs.md) | – | 0,5d | sau mỗi pha | pending |
 

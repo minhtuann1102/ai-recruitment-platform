@@ -20,7 +20,7 @@
 | Knowledge base RAG | `ai_db.knowledge_chunks` | ai-service | Không liên quan phiên |
 | Topic catalog | File trong repo (`apps/ai-service/app/catalog/*.yaml`) | **AIE + DE** | Version theo git; PR cần review của người còn lại (§8.7) |
 | Prompt | File trong repo (`apps/ai-service/app/prompts/*.md`) | AIE | Version theo git |
-| Dữ liệu phiên trong ai-service | **Không có** | — | Log chỉ chứa id + số đo |
+| Checkpoint phiên trong ai-service (nguồn đầu vào của `/api/next-turn`, `/api/finalize`) | LangGraph checkpointer (`SESSION_STORE=memory\|postgres`, §8.8) | ai-service (DE chốt DB, TTL, xoá theo consent) | Có câu trả lời ứng viên; log vẫn chỉ chứa id + số đo |
 
 ## 8.2 Thay đổi schema `interview_db` (đề xuất)
 
@@ -188,3 +188,29 @@ idempotency **không đổi**. Thay đổi về nội dung và ưu tiên:
 | **`question_bank`** (S4-DE-2) | Seed từ chính file Q&A (một nguồn duy nhất), mang theo `topic_id`; dùng làm câu hỏi dự phòng khi Interviewer lỗi (§4.6) |
 | **Topic catalog** | **AIE + DE đồng sở hữu.** AIE: danh sách topic, level, `key_concepts`, scenario. DE: `resources` (link tài liệu chính thức, dùng chung danh sách nguồn với textbook để không giữ hai nơi), map Q&A ↔ topic. Pipeline đọc catalog để **từ chối** chunk có `topic_id` không tồn tại. PR sửa catalog cần review của người còn lại |
 | **Dữ liệu cá nhân** | Transcript, câu trả lời, `cv_profile` và file CV **không bao giờ** được đưa vào `knowledge_chunks` hay dataset của pipeline. Nên bổ sung vào constitution V |
+
+## 8.8 Checkpoint phiên trong ai-service (plan 261127-1517 phase 03 + 04)
+
+`thread_id = session_id`; mỗi `/api/start` và mỗi lượt `/api/next-turn` ghi một checkpoint (`durability="exit"`). Key
+lâu dài (dict JSON, `model_dump(mode="json")`; chỉ node `record` của graph ghi):
+
+| Key | Nội dung | Ghi khi |
+|---|---|---|
+| `session` | `{track, level, duration_minutes, jd_profile, started_at}` (`jd_profile` null nếu không có; `started_at` epoch giây theo đồng hồ server, để phiên luôn hết giờ) | `/api/start` |
+| `plan` | `InterviewPlan` gốc (topic đổi nằm trong `state.swaps`) | `/api/start`, một lần |
+| `state` | `CandidateState` sau lượt | mỗi lượt |
+| `question` | câu hỏi đã gửi gần nhất = câu lượt sau trả lời | mỗi lượt có câu mới |
+| `turn` | `TurnInfo` của câu đang chờ trả lời (cho `turn_kind`, `topic_id`) | `/api/start`, mỗi lượt có câu mới |
+| `transcript` | cộng dồn, mỗi lượt một phần tử `{turn_number, question, answer, source, elapsed_seconds, topic_id, phase, turn_kind, difficulty, evaluation}`; 4 trường giữa lấy từ `turn` của câu được trả lời, `evaluation` null nếu lượt không chấm | mỗi lượt |
+| `last_turn` | đủ để replay (`meta`, `done`), chỉ giữ MỘT lượt | mỗi lượt |
+
+Từ các key này `app/session_store/session_request_builder.py` dựng lại `NextTurnRequest` / `FinalizeRequest` (nên
+`turn_engine`, Reporter, `report_scoring` không đổi). Không lưu: `TurnContext`, kết quả tạm của lượt. Dữ liệu cá nhân
+(transcript) chỉ ai-service đọc; TTL + xoá theo consent là việc DE (doc 12 mục 9). Kích thước: transcript phình
+~2 KB/lượt (có `evaluation`); phiên 20 lượt mock ≈ 61 KB ở checkpoint cuối, và mỗi lượt ghi lại cả channel nên tổng
+các checkpoint của phiên tăng theo bình phương số lượt (chưa đo trên Postgres sau phase 04; phase 03: 245 KB / 17 lượt
+khi chưa có `evaluation`).
+
+**Deploy gate:** `SESSION_STORE=memory` giữ bản duy nhất của phiên trong RAM (restart hoặc dọn quá 500 phiên = 404
+`session_not_found` giữa phiên). Chỉ dùng cho dev / test; staging / production phải chạy `postgres` (service chỉ cảnh
+báo khi khởi động với `APP_ENV` staging / production, không chặn).
