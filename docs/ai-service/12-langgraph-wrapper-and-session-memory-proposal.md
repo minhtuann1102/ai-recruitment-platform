@@ -1,6 +1,6 @@
 # Đề xuất: bọc orchestrator bằng LangGraph + memory phiên nằm trong ai-service
 
-> **Trạng thái:** Đề xuất, chờ AIE / team duyệt · **Ngày:** 2026-11-26 · **Người đề xuất:** DE · **Người thực hiện chính:** AIE
+> **Trạng thái:** Đề xuất. AIE đã góp ý và chấp nhận (2026-11-27, mục 11), chờ FSD / DE · **Ngày:** 2026-11-26 · **Người đề xuất:** DE · **Người thực hiện chính:** AIE
 >
 > Đề xuất này **đảo ngược quyết định đã ghi** (mục 2), nên cần cả team đồng ý chứ không chỉ AIE. Trước khi được
 > duyệt, không sửa README A4/A5, ADR-004 hay constitution.
@@ -99,8 +99,8 @@ Logic, prompt, model không đổi nên không đo lại chất lượng. Cần:
 
 `pip install --dry-run` ngày 2026-11-26 (giữ `langchain-core==0.3.86`, `psycopg` 3.2.12, `psycopg-pool` 3.3.3)
 giải được: `langgraph 1.0.1`, `langgraph-checkpoint 3.0.1`, `langgraph-checkpoint-postgres 3.0.5`,
-`langgraph-prebuilt 1.0.1`, `langgraph-sdk 0.2.15`, `ormsgpack 1.13.1`. **Mới giải được phụ thuộc, chưa chạy
-thử** → kiểm lại khi cài thật.
+`langgraph-prebuilt 1.0.1`, `langgraph-sdk 0.2.15`, `ormsgpack 1.13.1`. **Đã cài thật 2026-11-27** (Python 3.11): toàn bộ test
+ai-service xanh, đã pin trong `requirements.txt`.
 
 ## 9. Chia việc
 
@@ -116,11 +116,53 @@ README A4/A5 · constitution IV (`/speckit-constitution`) · ADR mới (thay m�
 [07](07-data-storage.md) · [03](03-orchestrator-state-machine.md) (sơ đồ graph) · `.env.example` (comment
 `REPLAN_ENABLED`) · `specs/README.md` (feature mới, chọn Spec Kit hay primary workflow).
 
+## 11. Góp ý AIE (2026-11-27, AIE chấp nhận; còn chờ FSD / DE)
+
+Đối chiếu với code: `app/turn_engine.py`, `turn_decision.py`, `main.py` (`_stream`) và `llm/tool_loop.py`. Kế hoạch
+triển khai: [plans/261127-1517-langgraph-orchestrator-session-memory](../../plans/261127-1517-langgraph-orchestrator-session-memory/plan.md).
+
+**Sửa để chạy được**
+
+| # | Vấn đề trong đề xuất | Sửa |
+|---|---|---|
+| G1 | Checkpointer của LangGraph tự ghi sau mỗi bước, hoặc lúc graph xong nếu `durability="exit"`. Graph kết thúc ở `act`, còn Interviewer stream ở ngoài, nên checkpoint ghi **trước** khi có câu hỏi thật. `finish_turn` (`asked_questions`, `question_source`, `qa_id`) lại nằm ngoài checkpoint. Kết quả là mâu thuẫn với quy tắc "chỉ ghi khi tới `done`" ở mục 4 | Đưa Interviewer vào graph thành node `ask`, đẩy token bằng `get_stream_writer()` (`stream_mode="custom"`), `finish_turn` là bước cuối của `ask`. Chạy với `durability="exit"`. Spike 27/11: client ngắt giữa `ask` thì **vẫn** ghi state sau `act` (`next=('ask',)`), nên guard phải resume hoặc lùi checkpoint (câu hỏi mở 7) |
+| G2 | `PostgresSaver` là bản sync, chặn event loop của FastAPI đúng lúc đang stream SSE | Dùng `AsyncPostgresSaver` + `AsyncConnectionPool` |
+| G3 | Chưa chặn chạy đồng thời. Client retry khi lượt đầu còn đang stream thì hai lần chạy cùng gọi LLM và cùng ghi một thread. Quy tắc "trùng `turn_number`" không bắt được, vì lượt đầu chưa ghi gì | Advisory lock Postgres theo `session_id` (`pg_try_advisory_lock`). Lượt thứ hai nhận 409 `turn_in_progress` |
+
+**Cải thiện**
+
+| # | Góp ý |
+|---|---|
+| G4 | (Pha C) Mô hình cả phiên thành **một graph có vòng lặp**: `plan → ask → wait_answer (interrupt) → perceive → evaluate → decide → ask … → report`. `/start` chạy tới interrupt đầu tiên, `/next-turn` là `Command(resume=…)`, `/finalize` là resume với `end_reason`. Vòng Perceive–Evaluate–Decide–Act hiện ra thành chu trình thật, và checkpoint chính là memory của phiên. Khi resume, node có `interrupt()` chạy lại từ đầu, nên `wait_answer` phải rỗng |
+| G5 | `decide` rẽ bằng cạnh có điều kiện theo `dec.action` (`follow_up` / `hint` / `clarify` / `next_topic` / `next_phase` / `wrap_up` / `end`), để sơ đồ hiện đủ nhánh như doc [03](03-orchestrator-state-machine.md) |
+| G6 | State của graph tách thành các key `request`, `plan`, `state`, `transcript: Annotated[list, add]`. Checkpointer chỉ ghi blob cho key nào đổi, nên `plan` (nặng vì `reference_snippets`) không bị ghi lại mỗi lượt |
+| G7 | Đưa phần kiểm 404 / 409 (phiên `done`, `turn_number` cũ, `session_id` không có, `/start` gọi lại trên thread đã có) **ra trước graph**: đọc `aget_state()` trong endpoint. Node không phải `raise`, lỗi không chạm checkpoint |
+| G8 | Chia pha. **A:** graph không checkpointer, API giữ nguyên, chỉ đảo README A4, không đụng ADR-004 / constitution IV. **B:** memory + đổi API + idempotency, cần team duyệt và DB của DE. **C:** graph cả phiên (G4), stretch. Hạn 21/12: A là phần chắc chắn làm được |
+| G9 | Pooler Supabase (gửi DE): transaction pooler cổng 6543 không chạy prepared statement, nên đặt `prepare_threshold=None` cho psycopg hoặc dùng session pooler cổng 5432. Ví dụ trong doc LangGraph đặt `prepare_threshold=0`, giá trị này **bật** prepare ngay lần đầu, không được chép nguyên. Cần thử thật |
+| G10 | Test tương đương chạy với `InMemorySaver`, không phụ thuộc Postgres. Postgres chỉ dùng trong `tests/integration/` |
+| G11 | Replay lượt trùng vẫn trả về dạng SSE (`meta` → `token` (một lần, cả câu) → `done`), vì bên gọi đang đọc stream |
+
+**LangChain Agents: không dùng.** Thứ tự ưu tiên forced → kiểm đề xuất LLM (hybrid) → luật → `low_performance_stop`
+là guardrail cố định có chủ đích (`turn_decision.py`). Agent kiểu ReAct để LLM tự chọn bước tiếp, nên phá đúng chỗ
+này. Vòng tool của Evaluator (`llm/tool_loop.py`) có ngân sách thời gian chung cho lượt, bước cuối luôn
+`tool_choice="none"`, latch `tools_unsupported` cho OpenRouter và fallback về mock; `create_agent` của LangChain
+không có sẵn những thứ này. Khi bảo vệ: đây là "agentic workflow" theo cách LangGraph phân loại, LLM đề xuất quyết
+định ở `decide`, code kiểm rồi mới áp dụng. `langchain-core` đang có trong `requirements.txt` nhưng app không
+import; thêm langgraph thì gói này mới thật sự được dùng (langgraph phụ thuộc vào nó).
+
 ## Câu hỏi mở
 
 1. Team (AIE, FSD, DE) đồng ý đảo ADR-004 / constitution IV không? Mentor có yêu cầu gì về LangGraph / agent memory?
-2. Có chỗ nào trong `next_turn()` khó tách thành node (reask voice, forced end, swap tính lại plan)?
+2. Có chỗ nào trong `next_turn()` khó tách thành node (reask voice, forced end, swap tính lại plan)? *AIE
+   (27/11):* tách được. Reask và forced end là cạnh ra từ `perceive` / `decide`. Swap đổi `plan` trong `decide`,
+   nên `plan` phải là key của state (G6). Hai lỗi 422 voice vẫn ném trong `perceive`: phải ném trước khi ghi gì,
+   giống hiện tại.
 3. Đồng hồ phiên: bên gọi giữ (`elapsed_seconds` như hiện tại) hay ai-service tự tính từ lúc start?
 4. Response `/start` có còn cần trả `plan` / `state` không?
 5. DB cho checkpoint: Supabase `ai_db` (nếu pooler chạy được) hay Postgres trên VM staging?
-6. AIE ước lượng bao lâu cho phần của mình, so với hạn 21/12/2026?
+6. AIE ước lượng bao lâu cho phần của mình, so với hạn 21/12/2026? *AIE (27/11):* pha A khoảng 4 ngày, pha B
+   khoảng 5 ngày sau khi DE chốt DB, pha C khoảng 3 ngày (stretch). Chi tiết ở plan.
+7. `durability="exit"` có ghi checkpoint khi run bị huỷ giữa node `ask` không (G1)? *AIE (27/11, spike):* **có**,
+   ghi state sau `act` với `next=('ask',)`. Phần `ask` dở không được ghi. Gửi lại cùng lượt, cùng answer thì resume
+   chỉ node `ask` (không chấm lại). Khác answer thì lùi về checkpoint trước. Chi tiết ở phase 03 của plan.
+8. Team có đồng ý chia pha A / B / C (G8) không? Pha A có cần chờ duyệt không, hay chỉ cần đồng ý đảo README A4?
