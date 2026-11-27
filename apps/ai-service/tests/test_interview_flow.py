@@ -104,7 +104,8 @@ def test_manipulation_gets_zero_and_evidence_quotes_are_verbatim(client):
 
     topic = d["plan"]["phases"][0]["topics"][0]
     good = ". ".join(topic["key_points"]) + "."
-    body["answer"] = good
+    # cung luot, answer khac tren cung phien la 409 turn_already_answered (session_store): cham tren phien khac
+    body.update(answer=good, session_id="s-good")
     ev = parse_sse(client.post("/api/next-turn", json=body).text)[-1][1]["evaluation"]
     assert ev["evidence"] and all(e["quote"] in good for e in ev["evidence"])
 

@@ -9,10 +9,15 @@ response: khi client ngat, Starlette huy generator bang cancel scope cua anyio, 
 khong kip huy task cua node -> Interviewer chay tiep trong nen toi het cau (review phase 02, M1). Huy task pump
 (`aclose`) thi LangGraph don dep binh thuong va dong Interviewer. Task tao bang create_task nen mang theo contextvars
 cua handler (bind_request, tracing).
+
+Phase 03: graph co checkpointer, chay tren thread cua phien (thread_id = session_id) voi durability="exit" - mot lan
+ghi checkpoint khi graph xong. `on_finish` (nha khoa phien, goi nhieu lan khong sao) goi khi task pump ket thuc vi bat
+ky ly do gi va o aclose: luc do checkpoint da ghi (hoac luot da huy), request sau cua phien doc dung state.
 """
 import asyncio
-from typing import AsyncIterator, Optional, Tuple
+from typing import AsyncIterator, Callable, Optional, Tuple
 
+from ..session_store.session_checkpointer import thread_config
 from ..turn_result import TurnResult
 from ..turn_steps import TurnContext
 
@@ -20,15 +25,18 @@ _END = object()  # graph chay xong
 
 
 class GraphTurnRun:
-    def __init__(self, graph, ctx: TurnContext):
+    def __init__(self, graph, ctx: TurnContext, on_finish: Optional[Callable[[], None]] = None):
         self.ctx = ctx
         self._queue: asyncio.Queue = asyncio.Queue()
         self._first: Optional[Tuple[str, dict]] = None
+        self._on_finish = on_finish
         self._task = asyncio.create_task(self._pump(graph))
 
     async def _pump(self, graph) -> None:
         try:
-            async for item in graph.astream({"ctx": self.ctx}, stream_mode="custom"):
+            # input {} (khong phai None): luon chay luot moi tu START, ke ca khi checkpoint truoc dung giua `ask`
+            async for item in graph.astream({}, thread_config(self.ctx.req.session_id), context=self.ctx,
+                                            stream_mode="custom", durability="exit"):
                 self._queue.put_nowait(item)
         except asyncio.CancelledError:
             raise
@@ -36,6 +44,9 @@ class GraphTurnRun:
             self._queue.put_nowait(err)
         else:
             self._queue.put_nowait(_END)
+        finally:
+            if self._on_finish is not None:
+                self._on_finish()
 
     async def _next(self) -> Optional[Tuple[str, dict]]:
         item = await self._queue.get()
@@ -71,3 +82,5 @@ class GraphTurnRun:
             await self._task
         except BaseException:  # CancelledError cua task pump (hoac huy tu ben ngoai): da xu ly xong
             pass
+        if self._on_finish is not None:  # task bi huy truoc khi kip chay thi finally cua pump khong chay
+            self._on_finish()
