@@ -60,3 +60,7 @@ Gateway 9080, ai-service 8000, Postgres host 5534, Redis host 6374. Container pr
   `app.main` (`contextlib.aclosing`): chạy test bằng venv Python 3.11 (giống CI).
 - Phase 05 (2026-11-27): `SESSION_GRAPH=per_turn|session` (mặc định `per_turn`). `session` = một graph cả phiên có
   `interrupt`; đổi `per_turn → session` giữa chừng thì phiên đang chạy bị 404, lùi về `per_turn` thì vẫn chạy tiếp.
+- Phase 06 (2026-11-27): đo độ trễ lưu phiên không cần LLM: `cd apps/ai-service && .venv/bin/python -m evals.session_store_latency
+  --sessions 10 --db-url postgresql://postgres:pg@localhost:5545/postgres --out <json>` (Postgres: `docker run -d --rm --name
+  session_pg -e POSTGRES_PASSWORD=pg -p 5545:5432 postgres:16-alpine`, rồi `scripts.setup_session_checkpoint_tables`). Bỏ
+  `--db-url` thì chỉ đo memory. Metric `ai_session_checkpoint_seconds{op,store}` ở `/metrics`.

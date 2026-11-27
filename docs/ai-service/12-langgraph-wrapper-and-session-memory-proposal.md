@@ -1,6 +1,6 @@
 # Đề xuất: bọc orchestrator bằng LangGraph + memory phiên nằm trong ai-service
 
-> **Trạng thái:** Đề xuất. AIE đã góp ý và chấp nhận (2026-11-27, mục 11), chờ FSD / DE · **Ngày:** 2026-11-26 · **Người đề xuất:** DE · **Người thực hiện chính:** AIE
+> **Trạng thái:** Đề xuất. AIE đã góp ý và chấp nhận (2026-11-27, mục 11), chờ FSD / DE. **Code AIE phase 01-06 xong (2026-11-27)**, chạy sau cờ / mặc định memory; README A4/A5, constitution IV, ADR vẫn chờ team duyệt · **Ngày:** 2026-11-26 · **Người đề xuất:** DE · **Người thực hiện chính:** AIE
 >
 > Đề xuất này **đảo ngược quyết định đã ghi** (mục 2), nên cần cả team đồng ý chứ không chỉ AIE. Trước khi được
 > duyệt, không sửa README A4/A5, ADR-004 hay constitution.

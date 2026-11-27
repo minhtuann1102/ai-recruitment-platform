@@ -87,6 +87,8 @@ Báo cáo: `plans/reports/eval-261109-1648-ttft-breakdown.md`.
 - PR #49 (DE duyệt golden RAG): **chưa merge, đang conflict** ở `03-non-functional-requirements.md`; chờ DE duyệt lại g22/g24/h29/h30. Trên `main` chưa query nào có `approved_by`.
 - Hạn tổng cho lần gọi LLM (PR #69, đã merge 02/11): `timeout_s` nay cắt thật mỗi lần gọi, quá hạn vào `degraded`/`partial`; thêm ngân sách retry CV/JD Parser 28 s, Reporter 80 s để fallback về trước timeout của interview-service; stream Interviewer có hạn tổng 15 s. Chỉ kiểm bằng test fake, chưa đo LLM thật. Ước tính từ log: ~1.8% lượt Evaluator chuyển thành `degraded` (trước đây các lượt này chờ 8–180 s). Chi tiết: docs 08 §9.3.
 
+- Kế hoạch LangGraph + memory phiên `plans/261127-1517-langgraph-orchestrator-session-memory/` (nhánh `thang/langgraph-*`, xếp chồng): phase 01 xong; 02 graph mỗi lượt, 03 checkpointer (`SESSION_STORE=memory|postgres`, mặc định memory), 04 API gọn (PR #117 đã merge), 05 graph cả phiên sau `SESSION_GRAPH=session` (PR #118 mở), 06 đo + docs xong. Đo mock (không LLM), Postgres local, 20 phiên / tổ hợp: TTFT P50 3-7 ms, đọc+ghi checkpoint P95 8-12 ms (< 100 ms), overhead graph < 50 ms; chưa đo Supabase / staging và `cost_latency` thật (cần user đồng ý). Mỗi lần lỗi thêm ~1,5 KB + một checkpoint không bao giờ xoá (cả hai chế độ graph): cần TTL / dọn khi finalize (DE). Chờ team duyệt đảo README A4/A5, ADR mới (thay một phần ADR-004), constitution IV (DE); DE chọn DB; FSD nối contract. Báo cáo: `plans/reports/eval-261127-2346-langgraph-latency.md`.
+
 ## Mốc
 Feature freeze 06/12/2026; Sprint 5 07–21/12. Gate voice 22/11. Mốc Evaluator ±1 band ≥ 80% ở tuần 09–15/11.
 

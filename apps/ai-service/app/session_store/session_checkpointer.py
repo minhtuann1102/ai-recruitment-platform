@@ -11,13 +11,14 @@ from typing import Optional
 
 from langgraph.checkpoint.memory import InMemorySaver
 
+from .session_checkpoint_timing import TimedInMemorySaver, timed_postgres_saver_class
 from .session_store_settings import SessionStoreSettings, load_session_store_settings
 
 log = logging.getLogger("ai_service.session_store")
 STORE_TIMEOUT_S = 3.0  # cho ket noi pool / doc checkpoint: AsyncPostgresSaver khoa chung moi lenh, DB treo khong duoc
 MAX_MEMORY_SESSIONS = 500  # memory: giu toi da N phien gan nhat (co cau tra loi ung vien), xoa phien cu nhat
 STRICT_ENVS = ("staging", "production")
-_saver = InMemorySaver()
+_saver = TimedInMemorySaver()
 _pool = None
 
 
@@ -33,7 +34,7 @@ def thread_config(session_id: str) -> dict:
 def reset_memory_store() -> None:
     """Test: moi test mot InMemorySaver moi (phien cua test truoc khong lam lech guard)."""
     global _saver
-    _saver = InMemorySaver()
+    _saver = TimedInMemorySaver()
 
 
 def postgres_pool(settings: SessionStoreSettings):
@@ -53,10 +54,9 @@ async def open_session_store(settings: Optional[SessionStoreSettings] = None) ->
             log.warning("session_store_memory_in_strict_env max_sessions=%d", MAX_MEMORY_SESSIONS)
         log.info("session_store kind=memory")
         return
-    from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
     _pool = postgres_pool(settings)
     await _pool.open(wait=False)
-    _saver = AsyncPostgresSaver(_pool)
+    _saver = timed_postgres_saver_class()(_pool)
     log.info("session_store kind=postgres pool_max=%d", settings.pool_max_size)
 
 

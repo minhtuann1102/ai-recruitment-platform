@@ -20,6 +20,7 @@ from .models_interview import Evaluation
 log = logging.getLogger("ai_service.metrics")
 disable_created_metrics()  # bo series *_created (moc tao counter): khong dung, chi lam day /metrics
 _SLOW = (0.25, 0.5, 1, 2, 3, 5, 8, 13, 20, 30, 60, 120)  # giay: ca request (SSE toi het stream), mot lan goi LLM
+_STORE = (0.001, 0.0025, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1)  # giay: lenh doc / ghi checkpoint (1 ms - 1 s)
 _FAST = (0.1, 0.25, 0.5, 0.75, 1, 1.5, 2, 3, 5, 8, 13)  # giay: TTFT
 
 HTTP = Counter("ai_http_responses", "Response HTTP theo route va ma (ca 401/422 truoc route, 500 loi ngoai du kien); "
@@ -36,6 +37,9 @@ AGENT_CALLS = Counter("ai_agent_calls", "Lan goi agent; fallback=none la chay bi
 AGENT_LATENCY = Histogram("ai_agent_latency_seconds", "Do tre mot lan goi LLM cua agent", ["agent"], buckets=_SLOW)
 TOKENS = Counter("ai_tokens", "Token theo agent; kind = input / output / cached (phan input doc tu cache)",
                  ["agent", "kind"])
+CHECKPOINT_SECONDS = Histogram("ai_session_checkpoint_seconds", "Thoi gian mot lenh doc / ghi / liet ke checkpoint phien "
+                               "(op = read / write / list; store = memory / postgres); ghi trong graph cung tinh",
+                               ["op", "store"], buckets=_STORE)
 TOOL_CALLS = Counter("ai_llm_tool_calls", "Lan agent goi cong cu trong vong lap tool calling cua gateway", ["agent"])
 TOOLS_UNSUPPORTED = Counter("ai_llm_tools_unsupported", "Lan model/provider tu choi tools + JSON strict (latch theo "
                             "tien trinh: cac luot sau khong thu lai)")
@@ -71,6 +75,12 @@ def _safe(fn):
         except Exception:
             log.exception("metrics_failed fn=%s", fn.__name__)
     return wrapper
+
+
+@_safe
+def observe_checkpoint(op: str, store: str, seconds: float) -> None:
+    """Goi tu CheckpointTimingMixin sau moi lenh doc / ghi / liet ke checkpoint."""
+    CHECKPOINT_SECONDS.labels(op, store).observe(seconds)
 
 
 @_safe

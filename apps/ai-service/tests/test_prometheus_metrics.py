@@ -98,3 +98,16 @@ def test_unhandled_error_is_counted_as_500(monkeypatch):
         "/api/jd/parse", json={"track": "java_backend", "jd_text": "Backend Java, Spring Boot, Kafka. " * 3})
     assert r.status_code == 500
     assert [value(n, **lb) - b for (n, lb), b in zip(keys, before)] == [1, 1]
+
+
+def test_session_checkpoint_read_and_write_are_timed(client):
+    """Mot luot ghi checkpoint trong graph (write) va doc lai o guard / runner (read) deu len metric store=memory."""
+    def count(op):
+        return value("ai_session_checkpoint_seconds_count", op=op, store="memory")
+
+    before = (count("read"), count("write"))
+    done = start(client, "sess-metrics-ckpt")
+    client.post("/api/next-turn", json=turn(done, session_id="sess-metrics-ckpt"))
+    assert count("read") > before[0]
+    assert count("write") > before[1]
+    assert "ai_session_checkpoint_seconds_bucket" in client.get("/metrics").text
