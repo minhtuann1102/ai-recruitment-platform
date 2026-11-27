@@ -7,6 +7,9 @@ psycopg[binary]==3.2.12
 psycopg-pool==3.3.3
 sqlalchemy==2.0.54
 langchain-core==0.3.86
+langgraph==1.0.1  # dieu phoi luot (plan 261127-1517)
+langgraph-checkpoint==3.0.1
+langgraph-checkpoint-postgres==3.0.5  # memory phien (pha B)
 langfuse==5.0.4
 prometheus-client==0.25.0
 python-dotenv==1.2.1

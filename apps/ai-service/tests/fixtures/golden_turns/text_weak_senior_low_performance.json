@@ -1,0 +1,3278 @@
+{
+ "finalize": {
+  "request": {
+   "duration_s": 540,
+   "end_reason": "low_performance",
+   "level": "senior",
+   "session_id": "g-low",
+   "track": "java_backend",
+   "turns": [
+    {
+     "answer": "Dạ em nghĩ cái này tùy dự án, em thường hỏi đồng nghiệp ạ.",
+     "difficulty": 4,
+     "evaluation": {
+      "answer_type": "off_topic",
+      "confidence": null,
+      "covered_points": [],
+      "degraded": false,
+      "evidence": [],
+      "follow_up_focus": "Giới thiệu ngắn gọn về nền tảng",
+      "gap_tags": [
+       "gioi-ngan",
+       "minh",
+       "cong-dung"
+      ],
+      "misconceptions": [],
+      "missing_points": [
+       "Giới thiệu ngắn gọn về nền tảng",
+       "Mô tả một dự án và vai trò của mình",
+       "Nêu công nghệ đã dùng"
+      ],
+      "prompt_version": null,
+      "reference_missing": false,
+      "scores": {
+       "completeness": 0,
+       "extensibility": 0,
+       "relevance": 0,
+       "technical_accuracy": 1
+      },
+      "scores_10": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 2.5
+      },
+      "sources": [],
+      "strength_tags": [],
+      "transcript_low_confidence": false,
+      "turn_number": 1,
+      "turn_score_10": 0.6
+     },
+     "phase": "intro",
+     "question": "Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+     "topic_id": "t1",
+     "turn_kind": "main",
+     "turn_number": 1
+    },
+    {
+     "answer": "Dạ em nghĩ cái này tùy dự án, em thường hỏi đồng nghiệp ạ.",
+     "difficulty": 4,
+     "evaluation": {
+      "answer_type": "off_topic",
+      "confidence": null,
+      "covered_points": [],
+      "degraded": false,
+      "evidence": [],
+      "follow_up_focus": "Giới thiệu ngắn gọn về nền tảng",
+      "gap_tags": [
+       "gioi-ngan",
+       "minh",
+       "cong-dung"
+      ],
+      "misconceptions": [],
+      "missing_points": [
+       "Giới thiệu ngắn gọn về nền tảng",
+       "Mô tả một dự án và vai trò của mình",
+       "Nêu công nghệ đã dùng"
+      ],
+      "prompt_version": null,
+      "reference_missing": false,
+      "scores": {
+       "completeness": 0,
+       "extensibility": 0,
+       "relevance": 0,
+       "technical_accuracy": 1
+      },
+      "scores_10": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 2.5
+      },
+      "sources": [],
+      "strength_tags": [],
+      "transcript_low_confidence": false,
+      "turn_number": 2,
+      "turn_score_10": 0.6
+     },
+     "phase": "intro",
+     "question": "Có thể mình hỏi chưa rõ. Ý mình là: Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+     "topic_id": "t1",
+     "turn_kind": "clarify",
+     "turn_number": 2
+    },
+    {
+     "answer": "Dạ em nghĩ cái này tùy dự án, em thường hỏi đồng nghiệp ạ.",
+     "difficulty": 3,
+     "evaluation": {
+      "answer_type": "off_topic",
+      "confidence": null,
+      "covered_points": [],
+      "degraded": false,
+      "evidence": [],
+      "follow_up_focus": "thread pool và ExecutorService",
+      "gap_tags": [
+       "executorservice-pool",
+       "lock-synchronized",
+       "before-happens"
+      ],
+      "misconceptions": [],
+      "missing_points": [
+       "Nêu được thread pool và ExecutorService",
+       "Nêu được synchronized vs Lock",
+       "Nêu được volatile và happens-before"
+      ],
+      "prompt_version": null,
+      "reference_missing": false,
+      "scores": {
+       "completeness": 0,
+       "extensibility": 0,
+       "relevance": 0,
+       "technical_accuracy": 1
+      },
+      "scores_10": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 2.5
+      },
+      "sources": [],
+      "strength_tags": [],
+      "transcript_low_confidence": false,
+      "turn_number": 3,
+      "turn_score_10": 0.6
+     },
+     "phase": "technical",
+     "question": "Giờ mình chuyển sang phần kiến thức chuyên môn nhé. Đa luồng và concurrency: bạn hiểu như thế nào và đã áp dụng ra sao?",
+     "topic_id": "t2",
+     "turn_kind": "main",
+     "turn_number": 3
+    },
+    {
+     "answer": "Dạ em nghĩ cái này tùy dự án, em thường hỏi đồng nghiệp ạ.",
+     "difficulty": 3,
+     "evaluation": {
+      "answer_type": "off_topic",
+      "confidence": null,
+      "covered_points": [],
+      "degraded": false,
+      "evidence": [],
+      "follow_up_focus": "thread pool và ExecutorService",
+      "gap_tags": [
+       "executorservice-pool",
+       "lock-synchronized",
+       "before-happens"
+      ],
+      "misconceptions": [],
+      "missing_points": [
+       "Nêu được thread pool và ExecutorService",
+       "Nêu được synchronized vs Lock",
+       "Nêu được volatile và happens-before"
+      ],
+      "prompt_version": null,
+      "reference_missing": false,
+      "scores": {
+       "completeness": 0,
+       "extensibility": 0,
+       "relevance": 0,
+       "technical_accuracy": 1
+      },
+      "scores_10": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 2.5
+      },
+      "sources": [],
+      "strength_tags": [],
+      "transcript_low_confidence": false,
+      "turn_number": 4,
+      "turn_score_10": 0.6
+     },
+     "phase": "technical",
+     "question": "Có thể mình hỏi chưa rõ. Ý mình là: Giờ mình chuyển sang phần kiến thức chuyên môn nhé. Đa luồng và concurrency: bạn hiểu như thế nào và đã áp dụng ra sao?",
+     "topic_id": "t2",
+     "turn_kind": "clarify",
+     "turn_number": 4
+    },
+    {
+     "answer": "Dạ em nghĩ cái này tùy dự án, em thường hỏi đồng nghiệp ạ.",
+     "difficulty": 3,
+     "evaluation": {
+      "answer_type": "off_topic",
+      "confidence": null,
+      "covered_points": [],
+      "degraded": false,
+      "evidence": [],
+      "follow_up_focus": "heap và stack",
+      "gap_tags": [
+       "heap-stack",
+       "generational",
+       "general"
+      ],
+      "misconceptions": [],
+      "missing_points": [
+       "Nêu được heap và stack",
+       "Nêu được generational GC",
+       "Nêu được G1 và ZGC"
+      ],
+      "prompt_version": null,
+      "reference_missing": false,
+      "scores": {
+       "completeness": 0,
+       "extensibility": 0,
+       "relevance": 0,
+       "technical_accuracy": 1
+      },
+      "scores_10": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 2.5
+      },
+      "sources": [],
+      "strength_tags": [],
+      "transcript_low_confidence": false,
+      "turn_number": 5,
+      "turn_score_10": 0.6
+     },
+     "phase": "technical",
+     "question": "JVM, bộ nhớ và Garbage Collection: bạn hiểu như thế nào và đã áp dụng ra sao?",
+     "topic_id": "t3",
+     "turn_kind": "main",
+     "turn_number": 5
+    },
+    {
+     "answer": "Dạ em nghĩ cái này tùy dự án, em thường hỏi đồng nghiệp ạ.",
+     "difficulty": 3,
+     "evaluation": {
+      "answer_type": "off_topic",
+      "confidence": null,
+      "covered_points": [],
+      "degraded": false,
+      "evidence": [],
+      "follow_up_focus": "heap và stack",
+      "gap_tags": [
+       "heap-stack",
+       "generational",
+       "general"
+      ],
+      "misconceptions": [],
+      "missing_points": [
+       "Nêu được heap và stack",
+       "Nêu được generational GC",
+       "Nêu được G1 và ZGC"
+      ],
+      "prompt_version": null,
+      "reference_missing": false,
+      "scores": {
+       "completeness": 0,
+       "extensibility": 0,
+       "relevance": 0,
+       "technical_accuracy": 1
+      },
+      "scores_10": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 2.5
+      },
+      "sources": [],
+      "strength_tags": [],
+      "transcript_low_confidence": false,
+      "turn_number": 6,
+      "turn_score_10": 0.6
+     },
+     "phase": "technical",
+     "question": "Mình hỏi lại cho rõ nhé: JVM, bộ nhớ và Garbage Collection: bạn hiểu như thế nào và đã áp dụng ra sao?",
+     "topic_id": "t3",
+     "turn_kind": "clarify",
+     "turn_number": 6
+    },
+    {
+     "answer": "Dạ em nghĩ cái này tùy dự án, em thường hỏi đồng nghiệp ạ.",
+     "difficulty": 3,
+     "evaluation": {
+      "answer_type": "off_topic",
+      "confidence": null,
+      "covered_points": [],
+      "degraded": false,
+      "evidence": [],
+      "follow_up_focus": "propagation",
+      "gap_tags": [
+       "propagation",
+       "isolation-level",
+       "rollback-rules"
+      ],
+      "misconceptions": [],
+      "missing_points": [
+       "Nêu được propagation",
+       "Nêu được isolation level",
+       "Nêu được rollback rules"
+      ],
+      "prompt_version": null,
+      "reference_missing": false,
+      "scores": {
+       "completeness": 0,
+       "extensibility": 0,
+       "relevance": 0,
+       "technical_accuracy": 1
+      },
+      "scores_10": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 2.5
+      },
+      "sources": [],
+      "strength_tags": [],
+      "transcript_low_confidence": false,
+      "turn_number": 7,
+      "turn_score_10": 0.6
+     },
+     "phase": "technical",
+     "question": "Spring @Transactional: bạn hiểu như thế nào và đã áp dụng ra sao?",
+     "topic_id": "t4",
+     "turn_kind": "main",
+     "turn_number": 7
+    },
+    {
+     "answer": "Dạ em nghĩ cái này tùy dự án, em thường hỏi đồng nghiệp ạ.",
+     "difficulty": 3,
+     "evaluation": {
+      "answer_type": "off_topic",
+      "confidence": null,
+      "covered_points": [],
+      "degraded": false,
+      "evidence": [],
+      "follow_up_focus": "propagation",
+      "gap_tags": [
+       "propagation",
+       "isolation-level",
+       "rollback-rules"
+      ],
+      "misconceptions": [],
+      "missing_points": [
+       "Nêu được propagation",
+       "Nêu được isolation level",
+       "Nêu được rollback rules"
+      ],
+      "prompt_version": null,
+      "reference_missing": false,
+      "scores": {
+       "completeness": 0,
+       "extensibility": 0,
+       "relevance": 0,
+       "technical_accuracy": 1
+      },
+      "scores_10": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 2.5
+      },
+      "sources": [],
+      "strength_tags": [],
+      "transcript_low_confidence": false,
+      "turn_number": 8,
+      "turn_score_10": 0.6
+     },
+     "phase": "technical",
+     "question": "Mình hỏi lại cho rõ nhé: Spring @Transactional: bạn hiểu như thế nào và đã áp dụng ra sao?",
+     "topic_id": "t4",
+     "turn_kind": "clarify",
+     "turn_number": 8
+    },
+    {
+     "answer": "Dạ em nghĩ cái này tùy dự án, em thường hỏi đồng nghiệp ạ.",
+     "difficulty": 3,
+     "evaluation": null,
+     "phase": "wrap_up",
+     "question": "Cảm ơn bạn, buổi phỏng vấn đến đây là kết thúc. Bạn còn câu hỏi nào dành cho mình không?",
+     "topic_id": null,
+     "turn_kind": "main",
+     "turn_number": 9
+    }
+   ]
+  },
+  "response": {
+   "json": {
+    "criteria": {
+     "completeness": 0.0,
+     "extensibility": 0.0,
+     "relevance": 0.0,
+     "technical_accuracy": 2.5
+    },
+    "improvements": [
+     {
+      "evidence_turns": [
+       1,
+       2
+      ],
+      "point": "Giới thiệu bản thân và dự án gần nhất",
+      "why": "Còn thiếu: Giới thiệu ngắn gọn về nền tảng."
+     },
+     {
+      "evidence_turns": [
+       3,
+       4
+      ],
+      "point": "Đa luồng và concurrency",
+      "why": "Còn thiếu: Nêu được thread pool và ExecutorService."
+     },
+     {
+      "evidence_turns": [
+       5,
+       6
+      ],
+      "point": "JVM, bộ nhớ và Garbage Collection",
+      "why": "Còn thiếu: Nêu được heap và stack."
+     }
+    ],
+    "level_signal": null,
+    "meta": {
+     "degraded_turns": [],
+     "difficulty_trajectory": [
+      4,
+      4,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+     ],
+     "disclaimer": "Điểm do AI chấm, mang tính tham khảo cho việc luyện tập.",
+     "fallbacks": [],
+     "prompt_versions": {
+      "evaluator": "mock",
+      "reporter": "mock"
+     },
+     "reference_missing_turns": []
+    },
+    "metadata": {
+     "latency_ms_by_agent": {
+      "total": 0
+     },
+     "model": "mock-rule-based",
+     "usage": {}
+    },
+    "overall": {
+     "score": 0.6,
+     "summary": "Kết quả tổng thể 0.6/10: chưa đạt.",
+     "verdict": "below"
+    },
+    "schema_version": 1,
+    "sections": [
+     {
+      "phase": "intro",
+      "score": 0.6,
+      "weight": 0.2
+     },
+     {
+      "phase": "technical",
+      "score": 0.6,
+      "weight": 0.35
+     }
+    ],
+    "session": {
+     "confidence": "low",
+     "duration_s": 540,
+     "end_reason": "low_performance",
+     "evaluated_turns": 8,
+     "level": "senior",
+     "track": "java_backend"
+    },
+    "status": "complete",
+    "strengths": [],
+    "study_plan": [
+     {
+      "actions": [
+       "Ôn lại: Giới thiệu ngắn gọn về nền tảng",
+       "Ôn lại: Mô tả một dự án và vai trò của mình",
+       "Ôn lại: Nêu công nghệ đã dùng"
+      ],
+      "priority": "high",
+      "resources": [],
+      "topic": "Giới thiệu bản thân và dự án gần nhất"
+     },
+     {
+      "actions": [
+       "Ôn lại: Nêu được thread pool và ExecutorService",
+       "Ôn lại: Nêu được synchronized vs Lock",
+       "Ôn lại: Nêu được volatile và happens-before"
+      ],
+      "priority": "high",
+      "resources": [],
+      "topic": "Đa luồng và concurrency"
+     },
+     {
+      "actions": [
+       "Ôn lại: Nêu được heap và stack",
+       "Ôn lại: Nêu được generational GC",
+       "Ôn lại: Nêu được G1 và ZGC"
+      ],
+      "priority": "high",
+      "resources": [],
+      "topic": "JVM, bộ nhớ và Garbage Collection"
+     }
+    ],
+    "topics": [
+     {
+      "comment": "Còn thiếu: Giới thiệu ngắn gọn về nền tảng.",
+      "difficulty_path": [
+       4,
+       4
+      ],
+      "hint_used": false,
+      "phase": "intro",
+      "score": 0.6,
+      "title": "Giới thiệu bản thân và dự án gần nhất",
+      "topic_id": "t1"
+     },
+     {
+      "comment": "Còn thiếu: Nêu được thread pool và ExecutorService.",
+      "difficulty_path": [
+       3,
+       3
+      ],
+      "hint_used": false,
+      "phase": "technical",
+      "score": 0.6,
+      "title": "Đa luồng và concurrency",
+      "topic_id": "t2"
+     },
+     {
+      "comment": "Còn thiếu: Nêu được heap và stack.",
+      "difficulty_path": [
+       3,
+       3
+      ],
+      "hint_used": false,
+      "phase": "technical",
+      "score": 0.6,
+      "title": "JVM, bộ nhớ và Garbage Collection",
+      "topic_id": "t3"
+     },
+     {
+      "comment": "Còn thiếu: Nêu được propagation.",
+      "difficulty_path": [
+       3,
+       3
+      ],
+      "hint_used": false,
+      "phase": "technical",
+      "score": 0.6,
+      "title": "Spring @Transactional",
+      "topic_id": "t4"
+     }
+    ],
+    "turns": [
+     {
+      "comment": "Còn thiếu: Giới thiệu ngắn gọn về nền tảng.",
+      "question": "Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+      "scores": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 2.5
+      },
+      "topic_id": "t1",
+      "turn_kind": "main",
+      "turn_number": 1
+     },
+     {
+      "comment": "Còn thiếu: Giới thiệu ngắn gọn về nền tảng.",
+      "question": "Có thể mình hỏi chưa rõ. Ý mình là: Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+      "scores": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 2.5
+      },
+      "topic_id": "t1",
+      "turn_kind": "clarify",
+      "turn_number": 2
+     },
+     {
+      "comment": "Còn thiếu: Nêu được thread pool và ExecutorService.",
+      "question": "Giờ mình chuyển sang phần kiến thức chuyên môn nhé. Đa luồng và concurrency: bạn hiểu như thế nào và đã áp dụng ra sao?",
+      "scores": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 2.5
+      },
+      "topic_id": "t2",
+      "turn_kind": "main",
+      "turn_number": 3
+     },
+     {
+      "comment": "Còn thiếu: Nêu được thread pool và ExecutorService.",
+      "question": "Có thể mình hỏi chưa rõ. Ý mình là: Giờ mình chuyển sang phần kiến thức chuyên môn nhé. Đa luồng và concurrency: bạn hiểu như thế nào và đã áp dụng ra sao?",
+      "scores": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 2.5
+      },
+      "topic_id": "t2",
+      "turn_kind": "clarify",
+      "turn_number": 4
+     },
+     {
+      "comment": "Còn thiếu: Nêu được heap và stack.",
+      "question": "JVM, bộ nhớ và Garbage Collection: bạn hiểu như thế nào và đã áp dụng ra sao?",
+      "scores": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 2.5
+      },
+      "topic_id": "t3",
+      "turn_kind": "main",
+      "turn_number": 5
+     },
+     {
+      "comment": "Còn thiếu: Nêu được heap và stack.",
+      "question": "Mình hỏi lại cho rõ nhé: JVM, bộ nhớ và Garbage Collection: bạn hiểu như thế nào và đã áp dụng ra sao?",
+      "scores": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 2.5
+      },
+      "topic_id": "t3",
+      "turn_kind": "clarify",
+      "turn_number": 6
+     },
+     {
+      "comment": "Còn thiếu: Nêu được propagation.",
+      "question": "Spring @Transactional: bạn hiểu như thế nào và đã áp dụng ra sao?",
+      "scores": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 2.5
+      },
+      "topic_id": "t4",
+      "turn_kind": "main",
+      "turn_number": 7
+     },
+     {
+      "comment": "Còn thiếu: Nêu được propagation.",
+      "question": "Mình hỏi lại cho rõ nhé: Spring @Transactional: bạn hiểu như thế nào và đã áp dụng ra sao?",
+      "scores": {
+       "completeness": 0.0,
+       "extensibility": 0.0,
+       "relevance": 0.0,
+       "technical_accuracy": 2.5
+      },
+      "topic_id": "t4",
+      "turn_kind": "clarify",
+      "turn_number": 8
+     }
+    ]
+   },
+   "status": 200
+  }
+ },
+ "start": {
+  "request": {
+   "level": "senior",
+   "session_id": "g-low",
+   "track": "java_backend"
+  },
+  "response": {
+   "events": [
+    [
+     "meta",
+     {
+      "action": "ask_main",
+      "phase": "intro",
+      "topic_index": 1,
+      "topic_total": 5,
+      "turn_number": 1
+     }
+    ],
+    [
+     "token*",
+     {
+      "n": 7,
+      "t": "Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?"
+     }
+    ],
+    [
+     "done",
+     {
+      "metadata": {
+       "fallbacks": [],
+       "prompt_versions": {
+        "mock": "mock-v2"
+       },
+       "rag": {
+        "status": "off"
+       },
+       "usage": {}
+      },
+      "plan": {
+       "level_note": null,
+       "phases": [
+        {
+         "phase": "intro",
+         "time_budget_min": 5,
+         "topics": [
+          {
+           "backup_question": "Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+           "bank_questions": [],
+           "catalog_ref": null,
+           "cv_ref": null,
+           "id": "t1",
+           "key_points": [
+            "Giới thiệu ngắn gọn về nền tảng",
+            "Mô tả một dự án và vai trò của mình",
+            "Nêu công nghệ đã dùng"
+           ],
+           "objective": "Làm quen và nắm bối cảnh kinh nghiệm của ứng viên",
+           "opening_hint": "Mời ứng viên giới thiệu bản thân và dự án gần nhất",
+           "reference_snippets": [],
+           "reference_sources": [],
+           "source": "generic",
+           "start_difficulty": 4,
+           "title": "Giới thiệu bản thân và dự án gần nhất"
+          }
+         ]
+        },
+        {
+         "phase": "technical",
+         "time_budget_min": 14,
+         "topics": [
+          {
+           "backup_question": "Đa luồng và concurrency: bạn hiểu như thế nào và đã áp dụng ra sao?",
+           "bank_questions": [],
+           "catalog_ref": "java.core.concurrency",
+           "cv_ref": null,
+           "id": "t2",
+           "key_points": [
+            "Nêu được thread pool và ExecutorService",
+            "Nêu được synchronized vs Lock",
+            "Nêu được volatile và happens-before",
+            "Nêu được deadlock"
+           ],
+           "objective": "Đánh giá hiểu biết về Đa luồng và concurrency ở mức senior",
+           "opening_hint": "Bắt đầu bằng câu hỏi tổng quan về Đa luồng và concurrency",
+           "reference_snippets": [],
+           "reference_sources": [],
+           "source": "catalog",
+           "start_difficulty": 4,
+           "title": "Đa luồng và concurrency"
+          },
+          {
+           "backup_question": "JVM, bộ nhớ và Garbage Collection: bạn hiểu như thế nào và đã áp dụng ra sao?",
+           "bank_questions": [],
+           "catalog_ref": "java.core.jvm-memory-gc",
+           "cv_ref": null,
+           "id": "t3",
+           "key_points": [
+            "Nêu được heap và stack",
+            "Nêu được generational GC",
+            "Nêu được G1 và ZGC",
+            "Nêu được memory leak"
+           ],
+           "objective": "Đánh giá hiểu biết về JVM, bộ nhớ và Garbage Collection ở mức senior",
+           "opening_hint": "Bắt đầu bằng câu hỏi tổng quan về JVM, bộ nhớ và Garbage Collection",
+           "reference_snippets": [],
+           "reference_sources": [],
+           "source": "catalog",
+           "start_difficulty": 4,
+           "title": "JVM, bộ nhớ và Garbage Collection"
+          },
+          {
+           "backup_question": "Spring @Transactional: bạn hiểu như thế nào và đã áp dụng ra sao?",
+           "bank_questions": [],
+           "catalog_ref": "java.spring.transaction",
+           "cv_ref": null,
+           "id": "t4",
+           "key_points": [
+            "Nêu được propagation",
+            "Nêu được isolation level",
+            "Nêu được rollback rules",
+            "Nêu được self-invocation proxy"
+           ],
+           "objective": "Đánh giá hiểu biết về Spring @Transactional ở mức senior",
+           "opening_hint": "Bắt đầu bằng câu hỏi tổng quan về Spring @Transactional",
+           "reference_snippets": [],
+           "reference_sources": [],
+           "source": "catalog",
+           "start_difficulty": 4,
+           "title": "Spring @Transactional"
+          }
+         ]
+        },
+        {
+         "phase": "scenario",
+         "time_budget_min": 11,
+         "topics": [
+          {
+           "backup_question": "Tình huống: Xử lý tồn kho khi flash sale nhiều request đồng thời. Bạn sẽ tiếp cận thế nào?",
+           "bank_questions": [],
+           "catalog_ref": "scn.java.flash-sale-inventory",
+           "cv_ref": null,
+           "id": "t5",
+           "key_points": [
+            "Làm rõ yêu cầu và giả định",
+            "Đề xuất thiết kế hoặc hướng giải quyết cụ thể",
+            "Nêu trade-off và rủi ro"
+           ],
+           "objective": "Đánh giá cách tiếp cận một tình huống thực tế",
+           "opening_hint": "Đưa tình huống: Xử lý tồn kho khi flash sale nhiều request đồng thời",
+           "reference_snippets": [],
+           "reference_sources": [],
+           "source": "scenario",
+           "start_difficulty": 4,
+           "title": "Xử lý tồn kho khi flash sale nhiều request đồng thời"
+          }
+         ]
+        }
+       ],
+       "replan": null,
+       "schema_version": 1
+      },
+      "question": "Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+      "state": {
+       "active_topic_id": "t1",
+       "asked_questions": [
+        "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?"
+       ],
+       "counters": {
+        "clarifies": 0,
+        "consecutive_dont_know": 0,
+        "follow_ups": 0,
+        "hints": 0,
+        "stt_reasks": 0
+       },
+       "current_difficulty": 4,
+       "current_qa_id": null,
+       "difficulty_bounds": {
+        "max": 5,
+        "min": 2
+       },
+       "end_reason": null,
+       "evaluated_turns": 0,
+       "gaps": [],
+       "momentum": 0,
+       "notes": [],
+       "phase": "intro",
+       "phase_started_s": 0,
+       "schema_version": 1,
+       "strengths": [],
+       "swaps": [],
+       "topic_index": 1,
+       "topic_started_s": 0,
+       "topics": [
+        {
+         "covered": [],
+         "focus_used": [],
+         "hint_used": false,
+         "id": "t1",
+         "n_scored": 0,
+         "score_band": null,
+         "score_sum": 0.0,
+         "status": "active",
+         "turns": [
+          1
+         ]
+        },
+        {
+         "covered": [],
+         "focus_used": [],
+         "hint_used": false,
+         "id": "t2",
+         "n_scored": 0,
+         "score_band": null,
+         "score_sum": 0.0,
+         "status": "pending",
+         "turns": []
+        },
+        {
+         "covered": [],
+         "focus_used": [],
+         "hint_used": false,
+         "id": "t3",
+         "n_scored": 0,
+         "score_band": null,
+         "score_sum": 0.0,
+         "status": "pending",
+         "turns": []
+        },
+        {
+         "covered": [],
+         "focus_used": [],
+         "hint_used": false,
+         "id": "t4",
+         "n_scored": 0,
+         "score_band": null,
+         "score_sum": 0.0,
+         "status": "pending",
+         "turns": []
+        },
+        {
+         "covered": [],
+         "focus_used": [],
+         "hint_used": false,
+         "id": "t5",
+         "n_scored": 0,
+         "score_band": null,
+         "score_sum": 0.0,
+         "status": "pending",
+         "turns": []
+        }
+       ],
+       "turn_count": 1,
+       "used_qa_ids": []
+      },
+      "turn": {
+       "action": "ask_main",
+       "action_reason": null,
+       "agent_decision": "switch_topic",
+       "decided_by": null,
+       "difficulty": 4,
+       "overrule_reason": null,
+       "phase": "intro",
+       "policy_action": null,
+       "proposed_action": null,
+       "qa_id": null,
+       "question_source": "ai",
+       "reasoning": null,
+       "swap_result": null,
+       "topic_id": "t1",
+       "turn_kind": "main",
+       "turn_number": 1
+      }
+     }
+    ]
+   ],
+   "status": 200
+  }
+ },
+ "turns": [
+  {
+   "request": {
+    "answer": "Dạ em nghĩ cái này tùy dự án, em thường hỏi đồng nghiệp ạ.",
+    "elapsed_seconds": 60,
+    "level": "senior",
+    "question": "Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+    "session_id": "g-low",
+    "topic_turns": [],
+    "track": "java_backend",
+    "turn_kind": "main",
+    "turn_number": 1
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "clarify",
+       "phase": "intro",
+       "topic_index": 1,
+       "topic_total": 5,
+       "turn_number": 2
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 10,
+       "t": "Có thể mình hỏi chưa rõ. Ý mình là: Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "off_topic",
+        "confidence": null,
+        "covered_points": [],
+        "degraded": false,
+        "evidence": [],
+        "follow_up_focus": "Giới thiệu ngắn gọn về nền tảng",
+        "gap_tags": [
+         "gioi-ngan",
+         "minh",
+         "cong-dung"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Giới thiệu ngắn gọn về nền tảng",
+         "Mô tả một dự án và vai trò của mình",
+         "Nêu công nghệ đã dùng"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 0,
+         "extensibility": 0,
+         "relevance": 0,
+         "technical_accuracy": 1
+        },
+        "scores_10": {
+         "completeness": 0.0,
+         "extensibility": 0.0,
+         "relevance": 0.0,
+         "technical_accuracy": 2.5
+        },
+        "sources": [],
+        "strength_tags": [],
+        "transcript_low_confidence": false,
+        "turn_number": 1,
+        "turn_score_10": 0.6
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Có thể mình hỏi chưa rõ. Ý mình là: Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t1",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "co the minh hoi chua ro. y minh la: chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?"
+        ],
+        "counters": {
+         "clarifies": 1,
+         "consecutive_dont_know": 0,
+         "follow_ups": 1,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 4,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 5,
+         "min": 2
+        },
+        "end_reason": null,
+        "evaluated_turns": 1,
+        "gaps": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1
+          ]
+         },
+         {
+          "tag": "minh",
+          "turns": [
+           1
+          ]
+         },
+         {
+          "tag": "cong-dung",
+          "turns": [
+           1
+          ]
+         }
+        ],
+        "momentum": 0,
+        "notes": [],
+        "phase": "intro",
+        "phase_started_s": 0,
+        "schema_version": 1,
+        "strengths": [],
+        "swaps": [],
+        "topic_index": 1,
+        "topic_started_s": 0,
+        "topics": [
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 1,
+          "score_band": 0.2,
+          "score_sum": 0.24,
+          "status": "active",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t3",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 2,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "clarify",
+        "action_reason": null,
+        "agent_decision": "keep_difficulty",
+        "decided_by": null,
+        "difficulty": 4,
+        "overrule_reason": null,
+        "phase": "intro",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "off_topic -> clarify (luật 2)",
+        "swap_result": null,
+        "topic_id": "t1",
+        "turn_kind": "clarify",
+        "turn_number": 2
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Dạ em nghĩ cái này tùy dự án, em thường hỏi đồng nghiệp ạ.",
+    "elapsed_seconds": 120,
+    "level": "senior",
+    "question": "Có thể mình hỏi chưa rõ. Ý mình là: Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+    "session_id": "g-low",
+    "topic_turns": [
+     {
+      "a": "Dạ em nghĩ cái này tùy dự án, em thường hỏi đồng nghiệp ạ.",
+      "q": "Chào bạn, mình bắt đầu nhé. Bạn hãy giới thiệu về bản thân và dự án gần nhất bạn tham gia?",
+      "source": "text"
+     }
+    ],
+    "track": "java_backend",
+    "turn_kind": "clarify",
+    "turn_number": 2
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "ask_main",
+       "phase": "technical",
+       "topic_index": 2,
+       "topic_total": 5,
+       "turn_number": 3
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 9,
+       "t": "Giờ mình chuyển sang phần kiến thức chuyên môn nhé. Đa luồng và concurrency: bạn hiểu như thế nào và đã áp dụng ra sao?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "off_topic",
+        "confidence": null,
+        "covered_points": [],
+        "degraded": false,
+        "evidence": [],
+        "follow_up_focus": "Giới thiệu ngắn gọn về nền tảng",
+        "gap_tags": [
+         "gioi-ngan",
+         "minh",
+         "cong-dung"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Giới thiệu ngắn gọn về nền tảng",
+         "Mô tả một dự án và vai trò của mình",
+         "Nêu công nghệ đã dùng"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 0,
+         "extensibility": 0,
+         "relevance": 0,
+         "technical_accuracy": 1
+        },
+        "scores_10": {
+         "completeness": 0.0,
+         "extensibility": 0.0,
+         "relevance": 0.0,
+         "technical_accuracy": 2.5
+        },
+        "sources": [],
+        "strength_tags": [],
+        "transcript_low_confidence": false,
+        "turn_number": 2,
+        "turn_score_10": 0.6
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Giờ mình chuyển sang phần kiến thức chuyên môn nhé. Đa luồng và concurrency: bạn hiểu như thế nào và đã áp dụng ra sao?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t2",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "co the minh hoi chua ro. y minh la: chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. da luong va concurrency: ban hieu nhu the nao va da ap dung ra sao?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 0,
+         "follow_ups": 0,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 3,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 5,
+         "min": 2
+        },
+        "end_reason": null,
+        "evaluated_turns": 2,
+        "gaps": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "minh",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "cong-dung",
+          "turns": [
+           1,
+           2
+          ]
+         }
+        ],
+        "momentum": -1,
+        "notes": [],
+        "phase": "technical",
+        "phase_started_s": 120,
+        "schema_version": 1,
+        "strengths": [],
+        "swaps": [],
+        "topic_index": 1,
+        "topic_started_s": 120,
+        "topics": [
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 2,
+          "score_band": 0.2,
+          "score_sum": 0.48,
+          "status": "done",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "active",
+          "turns": [
+           3
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t3",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 3,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "ask_main",
+        "action_reason": null,
+        "agent_decision": "switch_topic",
+        "decided_by": null,
+        "difficulty": 3,
+        "overrule_reason": null,
+        "phase": "technical",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "off_topic -> next_topic (luật 3)",
+        "swap_result": null,
+        "topic_id": "t2",
+        "turn_kind": "main",
+        "turn_number": 3
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Dạ em nghĩ cái này tùy dự án, em thường hỏi đồng nghiệp ạ.",
+    "elapsed_seconds": 180,
+    "level": "senior",
+    "question": "Giờ mình chuyển sang phần kiến thức chuyên môn nhé. Đa luồng và concurrency: bạn hiểu như thế nào và đã áp dụng ra sao?",
+    "session_id": "g-low",
+    "topic_turns": [],
+    "track": "java_backend",
+    "turn_kind": "main",
+    "turn_number": 3
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "clarify",
+       "phase": "technical",
+       "topic_index": 2,
+       "topic_total": 5,
+       "turn_number": 4
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 12,
+       "t": "Có thể mình hỏi chưa rõ. Ý mình là: Giờ mình chuyển sang phần kiến thức chuyên môn nhé. Đa luồng và concurrency: bạn hiểu như thế nào và đã áp dụng ra sao?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "off_topic",
+        "confidence": null,
+        "covered_points": [],
+        "degraded": false,
+        "evidence": [],
+        "follow_up_focus": "thread pool và ExecutorService",
+        "gap_tags": [
+         "executorservice-pool",
+         "lock-synchronized",
+         "before-happens"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Nêu được thread pool và ExecutorService",
+         "Nêu được synchronized vs Lock",
+         "Nêu được volatile và happens-before"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 0,
+         "extensibility": 0,
+         "relevance": 0,
+         "technical_accuracy": 1
+        },
+        "scores_10": {
+         "completeness": 0.0,
+         "extensibility": 0.0,
+         "relevance": 0.0,
+         "technical_accuracy": 2.5
+        },
+        "sources": [],
+        "strength_tags": [],
+        "transcript_low_confidence": false,
+        "turn_number": 3,
+        "turn_score_10": 0.6
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Có thể mình hỏi chưa rõ. Ý mình là: Giờ mình chuyển sang phần kiến thức chuyên môn nhé. Đa luồng và concurrency: bạn hiểu như thế nào và đã áp dụng ra sao?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t2",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "co the minh hoi chua ro. y minh la: chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. da luong va concurrency: ban hieu nhu the nao va da ap dung ra sao?",
+         "co the minh hoi chua ro. y minh la: gio minh chuyen sang phan kien thuc chuyen mon nhe. da luong va concurrency: ban hieu nhu the nao va da ap dung ra sao?"
+        ],
+        "counters": {
+         "clarifies": 1,
+         "consecutive_dont_know": 0,
+         "follow_ups": 1,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 3,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 5,
+         "min": 2
+        },
+        "end_reason": null,
+        "evaluated_turns": 3,
+        "gaps": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "minh",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "cong-dung",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "executorservice-pool",
+          "turns": [
+           3
+          ]
+         },
+         {
+          "tag": "lock-synchronized",
+          "turns": [
+           3
+          ]
+         },
+         {
+          "tag": "before-happens",
+          "turns": [
+           3
+          ]
+         }
+        ],
+        "momentum": -1,
+        "notes": [],
+        "phase": "technical",
+        "phase_started_s": 120,
+        "schema_version": 1,
+        "strengths": [],
+        "swaps": [],
+        "topic_index": 1,
+        "topic_started_s": 120,
+        "topics": [
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 2,
+          "score_band": 0.2,
+          "score_sum": 0.48,
+          "status": "done",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 1,
+          "score_band": 0.2,
+          "score_sum": 0.24,
+          "status": "active",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t3",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 4,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "clarify",
+        "action_reason": null,
+        "agent_decision": "keep_difficulty",
+        "decided_by": null,
+        "difficulty": 3,
+        "overrule_reason": null,
+        "phase": "technical",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "off_topic -> clarify (luật 2)",
+        "swap_result": null,
+        "topic_id": "t2",
+        "turn_kind": "clarify",
+        "turn_number": 4
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Dạ em nghĩ cái này tùy dự án, em thường hỏi đồng nghiệp ạ.",
+    "elapsed_seconds": 240,
+    "level": "senior",
+    "question": "Có thể mình hỏi chưa rõ. Ý mình là: Giờ mình chuyển sang phần kiến thức chuyên môn nhé. Đa luồng và concurrency: bạn hiểu như thế nào và đã áp dụng ra sao?",
+    "session_id": "g-low",
+    "topic_turns": [
+     {
+      "a": "Dạ em nghĩ cái này tùy dự án, em thường hỏi đồng nghiệp ạ.",
+      "q": "Giờ mình chuyển sang phần kiến thức chuyên môn nhé. Đa luồng và concurrency: bạn hiểu như thế nào và đã áp dụng ra sao?",
+      "source": "text"
+     }
+    ],
+    "track": "java_backend",
+    "turn_kind": "clarify",
+    "turn_number": 4
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "ask_main",
+       "phase": "technical",
+       "topic_index": 3,
+       "topic_total": 5,
+       "turn_number": 5
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 6,
+       "t": "JVM, bộ nhớ và Garbage Collection: bạn hiểu như thế nào và đã áp dụng ra sao?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "off_topic",
+        "confidence": null,
+        "covered_points": [],
+        "degraded": false,
+        "evidence": [],
+        "follow_up_focus": "thread pool và ExecutorService",
+        "gap_tags": [
+         "executorservice-pool",
+         "lock-synchronized",
+         "before-happens"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Nêu được thread pool và ExecutorService",
+         "Nêu được synchronized vs Lock",
+         "Nêu được volatile và happens-before"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 0,
+         "extensibility": 0,
+         "relevance": 0,
+         "technical_accuracy": 1
+        },
+        "scores_10": {
+         "completeness": 0.0,
+         "extensibility": 0.0,
+         "relevance": 0.0,
+         "technical_accuracy": 2.5
+        },
+        "sources": [],
+        "strength_tags": [],
+        "transcript_low_confidence": false,
+        "turn_number": 4,
+        "turn_score_10": 0.6
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "JVM, bộ nhớ và Garbage Collection: bạn hiểu như thế nào và đã áp dụng ra sao?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t3",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "co the minh hoi chua ro. y minh la: chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. da luong va concurrency: ban hieu nhu the nao va da ap dung ra sao?",
+         "co the minh hoi chua ro. y minh la: gio minh chuyen sang phan kien thuc chuyen mon nhe. da luong va concurrency: ban hieu nhu the nao va da ap dung ra sao?",
+         "jvm, bo nho va garbage collection: ban hieu nhu the nao va da ap dung ra sao?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 0,
+         "follow_ups": 0,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 3,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 5,
+         "min": 2
+        },
+        "end_reason": null,
+        "evaluated_turns": 4,
+        "gaps": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "minh",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "cong-dung",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "executorservice-pool",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "lock-synchronized",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "before-happens",
+          "turns": [
+           3,
+           4
+          ]
+         }
+        ],
+        "momentum": -1,
+        "notes": [],
+        "phase": "technical",
+        "phase_started_s": 120,
+        "schema_version": 1,
+        "strengths": [],
+        "swaps": [],
+        "topic_index": 2,
+        "topic_started_s": 240,
+        "topics": [
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 2,
+          "score_band": 0.2,
+          "score_sum": 0.48,
+          "status": "done",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 2,
+          "score_band": 0.2,
+          "score_sum": 0.48,
+          "status": "done",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t3",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "active",
+          "turns": [
+           5
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 5,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "ask_main",
+        "action_reason": null,
+        "agent_decision": "switch_topic",
+        "decided_by": null,
+        "difficulty": 3,
+        "overrule_reason": null,
+        "phase": "technical",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "off_topic -> next_topic (luật 3)",
+        "swap_result": null,
+        "topic_id": "t3",
+        "turn_kind": "main",
+        "turn_number": 5
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Dạ em nghĩ cái này tùy dự án, em thường hỏi đồng nghiệp ạ.",
+    "elapsed_seconds": 300,
+    "level": "senior",
+    "question": "JVM, bộ nhớ và Garbage Collection: bạn hiểu như thế nào và đã áp dụng ra sao?",
+    "session_id": "g-low",
+    "topic_turns": [],
+    "track": "java_backend",
+    "turn_kind": "main",
+    "turn_number": 5
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "clarify",
+       "phase": "technical",
+       "topic_index": 3,
+       "topic_total": 5,
+       "turn_number": 6
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 8,
+       "t": "Mình hỏi lại cho rõ nhé: JVM, bộ nhớ và Garbage Collection: bạn hiểu như thế nào và đã áp dụng ra sao?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "off_topic",
+        "confidence": null,
+        "covered_points": [],
+        "degraded": false,
+        "evidence": [],
+        "follow_up_focus": "heap và stack",
+        "gap_tags": [
+         "heap-stack",
+         "generational",
+         "general"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Nêu được heap và stack",
+         "Nêu được generational GC",
+         "Nêu được G1 và ZGC"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 0,
+         "extensibility": 0,
+         "relevance": 0,
+         "technical_accuracy": 1
+        },
+        "scores_10": {
+         "completeness": 0.0,
+         "extensibility": 0.0,
+         "relevance": 0.0,
+         "technical_accuracy": 2.5
+        },
+        "sources": [],
+        "strength_tags": [],
+        "transcript_low_confidence": false,
+        "turn_number": 5,
+        "turn_score_10": 0.6
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Mình hỏi lại cho rõ nhé: JVM, bộ nhớ và Garbage Collection: bạn hiểu như thế nào và đã áp dụng ra sao?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t3",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "co the minh hoi chua ro. y minh la: chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. da luong va concurrency: ban hieu nhu the nao va da ap dung ra sao?",
+         "co the minh hoi chua ro. y minh la: gio minh chuyen sang phan kien thuc chuyen mon nhe. da luong va concurrency: ban hieu nhu the nao va da ap dung ra sao?",
+         "jvm, bo nho va garbage collection: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh hoi lai cho ro nhe: jvm, bo nho va garbage collection: ban hieu nhu the nao va da ap dung ra sao?"
+        ],
+        "counters": {
+         "clarifies": 1,
+         "consecutive_dont_know": 0,
+         "follow_ups": 1,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 3,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 5,
+         "min": 2
+        },
+        "end_reason": null,
+        "evaluated_turns": 5,
+        "gaps": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "minh",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "cong-dung",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "executorservice-pool",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "lock-synchronized",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "before-happens",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "heap-stack",
+          "turns": [
+           5
+          ]
+         },
+         {
+          "tag": "generational",
+          "turns": [
+           5
+          ]
+         },
+         {
+          "tag": "general",
+          "turns": [
+           5
+          ]
+         }
+        ],
+        "momentum": -1,
+        "notes": [],
+        "phase": "technical",
+        "phase_started_s": 120,
+        "schema_version": 1,
+        "strengths": [],
+        "swaps": [],
+        "topic_index": 2,
+        "topic_started_s": 240,
+        "topics": [
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 2,
+          "score_band": 0.2,
+          "score_sum": 0.48,
+          "status": "done",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 2,
+          "score_band": 0.2,
+          "score_sum": 0.48,
+          "status": "done",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t3",
+          "n_scored": 1,
+          "score_band": 0.2,
+          "score_sum": 0.24,
+          "status": "active",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 6,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "clarify",
+        "action_reason": null,
+        "agent_decision": "keep_difficulty",
+        "decided_by": null,
+        "difficulty": 3,
+        "overrule_reason": null,
+        "phase": "technical",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "off_topic -> clarify (luật 2)",
+        "swap_result": null,
+        "topic_id": "t3",
+        "turn_kind": "clarify",
+        "turn_number": 6
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Dạ em nghĩ cái này tùy dự án, em thường hỏi đồng nghiệp ạ.",
+    "elapsed_seconds": 360,
+    "level": "senior",
+    "question": "Mình hỏi lại cho rõ nhé: JVM, bộ nhớ và Garbage Collection: bạn hiểu như thế nào và đã áp dụng ra sao?",
+    "session_id": "g-low",
+    "topic_turns": [
+     {
+      "a": "Dạ em nghĩ cái này tùy dự án, em thường hỏi đồng nghiệp ạ.",
+      "q": "JVM, bộ nhớ và Garbage Collection: bạn hiểu như thế nào và đã áp dụng ra sao?",
+      "source": "text"
+     }
+    ],
+    "track": "java_backend",
+    "turn_kind": "clarify",
+    "turn_number": 6
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "ask_main",
+       "phase": "technical",
+       "topic_index": 4,
+       "topic_total": 5,
+       "turn_number": 7
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 5,
+       "t": "Spring @Transactional: bạn hiểu như thế nào và đã áp dụng ra sao?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "off_topic",
+        "confidence": null,
+        "covered_points": [],
+        "degraded": false,
+        "evidence": [],
+        "follow_up_focus": "heap và stack",
+        "gap_tags": [
+         "heap-stack",
+         "generational",
+         "general"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Nêu được heap và stack",
+         "Nêu được generational GC",
+         "Nêu được G1 và ZGC"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 0,
+         "extensibility": 0,
+         "relevance": 0,
+         "technical_accuracy": 1
+        },
+        "scores_10": {
+         "completeness": 0.0,
+         "extensibility": 0.0,
+         "relevance": 0.0,
+         "technical_accuracy": 2.5
+        },
+        "sources": [],
+        "strength_tags": [],
+        "transcript_low_confidence": false,
+        "turn_number": 6,
+        "turn_score_10": 0.6
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Spring @Transactional: bạn hiểu như thế nào và đã áp dụng ra sao?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t4",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "co the minh hoi chua ro. y minh la: chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. da luong va concurrency: ban hieu nhu the nao va da ap dung ra sao?",
+         "co the minh hoi chua ro. y minh la: gio minh chuyen sang phan kien thuc chuyen mon nhe. da luong va concurrency: ban hieu nhu the nao va da ap dung ra sao?",
+         "jvm, bo nho va garbage collection: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh hoi lai cho ro nhe: jvm, bo nho va garbage collection: ban hieu nhu the nao va da ap dung ra sao?",
+         "spring @transactional: ban hieu nhu the nao va da ap dung ra sao?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 0,
+         "follow_ups": 0,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 3,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 5,
+         "min": 2
+        },
+        "end_reason": null,
+        "evaluated_turns": 6,
+        "gaps": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "minh",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "cong-dung",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "executorservice-pool",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "lock-synchronized",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "before-happens",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "heap-stack",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "tag": "generational",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "tag": "general",
+          "turns": [
+           5,
+           6
+          ]
+         }
+        ],
+        "momentum": -1,
+        "notes": [],
+        "phase": "technical",
+        "phase_started_s": 120,
+        "schema_version": 1,
+        "strengths": [],
+        "swaps": [],
+        "topic_index": 3,
+        "topic_started_s": 360,
+        "topics": [
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 2,
+          "score_band": 0.2,
+          "score_sum": 0.48,
+          "status": "done",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 2,
+          "score_band": 0.2,
+          "score_sum": 0.48,
+          "status": "done",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t3",
+          "n_scored": 2,
+          "score_band": 0.2,
+          "score_sum": 0.48,
+          "status": "done",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "active",
+          "turns": [
+           7
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 7,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "ask_main",
+        "action_reason": null,
+        "agent_decision": "switch_topic",
+        "decided_by": null,
+        "difficulty": 3,
+        "overrule_reason": null,
+        "phase": "technical",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "off_topic -> next_topic (luật 3)",
+        "swap_result": null,
+        "topic_id": "t4",
+        "turn_kind": "main",
+        "turn_number": 7
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Dạ em nghĩ cái này tùy dự án, em thường hỏi đồng nghiệp ạ.",
+    "elapsed_seconds": 420,
+    "level": "senior",
+    "question": "Spring @Transactional: bạn hiểu như thế nào và đã áp dụng ra sao?",
+    "session_id": "g-low",
+    "topic_turns": [],
+    "track": "java_backend",
+    "turn_kind": "main",
+    "turn_number": 7
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "clarify",
+       "phase": "technical",
+       "topic_index": 4,
+       "topic_total": 5,
+       "turn_number": 8
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 7,
+       "t": "Mình hỏi lại cho rõ nhé: Spring @Transactional: bạn hiểu như thế nào và đã áp dụng ra sao?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "off_topic",
+        "confidence": null,
+        "covered_points": [],
+        "degraded": false,
+        "evidence": [],
+        "follow_up_focus": "propagation",
+        "gap_tags": [
+         "propagation",
+         "isolation-level",
+         "rollback-rules"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Nêu được propagation",
+         "Nêu được isolation level",
+         "Nêu được rollback rules"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 0,
+         "extensibility": 0,
+         "relevance": 0,
+         "technical_accuracy": 1
+        },
+        "scores_10": {
+         "completeness": 0.0,
+         "extensibility": 0.0,
+         "relevance": 0.0,
+         "technical_accuracy": 2.5
+        },
+        "sources": [],
+        "strength_tags": [],
+        "transcript_low_confidence": false,
+        "turn_number": 7,
+        "turn_score_10": 0.6
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Mình hỏi lại cho rõ nhé: Spring @Transactional: bạn hiểu như thế nào và đã áp dụng ra sao?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": "t4",
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "co the minh hoi chua ro. y minh la: chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. da luong va concurrency: ban hieu nhu the nao va da ap dung ra sao?",
+         "co the minh hoi chua ro. y minh la: gio minh chuyen sang phan kien thuc chuyen mon nhe. da luong va concurrency: ban hieu nhu the nao va da ap dung ra sao?",
+         "jvm, bo nho va garbage collection: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh hoi lai cho ro nhe: jvm, bo nho va garbage collection: ban hieu nhu the nao va da ap dung ra sao?",
+         "spring @transactional: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh hoi lai cho ro nhe: spring @transactional: ban hieu nhu the nao va da ap dung ra sao?"
+        ],
+        "counters": {
+         "clarifies": 1,
+         "consecutive_dont_know": 0,
+         "follow_ups": 1,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 3,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 5,
+         "min": 2
+        },
+        "end_reason": null,
+        "evaluated_turns": 7,
+        "gaps": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "minh",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "cong-dung",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "executorservice-pool",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "lock-synchronized",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "before-happens",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "heap-stack",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "tag": "generational",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "tag": "general",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "tag": "propagation",
+          "turns": [
+           7
+          ]
+         }
+        ],
+        "momentum": -1,
+        "notes": [],
+        "phase": "technical",
+        "phase_started_s": 120,
+        "schema_version": 1,
+        "strengths": [],
+        "swaps": [],
+        "topic_index": 3,
+        "topic_started_s": 360,
+        "topics": [
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 2,
+          "score_band": 0.2,
+          "score_sum": 0.48,
+          "status": "done",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 2,
+          "score_band": 0.2,
+          "score_sum": 0.48,
+          "status": "done",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t3",
+          "n_scored": 2,
+          "score_band": 0.2,
+          "score_sum": 0.48,
+          "status": "done",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 1,
+          "score_band": 0.2,
+          "score_sum": 0.24,
+          "status": "active",
+          "turns": [
+           7,
+           8
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 8,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "clarify",
+        "action_reason": null,
+        "agent_decision": "keep_difficulty",
+        "decided_by": null,
+        "difficulty": 3,
+        "overrule_reason": null,
+        "phase": "technical",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "off_topic -> clarify (luật 2)",
+        "swap_result": null,
+        "topic_id": "t4",
+        "turn_kind": "clarify",
+        "turn_number": 8
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Dạ em nghĩ cái này tùy dự án, em thường hỏi đồng nghiệp ạ.",
+    "elapsed_seconds": 480,
+    "level": "senior",
+    "question": "Mình hỏi lại cho rõ nhé: Spring @Transactional: bạn hiểu như thế nào và đã áp dụng ra sao?",
+    "session_id": "g-low",
+    "topic_turns": [
+     {
+      "a": "Dạ em nghĩ cái này tùy dự án, em thường hỏi đồng nghiệp ạ.",
+      "q": "Spring @Transactional: bạn hiểu như thế nào và đã áp dụng ra sao?",
+      "source": "text"
+     }
+    ],
+    "track": "java_backend",
+    "turn_kind": "clarify",
+    "turn_number": 8
+   },
+   "response": {
+    "events": [
+     [
+      "meta",
+      {
+       "action": "wrap_up",
+       "phase": "wrap_up",
+       "topic_index": 5,
+       "topic_total": 5,
+       "turn_number": 9
+      }
+     ],
+     [
+      "token*",
+      {
+       "n": 7,
+       "t": "Cảm ơn bạn, buổi phỏng vấn đến đây là kết thúc. Bạn còn câu hỏi nào dành cho mình không?"
+      }
+     ],
+     [
+      "done",
+      {
+       "evaluation": {
+        "answer_type": "off_topic",
+        "confidence": null,
+        "covered_points": [],
+        "degraded": false,
+        "evidence": [],
+        "follow_up_focus": "propagation",
+        "gap_tags": [
+         "propagation",
+         "isolation-level",
+         "rollback-rules"
+        ],
+        "misconceptions": [],
+        "missing_points": [
+         "Nêu được propagation",
+         "Nêu được isolation level",
+         "Nêu được rollback rules"
+        ],
+        "prompt_version": null,
+        "reference_missing": false,
+        "scores": {
+         "completeness": 0,
+         "extensibility": 0,
+         "relevance": 0,
+         "technical_accuracy": 1
+        },
+        "scores_10": {
+         "completeness": 0.0,
+         "extensibility": 0.0,
+         "relevance": 0.0,
+         "technical_accuracy": 2.5
+        },
+        "sources": [],
+        "strength_tags": [],
+        "transcript_low_confidence": false,
+        "turn_number": 8,
+        "turn_score_10": 0.6
+       },
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": "Cảm ơn bạn, buổi phỏng vấn đến đây là kết thúc. Bạn còn câu hỏi nào dành cho mình không?",
+       "session_end": false,
+       "state": {
+        "active_topic_id": null,
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "co the minh hoi chua ro. y minh la: chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. da luong va concurrency: ban hieu nhu the nao va da ap dung ra sao?",
+         "co the minh hoi chua ro. y minh la: gio minh chuyen sang phan kien thuc chuyen mon nhe. da luong va concurrency: ban hieu nhu the nao va da ap dung ra sao?",
+         "jvm, bo nho va garbage collection: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh hoi lai cho ro nhe: jvm, bo nho va garbage collection: ban hieu nhu the nao va da ap dung ra sao?",
+         "spring @transactional: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh hoi lai cho ro nhe: spring @transactional: ban hieu nhu the nao va da ap dung ra sao?",
+         "cam on ban, buoi phong van den day la ket thuc. ban con cau hoi nao danh cho minh khong?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 0,
+         "follow_ups": 0,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 3,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 5,
+         "min": 2
+        },
+        "end_reason": "low_performance",
+        "evaluated_turns": 8,
+        "gaps": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "minh",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "cong-dung",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "executorservice-pool",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "lock-synchronized",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "before-happens",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "heap-stack",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "tag": "generational",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "tag": "general",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "tag": "propagation",
+          "turns": [
+           7,
+           8
+          ]
+         }
+        ],
+        "momentum": -1,
+        "notes": [],
+        "phase": "wrap_up",
+        "phase_started_s": 120,
+        "schema_version": 1,
+        "strengths": [],
+        "swaps": [],
+        "topic_index": 3,
+        "topic_started_s": 360,
+        "topics": [
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 2,
+          "score_band": 0.2,
+          "score_sum": 0.48,
+          "status": "done",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 2,
+          "score_band": 0.2,
+          "score_sum": 0.48,
+          "status": "done",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t3",
+          "n_scored": 2,
+          "score_band": 0.2,
+          "score_sum": 0.48,
+          "status": "done",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 2,
+          "score_band": 0.2,
+          "score_sum": 0.48,
+          "status": "done",
+          "turns": [
+           7,
+           8
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 9,
+        "used_qa_ids": []
+       },
+       "turn": {
+        "action": "wrap_up",
+        "action_reason": null,
+        "agent_decision": "switch_topic",
+        "decided_by": null,
+        "difficulty": 3,
+        "overrule_reason": null,
+        "phase": "wrap_up",
+        "policy_action": null,
+        "proposed_action": null,
+        "qa_id": null,
+        "question_source": "ai",
+        "reasoning": "low_performance -> wrap_up (3 topic technical yếu liên tiếp)",
+        "swap_result": null,
+        "topic_id": null,
+        "turn_kind": "main",
+        "turn_number": 9
+       }
+      }
+     ]
+    ],
+    "status": 200
+   }
+  },
+  {
+   "request": {
+    "answer": "Dạ em nghĩ cái này tùy dự án, em thường hỏi đồng nghiệp ạ.",
+    "elapsed_seconds": 540,
+    "level": "senior",
+    "question": "Cảm ơn bạn, buổi phỏng vấn đến đây là kết thúc. Bạn còn câu hỏi nào dành cho mình không?",
+    "session_id": "g-low",
+    "topic_turns": [],
+    "track": "java_backend",
+    "turn_kind": "main",
+    "turn_number": 9
+   },
+   "response": {
+    "events": [
+     [
+      "done",
+      {
+       "evaluation": null,
+       "metadata": {
+        "fallbacks": [],
+        "prompt_versions": {
+         "mock": "mock-v2"
+        },
+        "rag": {
+         "status": "off"
+        },
+        "usage": {}
+       },
+       "question": null,
+       "session_end": true,
+       "state": {
+        "active_topic_id": null,
+        "asked_questions": [
+         "chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "co the minh hoi chua ro. y minh la: chao ban, minh bat dau nhe. ban hay gioi thieu ve ban than va du an gan nhat ban tham gia?",
+         "gio minh chuyen sang phan kien thuc chuyen mon nhe. da luong va concurrency: ban hieu nhu the nao va da ap dung ra sao?",
+         "co the minh hoi chua ro. y minh la: gio minh chuyen sang phan kien thuc chuyen mon nhe. da luong va concurrency: ban hieu nhu the nao va da ap dung ra sao?",
+         "jvm, bo nho va garbage collection: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh hoi lai cho ro nhe: jvm, bo nho va garbage collection: ban hieu nhu the nao va da ap dung ra sao?",
+         "spring @transactional: ban hieu nhu the nao va da ap dung ra sao?",
+         "minh hoi lai cho ro nhe: spring @transactional: ban hieu nhu the nao va da ap dung ra sao?",
+         "cam on ban, buoi phong van den day la ket thuc. ban con cau hoi nao danh cho minh khong?"
+        ],
+        "counters": {
+         "clarifies": 0,
+         "consecutive_dont_know": 0,
+         "follow_ups": 0,
+         "hints": 0,
+         "stt_reasks": 0
+        },
+        "current_difficulty": 3,
+        "current_qa_id": null,
+        "difficulty_bounds": {
+         "max": 5,
+         "min": 2
+        },
+        "end_reason": "low_performance",
+        "evaluated_turns": 8,
+        "gaps": [
+         {
+          "tag": "gioi-ngan",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "minh",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "cong-dung",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "tag": "executorservice-pool",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "lock-synchronized",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "before-happens",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "tag": "heap-stack",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "tag": "generational",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "tag": "general",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "tag": "propagation",
+          "turns": [
+           7,
+           8
+          ]
+         }
+        ],
+        "momentum": -1,
+        "notes": [],
+        "phase": "done",
+        "phase_started_s": 120,
+        "schema_version": 1,
+        "strengths": [],
+        "swaps": [],
+        "topic_index": 3,
+        "topic_started_s": 360,
+        "topics": [
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t1",
+          "n_scored": 2,
+          "score_band": 0.2,
+          "score_sum": 0.48,
+          "status": "done",
+          "turns": [
+           1,
+           2
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t2",
+          "n_scored": 2,
+          "score_band": 0.2,
+          "score_sum": 0.48,
+          "status": "done",
+          "turns": [
+           3,
+           4
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t3",
+          "n_scored": 2,
+          "score_band": 0.2,
+          "score_sum": 0.48,
+          "status": "done",
+          "turns": [
+           5,
+           6
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t4",
+          "n_scored": 2,
+          "score_band": 0.2,
+          "score_sum": 0.48,
+          "status": "done",
+          "turns": [
+           7,
+           8
+          ]
+         },
+         {
+          "covered": [],
+          "focus_used": [],
+          "hint_used": false,
+          "id": "t5",
+          "n_scored": 0,
+          "score_band": null,
+          "score_sum": 0.0,
+          "status": "pending",
+          "turns": []
+         }
+        ],
+        "turn_count": 9,
+        "used_qa_ids": []
+       },
+       "turn": null
+      }
+     ]
+    ],
+    "status": 200
+   }
+  }
+ ]
+}
