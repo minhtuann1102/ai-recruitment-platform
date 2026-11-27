@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Luyện phỏng vấn cùng AI</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;500;700;800&display=swap">
+<link rel="stylesheet" href="/dev/interview/interview.css">
+</head>
+<body>
+<!-- Man hinh cho ung vien, giao dien theo file Figma cong dong "AI Video Interview App" (Fill the Basic Details,
+     Permission, Audio Question, Result). Logo, anh dai dien, email lien he va webcam cua ban thiet ke khong dung lai. -->
+<div class="topbar" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+<header class="header">
+  <div class="brand">ai<b>recruit</b></div>
+  <div class="header-right">
+    <div id="timer" class="pill pill-red hidden" title="Thời gian còn lại của buổi">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+      <span id="timerText">00:00</span>
+    </div>
+    <span class="divider" aria-hidden="true"></span>
+    <div class="user"><span class="avatar">UV</span><span>Ứng viên</span></div>
+  </div>
+</header>
+
+<main>
+  <section id="screenSetup" class="screen">
+    <div class="intro">
+      <h1>Luyện phỏng vấn cùng AI</h1>
+      <p class="lead">Trả lời bằng giọng nói như một buổi phỏng vấn thật, rồi nhận đánh giá chi tiết.</p>
+    </div>
+    <div class="card-wrap w600">
+      <img class="hatch" src="/dev/interview/assets/card-hatch-setup.svg" alt="">
+      <div class="card card-teal">
+        <h2 class="card-title">Thiết lập buổi phỏng vấn</h2>
+        <div class="fields">
+          <div class="row2">
+            <label>Vị trí<select id="track"><option value="" selected disabled>Chọn vị trí…</option></select></label>
+            <label>Cấp độ<select id="level"></select></label>
+          </div>
+          <label>Thời lượng<select id="duration"><option value="15" selected>15 phút</option><option value="30">30 phút</option><option value="45">45 phút</option></select></label>
+          <label>CV của bạn <span class="hint">(không bắt buộc, PDF hoặc DOCX: câu hỏi sẽ bám theo kinh nghiệm của bạn)</span><span class="file-pick"><input id="cv" type="file" accept=".pdf,.docx"><span class="btn btn-outline btn-sm">Chọn tệp</span><span id="cvName" class="hint">Chưa chọn tệp</span></span></label>
+          <label>Mô tả công việc <span class="hint">(không bắt buộc: dán JD của vị trí bạn ứng tuyển)</span><textarea id="jd" rows="3" placeholder="Dán mô tả công việc vào đây"></textarea></label>
+        </div>
+        <div class="actions"><button id="setupNext" class="btn btn-primary" type="button">Tiếp tục</button></div>
+        <p id="setupStatus" class="status"></p>
+      </div>
+    </div>
+  </section>
+
+  <section id="screenPermission" class="screen hidden">
+    <div class="intro">
+      <h1>Chuẩn bị micro</h1>
+      <p class="lead w632">AI sẽ đọc câu hỏi, bạn trả lời bằng micro. Giọng nói được chuyển thành chữ để AI đánh giá, âm thanh không được lưu lại.</p>
+    </div>
+    <div class="perm-list">
+      <div class="card-wrap">
+        <img class="hatch hatch-perm" src="/dev/interview/assets/card-hatch-permission.svg" alt="">
+        <div class="card card-grey perm">
+          <span class="perm-icon"><img src="/dev/interview/assets/permission-mic.svg" alt=""></span>
+          <span class="perm-text">Cho phép dùng micro<small>Đồng ý để giọng nói được chuyển thành chữ</small></span>
+          <button id="micToggle" class="toggle" type="button" role="switch" aria-checked="false" aria-label="Bật micro"></button>
+        </div>
+      </div>
+      <div class="card-wrap">
+        <img class="hatch hatch-perm" src="/dev/interview/assets/card-hatch-permission.svg" alt="">
+        <div class="card card-grey perm">
+          <span class="perm-icon"><img src="/dev/interview/assets/permission-screen.svg" alt=""></span>
+          <span class="perm-text">Dịch vụ giọng nói<small id="svcText">Chưa kiểm tra</small></span>
+          <button id="svcToggle" class="toggle" type="button" role="switch" aria-checked="false" aria-label="Kiểm tra lại dịch vụ giọng nói"></button>
+        </div>
+      </div>
+    </div>
+    <div class="actions center">
+      <button id="permBack" class="btn btn-outline" type="button">Quay lại</button>
+      <button id="permNext" class="btn btn-primary" type="button">Bắt đầu (trả lời bằng chữ)</button>
+    </div>
+    <p id="permStatus" class="status center"></p>
+  </section>
+
+  <section id="screenQuestion" class="screen hidden">
+    <div class="progress-row">
+      <button id="endBtn" class="pill pill-red end-btn" type="button">Kết thúc &amp; xem đánh giá</button>
+      <div id="progressBars" class="progress"></div>
+      <span id="progressCount" class="progress-count"></span>
+    </div>
+    <!-- Khung chat: moi luot noi la mot bong chat chi doc (AI ben trai, ung vien ben phai), interview-chat.js -->
+    <div id="chatLog" class="chat-log" aria-live="polite"></div>
+    <div class="composer">
+      <div class="recorder-card">
+        <button id="micBtn" class="recorder" type="button" aria-label="Bấm để ghi âm câu trả lời">
+          <img class="ring" src="/dev/interview/assets/recorder-ring.svg" alt="">
+          <img class="ring ring2" src="/dev/interview/assets/recorder-ring.svg" alt="">
+          <span class="recorder-core"><img src="/dev/interview/assets/mic-white.svg" alt=""></span>
+        </button>
+        <p id="recStatus" class="status center"></p>
+        <textarea id="answer" class="answer hidden" rows="3" placeholder="Gõ câu trả lời rồi bấm Gửi (Ctrl/⌘ + Enter)"></textarea>
+        <div class="rec-actions">
+          <button id="replayBtn" class="link-btn" type="button">Nghe lại câu hỏi</button>
+          <button id="typeBtn" class="link-btn" type="button">Gõ thay vì nói</button>
+        </div>
+      </div>
+      <div class="actions center">
+        <button id="sendBtn" class="btn btn-primary hidden" type="button">Gửi và tiếp tục</button>
+        <button id="retryBtn" class="btn btn-outline hidden" type="button">Gửi lại</button>
+      </div>
+      <p id="chatStatus" class="status center"></p>
+      <p class="note">Lưu ý: đừng tải lại trang trong lúc phỏng vấn để không mất buổi.</p>
+    </div>
+    <div class="meters" aria-label="Mức micro và trạng thái dịch vụ giọng nói">
+      <span class="meter"><img src="/dev/interview/assets/mic-small.svg" alt="Micro"><span id="micBars" class="bars"><i></i><i></i><i></i><i></i></span></span>
+      <span class="meter"><img src="/dev/interview/assets/monitor-small.svg" alt="Dịch vụ giọng nói"><span id="svcBars" class="bars bars-teal"><i></i><i></i><i></i><i></i></span></span>
+    </div>
+  </section>
+
+  <section id="screenResult" class="screen hidden">
+    <div class="card-wrap w625">
+      <img class="hatch" src="/dev/interview/assets/card-hatch-result.svg" alt="">
+      <div class="card card-teal result-card">
+        <h1>Hoàn thành 🙌</h1>
+        <p class="lead">Cảm ơn bạn đã tham gia buổi phỏng vấn.</p>
+        <p id="resultStatus" class="result-text">AI đang tổng hợp đánh giá cho bạn…</p>
+        <div class="actions center">
+          <button id="finalizeRetryBtn" class="btn btn-outline hidden" type="button">Thử lại</button>
+          <button id="resetBtn" class="btn btn-primary" type="button">Buổi mới</button>
+        </div>
+      </div>
+    </div>
+    <section id="report" class="panel hidden"></section>
+    <section id="voiceSummary" class="panel hidden"></section>
+    <section id="agentNotes" class="panel hidden"></section>
+  </section>
+</main>
+
+<img class="star" src="/dev/interview/assets/star-decoration.svg" alt="">
+<!-- Hop xac nhan (ket thuc buoi, y muon dung khi noi): interview-chat.js askConfirm -->
+<dialog id="confirmDialog" class="modal-card" aria-labelledby="confirmTitle" aria-describedby="confirmText">
+  <h2 id="confirmTitle"></h2>
+  <p id="confirmText"></p>
+  <div class="actions center">
+    <button id="confirmCancel" class="btn btn-outline" type="button"></button>
+    <button id="confirmOk" class="btn btn-primary" type="button"></button>
+  </div>
+</dialog>
+
+<script>window.TRACKS = __TRACKS__;</script>
+<script src="/dev/interview/interview-api.js"></script>
+<script src="/dev/interview/interview-chat.js"></script>
+<script src="/dev/interview/interview-voice.js"></script>
+<script src="/dev/interview/interview-turn.js"></script>
+<script src="/dev/interview/interview-report.js"></script>
+<script src="/dev/interview/interview-result.js"></script>
+<script src="/dev/interview/interview-app.js"></script>
+</body>
+</html>

@@ -337,7 +337,7 @@ Kèm số liệu process mặc định của `prometheus_client` (CPU, RAM, file
 - Tỉ lệ lỗi: `sum by (endpoint) (rate(ai_requests_total{status="error"}[5m])) / sum by (endpoint) (rate(ai_requests_total[5m]))`
 - Token mỗi giờ theo agent: `sum by (agent, kind) (increase(ai_tokens_total[1h]))`
 
-Ngoài contract: `GET /dev/play` là trang HTML tĩnh cho dev tự phỏng vấn thử (đóng vai interview-service, gọi các endpoint trên). Không qua token, tự trả 404 khi `APP_ENV` là staging/production; interview-service không dùng. Từ 04/11 trang có ô Giọng nói (Web Speech API của trình duyệt) gửi `answer_source`, `stt_confidence` như §7.4 để thử luồng voice; đây không phải lựa chọn nhà cung cấp STT/TTS.
+Ngoài contract: `GET /dev/play` là trang HTML tĩnh cho dev tự phỏng vấn thử (đóng vai interview-service, gọi các endpoint trên). Không qua token, tự trả 404 khi `APP_ENV` là staging/production; interview-service không dùng. Từ 04/11 trang có ô Giọng nói (Web Speech API của trình duyệt) gửi `answer_source`, `stt_confidence` như §7.4 để thử luồng voice; đây không phải lựa chọn nhà cung cấp STT/TTS. Từ 27/11 có thêm `GET /dev/interview` (cùng điều kiện, giao diện theo file Figma cộng đồng "AI Video Interview App"): thử cả vòng phỏng vấn bằng giọng nói với voice-service thật (TTS đọc câu hỏi, ghi âm → STT Blaze → `/api/next-turn` với `answer_source: voice`, không gửi `stt_confidence`; cuối buổi gọi `session-summary`). Trình duyệt gọi voice-service qua proxy dev `/dev/voice/{health,transcribe,speak,session-summary}` của ai-service (`VOICE_SERVICE_URL`, token `VOICE_SERVICE_INTERNAL_TOKEN` gắn phía server); proxy vẫn cần `X-Internal-Token` của ai-service và chặn request `Sec-Fetch-Site: cross-site` vì Blaze tính phí.
 
 ### POST /api/cv/parse
 

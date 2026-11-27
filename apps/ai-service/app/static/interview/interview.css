@@ -1,0 +1,189 @@
+/* /dev/interview: token lay tu Design Guideline cua file Figma "AI Video Interview App" (mau 900, thang chu Overpass). */
+:root {
+  --teal: #00a398; --teal-50: #f7fcfc; --teal-line: #d1eeec; --teal-36: rgba(0, 163, 152, .36); --teal-12: rgba(0, 163, 152, .12);
+  --red: #e0302d; --red-5: rgba(224, 48, 45, .05); --orange: #f5901d; --parrot: #d5de23; --green: #8ac43f;
+  --ink: #1a1a1a; --muted: #5f5f5f; --input-line: #e4e4e4; --placeholder: #adadad; --grey-line: #d6d6d6;
+  --grey-3: #f9f9f9; --grey-8: #ededed;
+}
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; background: #fff; color: var(--ink); font: 500 16px/24px Overpass, system-ui, sans-serif; overflow-x: hidden; }
+button, input, select, textarea { font: inherit; color: inherit; }
+.hidden { display: none !important; }
+h1 { font-size: 40px; line-height: 48px; font-weight: 800; margin: 0; text-align: center; }
+.lead { font-size: 20px; line-height: 28px; font-weight: 400; color: var(--muted); margin: 10px auto 0; text-align: center; }
+.w632 { max-width: 632px; }
+.muted { color: var(--muted); font-size: 14px; line-height: 20px; }
+.status { font-size: 14px; line-height: 20px; color: var(--muted); min-height: 20px; margin: 10px 0 0; }
+.status.error { color: var(--red); }
+.status.warn { color: #b45f06; }
+.center { text-align: center; justify-content: center; }
+
+/* Top Bar 10 px, 5 mau */
+.topbar { display: flex; height: 10px; }
+.topbar i { flex: 1; }
+.topbar i:nth-child(1) { background: var(--red); } .topbar i:nth-child(2) { background: var(--orange); }
+.topbar i:nth-child(3) { background: var(--parrot); } .topbar i:nth-child(4) { background: var(--green); }
+.topbar i:nth-child(5) { background: var(--teal); }
+
+/* Header: logo trai, timer / pill / nguoi dung phai (w 1250, cach tren 40) */
+.header { max-width: 1250px; margin: 40px auto 0; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; }
+.brand { font-size: 30px; line-height: 40px; font-weight: 400; letter-spacing: -.5px; }
+.brand b { color: var(--teal); font-weight: 700; }
+.header-right { display: flex; align-items: center; gap: 30px; }
+.pill { display: inline-flex; align-items: center; gap: 10px; padding: 10px 22px 10px 20px; border-radius: 70px; cursor: pointer; }
+.pill-red { border: 1px solid var(--red); background: var(--red-5); color: var(--red); }
+#timer { cursor: default; font-variant-numeric: tabular-nums; }
+.divider { width: 1px; align-self: stretch; background: var(--ink); }
+#timer.hidden + .divider { display: none; } /* khong co dong ho thi bo vach ngan */
+.user { display: flex; align-items: center; gap: 6px; }
+.avatar { width: 34px; height: 34px; margin: 5px; border-radius: 50%; background: var(--teal); color: #fff; font-size: 13px;
+          display: grid; place-items: center; box-shadow: 0 0 0 5px var(--teal-12); }
+
+main { max-width: 1036px; margin: 0 auto; padding: 60px 20px 120px; position: relative; z-index: 1; }
+.intro { margin-bottom: 60px; }
+
+/* The co bong soc: bong la SVG "Subtract" cua Figma, dat lech 5 px sau the */
+.card-wrap { position: relative; padding: 0 5px 5px 0; margin: 0 auto; }
+.card-wrap.w600 { width: min(600px, 100%); } .card-wrap.w625 { width: min(625px, 100%); }
+.hatch { position: absolute; inset: 3px 0 0 5px; width: calc(100% - 5px); height: calc(100% - 3px); }
+.hatch-perm { inset: 5px 0 0 5px; height: calc(100% - 5px); }
+.card { position: relative; border: 1px solid; border-radius: 12px 12px 6px 12px; }
+.card-teal { border-color: var(--teal-line); background: var(--teal-50); padding: 40px; }
+.card-grey { border-color: var(--grey-line); background: var(--grey-3); padding: 20px; }
+.card-title { font-size: 28px; line-height: 36px; font-weight: 700; margin: 0 0 40px; }
+
+/* Form (InputText cua Figma) */
+.fields { display: flex; flex-direction: column; gap: 20px; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+label { display: flex; flex-direction: column; gap: 4px; font-size: 14px; line-height: 20px; }
+input, select, textarea { width: 100%; padding: 12px; background: #fff; border: 1px solid var(--input-line); border-radius: 6px;
+  font-size: 16px; line-height: 24px; font-weight: 400; }
+input::placeholder, textarea::placeholder { color: var(--placeholder); }
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--teal-36); border-color: var(--teal); }
+details summary { cursor: pointer; font-size: 14px; color: var(--muted); }
+details label { margin-top: 10px; }
+.actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 40px; flex-wrap: wrap; }
+.actions.center { justify-content: center; }
+
+/* Nut tron (Button cua Figma) */
+.btn { border-radius: 40px; padding: 10px 32px 10px 30px; border: 1px solid var(--teal); cursor: pointer; }
+.btn-primary { background: var(--teal); color: #fff; padding: 10px 42px 10px 40px; }
+.btn-outline { background: #fff; color: var(--teal); }
+.btn:disabled { opacity: .45; cursor: default; }
+.link-btn { background: none; border: 0; padding: 0; color: var(--muted); cursor: pointer; text-decoration: underline transparent; }
+.link-btn:hover:not(:disabled) { color: var(--teal); text-decoration-color: currentColor; }
+.link-btn:disabled { opacity: .45; cursor: default; }
+
+/* Permission: the 500 px, icon 60 px, toggle 36x20 */
+.perm-list { width: min(500px, 100%); margin: 0 auto; display: flex; flex-direction: column; gap: 30px; }
+.perm-list .card-wrap { width: 100%; }
+.perm { display: flex; align-items: center; gap: 20px; }
+.perm-icon { width: 60px; height: 60px; border-radius: 10px; background: var(--grey-8); display: grid; place-items: center; flex: none; }
+.perm-text { flex: 1; display: flex; flex-direction: column; }
+.perm-text small { font-size: 14px; line-height: 20px; color: var(--muted); font-weight: 400; }
+.toggle { width: 36px; height: 20px; border-radius: 10px; border: 0; background: #f2f4f7; position: relative; cursor: pointer; flex: none;
+          box-shadow: inset 0 0 0 1px #e4e7ec; transition: background .15s; }
+.toggle::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff;
+                 box-shadow: 0 1px 3px rgba(16, 24, 40, .1), 0 1px 2px rgba(16, 24, 40, .06); transition: left .15s; }
+.toggle[aria-checked="true"] { background: var(--teal); box-shadow: none; }
+.toggle[aria-checked="true"]::after { left: 18px; }
+
+/* Audio Question */
+.progress-row { display: flex; align-items: center; justify-content: space-between; gap: 40px; }
+.progress { display: flex; gap: 10px; padding: 8px 10px; width: 610px; max-width: 60%; }
+.progress i { flex: 1; height: 6px; border-radius: 10px; background: var(--teal-12); }
+.progress i.done { background: var(--teal-36); }
+.end-btn { padding: 8px 18px; font-size: 14px; line-height: 20px; white-space: nowrap; }
+.end-btn:disabled { opacity: .45; cursor: default; }
+.progress-count { min-width: 64px; text-align: right; white-space: nowrap; }
+.recorder-card { width: min(824px, 100%); margin: 50px auto 0; min-height: 200px; padding: 30px 40px; border: 1px solid var(--teal-line);
+                 border-radius: 10px; background: var(--teal-50); display: flex; flex-direction: column; align-items: center; }
+.recorder { width: 100px; height: 100px; border: 0; background: none; position: relative; cursor: pointer; display: grid; place-items: center; }
+.recorder:disabled { cursor: default; opacity: .5; }
+.recorder .ring { position: absolute; left: 26px; top: 26px; opacity: 0; }
+.recorder-core { width: 48px; height: 48px; border-radius: 90px; background: var(--teal); display: grid; place-items: center; position: relative; }
+.recorder.recording .recorder-core { background: var(--red); }
+.recorder.recording .ring { animation: pulse 1.6s ease-out infinite; }
+.recorder.recording .ring2 { animation-delay: .8s; }
+.recorder.busy .recorder-core { animation: breathe 1s ease-in-out infinite alternate; }
+@keyframes pulse { from { transform: scale(1); opacity: .9; } to { transform: scale(2); opacity: 0; } }
+@keyframes breathe { from { opacity: 1; } to { opacity: .4; } }
+.answer { margin-top: 16px; }
+/* Khung chat (bong chat chi doc): AI trai, ung vien phai */
+.chat-log { display: flex; flex-direction: column; gap: 16px; margin-top: 40px; min-height: 160px; }
+.msg { max-width: 78%; padding: 14px 18px; border-radius: 16px; font-size: 18px; line-height: 28px; font-weight: 400; white-space: pre-wrap; }
+.msg-ai { align-self: flex-start; background: var(--teal-50); border: 1px solid var(--teal-line); border-bottom-left-radius: 4px; }
+.msg-me { align-self: flex-end; background: var(--teal); color: #fff; border-bottom-right-radius: 4px; }
+.msg-tag { display: block; font-size: 13px; line-height: 18px; font-weight: 500; color: var(--teal); margin-bottom: 4px; }
+.msg-me .msg-tag { color: rgba(255, 255, 255, .85); }
+.msg-body:empty::before { content: "…"; }
+.msg.pending .msg-body { font-style: italic; opacity: .8; }
+.msg.rejected { opacity: .55; }
+.msg-note { display: block; font-size: 13px; line-height: 18px; margin-top: 6px; opacity: .9; }
+.composer { position: sticky; bottom: 0; z-index: 2; background: linear-gradient(to bottom, rgba(255,255,255,0), #fff 24px); padding: 32px 0 12px; }
+.composer .recorder-card { margin: 0 auto; min-height: 0; padding: 12px 30px 16px; }
+.composer .actions { margin-top: 12px; }
+.composer .actions:not(:has(.btn:not(.hidden))) { display: none; }
+.composer .note { margin-top: 8px; }
+.rec-actions { display: flex; gap: 24px; margin-top: 14px; font-size: 14px; }
+.note { text-align: center; font-size: 14px; line-height: 20px; margin-top: 60px; }
+.meters { position: fixed; right: 40px; bottom: 30px; display: flex; flex-direction: column; gap: 20px; align-items: flex-end; z-index: 2; }
+.meter { display: flex; gap: 10px; align-items: center; }
+.bars { display: flex; gap: 3px; align-items: flex-end; height: 20px; width: 36px; }
+.bars i { width: 6px; border-radius: 2px; background: #e4e4e4; }
+.bars i:nth-child(1) { height: 5px; } .bars i:nth-child(2) { height: 10px; } .bars i:nth-child(3) { height: 15px; } .bars i:nth-child(4) { height: 20px; }
+.bars i.on { background: var(--orange); }
+.bars-teal i.on { background: var(--teal); }
+
+/* Result */
+.result-card { text-align: center; padding: 60px 40px 40px; }
+.result-text { font-size: 20px; line-height: 30px; margin: 40px 0 0; }
+.result-card .actions { margin-top: 30px; }
+.panel { margin-top: 40px; border: 1px solid var(--teal-line); border-radius: 10px; padding: 24px 30px; }
+.panel h2 { font-size: 20px; line-height: 28px; margin: 22px 0 8px; } .panel h2:first-child { margin-top: 0; }
+.panel table { border-collapse: collapse; width: 100%; font-size: 14px; line-height: 20px; }
+.panel td, .panel th { border-bottom: 1px solid var(--grey-8); padding: 6px; text-align: left; vertical-align: top; }
+.panel .score { font-size: 28px; font-weight: 800; color: var(--teal); }
+.panel .warn { color: #b45f06; }
+.panel pre { white-space: pre-wrap; font-size: 12px; }
+
+.star { position: fixed; left: -70px; bottom: -70px; width: 260px; height: 260px; z-index: 0; pointer-events: none; }
+
+/* Hop xac nhan */
+.modal-card { width: min(480px, calc(100% - 40px)); border: 0; background: #fff; color: inherit; font: inherit; border-radius: 16px; padding: 28px 30px 24px; box-shadow: 0 20px 50px rgba(26, 26, 26, .2); }
+.modal-card::backdrop { background: rgba(26, 26, 26, .35); }
+.modal-card h2 { font-size: 24px; line-height: 32px; margin: 0 0 8px; }
+.modal-card p { margin: 0; color: var(--muted); font-weight: 400; }
+.modal-card .actions { margin-top: 24px; }
+
+/* Man danh gia */
+.overall { display: flex; gap: 28px; align-items: center; }
+.overall-score { font-size: 56px; line-height: 60px; font-weight: 800; color: var(--teal); white-space: nowrap; }
+.overall-score small { font-size: 22px; color: var(--muted); font-weight: 500; }
+.overall p { margin: 8px 0 0; font-weight: 400; }
+.chip { display: inline-block; padding: 2px 12px; border-radius: 20px; background: var(--teal); color: #fff; font-size: 14px; line-height: 22px; }
+.chip-soft { background: var(--teal-12); color: #00756d; font-size: 13px; padding: 0 10px; }
+.score-row { display: grid; grid-template-columns: 220px 1fr 44px; gap: 14px; align-items: center; margin: 8px 0; font-weight: 400; }
+.score-row b { text-align: right; }
+.bar { height: 8px; border-radius: 8px; background: var(--teal-12); overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--teal); border-radius: 8px; }
+ul.clean { margin: 0; padding-left: 20px; font-weight: 400; } ul.clean li { margin: 6px 0; } ul.clean ul.clean { margin-top: 4px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; margin-bottom: 12px; }
+.stat { border: 1px solid var(--teal-line); border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px; }
+.stat span { font-size: 14px; color: var(--muted); } .stat b { font-size: 24px; line-height: 32px; } .stat b small { font-size: 14px; color: var(--muted); }
+.turns { margin-top: 24px; } .turns summary { cursor: pointer; font-weight: 700; font-size: 18px; color: var(--ink); }
+.turn { border-top: 1px solid var(--grey-8); padding: 12px 0; font-weight: 400; } .turn p { margin: 4px 0; }
+.turn-q { font-weight: 500; } .turn-a { color: var(--muted); font-style: italic; }
+.disclaimer { margin-top: 20px; }
+.hint { color: var(--muted); font-weight: 400; }
+.file-pick { display: flex; align-items: center; gap: 12px; padding: 8px 12px; background: #fff; border: 1px solid var(--input-line); border-radius: 6px; cursor: pointer; }
+.file-pick input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.file-pick:focus-within { outline: 2px solid var(--teal-36); }
+.btn-sm { padding: 4px 16px; font-size: 14px; line-height: 22px; }
+.error-text { color: var(--red); }
+
+@media (max-width: 720px) {
+  .overall { flex-direction: column; align-items: flex-start; } .score-row { grid-template-columns: 1fr 1fr 40px; }
+  h1 { font-size: 30px; line-height: 38px; } .row2 { grid-template-columns: 1fr; }
+  .header-right { gap: 12px; } .user span:last-child, .divider { display: none; } .meters { display: none; }
+}

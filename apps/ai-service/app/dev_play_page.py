@@ -20,21 +20,21 @@ SCRIPTS = ("dev-play.js", "dev-play-api.js", "dev-play-report.js", "dev-play-tra
 router = APIRouter(include_in_schema=False)
 
 
-def _ensure_dev() -> None:
+def ensure_dev() -> None:
     if os.environ.get("APP_ENV", "dev").lower() in STRICT_ENVS:
         raise ApiError(404, "not_found", "Không có trang này")
 
 
 @router.get("/dev/play")
 def dev_play() -> HTMLResponse:
-    _ensure_dev()
+    ensure_dev()
     html = (STATIC / "dev-play.html").read_text(encoding="utf-8")
     return HTMLResponse(html.replace("__TRACKS__", json.dumps(list_tracks())))
 
 
 @router.get("/dev/{name}")
 def dev_play_script(name: str) -> Response:
-    _ensure_dev()
+    ensure_dev()
     if name not in SCRIPTS:  # chi phuc vu file trong danh sach, khong doc duong dan tuy y
         raise ApiError(404, "not_found", "Không có file này")
     return Response((STATIC / name).read_text(encoding="utf-8"), media_type="text/javascript")

@@ -4,6 +4,7 @@ Token lay tu bien moi truong AI_SERVICE_INTERNAL_TOKEN, so sanh hang thoi gian. 
 thi khong kiem va ghi canh bao mot lan; APP_ENV la staging/production ma thieu token thi tra 503 (fail closed).
 """
 import hmac
+import re
 import logging
 import os
 
@@ -14,6 +15,16 @@ log = logging.getLogger("ai_service.security")
 # trang dev /dev/play (app/dev_play_page.py) khong chua bi mat va tu tra 404 khi APP_ENV strict; API van can token
 DEV_PAGE_PATHS = {"/dev/play", *(f"/dev/dev-play{s}.js" for s in ("", "-api", "-report", "-trace", "-voice"))}
 OPEN_PATHS = {"/api/health", *DEV_PAGE_PATHS}
+# trang dev /dev/interview (app/dev_interview_page.py) va file tinh cua no: route tu chi phuc vu file trong danh sach.
+# Proxy /dev/voice/* KHONG mo: goi Blaze ton phi, van can X-Internal-Token nhu /api/*
+# Chi mo dang file tinh (.js/.css/.svg): route moi sau nay duoi /dev/interview/ khong tu dong bi mo
+DEV_INTERVIEW_OPEN = re.compile(r"/dev/interview(?:/(?:assets/)?[\w.-]+\.(?:js|css|svg))?")
+
+
+def is_open_path(path: str) -> bool:
+    return path in OPEN_PATHS or DEV_INTERVIEW_OPEN.fullmatch(path) is not None
+
+
 STRICT_ENVS = {"staging", "production", "prod"}
 HEADER = "X-Internal-Token"
 _warned = False
@@ -24,7 +35,7 @@ async def internal_token_middleware(request: Request, call_next):
     expected = os.environ.get("AI_SERVICE_INTERNAL_TOKEN", "")
     if not expected and os.environ.get("APP_ENV", "dev").lower() in STRICT_ENVS:
         # staging/production ma quen dat token: dong cua thay vi mo toan bo endpoint (fail closed)
-        if request.url.path in OPEN_PATHS:
+        if is_open_path(request.url.path):
             return await call_next(request)
         return JSONResponse(status_code=503, content={"error": "misconfigured",
                                                       "message": "ai-service chưa cấu hình token nội bộ",
@@ -34,7 +45,7 @@ async def internal_token_middleware(request: Request, call_next):
             log.warning("internal_token_unset AI_SERVICE_INTERNAL_TOKEN chua dat: ai-service dang nhan request khong xac thuc (chi dung cho dev)")
             _warned = True
         return await call_next(request)
-    if request.url.path in OPEN_PATHS:
+    if is_open_path(request.url.path):
         return await call_next(request)
     given = request.headers.get(HEADER, "")
     if not hmac.compare_digest(given.encode("utf-8"), expected.encode("utf-8")):
