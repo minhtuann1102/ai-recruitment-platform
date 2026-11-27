@@ -196,7 +196,8 @@ async def run_turn(req: NextTurnRequest) -> AsyncIterator[SseEvent]:
 > giữa stream thì `_TurnStream` huỷ task đó, Interviewer bị đóng ngay (không chạy nền tới hết câu).
 > Tương đương được kiểm bằng golden trace ghi từ code cũ (`tests/test_golden_turns_match_fixture.py`, 8 kịch bản)
 > và mô phỏng 10 phiên / 125 lượt giống hệt. Overhead đo bằng mock khoảng 3 ms P50 mỗi lượt. Sơ đồ (xuất bằng
-> `scripts/export_turn_graph_mermaid.py`):
+> `scripts/export_turn_graph_mermaid.py`). **Sơ đồ này là graph mỗi lượt (`SESSION_GRAPH=per_turn`, mặc định);
+> graph cả phiên có `interrupt` ở khối "Graph cả phiên" bên dưới:**
 >
 > ```mermaid
 > graph TD;
@@ -231,6 +232,45 @@ async def run_turn(req: NextTurnRequest) -> AsyncIterator[SseEvent]:
 > `session_not_found` (06 §7.4, 07 §8.8). Lượt bị ngắt
 > giữa `ask` không tới `record` nên checkpoint giữ state trước lượt, gửi lại thì chạy lại cả lượt. Đo trên Postgres
 > local: phiên 17 lượt khoảng 245 KB (transcript ghi lại cả danh sách mỗi lượt, lớn nhất 11 KB).
+
+> **Graph cả phiên có `interrupt` (2026-11-27, phase 05 của plan 261127-1517, nhánh `thang/langgraph-session-graph`,
+> sau cờ `SESSION_GRAPH=per_turn|session`, mặc định `per_turn`, giá trị sai thì không khởi động).** `session` dùng một
+> graph cho cả phiên (`app/turn_graph/session_graph_builder.py`): vòng `ask → record → wait_answer → perceive →
+> evaluate → decide → act → ask` chạy thật, `wait_answer` chỉ có `interrupt` nên graph dừng giữa các lượt và checkpoint
+> nằm đúng chỗ chờ ứng viên. `/start` xoá thread cũ rồi chạy `plan → ask → record` tới interrupt đầu; `/next-turn` resume
+> `Command(resume={"kind": "answer"})`; `/finalize` resume `{"kind": "finalize"}` → node `report` (Reporter, và chốt
+> `state` done nếu phiên chưa done), xong quay lại `wait_answer` nên gọi finalize lần nữa vẫn chạy lại `report`. Khoá,
+> guard, replay, mã lỗi và body HTTP giữ nguyên (06 không đổi). Luồng SSE vẫn qua `GraphTurnRun.prime()`.
+> Dữ liệu từng request (`StartRequest`, `TurnContext`, `FinalizeRequest`, kết quả) đi qua `SessionRunContext`, không
+> vào checkpoint. Stream đứt giữa `ask` thì checkpoint mới nhất có `next=('ask',)`; trước khi resume, endpoint lùi về
+> checkpoint gần nhất có `next=('wait_answer',)` (`session_resume_point.py`) và chạy lại cả lượt như phase 03. Thread do
+> graph mỗi lượt ghi mà đọc bằng graph cả phiên (đổi cờ từ `per_turn` sang `session` giữa phiên) thì 404 `session_not_found`,
+> log `session_not_resumable`; lùi cờ về `per_turn` thì phiên đang chạy vẫn đi tiếp, và `/start` mới luôn dùng được.
+> Điểm resume tìm bằng cách lần theo `parent_config` từ checkpoint mới nhất (lần chạy lỗi / bị ngắt ghi thêm checkpoint
+> con của `wait_answer`, không quét cả lịch sử). `/finalize` chốt `state` done (`record_finalize_end`, như `per_turn`)
+> trước khi Reporter chạy trong graph, nên Reporter lỗi vẫn không chơi tiếp được. Lưu ý `/start`: graph cả phiên xoá thread
+> cũ trước khi chạy, nên `/start` gửi lại mà Planner lỗi (422...) thì phiên cũ đã mất (`per_turn` giữ tới khi ghi xong).
+> Sơ đồ (xuất bằng
+> `session_graph_mermaid()`, đã gộp nhãn cạnh):
+>
+> ```mermaid
+> graph TD;
+>   __start__([start]) --> plan;
+>   plan --> ask;
+>   ask --> record;
+>   record --> wait_answer;
+>   wait_answer -. answer .-> perceive;
+>   wait_answer -. finalize .-> report;
+>   report --> wait_answer;
+>   perceive -. session_end .-> record;
+>   perceive -.-> reask;
+>   perceive -.-> evaluate;
+>   reask --> ask;
+>   evaluate --> decide;
+>   decide -. session_end .-> record;
+>   decide -. follow_up, hint, clarify, next_topic, next_phase, wrap_up .-> act;
+>   act --> ask;
+> ```
 
 > **Policy lai (2026-11-14, phase 04, `POLICY_MODE=rules|hybrid`, mặc định `rules`, `app/turn_decision.py`).** Thứ tự quyết định mỗi lượt: **`forced_transition` (hết giờ, turn cap, phase quá hạn, hai lần `dont_know`, topic quá hạn) → (chỉ `hybrid`) đề xuất của Evaluator đã qua `validate_decision` → `decide()` → `low_performance_stop`**. `forced`, `low_performance_stop` và turn cap luôn đứng trên LLM: đề xuất không bao giờ ghi đè chúng (`decided_by = "forced"`). `rules` giữ quyết định và request y như trước (Evaluator prompt v8, không `policy_context`, 5 trường `TurnInfo` mới là `null`). Trong `hybrid`, LLM chọn `follow_up`/`clarify` ở chỗ luật chọn `next_topic` chỉ làm `low_performance_stop` đến muộn hơn (tối đa hết ngân sách hành động của topic), không bao giờ vượt qua nó. Chi tiết bảng hợp lệ ở 04 §5.4, ngưỡng và đo ở 09.
 

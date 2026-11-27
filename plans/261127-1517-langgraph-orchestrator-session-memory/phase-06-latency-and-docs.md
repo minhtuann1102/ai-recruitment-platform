@@ -28,6 +28,8 @@
 - [ ] Đo checkpoint Postgres local
 - [ ] cost_latency thật (sau khi user đồng ý)
 - [ ] Docs theo doc 12 mục 10
+- [ ] Dọn checkpoint của lần chạy lỗi (SESSION_GRAPH=session): mỗi lượt 409 / 422 / bị ngắt / Reporter lỗi ghi thêm một
+  checkpoint con của `wait_answer` (durability exit), không bao giờ bị xoá; đo mức phình rồi quyết định dọn / TTL (review phase 05, M3)
 
 ## Success Criteria
 - Overhead graph < 50 ms P50; đọc + ghi checkpoint < 100 ms P95 trên DB đích. Vượt thì báo, không tự nới ngân sách.

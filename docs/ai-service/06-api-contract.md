@@ -616,6 +616,7 @@ sau đó trả `409 session_invalid_state`. Ứng viên bấm kết thúc khi ch
 Lỗi riêng: `404 session_not_found`; `409 session_no_turns` (chưa trả lời lượt nào, không có gì để tổng kết);
 `409 turn_in_progress` (một lượt của phiên đang chạy, gửi lại sau); `503 session_store_unavailable` (`retryable`).
 Finalize phiên đã done không ghi checkpoint và gọi lại được (báo cáo tính lại từ cùng transcript).
+Với `SESSION_GRAPH=session` Reporter chạy trong graph và giữ khoá phiên suốt lúc viết báo cáo: `/finalize` thứ hai (hoặc `/next-turn`) gửi đúng lúc đó nhận `409 turn_in_progress` (`details.retryable = true`), gửi lại sau khi lần đầu xong. Với `per_turn` khoá nhả trước Reporter nên hai lần `/finalize` cùng lúc đều chạy.
 
 Response 200: report theo §6.4 (snake_case) + `metadata` (usage, latency, prompt version của Reporter). Reporter lỗi vẫn trả 200 với `status = "partial"` (chỉ có điểm và nhận xét mẫu); `meta.fallbacks` ghi `reporter_partial`, hoặc `reporter_config_error` nếu thiếu cấu hình. Không lượt nào chấm được thì vẫn 200 với `status = "unscored"`, `overall.score`, `overall.verdict` và các tiêu chí là `null`, không gọi Reporter LLM. Có `jd_profile` thì report có khối `requirements` (design 05 §6.4). Report luôn có `level_signal` (`null` hoặc cờ `above_level` gợi ý thử level cao hơn, design 05 §6.3, thêm 2026-11-03). `end_reason` có thêm giá trị `low_performance` (ai-service tự wrap-up sớm khi ứng viên middle/senior yếu 3 topic technical liên tiếp, hoặc tất cả nếu plan ít hơn 3, design 03 §4.4).
 
