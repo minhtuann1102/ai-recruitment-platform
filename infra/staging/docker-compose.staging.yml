@@ -1,0 +1,120 @@
+# Staging (spec 014): mot VM chay file nay; image keo tu GHCR, khong build tu source. Compose dev (docker-compose.yml
+# o goc repo) khong doi. Chay trong thu muc chua file nay (tren VM: /opt/ai-recruit):
+#   cp .env.staging.example .env   # dien gia tri, chmod 600
+#   mkdir -p env && cp <repo>/apps/ai-service/.env.example env/ai-service.env      # dien key LLM, AI_DB_URL...
+#   cp <repo>/apps/voice-service/.env.example env/voice-service.env                # dien BLAZE_API_KEY
+#   docker compose -f docker-compose.staging.yml up -d
+# Chi Caddy mo cong ra ngoai (80/443); db, ai-service, voice-service chi trong mang noi bo.
+# Bien dung chung (token noi bo, mat khau DB, APP_ENV) dat o day qua `environment:` -> ghi de env/*.env, khong quen duoc.
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: '10m'
+    max-file: '5'
+
+services:
+  caddy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    ports:
+      - '${HTTP_PORT:-80}:80'
+      - '${HTTPS_PORT:-443}:443'
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data # chung chi + khoa ACME: mat volume = xin lai chung chi (de cham han muc Let's Encrypt)
+      - caddy_config:/config
+    environment:
+      ACME_EMAIL: ${ACME_EMAIL:?}
+      AI_HOST: ${AI_HOST:?}
+      VOICE_HOST: ${VOICE_HOST:?}
+      DEMO_HOST: ${DEMO_HOST:?}
+      DEMO_USER: ${DEMO_USER:?}
+      DEMO_PASSWORD_HASH: ${DEMO_PASSWORD_HASH:?}
+      # host demo: Caddy gan token phia server, trinh duyet khong bao gio thay
+      AI_SERVICE_INTERNAL_TOKEN: ${AI_SERVICE_INTERNAL_TOKEN:?}
+    # khong depends_on: Caddy noi upstream luc co request (thieu thi 502); ai-service hong khong keo sap ca 3 host
+    networks: [staging]
+    logging: *default-logging
+
+  # Postgres chi luu checkpoint phien phong van cua ai-service (SESSION_STORE=postgres). Kho RAG ai_db van o Supabase.
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ai_session
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+      POSTGRES_DB: ai_session
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ai_session -d ai_session']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks: [staging]
+    logging: *default-logging
+
+  # Tao / nang cap bang checkpoint truoc khi ai-service nhan traffic (idempotent). depends_on ben duoi chi du cho lan
+  # `up` dau: khi deploy, compose tao lai container ai-service TRUOC khi biet setup loi (ai-service cu bi go, ban moi
+  # nam o Created) -> deploy-on-vm.sh phai chay `run --rm ai-session-setup` thanh buoc rieng, loi thi dung truoc `up -d`.
+  ai-session-setup:
+    image: ${IMAGE_REGISTRY:-ghcr.io/minhtuann1102/ai-recruitment-platform}/ai-service:${IMAGE_TAG:?}
+    command: ['python', '-m', 'scripts.setup_session_checkpoint_tables']
+    restart: 'no'
+    environment:
+      SESSION_DB_URL: postgresql://ai_session:${POSTGRES_PASSWORD:?}@db:5432/ai_session
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [staging]
+    logging: *default-logging
+
+  ai-service:
+    image: ${IMAGE_REGISTRY:-ghcr.io/minhtuann1102/ai-recruitment-platform}/ai-service:${IMAGE_TAG:?}
+    restart: unless-stopped
+    env_file:
+      - path: ./env/ai-service.env
+    environment:
+      APP_ENV: staging # thieu token -> 503; agent llm thieu key -> khong khoi dong
+      AI_SERVICE_INTERNAL_TOKEN: ${AI_SERVICE_INTERNAL_TOKEN:?}
+      SESSION_STORE: postgres
+      SESSION_DB_URL: postgresql://ai_session:${POSTGRES_PASSWORD:?}@db:5432/ai_session
+      VOICE_SERVICE_URL: http://voice-service:8020
+      VOICE_SERVICE_INTERNAL_TOKEN: ${VOICE_SERVICE_INTERNAL_TOKEN:?}
+    depends_on:
+      ai-session-setup:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ['CMD', 'curl', '-fsS', 'http://localhost:8000/api/health']
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    networks: [staging]
+    logging: *default-logging
+
+  voice-service:
+    image: ${IMAGE_REGISTRY:-ghcr.io/minhtuann1102/ai-recruitment-platform}/voice-service:${IMAGE_TAG:?}
+    restart: unless-stopped
+    env_file:
+      - path: ./env/voice-service.env
+    environment:
+      APP_ENV: staging # thieu token -> 503, khong ai dung credit Blaze an danh
+      VOICE_SERVICE_INTERNAL_TOKEN: ${VOICE_SERVICE_INTERNAL_TOKEN:?}
+    healthcheck:
+      test: ['CMD', 'curl', '-fsS', 'http://localhost:8020/api/health']
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    networks: [staging]
+    logging: *default-logging
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:
+
+networks:
+  staging:
