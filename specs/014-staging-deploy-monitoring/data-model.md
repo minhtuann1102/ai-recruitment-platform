@@ -2,7 +2,7 @@
 
 Feature hạ tầng: không có bảng nghiệp vụ mới. Các "thực thể" là file / tài nguyên vận hành.
 
-## 1. Trạng thái deploy — `/opt/ai-recruit/deploy-state.json` (trên VM)
+## 1. Trạng thái deploy — `/opt/ai-recruit/state/deploy-state.json` (trên VM)
 
 | Trường | Kiểu | Ghi chú |
 |---|---|---|
@@ -16,19 +16,23 @@ Feature hạ tầng: không có bảng nghiệp vụ mới. Các "thực thể" 
 
 ## 2. Image
 
-`asia-southeast1-docker.pkg.dev/<project>/ai-recruit/<service>:<sha>`; `<service>` ∈ {`ai-service`,
-`auth-service`, `user-service`, `notification-service`} + `user-service-migrator` (service có DB). Thêm tag `main` cho
-bản mới nhất. Dọn trong registry: giữ 20 tag gần nhất / service (cleanup policy).
+`ghcr.io/minhtuann1102/ai-recruitment-platform/<service>:<sha>` (sửa 2026-11-28: GHCR thay Artifact Registry);
+`<service>` ∈ {`ai-service`, `voice-service`}. Thêm tag `main` cho bản mới nhất. Package public. Dọn image cũ trên
+GHCR: không bắt buộc (repo public không tính dung lượng); trên VM giữ 2 bản.
 
-## 3. Cấu hình bí mật — `/opt/ai-recruit/.env` (trên VM, `600`)
+## 3. Cấu hình bí mật — trên VM, `/opt/ai-recruit/`, quyền `600`
 
-Danh sách biến = `infra/staging/.env.staging.example` (gồm biến của `.env.example` gốc cần cho service đang chạy +
-`STAGING_API_HOST`, `REGISTRY`, `APP_VERSION` do deploy ghi, `AI_SERVICE_INTERNAL_TOKEN`, `APP_ENV=staging`,
-`ALERT_EMAIL`, `BACKUP_BUCKET`). Thiếu biến bắt buộc → `deploy-on-vm.sh` dừng trước khi `pull`.
+- `.env` (biến của compose) = `infra/staging/.env.staging.example`: `IMAGE_REGISTRY`, `IMAGE_TAG` (deploy ghi), 3 tên
+  host, `ACME_EMAIL`, 2 token nội bộ, `POSTGRES_PASSWORD`, `DEMO_USER`, `DEMO_PASSWORD_HASH`; thêm `ALERT_EMAIL`,
+  `BACKUP_BUCKET` khi có đợt D.
+- `env/ai-service.env`, `env/voice-service.env` = `apps/<service>/.env.example` điền key (LLM, Langfuse, `AI_DB_URL`,
+  Blaze). Compose ghi đè `APP_ENV`, token, `SESSION_*`, `VOICE_SERVICE_URL` nên các biến đó trong file này không có tác
+  dụng.
+- Thiếu biến bắt buộc → `docker compose` báo lỗi (`${VAR:?}`) trước khi chạy gì; `deploy-on-vm.sh` dừng trước `pull`.
 
 ## 4. Bản sao lưu
 
-`gs://<project>-staging-backup/pg/<db>/<YYYYMMDD-HHMM>.dump` (`pg_dump -Fc`); lifecycle xóa sau 7 ngày. Mỗi lần
+`gs://<project>-staging-backup/pg/ai_session/<YYYYMMDD-HHMM>.dump` (`pg_dump -Fc`); lifecycle xóa sau 7 ngày. Mỗi lần
 chạy ghi một dòng log có cấu trúc `backup_ok db=<db> bytes=<n> object=<path>` hoặc `backup_failed db=<db>
 reason=<…>` → log-based metric cho cảnh báo #8.
 

@@ -7,7 +7,8 @@
 ## Content Quality
 
 - [x] No implementation details (languages, frameworks, APIs) — ngoại lệ có chủ đích: feature là hạ tầng, nền tảng
-  (GCP VM, compose, APISIX, Vercel) là quyết định đã chốt của DE / constitution, ghi ở "Quyết định" và Assumptions;
+  (GCP VM, compose, Caddy, GHCR; APISIX / Vercel bỏ khỏi phạm vi 2026-11-28) là quyết định đã chốt của DE /
+  constitution, ghi ở "Quyết định" và Assumptions;
   FR mô tả năng lực, cách làm cụ thể để plan
 - [x] Focused on user value and business needs
 - [x] Written for non-technical stakeholders (mức đủ cho GVHD / thành viên không làm DevOps)
@@ -36,3 +37,5 @@
 - 4 quyết định chốt bởi DE ngày 2026-11-19 (VM + compose; phạm vi = service đang có + quy trình thêm; seed ngoài
   014; GCP sẵn, domain chưa mua) nên không còn marker cần hỏi.
 - Còn mở, không chặn plan: tên domain (tạm dùng tên suy ra IP), danh sách nhận email ngoài DE.
+- 2026-11-28 DE chốt thêm: lưu phiên Postgres trên VM; host demo có basic auth; token nội bộ + bên gọi tự rate limit;
+  kho image GHCR. Spec viết lại phần APISIX / NestJS / JWT; kiểm lại checklist: vẫn đạt.

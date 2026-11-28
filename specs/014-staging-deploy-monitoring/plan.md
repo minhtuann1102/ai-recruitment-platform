@@ -1,35 +1,37 @@
 # Implementation Plan: Staging Deploy & Monitoring
 
-**Branch**: `docs/staging-deploy-spec` (spec + plan); code theo phần: `chore/infra/staging-*`, `feat/<service>/health`
-| **Date**: 2026-11-19 | **Spec**: [spec.md](spec.md)
+**Branch**: `chore/staging-compose-014` (cập nhật phạm vi + compose staging); code sau theo phần: `chore/staging-*`,
+`feat/ai-service/<...>` | **Date**: 2026-11-19, cập nhật 2026-11-28 | **Spec**: [spec.md](spec.md)
 
 **Input**: Feature specification from `specs/014-staging-deploy-monitoring/spec.md`
 
 ## Summary
 
-Dựng staging trên một VM Compute Engine chạy Docker Compose: Caddy (chỉ TLS) → APISIX (profile `staging`, JWT, token
-nội bộ tới ai-service, rate limit, CORS cho Vercel) → ai-service + 3 service NestJS (Dockerfile mới, health chung) +
-Postgres / Redis / MinIO / etcd. CI build image vào Artifact Registry bằng Workload Identity Federation; một lệnh
-deploy / rollback qua IAP SSH, migration chạy trước. Ops Agent → Cloud Monitoring / Logging, 8 cảnh báo email, sao
-lưu Postgres hằng ngày ra GCS. Quyết định chi tiết: [research.md](research.md).
+Dựng staging trên một VM Compute Engine chạy Docker Compose: Caddy (TLS + chọn upstream theo host) → ai-service +
+voice-service, Postgres trên VM chỉ để lưu checkpoint phiên (`SESSION_STORE=postgres`); kho RAG vẫn là `ai_db` trên
+Supabase. Ba host: `ai.<host>`, `voice.<host>` (backend FSD gọi bằng token nội bộ), `demo.<host>` (basic auth, Caddy
+gắn token, chỉ các đường trang `/dev/interview` cần). CI build image lên GHCR bằng `GITHUB_TOKEN`; một lệnh deploy /
+rollback qua IAP SSH, bước tạo bảng checkpoint chạy trước ai-service. Ops Agent → Cloud Monitoring / Logging, 8 cảnh
+báo email, sao lưu `ai_session` hằng ngày ra GCS. Quyết định chi tiết: [research.md](research.md) (mục "Cập nhật
+2026-11-28" thay R1, R4–R9).
 
 ## Technical Context
 
-**Language/Version**: Bash (script hạ tầng), YAML (compose, APISIX, Ops Agent, GitHub Actions), JSON (policy
-cảnh báo, dashboard); TypeScript / NestJS 11 cho `HealthModule`; Python (ai-service, thay đổi nhỏ)
-**Primary Dependencies**: Docker Engine + Compose v2, Caddy 2, APISIX 3.14 + ADC, Google Cloud CLI, Ops Agent,
-GitHub Actions (`google-github-actions/auth`, `docker/build-push-action`), Turborepo `prune`, gitleaks
-**Storage**: Postgres 16 (pgvector image) trên VM cho DB của service; GCS bucket sao lưu; Artifact Registry; `ai_db`
-ở Supabase (đọc, role `aie_reader`)
-**Testing**: Jest cho `HealthModule` (unit: 200 / 503 theo phụ thuộc); pytest cho thay đổi ai-service; `shellcheck`
-cho script; kiểm chấp nhận theo [quickstart.md](quickstart.md) trên staging thật
-**Target Platform**: Ubuntu 24.04 LTS, `e2-standard-4`, `asia-southeast1-b`
-**Project Type**: hạ tầng / vận hành cho monorepo web-service
-**Performance Goals**: TTFT p95 qua gateway ≤ trực tiếp + 300 ms (SC-003); 5 phiên đồng thời, RAM / CPU < 80%
+**Language/Version**: Bash (script hạ tầng), YAML (compose, Ops Agent, GitHub Actions), Caddyfile, JSON (policy cảnh
+báo, dashboard); Python 3.12 (ai-service, thay đổi nhỏ)
+**Primary Dependencies**: Docker Engine + Compose v2, Caddy 2.10, Postgres 16, Google Cloud CLI, Ops Agent, GitHub
+Actions (`docker/login-action`, `docker/build-push-action`), gitleaks
+**Storage**: Postgres 16 trên VM (DB `ai_session`, bảng checkpoint LangGraph); GCS bucket sao lưu; GHCR (image);
+`ai_db` ở Supabase (đọc, role `aie_reader`)
+**Testing**: pytest cho thay đổi ai-service; `shellcheck` cho script; `docker compose config` + `caddy validate` + chạy
+thử cả stack trên máy với host `*.localhost`; kiểm chấp nhận theo [quickstart.md](quickstart.md) trên staging thật
+**Target Platform**: Ubuntu 24.04 LTS, `e2-standard-2`, `asia-southeast1-b`
+**Project Type**: hạ tầng / vận hành cho 2 service Python
+**Performance Goals**: TTFT p95 qua Caddy ≤ trực tiếp + 300 ms (SC-003); 5 phiên đồng thời, RAM / CPU < 80%
 (SC-004); merge → live ≤ 15 phút, rollback ≤ 5 phút (SC-002)
-**Constraints**: chỉ 80/443 công khai; không secret trong git; không khóa dài hạn trong CI; dev `docker compose up`
-không đổi hành vi; xong US1 + US2 trước 28/11 để Stretch (voice 015) bắt đầu
-**Scale/Scope**: 1 máy, 4 service ứng dụng + 6 thành phần hạ tầng; thêm ~2 service FSD sau qua US5
+**Constraints**: chỉ 80/443 công khai; không secret trong git; không khóa dài hạn trong CI; compose dev không đổi;
+US1 trước 30/11, US2 + US3 trước 03/12 (SC-009)
+**Scale/Scope**: 1 máy, 2 service ứng dụng + Caddy + Postgres
 
 ## Constitution Check
 
@@ -37,19 +39,17 @@ không đổi hành vi; xong US1 + US2 trước 28/11 để Stretch (voice 015) 
 
 | Nguyên tắc | Đánh giá | Ghi chú |
 |---|---|---|
-| I. DB-per-service | Đạt | Postgres một instance, mỗi service DB riêng như dev; sao lưu theo từng DB |
-| II. Gateway duy nhất | Đạt có ghi chú | Caddy chỉ TLS trong suốt (Complexity Tracking); route mới khai báo ở `apisix-staging.yaml`; JWT verify tại gateway giữ nguyên |
-| II. Transport | Không đổi | gRPC còn trong user / notification là đồ thừa starter (FSD), không thêm transport mới |
-| III. Contract-first | Đạt | Không đổi API nghiệp vụ; health NestJS mới + trường `build` ở health ai-service ghi trong [contracts/](contracts/) và `docs/architecture/api-contracts.md` cùng PR |
-| IV. AI stateless | Đạt | ai-service không lưu phiên; chỉ đọc `ai_db` |
+| I. DB-per-service | Đạt | `ai_session` chỉ ai-service dùng; voice-service không có DB |
+| II. Gateway duy nhất | Lệch, ghi ở Complexity Tracking | APISIX đã gỡ khỏi repo (#113); Caddy là điểm vào duy nhất của repo này. Sửa constitution ở PR riêng (`/speckit-constitution`) |
+| III. Contract-first | Đạt | Không đổi API nghiệp vụ; host + chặn đường ghi ở [contracts/staging-hosts.md](contracts/staging-hosts.md); trường `build` của health ghi ở [contracts/health-endpoints.md](contracts/health-endpoints.md) |
+| IV. AI stateless | Lệch đã có từ trước | Lưu phiên LangGraph (#118, đề xuất option B) đã đảo nguyên tắc này; 014 chỉ cấp Postgres cho nó |
 | V. Data pipeline | Không áp | Không ghi `ai_db` |
-| VI. Quality gates | Đạt | CI giữ lint / check-types / test; thêm gitleaks; `HealthModule` có test; mọi env mới vào `.env.example` + `turbo.json` `globalEnv` (`APP_VERSION`) |
-| VII. Đơn giản | Đạt | Không Terraform / Kubernetes / Prometheus tự dựng; 1 Dockerfile mẫu cho NestJS; script gcloud |
-| Ràng buộc hạ tầng | Đạt | "Staging: Docker Compose trên VPS/cloud, có HTTPS"; "mọi service MUST có health endpoint" — bổ sung cho 3 NestJS; object storage MinIO (S3-compatible) |
-| Quy trình | Đạt | Spec Kit (feature DE); link `docs/` thay vì chép; không đổi kiến trúc → không cần ADR mới |
+| VI. Quality gates | Đạt | CI giữ pytest; thêm gitleaks; mọi env mới vào file mẫu |
+| VII. Đơn giản | Đạt | Không Terraform / Kubernetes / Prometheus tự dựng; Caddy image chính thức, không plugin; script gcloud |
+| Ràng buộc hạ tầng | Đạt | "Staging: Docker Compose trên VPS/cloud, có HTTPS"; mọi service có health endpoint |
+| Quy trình | Đạt | Spec Kit (feature DE); link `docs/` thay vì chép |
 
-**Re-check sau Phase 1**: đạt; không vi phạm mới. Sửa code của FSD (`apps/*-service`, `libs/core`) và AIE
-(`apps/ai-service`) qua PR có owner review (spec "Phụ thuộc").
+**Re-check 2026-11-28**: đạt với 2 lệch đã ghi. Sửa code ai-service của AIE qua PR có AIE review (spec "Phụ thuộc").
 
 ## Project Structure
 
@@ -63,8 +63,8 @@ specs/014-staging-deploy-monitoring/
 ├── quickstart.md
 ├── contracts/
 │   ├── staging-cli.md              # lệnh provision / deploy / rollback / backup / restore
-│   ├── gateway-staging-routes.md   # route công khai, auth, rate limit, CORS, chặn
-│   └── health-endpoints.md         # health NestJS + trường build của ai-service
+│   ├── staging-hosts.md            # host công khai, upstream, chặn, ai giữ token nào
+│   └── health-endpoints.md         # trường build của health
 ├── checklists/requirements.md
 └── tasks.md                        # /speckit-tasks
 ```
@@ -72,55 +72,48 @@ specs/014-staging-deploy-monitoring/
 ### Source Code (repository root)
 
 ```text
-.docker/node-service.Dockerfile            # MỚI: Dockerfile mẫu NestJS (ARG SERVICE; target runtime, migrator)
 .github/workflows/
 ├── ci.yml                                 # SỬA: thêm job gitleaks
-└── build-images.yml                       # MỚI: build + push image khi main xanh (WIF)
-config/apisix/conf/
-├── apisix-staging.yaml                    # MỚI: route staging
-├── config-staging.yaml                    # MỚI: admin khóa nội bộ, real_ip, prometheus export
-└── debug-staging.yaml                     # MỚI: chép debug-dev, tắt
-libs/core/src/health/                      # MỚI: HealthModule dùng chung (FSD review)
-apps/{auth,user,notification}-service/src/ # SỬA: import HealthModule (FSD review)
-apps/ai-service/app/{security,main}.py     # SỬA: /metrics vào OPEN_PATHS, health thêm build (AIE review)
-apps/ai-service/Dockerfile                 # SỬA: user không phải root, ARG APP_VERSION
+└── build-images.yml                       # MỚI: build + push GHCR khi CI main xanh
+apps/ai-service/Dockerfile                 # SỬA: chép lệnh tạo bảng checkpoint (xong), user không phải root, ARG APP_VERSION
+apps/voice-service/Dockerfile              # SỬA: user không phải root, ARG APP_VERSION
+apps/ai-service/app/{dev_play_page,main}.py  # SỬA: cờ DEV_PAGES_ENABLED cho host demo; health thêm build (AIE review)
+apps/voice-service/app/...                 # SỬA: health thêm build
 infra/staging/
-├── docker-compose.staging.yml             # MỚI
-├── Caddyfile                              # MỚI
-├── .env.staging.example                   # MỚI
+├── docker-compose.staging.yml             # MỚI (xong): caddy, db, ai-session-setup, ai-service, voice-service
+├── Caddyfile                              # MỚI (xong): 3 host
+├── .env.staging.example                   # MỚI (xong): biến compose; key service ở env/<service>.env (gitignore)
 ├── scripts/
-│   ├── provision-gcp.sh                   # VM, IP, firewall, AR, bucket, snapshot, SA, WIF
-│   ├── bootstrap-vm.sh                    # Docker, Ops Agent, thư mục /opt/ai-recruit, cron
+│   ├── provision-gcp.sh                   # VM, IP, firewall, bucket, snapshot, SA
+│   ├── bootstrap-vm.sh                    # Docker, Ops Agent, /opt/ai-recruit, cron
 │   ├── deploy.sh / rollback.sh            # chạy ở máy DE → IAP SSH
 │   ├── deploy-on-vm.sh                    # chạy trên VM
-│   ├── backup-postgres.sh / restore-postgres.sh
-│   └── issue-test-jwt.sh                  # JWT thử khi luồng login FSD chưa xong (chỉ trên VM)
+│   └── backup-postgres.sh / restore-postgres.sh
 └── monitoring/
     ├── ops-agent.yaml
     ├── alerts/*.json                      # 8 chính sách
     ├── dashboard-staging.json
     └── apply-monitoring.sh
-docs/deployment-guide.md                   # MỚI (FR-020)
+docs/deployment-guide.md                   # MỚI (FR-020): dựng, deploy, rollback, khôi phục, hướng dẫn backend FSD
 ```
 
-**Structure Decision**: mọi thứ riêng staging nằm ở `infra/staging/` (đây là thư mục `infra/` đầu tiên của repo);
-cấu hình gateway theo cơ chế profile sẵn có ở `config/apisix/conf/`; Dockerfile NestJS dùng chung ở `.docker/` cạnh
-các file compose phụ trợ đang có.
+**Structure Decision**: mọi thứ riêng staging nằm ở `infra/staging/` (thư mục `infra/` đầu tiên của repo); VM giữ một
+bản của thư mục này ở `/opt/ai-recruit`.
 
 ## Thứ tự làm (map user story)
 
 | Đợt | Nội dung | Story | Mục tiêu |
 |---|---|---|---|
-| A | provision GCP + bootstrap VM; compose staging + Caddy + APISIX staging; ai-service lên với HTTPS; uptime + cảnh báo #1 | US1 (+ một phần US3) | 24–25/11 |
-| B | Dockerfile mẫu + HealthModule cho 3 NestJS; build-images + deploy / rollback | US1, US2 | 26–28/11 |
-| — | **Mốc**: US1 + US2 xong → Stretch (voice 015) được bắt đầu song song | | 28/11 |
-| C | sao lưu + khôi phục thử | US4 | 29–30/11 |
-| D | Ops Agent đủ, dashboard, 7 cảnh báo còn lại | US3 | 01–03/12 |
-| E | danh sách bước thêm service, nối Vercel khi 013 có, `docs/deployment-guide.md` | US5, FR-020 | khi FSD có code |
+| A | compose staging + Caddy + env mẫu, chạy thử trên máy (xong 28/11); provision + bootstrap VM; DNS wildcard `*.hireready.tuannm.app` + chứng chỉ Let's Encrypt; deploy tay lần đầu; uptime + cảnh báo #1 | US1 (+ một phần US3) | 29–30/11 |
+| B | build-images GHCR; deploy / rollback; `build` trong health; user không phải root | US2 | 01–02/12 |
+| C | cờ trang dev + host demo chạy thật (sau PR #120) | US1 kịch bản 5 | khi #120 merge |
+| D | Ops Agent đủ, dashboard, 7 cảnh báo còn lại; sao lưu + khôi phục thử | US3, US4 | 02–03/12 |
+| E | hướng dẫn backend FSD, danh sách bước thêm service, `docs/deployment-guide.md` | US5, FR-020 | 03/12 |
 
 ## Complexity Tracking
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 |-----------|------------|-------------------------------------|
-| Caddy đứng trước APISIX (constitution II: APISIX là entry point public duy nhất) | Cần HTTPS tự gia hạn; Caddy chỉ kết thúc TLS và chuyển tiếp mọi request sang APISIX, không route / auth | ACME trong APISIX cần plugin / cron certbot + nạp SSL qua admin API, dễ hỏng gia hạn; LB HTTPS của GCP tốn tiền và cần domain thật ngay |
-| Route `/ai/*` công khai (kiến trúc đích: chỉ interview-service gọi ai-service) | `interview-service` chưa tồn tại; demo AI cần gọi được qua gateway | Chờ FSD → không demo được S4; đã bù bằng JWT + token nội bộ do gateway gắn + rate limit; thu hồi khi interview-service có |
+| Caddy thay APISIX làm điểm vào (constitution II: APISIX là entry point public duy nhất) | APISIX + etcd đã gỡ khỏi repo ở #113; repo chỉ còn 2 service gọi server-to-server bằng token, không cần JWT / route động | Dựng lại APISIX + etcd cho 2 upstream: thêm 2 container, cấu hình ADC, không thêm bảo vệ nào so với token nội bộ |
+| Host demo: Caddy xác thực (basic auth) và gắn token thay bên gọi | Chưa có UI phía FSD; GVHD / mentor cần thử phỏng vấn giọng nói trên staging | Đưa token vào trình duyệt: ai mở trang cũng lấy được token gọi mọi endpoint; chỉ demo ở máy local: GVHD không tự thử được |
+| Không rate limit ở lớp vào | Lớp vào không biết người dùng (token là của service); Caddy chuẩn không có rate limit | Image Caddy tự build với plugin rate limit theo IP: thêm image phải bảo trì, giới hạn theo IP sai khi mọi lời gọi đến từ một backend FSD |
