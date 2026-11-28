@@ -1,0 +1,69 @@
+# Staging (spec 014): Caddy chi lo TLS tu gia han + chon upstream theo host; khong xac thuc thay service (tru host demo).
+# Ten host doc tu env (.env cua compose): mac dinh *.hireready.tuannm.app; doi domain chi bang cach doi bien (FR-009).
+# Moi host *.localhost (chay thu tren may) Caddy tu cap chung chi noi bo, khong goi Let's Encrypt.
+# SSE (text/event-stream) va body khong co Content-Length: Caddy tu flush ngay, khong can flush_interval; de mac dinh
+# de client dong tab thi request toi service bi huy (khong ton tiep credit LLM).
+{
+	email {$ACME_EMAIL}
+	servers {
+		protocols h1 h2 # compose chi mo TCP 443: tat HTTP/3 de trinh duyet khong thu UDP roi moi lui ve
+	}
+}
+
+# API ai-service cho backend cua FSD goi server-to-server; ben goi tu gui X-Internal-Token (ai-service tu kiem).
+{$AI_HOST} {
+	# trang dev va metrics khong ra Internet qua host API
+	@blocked path /dev/* /metrics
+	respond @blocked 404
+	request_body {
+		max_size 12MB # /api/cv/parse doc ca file vao RAM
+	}
+	# khong `encode gzip`: nen co the gom SSE lai toi cuoi
+	reverse_proxy ai-service:8000
+}
+
+# voice-service (ADR-011: backend FSD goi truc tiep); /metrics cua service nay khong can token nen chan o day.
+{$VOICE_HOST} {
+	respond /metrics 404
+	request_body {
+		max_size 12MB # VOICE_MAX_UPLOAD_MB=10 + phan multipart
+	}
+	reverse_proxy voice-service:8020
+}
+
+# Trang demo phong van (/dev/interview) cho GVHD / mentor khi FSD chua co UI. Basic auth roi Caddy gan token noi bo
+# phia server: ai co mat khau la dung duoc credit LLM + Blaze, nen chi mo dung cac duong trang can, con lai 404.
+# ai-service phai bat DEV_PAGES_ENABLED (sau PR #120) thi /dev/interview moi tra trang; truoc do host nay tra 404.
+{$DEMO_HOST} {
+	basic_auth {
+		{$DEMO_USER} {$DEMO_PASSWORD_HASH}
+	}
+	# Chong CSRF: trinh duyet tu gui basic auth da nho kem form POST tu trang khac (multipart /api/cv/parse khong can
+	# preflight) -> ton credit LLM. Request ghi chi nhan tu chinh origin nay; GET van qua de link tu email / chat mo duoc
+	# trang. Phai la "khac same-origin" chu khong chi "cross-site": du an khac duoi cung domain (tuannm.app) la
+	# "same-site". Thieu header (curl, client cu) thi cho qua.
+	@xsite {
+		header Sec-Fetch-Site *
+		not header Sec-Fetch-Site same-origin
+		not method GET HEAD
+	}
+	handle @xsite {
+		respond 403
+	}
+	@demo path /dev/interview /dev/interview/* /dev/voice/* /api/health /api/start /api/next-turn /api/finalize /api/cv/parse /api/jd/parse /api/stt/phrases
+	handle @demo {
+		request_body {
+			max_size 12MB
+		}
+		reverse_proxy ai-service:8000 {
+			header_up X-Internal-Token {$AI_SERVICE_INTERNAL_TOKEN} # ghi de gia tri client gui
+			header_up -Authorization # mat khau demo khong toi ai-service
+		}
+	}
+	handle / {
+		redir * /dev/interview
+	}
+	handle {
+		respond 404
+	}
+}

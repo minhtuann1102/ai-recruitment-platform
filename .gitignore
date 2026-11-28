@@ -1,6 +1,9 @@
 .docker/volumes/
 
 **/.env
+# env that cua staging tren VM (env/ai-service.env, env/voice-service.env chua key)
+infra/staging/env/
+infra/staging/.staging.local
 **/.idea
 
 /tmp

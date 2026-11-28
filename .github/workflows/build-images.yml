@@ -1,0 +1,62 @@
+# Build image ai-service + voice-service va day len GHCR khi CI tren main xanh (spec 014, T010; FR-010).
+# Xac thuc bang GITHUB_TOKEN cua workflow (khong luu khoa dai han). Tag: <sha 40 ky tu> + `main` (ban moi nhat).
+# Image: ghcr.io/<owner>/<repo>/<service>; package de public (T011) -> VM keo khong can dang nhap.
+name: Build images
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch: # chay tay (tab Actions) de build lai; tag `main` chi gan khi chay tren main
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: build-images-${{ github.event.workflow_run.head_sha || github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    # workflow_run: chi khi CI xanh cho mot lan push vao main cua chinh repo nay (PR tu fork co nhanh ten `main`
+    # cung khop bo loc `branches`, nen kiem them event + repo)
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [ai-service, voice-service]
+    env:
+      SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+      IMAGE: ghcr.io/${{ github.repository }}/${{ matrix.service }}
+      IS_MAIN: ${{ github.event_name == 'workflow_run' || github.ref == 'refs/heads/main' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SHA }}
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: apps/${{ matrix.service }}
+          push: true
+          build-args: APP_VERSION=${{ env.SHA }}
+          tags: |
+            ${{ env.IMAGE }}:${{ env.SHA }}
+            ${{ env.IS_MAIN == 'true' && format('{0}:main', env.IMAGE) || '' }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ env.SHA }}
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }}
