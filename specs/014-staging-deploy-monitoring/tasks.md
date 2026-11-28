@@ -43,7 +43,7 @@ quickstart trên máy (`*.localhost`) rồi trên staging thật. Sửa ai-servi
 
 ## Phase 2: Foundational (chặn mọi story trên cloud)
 
-- [ ] T007 [P] `apps/ai-service/Dockerfile` + `apps/voice-service/Dockerfile`: tạo user không phải root (`useradd
+- [x] T007 [P] `apps/ai-service/Dockerfile` + `apps/voice-service/Dockerfile`: tạo user không phải root (`useradd
   --uid 10001`), `USER` trước `CMD`; `ARG APP_VERSION=dev` → `ENV APP_VERSION=$APP_VERSION`; kiểm `docker run --rm
   <img> id -u` ≠ 0 (AIE review phần ai-service)
 - [ ] T008 [P] ai-service `/api/health` thêm `build` = `APP_VERSION` (mặc định `"dev"`), giữ nguyên `version` và các
@@ -51,7 +51,7 @@ quickstart trên máy (`*.localhost`) rồi trên staging thật. Sửa ai-servi
   ai-service ở `docs/ai-service/06-api-contract.md` (AIE review)
 - [ ] T009 [P] voice-service `/api/health` thêm `build` trong `apps/voice-service/app/` + test; ghi vào
   `specs/015-voice-mode/contracts/voice-service-api.md`
-- [ ] T010 Tạo `.github/workflows/build-images.yml`: chạy khi workflow `CI` trên `main` xong và xanh
+- [x] T010 Tạo `.github/workflows/build-images.yml`: chạy khi workflow `CI` trên `main` xong và xanh
   (`workflow_run`, `conclusion == success`) + `workflow_dispatch`; `permissions: contents: read, packages: write`;
   matrix `ai-service`, `voice-service`; `docker/login-action` với `GITHUB_TOKEN`; `docker/build-push-action` context
   `apps/<service>`, `build-args: APP_VERSION=<sha>`, tag `ghcr.io/minhtuann1102/ai-recruitment-platform/<service>:<sha>`
@@ -59,7 +59,7 @@ quickstart trên máy (`*.localhost`) rồi trên staging thật. Sửa ai-servi
 - [ ] T011 Sau lần chạy đầu của T010: `docker logout ghcr.io; docker pull ghcr.io/.../ai-service:main` ẩn danh; lỗi
   thì đổi visibility 2 package sang public trên GitHub (Package settings), ghi bước này vào `docs/deployment-guide.md`
 - [ ] T012 [P] `.github/workflows/ci.yml`: thêm job `gitleaks` (`gitleaks/gitleaks-action`, quét toàn repo; SC-006)
-- [ ] T013 [P] `infra/staging/scripts/provision-gcp.sh` theo [contracts/staging-cli.md](contracts/staging-cli.md):
+- [x] T013 [P] `infra/staging/scripts/provision-gcp.sh` theo [contracts/staging-cli.md](contracts/staging-cli.md):
   bật API, IP tĩnh, firewall 80/443 + 22 chỉ từ dải IAP `35.235.240.0/20`, SA của VM (logging.logWriter,
   monitoring.metricWriter, ghi bucket sao lưu), bucket + lifecycle 7 ngày, snapshot schedule hằng ngày, VM
   `e2-standard-2` Ubuntu 24.04 `asia-southeast1-b` 50 GB; tài nguyên đã có → in "exists"

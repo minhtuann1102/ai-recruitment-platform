@@ -4,7 +4,7 @@ Sửa 2026-11-28: GHCR thay Artifact Registry + WIF; bỏ migrator NestJS và `i
 
 Mọi lệnh: `set -euo pipefail`; in từng bước; thoát 0 = thành công, 1 = lỗi nghiệp vụ (đã dừng an toàn), 2 = thiếu cấu
 hình / tham số. Biến dùng chung đọc từ env hoặc `infra/staging/.staging.local` (không commit): `GCP_PROJECT`,
-`GCP_ZONE` (mặc định `asia-southeast1-b`), `VM_NAME` (mặc định `ai-recruit-staging`).
+`GCP_ZONE` (mặc định `asia-southeast1-b`), `VM_NAME` (mặc định `hireready-staging`).
 
 | Lệnh | Chạy ở | Làm gì | Chạy lại |
 |---|---|---|---|

@@ -25,7 +25,7 @@ publish cổng (`docker compose ps`); các mã ở bảng của [staging-hosts.m
 
 ```bash
 infra/staging/scripts/provision-gcp.sh     # chạy hai lần: lần 2 toàn "exists"
-gcloud compute ssh ai-recruit-staging --tunnel-through-iap -- 'sudo bash -s' < infra/staging/scripts/bootstrap-vm.sh
+gcloud compute ssh hireready-staging --tunnel-through-iap -- 'sudo bash -s' < infra/staging/scripts/bootstrap-vm.sh
 # trên VM: /opt/ai-recruit/.env (từ .env.staging.example) + env/ai-service.env + env/voice-service.env, chmod 600
 infra/staging/scripts/deploy.sh
 ```
